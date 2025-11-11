@@ -471,3 +471,28 @@ The program handles various error conditions gracefully:
 ## License
 
 This program is provided as-is for personal and educational use.
+
+## Data Attribution (Required by API Terms)
+
+This application uses:
+
+**Open-Meteo API** - Weather data licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+- Attribution: "Weather data by Open-Meteo.com"
+- More info: https://open-meteo.com/en/licence
+- Usage: Non-commercial, under 10,000 API calls per day
+
+**OpenStreetMap/Nominatim** - Geocoding data © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright)
+- Licensed under [ODbL](https://opendatacommons.org/licenses/odbl/)
+- More info: https://operations.osmfoundation.org/policies/nominatim/
+- Usage: User-triggered searches only, proper attribution displayed
+
+**Important for Commercial Use**: If you modify this application for commercial purposes, you must:
+1. Subscribe to Open-Meteo's commercial API plan (https://open-meteo.com/en/pricing)
+2. Ensure compliance with OSM/Nominatim terms for your use case  
+3. Review and comply with all license requirements
+
+## Credits
+
+- Weather data: [Open-Meteo](https://open-meteo.com/)
+- Geocoding: [OpenStreetMap Nominatim](https://nominatim.openstreetmap.org/)
+- Built with Python and PyQt5

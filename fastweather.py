@@ -1990,6 +1990,12 @@ The app uses the free Open-Meteo weather service - no API key required!"""
                 result.append(f"Observation time: {observation_time}")
         
         result.append(f"Report generated: {datetime.now().strftime('%Y-%m-%d %I:%M %p')}")
+        result.append("")
+        result.append("-" * 50)
+        result.append("Weather data by Open-Meteo.com (CC BY 4.0)")
+        result.append("https://open-meteo.com/")
+        result.append("Geocoding © OpenStreetMap contributors (ODbL)")
+        result.append("https://www.openstreetmap.org/copyright")
         
         return "\n".join(result)
     
