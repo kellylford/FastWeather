@@ -1,216 +1,429 @@
-# FastWeather
+# FastWeather# FastWeather
 
-A command-line and GUI weather application that fetches current weather and forecasts for cities using the Open-Meteo API. Features both a powerful CLI interface and a fully accessible PyQt5 GUI with screen reader support.
 
-## Applications Included
 
-- **fastweather.py**: Full-featured command-line interface
+A fast, accessible weather application that provides current conditions and detailed forecasts without the clutter.A command-line and GUI weather application that fetches current weather and forecasts for cities using the Open-Meteo API. Features both a powerful CLI interface and a fully accessible PyQt5 GUI with screen reader support.
+
+
+
+## Why FastWeather?## Applications Included
+
+
+
+Get weather fast. No ads, no tracking, no distractions. Just the weather you need, when you need it.- **fastweather.py**: Full-featured command-line interface
+
 - **accessible_weather_gui.py**: Accessible PyQt5 GUI application
 
 ## Features
 
-- **Current Weather**: Temperature, wind speed/direction, weather conditions
-- **Hourly Forecasts**: Next 5 hours with detailed information
-- **Daily Forecasts**: Up to 7 days with high/low temperatures, sunrise/sunset, precipitation
-- **Multiple Cities**: Manage and query multiple cities
-- **Interactive Mode**: User-friendly prompts for city selection
+## Features
+
+- **Fast & Simple** - Current weather at a glance, detailed forecasts on demand
+
+- **Multiple Cities** - Track weather for as many locations as you want- **Current Weather**: Temperature, wind speed/direction, weather conditions
+
+- **Comprehensive Data** - Temperature, feels-like, humidity, wind, precipitation, UV index, visibility, cloud cover, and more- **Hourly Forecasts**: Next 5 hours with detailed information
+
+- **Accessible** - Fully compatible with screen readers and keyboard navigation- **Daily Forecasts**: Up to 7 days with high/low temperatures, sunrise/sunset, precipitation
+
+- **No API Key Required** - Uses the free Open-Meteo weather service- **Multiple Cities**: Manage and query multiple cities
+
+- **Privacy First** - No tracking, no analytics, your cities stored locally- **Interactive Mode**: User-friendly prompts for city selection
+
 - **Non-Interactive Mode**: Command-line arguments for automation
-- **City Management**: Add, delete, and reorder cities
+
+## Quick Start- **City Management**: Add, delete, and reorder cities
+
 - **HTML Export**: Generate weather reports in HTML format
-- **Automatic Geocoding**: Look up city coordinates automatically
 
-## Installation
+### Running from Python- **Automatic Geocoding**: Look up city coordinates automatically
 
-### Requirements
-- Python 3.6 or higher
-- `requests` library
 
-### Setup
-1. Install the required dependency:
-   ```bash
+
+1. Install Python 3.8 or later## Installation
+
+2. Install dependencies:
+
+   ```bash### Requirements
+
+   pip install -r requirements.txt- Python 3.6 or higher
+
+   ```- `requests` library
+
+3. Run the application:
+
+   ```bash### Setup
+
+   python fastweather.py1. Install the required dependency:
+
+   ```   ```bash
+
    pip install requests
-   ```
 
-2. Download the `fastweather.py` script to your desired directory.
+### Running the Executable (Windows)   ```
 
-## Usage
 
-### Quick Start
 
-**Get current temperature for all cities (one line each):**
+1. Download the latest release2. Download the `fastweather.py` script to your desired directory.
+
+2. Extract the ZIP file
+
+3. Run `FastWeather.exe`## Usage
+
+
+
+## Usage### Quick Start
+
+
+
+### Adding Cities**Get current temperature for all cities (one line each):**
+
 ```bash
-python fastweather.py
-```
 
-### Command Line Options
+1. Type a city name in the search box (e.g., "Seattle", "New York, NY", "London, UK")python fastweather.py
 
-| Option | Description | Default |
+2. Press Enter or click "Search"```
+
+3. Select your city from the results
+
+4. The city will be added to your list with current weather### Command Line Options
+
+
+
+### Viewing Weather| Option | Description | Default |
+
 |--------|-------------|---------|
-| `--detail` | Level of detail: `full`, `basic`, or `temps` | `full` |
-| `--city` | Specify a city name, or use `all`, `list`, or `configure` | None |
-| `--city-file` | Path to JSON file with city coordinates | `city.json` |
-| `--days` | Number of forecast days (1-7) | `7` |
-| `--debug` | Show debug information including weather codes | `False` |
-| `--quiet` | Suppress non-error output | `False` |
+
+- **City List**: Shows temperature and current sky conditions for each city| `--detail` | Level of detail: `full`, `basic`, or `temps` | `full` |
+
+- **Full Weather**: Double-click a city or select and press Enter for:| `--city` | Specify a city name, or use `all`, `list`, or `configure` | None |
+
+  - Current conditions with all available data| `--city-file` | Path to JSON file with city coordinates | `city.json` |
+
+  - 12-hour forecast| `--days` | Number of forecast days (1-7) | `7` |
+
+  - 7-day forecast| `--debug` | Show debug information including weather codes | `False` |
+
+- **Refresh**: Click "Refresh All" or press F5 to update all cities| `--quiet` | Suppress non-error output | `False` |
+
 | `--html` | Export weather report to HTML file | None |
+
+### Keyboard Shortcuts
 
 ### Detail Levels
 
-- **`full`**: Current weather + 5-hour forecast + daily forecast
-- **`basic`**: Current weather only
-- **`temps`**: Current temperature only (compact format)
+- **Enter** - Add city or view full weather (depending on focus)
+
+- **Delete** - Remove selected city- **`full`**: Current weather + 5-hour forecast + daily forecast
+
+- **F5** - Refresh all weather data- **`basic`**: Current weather only
+
+- **Escape** - Close full weather view- **`temps`**: Current temperature only (compact format)
+
+- **Tab** - Navigate between elements
 
 ### Examples
 
+## Configuration
+
 **Get full weather for a specific city:**
-```bash
+
+### Custom City File```bash
+
 python fastweather.py --city "New York"
+
+By default, cities are saved in `city.json` in the application directory. You can specify a different file:```
+
+
+
+```bash**Get basic weather for all cities:**
+
+python fastweather.py --city-file /path/to/mycities.json```bash
+
+```python fastweather.py --city all --detail basic
+
 ```
 
-**Get basic weather for all cities:**
-```bash
-python fastweather.py --city all --detail basic
-```
+### Weather Display Options
 
 **List available cities:**
-```bash
-python fastweather.py --city list
-```
+
+Click "Configure Display" to customize what information is shown in full weather reports:```bash
+
+- **Current Conditions**: Temperature, feels-like, wind, humidity, precipitation, pressure, cloud cover, visibility, UV indexpython fastweather.py --city list
+
+- **Hourly Forecast**: Which details to show for the next 12 hours```
+
+- **Daily Forecast**: Which details to show for the 7-day forecast
 
 **Configure city list:**
-```bash
+
+## Weather Data Explained```bash
+
 python fastweather.py --city configure
-```
 
-**Get 3-day forecast with debug info:**
-```bash
-python fastweather.py --city "London" --days 3 --debug
-```
+### Sky Conditions```
 
-**Export all cities to HTML:**
-```bash
-python fastweather.py --html weather_report.html
-```
 
-**Quick temperature check (quiet mode):**
-```bash
-python fastweather.py --city all --detail temps --quiet
-```
 
-## Interactive Mode
+Cloud cover descriptions are based on meteorological standards:**Get 3-day forecast with debug info:**
 
-When run without the `--city` option, the program enters interactive mode:
+- **Clear**: 0-12% cloud cover```bash
+
+- **Mostly Clear**: 13-37% cloud cover  python fastweather.py --city "London" --days 3 --debug
+
+- **Partly Cloudy**: 38-62% cloud cover```
+
+- **Mostly Cloudy**: 63-87% cloud cover
+
+- **Cloudy**: 88-100% cloud cover**Export all cities to HTML:**
 
 ```bash
-python fastweather.py --detail full
+
+### What You Getpython fastweather.py --html weather_report.html
+
 ```
 
-You'll be prompted to enter:
-- City names (supports partial matching)
-- Special commands:
-  - `list` - Show available cities
+**Current Weather**:
+
+- Temperature and "feels like" temperature**Quick temperature check (quiet mode):**
+
+- Sky conditions with cloud cover percentage```bash
+
+- Wind speed, gusts, and directionpython fastweather.py --city all --detail temps --quiet
+
+- Humidity and dew point```
+
+- Precipitation amount
+
+- Barometric pressure## Interactive Mode
+
+- Visibility
+
+- UV indexWhen run without the `--city` option, the program enters interactive mode:
+
+- Observation time
+
+```bash
+
+**Hourly Forecast** (next 12 hours):python fastweather.py --detail full
+
+- Hour-by-hour conditions```
+
+- Temperature and feels-like
+
+- Precipitation amount and probabilityYou'll be prompted to enter:
+
+- Wind speed, gusts, and direction- City names (supports partial matching)
+
+- Cloud cover- Special commands:
+
+- Pressure, visibility, UV index  - `list` - Show available cities
+
   - `all` - Get weather for all cities
-  - `configure` - Edit city list
-  - `exit` - Quit program
 
-## City Management
+**Daily Forecast** (7 days):  - `configure` - Edit city list
 
-### Adding Cities
+- High and low temperatures  - `exit` - Quit program
 
-Cities are automatically added when you search for them. The program uses the Nominatim geocoding service to find coordinates.
+- Feels-like high and low
 
-**Via command line:**
+- Sky conditions## City Management
+
+- Sunrise and sunset times
+
+- Daylight and sunshine hours### Adding Cities
+
+- UV index
+
+- Precipitation amount and probabilityCities are automatically added when you search for them. The program uses the Nominatim geocoding service to find coordinates.
+
+- Wind speed, gusts, and direction
+
+- Solar radiation**Via command line:**
+
 ```bash
-python fastweather.py --city configure
+
+## Building from Sourcepython fastweather.py --city configure
+
 ```
+
+### Create Windows Executable
 
 **In interactive mode:**
-Type `configure` when prompted for a city name.
 
-### City Configuration Options
+1. Install PyInstaller:Type `configure` when prompted for a city name.
+
+   ```bash
+
+   pip install pyinstaller### City Configuration Options
+
+   ```
 
 When in configuration mode, you can:
-- `add <city name>` - Add a new city with automatic geocoding
-- `delete <number>` - Remove a city by its list number
-- `move up <number>` - Move a city up in the list
-- `move down <number>` - Move a city down in the list
+
+2. Run the build script:- `add <city name>` - Add a new city with automatic geocoding
+
+   ```bash- `delete <number>` - Remove a city by its list number
+
+   python build.py- `move up <number>` - Move a city up in the list
+
+   ```- `move down <number>` - Move a city down in the list
+
 - `save` - Save changes and exit
-- `cancel` - Discard changes and exit
 
-### City Disambiguation
+3. Find the executable in `dist/FastWeather/`- `cancel` - Discard changes and exit
 
-When multiple cities match your search, you'll see a numbered list:
+
+
+The build script creates a single-folder distribution with all dependencies included.### City Disambiguation
+
+
+
+## Sample CitiesWhen multiple cities match your search, you'll see a numbered list:
+
 ```
-Multiple matches found:
-  1. London, England, United Kingdom (lat: 51.5074, lon: -0.1278)
-  2. London, Ontario, Canada (lat: 42.9849, lon: -81.2453)
-  3. London, Kentucky, United States (lat: 37.1289, lon: -84.0832)
+
+The application ships with sample cities from around the world. You can:Multiple matches found:
+
+- Remove them using the "Remove City" button  1. London, England, United Kingdom (lat: 51.5074, lon: -0.1278)
+
+- Delete `city.json` before first run to start with an empty list  2. London, Ontario, Canada (lat: 42.9849, lon: -81.2453)
+
+- Edit the JSON file directly  3. London, Kentucky, United States (lat: 37.1289, lon: -84.0832)
+
 Select the correct city by number: 1
-```
 
-## City Data File
+## Data Sources```
+
+
+
+- **Weather Data**: [Open-Meteo](https://open-meteo.com/) - Free weather API, no key required## City Data File
+
+- **Geocoding**: [OpenStreetMap Nominatim](https://nominatim.openstreetmap.org/)
 
 Cities are stored in a JSON file (default: `city.json`) with this format:
-```json
+
+## Technical Details```json
+
 {
-    "New York, New York, United States": [40.7128, -74.0060],
-    "London, England, United Kingdom": [51.5074, -0.1278],
-    "Tokyo, Tokyo, Japan": [35.6762, 139.6503]
-}
-```
+
+- **Language**: Python 3.8+    "New York, New York, United States": [40.7128, -74.0060],
+
+- **GUI Framework**: PyQt5    "London, England, United Kingdom": [51.5074, -0.1278],
+
+- **Weather API**: Open-Meteo API    "Tokyo, Tokyo, Japan": [35.6762, 139.6503]
+
+- **Geocoding**: Nominatim}
+
+- **Data Format**: JSON```
+
+- **Units**: Fahrenheit, MPH, inches (with Celsius shown for temperature)
 
 You can specify a different file with `--city-file`:
-```bash
-python fastweather.py --city-file my_cities.json
-```
 
-## Output Formats
+## System Requirements```bash
+
+python fastweather.py --city-file my_cities.json
+
+- **OS**: Windows 10/11 (executable), or any OS with Python 3.8+```
+
+- **Memory**: 50-100 MB RAM
+
+- **Disk Space**: ~30 MB for executable, ~5 MB for Python version## Output Formats
+
+- **Internet**: Required for weather data and city search
 
 ### Full Detail Example
-```
+
+## Privacy```
+
 --- Current Weather for New York, New York, United States ---
-Temperature: 72.50°F
-Wind Speed: 8.45 mph
-Wind Direction: South-West (225°)
-Conditions: Clear sky
 
---- Hourly Weather (Next 5 Hours) for New York, New York, United States ---
+FastWeather:Temperature: 72.50°F
 
-Hour 1 (2025-06-23T14:00):
+- ✅ Does NOT collect any personal informationWind Speed: 8.45 mph
+
+- ✅ Does NOT track your usage  Wind Direction: South-West (225°)
+
+- ✅ Does NOT contain ads or analyticsConditions: Clear sky
+
+- ✅ Stores city preferences locally on your computer
+
+- ✅ Only connects to Open-Meteo API and Nominatim for weather/geocoding data--- Hourly Weather (Next 5 Hours) for New York, New York, United States ---
+
+
+
+## TroubleshootingHour 1 (2025-06-23T14:00):
+
   Temperature: 73.40°F
-  Humidity: 45%
-  Precipitation: 0.00 in
-  Wind Speed: 9.32 mph
-  Wind Direction: South-West (230°)
+
+**"No weather data" appears**  Humidity: 45%
+
+- Check your internet connection  Precipitation: 0.00 in
+
+- The weather service may be temporarily unavailable  Wind Speed: 9.32 mph
+
+- Try refreshing (F5)  Wind Direction: South-West (230°)
+
 ...
 
---- Daily Weather (Next 7 Days) for New York, New York, United States ---
+**City not found**
 
-Monday (2025-06-23):
+- Try adding state/country (e.g., "Portland, OR" or "Portland, Oregon, USA")--- Daily Weather (Next 7 Days) for New York, New York, United States ---
+
+- Use full city names
+
+- Check spellingMonday (2025-06-23):
+
   Max Temp: 78.80°F
-  Min Temp: 65.30°F
-  Sunrise: 5:25 AM
-  Sunset: 8:30 PM
-  Total Precipitation: 0.00 in
+
+**Weather conditions seem wrong**  Min Temp: 65.30°F
+
+- Weather data comes from models and may lag reality by 15-30 minutes  Sunrise: 5:25 AM
+
+- Sky conditions shown include both the weather code and actual cloud cover percentage  Sunset: 8:30 PM
+
+- Click "Refresh All" to get the latest data  Total Precipitation: 0.00 in
+
 ...
-```
 
-### Temps Mode Example
-```
+**Application won't start (executable)**```
+
+- Make sure all files from the ZIP are extracted to the same folder
+
+- Windows may block the executable - right-click, select "Properties" > "Unblock"### Temps Mode Example
+
+- Check that `city.json` is in the same folder as the executable```
+
 New York, New York, United States: 72.50°F
-London, England, United Kingdom: 59.36°F
+
+## LicenseLondon, England, United Kingdom: 59.36°F
+
 Tokyo, Tokyo, Japan: 77.90°F
-```
 
-## HTML Export
+See LICENSE file for details.```
 
-Generate a comprehensive weather report for all cities:
+
+
+## Contributing## HTML Export
+
+
+
+This is a simple, focused weather app. If you have suggestions or find bugs, please open an issue on GitHub.Generate a comprehensive weather report for all cities:
+
 ```bash
-python fastweather.py --html weather_report.html
+
+## Creditspython fastweather.py --html weather_report.html
+
 ```
 
-This creates an HTML file with full weather details for all configured cities, including:
-- Timestamp of report generation
+- Weather data: [Open-Meteo](https://open-meteo.com/)
+
+- Geocoding: [OpenStreetMap Nominatim](https://nominatim.openstreetmap.org/)This creates an HTML file with full weather details for all configured cities, including:
+
+- Built with Python and PyQt5- Timestamp of report generation
+
 - Current weather for each city
 - Hourly and daily forecasts
 - Formatted for easy reading in web browsers

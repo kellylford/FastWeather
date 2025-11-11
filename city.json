@@ -1,4 +1,8 @@
 {
+    "Madison, Wisconsin, United States": [
+        43.074761,
+        -89.3837613
+    ],
     "Portland, Oregon, United States": [
         45.5202471,
         -122.674194
@@ -10,10 +14,6 @@
     "Miami, Florida, United States": [
         25.7741728,
         -80.19362
-    ],
-    "Madison, Wisconsin, United States": [
-        43.074761,
-        -89.3837613
     ],
     "San Diego, California, United States": [
         32.7174202,
@@ -38,9 +38,5 @@
     "Mission Viejo, California, United States": [
         33.612472,
         -117.6425884
-    ],
-    "Berlin, Deutschland": [
-        52.5173885,
-        13.3951309
     ]
 }

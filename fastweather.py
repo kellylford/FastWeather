@@ -9,6 +9,7 @@ import sys
 import json
 import requests
 import logging
+import argparse
 from datetime import datetime
 from typing import Dict, Tuple, Optional, List
 import threading
@@ -28,6 +29,7 @@ from PyQt5.QtWidgets import QShortcut
 # Constants (same as original)
 KMH_TO_MPH = 0.621371
 MM_TO_INCHES = 0.0393701
+HPA_TO_INHG = 0.02953  # hectopascals to inches of mercury
 OPEN_METEO_API_URL = "https://api.open-meteo.com/v1/forecast"
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 
@@ -55,9 +57,12 @@ class WeatherFetchThread(QThread):
             }
             
             if self.detail == "full":
-                params["hourly"] = "temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,windspeed_10m,winddirection_10m"
-                params["daily"] = "temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum"
+                params["hourly"] = "temperature_2m,apparent_temperature,relative_humidity_2m,dewpoint_2m,precipitation,precipitation_probability,rain,showers,snowfall,snow_depth,weathercode,pressure_msl,surface_pressure,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,visibility,evapotranspiration,et0_fao_evapotranspiration,vapor_pressure_deficit,windspeed_10m,winddirection_10m,windgusts_10m,uv_index,uv_index_clear_sky,is_day,cape,freezing_level_height,soil_temperature_0cm"
+                params["daily"] = "weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,uv_index_clear_sky_max,precipitation_sum,rain_sum,showers_sum,snowfall_sum,precipitation_hours,precipitation_probability_max,windspeed_10m_max,windgusts_10m_max,winddirection_10m_dominant,shortwave_radiation_sum,et0_fao_evapotranspiration"
                 params["forecast_days"] = self.forecast_days
+            else:
+                # For basic weather, request cloud cover data
+                params["hourly"] = "cloudcover"
             
             response = requests.get(OPEN_METEO_API_URL, params=params, timeout=10)
             response.raise_for_status()
@@ -325,10 +330,14 @@ class WeatherConfigDialog(QDialog):
 class AccessibleWeatherApp(QMainWindow):
     """Main accessible weather application window"""
     
-    def __init__(self):
+    def __init__(self, city_file=None):
         super().__init__()
         self.city_data = {}
-        self.city_file = os.path.join(os.path.dirname(__file__), "city.json")
+        # Use provided city_file or default to city.json in script directory
+        if city_file:
+            self.city_file = city_file
+        else:
+            self.city_file = os.path.join(os.path.dirname(__file__), "city.json")
         self.last_focused_city_index = 0  # Track last focused city for tab navigation
         
         # Initialize weather display configuration
@@ -536,9 +545,19 @@ class AccessibleWeatherApp(QMainWindow):
         
         main_layout.addWidget(splitter)
         
-        # Status bar
+        # Status bar with attribution
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
+        
+        # Add attribution labels (required by API terms)
+        attribution_label = QLabel(
+            'Weather: <a href="https://open-meteo.com/">Open-Meteo.com</a> | '
+            'Geocoding: <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>'
+        )
+        attribution_label.setOpenExternalLinks(True)
+        attribution_label.setStyleSheet("QLabel { color: #666; font-size: 9pt; }")
+        self.status_bar.addPermanentWidget(attribution_label)
+        
         self.status_bar.showMessage("Ready - Enter a city name or zip code to add to your list")
         
         # Populate city list
@@ -816,8 +835,35 @@ The app uses the free Open-Meteo weather service - no API key required!"""
             weather_code = current_weather.get("weathercode", 0)
             conditions = self.weather_code_description(weather_code)
             
+            # Get cloud cover percentage and description
+            cloud_cover_text = ""
+            hourly = data.get("hourly", {})
+            if hourly and hourly.get("time"):
+                # Find the correct hour that matches current_weather time
+                current_index = 0
+                api_current_time = current_weather.get("time", "")
+                if api_current_time:
+                    times = hourly.get("time", [])
+                    try:
+                        api_time = datetime.strptime(api_current_time, "%Y-%m-%dT%H:%M")
+                        for i, time_str in enumerate(times):
+                            try:
+                                forecast_time = datetime.strptime(time_str, "%Y-%m-%dT%H:%M")
+                                if forecast_time.replace(minute=0) == api_time.replace(minute=0):
+                                    current_index = i
+                                    break
+                            except:
+                                continue
+                    except:
+                        current_index = 0
+                
+                cloudcover = hourly.get("cloudcover", [])
+                if cloudcover and len(cloudcover) > current_index:
+                    cloud_desc = self.cloud_cover_description(cloudcover[current_index])
+                    cloud_cover_text = f", {cloud_desc}"
+            
             # Create short weather description for list
-            weather_summary = f"{temp_f:.0f}°F, {conditions}"
+            weather_summary = f"{temp_f:.0f}°F{cloud_cover_text}"
             item_text = f"{city_name} - {weather_summary}"
         else:
             item_text = f"{city_name} - No weather data"
@@ -916,7 +962,7 @@ The app uses the free Open-Meteo weather service - no API key required!"""
         for i in range(self.city_list.count()):
             if self.city_list.item(i).data(Qt.UserRole) == city_key:
                 self.city_list.setCurrentRow(i)
-                self.get_basic_weather()
+                self.load_all_weather()
                 break
         
         self.city_input.setFocus()
@@ -1503,6 +1549,19 @@ The app uses the free Open-Meteo weather service - no API key required!"""
         index = round(degrees / 45) % 8
         return directions[index]
     
+    def cloud_cover_description(self, cloud_percent: float) -> str:
+        """Convert cloud cover percentage to descriptive text using meteorological standards (oktas)"""
+        if cloud_percent <= 12:
+            return "clear"
+        elif cloud_percent <= 37:
+            return "mostly clear"
+        elif cloud_percent <= 62:
+            return "partly cloudy"
+        elif cloud_percent <= 87:
+            return "mostly cloudy"
+        else:
+            return "cloudy"
+    
     def weather_code_description(self, code: int) -> str:
         descriptions = {
             0: "Clear sky", 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast",
@@ -1541,6 +1600,33 @@ The app uses the free Open-Meteo weather service - no API key required!"""
             weather_code = current_weather.get("weathercode", 0)
             conditions = self.weather_code_description(weather_code)
             
+            # Get cloud cover to add to conditions
+            hourly = data.get("hourly", {})
+            cloud_cover_text = ""
+            if hourly and hourly.get("time"):
+                # Find the correct hour that matches current_weather time
+                current_index = 0
+                api_current_time = current_weather.get("time", "")
+                if api_current_time:
+                    times = hourly.get("time", [])
+                    try:
+                        api_time = datetime.strptime(api_current_time, "%Y-%m-%dT%H:%M")
+                        for i, time_str in enumerate(times):
+                            try:
+                                forecast_time = datetime.strptime(time_str, "%Y-%m-%dT%H:%M")
+                                if forecast_time.replace(minute=0) == api_time.replace(minute=0):
+                                    current_index = i
+                                    break
+                            except:
+                                continue
+                    except:
+                        current_index = 0
+                
+                cloudcover = hourly.get("cloudcover", [])
+                if cloudcover and len(cloudcover) > current_index:
+                    cloud_desc = self.cloud_cover_description(cloudcover[current_index])
+                    cloud_cover_text = f" ({cloud_desc})"
+            
             # Calculate feels like temperature
             feels_like_c = self.calculate_feels_like(temp_c, wind_kmh, 50)  # Assume 50% humidity
             feels_like_f = self.celsius_to_fahrenheit(feels_like_c)
@@ -1554,7 +1640,7 @@ The app uses the free Open-Meteo weather service - no API key required!"""
             if current_config.get('feels_like', True):
                 result.append(f"Feels Like: {feels_like_f:.1f}°F ({feels_like_c:.1f}°C)")
             
-            result.append(f"Conditions: {conditions}")  # Always show conditions
+            result.append(f"Conditions: {conditions}{cloud_cover_text}")  # Show conditions with cloud cover percentage
             
             if current_config.get('wind_speed', True) and current_config.get('wind_direction', True):
                 result.append(f"Wind: {wind_mph:.1f} mph {wind_cardinal} ({wind_dir}°)")
@@ -1563,12 +1649,58 @@ The app uses the free Open-Meteo weather service - no API key required!"""
             elif current_config.get('wind_direction', True):
                 result.append(f"Wind Direction: {wind_cardinal} ({wind_dir}°)")
             
-            if current_config.get('humidity', True):
-                # For current weather, we don't have humidity from the API, so we note this
-                result.append("Humidity: See hourly data for humidity details")
-            
-            if current_config.get('precipitation', True):
-                result.append("Precipitation: See hourly data for precipitation details")
+            # Additional current data from hourly - find the matching time index
+            hourly = data.get("hourly", {})
+            if hourly and hourly.get("time"):
+                # Find the correct hour that matches current_weather time
+                current_index = 0
+                api_current_time = current_weather.get("time", "")
+                if api_current_time:
+                    times = hourly.get("time", [])
+                    try:
+                        api_time = datetime.strptime(api_current_time, "%Y-%m-%dT%H:%M")
+                        for i, time_str in enumerate(times):
+                            try:
+                                forecast_time = datetime.strptime(time_str, "%Y-%m-%dT%H:%M")
+                                if forecast_time.replace(minute=0) == api_time.replace(minute=0):
+                                    current_index = i
+                                    break
+                            except:
+                                continue
+                    except:
+                        current_index = 0
+                
+                # Get current hour data using the matched index
+                humidity = hourly.get("relative_humidity_2m", [])
+                precipitation = hourly.get("precipitation", [])
+                pressure_msl = hourly.get("pressure_msl", [])
+                cloudcover = hourly.get("cloudcover", [])
+                visibility = hourly.get("visibility", [])
+                uv_index = hourly.get("uv_index", [])
+                
+                if current_config.get('humidity', True) and humidity and len(humidity) > current_index:
+                    result.append(f"Humidity: {humidity[current_index]:.0f}%")
+                
+                if current_config.get('precipitation', True) and precipitation and len(precipitation) > current_index:
+                    precip_in = precipitation[current_index] * MM_TO_INCHES
+                    if precip_in > 0:
+                        result.append(f"Precipitation: {precip_in:.2f}\"")
+                    else:
+                        result.append("Precipitation: None")
+                
+                if pressure_msl and len(pressure_msl) > current_index:
+                    pressure_inhg = pressure_msl[current_index] * HPA_TO_INHG
+                    result.append(f"Pressure: {pressure_inhg:.2f} inHg")
+                
+                if cloudcover and len(cloudcover) > current_index:
+                    result.append(f"Cloud Cover: {cloudcover[current_index]:.0f}%")
+                
+                if visibility and len(visibility) > current_index:
+                    visibility_miles = visibility[current_index] / 1609.34  # meters to miles
+                    result.append(f"Visibility: {visibility_miles:.1f} miles")
+                
+                if uv_index and len(uv_index) > current_index and uv_index[current_index] is not None:
+                    result.append(f"UV Index: {uv_index[current_index]:.1f}")
                 
             result.append("")
         
@@ -1586,9 +1718,25 @@ The app uses the free Open-Meteo weather service - no API key required!"""
                 temps = hourly.get("temperature_2m", [])
                 apparent_temps = hourly.get("apparent_temperature", [])
                 humidity = hourly.get("relative_humidity_2m", [])
+                dewpoint = hourly.get("dewpoint_2m", [])
                 precip = hourly.get("precipitation", [])
+                precip_prob = hourly.get("precipitation_probability", [])
+                rain = hourly.get("rain", [])
+                showers = hourly.get("showers", [])
+                snowfall = hourly.get("snowfall", [])
+                snow_depth = hourly.get("snow_depth", [])
+                weathercodes = hourly.get("weathercode", [])
+                pressure_msl = hourly.get("pressure_msl", [])
+                cloudcover = hourly.get("cloudcover", [])
+                cloudcover_low = hourly.get("cloudcover_low", [])
+                cloudcover_mid = hourly.get("cloudcover_mid", [])
+                cloudcover_high = hourly.get("cloudcover_high", [])
+                visibility = hourly.get("visibility", [])
                 wind_speeds = hourly.get("windspeed_10m", [])
                 wind_dirs = hourly.get("winddirection_10m", [])
+                wind_gusts = hourly.get("windgusts_10m", [])
+                uv_index = hourly.get("uv_index", [])
+                is_day = hourly.get("is_day", [])
                 
                 # Find the current hour index
                 current_weather = data.get("current_weather", {})
@@ -1616,6 +1764,11 @@ The app uses the free Open-Meteo weather service - no API key required!"""
                     time_str = self.format_time(times[i], with_date=False)
                     hourly_line = [time_str + ":"]
                     
+                    # Weather condition
+                    if weathercodes and i < len(weathercodes):
+                        condition = self.weather_code_description(weathercodes[i])
+                        hourly_line.append(condition)
+                    
                     if hourly_config.get('temperature', True) and i < len(temps):
                         temp_f = self.celsius_to_fahrenheit(temps[i])
                         hourly_line.append(f"{temp_f:.0f}°F")
@@ -1628,9 +1781,26 @@ The app uses the free Open-Meteo weather service - no API key required!"""
                     if hourly_config.get('humidity', False) and i < len(humidity):
                         hourly_line.append(f"{humidity[i]:.0f}% humidity")
                     
+                    if dewpoint and i < len(dewpoint) and dewpoint[i] is not None:
+                        dewpoint_f = self.celsius_to_fahrenheit(dewpoint[i])
+                        hourly_line.append(f"dewpoint {dewpoint_f:.0f}°F")
+                    
                     if hourly_config.get('precipitation', True) and i < len(precip):
                         prec_in = precip[i] * MM_TO_INCHES
-                        hourly_line.append(f"{prec_in:.2f}\" rain")
+                        if prec_in > 0:
+                            hourly_line.append(f"{prec_in:.2f}\" precip")
+                    
+                    if precip_prob and i < len(precip_prob) and precip_prob[i] is not None:
+                        if precip_prob[i] > 0:
+                            hourly_line.append(f"{precip_prob[i]:.0f}% chance")
+                    
+                    if snowfall and i < len(snowfall) and snowfall[i] is not None and snowfall[i] > 0:
+                        snow_in = snowfall[i] * 0.393701  # cm to inches
+                        hourly_line.append(f"{snow_in:.1f}\" snow")
+                    
+                    if snow_depth and i < len(snow_depth) and snow_depth[i] is not None and snow_depth[i] > 0:
+                        depth_in = snow_depth[i] * 39.3701  # meters to inches
+                        hourly_line.append(f"{depth_in:.1f}\" on ground")
                     
                     if hourly_config.get('wind_speed', False) and i < len(wind_speeds):
                         wind_mph = wind_speeds[i] * KMH_TO_MPH
@@ -1644,6 +1814,26 @@ The app uses the free Open-Meteo weather service - no API key required!"""
                     elif hourly_config.get('wind_direction', False) and i < len(wind_dirs):
                         wind_card = self.degrees_to_cardinal(wind_dirs[i])
                         hourly_line.append(f"from {wind_card}")
+                    
+                    if wind_gusts and i < len(wind_gusts) and wind_gusts[i] is not None:
+                        gust_mph = wind_gusts[i] * KMH_TO_MPH
+                        if gust_mph > 15:  # Only show significant gusts
+                            hourly_line.append(f"gusts {gust_mph:.0f} mph")
+                    
+                    if cloudcover and i < len(cloudcover):
+                        hourly_line.append(f"{cloudcover[i]:.0f}% clouds")
+                    
+                    if visibility and i < len(visibility) and visibility[i] is not None:
+                        vis_miles = visibility[i] / 1609.34
+                        if vis_miles < 5:  # Only show if visibility is reduced
+                            hourly_line.append(f"{vis_miles:.1f} mi vis")
+                    
+                    if uv_index and i < len(uv_index) and uv_index[i] is not None and uv_index[i] > 0:
+                        hourly_line.append(f"UV {uv_index[i]:.0f}")
+                    
+                    if pressure_msl and i < len(pressure_msl) and pressure_msl[i] is not None:
+                        pressure_inhg = pressure_msl[i] * HPA_TO_INHG
+                        hourly_line.append(f"{pressure_inhg:.2f} inHg")
                     
                     result.append(" ".join(hourly_line))
                 
@@ -1660,15 +1850,35 @@ The app uses the free Open-Meteo weather service - no API key required!"""
                 result.append("-" * 20)
                 
                 times = daily.get("time", [])
+                weathercodes = daily.get("weathercode", [])
                 max_temps = daily.get("temperature_2m_max", [])
                 min_temps = daily.get("temperature_2m_min", [])
+                apparent_max = daily.get("apparent_temperature_max", [])
+                apparent_min = daily.get("apparent_temperature_min", [])
                 sunrise_times = daily.get("sunrise", [])
                 sunset_times = daily.get("sunset", [])
+                daylight_duration = daily.get("daylight_duration", [])
+                sunshine_duration = daily.get("sunshine_duration", [])
+                uv_index_max = daily.get("uv_index_max", [])
                 precip_sums = daily.get("precipitation_sum", [])
+                rain_sum = daily.get("rain_sum", [])
+                showers_sum = daily.get("showers_sum", [])
+                snowfall_sum = daily.get("snowfall_sum", [])
+                precip_hours = daily.get("precipitation_hours", [])
+                precip_prob_max = daily.get("precipitation_probability_max", [])
+                wind_speed_max = daily.get("windspeed_10m_max", [])
+                wind_gusts_max = daily.get("windgusts_10m_max", [])
+                wind_dir_dominant = daily.get("winddirection_10m_dominant", [])
+                shortwave_radiation = daily.get("shortwave_radiation_sum", [])
                 
                 for i in range(min(len(times), 7)):
                     date_str = self.format_date(times[i])
                     result.append(f"{date_str}:")
+                    
+                    # Weather condition
+                    if weathercodes and i < len(weathercodes):
+                        condition = self.weather_code_description(weathercodes[i])
+                        result.append(f"  {condition}")
                     
                     temp_line = []
                     if daily_config.get('temperature_max', True) and i < len(max_temps):
@@ -1682,6 +1892,19 @@ The app uses the free Open-Meteo weather service - no API key required!"""
                     if temp_line:
                         result.append(f"  {' '.join(temp_line)}")
                     
+                    # Apparent temperatures
+                    apparent_line = []
+                    if apparent_max and i < len(apparent_max) and apparent_max[i] is not None:
+                        app_max_f = self.celsius_to_fahrenheit(apparent_max[i])
+                        apparent_line.append(f"Feels like high: {app_max_f:.0f}°F")
+                    
+                    if apparent_min and i < len(apparent_min) and apparent_min[i] is not None:
+                        app_min_f = self.celsius_to_fahrenheit(apparent_min[i])
+                        apparent_line.append(f"low: {app_min_f:.0f}°F")
+                    
+                    if apparent_line:
+                        result.append(f"  {' '.join(apparent_line)}")
+                    
                     sun_line = []
                     if daily_config.get('sunrise', True) and i < len(sunrise_times):
                         sunrise = self.format_time(sunrise_times[i], with_date=False)
@@ -1694,11 +1917,77 @@ The app uses the free Open-Meteo weather service - no API key required!"""
                     if sun_line:
                         result.append(f"  {' '.join(sun_line)}")
                     
+                    # Daylight and sunshine
+                    if daylight_duration and i < len(daylight_duration) and daylight_duration[i] is not None:
+                        daylight_hours = daylight_duration[i] / 3600
+                        result.append(f"  Daylight: {daylight_hours:.1f} hours")
+                    
+                    if sunshine_duration and i < len(sunshine_duration) and sunshine_duration[i] is not None:
+                        sunshine_hours = sunshine_duration[i] / 3600
+                        result.append(f"  Sunshine: {sunshine_hours:.1f} hours")
+                    
+                    # UV Index
+                    if uv_index_max and i < len(uv_index_max) and uv_index_max[i] is not None:
+                        result.append(f"  UV Index: {uv_index_max[i]:.1f}")
+                    
+                    # Precipitation
                     if daily_config.get('precipitation_sum', True) and i < len(precip_sums):
                         precip_in = precip_sums[i] * MM_TO_INCHES
-                        result.append(f"  Precipitation: {precip_in:.2f}\"")
+                        if precip_in > 0:
+                            result.append(f"  Precipitation: {precip_in:.2f}\"")
+                    
+                    if precip_prob_max and i < len(precip_prob_max) and precip_prob_max[i] is not None:
+                        if precip_prob_max[i] > 0:
+                            result.append(f"  Chance of precipitation: {precip_prob_max[i]:.0f}%")
+                    
+                    if rain_sum and i < len(rain_sum) and rain_sum[i] is not None and rain_sum[i] > 0:
+                        rain_in = rain_sum[i] * MM_TO_INCHES
+                        result.append(f"  Rain: {rain_in:.2f}\"")
+                    
+                    if showers_sum and i < len(showers_sum) and showers_sum[i] is not None and showers_sum[i] > 0:
+                        showers_in = showers_sum[i] * MM_TO_INCHES
+                        result.append(f"  Showers: {showers_in:.2f}\"")
+                    
+                    if snowfall_sum and i < len(snowfall_sum) and snowfall_sum[i] is not None and snowfall_sum[i] > 0:
+                        snow_in = snowfall_sum[i] * 0.393701  # cm to inches
+                        result.append(f"  Snowfall: {snow_in:.1f}\"")
+                    
+                    if precip_hours and i < len(precip_hours) and precip_hours[i] is not None and precip_hours[i] > 0:
+                        result.append(f"  Hours with precipitation: {precip_hours[i]:.0f}")
+                    
+                    # Wind
+                    wind_line = []
+                    if wind_speed_max and i < len(wind_speed_max) and wind_speed_max[i] is not None:
+                        wind_max_mph = wind_speed_max[i] * KMH_TO_MPH
+                        wind_line.append(f"Wind up to {wind_max_mph:.0f} mph")
+                    
+                    if wind_dir_dominant and i < len(wind_dir_dominant) and wind_dir_dominant[i] is not None:
+                        wind_card = self.degrees_to_cardinal(wind_dir_dominant[i])
+                        wind_line.append(f"from {wind_card}")
+                    
+                    if wind_line:
+                        result.append(f"  {' '.join(wind_line)}")
+                    
+                    if wind_gusts_max and i < len(wind_gusts_max) and wind_gusts_max[i] is not None:
+                        gusts_mph = wind_gusts_max[i] * KMH_TO_MPH
+                        if gusts_mph > 20:  # Only show significant gusts
+                            result.append(f"  Wind gusts up to {gusts_mph:.0f} mph")
+                    
+                    # Solar radiation
+                    if shortwave_radiation and i < len(shortwave_radiation) and shortwave_radiation[i] is not None:
+                        result.append(f"  Solar radiation: {shortwave_radiation[i]:.1f} MJ/m²")
                     
                     result.append("")
+        
+        # Add observation time if available
+        current_weather = data.get("current_weather", {})
+        observation_time = current_weather.get("time", "")
+        if observation_time:
+            try:
+                obs_dt = datetime.strptime(observation_time, "%Y-%m-%dT%H:%M")
+                result.append(f"Observation time: {obs_dt.strftime('%A, %B %d, %Y at %I:%M %p')}")
+            except:
+                result.append(f"Observation time: {observation_time}")
         
         result.append(f"Report generated: {datetime.now().strftime('%Y-%m-%d %I:%M %p')}")
         
@@ -1726,6 +2015,25 @@ The app uses the free Open-Meteo weather service - no API key required!"""
 
 def main():
     """Main function to run the accessible weather application"""
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(
+        description='FastWeather - Accessible Weather Application',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  fastweather.py                    # Use default city.json file
+  fastweather.py -c mycities.json   # Use custom city file
+  fastweather.py --city-file /path/to/cities.json
+        """
+    )
+    parser.add_argument(
+        '-c', '--city-file',
+        type=str,
+        help='Path to city JSON file (default: city.json in script directory)'
+    )
+    
+    args = parser.parse_args()
+    
     # Enable high DPI scaling before creating QApplication
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
@@ -1738,8 +2046,8 @@ def main():
     app.setApplicationVersion("2.0")
     app.setOrganizationName("FastWeather")
     
-    # Create and show main window
-    window = AccessibleWeatherApp()
+    # Create and show main window with optional custom city file
+    window = AccessibleWeatherApp(city_file=args.city_file)
     window.show()
     
     # Run the application
