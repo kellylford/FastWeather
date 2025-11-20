@@ -1,6 +1,6 @@
 # FastWeather
 
-A fast, accessible weather application that provides current conditions and detailed forecasts without the clutter. Built with Python and wxPython, it is designed to be fully compatible with screen readers and keyboard navigation.
+A fast weather application that provides current conditions and detailed forecasts without the clutter. Built with Python and wxPython, it is designed to be fully compatible with screen readers and keyboard navigation.
 
 ## Features
 

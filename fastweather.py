@@ -90,7 +90,7 @@ class GeocodingThread(threading.Thread):
     def run(self):
         try:
             params = {"q": self.city_input, "format": "json", "addressdetails": 1, "limit": 5}
-            headers = {"User-Agent": "FastWeather GUI/1.0 (accessible weather app)"}
+            headers = {"User-Agent": "FastWeather GUI/1.0"}
             response = requests.get(NOMINATIM_URL, params=params, headers=headers, timeout=10)
             response.raise_for_status()
             results = response.json()
@@ -235,7 +235,7 @@ class AccessibleWeatherApp(wx.Frame):
     }
 
     def __init__(self, city_file=None):
-        super().__init__(None, title="FastWeather - Accessible Weather App", size=(1000, 700))
+        super().__init__(None, title="FastWeather", size=(1000, 700))
         
         # Determine user data directory if no file provided
         if city_file is None:
@@ -909,7 +909,7 @@ class AccessibleWeatherApp(wx.Frame):
 if __name__ == "__main__":
     app = wx.App()
     
-    parser = argparse.ArgumentParser(description="FastWeather - Accessible Weather App")
+    parser = argparse.ArgumentParser(description="FastWeather")
     parser.add_argument("--reset", action="store_true", help="Reset (delete) the saved city data file")
     parser.add_argument("-c", "--config", help="Path to a specific city data JSON file to use")
     args = parser.parse_args()
