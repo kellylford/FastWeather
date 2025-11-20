@@ -24,6 +24,27 @@ def main():
         print("\nInstalling PyInstaller...")
         subprocess.check_call([sys.executable, "-m", "pip", "install", "pyinstaller"])
         print("✓ PyInstaller installed")
+
+    # Check for app dependencies
+    print("Checking dependencies...")
+    missing_deps = []
+    try:
+        import wx
+        print("✓ wxPython found")
+    except ImportError:
+        missing_deps.append("wxPython")
+    
+    try:
+        import requests
+        print("✓ requests found")
+    except ImportError:
+        missing_deps.append("requests")
+        
+    if missing_deps:
+        print(f"✗ Missing dependencies: {', '.join(missing_deps)}")
+        print("Installing dependencies...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+        print("✓ Dependencies installed")
     
     print()
     
@@ -55,6 +76,7 @@ def main():
         "--onedir",    # Single directory with dependencies
         "--icon=NONE", # No icon (you can add one later)
         "--add-data=city.json;.",  # Include sample city file
+        "--exclude-module=tkinter", # Exclude unnecessary standard library GUI
         "fastweather.py"
     ]
     
