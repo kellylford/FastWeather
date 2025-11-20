@@ -8,9 +8,8 @@ Uses Open-Meteo API (no API key required)
 import sys
 import json
 import requests
-import logging
 import argparse
-from datetime import datetime
+from datetime import datetime, timedelta
 import threading
 import os
 import wx
@@ -23,6 +22,21 @@ MM_TO_INCHES = 0.0393701
 HPA_TO_INHG = 0.02953
 OPEN_METEO_API_URL = "https://api.open-meteo.com/v1/forecast"
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
+
+# Default Cities
+DEFAULT_CITIES = {
+    "Madison, Wisconsin, United States": [43.074761, -89.3837613],
+    "San Diego, California, United States": [32.7174202, -117.162772],
+    "Portland, Oregon, United States": [45.5202471, -122.674194],
+    "London, England, United Kingdom": [51.5074456, -0.1277653],
+    "Miami, Florida, United States": [25.7741728, -80.19362],
+    "Redmond, Washington, United States": [47.6694141, -122.1238767],
+    "Mexico City, Ciudad de México, México": [19.3207722, -99.1514678],
+    "Seaside, Oregon, United States": [45.993246, -123.920213],
+    "Fond du Lac, Wisconsin, United States": [43.7731217, -88.4417538],
+    "Mission Viejo, California, United States": [33.612472, -117.6425884],
+    "Maui, Hawaii, United States of America": [20.8029568, -156.3106833]
+}
 
 # Custom Events
 WeatherReadyEvent, EVT_WEATHER_READY = wx.lib.newevent.NewEvent()
@@ -47,7 +61,7 @@ class WeatherFetchThread(threading.Thread):
             params = {
                 "latitude": self.lat,
                 "longitude": self.lon,
-                "current": "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m",
+                "current": "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m,visibility",
                 "timezone": "auto",
             }
             
@@ -165,13 +179,14 @@ class WeatherConfigDialog(wx.Dialog):
             ('humidity', 'Humidity'), ('wind_speed', 'Wind Speed'),
             ('wind_direction', 'Wind Direction'), ('pressure', 'Pressure'),
             ('visibility', 'Visibility'), ('uv_index', 'UV Index'),
-            ('precipitation', 'Precipitation')
+            ('precipitation', 'Precipitation'), ('cloud_cover', 'Cloud Cover')
         ])
         
         add_tab("Hourly", 'hourly', [
             ('temperature', 'Temperature'), ('feels_like', 'Feels Like'),
             ('humidity', 'Humidity'), ('precipitation', 'Precipitation'),
-            ('wind_speed', 'Wind Speed'), ('wind_direction', 'Wind Direction')
+            ('wind_speed', 'Wind Speed'), ('wind_direction', 'Wind Direction'),
+            ('cloud_cover', 'Cloud Cover')
         ])
         
         add_tab("Daily", 'daily', [
@@ -221,15 +236,33 @@ class AccessibleWeatherApp(wx.Frame):
 
     def __init__(self, city_file=None):
         super().__init__(None, title="FastWeather - Accessible Weather App", size=(1000, 700))
-        self.city_file = city_file or os.path.join(os.path.dirname(__file__), "city.json")
+        
+        # Determine user data directory if no file provided
+        if city_file is None:
+            sp = wx.StandardPaths.Get()
+            user_data_dir = sp.GetUserDataDir()
+            if not os.path.exists(user_data_dir):
+                os.makedirs(user_data_dir)
+            self.city_file = os.path.join(user_data_dir, "city.json")
+            self.config_file = os.path.join(user_data_dir, "config.json")
+        else:
+            self.city_file = city_file
+            # If a specific city file is provided, we still try to use the standard user data dir for config
+            sp = wx.StandardPaths.Get()
+            user_data_dir = sp.GetUserDataDir()
+            if not os.path.exists(user_data_dir):
+                os.makedirs(user_data_dir)
+            self.config_file = os.path.join(user_data_dir, "config.json")
+            
         self.city_data = {}
         self.weather_config = {
-            'current': {'temperature': True, 'feels_like': True, 'humidity': True, 'wind_speed': True, 'wind_direction': True, 'pressure': False, 'visibility': False, 'uv_index': False, 'precipitation': True},
-            'hourly': {'temperature': True, 'feels_like': False, 'humidity': False, 'precipitation': True, 'wind_speed': False, 'wind_direction': False},
+            'current': {'temperature': True, 'feels_like': True, 'humidity': True, 'wind_speed': True, 'wind_direction': True, 'pressure': False, 'visibility': False, 'uv_index': False, 'precipitation': True, 'cloud_cover': False},
+            'hourly': {'temperature': True, 'feels_like': False, 'humidity': False, 'precipitation': True, 'wind_speed': False, 'wind_direction': False, 'cloud_cover': False},
             'daily': {'temperature_max': True, 'temperature_min': True, 'sunrise': True, 'sunset': True, 'precipitation_sum': True, 'precipitation_hours': False, 'wind_speed_max': False, 'wind_direction_dominant': False}
         }
         
         self.load_city_data()
+        self.load_config()
         self.init_ui()
         self.setup_shortcuts()
         
@@ -329,6 +362,12 @@ class AccessibleWeatherApp(wx.Frame):
         keycode = event.GetKeyCode()
         if keycode == wx.WXK_RETURN or keycode == wx.WXK_NUMPAD_ENTER:
             self.on_full_weather(event)
+        elif keycode == wx.WXK_TAB:
+            # Manually handle Tab navigation since WANTS_CHARS consumes it
+            flags = wx.NavigationKeyEvent.IsForward
+            if event.ShiftDown():
+                flags = wx.NavigationKeyEvent.IsBackward
+            self.city_list.Navigate(flags)
         else:
             event.Skip()
 
@@ -379,14 +418,64 @@ class AccessibleWeatherApp(wx.Frame):
         self.btn_down.Enable(has_sel and sel < self.city_list.GetCount() - 1)
 
     def load_city_data(self):
-        try:
-            if os.path.exists(self.city_file):
-                with open(self.city_file) as f: self.city_data = json.load(f)
-        except: self.city_data = {}
+        loaded = False
+        # 1. Try User Data (AppData)
+        if os.path.exists(self.city_file):
+            try:
+                with open(self.city_file) as f:
+                    data = json.load(f)
+                    if data:
+                        self.city_data = data
+                        loaded = True
+            except:
+                pass
+        
+        # 2. Try Bundled/Local Default if User Data missing
+        if not loaded:
+            default_path = None
+            if getattr(sys, 'frozen', False):
+                # Running as compiled exe - look in temp folder
+                default_path = os.path.join(sys._MEIPASS, "city.json")
+            else:
+                # Running from source - look in script directory
+                default_path = os.path.join(os.path.dirname(__file__), "city.json")
+            
+            if default_path and os.path.exists(default_path):
+                try:
+                    with open(default_path) as f:
+                        self.city_data = json.load(f)
+                        loaded = True
+                except: pass
+
+        # 3. Fallback to hardcoded defaults
+        if not loaded:
+            self.city_data = DEFAULT_CITIES.copy()
+            
+        # Save to user data so it exists for next time
+        if not os.path.exists(self.city_file) and self.city_data:
+             self.save_city_data()
 
     def save_city_data(self):
         try:
             with open(self.city_file, 'w') as f: json.dump(self.city_data, f, indent=4)
+        except: pass
+
+    def load_config(self):
+        if os.path.exists(self.config_file):
+            try:
+                with open(self.config_file) as f:
+                    saved_config = json.load(f)
+                    # Merge saved config with defaults to handle new keys
+                    for section, options in saved_config.items():
+                        if section in self.weather_config:
+                            for key, value in options.items():
+                                self.weather_config[section][key] = value
+            except: pass
+
+    def save_config(self):
+        try:
+            with open(self.config_file, 'w') as f:
+                json.dump(self.weather_config, f, indent=4)
         except: pass
 
     def update_city_list(self, reload=True):
@@ -508,6 +597,7 @@ class AccessibleWeatherApp(wx.Frame):
         dlg = WeatherConfigDialog(self, self.weather_config)
         if dlg.ShowModal() == wx.ID_OK:
             self.weather_config = dlg.get_configuration()
+            self.save_config()
             if hasattr(self, 'current_full_city'):
                 self.on_full_weather(None)
         dlg.Destroy()
@@ -521,45 +611,54 @@ class AccessibleWeatherApp(wx.Frame):
         city, data = event.data
         
         # Update list
-        curr = data.get("current_weather", {})
+        curr = data.get("current", data.get("current_weather", {}))
         if curr:
-            temp_c = curr.get("temperature", 0)
+            # Handle key differences between 'current' and legacy 'current_weather'
+            temp_c = curr.get("temperature_2m", curr.get("temperature", 0))
             temp_f = (temp_c * 9/5) + 32
             
-            hourly = data.get("hourly", {})
             cloud_text = ""
             
-            if hourly and 'time' in hourly and 'cloudcover' in hourly:
-                times = hourly['time']
-                cloudcover = hourly['cloudcover']
-                curr_time_str = curr.get('time')
-                
-                idx = -1
-                # Try exact match first
-                if curr_time_str in times:
-                    idx = times.index(curr_time_str)
-                else:
-                    # Try datetime match
-                    try:
-                        curr_dt = datetime.strptime(curr_time_str, "%Y-%m-%dT%H:%M")
-                        # Find closest hour
-                        for i, t_str in enumerate(times):
-                            try:
-                                t_dt = datetime.strptime(t_str, "%Y-%m-%dT%H:%M")
-                                if t_dt.replace(minute=0) == curr_dt.replace(minute=0):
-                                    idx = i
-                                    break
-                            except: continue
-                    except: pass
-                
-                if idx != -1 and idx < len(cloudcover):
-                    cc = cloudcover[idx]
-                    if cc <= 12: desc = "clear"
-                    elif cc <= 37: desc = "mostly clear"
-                    elif cc <= 62: desc = "partly cloudy"
-                    elif cc <= 87: desc = "mostly cloudy"
-                    else: desc = "cloudy"
-                    cloud_text = f", {desc}"
+            # Try to get cloud cover directly (new API)
+            if "cloud_cover" in curr:
+                cc = curr["cloud_cover"]
+                if cc <= 12: desc = "clear"
+                elif cc <= 37: desc = "mostly clear"
+                elif cc <= 62: desc = "partly cloudy"
+                elif cc <= 87: desc = "mostly cloudy"
+                else: desc = "cloudy"
+                cloud_text = f", {desc}"
+            else:
+                # Fallback to hourly matching
+                hourly = data.get("hourly", {})
+                if hourly and 'time' in hourly and 'cloudcover' in hourly:
+                    times = hourly['time']
+                    cloudcover = hourly['cloudcover']
+                    curr_time_str = curr.get('time')
+                    
+                    idx = -1
+                    if curr_time_str in times:
+                        idx = times.index(curr_time_str)
+                    else:
+                        try:
+                            curr_dt = datetime.strptime(curr_time_str, "%Y-%m-%dT%H:%M")
+                            for i, t_str in enumerate(times):
+                                try:
+                                    t_dt = datetime.strptime(t_str, "%Y-%m-%dT%H:%M")
+                                    if t_dt.replace(minute=0) == curr_dt.replace(minute=0):
+                                        idx = i
+                                        break
+                                except: continue
+                        except: pass
+                    
+                    if idx != -1 and idx < len(cloudcover):
+                        cc = cloudcover[idx]
+                        if cc <= 12: desc = "clear"
+                        elif cc <= 37: desc = "mostly clear"
+                        elif cc <= 62: desc = "partly cloudy"
+                        elif cc <= 87: desc = "mostly cloudy"
+                        else: desc = "cloudy"
+                        cloud_text = f", {desc}"
             
             new_text = f"{city} - {temp_f:.0f}°F{cloud_text}"
             
@@ -589,19 +688,85 @@ class AccessibleWeatherApp(wx.Frame):
         lines.append(f"Report for {city}")
         lines.append("="*40)
         
-        curr = data.get("current_weather", {})
+        # Handle both new 'current' and legacy 'current_weather'
+        curr = data.get("current", data.get("current_weather", {}))
+        hourly = data.get("hourly", {})
+        daily = data.get("daily", {})
+        
         cfg_curr = self.weather_config['current']
         if curr:
             lines.append("CURRENT")
-            temp_c = curr.get("temperature", 0)
-            temp_f = (temp_c * 9/5) + 32
             
+            # Helper to get value from either new or legacy keys
+            def get_val(keys, default=0):
+                if isinstance(keys, str): keys = [keys]
+                for k in keys:
+                    if k in curr: return curr[k]
+                return default
+
+            # Temperature
             if cfg_curr.get('temperature', True):
+                temp_c = get_val(['temperature_2m', 'temperature'])
+                temp_f = (temp_c * 9/5) + 32
                 lines.append(f"Temp: {temp_f:.1f}°F ({temp_c:.1f}°C)")
             
+            # Feels Like
+            if cfg_curr.get('feels_like', False):
+                app_temp_c = get_val(['apparent_temperature'])
+                app_temp_f = (app_temp_c * 9/5) + 32
+                lines.append(f"Feels Like: {app_temp_f:.1f}°F")
+
+            # Humidity
+            if cfg_curr.get('humidity', False):
+                hum = get_val(['relative_humidity_2m'])
+                lines.append(f"Humidity: {hum}%")
+
+            # Pressure
+            if cfg_curr.get('pressure', False):
+                pres = get_val(['pressure_msl', 'surface_pressure'])
+                pres_in = pres * HPA_TO_INHG
+                lines.append(f"Pressure: {pres_in:.2f} inHg")
+
+            # Visibility
+            if cfg_curr.get('visibility', False):
+                vis_m = get_val(['visibility'])
+                vis_miles = vis_m / 1609.34
+                lines.append(f"Visibility: {vis_miles:.1f} miles")
+
+            # UV Index (fetch from hourly if not in current)
+            if cfg_curr.get('uv_index', False):
+                uv = get_val(['uv_index'])
+                if uv == 0 and hourly and 'uv_index' in hourly and 'time' in hourly:
+                    # Try to find current hour in hourly data
+                    curr_time = curr.get('time')
+                    if curr_time in hourly['time']:
+                        idx = hourly['time'].index(curr_time)
+                        uv = hourly['uv_index'][idx]
+                lines.append(f"UV Index: {uv}")
+
+            # Precipitation
+            if cfg_curr.get('precipitation', False):
+                precip = get_val(['precipitation'])
+                if precip > 0:
+                    precip_in = precip * MM_TO_INCHES
+                    lines.append(f"Precipitation: {precip_in:.2f}\"")
+
+            # Cloud Cover
+            if cfg_curr.get('cloud_cover', False):
+                cc = get_val(['cloud_cover', 'cloudcover'])
+                if cc is not None:
+                    if cc <= 12: desc = "Clear"
+                    elif cc <= 37: desc = "Mostly Clear"
+                    elif cc <= 62: desc = "Partly Cloudy"
+                    elif cc <= 87: desc = "Mostly Cloudy"
+                    else: desc = "Cloudy"
+                    lines.append(f"Cloud Cover: {cc}% ({desc})")
+
+            # Wind
             if cfg_curr.get('wind_speed', True):
-                wind_mph = curr.get('windspeed', 0) * KMH_TO_MPH
-                wind_dir = curr.get('winddirection', 0)
+                wind_kmh = get_val(['wind_speed_10m', 'windspeed'])
+                wind_mph = wind_kmh * KMH_TO_MPH
+                wind_dir = get_val(['wind_direction_10m', 'winddirection'])
                 wind_card = self.degrees_to_cardinal(wind_dir)
                 
                 if cfg_curr.get('wind_direction', True):
@@ -609,47 +774,83 @@ class AccessibleWeatherApp(wx.Frame):
                 else:
                     lines.append(f"Wind: {wind_mph:.1f} mph")
             elif cfg_curr.get('wind_direction', True):
-                wind_dir = curr.get('winddirection', 0)
+                wind_dir = get_val(['wind_direction_10m', 'winddirection'])
                 wind_card = self.degrees_to_cardinal(wind_dir)
                 lines.append(f"Wind Dir: {wind_card} ({wind_dir}°)")
                 
             lines.append("")
             
-        hourly = data.get("hourly", {})
         cfg_hourly = self.weather_config['hourly']
-        # Check if any hourly option is enabled
         if hourly and any(cfg_hourly.values()):
             lines.append("HOURLY")
             times = hourly.get('time', [])
             temps = hourly.get('temperature_2m', [])
+            app_temps = hourly.get('apparent_temperature', [])
             precip = hourly.get('precipitation', [])
             humidity = hourly.get('relative_humidity_2m', [])
+            wind_speeds = hourly.get('windspeed_10m', [])
+            wind_dirs = hourly.get('winddirection_10m', [])
+            cloud_cover = hourly.get('cloudcover', [])
             
             # Find start
             start = 0
-            if curr and curr.get('time') in times:
-                start = times.index(curr.get('time'))
+            curr_time = curr.get('time') if curr else None
+            
+            if curr_time and times:
+                try:
+                    # Calculate index based on time difference from start of list
+                    # This is more robust than string matching
+                    curr_dt = datetime.strptime(curr_time, "%Y-%m-%dT%H:%M")
+                    first_dt = datetime.strptime(times[0], "%Y-%m-%dT%H:%M")
+                    
+                    diff_seconds = (curr_dt - first_dt).total_seconds()
+                    idx = round(diff_seconds / 3600)
+                    
+                    if 0 <= idx < len(times):
+                        start = idx
+                except:
+                    pass
                 
             for i in range(start, min(start+12, len(times))):
                 parts = []
                 t = datetime.strptime(times[i], "%Y-%m-%dT%H:%M").strftime("%I:%M %p")
                 parts.append(f"{t}:")
                 
-                if cfg_hourly.get('temperature', True):
+                if cfg_hourly.get('temperature', True) and i < len(temps):
                     tf = (temps[i] * 9/5) + 32
                     parts.append(f"{tf:.0f}°F")
                 
-                if cfg_hourly.get('precipitation', True):
+                if cfg_hourly.get('feels_like', False) and i < len(app_temps):
+                    atf = (app_temps[i] * 9/5) + 32
+                    parts.append(f"Feels Like {atf:.0f}°F")
+
+                if cfg_hourly.get('precipitation', True) and i < len(precip):
                     p = precip[i] * MM_TO_INCHES
                     if p > 0: parts.append(f"{p:.2f}\" precip")
                 
-                if cfg_hourly.get('humidity', True) and humidity:
-                    parts.append(f"{humidity[i]}% hum")
+                if cfg_hourly.get('humidity', True) and i < len(humidity):
+                    parts.append(f"Humidity {humidity[i]}%")
+
+                if cfg_hourly.get('cloud_cover', False) and i < len(cloud_cover):
+                    cc = cloud_cover[i]
+                    if cc <= 12: desc = "Clear"
+                    elif cc <= 37: desc = "Mostly Clear"
+                    elif cc <= 62: desc = "Partly Cloudy"
+                    elif cc <= 87: desc = "Mostly Cloudy"
+                    else: desc = "Cloudy"
+                    parts.append(f"{desc} ({cc}%)")
+
+                if cfg_hourly.get('wind_speed', False) and i < len(wind_speeds):
+                    ws = wind_speeds[i] * KMH_TO_MPH
+                    parts.append(f"{ws:.0f}mph")
+                    
+                if cfg_hourly.get('wind_direction', False) and i < len(wind_dirs):
+                    wd = self.degrees_to_cardinal(wind_dirs[i])
+                    parts.append(f"{wd}")
                     
                 lines.append(" ".join(parts))
             lines.append("")
             
-        daily = data.get("daily", {})
         cfg_daily = self.weather_config['daily']
         if daily and any(cfg_daily.values()):
             lines.append("DAILY")
@@ -657,6 +858,9 @@ class AccessibleWeatherApp(wx.Frame):
             maxs = daily.get('temperature_2m_max', [])
             mins = daily.get('temperature_2m_min', [])
             precip_sum = daily.get('precipitation_sum', [])
+            precip_hours = daily.get('precipitation_hours', [])
+            wind_maxs = daily.get('windspeed_10m_max', [])
+            wind_doms = daily.get('winddirection_10m_dominant', [])
             sunrise = daily.get('sunrise', [])
             sunset = daily.get('sunset', [])
             
@@ -664,27 +868,39 @@ class AccessibleWeatherApp(wx.Frame):
                 d = datetime.strptime(times[i], "%Y-%m-%d").strftime("%a %b %d")
                 parts = [f"{d}:"]
                 
-                if cfg_daily.get('temperature_max', True):
+                if cfg_daily.get('temperature_max', True) and i < len(maxs):
                     hi = (maxs[i] * 9/5) + 32
                     parts.append(f"High {hi:.0f}°F")
                 
-                if cfg_daily.get('temperature_min', True):
+                if cfg_daily.get('temperature_min', True) and i < len(mins):
                     lo = (mins[i] * 9/5) + 32
                     parts.append(f"Low {lo:.0f}°F")
                 
-                if cfg_daily.get('precipitation_sum', True) and precip_sum:
+                if cfg_daily.get('precipitation_sum', True) and i < len(precip_sum):
                     p = precip_sum[i] * MM_TO_INCHES
                     if p > 0: parts.append(f"{p:.2f}\" precip")
+
+                if cfg_daily.get('precipitation_hours', False) and i < len(precip_hours):
+                    ph = precip_hours[i]
+                    if ph > 0: parts.append(f"{ph:.1f}h precip")
+
+                if cfg_daily.get('wind_speed_max', False) and i < len(wind_maxs):
+                    wm = wind_maxs[i] * KMH_TO_MPH
+                    parts.append(f"Max Wind {wm:.0f}mph")
+
+                if cfg_daily.get('wind_direction_dominant', False) and i < len(wind_doms):
+                    wd = self.degrees_to_cardinal(wind_doms[i])
+                    parts.append(f"Wind {wd}")
                 
-                if cfg_daily.get('sunrise', True) and sunrise:
+                if cfg_daily.get('sunrise', True) and i < len(sunrise):
                     sr = datetime.strptime(sunrise[i], "%Y-%m-%dT%H:%M").strftime("%I:%M %p")
                     parts.append(f"Sunrise {sr}")
                 
-                if cfg_daily.get('sunset', True) and sunset:
+                if cfg_daily.get('sunset', True) and i < len(sunset):
                     ss = datetime.strptime(sunset[i], "%Y-%m-%dT%H:%M").strftime("%I:%M %p")
                     parts.append(f"Sunset {ss}")
                     
-                lines.append(" ".join(parts))
+                lines.append("".join(parts))
                 
         lines.append("")
         lines.append("Data by Open-Meteo.com (CC BY 4.0)")
@@ -692,5 +908,35 @@ class AccessibleWeatherApp(wx.Frame):
 
 if __name__ == "__main__":
     app = wx.App()
-    AccessibleWeatherApp(None).Show()
+    
+    parser = argparse.ArgumentParser(description="FastWeather - Accessible Weather App")
+    parser.add_argument("--reset", action="store_true", help="Reset (delete) the saved city data file")
+    parser.add_argument("-c", "--config", help="Path to a specific city data JSON file to use")
+    args = parser.parse_args()
+    
+    # Determine standard path for user data
+    app_name = "FastWeather"
+    app.SetAppName(app_name)
+    sp = wx.StandardPaths.Get()
+    user_data_dir = sp.GetUserDataDir()
+    
+    # Ensure directory exists
+    if not os.path.exists(user_data_dir):
+        os.makedirs(user_data_dir)
+        
+    city_file = args.config if args.config else os.path.join(user_data_dir, "city.json")
+    
+    if args.reset:
+        # If reset is used with a custom config, we reset that file
+        target_file = city_file
+        if os.path.exists(target_file):
+            try:
+                os.remove(target_file)
+                print(f"Reset complete: Removed {target_file}")
+            except Exception as e:
+                print(f"Error resetting data: {e}")
+        else:
+            print(f"No data file found at {target_file} to reset.")
+            
+    AccessibleWeatherApp(city_file).Show()
     app.MainLoop()

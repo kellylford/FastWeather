@@ -52,8 +52,12 @@ def main():
     print("Cleaning previous builds...")
     for folder in ['build', 'dist']:
         if os.path.exists(folder):
-            shutil.rmtree(folder)
-            print(f"  Removed {folder}/")
+            try:
+                shutil.rmtree(folder)
+                print(f"  Removed {folder}/")
+            except Exception as e:
+                print(f"  Warning: Could not remove {folder}/: {e}")
+
     
     # Remove spec file if it exists
     spec_file = "fastweather.spec"
@@ -70,12 +74,13 @@ def main():
     
     # PyInstaller command
     cmd = [
-        "pyinstaller",
+        sys.executable, "-m", "PyInstaller",
+        "--noconfirm", # Overwrite output directory
         "--name=FastWeather",
         "--windowed",  # No console window
-        "--onedir",    # Single directory with dependencies
+        "--onefile",   # Single executable file
         "--icon=NONE", # No icon (you can add one later)
-        "--add-data=city.json;.",  # Include sample city file
+        "--add-data", "city.json;.", # Embed city.json as a resource
         "--exclude-module=tkinter", # Exclude unnecessary standard library GUI
         "fastweather.py"
     ]
@@ -95,26 +100,20 @@ def main():
     print()
     
     # Check output
-    dist_path = os.path.join("dist", "FastWeather")
-    if os.path.exists(dist_path):
-        print(f"Executable location: {os.path.abspath(dist_path)}")
-        print()
-        print("Files included:")
-        for item in sorted(os.listdir(dist_path)):
-            print(f"  - {item}")
+    dist_dir = "dist"
+    exe_path = os.path.join(dist_dir, "FastWeather.exe")
+    
+    if os.path.exists(exe_path):
+        print(f"Executable location: {os.path.abspath(exe_path)}")
         print()
         
-        exe_path = os.path.join(dist_path, "FastWeather.exe")
-        if os.path.exists(exe_path):
-            size_mb = os.path.getsize(exe_path) / (1024 * 1024)
-            print(f"Executable size: {size_mb:.1f} MB")
-            print()
+        size_mb = os.path.getsize(exe_path) / (1024 * 1024)
+        print(f"Executable size: {size_mb:.1f} MB")
+        print()
         
         print("To distribute:")
-        print(f"  1. ZIP the entire '{dist_path}' folder")
-        print("  2. Users should extract the ZIP and run FastWeather.exe")
+        print(f"  Just share the 'FastWeather.exe' file.")
         print()
-        print("Note: All files in the folder are required for the app to run.")
     else:
         print("✗ Build output not found!")
         return 1
