@@ -95,3 +95,10 @@ This will delete your saved cities and configuration file.
 
 **Where does the weather data come from?**
 Weather data is provided by [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0). Geocoding is provided by [OpenStreetMap](https://www.openstreetmap.org/).
+
+---
+
+## Reporting Issues
+
+If you encounter any bugs or have suggestions for improvements, please report them on our GitHub Issues page:
+[https://github.com/kellylford/FastWeather/issues](https://github.com/kellylford/FastWeather/issues)
