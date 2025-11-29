@@ -5,6 +5,8 @@ Fully accessible with screen readers, keyboard navigation, and proper focus mana
 Uses Open-Meteo API (no API key required)
 """
 
+__version__ = "1.1"
+
 import sys
 import json
 import requests
@@ -143,12 +145,20 @@ class CitySelectionDialog(wx.Dialog):
         
         self.Bind(wx.EVT_BUTTON, self.on_ok, id=wx.ID_OK)
         self.city_list.Bind(wx.EVT_LISTBOX_DCLICK, self.on_ok)
+        self.city_list.Bind(wx.EVT_KEY_DOWN, self.on_list_key)
         
     def on_ok(self, event):
         sel = self.city_list.GetSelection()
         if sel != wx.NOT_FOUND:
             self.selected_match = self.matches[sel]
             self.EndModal(wx.ID_OK)
+        else:
+            event.Skip()
+    
+    def on_list_key(self, event):
+        keycode = event.GetKeyCode()
+        if keycode == wx.WXK_RETURN or keycode == wx.WXK_NUMPAD_ENTER:
+            self.on_ok(event)
         else:
             event.Skip()
 
@@ -183,14 +193,14 @@ class WeatherConfigDialog(wx.Dialog):
             ('wind_direction', 'Wind Direction'), ('pressure', 'Pressure'),
             ('visibility', 'Visibility'), ('uv_index', 'UV Index'),
             ('precipitation', 'Precipitation'), ('cloud_cover', 'Cloud Cover'),
-            ('snowfall', 'Snowfall'), ('rain', 'Rain'), ('showers', 'Showers')
+            ('snowfall', 'Snowfall'), ('snow_depth', 'Snow Depth'), ('rain', 'Rain'), ('showers', 'Showers')
         ])
         
         add_tab("Hourly", 'hourly', [
             ('temperature', 'Temperature'), ('feels_like', 'Feels Like'),
             ('humidity', 'Humidity'), ('precipitation', 'Precipitation'),
             ('wind_speed', 'Wind Speed'), ('wind_direction', 'Wind Direction'),
-            ('cloud_cover', 'Cloud Cover'), ('snowfall', 'Snowfall'), ('snow_depth', 'Snow Depth'),
+            ('cloud_cover', 'Cloud Cover'), ('snowfall', 'Snowfall'),
             ('rain', 'Rain'), ('showers', 'Showers')
         ])
         
@@ -245,13 +255,18 @@ class WeatherConfigDialog(wx.Dialog):
         vbox.Add(nb, 1, wx.EXPAND | wx.ALL, 10)
         
         btns = wx.StdDialogButtonSizer()
-        btns.AddButton(wx.Button(panel, wx.ID_OK))
-        btns.AddButton(wx.Button(panel, wx.ID_CANCEL))
+        ok_btn = wx.Button(panel, wx.ID_OK)
+        apply_btn = wx.Button(panel, wx.ID_APPLY, "Apply")
+        cancel_btn = wx.Button(panel, wx.ID_CANCEL)
+        btns.AddButton(ok_btn)
+        btns.AddButton(apply_btn)
+        btns.AddButton(cancel_btn)
         btns.Realize()
         vbox.Add(btns, 0, wx.ALIGN_CENTER | wx.ALL, 10)
         
         panel.SetSizer(vbox)
         self.Bind(wx.EVT_BUTTON, self.on_ok, id=wx.ID_OK)
+        self.Bind(wx.EVT_BUTTON, self.on_apply, id=wx.ID_APPLY)
 
     def on_ok(self, event):
         for section in self.checkboxes:
@@ -264,6 +279,22 @@ class WeatherConfigDialog(wx.Dialog):
         self.config['units']['precipitation'] = 'in' if self.unit_controls['precip_in'].GetValue() else 'mm'
         
         self.EndModal(wx.ID_OK)
+    
+    def on_apply(self, event):
+        """Apply changes without closing the dialog"""
+        for section in self.checkboxes:
+            for key, cb in self.checkboxes[section].items():
+                self.config[section][key] = cb.GetValue()
+        
+        # Save unit preferences
+        self.config['units']['temperature'] = 'F' if self.unit_controls['temp_f'].GetValue() else 'C'
+        self.config['units']['wind_speed'] = 'mph' if self.unit_controls['wind_mph'].GetValue() else 'km/h'
+        self.config['units']['precipitation'] = 'in' if self.unit_controls['precip_in'].GetValue() else 'mm'
+        
+        # Notify parent to apply changes
+        parent = self.GetParent()
+        if parent and hasattr(parent, 'apply_config_changes'):
+            parent.apply_config_changes(self.config)
 
     def get_configuration(self):
         return self.config
@@ -308,8 +339,8 @@ class AccessibleWeatherApp(wx.Frame):
             
         self.city_data = {}
         self.weather_config = {
-            'current': {'temperature': True, 'feels_like': True, 'humidity': True, 'wind_speed': True, 'wind_direction': True, 'pressure': False, 'visibility': False, 'uv_index': False, 'precipitation': True, 'cloud_cover': False, 'snowfall': False, 'rain': False, 'showers': False},
-            'hourly': {'temperature': True, 'feels_like': False, 'humidity': False, 'precipitation': True, 'wind_speed': False, 'wind_direction': False, 'cloud_cover': False, 'snowfall': False, 'snow_depth': False, 'rain': False, 'showers': False},
+            'current': {'temperature': True, 'feels_like': True, 'humidity': True, 'wind_speed': True, 'wind_direction': True, 'pressure': False, 'visibility': False, 'uv_index': False, 'precipitation': True, 'cloud_cover': False, 'snowfall': False, 'snow_depth': False, 'rain': False, 'showers': False},
+            'hourly': {'temperature': True, 'feels_like': False, 'humidity': False, 'precipitation': True, 'wind_speed': False, 'wind_direction': False, 'cloud_cover': False, 'snowfall': False, 'rain': False, 'showers': False},
             'daily': {'temperature_max': True, 'temperature_min': True, 'sunrise': True, 'sunset': True, 'precipitation_sum': True, 'precipitation_hours': False, 'wind_speed_max': False, 'wind_direction_dominant': False, 'snowfall_sum': False, 'rain_sum': False, 'showers_sum': False},
             'units': {'temperature': 'F', 'wind_speed': 'mph', 'precipitation': 'in'}
         }
@@ -434,6 +465,8 @@ class AccessibleWeatherApp(wx.Frame):
         self.ID_MOVE_DOWN = wx.NewIdRef()
         self.ID_ESCAPE = wx.NewIdRef()
         self.ID_FULL_WEATHER = wx.NewIdRef()
+        self.ID_NEW_CITY = wx.NewIdRef()
+        self.ID_CONFIGURE = wx.NewIdRef()
         
         # Bind IDs to methods
         self.Bind(wx.EVT_MENU, self.on_refresh, id=self.ID_REFRESH)
@@ -442,6 +475,8 @@ class AccessibleWeatherApp(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_move_down, id=self.ID_MOVE_DOWN)
         self.Bind(wx.EVT_MENU, self.on_escape, id=self.ID_ESCAPE)
         self.Bind(wx.EVT_MENU, self.on_full_weather, id=self.ID_FULL_WEATHER)
+        self.Bind(wx.EVT_MENU, self.on_focus_new_city, id=self.ID_NEW_CITY)
+        self.Bind(wx.EVT_MENU, self.on_config, id=self.ID_CONFIGURE)
         
         accel = [
             (wx.ACCEL_NORMAL, wx.WXK_F5, self.ID_REFRESH),
@@ -450,12 +485,19 @@ class AccessibleWeatherApp(wx.Frame):
             (wx.ACCEL_ALT, ord('U'), self.ID_MOVE_UP),
             (wx.ACCEL_ALT, ord('D'), self.ID_MOVE_DOWN),
             (wx.ACCEL_NORMAL, wx.WXK_ESCAPE, self.ID_ESCAPE),
-            (wx.ACCEL_ALT, ord('F'), self.ID_FULL_WEATHER)
+            (wx.ACCEL_ALT, ord('F'), self.ID_FULL_WEATHER),
+            (wx.ACCEL_ALT, ord('N'), self.ID_NEW_CITY),
+            (wx.ACCEL_ALT, ord('C'), self.ID_CONFIGURE)
         ]
         self.SetAcceleratorTable(wx.AcceleratorTable(accel))
 
     def on_escape(self, event):
         if self.book.GetSelection() == 1: self.on_back(event)
+    
+    def on_focus_new_city(self, event):
+        """Focus the new city input field (Alt+N)"""
+        if self.book.GetSelection() == 0:  # Only on main view
+            self.city_input.SetFocus()
 
     def set_initial_focus(self):
         if self.city_list.GetCount() > 0:
@@ -656,6 +698,16 @@ class AccessibleWeatherApp(wx.Frame):
             if hasattr(self, 'current_full_city'):
                 self.on_full_weather(None)
         dlg.Destroy()
+    
+    def apply_config_changes(self, new_config):
+        """Apply configuration changes without closing the dialog"""
+        self.weather_config = new_config.copy()
+        self.save_config()
+        # Refresh city list to show updated units
+        self.load_all_weather()
+        # Refresh full weather view if active
+        if hasattr(self, 'current_full_city') and self.book.GetSelection() == 1:
+            self.on_full_weather(None)
 
     def degrees_to_cardinal(self, degrees):
         directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
@@ -757,8 +809,19 @@ class AccessibleWeatherApp(wx.Frame):
                 temp_min = self.format_temperature_short(temp_min_c)
                 daily_temps = f" (High: {temp_max}, Low: {temp_min})"
             
+            # Check for current precipitation
+            precip_text = ""
+            snowfall = curr.get("snowfall", 0)
+            rain = curr.get("rain", 0)
+            showers = curr.get("showers", 0)
+            
+            if snowfall >= 0.01:
+                precip_text = " [Snow]"
+            elif rain >= 0.01 or showers >= 0.01:
+                precip_text = " [Rain]"
+            
             temp_display = self.format_temperature_short(temp_c)
-            new_text = f"{city} - {temp_display}{cloud_text}{daily_temps}"
+            new_text = f"{city} - {temp_display}{cloud_text}{precip_text}{daily_temps}"
             
             for i in range(self.city_list.GetCount()):
                 if self.city_list.GetString(i).startswith(city + " - "):
@@ -860,20 +923,35 @@ class AccessibleWeatherApp(wx.Frame):
             # Snowfall
             if cfg_curr.get('snowfall', False):
                 snow = get_val(['snowfall'])
-                if snow > 0:
+                if snow >= 0.01:
                     lines.append(f"Snowfall: {self.format_precipitation(snow)}")
+                elif snow == 0:
+                    lines.append(f"Snowfall: None")
+
+            # Snow Depth
+            if cfg_curr.get('snow_depth', False):
+                depth = get_val(['snow_depth'])
+                if depth >= 0.01:
+                    depth_converted = depth * 1000  # Convert meters to mm for consistency
+                    lines.append(f"Snow Depth: {self.format_precipitation(depth_converted)}")
+                elif depth == 0:
+                    lines.append(f"Snow Depth: None")
 
             # Rain
             if cfg_curr.get('rain', False):
                 rain = get_val(['rain'])
-                if rain > 0:
+                if rain >= 0.01:
                     lines.append(f"Rain: {self.format_precipitation(rain)}")
+                elif rain == 0:
+                    lines.append(f"Rain: None")
 
             # Showers
             if cfg_curr.get('showers', False):
                 showers = get_val(['showers'])
-                if showers > 0:
+                if showers >= 0.01:
                     lines.append(f"Showers: {self.format_precipitation(showers)}")
+                elif showers == 0:
+                    lines.append(f"Showers: None")
 
             # Wind
             if cfg_curr.get('wind_speed', True):
@@ -927,7 +1005,7 @@ class AccessibleWeatherApp(wx.Frame):
                 except:
                     pass
                 
-            for i in range(start, min(start+12, len(times))):
+            for i in range(start, min(start+24, len(times))):
                 parts = []
                 t = datetime.strptime(times[i], "%Y-%m-%dT%H:%M").strftime("%I:%M %p")
                 parts.append(f"{t}:")
@@ -956,19 +1034,18 @@ class AccessibleWeatherApp(wx.Frame):
 
                 if cfg_hourly.get('snowfall', False) and i < len(snowfall):
                     s = snowfall[i]
-                    if s > 0: parts.append(f"{self.format_precipitation(s)} snow")
-
-                if cfg_hourly.get('snow_depth', False) and i < len(snow_depth):
-                    sd = snow_depth[i]
-                    if sd > 0: parts.append(f"{self.format_precipitation(sd)} depth")
+                    if s >= 0.01: 
+                        parts.append(f"{self.format_precipitation(s)} snow")
 
                 if cfg_hourly.get('rain', False) and i < len(rain):
                     r = rain[i]
-                    if r > 0: parts.append(f"{self.format_precipitation(r)} rain")
+                    if r >= 0.01: 
+                        parts.append(f"{self.format_precipitation(r)} rain")
 
                 if cfg_hourly.get('showers', False) and i < len(showers):
                     sh = showers[i]
-                    if sh > 0: parts.append(f"{self.format_precipitation(sh)} showers")
+                    if sh >= 0.01: 
+                        parts.append(f"{self.format_precipitation(sh)} showers")
 
                 if cfg_hourly.get('wind_speed', False) and i < len(wind_speeds):
                     parts.append(self.format_wind_speed(wind_speeds[i]))
@@ -1016,15 +1093,18 @@ class AccessibleWeatherApp(wx.Frame):
 
                 if cfg_daily.get('snowfall_sum', False) and i < len(snowfall_sum):
                     ss = snowfall_sum[i]
-                    if ss > 0: parts.append(f"{self.format_precipitation(ss)} snow")
+                    if ss >= 0.01: 
+                        parts.append(f"{self.format_precipitation(ss)} snow")
 
                 if cfg_daily.get('rain_sum', False) and i < len(rain_sum):
                     rs = rain_sum[i]
-                    if rs > 0: parts.append(f"{self.format_precipitation(rs)} rain")
+                    if rs >= 0.01: 
+                        parts.append(f"{self.format_precipitation(rs)} rain")
 
                 if cfg_daily.get('showers_sum', False) and i < len(showers_sum):
                     shs = showers_sum[i]
-                    if shs > 0: parts.append(f"{self.format_precipitation(shs)} showers")
+                    if shs >= 0.01: 
+                        parts.append(f"{self.format_precipitation(shs)} showers")
 
                 if cfg_daily.get('wind_speed_max', False) and i < len(wind_maxs):
                     parts.append(f"Max Wind {self.format_wind_speed(wind_maxs[i])}")

@@ -76,6 +76,8 @@ FastWeather is designed to be fully accessible with screen readers and keyboard 
 | :--- | :--- |
 | **Refresh Weather** | `F5` or `Ctrl + R` |
 | **View Full Report** | `Alt + F` or `Enter` (on list) |
+| **Configure Display** | `Alt + C` |
+| **New City Field** | `Alt + N` |
 | **Remove City** | `Delete` |
 | **Move City Up** | `Alt + U` |
 | **Move City Down** | `Alt + D` |
