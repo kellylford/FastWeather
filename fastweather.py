@@ -71,6 +71,8 @@ class WeatherFetchThread(threading.Thread):
                 params["forecast_days"] = self.forecast_days
             else:
                 params["hourly"] = "cloudcover"
+                params["daily"] = "temperature_2m_max,temperature_2m_min"
+                params["forecast_days"] = 1
             
             response = requests.get(OPEN_METEO_API_URL, params=params, timeout=10)
             response.raise_for_status()
@@ -161,6 +163,7 @@ class WeatherConfigDialog(wx.Dialog):
         
         nb = wx.Notebook(panel)
         self.checkboxes = {'current': {}, 'hourly': {}, 'daily': {}}
+        self.unit_controls = {}
         
         # Helper to create tabs
         def add_tab(name, key, options):
@@ -179,22 +182,65 @@ class WeatherConfigDialog(wx.Dialog):
             ('humidity', 'Humidity'), ('wind_speed', 'Wind Speed'),
             ('wind_direction', 'Wind Direction'), ('pressure', 'Pressure'),
             ('visibility', 'Visibility'), ('uv_index', 'UV Index'),
-            ('precipitation', 'Precipitation'), ('cloud_cover', 'Cloud Cover')
+            ('precipitation', 'Precipitation'), ('cloud_cover', 'Cloud Cover'),
+            ('snowfall', 'Snowfall'), ('rain', 'Rain'), ('showers', 'Showers')
         ])
         
         add_tab("Hourly", 'hourly', [
             ('temperature', 'Temperature'), ('feels_like', 'Feels Like'),
             ('humidity', 'Humidity'), ('precipitation', 'Precipitation'),
             ('wind_speed', 'Wind Speed'), ('wind_direction', 'Wind Direction'),
-            ('cloud_cover', 'Cloud Cover')
+            ('cloud_cover', 'Cloud Cover'), ('snowfall', 'Snowfall'), ('snow_depth', 'Snow Depth'),
+            ('rain', 'Rain'), ('showers', 'Showers')
         ])
         
         add_tab("Daily", 'daily', [
             ('temperature_max', 'High Temp'), ('temperature_min', 'Low Temp'),
             ('sunrise', 'Sunrise'), ('sunset', 'Sunset'),
             ('precipitation_sum', 'Precip Total'), ('precipitation_hours', 'Precip Hours'),
-            ('wind_speed_max', 'Max Wind'), ('wind_direction_dominant', 'Wind Direction')
+            ('wind_speed_max', 'Max Wind'), ('wind_direction_dominant', 'Wind Direction'),
+            ('snowfall_sum', 'Snowfall Total'), ('rain_sum', 'Rain Total'), ('showers_sum', 'Showers Total')
         ])
+        
+        # Units Tab
+        units_panel = wx.Panel(nb)
+        units_sizer = wx.BoxSizer(wx.VERTICAL)
+        
+        # Temperature units
+        temp_box = wx.StaticBox(units_panel, label="Temperature")
+        temp_sizer = wx.StaticBoxSizer(temp_box, wx.HORIZONTAL)
+        self.unit_controls['temp_f'] = wx.RadioButton(units_panel, label="Fahrenheit (°F)", style=wx.RB_GROUP)
+        self.unit_controls['temp_c'] = wx.RadioButton(units_panel, label="Celsius (°C)")
+        self.unit_controls['temp_f'].SetValue(self.config['units'].get('temperature', 'F') == 'F')
+        self.unit_controls['temp_c'].SetValue(self.config['units'].get('temperature', 'F') == 'C')
+        temp_sizer.Add(self.unit_controls['temp_f'], 0, wx.ALL, 5)
+        temp_sizer.Add(self.unit_controls['temp_c'], 0, wx.ALL, 5)
+        units_sizer.Add(temp_sizer, 0, wx.EXPAND | wx.ALL, 10)
+        
+        # Wind speed units
+        wind_box = wx.StaticBox(units_panel, label="Wind Speed")
+        wind_sizer = wx.StaticBoxSizer(wind_box, wx.HORIZONTAL)
+        self.unit_controls['wind_mph'] = wx.RadioButton(units_panel, label="Miles per hour (mph)", style=wx.RB_GROUP)
+        self.unit_controls['wind_kmh'] = wx.RadioButton(units_panel, label="Kilometers per hour (km/h)")
+        self.unit_controls['wind_mph'].SetValue(self.config['units'].get('wind_speed', 'mph') == 'mph')
+        self.unit_controls['wind_kmh'].SetValue(self.config['units'].get('wind_speed', 'mph') == 'km/h')
+        wind_sizer.Add(self.unit_controls['wind_mph'], 0, wx.ALL, 5)
+        wind_sizer.Add(self.unit_controls['wind_kmh'], 0, wx.ALL, 5)
+        units_sizer.Add(wind_sizer, 0, wx.EXPAND | wx.ALL, 10)
+        
+        # Precipitation units
+        precip_box = wx.StaticBox(units_panel, label="Precipitation")
+        precip_sizer = wx.StaticBoxSizer(precip_box, wx.HORIZONTAL)
+        self.unit_controls['precip_in'] = wx.RadioButton(units_panel, label="Inches (in)", style=wx.RB_GROUP)
+        self.unit_controls['precip_mm'] = wx.RadioButton(units_panel, label="Millimeters (mm)")
+        self.unit_controls['precip_in'].SetValue(self.config['units'].get('precipitation', 'in') == 'in')
+        self.unit_controls['precip_mm'].SetValue(self.config['units'].get('precipitation', 'in') == 'mm')
+        precip_sizer.Add(self.unit_controls['precip_in'], 0, wx.ALL, 5)
+        precip_sizer.Add(self.unit_controls['precip_mm'], 0, wx.ALL, 5)
+        units_sizer.Add(precip_sizer, 0, wx.EXPAND | wx.ALL, 10)
+        
+        units_panel.SetSizer(units_sizer)
+        nb.AddPage(units_panel, "Units")
         
         vbox.Add(nb, 1, wx.EXPAND | wx.ALL, 10)
         
@@ -211,6 +257,12 @@ class WeatherConfigDialog(wx.Dialog):
         for section in self.checkboxes:
             for key, cb in self.checkboxes[section].items():
                 self.config[section][key] = cb.GetValue()
+        
+        # Save unit preferences
+        self.config['units']['temperature'] = 'F' if self.unit_controls['temp_f'].GetValue() else 'C'
+        self.config['units']['wind_speed'] = 'mph' if self.unit_controls['wind_mph'].GetValue() else 'km/h'
+        self.config['units']['precipitation'] = 'in' if self.unit_controls['precip_in'].GetValue() else 'mm'
+        
         self.EndModal(wx.ID_OK)
 
     def get_configuration(self):
@@ -256,9 +308,10 @@ class AccessibleWeatherApp(wx.Frame):
             
         self.city_data = {}
         self.weather_config = {
-            'current': {'temperature': True, 'feels_like': True, 'humidity': True, 'wind_speed': True, 'wind_direction': True, 'pressure': False, 'visibility': False, 'uv_index': False, 'precipitation': True, 'cloud_cover': False},
-            'hourly': {'temperature': True, 'feels_like': False, 'humidity': False, 'precipitation': True, 'wind_speed': False, 'wind_direction': False, 'cloud_cover': False},
-            'daily': {'temperature_max': True, 'temperature_min': True, 'sunrise': True, 'sunset': True, 'precipitation_sum': True, 'precipitation_hours': False, 'wind_speed_max': False, 'wind_direction_dominant': False}
+            'current': {'temperature': True, 'feels_like': True, 'humidity': True, 'wind_speed': True, 'wind_direction': True, 'pressure': False, 'visibility': False, 'uv_index': False, 'precipitation': True, 'cloud_cover': False, 'snowfall': False, 'rain': False, 'showers': False},
+            'hourly': {'temperature': True, 'feels_like': False, 'humidity': False, 'precipitation': True, 'wind_speed': False, 'wind_direction': False, 'cloud_cover': False, 'snowfall': False, 'snow_depth': False, 'rain': False, 'showers': False},
+            'daily': {'temperature_max': True, 'temperature_min': True, 'sunrise': True, 'sunset': True, 'precipitation_sum': True, 'precipitation_hours': False, 'wind_speed_max': False, 'wind_direction_dominant': False, 'snowfall_sum': False, 'rain_sum': False, 'showers_sum': False},
+            'units': {'temperature': 'F', 'wind_speed': 'mph', 'precipitation': 'in'}
         }
         
         self.load_city_data()
@@ -307,7 +360,8 @@ class AccessibleWeatherApp(wx.Frame):
         self.btn_remove = wx.Button(self.main_view, label="Remove")
         self.btn_refresh = wx.Button(self.main_view, label="Refresh")
         self.btn_full = wx.Button(self.main_view, label="Full Weather")
-        for b in [self.btn_up, self.btn_down, self.btn_remove, self.btn_refresh, self.btn_full]:
+        self.btn_config_main = wx.Button(self.main_view, label="Configure")
+        for b in [self.btn_up, self.btn_down, self.btn_remove, self.btn_refresh, self.btn_full, self.btn_config_main]:
             btn_row.Add(b, 0, wx.RIGHT, 5)
         list_box.Add(btn_row, 0, wx.ALIGN_CENTER | wx.ALL, 5)
         mv_sizer.Add(list_box, 1, wx.EXPAND | wx.ALL, 10)
@@ -354,6 +408,7 @@ class AccessibleWeatherApp(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.on_full_weather, self.btn_full)
         self.Bind(wx.EVT_BUTTON, self.on_back, self.btn_back)
         self.Bind(wx.EVT_BUTTON, self.on_config, self.btn_config)
+        self.Bind(wx.EVT_BUTTON, self.on_config, self.btn_config_main)
         self.city_list.Bind(wx.EVT_KEY_DOWN, self.on_list_key)
         
         self.update_city_list()
@@ -606,6 +661,38 @@ class AccessibleWeatherApp(wx.Frame):
         directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
         index = round(degrees / 45) % 8
         return directions[index]
+    
+    def format_temperature(self, temp_c):
+        """Convert temperature to configured unit and format"""
+        if self.weather_config['units']['temperature'] == 'C':
+            return f"{temp_c:.1f}°C"
+        else:
+            temp_f = (temp_c * 9/5) + 32
+            return f"{temp_f:.1f}°F"
+    
+    def format_temperature_short(self, temp_c):
+        """Convert temperature to configured unit (short format for lists)"""
+        if self.weather_config['units']['temperature'] == 'C':
+            return f"{temp_c:.0f}°C"
+        else:
+            temp_f = (temp_c * 9/5) + 32
+            return f"{temp_f:.0f}°F"
+    
+    def format_wind_speed(self, wind_kmh):
+        """Convert wind speed to configured unit and format"""
+        if self.weather_config['units']['wind_speed'] == 'km/h':
+            return f"{wind_kmh:.1f} km/h"
+        else:
+            wind_mph = wind_kmh * KMH_TO_MPH
+            return f"{wind_mph:.1f} mph"
+    
+    def format_precipitation(self, precip_mm):
+        """Convert precipitation to configured unit and format"""
+        if self.weather_config['units']['precipitation'] == 'mm':
+            return f"{precip_mm:.1f}mm"
+        else:
+            precip_in = precip_mm * MM_TO_INCHES
+            return f"{precip_in:.2f}\""
 
     def on_weather_ready(self, event):
         city, data = event.data
@@ -660,7 +747,18 @@ class AccessibleWeatherApp(wx.Frame):
                         else: desc = "cloudy"
                         cloud_text = f", {desc}"
             
-            new_text = f"{city} - {temp_f:.0f}°F{cloud_text}"
+            # Get daily high and low temperatures
+            daily_temps = ""
+            daily = data.get("daily", {})
+            if daily and daily.get("temperature_2m_max") and daily.get("temperature_2m_min"):
+                temp_max_c = daily["temperature_2m_max"][0]
+                temp_min_c = daily["temperature_2m_min"][0]
+                temp_max = self.format_temperature_short(temp_max_c)
+                temp_min = self.format_temperature_short(temp_min_c)
+                daily_temps = f" (High: {temp_max}, Low: {temp_min})"
+            
+            temp_display = self.format_temperature_short(temp_c)
+            new_text = f"{city} - {temp_display}{cloud_text}{daily_temps}"
             
             for i in range(self.city_list.GetCount()):
                 if self.city_list.GetString(i).startswith(city + " - "):
@@ -707,14 +805,12 @@ class AccessibleWeatherApp(wx.Frame):
             # Temperature
             if cfg_curr.get('temperature', True):
                 temp_c = get_val(['temperature_2m', 'temperature'])
-                temp_f = (temp_c * 9/5) + 32
-                lines.append(f"Temp: {temp_f:.1f}°F ({temp_c:.1f}°C)")
+                lines.append(f"Temp: {self.format_temperature(temp_c)}")
             
             # Feels Like
             if cfg_curr.get('feels_like', False):
                 app_temp_c = get_val(['apparent_temperature'])
-                app_temp_f = (app_temp_c * 9/5) + 32
-                lines.append(f"Feels Like: {app_temp_f:.1f}°F")
+                lines.append(f"Feels Like: {self.format_temperature(app_temp_c)}")
 
             # Humidity
             if cfg_curr.get('humidity', False):
@@ -748,8 +844,7 @@ class AccessibleWeatherApp(wx.Frame):
             if cfg_curr.get('precipitation', False):
                 precip = get_val(['precipitation'])
                 if precip > 0:
-                    precip_in = precip * MM_TO_INCHES
-                    lines.append(f"Precipitation: {precip_in:.2f}\"")
+                    lines.append(f"Precipitation: {self.format_precipitation(precip)}")
 
             # Cloud Cover
             if cfg_curr.get('cloud_cover', False):
@@ -762,17 +857,34 @@ class AccessibleWeatherApp(wx.Frame):
                     else: desc = "Cloudy"
                     lines.append(f"Cloud Cover: {cc}% ({desc})")
 
+            # Snowfall
+            if cfg_curr.get('snowfall', False):
+                snow = get_val(['snowfall'])
+                if snow > 0:
+                    lines.append(f"Snowfall: {self.format_precipitation(snow)}")
+
+            # Rain
+            if cfg_curr.get('rain', False):
+                rain = get_val(['rain'])
+                if rain > 0:
+                    lines.append(f"Rain: {self.format_precipitation(rain)}")
+
+            # Showers
+            if cfg_curr.get('showers', False):
+                showers = get_val(['showers'])
+                if showers > 0:
+                    lines.append(f"Showers: {self.format_precipitation(showers)}")
+
             # Wind
             if cfg_curr.get('wind_speed', True):
                 wind_kmh = get_val(['wind_speed_10m', 'windspeed'])
-                wind_mph = wind_kmh * KMH_TO_MPH
                 wind_dir = get_val(['wind_direction_10m', 'winddirection'])
                 wind_card = self.degrees_to_cardinal(wind_dir)
                 
                 if cfg_curr.get('wind_direction', True):
-                    lines.append(f"Wind: {wind_mph:.1f} mph {wind_card} ({wind_dir}°)")
+                    lines.append(f"Wind: {self.format_wind_speed(wind_kmh)} {wind_card} ({wind_dir}°)")
                 else:
-                    lines.append(f"Wind: {wind_mph:.1f} mph")
+                    lines.append(f"Wind: {self.format_wind_speed(wind_kmh)}")
             elif cfg_curr.get('wind_direction', True):
                 wind_dir = get_val(['wind_direction_10m', 'winddirection'])
                 wind_card = self.degrees_to_cardinal(wind_dir)
@@ -791,6 +903,10 @@ class AccessibleWeatherApp(wx.Frame):
             wind_speeds = hourly.get('windspeed_10m', [])
             wind_dirs = hourly.get('winddirection_10m', [])
             cloud_cover = hourly.get('cloudcover', [])
+            snowfall = hourly.get('snowfall', [])
+            snow_depth = hourly.get('snow_depth', [])
+            rain = hourly.get('rain', [])
+            showers = hourly.get('showers', [])
             
             # Find start
             start = 0
@@ -817,16 +933,14 @@ class AccessibleWeatherApp(wx.Frame):
                 parts.append(f"{t}:")
                 
                 if cfg_hourly.get('temperature', True) and i < len(temps):
-                    tf = (temps[i] * 9/5) + 32
-                    parts.append(f"{tf:.0f}°F")
+                    parts.append(self.format_temperature_short(temps[i]))
                 
                 if cfg_hourly.get('feels_like', False) and i < len(app_temps):
-                    atf = (app_temps[i] * 9/5) + 32
-                    parts.append(f"Feels Like {atf:.0f}°F")
+                    parts.append(f"Feels Like {self.format_temperature_short(app_temps[i])}")
 
                 if cfg_hourly.get('precipitation', True) and i < len(precip):
-                    p = precip[i] * MM_TO_INCHES
-                    if p > 0: parts.append(f"{p:.2f}\" precip")
+                    p = precip[i]
+                    if p > 0: parts.append(f"{self.format_precipitation(p)} precip")
                 
                 if cfg_hourly.get('humidity', True) and i < len(humidity):
                     parts.append(f"Humidity {humidity[i]}%")
@@ -840,9 +954,24 @@ class AccessibleWeatherApp(wx.Frame):
                     else: desc = "Cloudy"
                     parts.append(f"{desc} ({cc}%)")
 
+                if cfg_hourly.get('snowfall', False) and i < len(snowfall):
+                    s = snowfall[i]
+                    if s > 0: parts.append(f"{self.format_precipitation(s)} snow")
+
+                if cfg_hourly.get('snow_depth', False) and i < len(snow_depth):
+                    sd = snow_depth[i]
+                    if sd > 0: parts.append(f"{self.format_precipitation(sd)} depth")
+
+                if cfg_hourly.get('rain', False) and i < len(rain):
+                    r = rain[i]
+                    if r > 0: parts.append(f"{self.format_precipitation(r)} rain")
+
+                if cfg_hourly.get('showers', False) and i < len(showers):
+                    sh = showers[i]
+                    if sh > 0: parts.append(f"{self.format_precipitation(sh)} showers")
+
                 if cfg_hourly.get('wind_speed', False) and i < len(wind_speeds):
-                    ws = wind_speeds[i] * KMH_TO_MPH
-                    parts.append(f"{ws:.0f}mph")
+                    parts.append(self.format_wind_speed(wind_speeds[i]))
                     
                 if cfg_hourly.get('wind_direction', False) and i < len(wind_dirs):
                     wd = self.degrees_to_cardinal(wind_dirs[i])
@@ -863,30 +992,42 @@ class AccessibleWeatherApp(wx.Frame):
             wind_doms = daily.get('winddirection_10m_dominant', [])
             sunrise = daily.get('sunrise', [])
             sunset = daily.get('sunset', [])
+            snowfall_sum = daily.get('snowfall_sum', [])
+            rain_sum = daily.get('rain_sum', [])
+            showers_sum = daily.get('showers_sum', [])
             
             for i in range(min(len(times), 7)):
                 d = datetime.strptime(times[i], "%Y-%m-%d").strftime("%a %b %d")
                 parts = [f"{d}:"]
                 
                 if cfg_daily.get('temperature_max', True) and i < len(maxs):
-                    hi = (maxs[i] * 9/5) + 32
-                    parts.append(f"High {hi:.0f}°F")
+                    parts.append(f"High {self.format_temperature_short(maxs[i])}")
                 
                 if cfg_daily.get('temperature_min', True) and i < len(mins):
-                    lo = (mins[i] * 9/5) + 32
-                    parts.append(f"Low {lo:.0f}°F")
+                    parts.append(f"Low {self.format_temperature_short(mins[i])}")
                 
                 if cfg_daily.get('precipitation_sum', True) and i < len(precip_sum):
-                    p = precip_sum[i] * MM_TO_INCHES
-                    if p > 0: parts.append(f"{p:.2f}\" precip")
+                    p = precip_sum[i]
+                    if p > 0: parts.append(f"{self.format_precipitation(p)} precip")
 
                 if cfg_daily.get('precipitation_hours', False) and i < len(precip_hours):
                     ph = precip_hours[i]
                     if ph > 0: parts.append(f"{ph:.1f}h precip")
 
+                if cfg_daily.get('snowfall_sum', False) and i < len(snowfall_sum):
+                    ss = snowfall_sum[i]
+                    if ss > 0: parts.append(f"{self.format_precipitation(ss)} snow")
+
+                if cfg_daily.get('rain_sum', False) and i < len(rain_sum):
+                    rs = rain_sum[i]
+                    if rs > 0: parts.append(f"{self.format_precipitation(rs)} rain")
+
+                if cfg_daily.get('showers_sum', False) and i < len(showers_sum):
+                    shs = showers_sum[i]
+                    if shs > 0: parts.append(f"{self.format_precipitation(shs)} showers")
+
                 if cfg_daily.get('wind_speed_max', False) and i < len(wind_maxs):
-                    wm = wind_maxs[i] * KMH_TO_MPH
-                    parts.append(f"Max Wind {wm:.0f}mph")
+                    parts.append(f"Max Wind {self.format_wind_speed(wind_maxs[i])}")
 
                 if cfg_daily.get('wind_direction_dominant', False) and i < len(wind_doms):
                     wd = self.degrees_to_cardinal(wind_doms[i])
