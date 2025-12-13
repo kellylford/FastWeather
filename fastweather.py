@@ -47,7 +47,7 @@ GeoReadyEvent, EVT_GEO_READY = wx.lib.newevent.NewEvent()
 GeoErrorEvent, EVT_GEO_ERROR = wx.lib.newevent.NewEvent()
 
 class WeatherFetchThread(threading.Thread):
-    def __init__(self, notify_window, city_name, lat, lon, detail="basic", forecast_days=7):
+    def __init__(self, notify_window, city_name, lat, lon, detail="basic", forecast_days=16):
         super().__init__()
         self.notify_window = notify_window
         self.city_name = city_name
@@ -1073,7 +1073,7 @@ class AccessibleWeatherApp(wx.Frame):
             rain_sum = daily.get('rain_sum', [])
             showers_sum = daily.get('showers_sum', [])
             
-            for i in range(min(len(times), 7)):
+            for i in range(len(times)):
                 d = datetime.strptime(times[i], "%Y-%m-%d").strftime("%a %b %d")
                 parts = [f"{d}:"]
                 
