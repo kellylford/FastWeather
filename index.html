@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FastWeather - A fast, accessible weather application providing current conditions and detailed forecasts">
+    <title>FastWeather - Accessible Weather App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <header role="banner">
+        <h1>FastWeather</h1>
+        <p class="tagline">Fast, accessible weather information</p>
+    </header>
+
+    <main id="main-content" role="main">
+        <section class="city-management" aria-labelledby="manage-cities-heading">
+            <h2 id="manage-cities-heading">Add New City</h2>
+            <form id="add-city-form" aria-label="Add city form">
+                <div class="input-group">
+                    <label for="city-input">Enter city name or zip code:</label>
+                    <input 
+                        type="text" 
+                        id="city-input" 
+                        name="city" 
+                        autocomplete="off"
+                        placeholder="e.g., San Diego, California"
+                        aria-describedby="city-input-help"
+                        required>
+                    <span id="city-input-help" class="visually-hidden">
+                        Enter a city name, state, and country, or a zip code to add weather information
+                    </span>
+                    <button type="submit" id="add-city-btn" aria-label="Add city to your list">
+                        Add City
+                    </button>
+                </div>
+                <div id="city-search-error" role="alert" aria-live="polite" class="error-message"></div>
+            </form>
+
+            <!-- City selection dialog for multiple matches -->
+            <div id="city-selection-dialog" 
+                 class="modal" 
+                 role="dialog" 
+                 aria-labelledby="city-selection-title" 
+                 aria-describedby="city-selection-desc"
+                 aria-modal="true"
+                 hidden>
+                <div class="modal-content">
+                    <h3 id="city-selection-title">Select City</h3>
+                    <p id="city-selection-desc">Multiple cities were found. Please select one:</p>
+                    <div id="city-matches-list" role="listbox" tabindex="0" aria-label="City matches">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                    <div class="modal-buttons">
+                        <button id="select-city-btn" type="button">Select</button>
+                        <button id="cancel-selection-btn" type="button">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="city-list-section" aria-labelledby="your-cities-heading">
+            <div class="section-header">
+                <h2 id="your-cities-heading">Your Cities</h2>
+                <div class="controls">
+                    <button id="configure-btn" aria-label="Configure weather display settings">
+                        <span aria-hidden="true">⚙️</span> Configure
+                    </button>
+                    <button id="refresh-all-btn" aria-label="Refresh all city weather data">
+                        <span aria-hidden="true">🔄</span> Refresh All
+                    </button>
+                </div>
+            </div>
+            
+            <div id="loading-indicator" role="status" aria-live="polite" class="loading" hidden>
+                <span class="spinner" aria-hidden="true"></span>
+                <span>Loading weather data...</span>
+            </div>
+
+            <div id="city-list" role="list" aria-label="List of your saved cities">
+                <!-- Populated by JavaScript -->
+            </div>
+
+            <div id="empty-state" class="empty-state" hidden>
+                <p>No cities added yet. Add a city above to get started!</p>
+            </div>
+        </section>
+
+        <!-- Configuration dialog -->
+        <div id="config-dialog" 
+             class="modal" 
+             role="dialog" 
+             aria-labelledby="config-title" 
+             aria-modal="true"
+             hidden>
+            <div class="modal-content large">
+                <h3 id="config-title">Configure Weather Display</h3>
+                
+                <div class="tabs" role="tablist" aria-label="Weather configuration options">
+                    <button role="tab" aria-selected="true" aria-controls="current-panel" id="current-tab" tabindex="0">
+                        Current Weather
+                    </button>
+                    <button role="tab" aria-selected="false" aria-controls="hourly-panel" id="hourly-tab" tabindex="-1">
+                        Hourly Forecast
+                    </button>
+                    <button role="tab" aria-selected="false" aria-controls="daily-panel" id="daily-tab" tabindex="-1">
+                        Daily Forecast
+                    </button>
+                    <button role="tab" aria-selected="false" aria-controls="units-panel" id="units-tab" tabindex="-1">
+                        Units
+                    </button>
+                </div>
+
+                <div id="current-panel" role="tabpanel" aria-labelledby="current-tab" class="tab-panel">
+                    <fieldset>
+                        <legend>Select current weather details to display:</legend>
+                        <div class="checkbox-grid">
+                            <label><input type="checkbox" name="current-temperature" checked> Temperature</label>
+                            <label><input type="checkbox" name="current-feels_like" checked> Feels Like</label>
+                            <label><input type="checkbox" name="current-humidity" checked> Humidity</label>
+                            <label><input type="checkbox" name="current-wind_speed" checked> Wind Speed</label>
+                            <label><input type="checkbox" name="current-wind_direction" checked> Wind Direction</label>
+                            <label><input type="checkbox" name="current-pressure"> Pressure</label>
+                            <label><input type="checkbox" name="current-visibility"> Visibility</label>
+                            <label><input type="checkbox" name="current-precipitation" checked> Precipitation</label>
+                            <label><input type="checkbox" name="current-cloud_cover"> Cloud Cover</label>
+                            <label><input type="checkbox" name="current-rain"> Rain</label>
+                            <label><input type="checkbox" name="current-showers"> Showers</label>
+                            <label><input type="checkbox" name="current-snowfall"> Snowfall</label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div id="hourly-panel" role="tabpanel" aria-labelledby="hourly-tab" class="tab-panel" hidden>
+                    <fieldset>
+                        <legend>Select hourly forecast details to display:</legend>
+                        <div class="checkbox-grid">
+                            <label><input type="checkbox" name="hourly-temperature" checked> Temperature</label>
+                            <label><input type="checkbox" name="hourly-feels_like"> Feels Like</label>
+                            <label><input type="checkbox" name="hourly-humidity"> Humidity</label>
+                            <label><input type="checkbox" name="hourly-precipitation" checked> Precipitation</label>
+                            <label><input type="checkbox" name="hourly-wind_speed"> Wind Speed</label>
+                            <label><input type="checkbox" name="hourly-cloud_cover"> Cloud Cover</label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div id="daily-panel" role="tabpanel" aria-labelledby="daily-tab" class="tab-panel" hidden>
+                    <fieldset>
+                        <legend>Select daily forecast details to display:</legend>
+                        <div class="checkbox-grid">
+                            <label><input type="checkbox" name="daily-temperature_max" checked> High Temperature</label>
+                            <label><input type="checkbox" name="daily-temperature_min" checked> Low Temperature</label>
+                            <label><input type="checkbox" name="daily-sunrise" checked> Sunrise</label>
+                            <label><input type="checkbox" name="daily-sunset" checked> Sunset</label>
+                            <label><input type="checkbox" name="daily-precipitation_sum" checked> Total Precipitation</label>
+                            <label><input type="checkbox" name="daily-wind_speed_max"> Max Wind Speed</label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div id="units-panel" role="tabpanel" aria-labelledby="units-tab" class="tab-panel" hidden>
+                    <fieldset>
+                        <legend>Temperature</legend>
+                        <label><input type="radio" name="temp-unit" value="F" checked> Fahrenheit (°F)</label>
+                        <label><input type="radio" name="temp-unit" value="C"> Celsius (°C)</label>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Wind Speed</legend>
+                        <label><input type="radio" name="wind-unit" value="mph" checked> Miles per hour (mph)</label>
+                        <label><input type="radio" name="wind-unit" value="kmh"> Kilometers per hour (km/h)</label>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Precipitation</legend>
+                        <label><input type="radio" name="precip-unit" value="in" checked> Inches (in)</label>
+                        <label><input type="radio" name="precip-unit" value="mm"> Millimeters (mm)</label>
+                    </fieldset>
+                </div>
+
+                <div class="modal-buttons">
+                    <button id="apply-config-btn" type="button">Apply</button>
+                    <button id="save-config-btn" type="button">Save & Close</button>
+                    <button id="cancel-config-btn" type="button">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Full Weather Details Dialog -->
+        <div id="weather-details-dialog" 
+             class="modal" 
+             role="dialog" 
+             aria-labelledby="weather-details-title" 
+             aria-modal="true"
+             hidden>
+            <div class="modal-content large">
+                <h3 id="weather-details-title">Full Weather Details</h3>
+                <div id="weather-details-content">
+                    <!-- Populated by JavaScript -->
+                </div>
+                <div class="modal-buttons">
+                    <button id="close-weather-details-btn" type="button">Close</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer role="contentinfo">
+        <p>Data provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo.com</a> (CC BY 4.0)</p>
+        <p>FastWeather v1.1 &copy; 2025 | <a href="https://github.com/kellylford/FastWeather">GitHub</a></p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

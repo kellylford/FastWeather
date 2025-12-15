@@ -1,0 +1,952 @@
+/**
+ * FastWeather Web Application
+ * Accessible weather application with WCAG 2.2 AA compliance
+ */
+
+// Constants
+const KMH_TO_MPH = 0.621371;
+const MM_TO_INCHES = 0.0393701;
+const OPEN_METEO_API_URL = 'https://api.open-meteo.com/v1/forecast';
+const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
+
+// WMO Weather interpretation codes
+const WEATHER_CODES = {
+    0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+    45: 'Fog', 48: 'Depositing rime fog',
+    51: 'Light drizzle', 53: 'Moderate drizzle', 55: 'Dense drizzle',
+    56: 'Light freezing drizzle', 57: 'Dense freezing drizzle',
+    61: 'Slight rain', 63: 'Moderate rain', 65: 'Heavy rain',
+    66: 'Light freezing rain', 67: 'Heavy freezing rain',
+    71: 'Slight snow fall', 73: 'Moderate snow fall', 75: 'Heavy snow fall',
+    77: 'Snow grains',
+    80: 'Slight rain showers', 81: 'Moderate rain showers', 82: 'Violent rain showers',
+    85: 'Slight snow showers', 86: 'Heavy snow showers',
+    95: 'Thunderstorm',
+    96: 'Thunderstorm with slight hail', 99: 'Thunderstorm with heavy hail'
+};
+
+// Default configuration
+const DEFAULT_CONFIG = {
+    current: {
+        temperature: true,
+        feels_like: true,
+        humidity: true,
+        wind_speed: true,
+        wind_direction: true,
+        pressure: false,
+        visibility: false,
+        precipitation: true,
+        cloud_cover: false,
+        rain: false,
+        showers: false,
+        snowfall: false
+    },
+    hourly: {
+        temperature: true,
+        feels_like: false,
+        humidity: false,
+        precipitation: true,
+        wind_speed: false,
+        cloud_cover: false
+    },
+    daily: {
+        temperature_max: true,
+        temperature_min: true,
+        sunrise: true,
+        sunset: true,
+        precipitation_sum: true,
+        wind_speed_max: false
+    },
+    units: {
+        temperature: 'F',
+        wind_speed: 'mph',
+        precipitation: 'in'
+    }
+};
+
+// Application state
+let cities = {};
+let weatherData = {};
+let currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+let currentCityMatches = [];
+let focusReturnElement = null;
+
+// Initialize app
+document.addEventListener('DOMContentLoaded', () => {
+    loadCitiesFromStorage();
+    loadConfigFromStorage();
+    initializeEventListeners();
+    renderCityList();
+    announceToScreenReader('FastWeather application loaded');
+});
+
+// Event Listeners
+function initializeEventListeners() {
+    // Add city form
+    document.getElementById('add-city-form').addEventListener('submit', handleAddCity);
+    
+    // Configuration dialog
+    document.getElementById('configure-btn').addEventListener('click', openConfigDialog);
+    document.getElementById('apply-config-btn').addEventListener('click', applyConfiguration);
+    document.getElementById('save-config-btn').addEventListener('click', saveConfiguration);
+    document.getElementById('cancel-config-btn').addEventListener('click', closeConfigDialog);
+    
+    // City selection dialog
+    document.getElementById('select-city-btn').addEventListener('click', handleCitySelection);
+    document.getElementById('cancel-selection-btn').addEventListener('click', closeCitySelectionDialog);
+    
+    // Refresh all
+    document.getElementById('refresh-all-btn').addEventListener('click', refreshAllCities);
+    
+    // Close weather details
+    document.getElementById('close-weather-details-btn').addEventListener('click', closeWeatherDetailsDialog);
+    
+    // Tab navigation for config dialog
+    setupTabNavigation();
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', handleKeyboardShortcuts);
+    
+    // Close modals on Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeAllModals();
+        }
+    });
+}
+
+// Keyboard shortcuts
+function handleKeyboardShortcuts(e) {
+    // Ctrl+R: Refresh all cities
+    if (e.ctrlKey && e.key === 'r') {
+        e.preventDefault();
+        refreshAllCities();
+    }
+}
+
+// Tab navigation
+function setupTabNavigation() {
+    const tabs = document.querySelectorAll('[role="tab"]');
+    const panels = document.querySelectorAll('[role="tabpanel"]');
+    
+    tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => activateTab(tab, panels));
+        tab.addEventListener('keydown', (e) => {
+            let newIndex = index;
+            
+            if (e.key === 'ArrowRight') {
+                newIndex = (index + 1) % tabs.length;
+                e.preventDefault();
+            } else if (e.key === 'ArrowLeft') {
+                newIndex = (index - 1 + tabs.length) % tabs.length;
+                e.preventDefault();
+            } else if (e.key === 'Home') {
+                newIndex = 0;
+                e.preventDefault();
+            } else if (e.key === 'End') {
+                newIndex = tabs.length - 1;
+                e.preventDefault();
+            }
+            
+            if (newIndex !== index) {
+                activateTab(tabs[newIndex], panels);
+                tabs[newIndex].focus();
+            }
+        });
+    });
+}
+
+function activateTab(selectedTab, panels) {
+    const tabs = document.querySelectorAll('[role="tab"]');
+    
+    tabs.forEach(tab => {
+        tab.setAttribute('aria-selected', 'false');
+        tab.setAttribute('tabindex', '-1');
+    });
+    
+    panels.forEach(panel => {
+        panel.hidden = true;
+    });
+    
+    selectedTab.setAttribute('aria-selected', 'true');
+    selectedTab.setAttribute('tabindex', '0');
+    
+    const panelId = selectedTab.getAttribute('aria-controls');
+    document.getElementById(panelId).hidden = false;
+}
+
+// Add city handler
+async function handleAddCity(e) {
+    e.preventDefault();
+    
+    const input = document.getElementById('city-input');
+    const cityName = input.value.trim();
+    const errorDiv = document.getElementById('city-search-error');
+    
+    if (!cityName) {
+        showError(errorDiv, 'Please enter a city name');
+        return;
+    }
+    
+    showLoading(true);
+    clearError(errorDiv);
+    
+    try {
+        const matches = await geocodeCity(cityName);
+        
+        if (matches.length === 0) {
+            showError(errorDiv, `No cities found for "${cityName}"`);
+            showLoading(false);
+            return;
+        }
+        
+        if (matches.length === 1) {
+            await addCity(matches[0]);
+            input.value = '';
+        } else {
+            currentCityMatches = matches;
+            showCitySelectionDialog(cityName, matches);
+        }
+        
+        showLoading(false);
+    } catch (error) {
+        showError(errorDiv, `Error searching for city: ${error.message}`);
+        showLoading(false);
+    }
+}
+
+// Geocode city
+async function geocodeCity(cityName) {
+    const params = new URLSearchParams({
+        q: cityName,
+        format: 'json',
+        addressdetails: '1',
+        limit: '5'
+    });
+    
+    const response = await fetch(`${NOMINATIM_URL}?${params}`, {
+        headers: { 'User-Agent': 'FastWeather Web/1.0' }
+    });
+    
+    if (!response.ok) throw new Error('Failed to search for city');
+    
+    const results = await response.json();
+    
+    return results.map(r => {
+        const address = r.address || {};
+        const city = address.city || address.town || address.village || cityName;
+        const state = address.state || '';
+        const country = address.country || '';
+        const displayParts = [city, state, country].filter(p => p);
+        
+        return {
+            display: displayParts.join(', '),
+            city, state, country,
+            lat: parseFloat(r.lat),
+            lon: parseFloat(r.lon)
+        };
+    });
+}
+
+// City selection dialog
+function showCitySelectionDialog(originalInput, matches) {
+    const dialog = document.getElementById('city-selection-dialog');
+    const listBox = document.getElementById('city-matches-list');
+    const desc = document.getElementById('city-selection-desc');
+    
+    desc.textContent = `Multiple cities found for "${originalInput}". Please select one:`;
+    
+    listBox.innerHTML = '';
+    matches.forEach((match, index) => {
+        const option = document.createElement('div');
+        option.className = 'city-option';
+        option.setAttribute('role', 'option');
+        option.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
+        option.textContent = `${match.display} (${match.lat.toFixed(4)}, ${match.lon.toFixed(4)})`;
+        option.dataset.index = index;
+        
+        option.addEventListener('click', () => selectCityOption(option));
+        option.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleCitySelection();
+            }
+        });
+        
+        listBox.appendChild(option);
+    });
+    
+    focusReturnElement = document.activeElement;
+    dialog.hidden = false;
+    trapFocus(dialog);
+    listBox.focus();
+}
+
+function selectCityOption(option) {
+    const options = document.querySelectorAll('.city-option');
+    options.forEach(opt => opt.setAttribute('aria-selected', 'false'));
+    option.setAttribute('aria-selected', 'true');
+}
+
+async function handleCitySelection() {
+    const selected = document.querySelector('.city-option[aria-selected="true"]');
+    if (!selected) return;
+    
+    const index = parseInt(selected.dataset.index);
+    const match = currentCityMatches[index];
+    
+    closeCitySelectionDialog();
+    await addCity(match);
+    document.getElementById('city-input').value = '';
+}
+
+function closeCitySelectionDialog() {
+    const dialog = document.getElementById('city-selection-dialog');
+    dialog.hidden = true;
+    if (focusReturnElement) {
+        focusReturnElement.focus();
+        focusReturnElement = null;
+    }
+}
+
+// Add city to list
+async function addCity(cityData) {
+    const key = cityData.display;
+    
+    if (cities[key]) {
+        announceToScreenReader(`${key} is already in your list`);
+        return;
+    }
+    
+    cities[key] = [cityData.lat, cityData.lon];
+    saveCitiesToStorage();
+    renderCityList();
+    
+    announceToScreenReader(`Added ${key} to your cities`);
+    
+    // Fetch weather for new city
+    await fetchWeatherForCity(key, cityData.lat, cityData.lon);
+}
+
+// Fetch weather data
+async function fetchWeatherForCity(cityName, lat, lon, detailed = false) {
+    try {
+        const params = new URLSearchParams({
+            latitude: lat,
+            longitude: lon,
+            current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility',
+            timezone: 'auto'
+        });
+        
+        if (detailed) {
+            params.append('hourly', 'temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weathercode,cloudcover,windspeed_10m');
+            params.append('daily', 'weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,windspeed_10m_max');
+            params.append('forecast_days', '7');
+        } else {
+            params.append('hourly', 'cloudcover');
+            params.append('daily', 'temperature_2m_max,temperature_2m_min');
+            params.append('forecast_days', '1');
+        }
+        
+        const response = await fetch(`${OPEN_METEO_API_URL}?${params}`);
+        if (!response.ok) throw new Error('Failed to fetch weather data');
+        
+        const data = await response.json();
+        weatherData[cityName] = data;
+        
+        renderCityList();
+        announceToScreenReader(`Weather data updated for ${cityName}`);
+        
+        return data;
+    } catch (error) {
+        console.error(`Error fetching weather for ${cityName}:`, error);
+        announceToScreenReader(`Failed to fetch weather for ${cityName}`);
+        throw error;
+    }
+}
+
+// Render city list
+function renderCityList() {
+    const container = document.getElementById('city-list');
+    const emptyState = document.getElementById('empty-state');
+    
+    if (Object.keys(cities).length === 0) {
+        container.innerHTML = '';
+        emptyState.hidden = false;
+        return;
+    }
+    
+    emptyState.hidden = true;
+    container.innerHTML = '';
+    
+    Object.keys(cities).forEach((cityName, index) => {
+        const [lat, lon] = cities[cityName];
+        const weather = weatherData[cityName];
+        
+        const cityCard = createCityCard(cityName, lat, lon, weather, index);
+        container.appendChild(cityCard);
+    });
+}
+
+// Create city card
+function createCityCard(cityName, lat, lon, weather, index) {
+    const card = document.createElement('article');
+    card.className = 'city-card';
+    card.setAttribute('role', 'listitem');
+    card.setAttribute('aria-label', `Weather for ${cityName}`);
+    
+    const header = document.createElement('div');
+    header.className = 'city-card-header';
+    
+    const title = document.createElement('h3');
+    title.textContent = cityName;
+    header.appendChild(title);
+    
+    const controls = document.createElement('div');
+    controls.className = 'city-card-controls';
+    
+    // Move up button
+    if (index > 0) {
+        const upBtn = createButton('↑', `Move ${cityName} up in list`, () => moveCityUp(cityName));
+        upBtn.className = 'icon-btn';
+        controls.appendChild(upBtn);
+    }
+    
+    // Move down button
+    if (index < Object.keys(cities).length - 1) {
+        const downBtn = createButton('↓', `Move ${cityName} down in list`, () => moveCityDown(cityName));
+        downBtn.className = 'icon-btn';
+        controls.appendChild(downBtn);
+    }
+    
+    // Refresh button
+    const refreshBtn = createButton('🔄', `Refresh weather for ${cityName}`, () => refreshCity(cityName, lat, lon));
+    refreshBtn.className = 'icon-btn';
+    controls.appendChild(refreshBtn);
+    
+    // Full weather button
+    const fullBtn = createButton('📊', `View full weather details for ${cityName}`, () => showFullWeather(cityName, lat, lon));
+    fullBtn.className = 'icon-btn';
+    controls.appendChild(fullBtn);
+    
+    // Remove button
+    const removeBtn = createButton('🗑️', `Remove ${cityName} from list`, () => removeCity(cityName));
+    removeBtn.className = 'icon-btn remove-btn';
+    controls.appendChild(removeBtn);
+    
+    header.appendChild(controls);
+    card.appendChild(header);
+    
+    // Weather content
+    const content = document.createElement('div');
+    content.className = 'city-card-content';
+    
+    if (weather) {
+        const current = weather.current;
+        const weatherDesc = WEATHER_CODES[current.weather_code] || 'Unknown';
+        
+        const summary = document.createElement('div');
+        summary.className = 'weather-summary';
+        summary.setAttribute('role', 'status');
+        summary.setAttribute('aria-live', 'polite');
+        
+        // Temperature
+        if (currentConfig.current.temperature) {
+            const temp = convertTemperature(current.temperature_2m);
+            const tempSpan = document.createElement('span');
+            tempSpan.className = 'temperature';
+            tempSpan.textContent = `${temp}°${currentConfig.units.temperature}`;
+            tempSpan.setAttribute('aria-label', `Temperature: ${temp} degrees ${currentConfig.units.temperature === 'F' ? 'Fahrenheit' : 'Celsius'}`);
+            summary.appendChild(tempSpan);
+        }
+        
+        // Weather description
+        const descSpan = document.createElement('span');
+        descSpan.className = 'weather-desc';
+        descSpan.textContent = weatherDesc;
+        summary.appendChild(descSpan);
+        
+        content.appendChild(summary);
+        
+        // Additional details
+        const details = document.createElement('dl');
+        details.className = 'weather-details';
+        
+        if (currentConfig.current.feels_like) {
+            addDetail(details, 'Feels Like', `${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}`);
+        }
+        
+        if (currentConfig.current.humidity) {
+            addDetail(details, 'Humidity', `${current.relative_humidity_2m}%`);
+        }
+        
+        if (currentConfig.current.wind_speed) {
+            const windSpeed = convertWindSpeed(current.wind_speed_10m);
+            addDetail(details, 'Wind Speed', `${windSpeed} ${currentConfig.units.wind_speed}`);
+        }
+        
+        if (currentConfig.current.wind_direction) {
+            addDetail(details, 'Wind Direction', `${current.wind_direction_10m}°`);
+        }
+        
+        if (currentConfig.current.precipitation && current.precipitation > 0) {
+            const precip = convertPrecipitation(current.precipitation);
+            addDetail(details, 'Precipitation', `${precip} ${currentConfig.units.precipitation}`);
+        }
+        
+        if (currentConfig.current.pressure) {
+            addDetail(details, 'Pressure', `${current.pressure_msl.toFixed(1)} hPa`);
+        }
+        
+        if (currentConfig.current.visibility) {
+            addDetail(details, 'Visibility', `${(current.visibility / 1000).toFixed(1)} km`);
+        }
+        
+        if (currentConfig.current.cloud_cover) {
+            addDetail(details, 'Cloud Cover', `${current.cloud_cover}%`);
+        }
+        
+        if (currentConfig.current.rain && current.rain > 0) {
+            addDetail(details, 'Rain', `${convertPrecipitation(current.rain)} ${currentConfig.units.precipitation}`);
+        }
+        
+        if (currentConfig.current.showers && current.showers > 0) {
+            addDetail(details, 'Showers', `${convertPrecipitation(current.showers)} ${currentConfig.units.precipitation}`);
+        }
+        
+        if (currentConfig.current.snowfall && current.snowfall > 0) {
+            addDetail(details, 'Snowfall', `${convertPrecipitation(current.snowfall)} ${currentConfig.units.precipitation}`);
+        }
+        
+        content.appendChild(details);
+        
+        // Daily forecast if available
+        if (weather.daily && (currentConfig.daily.temperature_max || currentConfig.daily.temperature_min)) {
+            const forecast = document.createElement('div');
+            forecast.className = 'daily-forecast';
+            
+            const forecastTitle = document.createElement('h4');
+            forecastTitle.textContent = 'Today';
+            forecast.appendChild(forecastTitle);
+            
+            const forecastDetails = document.createElement('dl');
+            
+            if (currentConfig.daily.temperature_max) {
+                addDetail(forecastDetails, 'High', `${convertTemperature(weather.daily.temperature_2m_max[0])}°${currentConfig.units.temperature}`);
+            }
+            
+            if (currentConfig.daily.temperature_min) {
+                addDetail(forecastDetails, 'Low', `${convertTemperature(weather.daily.temperature_2m_min[0])}°${currentConfig.units.temperature}`);
+            }
+            
+            forecast.appendChild(forecastDetails);
+            content.appendChild(forecast);
+        }
+    } else {
+        content.innerHTML = '<p class="loading-text">Loading weather data...</p>';
+    }
+    
+    card.appendChild(content);
+    return card;
+}
+
+function addDetail(dl, label, value) {
+    const dt = document.createElement('dt');
+    dt.textContent = label + ':';
+    const dd = document.createElement('dd');
+    dd.textContent = value;
+    dl.appendChild(dt);
+    dl.appendChild(dd);
+}
+
+function createButton(text, ariaLabel, onClick) {
+    const btn = document.createElement('button');
+    btn.innerHTML = text;
+    btn.setAttribute('aria-label', ariaLabel);
+    btn.addEventListener('click', onClick);
+    return btn;
+}
+
+// City management
+function moveCityUp(cityName) {
+    const keys = Object.keys(cities);
+    const index = keys.indexOf(cityName);
+    if (index <= 0) return;
+    
+    const newCities = {};
+    keys.forEach((key, i) => {
+        if (i === index - 1) {
+            newCities[cityName] = cities[cityName];
+        } else if (i === index) {
+            newCities[keys[index - 1]] = cities[keys[index - 1]];
+        } else {
+            newCities[key] = cities[key];
+        }
+    });
+    
+    cities = newCities;
+    saveCitiesToStorage();
+    renderCityList();
+    announceToScreenReader(`Moved ${cityName} up in the list`);
+}
+
+function moveCityDown(cityName) {
+    const keys = Object.keys(cities);
+    const index = keys.indexOf(cityName);
+    if (index < 0 || index >= keys.length - 1) return;
+    
+    const newCities = {};
+    keys.forEach((key, i) => {
+        if (i === index) {
+            newCities[keys[index + 1]] = cities[keys[index + 1]];
+        } else if (i === index + 1) {
+            newCities[cityName] = cities[cityName];
+        } else {
+            newCities[key] = cities[key];
+        }
+    });
+    
+    cities = newCities;
+    saveCitiesToStorage();
+    renderCityList();
+    announceToScreenReader(`Moved ${cityName} down in the list`);
+}
+
+async function refreshCity(cityName, lat, lon) {
+    announceToScreenReader(`Refreshing weather for ${cityName}`);
+    await fetchWeatherForCity(cityName, lat, lon);
+}
+
+async function refreshAllCities() {
+    if (Object.keys(cities).length === 0) return;
+    
+    announceToScreenReader('Refreshing all cities');
+    showLoading(true);
+    
+    const promises = Object.entries(cities).map(([cityName, [lat, lon]]) => 
+        fetchWeatherForCity(cityName, lat, lon)
+    );
+    
+    try {
+        await Promise.all(promises);
+        announceToScreenReader('All cities refreshed');
+    } catch (error) {
+        announceToScreenReader('Some cities failed to refresh');
+    }
+    
+    showLoading(false);
+}
+
+function removeCity(cityName) {
+    if (!confirm(`Remove ${cityName} from your cities?`)) return;
+    
+    delete cities[cityName];
+    delete weatherData[cityName];
+    saveCitiesToStorage();
+    renderCityList();
+    announceToScreenReader(`Removed ${cityName} from your cities`);
+}
+
+// Full weather details
+async function showFullWeather(cityName, lat, lon) {
+    const dialog = document.getElementById('weather-details-dialog');
+    const title = document.getElementById('weather-details-title');
+    const content = document.getElementById('weather-details-content');
+    
+    title.textContent = `Full Weather Details - ${cityName}`;
+    content.innerHTML = '<p class="loading-text">Loading detailed forecast...</p>';
+    
+    focusReturnElement = document.activeElement;
+    dialog.hidden = false;
+    trapFocus(dialog);
+    
+    try {
+        const weather = await fetchWeatherForCity(cityName, lat, lon, true);
+        content.innerHTML = renderFullWeatherDetails(weather);
+    } catch (error) {
+        content.innerHTML = `<p class="error-message">Failed to load detailed forecast: ${error.message}</p>`;
+    }
+}
+
+function renderFullWeatherDetails(weather) {
+    let html = '<div class="full-weather-details">';
+    
+    // Current conditions (expanded)
+    html += '<section><h4>Current Conditions</h4><dl>';
+    const current = weather.current;
+    
+    html += `<dt>Temperature:</dt><dd>${convertTemperature(current.temperature_2m)}°${currentConfig.units.temperature}</dd>`;
+    html += `<dt>Feels Like:</dt><dd>${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}</dd>`;
+    html += `<dt>Weather:</dt><dd>${WEATHER_CODES[current.weather_code] || 'Unknown'}</dd>`;
+    html += `<dt>Humidity:</dt><dd>${current.relative_humidity_2m}%</dd>`;
+    html += `<dt>Wind:</dt><dd>${convertWindSpeed(current.wind_speed_10m)} ${currentConfig.units.wind_speed} at ${current.wind_direction_10m}°</dd>`;
+    html += `<dt>Pressure:</dt><dd>${current.pressure_msl.toFixed(1)} hPa</dd>`;
+    html += `<dt>Cloud Cover:</dt><dd>${current.cloud_cover}%</dd>`;
+    html += `<dt>Visibility:</dt><dd>${(current.visibility / 1000).toFixed(1)} km</dd>`;
+    
+    html += '</dl></section>';
+    
+    // 7-day forecast
+    if (weather.daily) {
+        html += '<section><h4>7-Day Forecast</h4>';
+        html += '<div class="forecast-grid">';
+        
+        for (let i = 0; i < 7 && i < weather.daily.time.length; i++) {
+            const date = new Date(weather.daily.time[i]);
+            const dayName = i === 0 ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short' });
+            
+            html += '<article class="forecast-day">';
+            html += `<h5>${dayName}</h5>`;
+            html += `<p class="forecast-weather">${WEATHER_CODES[weather.daily.weathercode[i]] || 'Unknown'}</p>`;
+            html += `<p class="forecast-temp">High: ${convertTemperature(weather.daily.temperature_2m_max[i])}°${currentConfig.units.temperature}</p>`;
+            html += `<p class="forecast-temp">Low: ${convertTemperature(weather.daily.temperature_2m_min[i])}°${currentConfig.units.temperature}</p>`;
+            
+            if (currentConfig.daily.precipitation_sum) {
+                html += `<p>Precip: ${convertPrecipitation(weather.daily.precipitation_sum[i])} ${currentConfig.units.precipitation}</p>`;
+            }
+            
+            if (currentConfig.daily.sunrise && weather.daily.sunrise) {
+                const sunrise = new Date(weather.daily.sunrise[i]).toLocaleTimeString('en-US', { 
+                    hour: 'numeric', minute: '2-digit', hour12: true 
+                });
+                html += `<p>☀️ ${sunrise}</p>`;
+            }
+            
+            if (currentConfig.daily.sunset && weather.daily.sunset) {
+                const sunset = new Date(weather.daily.sunset[i]).toLocaleTimeString('en-US', { 
+                    hour: 'numeric', minute: '2-digit', hour12: true 
+                });
+                html += `<p>🌙 ${sunset}</p>`;
+            }
+            
+            html += '</article>';
+        }
+        
+        html += '</div></section>';
+    }
+    
+    html += '</div>';
+    return html;
+}
+
+function closeWeatherDetailsDialog() {
+    const dialog = document.getElementById('weather-details-dialog');
+    dialog.hidden = true;
+    if (focusReturnElement) {
+        focusReturnElement.focus();
+        focusReturnElement = null;
+    }
+}
+
+// Configuration dialog
+function openConfigDialog() {
+    const dialog = document.getElementById('config-dialog');
+    
+    // Load current config into form
+    Object.keys(currentConfig.current).forEach(key => {
+        const checkbox = document.querySelector(`input[name="current-${key}"]`);
+        if (checkbox) checkbox.checked = currentConfig.current[key];
+    });
+    
+    Object.keys(currentConfig.hourly).forEach(key => {
+        const checkbox = document.querySelector(`input[name="hourly-${key}"]`);
+        if (checkbox) checkbox.checked = currentConfig.hourly[key];
+    });
+    
+    Object.keys(currentConfig.daily).forEach(key => {
+        const checkbox = document.querySelector(`input[name="daily-${key}"]`);
+        if (checkbox) checkbox.checked = currentConfig.daily[key];
+    });
+    
+    document.querySelector(`input[name="temp-unit"][value="${currentConfig.units.temperature}"]`).checked = true;
+    document.querySelector(`input[name="wind-unit"][value="${currentConfig.units.wind_speed}"]`).checked = true;
+    document.querySelector(`input[name="precip-unit"][value="${currentConfig.units.precipitation}"]`).checked = true;
+    
+    focusReturnElement = document.activeElement;
+    dialog.hidden = false;
+    trapFocus(dialog);
+    document.getElementById('current-tab').focus();
+}
+
+function applyConfiguration() {
+    updateConfigFromForm();
+    renderCityList();
+    announceToScreenReader('Configuration applied');
+}
+
+function saveConfiguration() {
+    updateConfigFromForm();
+    saveConfigToStorage();
+    renderCityList();
+    closeConfigDialog();
+    announceToScreenReader('Configuration saved');
+}
+
+function updateConfigFromForm() {
+    // Current weather
+    Object.keys(currentConfig.current).forEach(key => {
+        const checkbox = document.querySelector(`input[name="current-${key}"]`);
+        if (checkbox) currentConfig.current[key] = checkbox.checked;
+    });
+    
+    // Hourly forecast
+    Object.keys(currentConfig.hourly).forEach(key => {
+        const checkbox = document.querySelector(`input[name="hourly-${key}"]`);
+        if (checkbox) currentConfig.hourly[key] = checkbox.checked;
+    });
+    
+    // Daily forecast
+    Object.keys(currentConfig.daily).forEach(key => {
+        const checkbox = document.querySelector(`input[name="daily-${key}"]`);
+        if (checkbox) currentConfig.daily[key] = checkbox.checked;
+    });
+    
+    // Units
+    currentConfig.units.temperature = document.querySelector('input[name="temp-unit"]:checked').value;
+    currentConfig.units.wind_speed = document.querySelector('input[name="wind-unit"]:checked').value;
+    currentConfig.units.precipitation = document.querySelector('input[name="precip-unit"]:checked').value;
+}
+
+function closeConfigDialog() {
+    const dialog = document.getElementById('config-dialog');
+    dialog.hidden = true;
+    if (focusReturnElement) {
+        focusReturnElement.focus();
+        focusReturnElement = null;
+    }
+}
+
+// Unit conversion
+function convertTemperature(celsius) {
+    if (currentConfig.units.temperature === 'F') {
+        return Math.round(celsius * 9/5 + 32);
+    }
+    return Math.round(celsius);
+}
+
+function convertWindSpeed(kmh) {
+    if (currentConfig.units.wind_speed === 'mph') {
+        return Math.round(kmh * KMH_TO_MPH);
+    }
+    return Math.round(kmh);
+}
+
+function convertPrecipitation(mm) {
+    if (currentConfig.units.precipitation === 'in') {
+        return (mm * MM_TO_INCHES).toFixed(2);
+    }
+    return mm.toFixed(1);
+}
+
+// Storage
+function loadCitiesFromStorage() {
+    const stored = localStorage.getItem('fastweather-cities');
+    if (stored) {
+        try {
+            cities = JSON.parse(stored);
+        } catch (e) {
+            console.error('Failed to load cities:', e);
+            cities = {};
+        }
+    } else {
+        // Load default cities
+        cities = {
+            "Madison, Wisconsin, United States": [43.074761, -89.3837613],
+            "San Diego, California, United States": [32.7174202, -117.162772]
+        };
+    }
+    
+    // Fetch weather for all cities
+    Object.entries(cities).forEach(([cityName, [lat, lon]]) => {
+        fetchWeatherForCity(cityName, lat, lon);
+    });
+}
+
+function saveCitiesToStorage() {
+    localStorage.setItem('fastweather-cities', JSON.stringify(cities));
+}
+
+function loadConfigFromStorage() {
+    const stored = localStorage.getItem('fastweather-config');
+    if (stored) {
+        try {
+            currentConfig = JSON.parse(stored);
+        } catch (e) {
+            console.error('Failed to load config:', e);
+        }
+    }
+}
+
+function saveConfigToStorage() {
+    localStorage.setItem('fastweather-config', JSON.stringify(currentConfig));
+}
+
+// Utility functions
+function showLoading(show) {
+    const loading = document.getElementById('loading-indicator');
+    loading.hidden = !show;
+}
+
+function showError(element, message) {
+    element.textContent = message;
+    element.classList.add('visible');
+}
+
+function clearError(element) {
+    element.textContent = '';
+    element.classList.remove('visible');
+}
+
+function announceToScreenReader(message) {
+    const announcement = document.createElement('div');
+    announcement.setAttribute('role', 'status');
+    announcement.setAttribute('aria-live', 'polite');
+    announcement.className = 'visually-hidden';
+    announcement.textContent = message;
+    document.body.appendChild(announcement);
+    
+    setTimeout(() => {
+        document.body.removeChild(announcement);
+    }, 1000);
+}
+
+function closeAllModals() {
+    document.querySelectorAll('.modal:not([hidden])').forEach(modal => {
+        modal.hidden = true;
+    });
+    
+    if (focusReturnElement) {
+        focusReturnElement.focus();
+        focusReturnElement = null;
+    }
+}
+
+// Focus trap for modal dialogs
+function trapFocus(element) {
+    const focusableElements = element.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+    
+    element.addEventListener('keydown', function(e) {
+        if (e.key !== 'Tab') return;
+        
+        if (e.shiftKey) {
+            if (document.activeElement === firstFocusable) {
+                lastFocusable.focus();
+                e.preventDefault();
+            }
+        } else {
+            if (document.activeElement === lastFocusable) {
+                firstFocusable.focus();
+                e.preventDefault();
+            }
+        }
+    });
+    
+    // Focus first element
+    if (firstFocusable) {
+        firstFocusable.focus();
+    }
+}
