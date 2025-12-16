@@ -100,10 +100,37 @@ function initializeEventListeners() {
     // Refresh all
     document.getElementById('refresh-all-btn').addEventListener('click', refreshAllCities);
     
-    // View switcher
-    document.getElementById('view-flat-btn').addEventListener('click', () => switchView('flat'));
-    document.getElementById('view-table-btn').addEventListener('click', () => switchView('table'));
-    document.getElementById('view-list-btn').addEventListener('click', () => switchView('list'));
+    // View menu button
+    const viewMenuBtn = document.getElementById('view-menu-btn');
+    const viewMenu = document.getElementById('view-menu');
+    
+    viewMenuBtn.addEventListener('click', toggleViewMenu);
+    
+    // Menu item clicks
+    document.querySelectorAll('#view-menu [role="menuitem"]').forEach(item => {
+        item.addEventListener('click', (e) => {
+            const view = e.target.dataset.view;
+            switchView(view);
+            closeViewMenu();
+        });
+    });
+    
+    // Close menu on Escape or outside click
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.view-menu-container')) {
+            closeViewMenu();
+        }
+    });
+    
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && viewMenu.hidden === false) {
+            closeViewMenu();
+            viewMenuBtn.focus();
+        }
+    });
+    
+    // Keyboard navigation in menu
+    viewMenu.addEventListener('keydown', handleViewMenuKeydown);
     
     // Close weather details
     document.getElementById('close-weather-details-btn').addEventListener('click', closeWeatherDetailsDialog);
@@ -493,19 +520,89 @@ function renderCityList() {
     }
 }
 
+// View menu functions
+function toggleViewMenu() {
+    const viewMenu = document.getElementById('view-menu');
+    const viewMenuBtn = document.getElementById('view-menu-btn');
+    const isExpanded = viewMenuBtn.getAttribute('aria-expanded') === 'true';
+    
+    if (isExpanded) {
+        closeViewMenu();
+    } else {
+        openViewMenu();
+    }
+}
+
+function openViewMenu() {
+    const viewMenu = document.getElementById('view-menu');
+    const viewMenuBtn = document.getElementById('view-menu-btn');
+    
+    viewMenu.hidden = false;
+    viewMenuBtn.setAttribute('aria-expanded', 'true');
+    
+    // Focus first menu item
+    const firstItem = viewMenu.querySelector('[role="menuitem"]');
+    if (firstItem) {
+        firstItem.focus();
+    }
+}
+
+function closeViewMenu() {
+    const viewMenu = document.getElementById('view-menu');
+    const viewMenuBtn = document.getElementById('view-menu-btn');
+    
+    viewMenu.hidden = true;
+    viewMenuBtn.setAttribute('aria-expanded', 'false');
+}
+
+function handleViewMenuKeydown(e) {
+    const items = Array.from(e.currentTarget.querySelectorAll('[role="menuitem"]'));
+    const currentIndex = items.indexOf(document.activeElement);
+    
+    let handled = false;
+    
+    switch(e.key) {
+        case 'ArrowDown':
+            e.preventDefault();
+            const nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+            items[nextIndex].focus();
+            handled = true;
+            break;
+            
+        case 'ArrowUp':
+            e.preventDefault();
+            const prevIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+            items[prevIndex].focus();
+            handled = true;
+            break;
+            
+        case 'Home':
+            e.preventDefault();
+            items[0].focus();
+            handled = true;
+            break;
+            
+        case 'End':
+            e.preventDefault();
+            items[items.length - 1].focus();
+            handled = true;
+            break;
+    }
+}
+
 // View switcher
 function switchView(view) {
     currentView = view;
     
-    // Update button states
-    document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.classList.remove('active');
-        btn.setAttribute('aria-pressed', 'false');
+    // Update menu item states
+    document.querySelectorAll('#view-menu [role="menuitem"]').forEach(item => {
+        const isSelected = item.dataset.view === view;
+        item.setAttribute('aria-checked', isSelected ? 'true' : 'false');
     });
     
-    const activeBtn = document.getElementById(`view-${view}-btn`);
-    activeBtn.classList.add('active');
-    activeBtn.setAttribute('aria-pressed', 'true');
+    // Update button label
+    const viewLabel = view.charAt(0).toUpperCase() + view.slice(1);
+    document.getElementById('current-view-label').textContent = `View: ${viewLabel}`;
     
     // Re-render with new view
     renderCityList();
@@ -747,12 +844,7 @@ function renderTableView(container) {
         // City name (row header)
         const cityCell = document.createElement('th');
         cityCell.scope = 'row';
-        const cityBtn = document.createElement('button');
-        cityBtn.className = 'city-link-btn';
-        cityBtn.textContent = cityName;
-        cityBtn.setAttribute('aria-label', `View full weather for ${cityName}`);
-        cityBtn.addEventListener('click', () => showFullWeather(cityName, lat, lon));
-        cityCell.appendChild(cityBtn);
+        cityCell.textContent = cityName;
         row.appendChild(cityCell);
         
         if (weather && weather.current) {

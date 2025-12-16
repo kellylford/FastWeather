@@ -188,40 +188,90 @@ section {
     align-items: center;
 }
 
-/* === View Switcher === */
-.view-switcher {
-    display: flex;
-    gap: 2px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    overflow: hidden;
+/* === View Menu Button === */
+.view-menu-container {
+    position: relative;
 }
 
-.view-btn {
+#view-menu-btn {
     background: var(--bg-secondary);
-    border: none;
+    border: 1px solid var(--border-color);
     padding: 8px 16px;
+    border-radius: var(--border-radius);
     font-size: var(--font-size-sm);
     cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
+    transition: background-color 0.2s;
     min-height: 44px;
     color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
 }
 
-.view-btn:hover {
+#view-menu-btn:hover {
     background: var(--bg-primary);
 }
 
-.view-btn:focus {
+#view-menu-btn:focus {
     outline: 3px solid var(--focus-outline);
-    outline-offset: -3px;
-    z-index: 1;
+    outline-offset: 2px;
 }
 
-.view-btn.active {
+#view-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 4px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    list-style: none;
+    padding: 4px 0;
+    margin: 0;
+    min-width: 150px;
+    z-index: 1000;
+}
+
+#view-menu li {
+    padding: 0;
+    margin: 0;
+}
+
+#view-menu [role="menuitem"] {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 10px 16px;
+    text-align: left;
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    color: var(--text-primary);
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+#view-menu [role="menuitem"]::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+}
+
+#view-menu [role="menuitem"][aria-checked="true"]::before {
+    content: '✓';
+    font-weight: bold;
+}
+
+#view-menu [role="menuitem"]:hover {
+    background: var(--bg-primary);
+}
+
+#view-menu [role="menuitem"]:focus {
+    outline: none;
     background: var(--link-color);
     color: white;
-    font-weight: 600;
 }
 
 /* === Table View === */
@@ -906,12 +956,14 @@ a:hover {
         justify-content: flex-start;
     }
     
-    .view-switcher {
+    #view-menu-btn {
         width: 100%;
     }
     
-    .view-btn {
-        flex: 1;
+    #view-menu {
+        left: 0;
+        right: 0;
+        width: 100%;
     }
     
     /* Make table scrollable on mobile */
