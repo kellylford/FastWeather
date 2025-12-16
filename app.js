@@ -775,10 +775,18 @@ function renderFullWeatherDetails(weather) {
         
         for (let i = 0; i < 16 && i < weather.daily.time.length; i++) {
             const date = new Date(weather.daily.time[i]);
-            const dayName = i === 0 ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short' });
+            let dayLabel;
+            if (i === 0) {
+                dayLabel = 'Today';
+            } else {
+                // Use browser's locale for date formatting
+                const weekday = date.toLocaleDateString(undefined, { weekday: 'short' });
+                const monthDay = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                dayLabel = `${weekday}, ${monthDay}`;
+            }
             
             html += '<article class="forecast-day">';
-            html += `<h5>${dayName}</h5>`;
+            html += `<h5>${dayLabel}</h5>`;
             html += `<p class="forecast-weather">${WEATHER_CODES[weather.daily.weathercode[i]] || 'Unknown'}</p>`;
             html += `<p class="forecast-temp">High: ${convertTemperature(weather.daily.temperature_2m_max[i])}°${currentConfig.units.temperature}</p>`;
             html += `<p class="forecast-temp">Low: ${convertTemperature(weather.daily.temperature_2m_min[i])}°${currentConfig.units.temperature}</p>`;
