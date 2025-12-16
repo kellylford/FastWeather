@@ -70,6 +70,8 @@ let weatherData = {};
 let currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 let currentCityMatches = [];
 let focusReturnElement = null;
+let currentView = 'flat'; // 'flat', 'table', or 'list'
+let listNavigationHandler = null;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
@@ -97,6 +99,11 @@ function initializeEventListeners() {
     
     // Refresh all
     document.getElementById('refresh-all-btn').addEventListener('click', refreshAllCities);
+    
+    // View switcher
+    document.getElementById('view-flat-btn').addEventListener('click', () => switchView('flat'));
+    document.getElementById('view-table-btn').addEventListener('click', () => switchView('table'));
+    document.getElementById('view-list-btn').addEventListener('click', () => switchView('list'));
     
     // Close weather details
     document.getElementById('close-weather-details-btn').addEventListener('click', closeWeatherDetailsDialog);
@@ -453,11 +460,63 @@ function renderCityList() {
     if (Object.keys(cities).length === 0) {
         container.innerHTML = '';
         emptyState.hidden = false;
+        // Clean up list view controls if they exist
+        const existingControls = document.querySelector('.list-view-controls');
+        if (existingControls) {
+            existingControls.remove();
+        }
         return;
     }
     
     emptyState.hidden = true;
     container.innerHTML = '';
+    
+    // Remove any existing list navigation handler
+    if (listNavigationHandler) {
+        container.removeEventListener('keydown', listNavigationHandler);
+        listNavigationHandler = null;
+    }
+    
+    // Clean up list view controls if they exist
+    const existingControls = document.querySelector('.list-view-controls');
+    if (existingControls) {
+        existingControls.remove();
+    }
+    
+    // Render based on current view
+    if (currentView === 'table') {
+        renderTableView(container);
+    } else if (currentView === 'list') {
+        renderListView(container);
+    } else {
+        renderFlatView(container);
+    }
+}
+
+// View switcher
+function switchView(view) {
+    currentView = view;
+    
+    // Update button states
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+    });
+    
+    const activeBtn = document.getElementById(`view-${view}-btn`);
+    activeBtn.classList.add('active');
+    activeBtn.setAttribute('aria-pressed', 'true');
+    
+    // Re-render with new view
+    renderCityList();
+    announceToScreenReader(`Switched to ${view} view`);
+}
+
+// Flat view (original card-based layout)
+function renderFlatView(container) {
+    container.setAttribute('role', 'list');
+    container.removeAttribute('tabindex');
+    container.removeAttribute('aria-activedescendant');
     
     Object.keys(cities).forEach((cityName, index) => {
         const [lat, lon] = cities[cityName];
@@ -645,6 +704,283 @@ function createButton(text, ariaLabel, onClick) {
     btn.setAttribute('aria-label', ariaLabel);
     btn.addEventListener('click', onClick);
     return btn;
+}
+
+// Table view
+function renderTableView(container) {
+    container.setAttribute('role', 'region');
+    container.removeAttribute('tabindex');
+    container.removeAttribute('aria-activedescendant');
+    
+    const table = document.createElement('table');
+    table.className = 'weather-table';
+    
+    // Table header
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    
+    const headers = ['City', 'Temperature', 'Conditions', 'Feels Like', 'Humidity', 'Wind'];
+    headers.forEach(headerText => {
+        const th = document.createElement('th');
+        th.textContent = headerText;
+        th.scope = 'col';
+        headerRow.appendChild(th);
+    });
+    
+    const actionsHeader = document.createElement('th');
+    actionsHeader.textContent = 'Actions';
+    actionsHeader.scope = 'col';
+    headerRow.appendChild(actionsHeader);
+    
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    
+    // Table body
+    const tbody = document.createElement('tbody');
+    
+    Object.keys(cities).forEach((cityName, index) => {
+        const [lat, lon] = cities[cityName];
+        const weather = weatherData[cityName];
+        
+        const row = document.createElement('tr');
+        
+        // City name (row header)
+        const cityCell = document.createElement('th');
+        cityCell.scope = 'row';
+        const cityBtn = document.createElement('button');
+        cityBtn.className = 'city-link-btn';
+        cityBtn.textContent = cityName;
+        cityBtn.setAttribute('aria-label', `View full weather for ${cityName}`);
+        cityBtn.addEventListener('click', () => showFullWeather(cityName, lat, lon));
+        cityCell.appendChild(cityBtn);
+        row.appendChild(cityCell);
+        
+        if (weather && weather.current) {
+            const current = weather.current;
+            
+            // Temperature
+            const tempCell = document.createElement('td');
+            tempCell.textContent = `${convertTemperature(current.temperature_2m)}°${currentConfig.units.temperature}`;
+            row.appendChild(tempCell);
+            
+            // Conditions
+            const condCell = document.createElement('td');
+            condCell.textContent = WEATHER_CODES[current.weather_code] || 'Unknown';
+            row.appendChild(condCell);
+            
+            // Feels like
+            const feelsCell = document.createElement('td');
+            feelsCell.textContent = `${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}`;
+            row.appendChild(feelsCell);
+            
+            // Humidity
+            const humidityCell = document.createElement('td');
+            humidityCell.textContent = `${current.relative_humidity_2m}%`;
+            row.appendChild(humidityCell);
+            
+            // Wind
+            const windCell = document.createElement('td');
+            const windSpeed = convertWindSpeed(current.wind_speed_10m);
+            const windDir = degreesToCardinal(current.wind_direction_10m);
+            windCell.textContent = `${windDir} ${windSpeed} ${currentConfig.units.wind_speed}`;
+            row.appendChild(windCell);
+        } else {
+            // Loading cells
+            for (let i = 0; i < 5; i++) {
+                const loadingCell = document.createElement('td');
+                loadingCell.textContent = 'Loading...';
+                row.appendChild(loadingCell);
+            }
+        }
+        
+        // Actions cell
+        const actionsCell = document.createElement('td');
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'table-actions';
+        
+        if (index > 0) {
+            const upBtn = createButton('↑', `Move ${cityName} up`, () => moveCityUp(cityName));
+            upBtn.className = 'icon-btn-small';
+            actionsDiv.appendChild(upBtn);
+        }
+        
+        if (index < Object.keys(cities).length - 1) {
+            const downBtn = createButton('↓', `Move ${cityName} down`, () => moveCityDown(cityName));
+            downBtn.className = 'icon-btn-small';
+            actionsDiv.appendChild(downBtn);
+        }
+        
+        const removeBtn = createButton('🗑️', `Remove ${cityName}`, () => removeCity(cityName));
+        removeBtn.className = 'icon-btn-small remove-btn';
+        actionsDiv.appendChild(removeBtn);
+        
+        actionsCell.appendChild(actionsDiv);
+        row.appendChild(actionsCell);
+        
+        tbody.appendChild(row);
+    });
+    
+    table.appendChild(tbody);
+    container.appendChild(table);
+}
+
+// List view (compact, keyboard navigable)
+function renderListView(container) {
+    container.setAttribute('role', 'listbox');
+    container.setAttribute('tabindex', '0');
+    container.setAttribute('aria-label', 'Cities list - use arrow keys to navigate, Enter to view details');
+    
+    let activeIndex = 0;
+    const cityNames = Object.keys(cities);
+    
+    // Create list items
+    cityNames.forEach((cityName, index) => {
+        const [lat, lon] = cities[cityName];
+        const weather = weatherData[cityName];
+        
+        const item = document.createElement('div');
+        item.className = 'list-view-item';
+        item.setAttribute('role', 'option');
+        item.id = `list-item-${index}`;
+        item.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
+        
+        // City name and weather summary in one line
+        let weatherText = cityName;
+        if (weather && weather.current) {
+            const current = weather.current;
+            const temp = convertTemperature(current.temperature_2m);
+            const weatherDesc = WEATHER_CODES[current.weather_code] || 'Unknown';
+            const humidity = current.relative_humidity_2m;
+            const windSpeed = convertWindSpeed(current.wind_speed_10m);
+            const windDir = degreesToCardinal(current.wind_direction_10m);
+            
+            weatherText = `${cityName} - ${temp}°${currentConfig.units.temperature} ${weatherDesc}, Humidity: ${humidity}%, Wind: ${windDir} ${windSpeed} ${currentConfig.units.wind_speed}`;
+        } else {
+            weatherText = `${cityName} - Loading...`;
+        }
+        
+        item.textContent = weatherText;
+        item.dataset.cityName = cityName;
+        item.dataset.lat = lat;
+        item.dataset.lon = lon;
+        item.dataset.index = index;
+        
+        container.appendChild(item);
+    });
+    
+    // Set initial active descendant
+    container.setAttribute('aria-activedescendant', 'list-item-0');
+    
+    // Keyboard navigation handler
+    listNavigationHandler = (e) => {
+        const items = container.querySelectorAll('.list-view-item');
+        const currentActive = container.getAttribute('aria-activedescendant');
+        activeIndex = parseInt(currentActive.split('-')[2]);
+        
+        let handled = false;
+        
+        switch(e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                if (activeIndex < items.length - 1) {
+                    activeIndex++;
+                    setActiveListItem(container, items, activeIndex);
+                }
+                handled = true;
+                break;
+                
+            case 'ArrowUp':
+                e.preventDefault();
+                if (activeIndex > 0) {
+                    activeIndex--;
+                    setActiveListItem(container, items, activeIndex);
+                }
+                handled = true;
+                break;
+                
+            case 'Home':
+                e.preventDefault();
+                activeIndex = 0;
+                setActiveListItem(container, items, activeIndex);
+                handled = true;
+                break;
+                
+            case 'End':
+                e.preventDefault();
+                activeIndex = items.length - 1;
+                setActiveListItem(container, items, activeIndex);
+                handled = true;
+                break;
+                
+            case 'Enter':
+            case ' ':
+                e.preventDefault();
+                const activeItem = items[activeIndex];
+                const cityName = activeItem.dataset.cityName;
+                const lat = parseFloat(activeItem.dataset.lat);
+                const lon = parseFloat(activeItem.dataset.lon);
+                showFullWeather(cityName, lat, lon);
+                handled = true;
+                break;
+        }
+        
+        if (handled) {
+            const item = items[activeIndex];
+            announceToScreenReader(item.textContent);
+        }
+    };
+    
+    container.addEventListener('keydown', listNavigationHandler);
+    
+    // Add control buttons for list view (single set that acts on focused city)
+    const controlsDiv = document.createElement('div');
+    controlsDiv.className = 'list-view-controls';
+    
+    const upBtn = createButton('↑ Move Up', 'Move selected city up in list', () => {
+        const items = container.querySelectorAll('.list-view-item');
+        const currentActive = container.getAttribute('aria-activedescendant');
+        const activeIndex = parseInt(currentActive.split('-')[2]);
+        const cityName = items[activeIndex].dataset.cityName;
+        moveCityUp(cityName);
+    });
+    upBtn.className = 'list-control-btn';
+    
+    const downBtn = createButton('↓ Move Down', 'Move selected city down in list', () => {
+        const items = container.querySelectorAll('.list-view-item');
+        const currentActive = container.getAttribute('aria-activedescendant');
+        const activeIndex = parseInt(currentActive.split('-')[2]);
+        const cityName = items[activeIndex].dataset.cityName;
+        moveCityDown(cityName);
+    });
+    downBtn.className = 'list-control-btn';
+    
+    const removeBtn = createButton('🗑️ Remove', 'Remove selected city from list', () => {
+        const items = container.querySelectorAll('.list-view-item');
+        const currentActive = container.getAttribute('aria-activedescendant');
+        const activeIndex = parseInt(currentActive.split('-')[2]);
+        const cityName = items[activeIndex].dataset.cityName;
+        removeCity(cityName);
+    });
+    removeBtn.className = 'list-control-btn remove-btn';
+    
+    controlsDiv.appendChild(upBtn);
+    controlsDiv.appendChild(downBtn);
+    controlsDiv.appendChild(removeBtn);
+    
+    container.parentElement.insertBefore(controlsDiv, container.nextSibling);
+}
+
+function setActiveListItem(container, items, index) {
+    // Update aria-selected
+    items.forEach((item, i) => {
+        item.setAttribute('aria-selected', i === index ? 'true' : 'false');
+    });
+    
+    // Update aria-activedescendant
+    container.setAttribute('aria-activedescendant', `list-item-${index}`);
+    
+    // Scroll into view
+    items[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
 
 // City management
