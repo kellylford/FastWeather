@@ -841,7 +841,19 @@ function renderTableView(container) {
         // City name (row header)
         const cityCell = document.createElement('th');
         cityCell.scope = 'row';
-        cityCell.textContent = cityName;
+        
+        // Make city name a clickable link
+        const cityLink = document.createElement('a');
+        cityLink.href = '#';
+        cityLink.textContent = cityName;
+        cityLink.className = 'city-link';
+        cityLink.setAttribute('aria-label', `View full weather for ${cityName}`);
+        cityLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showFullWeather(cityName);
+        });
+        
+        cityCell.appendChild(cityLink);
         row.appendChild(cityCell);
         
         if (weather && weather.current) {
