@@ -384,7 +384,7 @@ section {
 }
 
 .list-view-item[aria-selected="true"] {
-    background: var(--link-color);
+    background: var(--button-primary);
     color: white;
     font-weight: 600;
 }
