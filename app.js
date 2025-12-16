@@ -421,7 +421,7 @@ async function fetchWeatherForCity(cityName, lat, lon, detailed = false) {
         if (detailed) {
             params.append('hourly', 'temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weathercode,cloudcover,windspeed_10m');
             params.append('daily', 'weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,windspeed_10m_max');
-            params.append('forecast_days', '7');
+            params.append('forecast_days', '16');
         } else {
             params.append('hourly', 'cloudcover');
             params.append('daily', 'temperature_2m_max,temperature_2m_min');
@@ -566,7 +566,8 @@ function createCityCard(cityName, lat, lon, weather, index) {
         }
         
         if (currentConfig.current.wind_direction) {
-            addDetail(details, 'Wind Direction', `${current.wind_direction_10m}°`);
+            const cardinal = degreesToCardinal(current.wind_direction_10m);
+            addDetail(details, 'Wind Direction', `${cardinal} (${current.wind_direction_10m}°)`);
         }
         
         if (currentConfig.current.precipitation && current.precipitation > 0) {
@@ -759,19 +760,20 @@ function renderFullWeatherDetails(weather) {
     html += `<dt>Feels Like:</dt><dd>${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}</dd>`;
     html += `<dt>Weather:</dt><dd>${WEATHER_CODES[current.weather_code] || 'Unknown'}</dd>`;
     html += `<dt>Humidity:</dt><dd>${current.relative_humidity_2m}%</dd>`;
-    html += `<dt>Wind:</dt><dd>${convertWindSpeed(current.wind_speed_10m)} ${currentConfig.units.wind_speed} at ${current.wind_direction_10m}°</dd>`;
+    const windCardinal = degreesToCardinal(current.wind_direction_10m);
+    html += `<dt>Wind:</dt><dd>${convertWindSpeed(current.wind_speed_10m)} ${currentConfig.units.wind_speed} ${windCardinal} (${current.wind_direction_10m}°)</dd>`;
     html += `<dt>Pressure:</dt><dd>${current.pressure_msl.toFixed(1)} hPa</dd>`;
     html += `<dt>Cloud Cover:</dt><dd>${current.cloud_cover}%</dd>`;
     html += `<dt>Visibility:</dt><dd>${(current.visibility / 1000).toFixed(1)} km</dd>`;
     
     html += '</dl></section>';
     
-    // 7-day forecast
+    // 16-day forecast
     if (weather.daily) {
-        html += '<section><h4>7-Day Forecast</h4>';
+        html += '<section><h4>16-Day Forecast</h4>';
         html += '<div class="forecast-grid">';
         
-        for (let i = 0; i < 7 && i < weather.daily.time.length; i++) {
+        for (let i = 0; i < 16 && i < weather.daily.time.length; i++) {
             const date = new Date(weather.daily.time[i]);
             const dayName = i === 0 ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short' });
             
@@ -897,6 +899,12 @@ function closeConfigDialog() {
 }
 
 // Unit conversion
+function degreesToCardinal(degrees) {
+    const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    const index = Math.round(degrees / 45) % 8;
+    return directions[index];
+}
+
 function convertTemperature(celsius) {
     if (currentConfig.units.temperature === 'F') {
         return Math.round(celsius * 9/5 + 32);
