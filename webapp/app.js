@@ -1493,13 +1493,21 @@ function announceToScreenReader(message) {
     const announcement = document.createElement('div');
     announcement.setAttribute('role', 'status');
     announcement.setAttribute('aria-live', 'polite');
+    announcement.setAttribute('aria-atomic', 'true');
     announcement.className = 'visually-hidden';
-    announcement.textContent = message;
     document.body.appendChild(announcement);
     
+    // Add text after a brief delay to ensure screen readers detect the change
     setTimeout(() => {
-        document.body.removeChild(announcement);
-    }, 1000);
+        announcement.textContent = message;
+    }, 100);
+    
+    // Remove after screen readers have had time to announce
+    setTimeout(() => {
+        if (announcement.parentNode) {
+            document.body.removeChild(announcement);
+        }
+    }, 2000);
 }
 
 function closeAllModals() {
