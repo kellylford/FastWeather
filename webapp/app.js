@@ -232,7 +232,6 @@ async function handleAddCity(e) {
         return;
     }
     
-    showLoading(true);
     clearError(errorDiv);
     
     try {
@@ -240,7 +239,6 @@ async function handleAddCity(e) {
         
         if (matches.length === 0) {
             showError(errorDiv, `No cities found for "${cityName}"`);
-            showLoading(false);
             return;
         }
         
@@ -251,11 +249,8 @@ async function handleAddCity(e) {
             currentCityMatches = matches;
             showCitySelectionDialog(cityName, matches);
         }
-        
-        showLoading(false);
     } catch (error) {
         showError(errorDiv, `Error searching for city: ${error.message}`);
-        showLoading(false);
     }
 }
 
@@ -1195,7 +1190,6 @@ async function refreshAllCities() {
     if (Object.keys(cities).length === 0) return;
     
     announceToScreenReader('Refreshing all cities');
-    showLoading(true);
     
     const promises = Object.entries(cities).map(([cityName, [lat, lon]]) => 
         fetchWeatherForCity(cityName, lat, lon)
@@ -1207,8 +1201,6 @@ async function refreshAllCities() {
     } catch (error) {
         announceToScreenReader('Some cities failed to refresh');
     }
-    
-    showLoading(false);
 }
 
 function removeCity(cityName) {
@@ -1487,11 +1479,6 @@ function saveConfigToStorage() {
 }
 
 // Utility functions
-function showLoading(show) {
-    const loading = document.getElementById('loading-indicator');
-    loading.hidden = !show;
-}
-
 function showError(element, message) {
     element.textContent = message;
     element.classList.add('visible');
