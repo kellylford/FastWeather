@@ -641,7 +641,7 @@ function createCityCard(cityName, lat, lon, weather, index) {
     
     const titleButton = document.createElement('button');
     titleButton.className = 'city-title-btn';
-    titleButton.setAttribute('aria-label', `View full weather details for ${cityName}`);
+    titleButton.setAttribute('aria-label', cityName);
     titleButton.addEventListener('click', () => showFullWeather(cityName, lat, lon));
     
     const title = document.createElement('h3');
@@ -847,7 +847,7 @@ function renderTableView(container) {
         cityLink.href = '#';
         cityLink.textContent = cityName;
         cityLink.className = 'city-link';
-        cityLink.setAttribute('aria-label', `View full weather for ${cityName}`);
+        cityLink.setAttribute('aria-label', cityName);
         cityLink.addEventListener('click', (e) => {
             e.preventDefault();
             showFullWeather(cityName);
