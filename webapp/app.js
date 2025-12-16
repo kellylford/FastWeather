@@ -1128,6 +1128,18 @@ function renderListView(container) {
     });
     removeBtn.className = 'list-control-btn remove-btn';
     
+    const detailsBtn = createButton('📋 Full Details', 'View full weather details for selected city', () => {
+        const items = container.querySelectorAll('.list-view-item');
+        const currentActive = container.getAttribute('aria-activedescendant');
+        const activeIndex = parseInt(currentActive.split('-')[2]);
+        const cityName = items[activeIndex].dataset.cityName;
+        const lat = parseFloat(items[activeIndex].dataset.lat);
+        const lon = parseFloat(items[activeIndex].dataset.lon);
+        showFullWeather(cityName, lat, lon);
+    });
+    detailsBtn.className = 'list-control-btn';
+    
+    controlsDiv.appendChild(detailsBtn);
     controlsDiv.appendChild(upBtn);
     controlsDiv.appendChild(downBtn);
     controlsDiv.appendChild(removeBtn);
