@@ -864,6 +864,46 @@ legend {
     margin-bottom: var(--spacing-md);
 }
 
+.hourly-forecast {
+    display: flex;
+    gap: var(--spacing-md);
+    overflow-x: auto;
+    padding-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.hourly-item {
+    background-color: var(--secondary-bg);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    min-width: 120px;
+    flex-shrink: 0;
+}
+
+.hourly-item h5 {
+    margin: 0 0 var(--spacing-sm) 0;
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+}
+
+.hourly-weather {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.hourly-temp {
+    margin: var(--spacing-xs) 0;
+    font-weight: 600;
+    font-size: var(--font-size-lg);
+}
+
+.hourly-item p {
+    font-size: var(--font-size-xs);
+    margin: var(--spacing-xs) 0;
+}
+
 .forecast-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));

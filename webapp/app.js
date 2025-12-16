@@ -1277,6 +1277,67 @@ function renderFullWeatherDetails(weather) {
     
     html += '</dl></section>';
     
+    // Next 24 hours hourly forecast
+    if (weather.hourly) {
+        html += '<section><h4>Next 24 Hours</h4>';
+        html += '<div class="hourly-forecast">';
+        
+        // Get current time and find the starting hour index
+        const now = new Date();
+        const currentHour = now.getHours();
+        
+        // Open-Meteo hourly data is in local timezone
+        // Find the closest hour index that matches or is after current time
+        let startIndex = 0;
+        for (let i = 0; i < weather.hourly.time.length; i++) {
+            const hourTime = new Date(weather.hourly.time[i]);
+            if (hourTime >= now) {
+                startIndex = i;
+                break;
+            }
+        }
+        
+        // Display next 24 hours (or up to end of available data)
+        const endIndex = Math.min(startIndex + 24, weather.hourly.time.length);
+        
+        for (let i = startIndex; i < endIndex; i++) {
+            const hourTime = new Date(weather.hourly.time[i]);
+            const timeStr = hourTime.toLocaleTimeString(undefined, { 
+                hour: 'numeric', 
+                hour12: true 
+            });
+            
+            html += '<article class="hourly-item">';
+            html += `<h5>${timeStr}</h5>`;
+            html += `<p class="hourly-weather">${WEATHER_CODES[weather.hourly.weathercode[i]] || 'Unknown'}</p>`;
+            html += `<p class="hourly-temp">${convertTemperature(weather.hourly.temperature_2m[i])}°${currentConfig.units.temperature}</p>`;
+            
+            if (currentConfig.hourly.feels_like) {
+                html += `<p>Feels: ${convertTemperature(weather.hourly.apparent_temperature[i])}°${currentConfig.units.temperature}</p>`;
+            }
+            
+            if (currentConfig.hourly.humidity) {
+                html += `<p>Humidity: ${weather.hourly.relative_humidity_2m[i]}%</p>`;
+            }
+            
+            if (currentConfig.hourly.precipitation) {
+                html += `<p>Precip: ${convertPrecipitation(weather.hourly.precipitation[i])} ${currentConfig.units.precipitation}</p>`;
+            }
+            
+            if (currentConfig.hourly.wind_speed) {
+                html += `<p>Wind: ${convertWindSpeed(weather.hourly.windspeed_10m[i])} ${currentConfig.units.wind_speed}</p>`;
+            }
+            
+            if (currentConfig.hourly.cloud_cover) {
+                html += `<p>Clouds: ${weather.hourly.cloudcover[i]}%</p>`;
+            }
+            
+            html += '</article>';
+        }
+        
+        html += '</div></section>';
+    }
+    
     // 16-day forecast
     if (weather.daily) {
         html += '<section><h4>16-Day Forecast</h4>';
