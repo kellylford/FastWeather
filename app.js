@@ -488,30 +488,6 @@ function createCityCard(cityName, lat, lon, weather, index) {
     titleButton.appendChild(title);
     
     header.appendChild(titleButton);
-    
-    const controls = document.createElement('div');
-    controls.className = 'city-card-controls';
-    
-    // Move up button
-    if (index > 0) {
-        const upBtn = createButton('↑', `Move ${cityName} up in list`, () => moveCityUp(cityName));
-        upBtn.className = 'icon-btn';
-        controls.appendChild(upBtn);
-    }
-    
-    // Move down button
-    if (index < Object.keys(cities).length - 1) {
-        const downBtn = createButton('↓', `Move ${cityName} down in list`, () => moveCityDown(cityName));
-        downBtn.className = 'icon-btn';
-        controls.appendChild(downBtn);
-    }
-    
-    // Remove button
-    const removeBtn = createButton('🗑️', `Remove ${cityName} from list`, () => removeCity(cityName));
-    removeBtn.className = 'icon-btn remove-btn';
-    controls.appendChild(removeBtn);
-    
-    header.appendChild(controls);
     card.appendChild(header);
     
     // Weather content
@@ -625,6 +601,32 @@ function createCityCard(cityName, lat, lon, weather, index) {
     }
     
     card.appendChild(content);
+    
+    // Controls at the bottom for better screen reader experience
+    const controls = document.createElement('div');
+    controls.className = 'city-card-controls';
+    
+    // Move up button
+    if (index > 0) {
+        const upBtn = createButton('↑', `Move ${cityName} up in list`, () => moveCityUp(cityName));
+        upBtn.className = 'icon-btn';
+        controls.appendChild(upBtn);
+    }
+    
+    // Move down button
+    if (index < Object.keys(cities).length - 1) {
+        const downBtn = createButton('↓', `Move ${cityName} down in list`, () => moveCityDown(cityName));
+        downBtn.className = 'icon-btn';
+        controls.appendChild(downBtn);
+    }
+    
+    // Remove button
+    const removeBtn = createButton('🗑️', `Remove ${cityName} from list`, () => removeCity(cityName));
+    removeBtn.className = 'icon-btn remove-btn';
+    controls.appendChild(removeBtn);
+    
+    card.appendChild(controls);
+    
     return card;
 }
 

@@ -339,12 +339,7 @@ legend {
 }
 
 .city-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: var(--spacing-md);
-    flex-wrap: wrap;
-    gap: var(--spacing-md);
 }
 
 .city-title-btn {
@@ -377,14 +372,17 @@ legend {
     color: inherit;
 }
 
+.city-card-content {
+    margin-bottom: var(--spacing-md);
+}
+
 .city-card-controls {
     display: flex;
     gap: var(--spacing-sm);
     flex-wrap: wrap;
-}
-
-.city-card-content {
-    margin-top: var(--spacing-md);
+    justify-content: flex-end;
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
 }
 
 .weather-summary {
