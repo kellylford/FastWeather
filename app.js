@@ -261,33 +261,57 @@ function showCitySelectionDialog(originalInput, matches) {
         const option = document.createElement('div');
         option.className = 'city-option';
         option.setAttribute('role', 'option');
+        option.setAttribute('id', `city-option-${index}`);
         option.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
         option.textContent = `${match.display} (${match.lat.toFixed(4)}, ${match.lon.toFixed(4)})`;
         option.dataset.index = index;
         
-        option.addEventListener('click', () => selectCityOption(option));
+        option.addEventListener('click', () => {
+            setActiveOption(index);
+            handleCitySelection();
+        });
         
         listBox.appendChild(option);
     });
     
+    // Set aria-activedescendant to the first option
+    listBox.setAttribute('aria-activedescendant', 'city-option-0');
+    
     focusReturnElement = document.activeElement;
     dialog.hidden = false;
     
-    // Add keyboard navigation to listBox - must be before trapFocus
+    // Add keyboard navigation to listBox
     listBox.addEventListener('keydown', handleCityListKeydown);
     
-    // Set up focus trap but focus listbox afterwards
+    // Set up focus trap
     trapFocus(dialog);
     
-    // Explicitly focus the listbox after a short delay to ensure it takes
-    setTimeout(() => {
-        listBox.focus();
-        // Scroll selected option into view
-        const selectedOption = listBox.querySelector('.city-option[aria-selected="true"]');
-        if (selectedOption) {
-            selectedOption.scrollIntoView({ block: 'nearest' });
-        }
-    }, 10);
+    // Focus the listbox
+    listBox.focus();
+    
+    // Scroll first option into view
+    const firstOption = listBox.querySelector('#city-option-0');
+    if (firstOption) {
+        firstOption.scrollIntoView({ block: 'nearest' });
+    }
+}
+
+function setActiveOption(index) {
+    const listBox = document.getElementById('city-matches-list');
+    const options = Array.from(listBox.querySelectorAll('.city-option'));
+    
+    if (index < 0 || index >= options.length) return;
+    
+    // Update aria-selected on all options
+    options.forEach((opt, i) => {
+        opt.setAttribute('aria-selected', i === index ? 'true' : 'false');
+    });
+    
+    // Update aria-activedescendant on listbox
+    listBox.setAttribute('aria-activedescendant', `city-option-${index}`);
+    
+    // Scroll option into view
+    options[index].scrollIntoView({ block: 'nearest' });
 }
 
 function handleCityListKeydown(e) {
@@ -302,9 +326,7 @@ function handleCityListKeydown(e) {
             e.preventDefault();
             newIndex = Math.min(currentIndex + 1, options.length - 1);
             if (newIndex !== currentIndex) {
-                selectCityOption(options[newIndex]);
-                options[newIndex].scrollIntoView({ block: 'nearest' });
-                announceToScreenReader(`${options[newIndex].textContent}`);
+                setActiveOption(newIndex);
             }
             break;
             
@@ -312,24 +334,18 @@ function handleCityListKeydown(e) {
             e.preventDefault();
             newIndex = Math.max(currentIndex - 1, 0);
             if (newIndex !== currentIndex) {
-                selectCityOption(options[newIndex]);
-                options[newIndex].scrollIntoView({ block: 'nearest' });
-                announceToScreenReader(`${options[newIndex].textContent}`);
+                setActiveOption(newIndex);
             }
             break;
             
         case 'Home':
             e.preventDefault();
-            selectCityOption(options[0]);
-            options[0].scrollIntoView({ block: 'nearest' });
-            announceToScreenReader(`${options[0].textContent}`);
+            setActiveOption(0);
             break;
             
         case 'End':
             e.preventDefault();
-            selectCityOption(options[options.length - 1]);
-            options[options.length - 1].scrollIntoView({ block: 'nearest' });
-            announceToScreenReader(`${options[options.length - 1].textContent}`);
+            setActiveOption(options.length - 1);
             break;
             
         case 'Enter':
@@ -342,12 +358,6 @@ function handleCityListKeydown(e) {
             handleCitySelection();
             break;
     }
-}
-
-function selectCityOption(option) {
-    const options = document.querySelectorAll('.city-option');
-    options.forEach(opt => opt.setAttribute('aria-selected', 'false'));
-    option.setAttribute('aria-selected', 'true');
 }
 
 async function handleCitySelection() {
@@ -368,6 +378,9 @@ function closeCitySelectionDialog() {
     
     // Remove event listener
     listBox.removeEventListener('keydown', handleCityListKeydown);
+    
+    // Clear aria-activedescendant
+    listBox.removeAttribute('aria-activedescendant');
     
     dialog.hidden = true;
     if (focusReturnElement) {
