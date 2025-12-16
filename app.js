@@ -270,19 +270,24 @@ function showCitySelectionDialog(originalInput, matches) {
         listBox.appendChild(option);
     });
     
-    // Add keyboard navigation to listBox
-    listBox.addEventListener('keydown', handleCityListKeydown);
-    
     focusReturnElement = document.activeElement;
     dialog.hidden = false;
-    trapFocus(dialog);
-    listBox.focus();
     
-    // Scroll selected option into view
-    const selectedOption = listBox.querySelector('.city-option[aria-selected="true"]');
-    if (selectedOption) {
-        selectedOption.scrollIntoView({ block: 'nearest' });
-    }
+    // Add keyboard navigation to listBox - must be before trapFocus
+    listBox.addEventListener('keydown', handleCityListKeydown);
+    
+    // Set up focus trap but focus listbox afterwards
+    trapFocus(dialog);
+    
+    // Explicitly focus the listbox after a short delay to ensure it takes
+    setTimeout(() => {
+        listBox.focus();
+        // Scroll selected option into view
+        const selectedOption = listBox.querySelector('.city-option[aria-selected="true"]');
+        if (selectedOption) {
+            selectedOption.scrollIntoView({ block: 'nearest' });
+        }
+    }, 10);
 }
 
 function handleCityListKeydown(e) {
@@ -1006,9 +1011,4 @@ function trapFocus(element) {
             }
         }
     });
-    
-    // Focus first element
-    if (firstFocusable) {
-        firstFocusable.focus();
-    }
 }
