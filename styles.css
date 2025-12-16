@@ -347,9 +347,34 @@ legend {
     gap: var(--spacing-md);
 }
 
-.city-card-header h3 {
+.city-title-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--link-color);
+    text-decoration: none;
+    font: inherit;
+    text-align: left;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+}
+
+.city-title-btn:hover {
+    text-decoration: underline;
+    color: var(--link-hover-color);
+}
+
+.city-title-btn:focus {
+    outline: 3px solid var(--focus-outline);
+    outline-offset: 2px;
+    border-radius: var(--border-radius);
+}
+
+.city-title-btn h3 {
     margin: 0;
-    color: var(--text-primary);
+    color: inherit;
 }
 
 .city-card-controls {

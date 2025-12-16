@@ -478,9 +478,16 @@ function createCityCard(cityName, lat, lon, weather, index) {
     const header = document.createElement('div');
     header.className = 'city-card-header';
     
+    const titleButton = document.createElement('button');
+    titleButton.className = 'city-title-btn';
+    titleButton.setAttribute('aria-label', `View full weather details for ${cityName}`);
+    titleButton.addEventListener('click', () => showFullWeather(cityName, lat, lon));
+    
     const title = document.createElement('h3');
     title.textContent = cityName;
-    header.appendChild(title);
+    titleButton.appendChild(title);
+    
+    header.appendChild(titleButton);
     
     const controls = document.createElement('div');
     controls.className = 'city-card-controls';
@@ -503,11 +510,6 @@ function createCityCard(cityName, lat, lon, weather, index) {
     const refreshBtn = createButton('🔄', `Refresh weather for ${cityName}`, () => refreshCity(cityName, lat, lon));
     refreshBtn.className = 'icon-btn';
     controls.appendChild(refreshBtn);
-    
-    // Full weather button
-    const fullBtn = createButton('📊', `View full weather details for ${cityName}`, () => showFullWeather(cityName, lat, lon));
-    fullBtn.className = 'icon-btn';
-    controls.appendChild(fullBtn);
     
     // Remove button
     const removeBtn = createButton('🗑️', `Remove ${cityName} from list`, () => removeCity(cityName));
