@@ -124,6 +124,9 @@
                     <button role="tab" aria-selected="false" aria-controls="daily-panel" id="daily-tab" tabindex="-1">
                         Daily Forecast
                     </button>
+                    <button role="tab" aria-selected="false" aria-controls="citylist-panel" id="citylist-tab" tabindex="-1">
+                        City List
+                    </button>
                     <button role="tab" aria-selected="false" aria-controls="units-panel" id="units-tab" tabindex="-1">
                         Units
                     </button>
@@ -173,6 +176,22 @@
                             <label><input type="checkbox" name="daily-sunset" checked> Sunset</label>
                             <label><input type="checkbox" name="daily-precipitation_sum" checked> Total Precipitation</label>
                             <label><input type="checkbox" name="daily-wind_speed_max"> Max Wind Speed</label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div id="citylist-panel" role="tabpanel" aria-labelledby="citylist-tab" class="tab-panel" hidden>
+                    <fieldset>
+                        <legend>Select city list details to display:</legend>
+                        <div class="checkbox-grid">
+                            <label><input type="checkbox" name="citylist-temperature" checked> Temperature</label>
+                            <label><input type="checkbox" name="citylist-conditions" checked> Weather Conditions</label>
+                            <label><input type="checkbox" name="citylist-feels_like" checked> Feels Like</label>
+                            <label><input type="checkbox" name="citylist-humidity" checked> Humidity</label>
+                            <label><input type="checkbox" name="citylist-wind_speed" checked> Wind Speed</label>
+                            <label><input type="checkbox" name="citylist-wind_direction" checked> Wind Direction</label>
+                            <label><input type="checkbox" name="citylist-high_temp" checked> Today's High</label>
+                            <label><input type="checkbox" name="citylist-low_temp" checked> Today's Low</label>
                         </div>
                     </fieldset>
                 </div>

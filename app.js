@@ -57,6 +57,16 @@ const DEFAULT_CONFIG = {
         precipitation_sum: true,
         wind_speed_max: false
     },
+    cityList: {
+        temperature: true,
+        conditions: true,
+        feels_like: true,
+        humidity: true,
+        wind_speed: true,
+        wind_direction: true,
+        high_temp: true,
+        low_temp: true
+    },
     units: {
         temperature: 'F',
         wind_speed: 'mph',
@@ -660,7 +670,7 @@ function createCityCard(cityName, lat, lon, weather, index) {
         summary.setAttribute('aria-live', 'polite');
         
         // Temperature
-        if (currentConfig.current.temperature) {
+        if (currentConfig.cityList.temperature) {
             const temp = convertTemperature(current.temperature_2m);
             const tempSpan = document.createElement('span');
             tempSpan.className = 'temperature';
@@ -670,10 +680,12 @@ function createCityCard(cityName, lat, lon, weather, index) {
         }
         
         // Weather description
-        const descSpan = document.createElement('span');
-        descSpan.className = 'weather-desc';
-        descSpan.textContent = weatherDesc;
-        summary.appendChild(descSpan);
+        if (currentConfig.cityList.conditions) {
+            const descSpan = document.createElement('span');
+            descSpan.className = 'weather-desc';
+            descSpan.textContent = weatherDesc;
+            summary.appendChild(descSpan);
+        }
         
         content.appendChild(summary);
         
@@ -681,57 +693,28 @@ function createCityCard(cityName, lat, lon, weather, index) {
         const details = document.createElement('dl');
         details.className = 'weather-details';
         
-        if (currentConfig.current.feels_like) {
+        if (currentConfig.cityList.feels_like) {
             addDetail(details, 'Feels Like', `${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}`);
         }
         
-        if (currentConfig.current.humidity) {
+        if (currentConfig.cityList.humidity) {
             addDetail(details, 'Humidity', `${current.relative_humidity_2m}%`);
         }
         
-        if (currentConfig.current.wind_speed) {
+        if (currentConfig.cityList.wind_speed) {
             const windSpeed = convertWindSpeed(current.wind_speed_10m);
             addDetail(details, 'Wind Speed', `${windSpeed} ${currentConfig.units.wind_speed}`);
         }
         
-        if (currentConfig.current.wind_direction) {
+        if (currentConfig.cityList.wind_direction) {
             const cardinal = degreesToCardinal(current.wind_direction_10m);
             addDetail(details, 'Wind Direction', `${cardinal} (${current.wind_direction_10m}°)`);
         }
         
-        if (currentConfig.current.precipitation && current.precipitation > 0) {
-            const precip = convertPrecipitation(current.precipitation);
-            addDetail(details, 'Precipitation', `${precip} ${currentConfig.units.precipitation}`);
-        }
-        
-        if (currentConfig.current.pressure) {
-            addDetail(details, 'Pressure', `${current.pressure_msl.toFixed(1)} hPa`);
-        }
-        
-        if (currentConfig.current.visibility) {
-            addDetail(details, 'Visibility', `${(current.visibility / 1000).toFixed(1)} km`);
-        }
-        
-        if (currentConfig.current.cloud_cover) {
-            addDetail(details, 'Cloud Cover', `${current.cloud_cover}%`);
-        }
-        
-        if (currentConfig.current.rain && current.rain > 0) {
-            addDetail(details, 'Rain', `${convertPrecipitation(current.rain)} ${currentConfig.units.precipitation}`);
-        }
-        
-        if (currentConfig.current.showers && current.showers > 0) {
-            addDetail(details, 'Showers', `${convertPrecipitation(current.showers)} ${currentConfig.units.precipitation}`);
-        }
-        
-        if (currentConfig.current.snowfall && current.snowfall > 0) {
-            addDetail(details, 'Snowfall', `${convertPrecipitation(current.snowfall)} ${currentConfig.units.precipitation}`);
-        }
-        
         content.appendChild(details);
         
-        // Daily forecast if available
-        if (weather.daily && (currentConfig.daily.temperature_max || currentConfig.daily.temperature_min)) {
+        // High/Low temps if available
+        if (weather.daily && (currentConfig.cityList.high_temp || currentConfig.cityList.low_temp)) {
             const forecast = document.createElement('div');
             forecast.className = 'daily-forecast';
             
@@ -741,11 +724,11 @@ function createCityCard(cityName, lat, lon, weather, index) {
             
             const forecastDetails = document.createElement('dl');
             
-            if (currentConfig.daily.temperature_max) {
+            if (currentConfig.cityList.high_temp) {
                 addDetail(forecastDetails, 'High', `${convertTemperature(weather.daily.temperature_2m_max[0])}°${currentConfig.units.temperature}`);
             }
             
-            if (currentConfig.daily.temperature_min) {
+            if (currentConfig.cityList.low_temp) {
                 addDetail(forecastDetails, 'Low', `${convertTemperature(weather.daily.temperature_2m_min[0])}°${currentConfig.units.temperature}`);
             }
             
@@ -812,16 +795,35 @@ function renderTableView(container) {
     const table = document.createElement('table');
     table.className = 'weather-table';
     
-    // Table header
+    // Table header - dynamically build based on config
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
     
-    const headers = ['City', 'Temperature', 'Conditions', 'Feels Like', 'Humidity', 'Wind'];
-    headers.forEach(headerText => {
-        const th = document.createElement('th');
-        th.textContent = headerText;
-        th.scope = 'col';
-        headerRow.appendChild(th);
+    // City column always present
+    const cityHeader = document.createElement('th');
+    cityHeader.textContent = 'City';
+    cityHeader.scope = 'col';
+    headerRow.appendChild(cityHeader);
+    
+    // Add headers based on config
+    const columnConfig = [
+        { key: 'temperature', label: 'Temperature' },
+        { key: 'conditions', label: 'Conditions' },
+        { key: 'feels_like', label: 'Feels Like' },
+        { key: 'humidity', label: 'Humidity' },
+        { key: 'wind_speed', label: 'Wind Speed' },
+        { key: 'wind_direction', label: 'Wind Direction' },
+        { key: 'high_temp', label: 'High' },
+        { key: 'low_temp', label: 'Low' }
+    ];
+    
+    columnConfig.forEach(col => {
+        if (currentConfig.cityList[col.key]) {
+            const th = document.createElement('th');
+            th.textContent = col.label;
+            th.scope = 'col';
+            headerRow.appendChild(th);
+        }
     });
     
     const actionsHeader = document.createElement('th');
@@ -850,35 +852,60 @@ function renderTableView(container) {
         if (weather && weather.current) {
             const current = weather.current;
             
-            // Temperature
-            const tempCell = document.createElement('td');
-            tempCell.textContent = `${convertTemperature(current.temperature_2m)}°${currentConfig.units.temperature}`;
-            row.appendChild(tempCell);
+            // Add cells based on config
+            if (currentConfig.cityList.temperature) {
+                const tempCell = document.createElement('td');
+                tempCell.textContent = `${convertTemperature(current.temperature_2m)}°${currentConfig.units.temperature}`;
+                row.appendChild(tempCell);
+            }
             
-            // Conditions
-            const condCell = document.createElement('td');
-            condCell.textContent = WEATHER_CODES[current.weather_code] || 'Unknown';
-            row.appendChild(condCell);
+            if (currentConfig.cityList.conditions) {
+                const condCell = document.createElement('td');
+                condCell.textContent = WEATHER_CODES[current.weather_code] || 'Unknown';
+                row.appendChild(condCell);
+            }
             
-            // Feels like
-            const feelsCell = document.createElement('td');
-            feelsCell.textContent = `${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}`;
-            row.appendChild(feelsCell);
+            if (currentConfig.cityList.feels_like) {
+                const feelsCell = document.createElement('td');
+                feelsCell.textContent = `${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}`;
+                row.appendChild(feelsCell);
+            }
             
-            // Humidity
-            const humidityCell = document.createElement('td');
-            humidityCell.textContent = `${current.relative_humidity_2m}%`;
-            row.appendChild(humidityCell);
+            if (currentConfig.cityList.humidity) {
+                const humidityCell = document.createElement('td');
+                humidityCell.textContent = `${current.relative_humidity_2m}%`;
+                row.appendChild(humidityCell);
+            }
             
-            // Wind
-            const windCell = document.createElement('td');
-            const windSpeed = convertWindSpeed(current.wind_speed_10m);
-            const windDir = degreesToCardinal(current.wind_direction_10m);
-            windCell.textContent = `${windDir} ${windSpeed} ${currentConfig.units.wind_speed}`;
-            row.appendChild(windCell);
+            if (currentConfig.cityList.wind_speed) {
+                const windSpeedCell = document.createElement('td');
+                const windSpeed = convertWindSpeed(current.wind_speed_10m);
+                windSpeedCell.textContent = `${windSpeed} ${currentConfig.units.wind_speed}`;
+                row.appendChild(windSpeedCell);
+            }
+            
+            if (currentConfig.cityList.wind_direction) {
+                const windDirCell = document.createElement('td');
+                const windDir = degreesToCardinal(current.wind_direction_10m);
+                windDirCell.textContent = `${windDir} (${current.wind_direction_10m}°)`;
+                row.appendChild(windDirCell);
+            }
+            
+            if (currentConfig.cityList.high_temp && weather.daily) {
+                const highCell = document.createElement('td');
+                highCell.textContent = `${convertTemperature(weather.daily.temperature_2m_max[0])}°${currentConfig.units.temperature}`;
+                row.appendChild(highCell);
+            }
+            
+            if (currentConfig.cityList.low_temp && weather.daily) {
+                const lowCell = document.createElement('td');
+                lowCell.textContent = `${convertTemperature(weather.daily.temperature_2m_min[0])}°${currentConfig.units.temperature}`;
+                row.appendChild(lowCell);
+            }
         } else {
-            // Loading cells
-            for (let i = 0; i < 5; i++) {
+            // Loading cells - count enabled columns
+            const enabledColumns = columnConfig.filter(col => currentConfig.cityList[col.key]).length;
+            for (let i = 0; i < enabledColumns; i++) {
                 const loadingCell = document.createElement('td');
                 loadingCell.textContent = 'Loading...';
                 row.appendChild(loadingCell);
@@ -940,13 +967,52 @@ function renderListView(container) {
         let weatherText = cityName;
         if (weather && weather.current) {
             const current = weather.current;
-            const temp = convertTemperature(current.temperature_2m);
-            const weatherDesc = WEATHER_CODES[current.weather_code] || 'Unknown';
-            const humidity = current.relative_humidity_2m;
-            const windSpeed = convertWindSpeed(current.wind_speed_10m);
-            const windDir = degreesToCardinal(current.wind_direction_10m);
+            const parts = [];
             
-            weatherText = `${cityName} - ${temp}°${currentConfig.units.temperature} ${weatherDesc}, Humidity: ${humidity}%, Wind: ${windDir} ${windSpeed} ${currentConfig.units.wind_speed}`;
+            if (currentConfig.cityList.temperature) {
+                const temp = convertTemperature(current.temperature_2m);
+                parts.push(`${temp}°${currentConfig.units.temperature}`);
+            }
+            
+            if (currentConfig.cityList.conditions) {
+                const weatherDesc = WEATHER_CODES[current.weather_code] || 'Unknown';
+                parts.push(weatherDesc);
+            }
+            
+            if (currentConfig.cityList.feels_like) {
+                const feels = convertTemperature(current.apparent_temperature);
+                parts.push(`Feels: ${feels}°${currentConfig.units.temperature}`);
+            }
+            
+            if (currentConfig.cityList.humidity) {
+                parts.push(`Humidity: ${current.relative_humidity_2m}%`);
+            }
+            
+            if (currentConfig.cityList.wind_speed || currentConfig.cityList.wind_direction) {
+                let windPart = 'Wind: ';
+                if (currentConfig.cityList.wind_direction) {
+                    const windDir = degreesToCardinal(current.wind_direction_10m);
+                    windPart += `${windDir} `;
+                }
+                if (currentConfig.cityList.wind_speed) {
+                    const windSpeed = convertWindSpeed(current.wind_speed_10m);
+                    windPart += `${windSpeed} ${currentConfig.units.wind_speed}`;
+                }
+                parts.push(windPart.trim());
+            }
+            
+            if (weather.daily) {
+                if (currentConfig.cityList.high_temp) {
+                    const high = convertTemperature(weather.daily.temperature_2m_max[0]);
+                    parts.push(`High: ${high}°${currentConfig.units.temperature}`);
+                }
+                if (currentConfig.cityList.low_temp) {
+                    const low = convertTemperature(weather.daily.temperature_2m_min[0]);
+                    parts.push(`Low: ${low}°${currentConfig.units.temperature}`);
+                }
+            }
+            
+            weatherText = `${cityName} - ${parts.join(', ')}`;
         } else {
             weatherText = `${cityName} - Loading...`;
         }
@@ -1275,6 +1341,11 @@ function openConfigDialog() {
         if (checkbox) checkbox.checked = currentConfig.daily[key];
     });
     
+    Object.keys(currentConfig.cityList).forEach(key => {
+        const checkbox = document.querySelector(`input[name="citylist-${key}"]`);
+        if (checkbox) checkbox.checked = currentConfig.cityList[key];
+    });
+    
     document.querySelector(`input[name="temp-unit"][value="${currentConfig.units.temperature}"]`).checked = true;
     document.querySelector(`input[name="wind-unit"][value="${currentConfig.units.wind_speed}"]`).checked = true;
     document.querySelector(`input[name="precip-unit"][value="${currentConfig.units.precipitation}"]`).checked = true;
@@ -1316,6 +1387,12 @@ function updateConfigFromForm() {
     Object.keys(currentConfig.daily).forEach(key => {
         const checkbox = document.querySelector(`input[name="daily-${key}"]`);
         if (checkbox) currentConfig.daily[key] = checkbox.checked;
+    });
+    
+    // City list
+    Object.keys(currentConfig.cityList).forEach(key => {
+        const checkbox = document.querySelector(`input[name="citylist-${key}"]`);
+        if (checkbox) currentConfig.cityList[key] = checkbox.checked;
     });
     
     // Units
@@ -1393,7 +1470,12 @@ function loadConfigFromStorage() {
     const stored = localStorage.getItem('fastweather-config');
     if (stored) {
         try {
-            currentConfig = JSON.parse(stored);
+            const loaded = JSON.parse(stored);
+            currentConfig = loaded;
+            // Ensure cityList exists for backward compatibility
+            if (!currentConfig.cityList) {
+                currentConfig.cityList = DEFAULT_CONFIG.cityList;
+            }
         } catch (e) {
             console.error('Failed to load config:', e);
         }
