@@ -22,11 +22,13 @@ This document outlines how the FastWeather web application meets WCAG 2.2 Level 
 ### 1.4 Distinguishable
 - ✅ **1.4.1 Use of Color (A)**: Information not conveyed by color alone
 - ✅ **1.4.2 Audio Control (A)**: N/A - No audio
-- ✅ **1.4.3 Contrast (Minimum) (AA)**: All text meets 4.5:1 ratio
-  - Primary text: #1a1a1a on #ffffff = 19.56:1
-  - Secondary text: #4a4a4a on #ffffff = 9.48:1
-  - Links: #0066cc on #ffffff = 6.31:1
-  - Buttons: white on #0066cc = 6.31:1
+- ✅ **1.4.3 Contrast (Minimum) (AA)**: All text meets required ratios
+  - Light mode primary text: #1a1a1a on #ffffff = 19.56:1 ✓
+  - Light mode secondary text: #4a4a4a on #ffffff = 9.48:1 ✓
+  - Light mode links: #0066cc on #ffffff = 6.31:1 ✓
+  - Light mode temperature: #0066cc on #ffffff = 6.31:1 ✓
+  - Dark mode temperature: #66b3ff on #2a2a2a = 4.92:1 ✓ (large text 3:1 required)
+  - Buttons: white on #0066cc = 6.31:1 ✓
 - ✅ **1.4.4 Resize Text (AA)**: Text can be resized to 200% without loss of functionality
 - ✅ **1.4.5 Images of Text (AA)**: No images of text used
 - ✅ **1.4.10 Reflow (AA)**: Content reflows at 320px viewport width

@@ -33,6 +33,7 @@
     --button-danger: #dc3545;
     --button-danger-hover: #c82333;
     --modal-overlay: rgba(0, 0, 0, 0.7);
+    --temperature-color: #0066cc;
     
     /* Spacing */
     --spacing-xs: 0.25rem;
@@ -372,7 +373,7 @@ legend {
 .temperature {
     font-size: var(--font-size-3xl);
     font-weight: 700;
-    color: var(--button-primary);
+    color: var(--temperature-color);
 }
 
 .weather-desc {
@@ -787,5 +788,6 @@ a:hover {
         --button-danger: #dc3545;
         --button-danger-hover: #e74c3c;
         --modal-overlay: rgba(0, 0, 0, 0.85);
+        --temperature-color: #66b3ff;
     }
 }
