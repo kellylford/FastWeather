@@ -850,7 +850,7 @@ function renderTableView(container) {
         cityLink.setAttribute('aria-label', cityName);
         cityLink.addEventListener('click', (e) => {
             e.preventDefault();
-            showFullWeather(cityName);
+            showFullWeather(cityName, lat, lon);
         });
         
         cityCell.appendChild(cityLink);
