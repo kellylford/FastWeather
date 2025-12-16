@@ -402,7 +402,7 @@ async function addCity(cityData) {
     saveCitiesToStorage();
     renderCityList();
     
-    announceToScreenReader(`Added ${key} to your cities`);
+    announceToScreenReader(`${key} added to list`);
     
     // Fetch weather for new city
     await fetchWeatherForCity(key, cityData.lat, cityData.lon);
