@@ -506,11 +506,6 @@ function createCityCard(cityName, lat, lon, weather, index) {
         controls.appendChild(downBtn);
     }
     
-    // Refresh button
-    const refreshBtn = createButton('🔄', `Refresh weather for ${cityName}`, () => refreshCity(cityName, lat, lon));
-    refreshBtn.className = 'icon-btn';
-    controls.appendChild(refreshBtn);
-    
     // Remove button
     const removeBtn = createButton('🗑️', `Remove ${cityName} from list`, () => removeCity(cityName));
     removeBtn.className = 'icon-btn remove-btn';
