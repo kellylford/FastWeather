@@ -266,20 +266,77 @@ function showCitySelectionDialog(originalInput, matches) {
         option.dataset.index = index;
         
         option.addEventListener('click', () => selectCityOption(option));
-        option.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                handleCitySelection();
-            }
-        });
         
         listBox.appendChild(option);
     });
+    
+    // Add keyboard navigation to listBox
+    listBox.addEventListener('keydown', handleCityListKeydown);
     
     focusReturnElement = document.activeElement;
     dialog.hidden = false;
     trapFocus(dialog);
     listBox.focus();
+    
+    // Scroll selected option into view
+    const selectedOption = listBox.querySelector('.city-option[aria-selected="true"]');
+    if (selectedOption) {
+        selectedOption.scrollIntoView({ block: 'nearest' });
+    }
+}
+
+function handleCityListKeydown(e) {
+    const listBox = e.currentTarget;
+    const options = Array.from(listBox.querySelectorAll('.city-option'));
+    const currentIndex = options.findIndex(opt => opt.getAttribute('aria-selected') === 'true');
+    
+    let newIndex = currentIndex;
+    
+    switch(e.key) {
+        case 'ArrowDown':
+            e.preventDefault();
+            newIndex = Math.min(currentIndex + 1, options.length - 1);
+            if (newIndex !== currentIndex) {
+                selectCityOption(options[newIndex]);
+                options[newIndex].scrollIntoView({ block: 'nearest' });
+                announceToScreenReader(`${options[newIndex].textContent}`);
+            }
+            break;
+            
+        case 'ArrowUp':
+            e.preventDefault();
+            newIndex = Math.max(currentIndex - 1, 0);
+            if (newIndex !== currentIndex) {
+                selectCityOption(options[newIndex]);
+                options[newIndex].scrollIntoView({ block: 'nearest' });
+                announceToScreenReader(`${options[newIndex].textContent}`);
+            }
+            break;
+            
+        case 'Home':
+            e.preventDefault();
+            selectCityOption(options[0]);
+            options[0].scrollIntoView({ block: 'nearest' });
+            announceToScreenReader(`${options[0].textContent}`);
+            break;
+            
+        case 'End':
+            e.preventDefault();
+            selectCityOption(options[options.length - 1]);
+            options[options.length - 1].scrollIntoView({ block: 'nearest' });
+            announceToScreenReader(`${options[options.length - 1].textContent}`);
+            break;
+            
+        case 'Enter':
+            e.preventDefault();
+            handleCitySelection();
+            break;
+            
+        case ' ':
+            e.preventDefault();
+            handleCitySelection();
+            break;
+    }
 }
 
 function selectCityOption(option) {
@@ -302,6 +359,11 @@ async function handleCitySelection() {
 
 function closeCitySelectionDialog() {
     const dialog = document.getElementById('city-selection-dialog');
+    const listBox = document.getElementById('city-matches-list');
+    
+    // Remove event listener
+    listBox.removeEventListener('keydown', handleCityListKeydown);
+    
     dialog.hidden = true;
     if (focusReturnElement) {
         focusReturnElement.focus();

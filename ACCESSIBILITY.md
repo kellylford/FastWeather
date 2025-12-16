@@ -112,10 +112,12 @@ This document outlines how the FastWeather web application meets WCAG 2.2 Level 
 - Tab/Shift+Tab for navigation
 - Enter/Space for activation
 - Escape for closing modals
-- Arrow keys for tab navigation
-- Home/End for first/last tab
+- Arrow keys (Up/Down) for city selection list navigation
+- Arrow keys (Left/Right) for tab navigation
+- Home/End for first/last item in lists and tabs
 - Focus trap in modal dialogs
 - Focus return on modal close
+- Automatic scrolling of focused items into view
 
 ### Screen Reader Support
 - Descriptive labels on all interactive elements
