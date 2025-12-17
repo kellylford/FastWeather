@@ -84,16 +84,19 @@ class WeatherFetchThread(threading.Thread):
             wx.PostEvent(self.notify_window, WeatherErrorEvent(data=(self.city_name, str(e))))
 
 class GeocodingThread(threading.Thread):
-    def __init__(self, notify_window, city_input):
+    def __init__(self, notify_window, city_input, country_code=''):
         super().__init__()
         self.notify_window = notify_window
         self.city_input = city_input
+        self.country_code = country_code
         self.daemon = True
         self.start()
     
     def run(self):
         try:
             params = {"q": self.city_input, "format": "json", "addressdetails": 1, "limit": 5}
+            if self.country_code:
+                params["countrycodes"] = self.country_code
             headers = {"User-Agent": "FastWeather GUI/1.0"}
             response = requests.get(NOMINATIM_URL, params=params, headers=headers, timeout=10)
             response.raise_for_status()
@@ -249,6 +252,28 @@ class WeatherConfigDialog(wx.Dialog):
         precip_sizer.Add(self.unit_controls['precip_mm'], 0, wx.ALL, 5)
         units_sizer.Add(precip_sizer, 0, wx.EXPAND | wx.ALL, 10)
         
+        # Pressure units
+        pressure_box = wx.StaticBox(units_panel, label="Pressure")
+        pressure_sizer = wx.StaticBoxSizer(pressure_box, wx.HORIZONTAL)
+        self.unit_controls['pressure_inhg'] = wx.RadioButton(units_panel, label="Inches of mercury (inHg)", style=wx.RB_GROUP)
+        self.unit_controls['pressure_hpa'] = wx.RadioButton(units_panel, label="Hectopascals (hPa/mb)")
+        self.unit_controls['pressure_inhg'].SetValue(self.config['units'].get('pressure', 'inHg') == 'inHg')
+        self.unit_controls['pressure_hpa'].SetValue(self.config['units'].get('pressure', 'inHg') == 'hPa')
+        pressure_sizer.Add(self.unit_controls['pressure_inhg'], 0, wx.ALL, 5)
+        pressure_sizer.Add(self.unit_controls['pressure_hpa'], 0, wx.ALL, 5)
+        units_sizer.Add(pressure_sizer, 0, wx.EXPAND | wx.ALL, 10)
+        
+        # Distance units
+        distance_box = wx.StaticBox(units_panel, label="Distance/Visibility")
+        distance_sizer = wx.StaticBoxSizer(distance_box, wx.HORIZONTAL)
+        self.unit_controls['distance_mi'] = wx.RadioButton(units_panel, label="Miles (mi)", style=wx.RB_GROUP)
+        self.unit_controls['distance_km'] = wx.RadioButton(units_panel, label="Kilometers (km)")
+        self.unit_controls['distance_mi'].SetValue(self.config['units'].get('distance', 'mi') == 'mi')
+        self.unit_controls['distance_km'].SetValue(self.config['units'].get('distance', 'mi') == 'km')
+        distance_sizer.Add(self.unit_controls['distance_mi'], 0, wx.ALL, 5)
+        distance_sizer.Add(self.unit_controls['distance_km'], 0, wx.ALL, 5)
+        units_sizer.Add(distance_sizer, 0, wx.EXPAND | wx.ALL, 10)
+        
         units_panel.SetSizer(units_sizer)
         nb.AddPage(units_panel, "Units")
         
@@ -277,6 +302,8 @@ class WeatherConfigDialog(wx.Dialog):
         self.config['units']['temperature'] = 'F' if self.unit_controls['temp_f'].GetValue() else 'C'
         self.config['units']['wind_speed'] = 'mph' if self.unit_controls['wind_mph'].GetValue() else 'km/h'
         self.config['units']['precipitation'] = 'in' if self.unit_controls['precip_in'].GetValue() else 'mm'
+        self.config['units']['pressure'] = 'inHg' if self.unit_controls['pressure_inhg'].GetValue() else 'hPa'
+        self.config['units']['distance'] = 'mi' if self.unit_controls['distance_mi'].GetValue() else 'km'
         
         self.EndModal(wx.ID_OK)
     
@@ -290,6 +317,8 @@ class WeatherConfigDialog(wx.Dialog):
         self.config['units']['temperature'] = 'F' if self.unit_controls['temp_f'].GetValue() else 'C'
         self.config['units']['wind_speed'] = 'mph' if self.unit_controls['wind_mph'].GetValue() else 'km/h'
         self.config['units']['precipitation'] = 'in' if self.unit_controls['precip_in'].GetValue() else 'mm'
+        self.config['units']['pressure'] = 'inHg' if self.unit_controls['pressure_inhg'].GetValue() else 'hPa'
+        self.config['units']['distance'] = 'mi' if self.unit_controls['distance_mi'].GetValue() else 'km'
         
         # Notify parent to apply changes
         parent = self.GetParent()
@@ -342,7 +371,7 @@ class AccessibleWeatherApp(wx.Frame):
             'current': {'temperature': True, 'feels_like': True, 'humidity': True, 'wind_speed': True, 'wind_direction': True, 'pressure': False, 'visibility': False, 'uv_index': False, 'precipitation': True, 'cloud_cover': False, 'snowfall': False, 'snow_depth': False, 'rain': False, 'showers': False},
             'hourly': {'temperature': True, 'feels_like': False, 'humidity': False, 'precipitation': True, 'wind_speed': False, 'wind_direction': False, 'cloud_cover': False, 'snowfall': False, 'rain': False, 'showers': False},
             'daily': {'temperature_max': True, 'temperature_min': True, 'sunrise': True, 'sunset': True, 'precipitation_sum': True, 'precipitation_hours': False, 'wind_speed_max': False, 'wind_direction_dominant': False, 'snowfall_sum': False, 'rain_sum': False, 'showers_sum': False},
-            'units': {'temperature': 'F', 'wind_speed': 'mph', 'precipitation': 'in'}
+            'units': {'temperature': 'F', 'wind_speed': 'mph', 'precipitation': 'in', 'pressure': 'inHg', 'distance': 'mi'}
         }
         
         self.load_city_data()
@@ -377,6 +406,41 @@ class AccessibleWeatherApp(wx.Frame):
         inp_row.Add(self.city_input, 1, wx.EXPAND | wx.RIGHT, 5)
         inp_row.Add(self.add_btn, 0)
         inp_box.Add(inp_row, 0, wx.EXPAND | wx.ALL, 5)
+        
+        country_row = wx.BoxSizer(wx.HORIZONTAL)
+        country_row.Add(wx.StaticText(self.main_view, label="Country (optional):"), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
+        self.country_choice = wx.Choice(self.main_view)
+        self.country_choice.Append("Any Country", "")
+        self.country_choice.Append("Argentina", "ar")
+        self.country_choice.Append("Australia", "au")
+        self.country_choice.Append("Austria", "at")
+        self.country_choice.Append("Belgium", "be")
+        self.country_choice.Append("Brazil", "br")
+        self.country_choice.Append("Canada", "ca")
+        self.country_choice.Append("China", "cn")
+        self.country_choice.Append("Denmark", "dk")
+        self.country_choice.Append("Finland", "fi")
+        self.country_choice.Append("France", "fr")
+        self.country_choice.Append("Germany", "de")
+        self.country_choice.Append("India", "in")
+        self.country_choice.Append("Ireland", "ie")
+        self.country_choice.Append("Italy", "it")
+        self.country_choice.Append("Japan", "jp")
+        self.country_choice.Append("Mexico", "mx")
+        self.country_choice.Append("Netherlands", "nl")
+        self.country_choice.Append("New Zealand", "nz")
+        self.country_choice.Append("Norway", "no")
+        self.country_choice.Append("Poland", "pl")
+        self.country_choice.Append("South Korea", "kr")
+        self.country_choice.Append("Spain", "es")
+        self.country_choice.Append("Sweden", "se")
+        self.country_choice.Append("Switzerland", "ch")
+        self.country_choice.Append("United Kingdom", "gb")
+        self.country_choice.Append("United States", "us")
+        self.country_choice.SetSelection(0)
+        country_row.Add(self.country_choice, 1, wx.EXPAND)
+        inp_box.Add(country_row, 0, wx.EXPAND | wx.ALL, 5)
+        
         mv_sizer.Add(inp_box, 0, wx.EXPAND | wx.ALL, 10)
         
         # List
@@ -599,9 +663,10 @@ class AccessibleWeatherApp(wx.Frame):
     def on_add_city(self, event):
         val = self.city_input.GetValue().strip()
         if val:
+            country_code = self.country_choice.GetClientData(self.country_choice.GetSelection())
             self.statusbar.SetStatusText("Searching...", 0)
             self.add_btn.Disable()
-            GeocodingThread(self, val)
+            GeocodingThread(self, val, country_code)
 
     def on_geo_ready(self, event):
         orig, matches = event.data
@@ -883,14 +948,21 @@ class AccessibleWeatherApp(wx.Frame):
             # Pressure
             if cfg_curr.get('pressure', False):
                 pres = get_val(['pressure_msl', 'surface_pressure'])
-                pres_in = pres * HPA_TO_INHG
-                lines.append(f"Pressure: {pres_in:.2f} inHg")
+                if self.weather_config['units'].get('pressure', 'inHg') == 'inHg':
+                    pres_in = pres * HPA_TO_INHG
+                    lines.append(f"Pressure: {pres_in:.2f} inHg")
+                else:
+                    lines.append(f"Pressure: {pres:.1f} hPa")
 
             # Visibility
             if cfg_curr.get('visibility', False):
                 vis_m = get_val(['visibility'])
-                vis_miles = vis_m / 1609.34
-                lines.append(f"Visibility: {vis_miles:.1f} miles")
+                if self.weather_config['units'].get('distance', 'mi') == 'mi':
+                    vis_miles = vis_m / 1609.34
+                    lines.append(f"Visibility: {vis_miles:.1f} miles")
+                else:
+                    vis_km = vis_m / 1000
+                    lines.append(f"Visibility: {vis_km:.1f} km")
 
             # UV Index (fetch from hourly if not in current)
             if cfg_curr.get('uv_index', False):

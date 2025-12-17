@@ -6,6 +6,9 @@
 // Constants
 const KMH_TO_MPH = 0.621371;
 const MM_TO_INCHES = 0.0393701;
+const HPA_TO_INHG = 0.02953;
+const M_TO_MILES = 0.000621371;
+const M_TO_KM = 0.001;
 const OPEN_METEO_API_URL = 'https://api.open-meteo.com/v1/forecast';
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
 
@@ -70,7 +73,9 @@ const DEFAULT_CONFIG = {
     units: {
         temperature: 'F',
         wind_speed: 'mph',
-        precipitation: 'in'
+        precipitation: 'in',
+        pressure: 'inHg',
+        distance: 'mi'
     }
 };
 
@@ -224,7 +229,9 @@ async function handleAddCity(e) {
     e.preventDefault();
     
     const input = document.getElementById('city-input');
+    const countrySelect = document.getElementById('country-select');
     const cityName = input.value.trim();
+    const countryCode = countrySelect ? countrySelect.value : '';
     const errorDiv = document.getElementById('city-search-error');
     
     if (!cityName) {
@@ -235,7 +242,7 @@ async function handleAddCity(e) {
     clearError(errorDiv);
     
     try {
-        const matches = await geocodeCity(cityName);
+        const matches = await geocodeCity(cityName, countryCode);
         
         if (matches.length === 0) {
             showError(errorDiv, `No cities found for "${cityName}"`);
@@ -255,13 +262,17 @@ async function handleAddCity(e) {
 }
 
 // Geocode city
-async function geocodeCity(cityName) {
+async function geocodeCity(cityName, countryCode = '') {
     const params = new URLSearchParams({
         q: cityName,
         format: 'json',
         addressdetails: '1',
         limit: '5'
     });
+    
+    if (countryCode) {
+        params.set('countrycodes', countryCode);
+    }
     
     const response = await fetch(`${NOMINATIM_URL}?${params}`, {
         headers: { 'User-Agent': 'FastWeather Web/1.0' }
@@ -1271,9 +1282,9 @@ function renderFullWeatherDetails(weather) {
     html += `<dt>Humidity:</dt><dd>${current.relative_humidity_2m}%</dd>`;
     const windCardinal = degreesToCardinal(current.wind_direction_10m);
     html += `<dt>Wind:</dt><dd>${convertWindSpeed(current.wind_speed_10m)} ${currentConfig.units.wind_speed} ${windCardinal} (${current.wind_direction_10m}°)</dd>`;
-    html += `<dt>Pressure:</dt><dd>${current.pressure_msl.toFixed(1)} hPa</dd>`;
+    html += `<dt>Pressure:</dt><dd>${convertPressure(current.pressure_msl)} ${currentConfig.units.pressure}</dd>`;
     html += `<dt>Cloud Cover:</dt><dd>${current.cloud_cover}%</dd>`;
-    html += `<dt>Visibility:</dt><dd>${(current.visibility / 1000).toFixed(1)} km</dd>`;
+    html += `<dt>Visibility:</dt><dd>${convertDistance(current.visibility)} ${currentConfig.units.distance}</dd>`;
     
     html += '</dl></section>';
     
@@ -1426,6 +1437,8 @@ function openConfigDialog() {
     document.querySelector(`input[name="temp-unit"][value="${currentConfig.units.temperature}"]`).checked = true;
     document.querySelector(`input[name="wind-unit"][value="${currentConfig.units.wind_speed}"]`).checked = true;
     document.querySelector(`input[name="precip-unit"][value="${currentConfig.units.precipitation}"]`).checked = true;
+    document.querySelector(`input[name="pressure-unit"][value="${currentConfig.units.pressure}"]`).checked = true;
+    document.querySelector(`input[name="distance-unit"][value="${currentConfig.units.distance}"]`).checked = true;
     
     focusReturnElement = document.activeElement;
     dialog.hidden = false;
@@ -1476,6 +1489,8 @@ function updateConfigFromForm() {
     currentConfig.units.temperature = document.querySelector('input[name="temp-unit"]:checked').value;
     currentConfig.units.wind_speed = document.querySelector('input[name="wind-unit"]:checked').value;
     currentConfig.units.precipitation = document.querySelector('input[name="precip-unit"]:checked').value;
+    currentConfig.units.pressure = document.querySelector('input[name="pressure-unit"]:checked').value;
+    currentConfig.units.distance = document.querySelector('input[name="distance-unit"]:checked').value;
 }
 
 function closeConfigDialog() {
@@ -1515,6 +1530,20 @@ function convertPrecipitation(mm) {
     return mm.toFixed(1);
 }
 
+function convertPressure(hpa) {
+    if (currentConfig.units.pressure === 'inHg') {
+        return (hpa * HPA_TO_INHG).toFixed(2);
+    }
+    return hpa.toFixed(1);
+}
+
+function convertDistance(meters) {
+    if (currentConfig.units.distance === 'mi') {
+        return (meters * M_TO_MILES).toFixed(1);
+    }
+    return (meters * M_TO_KM).toFixed(1);
+}
+
 // Storage
 function loadCitiesFromStorage() {
     const stored = localStorage.getItem('fastweather-cities');
@@ -1552,6 +1581,14 @@ function loadConfigFromStorage() {
             // Ensure cityList exists for backward compatibility
             if (!currentConfig.cityList) {
                 currentConfig.cityList = DEFAULT_CONFIG.cityList;
+            }
+            // Ensure pressure unit exists for backward compatibility
+            if (!currentConfig.units.pressure) {
+                currentConfig.units.pressure = DEFAULT_CONFIG.units.pressure;
+            }
+            // Ensure distance unit exists for backward compatibility
+            if (!currentConfig.units.distance) {
+                currentConfig.units.distance = DEFAULT_CONFIG.units.distance;
             }
         } catch (e) {
             console.error('Failed to load config:', e);

@@ -32,6 +32,36 @@
                     <span id="city-input-help" class="visually-hidden">
                         Enter a city name, state, and country, or a zip code to add weather information
                     </span>
+                    <label for="country-select">Country (optional):</label>
+                    <select id="country-select" name="country" aria-label="Filter search by country">
+                        <option value="">Any Country</option>
+                        <option value="ar">Argentina</option>
+                        <option value="au">Australia</option>
+                        <option value="at">Austria</option>
+                        <option value="be">Belgium</option>
+                        <option value="br">Brazil</option>
+                        <option value="ca">Canada</option>
+                        <option value="cn">China</option>
+                        <option value="dk">Denmark</option>
+                        <option value="fi">Finland</option>
+                        <option value="fr">France</option>
+                        <option value="de">Germany</option>
+                        <option value="in">India</option>
+                        <option value="ie">Ireland</option>
+                        <option value="it">Italy</option>
+                        <option value="jp">Japan</option>
+                        <option value="mx">Mexico</option>
+                        <option value="nl">Netherlands</option>
+                        <option value="nz">New Zealand</option>
+                        <option value="no">Norway</option>
+                        <option value="pl">Poland</option>
+                        <option value="kr">South Korea</option>
+                        <option value="es">Spain</option>
+                        <option value="se">Sweden</option>
+                        <option value="ch">Switzerland</option>
+                        <option value="gb">United Kingdom</option>
+                        <option value="us">United States</option>
+                    </select>
                     <button type="submit" id="add-city-btn" aria-label="Add city to your list">
                         Add City
                     </button>
@@ -206,6 +236,16 @@
                         <legend>Precipitation</legend>
                         <label><input type="radio" name="precip-unit" value="in" checked> Inches (in)</label>
                         <label><input type="radio" name="precip-unit" value="mm"> Millimeters (mm)</label>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Pressure</legend>
+                        <label><input type="radio" name="pressure-unit" value="inHg" checked> Inches of mercury (inHg)</label>
+                        <label><input type="radio" name="pressure-unit" value="hPa"> Hectopascals (hPa/mb)</label>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Distance/Visibility</legend>
+                        <label><input type="radio" name="distance-unit" value="mi" checked> Miles (mi)</label>
+                        <label><input type="radio" name="distance-unit" value="km"> Kilometers (km)</label>
                     </fieldset>
                 </div>
 
