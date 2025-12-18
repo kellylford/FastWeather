@@ -476,7 +476,7 @@ async function fetchWeatherForCity(cityName, lat, lon, detailed = false) {
             params.append('forecast_days', '16');
         } else {
             params.append('hourly', 'cloudcover');
-            params.append('daily', 'temperature_2m_max,temperature_2m_min');
+            params.append('daily', 'temperature_2m_max,temperature_2m_min,sunrise,sunset');
             params.append('forecast_days', '1');
         }
         
@@ -834,7 +834,9 @@ function renderTableView(container) {
         { key: 'wind_speed', label: 'Wind Speed' },
         { key: 'wind_direction', label: 'Wind Direction' },
         { key: 'high_temp', label: 'High' },
-        { key: 'low_temp', label: 'Low' }
+        { key: 'low_temp', label: 'Low' },
+        { key: 'sunrise', label: 'Sunrise' },
+        { key: 'sunset', label: 'Sunset' }
     ];
     
     columnConfig.forEach(col => {
@@ -923,16 +925,46 @@ function renderTableView(container) {
                 row.appendChild(windDirCell);
             }
             
-            if (currentConfig.cityList.high_temp && weather.daily) {
+            if (currentConfig.cityList.high_temp) {
                 const highCell = document.createElement('td');
-                highCell.textContent = `${convertTemperature(weather.daily.temperature_2m_max[0])}°${currentConfig.units.temperature}`;
+                if (weather.daily && weather.daily.temperature_2m_max) {
+                    highCell.textContent = `${convertTemperature(weather.daily.temperature_2m_max[0])}°${currentConfig.units.temperature}`;
+                } else {
+                    highCell.textContent = '-';
+                }
                 row.appendChild(highCell);
             }
             
-            if (currentConfig.cityList.low_temp && weather.daily) {
+            if (currentConfig.cityList.low_temp) {
                 const lowCell = document.createElement('td');
-                lowCell.textContent = `${convertTemperature(weather.daily.temperature_2m_min[0])}°${currentConfig.units.temperature}`;
+                if (weather.daily && weather.daily.temperature_2m_min) {
+                    lowCell.textContent = `${convertTemperature(weather.daily.temperature_2m_min[0])}°${currentConfig.units.temperature}`;
+                } else {
+                    lowCell.textContent = '-';
+                }
                 row.appendChild(lowCell);
+            }
+            
+            if (currentConfig.cityList.sunrise) {
+                const sunriseCell = document.createElement('td');
+                if (weather.daily && weather.daily.sunrise && weather.daily.sunrise[0]) {
+                    const sunriseTime = new Date(weather.daily.sunrise[0]);
+                    sunriseCell.textContent = sunriseTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                } else {
+                    sunriseCell.textContent = '-';
+                }
+                row.appendChild(sunriseCell);
+            }
+            
+            if (currentConfig.cityList.sunset) {
+                const sunsetCell = document.createElement('td');
+                if (weather.daily && weather.daily.sunset && weather.daily.sunset[0]) {
+                    const sunsetTime = new Date(weather.daily.sunset[0]);
+                    sunsetCell.textContent = sunsetTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                } else {
+                    sunsetCell.textContent = '-';
+                }
+                row.appendChild(sunsetCell);
             }
         } else {
             // Loading cells - count enabled columns
@@ -1041,6 +1073,14 @@ function renderListView(container) {
                 if (currentConfig.cityList.low_temp) {
                     const low = convertTemperature(weather.daily.temperature_2m_min[0]);
                     parts.push(`Low: ${low}°${currentConfig.units.temperature}`);
+                }
+                if (currentConfig.cityList.sunrise && weather.daily.sunrise && weather.daily.sunrise[0]) {
+                    const sunriseTime = new Date(weather.daily.sunrise[0]);
+                    parts.push(`Sunrise: ${sunriseTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`);
+                }
+                if (currentConfig.cityList.sunset && weather.daily.sunset && weather.daily.sunset[0]) {
+                    const sunsetTime = new Date(weather.daily.sunset[0]);
+                    parts.push(`Sunset: ${sunsetTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`);
                 }
             }
             
