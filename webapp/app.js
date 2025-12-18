@@ -68,7 +68,9 @@ const DEFAULT_CONFIG = {
         wind_speed: true,
         wind_direction: true,
         high_temp: true,
-        low_temp: true
+        low_temp: true,
+        sunrise: false,
+        sunset: false
     },
     units: {
         temperature: 'F',
@@ -719,8 +721,8 @@ function createCityCard(cityName, lat, lon, weather, index) {
         
         content.appendChild(details);
         
-        // High/Low temps if available
-        if (weather.daily && (currentConfig.cityList.high_temp || currentConfig.cityList.low_temp)) {
+        // High/Low temps and sunrise/sunset if available
+        if (weather.daily && (currentConfig.cityList.high_temp || currentConfig.cityList.low_temp || currentConfig.cityList.sunrise || currentConfig.cityList.sunset)) {
             const forecast = document.createElement('div');
             forecast.className = 'daily-forecast';
             
@@ -736,6 +738,18 @@ function createCityCard(cityName, lat, lon, weather, index) {
             
             if (currentConfig.cityList.low_temp) {
                 addDetail(forecastDetails, 'Low', `${convertTemperature(weather.daily.temperature_2m_min[0])}°${currentConfig.units.temperature}`);
+            }
+            
+            if (currentConfig.cityList.sunrise && weather.daily.sunrise && weather.daily.sunrise[0]) {
+                const sunriseTime = new Date(weather.daily.sunrise[0]);
+                const sunriseFormatted = sunriseTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                addDetail(forecastDetails, 'Sunrise', sunriseFormatted);
+            }
+            
+            if (currentConfig.cityList.sunset && weather.daily.sunset && weather.daily.sunset[0]) {
+                const sunsetTime = new Date(weather.daily.sunset[0]);
+                const sunsetFormatted = sunsetTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                addDetail(forecastDetails, 'Sunset', sunsetFormatted);
             }
             
             forecast.appendChild(forecastDetails);
