@@ -916,6 +916,8 @@ async function fetchWeatherData(lat, lon) {
 
 // Render state cities with weather in the current view
 function renderStateCitiesWithWeather(container, citiesData) {
+    console.log('renderStateCitiesWithWeather called, currentView:', currentView);
+    console.log('currentConfig.defaultView:', currentConfig.defaultView);
     container.innerHTML = '';
     
     // Clean up list view controls if they exist (they're siblings, not children)
@@ -925,10 +927,13 @@ function renderStateCitiesWithWeather(container, citiesData) {
     }
     
     if (currentView === 'table') {
+        console.log('Rendering table view with weather');
         renderStateCitiesTableWithWeather(container, citiesData);
     } else if (currentView === 'list') {
+        console.log('Rendering list view with weather');
         renderStateCitiesListWithWeather(container, citiesData);
     } else {
+        console.log('Rendering flat view with weather');
         renderStateCitiesFlatWithWeather(container, citiesData);
     }
 }
