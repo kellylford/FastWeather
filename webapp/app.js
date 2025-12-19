@@ -69,8 +69,8 @@ const DEFAULT_CONFIG = {
         wind_direction: true,
         high_temp: true,
         low_temp: true,
-        sunrise: false,
-        sunset: false
+        sunrise: true,
+        sunset: true
     },
     cityListOrder: ['temperature', 'conditions', 'feels_like', 'humidity', 'wind_speed', 'wind_direction', 'high_temp', 'low_temp', 'sunrise', 'sunset'],
     units: {
@@ -79,7 +79,8 @@ const DEFAULT_CONFIG = {
         precipitation: 'in',
         pressure: 'inHg',
         distance: 'mi'
-    }
+    },
+    defaultView: 'flat'
 };
 
 // Application state
@@ -95,6 +96,19 @@ let listNavigationHandler = null;
 document.addEventListener('DOMContentLoaded', () => {
     loadCitiesFromStorage();
     loadConfigFromStorage();
+    // Set initial view from config
+    if (currentConfig.defaultView) {
+        currentView = currentConfig.defaultView;
+    }
+    
+    // Update view button label and menu checkmarks to match initial view
+    const viewLabel = currentView.charAt(0).toUpperCase() + currentView.slice(1);
+    document.getElementById('current-view-label').textContent = `View: ${viewLabel}`;
+    document.querySelectorAll('#view-menu [role="menuitem"]').forEach(item => {
+        const isSelected = item.dataset.view === currentView;
+        item.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+    });
+    
     initializeEventListeners();
     renderCityList();
     announceToScreenReader('FastWeather application loaded');
@@ -110,6 +124,11 @@ function initializeEventListeners() {
     document.getElementById('apply-config-btn').addEventListener('click', applyConfiguration);
     document.getElementById('save-config-btn').addEventListener('click', saveConfiguration);
     document.getElementById('cancel-config-btn').addEventListener('click', closeConfigDialog);
+    
+    // Reset buttons
+    document.getElementById('reset-cities-btn').addEventListener('click', resetCities);
+    document.getElementById('reset-settings-btn').addEventListener('click', resetSettings);
+    document.getElementById('reset-all-btn').addEventListener('click', resetAll);
     
     // City selection dialog
     document.getElementById('select-city-btn').addEventListener('click', handleCitySelection);
@@ -1504,6 +1523,7 @@ function openConfigDialog() {
     document.querySelector(`input[name="precip-unit"][value="${currentConfig.units.precipitation}"]`).checked = true;
     document.querySelector(`input[name="pressure-unit"][value="${currentConfig.units.pressure}"]`).checked = true;
     document.querySelector(`input[name="distance-unit"][value="${currentConfig.units.distance}"]`).checked = true;
+    document.querySelector(`input[name="default-view"][value="${currentConfig.defaultView}"]`).checked = true;
     
     focusReturnElement = document.activeElement;
     dialog.hidden = false;
@@ -1556,6 +1576,9 @@ function updateConfigFromForm() {
     currentConfig.units.precipitation = document.querySelector('input[name="precip-unit"]:checked').value;
     currentConfig.units.pressure = document.querySelector('input[name="pressure-unit"]:checked').value;
     currentConfig.units.distance = document.querySelector('input[name="distance-unit"]:checked').value;
+    
+    // Default view
+    currentConfig.defaultView = document.querySelector('input[name="default-view"]:checked').value;
 }
 
 function renderCityListOrderControls() {
@@ -1651,6 +1674,54 @@ function closeConfigDialog() {
         focusReturnElement.focus();
         focusReturnElement = null;
     }
+}
+
+// Reset functions
+function resetCities() {
+    if (!confirm('Are you sure you want to clear all cities? This cannot be undone.')) {
+        return;
+    }
+    
+    cities = {};
+    weatherData = {};
+    saveCitiesToStorage();
+    renderCityList();
+    announceToScreenReader('All cities have been cleared');
+}
+
+function resetSettings() {
+    if (!confirm('Are you sure you want to reset all settings to default? This cannot be undone.')) {
+        return;
+    }
+    
+    currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+    saveConfigToStorage();
+    
+    // Update the config dialog if it's open
+    renderCityListOrderControls();
+    
+    // Refresh the display
+    renderCityList();
+    announceToScreenReader('All settings have been reset to default');
+}
+
+function resetAll() {
+    if (!confirm('Are you sure you want to reset everything? This will clear all cities and reset all settings to default. This cannot be undone.')) {
+        return;
+    }
+    
+    cities = {};
+    weatherData = {};
+    currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+    saveCitiesToStorage();
+    saveConfigToStorage();
+    
+    // Update the config dialog if it's open
+    renderCityListOrderControls();
+    
+    // Refresh the display
+    renderCityList();
+    announceToScreenReader('Everything has been reset');
 }
 
 // Unit conversion
@@ -1751,6 +1822,10 @@ function loadConfigFromStorage() {
             // Ensure distance unit exists for backward compatibility
             if (!currentConfig.units.distance) {
                 currentConfig.units.distance = DEFAULT_CONFIG.units.distance;
+            }
+            // Ensure defaultView exists for backward compatibility
+            if (!currentConfig.defaultView) {
+                currentConfig.defaultView = DEFAULT_CONFIG.defaultView;
             }
         } catch (e) {
             console.error('Failed to load config:', e);

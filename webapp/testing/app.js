@@ -69,8 +69,8 @@ const DEFAULT_CONFIG = {
         wind_direction: true,
         high_temp: true,
         low_temp: true,
-        sunrise: false,
-        sunset: false
+        sunrise: true,
+        sunset: true
     },
     cityListOrder: ['temperature', 'conditions', 'feels_like', 'humidity', 'wind_speed', 'wind_direction', 'high_temp', 'low_temp', 'sunrise', 'sunset'],
     units: {
@@ -79,7 +79,8 @@ const DEFAULT_CONFIG = {
         precipitation: 'in',
         pressure: 'inHg',
         distance: 'mi'
-    }
+    },
+    defaultView: 'flat'
 };
 
 // Application state
@@ -99,6 +100,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('=== FastWeather Initializing ===');
     loadCitiesFromStorage();
     loadConfigFromStorage();
+    
+    // Set initial view from config
+    if (currentConfig.defaultView) {
+        currentView = currentConfig.defaultView;
+    }
+    
+    // Update view button label and menu checkmarks to match initial view
+    const viewLabel = currentView.charAt(0).toUpperCase() + currentView.slice(1);
+    document.getElementById('current-view-label').textContent = `View: ${viewLabel}`;
+    document.querySelectorAll('#view-menu [role="menuitem"]').forEach(item => {
+        const isSelected = item.dataset.view === currentView;
+        item.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+    });
+    
     initializeEventListeners();
     renderCityList();
     
@@ -170,6 +185,11 @@ function initializeEventListeners() {
     document.getElementById('apply-config-btn').addEventListener('click', applyConfiguration);
     document.getElementById('save-config-btn').addEventListener('click', saveConfiguration);
     document.getElementById('cancel-config-btn').addEventListener('click', closeConfigDialog);
+    
+    // Reset buttons
+    document.getElementById('reset-cities-btn').addEventListener('click', resetCities);
+    document.getElementById('reset-settings-btn').addEventListener('click', resetSettings);
+    document.getElementById('reset-all-btn').addEventListener('click', resetAll);
     
     // City selection dialog
     document.getElementById('select-city-btn').addEventListener('click', handleCitySelection);
@@ -607,7 +627,7 @@ async function displayStateCities(stateName, cityNames, totalCount = null) {
     
     // Keep state selector visible and update heading
     stateSelectorSection.hidden = false;
-    heading.innerHTML = `Cities in ${stateName} <button id="back-to-your-cities-btn" class="back-btn" aria-label="Return to your cities list">← Back to Your Cities</button>`;
+    heading.innerHTML = `Cities in ${stateName} <button id="back-to-your-cities-btn" class="back-btn">← Back to Your Cities</button>`;
     container.innerHTML = '<p class="loading-text">Loading weather data... (0/' + cityNames.length + ')</p>';
     cityListSection.hidden = false;
     
@@ -735,7 +755,7 @@ async function displayStateCities(stateName, cityNames, totalCount = null) {
         currentStateCities = citiesData;
         currentStateName = stateName;
         
-        heading.innerHTML = `Cities in ${stateName} (${citiesData.length}) <button id="back-to-your-cities-btn" class="back-btn" aria-label="Return to your cities list">← Back to Your Cities</button>`;
+        heading.innerHTML = `Cities in ${stateName} (${citiesData.length}) <button id="back-to-your-cities-btn" class="back-btn">← Back to Your Cities</button>`;
         renderStateCitiesWithWeather(container, citiesData);
         announceToScreenReader(`Loaded ${citiesData.length} cities with weather for ${stateName}`);
         
@@ -756,7 +776,7 @@ async function fetchWeatherData(lat, lon) {
         longitude: lon,
         current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility',
         hourly: 'cloudcover',
-        daily: 'temperature_2m_max,temperature_2m_min',
+        daily: 'temperature_2m_max,temperature_2m_min,sunrise,sunset',
         forecast_days: '1',
         timezone: 'auto'
     });
@@ -770,6 +790,12 @@ async function fetchWeatherData(lat, lon) {
 // Render state cities with weather in the current view
 function renderStateCitiesWithWeather(container, citiesData) {
     container.innerHTML = '';
+    
+    // Clean up list view controls if they exist (they're siblings, not children)
+    const existingControls = document.querySelector('.list-view-controls');
+    if (existingControls) {
+        existingControls.remove();
+    }
     
     if (currentView === 'table') {
         renderStateCitiesTableWithWeather(container, citiesData);
@@ -801,7 +827,6 @@ function renderStateCitiesFlat(container, citiesData) {
         const card = document.createElement('article');
         card.className = 'city-card state-city-card';
         card.setAttribute('role', 'listitem');
-        card.setAttribute('aria-label', `${cityData.display}`);
         
         const header = document.createElement('div');
         header.className = 'city-card-header';
@@ -935,10 +960,45 @@ async function addCityFromState(cityData) {
         lon: cityData.lon
     }, true); // Skip render - we'll stay in state view
     
-    // Re-render state cities to update button states
+    // Re-render state cities to update button states, preserving active item and scroll position
     if (added && currentStateCities && currentStateName) {
         const container = document.getElementById('city-list');
+        const scrollPosition = container.scrollTop;
+        const currentActive = container.getAttribute('aria-activedescendant');
+        let activeIndex = 0;
+        
+        if (currentActive && currentActive.startsWith('state-city-item-')) {
+            activeIndex = parseInt(currentActive.split('-')[3]);
+        }
+        
         renderStateCitiesWithWeather(container, currentStateCities);
+        
+        // Restore scroll position for all views
+        container.scrollTop = scrollPosition;
+        
+        // Restore the active item after re-render for list view
+        if (currentView === 'list') {
+            container.setAttribute('aria-activedescendant', `state-city-item-${activeIndex}`);
+            const items = container.querySelectorAll('.state-city-item');
+            items.forEach((item, i) => {
+                item.setAttribute('aria-selected', i === activeIndex ? 'true' : 'false');
+            });
+            
+            // Update the action button to reflect the new state
+            const actionBtn = document.getElementById('state-city-action-btn');
+            if (actionBtn && citiesData[activeIndex]) {
+                const cityData = currentStateCities[activeIndex];
+                const isInList = cities[cityData.display];
+                
+                if (isInList) {
+                    actionBtn.textContent = '✖ Remove from My Cities';
+                    actionBtn.className = 'list-control-btn remove-btn';
+                } else {
+                    actionBtn.textContent = '➕ Add to My Cities';
+                    actionBtn.className = 'list-control-btn';
+                }
+            }
+        }
     }
 }
 
@@ -952,10 +1012,45 @@ async function removeCityFromState(cityData) {
         saveCitiesToStorage();
         announceToScreenReader(`${key} removed from list`);
         
-        // Re-render state cities to update button states
+        // Re-render state cities to update button states, preserving active item and scroll position
         if (currentStateCities && currentStateName) {
             const container = document.getElementById('city-list');
+            const scrollPosition = container.scrollTop;
+            const currentActive = container.getAttribute('aria-activedescendant');
+            let activeIndex = 0;
+            
+            if (currentActive && currentActive.startsWith('state-city-item-')) {
+                activeIndex = parseInt(currentActive.split('-')[3]);
+            }
+            
             renderStateCitiesWithWeather(container, currentStateCities);
+            
+            // Restore scroll position for all views
+            container.scrollTop = scrollPosition;
+            
+            // Restore the active item after re-render for list view
+            if (currentView === 'list') {
+                container.setAttribute('aria-activedescendant', `state-city-item-${activeIndex}`);
+                const items = container.querySelectorAll('.state-city-item');
+                items.forEach((item, i) => {
+                    item.setAttribute('aria-selected', i === activeIndex ? 'true' : 'false');
+                });
+                
+                // Update the action button to reflect the new state
+                const actionBtn = document.getElementById('state-city-action-btn');
+                if (actionBtn && currentStateCities[activeIndex]) {
+                    const cityData = currentStateCities[activeIndex];
+                    const isInList = cities[cityData.display];
+                    
+                    if (isInList) {
+                        actionBtn.textContent = '✖ Remove from My Cities';
+                        actionBtn.className = 'list-control-btn remove-btn';
+                    } else {
+                        actionBtn.textContent = '➕ Add to My Cities';
+                        actionBtn.className = 'list-control-btn';
+                    }
+                }
+            }
         }
     }
 }
@@ -968,7 +1063,6 @@ function renderStateCitiesFlatWithWeather(container, citiesData) {
         const card = document.createElement('article');
         card.className = 'city-card state-city-card';
         card.setAttribute('role', 'listitem');
-        card.setAttribute('aria-label', `Weather for ${cityData.display}`);
         
         const header = document.createElement('div');
         header.className = 'city-card-header';
@@ -988,64 +1082,95 @@ function renderStateCitiesFlatWithWeather(container, citiesData) {
             const summary = document.createElement('div');
             summary.className = 'weather-summary';
             
-            if (currentConfig.cityList.temperature) {
-                const temp = convertTemperature(current.temperature_2m);
-                const tempSpan = document.createElement('span');
-                tempSpan.className = 'temperature';
-                tempSpan.textContent = `${temp}°${currentConfig.units.temperature}`;
-                summary.appendChild(tempSpan);
-            }
-            
-            if (currentConfig.cityList.conditions) {
-                const descSpan = document.createElement('span');
-                descSpan.className = 'weather-desc';
-                descSpan.textContent = weatherDesc;
-                summary.appendChild(descSpan);
-            }
-            
-            content.appendChild(summary);
-            
             const details = document.createElement('dl');
             details.className = 'weather-details';
             
-            if (currentConfig.cityList.feels_like) {
-                addDetail(details, 'Feels Like', `${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}`);
+            const forecastDetails = document.createElement('dl');
+            let hasForecastData = false;
+            
+            // Render fields in custom order
+            currentConfig.cityListOrder.forEach(key => {
+                if (!currentConfig.cityList[key]) return;
+                
+                switch(key) {
+                    case 'temperature':
+                        const temp = convertTemperature(current.temperature_2m);
+                        const tempSpan = document.createElement('span');
+                        tempSpan.className = 'temperature';
+                        tempSpan.textContent = `${temp}°${currentConfig.units.temperature}`;
+                        summary.appendChild(tempSpan);
+                        break;
+                        
+                    case 'conditions':
+                        const descSpan = document.createElement('span');
+                        descSpan.className = 'weather-desc';
+                        descSpan.textContent = weatherDesc;
+                        summary.appendChild(descSpan);
+                        break;
+                        
+                    case 'feels_like':
+                        addDetail(details, 'Feels Like', `${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}`);
+                        break;
+                        
+                    case 'humidity':
+                        addDetail(details, 'Humidity', `${current.relative_humidity_2m}%`);
+                        break;
+                        
+                    case 'wind_speed':
+                        const windSpeed = convertWindSpeed(current.wind_speed_10m);
+                        addDetail(details, 'Wind Speed', `${windSpeed} ${currentConfig.units.wind_speed}`);
+                        break;
+                        
+                    case 'wind_direction':
+                        const cardinal = degreesToCardinal(current.wind_direction_10m);
+                        addDetail(details, 'Wind Direction', `${cardinal} (${current.wind_direction_10m}°)`);
+                        break;
+                        
+                    case 'high_temp':
+                        if (cityData.weather.daily) {
+                            addDetail(forecastDetails, 'High', `${convertTemperature(cityData.weather.daily.temperature_2m_max[0])}°${currentConfig.units.temperature}`);
+                            hasForecastData = true;
+                        }
+                        break;
+                        
+                    case 'low_temp':
+                        if (cityData.weather.daily) {
+                            addDetail(forecastDetails, 'Low', `${convertTemperature(cityData.weather.daily.temperature_2m_min[0])}°${currentConfig.units.temperature}`);
+                            hasForecastData = true;
+                        }
+                        break;
+                        
+                    case 'sunrise':
+                        if (cityData.weather.daily && cityData.weather.daily.sunrise && cityData.weather.daily.sunrise[0]) {
+                            const sunriseTime = new Date(cityData.weather.daily.sunrise[0]);
+                            addDetail(forecastDetails, 'Sunrise', sunriseTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }));
+                            hasForecastData = true;
+                        }
+                        break;
+                        
+                    case 'sunset':
+                        if (cityData.weather.daily && cityData.weather.daily.sunset && cityData.weather.daily.sunset[0]) {
+                            const sunsetTime = new Date(cityData.weather.daily.sunset[0]);
+                            addDetail(forecastDetails, 'Sunset', sunsetTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }));
+                            hasForecastData = true;
+                        }
+                        break;
+                }
+            });
+            
+            content.appendChild(summary);
+            
+            if (details.children.length > 0) {
+                content.appendChild(details);
             }
             
-            if (currentConfig.cityList.humidity) {
-                addDetail(details, 'Humidity', `${current.relative_humidity_2m}%`);
-            }
-            
-            if (currentConfig.cityList.wind_speed) {
-                const windSpeed = convertWindSpeed(current.wind_speed_10m);
-                addDetail(details, 'Wind Speed', `${windSpeed} ${currentConfig.units.wind_speed}`);
-            }
-            
-            if (currentConfig.cityList.wind_direction) {
-                const cardinal = degreesToCardinal(current.wind_direction_10m);
-                addDetail(details, 'Wind Direction', `${cardinal} (${current.wind_direction_10m}°)`);
-            }
-            
-            content.appendChild(details);
-            
-            if (cityData.weather.daily && (currentConfig.cityList.high_temp || currentConfig.cityList.low_temp)) {
+            if (hasForecastData) {
                 const forecast = document.createElement('div');
                 forecast.className = 'daily-forecast';
                 
                 const forecastTitle = document.createElement('h5');
                 forecastTitle.textContent = 'Today';
                 forecast.appendChild(forecastTitle);
-                
-                const forecastDetails = document.createElement('dl');
-                
-                if (currentConfig.cityList.high_temp) {
-                    addDetail(forecastDetails, 'High', `${convertTemperature(cityData.weather.daily.temperature_2m_max[0])}°${currentConfig.units.temperature}`);
-                }
-                
-                if (currentConfig.cityList.low_temp) {
-                    addDetail(forecastDetails, 'Low', `${convertTemperature(cityData.weather.daily.temperature_2m_min[0])}°${currentConfig.units.temperature}`);
-                }
-                
                 forecast.appendChild(forecastDetails);
                 content.appendChild(forecast);
             }
@@ -1103,7 +1228,9 @@ function renderStateCitiesTableWithWeather(container, citiesData) {
         { key: 'wind_speed', label: 'Wind Speed' },
         { key: 'wind_direction', label: 'Wind Direction' },
         { key: 'high_temp', label: 'High' },
-        { key: 'low_temp', label: 'Low' }
+        { key: 'low_temp', label: 'Low' },
+        { key: 'sunrise', label: 'Sunrise' },
+        { key: 'sunset', label: 'Sunset' }
     ];
     
     columnConfig.forEach(col => {
@@ -1135,56 +1262,69 @@ function renderStateCitiesTableWithWeather(container, citiesData) {
         
         if (cityData.weather && cityData.weather.current) {
             const current = cityData.weather.current;
+            const weather = cityData.weather;
             
-            if (currentConfig.cityList.temperature) {
-                const tempCell = document.createElement('td');
-                tempCell.textContent = `${convertTemperature(current.temperature_2m)}°${currentConfig.units.temperature}`;
-                row.appendChild(tempCell);
-            }
-            
-            if (currentConfig.cityList.conditions) {
-                const condCell = document.createElement('td');
-                condCell.textContent = WEATHER_CODES[current.weather_code] || 'Unknown';
-                row.appendChild(condCell);
-            }
-            
-            if (currentConfig.cityList.feels_like) {
-                const feelsCell = document.createElement('td');
-                feelsCell.textContent = `${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}`;
-                row.appendChild(feelsCell);
-            }
-            
-            if (currentConfig.cityList.humidity) {
-                const humidityCell = document.createElement('td');
-                humidityCell.textContent = `${current.relative_humidity_2m}%`;
-                row.appendChild(humidityCell);
-            }
-            
-            if (currentConfig.cityList.wind_speed) {
-                const windSpeedCell = document.createElement('td');
-                const windSpeed = convertWindSpeed(current.wind_speed_10m);
-                windSpeedCell.textContent = `${windSpeed} ${currentConfig.units.wind_speed}`;
-                row.appendChild(windSpeedCell);
-            }
-            
-            if (currentConfig.cityList.wind_direction) {
-                const windDirCell = document.createElement('td');
-                const windDir = degreesToCardinal(current.wind_direction_10m);
-                windDirCell.textContent = `${windDir} (${current.wind_direction_10m}°)`;
-                row.appendChild(windDirCell);
-            }
-            
-            if (currentConfig.cityList.high_temp && cityData.weather.daily) {
-                const highCell = document.createElement('td');
-                highCell.textContent = `${convertTemperature(cityData.weather.daily.temperature_2m_max[0])}°${currentConfig.units.temperature}`;
-                row.appendChild(highCell);
-            }
-            
-            if (currentConfig.cityList.low_temp && cityData.weather.daily) {
-                const lowCell = document.createElement('td');
-                lowCell.textContent = `${convertTemperature(cityData.weather.daily.temperature_2m_min[0])}°${currentConfig.units.temperature}`;
-                row.appendChild(lowCell);
-            }
+            // Add cells based on config order
+            currentConfig.cityListOrder.forEach(key => {
+                if (!currentConfig.cityList[key]) return;
+                
+                const cell = document.createElement('td');
+                
+                switch(key) {
+                    case 'temperature':
+                        cell.textContent = `${convertTemperature(current.temperature_2m)}°${currentConfig.units.temperature}`;
+                        break;
+                    case 'conditions':
+                        cell.textContent = WEATHER_CODES[current.weather_code] || 'Unknown';
+                        break;
+                    case 'feels_like':
+                        cell.textContent = `${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}`;
+                        break;
+                    case 'humidity':
+                        cell.textContent = `${current.relative_humidity_2m}%`;
+                        break;
+                    case 'wind_speed':
+                        const windSpeed = convertWindSpeed(current.wind_speed_10m);
+                        cell.textContent = `${windSpeed} ${currentConfig.units.wind_speed}`;
+                        break;
+                    case 'wind_direction':
+                        const windDir = degreesToCardinal(current.wind_direction_10m);
+                        cell.textContent = `${windDir} (${current.wind_direction_10m}°)`;
+                        break;
+                    case 'high_temp':
+                        if (weather.daily && weather.daily.temperature_2m_max) {
+                            cell.textContent = `${convertTemperature(weather.daily.temperature_2m_max[0])}°${currentConfig.units.temperature}`;
+                        } else {
+                            cell.textContent = '-';
+                        }
+                        break;
+                    case 'low_temp':
+                        if (weather.daily && weather.daily.temperature_2m_min) {
+                            cell.textContent = `${convertTemperature(weather.daily.temperature_2m_min[0])}°${currentConfig.units.temperature}`;
+                        } else {
+                            cell.textContent = '-';
+                        }
+                        break;
+                    case 'sunrise':
+                        if (weather.daily && weather.daily.sunrise && weather.daily.sunrise[0]) {
+                            const sunriseTime = new Date(weather.daily.sunrise[0]);
+                            cell.textContent = sunriseTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                        } else {
+                            cell.textContent = '-';
+                        }
+                        break;
+                    case 'sunset':
+                        if (weather.daily && weather.daily.sunset && weather.daily.sunset[0]) {
+                            const sunsetTime = new Date(weather.daily.sunset[0]);
+                            cell.textContent = sunsetTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                        } else {
+                            cell.textContent = '-';
+                        }
+                        break;
+                }
+                
+                row.appendChild(cell);
+            });
         } else {
             const enabledColumns = columnConfig.filter(col => currentConfig.cityList[col.key]).length;
             for (let i = 0; i < enabledColumns; i++) {
@@ -1237,56 +1377,203 @@ function renderStateCitiesListWithWeather(container, citiesData) {
         let weatherText = cityData.display;
         if (cityData.weather && cityData.weather.current) {
             const current = cityData.weather.current;
+            const weather = cityData.weather;
             const parts = [];
             
-            if (currentConfig.cityList.temperature) {
-                const temp = convertTemperature(current.temperature_2m);
-                parts.push(`${temp}°${currentConfig.units.temperature}`);
-            }
-            
-            if (currentConfig.cityList.conditions) {
-                const weatherDesc = WEATHER_CODES[current.weather_code] || 'Unknown';
-                parts.push(weatherDesc);
-            }
-            
-            if (currentConfig.cityList.feels_like) {
-                const feels = convertTemperature(current.apparent_temperature);
-                parts.push(`Feels: ${feels}°${currentConfig.units.temperature}`);
-            }
-            
-            if (currentConfig.cityList.humidity) {
-                parts.push(`Humidity: ${current.relative_humidity_2m}%`);
-            }
+            // Add data in custom order
+            currentConfig.cityListOrder.forEach(key => {
+                if (!currentConfig.cityList[key]) return;
+                
+                switch(key) {
+                    case 'temperature':
+                        const temp = convertTemperature(current.temperature_2m);
+                        parts.push(`${temp}°${currentConfig.units.temperature}`);
+                        break;
+                    case 'conditions':
+                        const weatherDesc = WEATHER_CODES[current.weather_code] || 'Unknown';
+                        parts.push(weatherDesc);
+                        break;
+                    case 'feels_like':
+                        const feels = convertTemperature(current.apparent_temperature);
+                        parts.push(`Feels: ${feels}°${currentConfig.units.temperature}`);
+                        break;
+                    case 'humidity':
+                        parts.push(`Humidity: ${current.relative_humidity_2m}%`);
+                        break;
+                    case 'wind_speed':
+                        const windSpeed = convertWindSpeed(current.wind_speed_10m);
+                        parts.push(`Wind: ${windSpeed} ${currentConfig.units.wind_speed}`);
+                        break;
+                    case 'wind_direction':
+                        const windDir = degreesToCardinal(current.wind_direction_10m);
+                        parts.push(`Wind Dir: ${windDir}`);
+                        break;
+                    case 'high_temp':
+                        if (weather.daily) {
+                            const high = convertTemperature(weather.daily.temperature_2m_max[0]);
+                            parts.push(`High: ${high}°${currentConfig.units.temperature}`);
+                        }
+                        break;
+                    case 'low_temp':
+                        if (weather.daily) {
+                            const low = convertTemperature(weather.daily.temperature_2m_min[0]);
+                            parts.push(`Low: ${low}°${currentConfig.units.temperature}`);
+                        }
+                        break;
+                    case 'sunrise':
+                        if (weather.daily && weather.daily.sunrise && weather.daily.sunrise[0]) {
+                            const sunriseTime = new Date(weather.daily.sunrise[0]);
+                            parts.push(`Sunrise: ${sunriseTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`);
+                        }
+                        break;
+                    case 'sunset':
+                        if (weather.daily && weather.daily.sunset && weather.daily.sunset[0]) {
+                            const sunsetTime = new Date(weather.daily.sunset[0]);
+                            parts.push(`Sunset: ${sunsetTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`);
+                        }
+                        break;
+                }
+            });
             
             weatherText = `${cityData.display} - ${parts.join(', ')}`;
         }
         
-        const textSpan = document.createElement('span');
-        textSpan.textContent = weatherText;
-        item.appendChild(textSpan);
-        
-        const isInList = cities[cityData.display];
-        
-        if (isInList) {
-            const removeBtn = createButton('✖ Remove', `Remove ${cityData.display} from your cities list`, async (e) => {
-                e.stopPropagation();
-                await removeCityFromState(cityData);
-            });
-            removeBtn.className = 'remove-btn-small inline';
-            item.appendChild(removeBtn);
-        } else {
-            const addBtn = createButton('➕ Add', `Add ${cityData.display} to your cities list`, async (e) => {
-                e.stopPropagation();
-                await addCityFromState(cityData);
-            });
-            addBtn.className = 'add-city-btn-small inline';
-            item.appendChild(addBtn);
-        }
+        // Just show the text - buttons will be displayed after the list
+        item.textContent = weatherText;
         
         container.appendChild(item);
     });
     
     container.setAttribute('aria-activedescendant', 'state-city-item-0');
+    
+    // Add control button for adding/removing the selected city
+    const controlsDiv = document.createElement('div');
+    controlsDiv.className = 'list-view-controls';
+    
+    const actionBtn = createButton('➕ Add to My Cities', 'Add selected city to your cities list', () => {
+        const items = container.querySelectorAll('.state-city-item');
+        const currentActive = container.getAttribute('aria-activedescendant');
+        let activeIndex = 0;
+        
+        if (currentActive && currentActive.startsWith('state-city-item-')) {
+            activeIndex = parseInt(currentActive.split('-')[3]);
+        }
+        
+        if (citiesData[activeIndex]) {
+            const cityData = citiesData[activeIndex];
+            const isInList = cities[cityData.display];
+            
+            if (isInList) {
+                removeCityFromState(cityData);
+            } else {
+                addCityFromState(cityData);
+            }
+        }
+    });
+    actionBtn.className = 'list-control-btn';
+    actionBtn.id = 'state-city-action-btn';
+    controlsDiv.appendChild(actionBtn);
+    
+    container.parentElement.insertBefore(controlsDiv, container.nextSibling);
+    
+    // Function to update the action button based on current selection
+    const updateActionButton = (index) => {
+        if (citiesData[index]) {
+            const cityData = citiesData[index];
+            const isInList = cities[cityData.display];
+            
+            if (isInList) {
+                actionBtn.textContent = '✖ Remove from My Cities';
+                actionBtn.className = 'list-control-btn remove-btn';
+            } else {
+                actionBtn.textContent = '➕ Add to My Cities';
+                actionBtn.className = 'list-control-btn';
+            }
+        }
+    };
+    
+    // Set initial button state
+    updateActionButton(0);
+    
+    // Add keyboard navigation for state cities list
+    container.addEventListener('keydown', (e) => {
+        const items = container.querySelectorAll('.state-city-item');
+        const currentActive = container.getAttribute('aria-activedescendant');
+        let activeIndex = 0;
+        
+        // Parse the index from the current active descendant
+        if (currentActive && currentActive.startsWith('state-city-item-')) {
+            activeIndex = parseInt(currentActive.split('-')[3]);
+        }
+        
+        let handled = false;
+        let newIndex = activeIndex;
+        
+        switch(e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                if (activeIndex < items.length - 1) {
+                    newIndex = activeIndex + 1;
+                }
+                handled = true;
+                break;
+                
+            case 'ArrowUp':
+                e.preventDefault();
+                if (activeIndex > 0) {
+                    newIndex = activeIndex - 1;
+                }
+                handled = true;
+                break;
+                
+            case 'Home':
+                e.preventDefault();
+                newIndex = 0;
+                handled = true;
+                break;
+                
+            case 'End':
+                e.preventDefault();
+                newIndex = items.length - 1;
+                handled = true;
+                break;
+                
+            case 'Enter':
+            case ' ':
+                // Activate the add/remove action for the selected city
+                e.preventDefault();
+                if (citiesData[activeIndex]) {
+                    const cityData = citiesData[activeIndex];
+                    const isInList = cities[cityData.display];
+                    
+                    if (isInList) {
+                        removeCityFromState(cityData);
+                    } else {
+                        addCityFromState(cityData);
+                    }
+                }
+                handled = true;
+                break;
+        }
+        
+        if (handled && newIndex !== activeIndex) {
+            // Update aria-selected on all items
+            items.forEach((item, i) => {
+                item.setAttribute('aria-selected', i === newIndex ? 'true' : 'false');
+            });
+            
+            // Update aria-activedescendant
+            container.setAttribute('aria-activedescendant', `state-city-item-${newIndex}`);
+            
+            // Scroll item into view
+            items[newIndex].scrollIntoView({ block: 'nearest' });
+            
+            // Update the action button text based on new selection
+            updateActionButton(newIndex);
+            
+            // Don't announce - screen reader will read it automatically
+        }
+    });
 }
 
 // Fetch weather data
@@ -1305,7 +1592,7 @@ async function fetchWeatherForCity(cityName, lat, lon, detailed = false) {
             params.append('forecast_days', '16');
         } else {
             params.append('hourly', 'cloudcover');
-            params.append('daily', 'temperature_2m_max,temperature_2m_min');
+            params.append('daily', 'temperature_2m_max,temperature_2m_min,sunrise,sunset');
             params.append('forecast_days', '1');
         }
         
@@ -1483,14 +1770,12 @@ function createCityCard(cityName, lat, lon, weather, index) {
     const card = document.createElement('article');
     card.className = 'city-card';
     card.setAttribute('role', 'listitem');
-    card.setAttribute('aria-label', `Weather for ${cityName}`);
     
     const header = document.createElement('div');
     header.className = 'city-card-header';
     
     const titleButton = document.createElement('button');
     titleButton.className = 'city-title-btn';
-    titleButton.setAttribute('aria-label', cityName);
     titleButton.addEventListener('click', () => showFullWeather(cityName, lat, lon));
     
     const title = document.createElement('h3');
@@ -1513,69 +1798,97 @@ function createCityCard(cityName, lat, lon, weather, index) {
         summary.setAttribute('role', 'status');
         summary.setAttribute('aria-live', 'polite');
         
-        // Temperature
-        if (currentConfig.cityList.temperature) {
-            const temp = convertTemperature(current.temperature_2m);
-            const tempSpan = document.createElement('span');
-            tempSpan.className = 'temperature';
-            tempSpan.textContent = `${temp}°${currentConfig.units.temperature}`;
-            tempSpan.setAttribute('aria-label', `Temperature: ${temp} degrees ${currentConfig.units.temperature === 'F' ? 'Fahrenheit' : 'Celsius'}`);
-            summary.appendChild(tempSpan);
-        }
-        
-        // Weather description
-        if (currentConfig.cityList.conditions) {
-            const descSpan = document.createElement('span');
-            descSpan.className = 'weather-desc';
-            descSpan.textContent = weatherDesc;
-            summary.appendChild(descSpan);
-        }
-        
-        content.appendChild(summary);
-        
-        // Additional details
         const details = document.createElement('dl');
         details.className = 'weather-details';
         
-        if (currentConfig.cityList.feels_like) {
-            addDetail(details, 'Feels Like', `${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}`);
+        const forecastDetails = document.createElement('dl');
+        let hasForecastData = false;
+        
+        // Render fields in custom order
+        currentConfig.cityListOrder.forEach(key => {
+            if (!currentConfig.cityList[key]) return;
+            
+            switch(key) {
+                case 'temperature':
+                    const temp = convertTemperature(current.temperature_2m);
+                    const tempSpan = document.createElement('span');
+                    tempSpan.className = 'temperature';
+                    tempSpan.textContent = `${temp}°${currentConfig.units.temperature}`;
+                    summary.appendChild(tempSpan);
+                    break;
+                    
+                case 'conditions':
+                    const descSpan = document.createElement('span');
+                    descSpan.className = 'weather-desc';
+                    descSpan.textContent = weatherDesc;
+                    summary.appendChild(descSpan);
+                    break;
+                    
+                case 'feels_like':
+                    addDetail(details, 'Feels Like', `${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}`);
+                    break;
+                    
+                case 'humidity':
+                    addDetail(details, 'Humidity', `${current.relative_humidity_2m}%`);
+                    break;
+                    
+                case 'wind_speed':
+                    const windSpeed = convertWindSpeed(current.wind_speed_10m);
+                    addDetail(details, 'Wind Speed', `${windSpeed} ${currentConfig.units.wind_speed}`);
+                    break;
+                    
+                case 'wind_direction':
+                    const cardinal = degreesToCardinal(current.wind_direction_10m);
+                    addDetail(details, 'Wind Direction', `${cardinal} (${current.wind_direction_10m}°)`);
+                    break;
+                    
+                case 'high_temp':
+                    if (weather.daily) {
+                        addDetail(forecastDetails, 'High', `${convertTemperature(weather.daily.temperature_2m_max[0])}°${currentConfig.units.temperature}`);
+                        hasForecastData = true;
+                    }
+                    break;
+                    
+                case 'low_temp':
+                    if (weather.daily) {
+                        addDetail(forecastDetails, 'Low', `${convertTemperature(weather.daily.temperature_2m_min[0])}°${currentConfig.units.temperature}`);
+                        hasForecastData = true;
+                    }
+                    break;
+                    
+                case 'sunrise':
+                    if (weather.daily && weather.daily.sunrise && weather.daily.sunrise[0]) {
+                        const sunriseTime = new Date(weather.daily.sunrise[0]);
+                        const sunriseFormatted = sunriseTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                        addDetail(forecastDetails, 'Sunrise', sunriseFormatted);
+                        hasForecastData = true;
+                    }
+                    break;
+                    
+                case 'sunset':
+                    if (weather.daily && weather.daily.sunset && weather.daily.sunset[0]) {
+                        const sunsetTime = new Date(weather.daily.sunset[0]);
+                        const sunsetFormatted = sunsetTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                        addDetail(forecastDetails, 'Sunset', sunsetFormatted);
+                        hasForecastData = true;
+                    }
+                    break;
+            }
+        });
+        
+        content.appendChild(summary);
+        
+        if (details.children.length > 0) {
+            content.appendChild(details);
         }
         
-        if (currentConfig.cityList.humidity) {
-            addDetail(details, 'Humidity', `${current.relative_humidity_2m}%`);
-        }
-        
-        if (currentConfig.cityList.wind_speed) {
-            const windSpeed = convertWindSpeed(current.wind_speed_10m);
-            addDetail(details, 'Wind Speed', `${windSpeed} ${currentConfig.units.wind_speed}`);
-        }
-        
-        if (currentConfig.cityList.wind_direction) {
-            const cardinal = degreesToCardinal(current.wind_direction_10m);
-            addDetail(details, 'Wind Direction', `${cardinal} (${current.wind_direction_10m}°)`);
-        }
-        
-        content.appendChild(details);
-        
-        // High/Low temps if available
-        if (weather.daily && (currentConfig.cityList.high_temp || currentConfig.cityList.low_temp)) {
+        if (hasForecastData) {
             const forecast = document.createElement('div');
             forecast.className = 'daily-forecast';
             
             const forecastTitle = document.createElement('h4');
             forecastTitle.textContent = 'Today';
             forecast.appendChild(forecastTitle);
-            
-            const forecastDetails = document.createElement('dl');
-            
-            if (currentConfig.cityList.high_temp) {
-                addDetail(forecastDetails, 'High', `${convertTemperature(weather.daily.temperature_2m_max[0])}°${currentConfig.units.temperature}`);
-            }
-            
-            if (currentConfig.cityList.low_temp) {
-                addDetail(forecastDetails, 'Low', `${convertTemperature(weather.daily.temperature_2m_min[0])}°${currentConfig.units.temperature}`);
-            }
-            
             forecast.appendChild(forecastDetails);
             content.appendChild(forecast);
         }
@@ -1622,10 +1935,12 @@ function addDetail(dl, label, value) {
     dl.appendChild(dd);
 }
 
-function createButton(text, ariaLabel, onClick) {
+function createButton(text, onClick, ariaLabel = null) {
     const btn = document.createElement('button');
     btn.innerHTML = text;
-    btn.setAttribute('aria-label', ariaLabel);
+    if (ariaLabel) {
+        btn.setAttribute('aria-label', ariaLabel);
+    }
     btn.addEventListener('click', onClick);
     return btn;
 }
@@ -1658,7 +1973,9 @@ function renderTableView(container) {
         { key: 'wind_speed', label: 'Wind Speed' },
         { key: 'wind_direction', label: 'Wind Direction' },
         { key: 'high_temp', label: 'High' },
-        { key: 'low_temp', label: 'Low' }
+        { key: 'low_temp', label: 'Low' },
+        { key: 'sunrise', label: 'Sunrise' },
+        { key: 'sunset', label: 'Sunset' }
     ];
     
     columnConfig.forEach(col => {
@@ -1696,7 +2013,6 @@ function renderTableView(container) {
         cityLink.href = '#';
         cityLink.textContent = cityName;
         cityLink.className = 'city-link';
-        cityLink.setAttribute('aria-label', cityName);
         cityLink.addEventListener('click', (e) => {
             e.preventDefault();
             showFullWeather(cityName, lat, lon);
@@ -1708,59 +2024,70 @@ function renderTableView(container) {
         if (weather && weather.current) {
             const current = weather.current;
             
-            // Add cells based on config
-            if (currentConfig.cityList.temperature) {
-                const tempCell = document.createElement('td');
-                tempCell.textContent = `${convertTemperature(current.temperature_2m)}°${currentConfig.units.temperature}`;
-                row.appendChild(tempCell);
-            }
-            
-            if (currentConfig.cityList.conditions) {
-                const condCell = document.createElement('td');
-                condCell.textContent = WEATHER_CODES[current.weather_code] || 'Unknown';
-                row.appendChild(condCell);
-            }
-            
-            if (currentConfig.cityList.feels_like) {
-                const feelsCell = document.createElement('td');
-                feelsCell.textContent = `${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}`;
-                row.appendChild(feelsCell);
-            }
-            
-            if (currentConfig.cityList.humidity) {
-                const humidityCell = document.createElement('td');
-                humidityCell.textContent = `${current.relative_humidity_2m}%`;
-                row.appendChild(humidityCell);
-            }
-            
-            if (currentConfig.cityList.wind_speed) {
-                const windSpeedCell = document.createElement('td');
-                const windSpeed = convertWindSpeed(current.wind_speed_10m);
-                windSpeedCell.textContent = `${windSpeed} ${currentConfig.units.wind_speed}`;
-                row.appendChild(windSpeedCell);
-            }
-            
-            if (currentConfig.cityList.wind_direction) {
-                const windDirCell = document.createElement('td');
-                const windDir = degreesToCardinal(current.wind_direction_10m);
-                windDirCell.textContent = `${windDir} (${current.wind_direction_10m}°)`;
-                row.appendChild(windDirCell);
-            }
-            
-            if (currentConfig.cityList.high_temp && weather.daily) {
-                const highCell = document.createElement('td');
-                highCell.textContent = `${convertTemperature(weather.daily.temperature_2m_max[0])}°${currentConfig.units.temperature}`;
-                row.appendChild(highCell);
-            }
-            
-            if (currentConfig.cityList.low_temp && weather.daily) {
-                const lowCell = document.createElement('td');
-                lowCell.textContent = `${convertTemperature(weather.daily.temperature_2m_min[0])}°${currentConfig.units.temperature}`;
-                row.appendChild(lowCell);
-            }
+            // Add cells based on config order
+            currentConfig.cityListOrder.forEach(key => {
+                if (!currentConfig.cityList[key]) return;
+                
+                const cell = document.createElement('td');
+                
+                switch(key) {
+                    case 'temperature':
+                        cell.textContent = `${convertTemperature(current.temperature_2m)}°${currentConfig.units.temperature}`;
+                        break;
+                    case 'conditions':
+                        cell.textContent = WEATHER_CODES[current.weather_code] || 'Unknown';
+                        break;
+                    case 'feels_like':
+                        cell.textContent = `${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}`;
+                        break;
+                    case 'humidity':
+                        cell.textContent = `${current.relative_humidity_2m}%`;
+                        break;
+                    case 'wind_speed':
+                        const windSpeed = convertWindSpeed(current.wind_speed_10m);
+                        cell.textContent = `${windSpeed} ${currentConfig.units.wind_speed}`;
+                        break;
+                    case 'wind_direction':
+                        const windDir = degreesToCardinal(current.wind_direction_10m);
+                        cell.textContent = `${windDir} (${current.wind_direction_10m}°)`;
+                        break;
+                    case 'high_temp':
+                        if (weather.daily && weather.daily.temperature_2m_max) {
+                            cell.textContent = `${convertTemperature(weather.daily.temperature_2m_max[0])}°${currentConfig.units.temperature}`;
+                        } else {
+                            cell.textContent = '-';
+                        }
+                        break;
+                    case 'low_temp':
+                        if (weather.daily && weather.daily.temperature_2m_min) {
+                            cell.textContent = `${convertTemperature(weather.daily.temperature_2m_min[0])}°${currentConfig.units.temperature}`;
+                        } else {
+                            cell.textContent = '-';
+                        }
+                        break;
+                    case 'sunrise':
+                        if (weather.daily && weather.daily.sunrise && weather.daily.sunrise[0]) {
+                            const sunriseTime = new Date(weather.daily.sunrise[0]);
+                            cell.textContent = sunriseTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                        } else {
+                            cell.textContent = '-';
+                        }
+                        break;
+                    case 'sunset':
+                        if (weather.daily && weather.daily.sunset && weather.daily.sunset[0]) {
+                            const sunsetTime = new Date(weather.daily.sunset[0]);
+                            cell.textContent = sunsetTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                        } else {
+                            cell.textContent = '-';
+                        }
+                        break;
+                }
+                
+                row.appendChild(cell);
+            });
         } else {
             // Loading cells - count enabled columns
-            const enabledColumns = columnConfig.filter(col => currentConfig.cityList[col.key]).length;
+            const enabledColumns = currentConfig.cityListOrder.filter(key => currentConfig.cityList[key]).length;
             for (let i = 0; i < enabledColumns; i++) {
                 const loadingCell = document.createElement('td');
                 loadingCell.textContent = 'Loading...';
@@ -1825,48 +2152,60 @@ function renderListView(container) {
             const current = weather.current;
             const parts = [];
             
-            if (currentConfig.cityList.temperature) {
-                const temp = convertTemperature(current.temperature_2m);
-                parts.push(`${temp}°${currentConfig.units.temperature}`);
-            }
-            
-            if (currentConfig.cityList.conditions) {
-                const weatherDesc = WEATHER_CODES[current.weather_code] || 'Unknown';
-                parts.push(weatherDesc);
-            }
-            
-            if (currentConfig.cityList.feels_like) {
-                const feels = convertTemperature(current.apparent_temperature);
-                parts.push(`Feels: ${feels}°${currentConfig.units.temperature}`);
-            }
-            
-            if (currentConfig.cityList.humidity) {
-                parts.push(`Humidity: ${current.relative_humidity_2m}%`);
-            }
-            
-            if (currentConfig.cityList.wind_speed || currentConfig.cityList.wind_direction) {
-                let windPart = 'Wind: ';
-                if (currentConfig.cityList.wind_direction) {
-                    const windDir = degreesToCardinal(current.wind_direction_10m);
-                    windPart += `${windDir} `;
+            // Add data in custom order
+            currentConfig.cityListOrder.forEach(key => {
+                if (!currentConfig.cityList[key]) return;
+                
+                switch(key) {
+                    case 'temperature':
+                        const temp = convertTemperature(current.temperature_2m);
+                        parts.push(`${temp}°${currentConfig.units.temperature}`);
+                        break;
+                    case 'conditions':
+                        const weatherDesc = WEATHER_CODES[current.weather_code] || 'Unknown';
+                        parts.push(weatherDesc);
+                        break;
+                    case 'feels_like':
+                        const feels = convertTemperature(current.apparent_temperature);
+                        parts.push(`Feels: ${feels}°${currentConfig.units.temperature}`);
+                        break;
+                    case 'humidity':
+                        parts.push(`Humidity: ${current.relative_humidity_2m}%`);
+                        break;
+                    case 'wind_speed':
+                        const windSpeed = convertWindSpeed(current.wind_speed_10m);
+                        parts.push(`Wind: ${windSpeed} ${currentConfig.units.wind_speed}`);
+                        break;
+                    case 'wind_direction':
+                        const windDir = degreesToCardinal(current.wind_direction_10m);
+                        parts.push(`Wind Dir: ${windDir}`);
+                        break;
+                    case 'high_temp':
+                        if (weather.daily) {
+                            const high = convertTemperature(weather.daily.temperature_2m_max[0]);
+                            parts.push(`High: ${high}°${currentConfig.units.temperature}`);
+                        }
+                        break;
+                    case 'low_temp':
+                        if (weather.daily) {
+                            const low = convertTemperature(weather.daily.temperature_2m_min[0]);
+                            parts.push(`Low: ${low}°${currentConfig.units.temperature}`);
+                        }
+                        break;
+                    case 'sunrise':
+                        if (weather.daily && weather.daily.sunrise && weather.daily.sunrise[0]) {
+                            const sunriseTime = new Date(weather.daily.sunrise[0]);
+                            parts.push(`Sunrise: ${sunriseTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`);
+                        }
+                        break;
+                    case 'sunset':
+                        if (weather.daily && weather.daily.sunset && weather.daily.sunset[0]) {
+                            const sunsetTime = new Date(weather.daily.sunset[0]);
+                            parts.push(`Sunset: ${sunsetTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`);
+                        }
+                        break;
                 }
-                if (currentConfig.cityList.wind_speed) {
-                    const windSpeed = convertWindSpeed(current.wind_speed_10m);
-                    windPart += `${windSpeed} ${currentConfig.units.wind_speed}`;
-                }
-                parts.push(windPart.trim());
-            }
-            
-            if (weather.daily) {
-                if (currentConfig.cityList.high_temp) {
-                    const high = convertTemperature(weather.daily.temperature_2m_max[0]);
-                    parts.push(`High: ${high}°${currentConfig.units.temperature}`);
-                }
-                if (currentConfig.cityList.low_temp) {
-                    const low = convertTemperature(weather.daily.temperature_2m_min[0]);
-                    parts.push(`Low: ${low}°${currentConfig.units.temperature}`);
-                }
-            }
+            });
             
             weatherText = `${cityName} - ${parts.join(', ')}`;
         } else {
@@ -1944,6 +2283,41 @@ function renderListView(container) {
         }
     };
     
+    // Function to update button labels based on current selection
+    const updateButtonLabels = (index) => {
+        const items = container.querySelectorAll('.list-view-item');
+        if (items[index]) {
+            const cityName = items[index].dataset.cityName;
+            
+            upBtn.textContent = `↑ Move ${cityName} Up`;
+            
+            downBtn.textContent = `↓ Move ${cityName} Down`;
+            
+            removeBtn.textContent = `🗑️ Remove ${cityName}`;
+            
+            detailsBtn.textContent = `📋 ${cityName} Details`;
+        }
+    };
+    
+    // Wrap the existing navigation handler to update button labels
+    const originalHandler = listNavigationHandler;
+    listNavigationHandler = (e) => {
+        const items = container.querySelectorAll('.list-view-item');
+        const currentActive = container.getAttribute('aria-activedescendant');
+        const oldIndex = parseInt(currentActive.split('-')[2]);
+        
+        // Call original handler
+        originalHandler(e);
+        
+        // Check if index changed
+        const newActive = container.getAttribute('aria-activedescendant');
+        const newIndex = parseInt(newActive.split('-')[2]);
+        
+        if (newIndex !== oldIndex) {
+            updateButtonLabels(newIndex);
+        }
+    };
+    
     container.addEventListener('keydown', listNavigationHandler);
     
     // Add control buttons for list view (single set that acts on focused city)
@@ -1994,6 +2368,9 @@ function renderListView(container) {
     controlsDiv.appendChild(removeBtn);
     
     container.parentElement.insertBefore(controlsDiv, container.nextSibling);
+    
+    // Set initial button labels
+    updateButtonLabels(0);
 }
 
 function setActiveListItem(container, items, index) {
@@ -2267,16 +2644,15 @@ function openConfigDialog() {
         if (checkbox) checkbox.checked = currentConfig.daily[key];
     });
     
-    Object.keys(currentConfig.cityList).forEach(key => {
-        const checkbox = document.querySelector(`input[name="citylist-${key}"]`);
-        if (checkbox) checkbox.checked = currentConfig.cityList[key];
-    });
+    // Render city list order controls
+    renderCityListOrderControls();
     
     document.querySelector(`input[name="temp-unit"][value="${currentConfig.units.temperature}"]`).checked = true;
     document.querySelector(`input[name="wind-unit"][value="${currentConfig.units.wind_speed}"]`).checked = true;
     document.querySelector(`input[name="precip-unit"][value="${currentConfig.units.precipitation}"]`).checked = true;
     document.querySelector(`input[name="pressure-unit"][value="${currentConfig.units.pressure}"]`).checked = true;
     document.querySelector(`input[name="distance-unit"][value="${currentConfig.units.distance}"]`).checked = true;
+    document.querySelector(`input[name="default-view"][value="${currentConfig.defaultView}"]`).checked = true;
     
     focusReturnElement = document.activeElement;
     dialog.hidden = false;
@@ -2329,6 +2705,95 @@ function updateConfigFromForm() {
     currentConfig.units.precipitation = document.querySelector('input[name="precip-unit"]:checked').value;
     currentConfig.units.pressure = document.querySelector('input[name="pressure-unit"]:checked').value;
     currentConfig.units.distance = document.querySelector('input[name="distance-unit"]:checked').value;
+    
+    // Default view
+    currentConfig.defaultView = document.querySelector('input[name="default-view"]:checked').value;
+}
+
+function renderCityListOrderControls() {
+    const container = document.getElementById('citylist-order-container');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    const fieldLabels = {
+        'temperature': 'Temperature',
+        'conditions': 'Weather Conditions',
+        'feels_like': 'Feels Like',
+        'humidity': 'Humidity',
+        'wind_speed': 'Wind Speed',
+        'wind_direction': 'Wind Direction',
+        'high_temp': "Today's High",
+        'low_temp': "Today's Low",
+        'sunrise': 'Sunrise',
+        'sunset': 'Sunset'
+    };
+    
+    currentConfig.cityListOrder.forEach((key, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'order-item';
+        itemDiv.dataset.key = key;
+        
+        const label = document.createElement('label');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.name = `citylist-${key}`;
+        checkbox.checked = currentConfig.cityList[key];
+        checkbox.setAttribute('aria-label', fieldLabels[key]);
+        
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(' ' + fieldLabels[key]));
+        
+        const controls = document.createElement('div');
+        controls.className = 'order-controls';
+        
+        const upBtn = document.createElement('button');
+        upBtn.type = 'button';
+        upBtn.className = 'order-btn';
+        upBtn.innerHTML = '↑';
+        upBtn.setAttribute('aria-label', `Move ${fieldLabels[key]} up`);
+        upBtn.disabled = index === 0;
+        upBtn.addEventListener('click', () => moveCityListFieldUp(key));
+        
+        const downBtn = document.createElement('button');
+        downBtn.type = 'button';
+        downBtn.className = 'order-btn';
+        downBtn.innerHTML = '↓';
+        downBtn.setAttribute('aria-label', `Move ${fieldLabels[key]} down`);
+        downBtn.disabled = index === currentConfig.cityListOrder.length - 1;
+        downBtn.addEventListener('click', () => moveCityListFieldDown(key));
+        
+        controls.appendChild(upBtn);
+        controls.appendChild(downBtn);
+        
+        itemDiv.appendChild(label);
+        itemDiv.appendChild(controls);
+        container.appendChild(itemDiv);
+    });
+}
+
+function moveCityListFieldUp(key) {
+    const index = currentConfig.cityListOrder.indexOf(key);
+    if (index <= 0) return;
+    
+    const newOrder = [...currentConfig.cityListOrder];
+    [newOrder[index - 1], newOrder[index]] = [newOrder[index], newOrder[index - 1]];
+    currentConfig.cityListOrder = newOrder;
+    
+    renderCityListOrderControls();
+    announceToScreenReader(`Moved ${key} up`);
+}
+
+function moveCityListFieldDown(key) {
+    const index = currentConfig.cityListOrder.indexOf(key);
+    if (index < 0 || index >= currentConfig.cityListOrder.length - 1) return;
+    
+    const newOrder = [...currentConfig.cityListOrder];
+    [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+    currentConfig.cityListOrder = newOrder;
+    
+    renderCityListOrderControls();
+    announceToScreenReader(`Moved ${key} down`);
 }
 
 function closeConfigDialog() {
@@ -2338,6 +2803,54 @@ function closeConfigDialog() {
         focusReturnElement.focus();
         focusReturnElement = null;
     }
+}
+
+// Reset functions
+function resetCities() {
+    if (!confirm('Are you sure you want to clear all cities? This cannot be undone.')) {
+        return;
+    }
+    
+    cities = {};
+    weatherData = {};
+    saveCitiesToStorage();
+    renderCityList();
+    announceToScreenReader('All cities have been cleared');
+}
+
+function resetSettings() {
+    if (!confirm('Are you sure you want to reset all settings to default? This cannot be undone.')) {
+        return;
+    }
+    
+    currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+    saveConfigToStorage();
+    
+    // Update the config dialog if it's open
+    renderCityListOrderControls();
+    
+    // Refresh the display
+    renderCityList();
+    announceToScreenReader('All settings have been reset to default');
+}
+
+function resetAll() {
+    if (!confirm('Are you sure you want to reset everything? This will clear all cities and reset all settings to default. This cannot be undone.')) {
+        return;
+    }
+    
+    cities = {};
+    weatherData = {};
+    currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+    saveCitiesToStorage();
+    saveConfigToStorage();
+    
+    // Update the config dialog if it's open
+    renderCityListOrderControls();
+    
+    // Refresh the display
+    renderCityList();
+    announceToScreenReader('Everything has been reset');
 }
 
 // Unit conversion
@@ -2420,6 +2933,17 @@ function loadConfigFromStorage() {
             if (!currentConfig.cityList) {
                 currentConfig.cityList = DEFAULT_CONFIG.cityList;
             }
+            // Ensure cityListOrder exists for backward compatibility
+            if (!currentConfig.cityListOrder) {
+                currentConfig.cityListOrder = DEFAULT_CONFIG.cityListOrder;
+            }
+            // Ensure new cityList fields exist
+            if (currentConfig.cityList.sunrise === undefined) {
+                currentConfig.cityList.sunrise = false;
+            }
+            if (currentConfig.cityList.sunset === undefined) {
+                currentConfig.cityList.sunset = false;
+            }
             // Ensure pressure unit exists for backward compatibility
             if (!currentConfig.units.pressure) {
                 currentConfig.units.pressure = DEFAULT_CONFIG.units.pressure;
@@ -2427,6 +2951,10 @@ function loadConfigFromStorage() {
             // Ensure distance unit exists for backward compatibility
             if (!currentConfig.units.distance) {
                 currentConfig.units.distance = DEFAULT_CONFIG.units.distance;
+            }
+            // Ensure defaultView exists for backward compatibility
+            if (!currentConfig.defaultView) {
+                currentConfig.defaultView = DEFAULT_CONFIG.defaultView;
             }
         } catch (e) {
             console.error('Failed to load config:', e);

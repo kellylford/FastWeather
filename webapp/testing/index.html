@@ -62,7 +62,7 @@
                         <option value="gb">United Kingdom</option>
                         <option value="us">United States</option>
                     </select>
-                    <button type="submit" id="add-city-btn" aria-label="Add city to your list">
+                    <button type="submit" id="add-city-btn">
                         Add City
                     </button>
                 </div>
@@ -149,7 +149,7 @@
                         <option value="Wisconsin">Wisconsin</option>
                         <option value="Wyoming">Wyoming</option>
                     </select>
-                    <button type="submit" id="choose-state-btn" aria-label="Load cities for selected state">
+                    <button type="submit" id="choose-state-btn">
                         Choose State
                     </button>
                 </div>
@@ -169,7 +169,7 @@
                 <h2 id="your-cities-heading">Your Cities</h2>
                 <div class="controls">
                     <div class="view-menu-container">
-                        <button id="view-menu-btn" aria-haspopup="menu" aria-expanded="false" aria-label="Choose view style">
+                        <button id="view-menu-btn" aria-haspopup="menu" aria-expanded="false">
                             <span id="current-view-label">View: Flat</span> <span aria-hidden="true">▼</span>
                         </button>
                         <ul id="view-menu" role="menu" aria-labelledby="view-menu-btn" hidden>
@@ -184,10 +184,10 @@
                             </li>
                         </ul>
                     </div>
-                    <button id="configure-btn" aria-label="Configure weather display settings">
+                    <button id="configure-btn">
                         <span aria-hidden="true">⚙️</span> Configure
                     </button>
-                    <button id="refresh-all-btn" aria-label="Refresh all city weather data">
+                    <button id="refresh-all-btn">
                         <span aria-hidden="true">🔄</span> Refresh All
                     </button>
                 </div>
@@ -227,6 +227,9 @@
                     </button>
                     <button role="tab" aria-selected="false" aria-controls="units-panel" id="units-tab" tabindex="-1">
                         Units
+                    </button>
+                    <button role="tab" aria-selected="false" aria-controls="reset-panel" id="reset-tab" tabindex="-1">
+                        Reset
                     </button>
                 </div>
 
@@ -285,6 +288,12 @@
                             <!-- Populated by JavaScript -->
                         </div>
                     </fieldset>
+                    <fieldset>
+                        <legend>Default View</legend>
+                        <label><input type="radio" name="default-view" value="flat" checked> Flat (Card View)</label>
+                        <label><input type="radio" name="default-view" value="table"> Table View</label>
+                        <label><input type="radio" name="default-view" value="list"> List View</label>
+                    </fieldset>
                 </div>
 
                 <div id="units-panel" role="tabpanel" aria-labelledby="units-tab" class="tab-panel" hidden>
@@ -312,6 +321,33 @@
                         <legend>Distance/Visibility</legend>
                         <label><input type="radio" name="distance-unit" value="mi" checked> Miles (mi)</label>
                         <label><input type="radio" name="distance-unit" value="km"> Kilometers (km)</label>
+                    </fieldset>
+                </div>
+
+                <div id="reset-panel" role="tabpanel" aria-labelledby="reset-tab" class="tab-panel" hidden>
+                    <fieldset>
+                        <legend>Reset Options</legend>
+                        <p style="margin-bottom: 1rem;">Use these options to clear your saved data and start fresh.</p>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <div>
+                                <button type="button" id="reset-cities-btn" class="reset-btn" style="width: 100%; min-height: 44px;">
+                                    Clear All Cities
+                                </button>
+                                <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">Remove all cities from your saved list. Your configuration settings will be preserved.</p>
+                            </div>
+                            <div>
+                                <button type="button" id="reset-settings-btn" class="reset-btn" style="width: 100%; min-height: 44px;">
+                                    Reset All Settings to Default
+                                </button>
+                                <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">Reset all configuration options to their default values. Your saved cities will be preserved.</p>
+                            </div>
+                            <div>
+                                <button type="button" id="reset-all-btn" class="reset-btn" style="width: 100%; min-height: 44px;">
+                                    Reset Everything
+                                </button>
+                                <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">Clear all cities and reset all settings to default. This is like clearing your browser cache.</p>
+                            </div>
+                        </div>
                     </fieldset>
                 </div>
 
