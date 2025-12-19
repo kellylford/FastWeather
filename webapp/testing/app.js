@@ -592,8 +592,8 @@ async function displayStateCities(stateName, cityNames, totalCount = null) {
     
     const displayTotal = totalCount || cityNames.length;
     
-    // Hide state selector and update heading
-    stateSelectorSection.hidden = true;
+    // Keep state selector visible and update heading
+    stateSelectorSection.hidden = false;
     heading.innerHTML = `Cities in ${stateName} <button id="back-to-your-cities-btn" class="back-btn" aria-label="Return to your cities list">← Back to Your Cities</button>`;
     container.innerHTML = '<p class="loading-text">Loading weather data... (0/' + cityNames.length + ')</p>';
     cityListSection.hidden = false;
