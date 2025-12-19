@@ -91,9 +91,11 @@ let currentCityMatches = [];
 let focusReturnElement = null;
 let currentView = 'flat'; // 'flat', 'table', or 'list'
 let listNavigationHandler = null;
-let cachedCityCoordinates = null; // Cache for pre-geocoded city coordinates
+let cachedCityCoordinates = null; // Cache for pre-geocoded US city coordinates
+let cachedInternationalCoordinates = null; // Cache for pre-geocoded international city coordinates
 let currentStateCities = null; // Store current state cities being viewed
 let currentStateName = null; // Store current state name
+let currentLocationType = 'us'; // 'us' or 'international'
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
@@ -121,6 +123,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('About to load cached city coordinates...');
     await loadCachedCityCoordinates();
     console.log('After loadCachedCityCoordinates, cachedCityCoordinates is:', cachedCityCoordinates ? 'LOADED' : 'NULL/UNDEFINED');
+    
+    // Load cached international city coordinates
+    console.log('About to load cached international city coordinates...');
+    await loadCachedInternationalCoordinates();
+    console.log('After loadCachedInternationalCoordinates, cachedInternationalCoordinates is:', cachedInternationalCoordinates ? 'LOADED' : 'NULL/UNDEFINED');
     
     announceToScreenReader('FastWeather application loaded');
     console.log('=== FastWeather Initialization Complete ===');
@@ -160,15 +167,67 @@ async function loadCachedCityCoordinates() {
     }
 }
 
+// Load international cached city coordinates
+async function loadCachedInternationalCoordinates() {
+    try {
+        console.log('Fetching international-cities-cached.json...');
+        const response = await fetch('international-cities-cached.json');
+        console.log('Fetch response:', response.status, response.statusText);
+        if (response.ok) {
+            cachedInternationalCoordinates = await response.json();
+            const countryCount = cachedInternationalCoordinates ? Object.keys(cachedInternationalCoordinates).length : 0;
+            const countries = cachedInternationalCoordinates ? Object.keys(cachedInternationalCoordinates).join(', ') : 'none';
+            console.log(`✓ Successfully loaded cached international city coordinates for ${countryCount} countries: ${countries}`);
+        } else {
+            console.error(`❌ Failed to fetch cached international city coordinates: HTTP ${response.status} ${response.statusText}`);
+        }
+    } catch (error) {
+        console.error('❌ Could not load cached international city coordinates:', error);
+        console.error('Error details:', error.message, error.stack);
+    }
+}
+
+// Switch between U.S. States and International tabs
+function switchLocationTab(type) {
+    currentLocationType = type;
+    
+    const usTab = document.getElementById('us-states-tab');
+    const intlTab = document.getElementById('international-tab');
+    const usPanel = document.getElementById('us-states-panel');
+    const intlPanel = document.getElementById('international-panel');
+    
+    if (type === 'us') {
+        usTab.setAttribute('aria-selected', 'true');
+        usTab.setAttribute('tabindex', '0');
+        intlTab.setAttribute('aria-selected', 'false');
+        intlTab.setAttribute('tabindex', '-1');
+        usPanel.hidden = false;
+        intlPanel.hidden = true;
+    } else {
+        usTab.setAttribute('aria-selected', 'false');
+        usTab.setAttribute('tabindex', '-1');
+        intlTab.setAttribute('aria-selected', 'true');
+        intlTab.setAttribute('tabindex', '0');
+        usPanel.hidden = true;
+        intlPanel.hidden = false;
+    }
+    
+    // Clear error messages when switching tabs
+    const errorDiv = document.getElementById('state-selector-error');
+    clearError(errorDiv);
+}
+
 // Manual cache reload function for debugging
 window.reloadCache = async function() {
-    console.log('Manually reloading cache...');
+    console.log('Manually reloading caches...');
     await loadCachedCityCoordinates();
+    await loadCachedInternationalCoordinates();
     if (cachedCityCoordinates) {
-        console.log('✓ Cache reloaded successfully');
+        console.log('✓ US cache reloaded successfully');
         window.debugCache();
-    } else {
-        console.error('❌ Cache still not loaded');
+    }
+    if (cachedInternationalCoordinates) {
+        console.log('✓ International cache reloaded successfully');
     }
 };
 
@@ -176,6 +235,10 @@ window.reloadCache = async function() {
 function initializeEventListeners() {
     // Add city form
     document.getElementById('add-city-form').addEventListener('submit', handleAddCity);
+    
+    // Location tabs (U.S. States / International)
+    document.getElementById('us-states-tab').addEventListener('click', () => switchLocationTab('us'));
+    document.getElementById('international-tab').addEventListener('click', () => switchLocationTab('international'));
     
     // State selector form
     document.getElementById('state-selector-form').addEventListener('submit', handleStateSelection);
@@ -567,41 +630,77 @@ async function addCity(cityData, skipRender = false) {
     return true;
 }
 
-// Handle state selection
+// Handle state/country selection
 async function handleStateSelection(e) {
     e.preventDefault();
     
-    const stateSelect = document.getElementById('state-select');
-    const stateName = stateSelect.value;
     const errorDiv = document.getElementById('state-selector-error');
     
-    console.log('State selected:', stateName);
-    
-    if (!stateName) {
-        showError(errorDiv, 'Please select a state');
-        return;
+    if (currentLocationType === 'us') {
+        // Handle U.S. state selection
+        const stateSelect = document.getElementById('state-select');
+        const stateName = stateSelect.value;
+        
+        console.log('State selected:', stateName);
+        
+        if (!stateName) {
+            showError(errorDiv, 'Please select a state');
+            return;
+        }
+        
+        clearError(errorDiv);
+        
+        // Check if US_CITIES_BY_STATE is defined
+        if (typeof US_CITIES_BY_STATE === 'undefined') {
+            console.error('US_CITIES_BY_STATE not loaded');
+            showError(errorDiv, 'City data not loaded. Please refresh the page.');
+            return;
+        }
+        
+        // Get cities for the selected state
+        const stateCities = US_CITIES_BY_STATE[stateName];
+        
+        if (!stateCities || stateCities.length === 0) {
+            showError(errorDiv, 'No cities found for this state');
+            return;
+        }
+        
+        // Load all cities
+        console.log('Loading all', stateCities.length, 'cities for', stateName);
+        displayLocationCities(stateName, stateCities, stateCities.length, 'us');
+    } else {
+        // Handle international country selection
+        const countrySelect = document.getElementById('country-select-browse');
+        const countryName = countrySelect.value;
+        
+        console.log('Country selected:', countryName);
+        
+        if (!countryName) {
+            showError(errorDiv, 'Please select a country');
+            return;
+        }
+        
+        clearError(errorDiv);
+        
+        // Check if INTERNATIONAL_CITIES_BY_COUNTRY is defined
+        if (typeof INTERNATIONAL_CITIES_BY_COUNTRY === 'undefined') {
+            console.error('INTERNATIONAL_CITIES_BY_COUNTRY not loaded');
+            showError(errorDiv, 'City data not loaded. Please refresh the page.');
+            return;
+        }
+        
+        // Get cities for the selected country
+        const countryCities = INTERNATIONAL_CITIES_BY_COUNTRY[countryName];
+        
+        if (!countryCities || countryCities.length === 0) {
+            showError(errorDiv, 'No cities found for this country');
+            return;
+        }
+        
+        // Load all cities
+        console.log('Loading all', countryCities.length, 'cities for', countryName);
+        displayLocationCities(countryName, countryCities, countryCities.length, 'international');
     }
-    
-    clearError(errorDiv);
-    
-    // Check if US_CITIES_BY_STATE is defined
-    if (typeof US_CITIES_BY_STATE === 'undefined') {
-        console.error('US_CITIES_BY_STATE not loaded');
-        showError(errorDiv, 'City data not loaded. Please refresh the page.');
-        return;
-    }
-    
-    // Get cities for the selected state
-    const stateCities = US_CITIES_BY_STATE[stateName];
-    
-    if (!stateCities || stateCities.length === 0) {
-        showError(errorDiv, 'No cities found for this state');
-        return;
-    }
-    
-    // Load all 50 cities
-    console.log('Loading all', stateCities.length, 'cities');
-    displayStateCities(stateName, stateCities, stateCities.length);
 }
 
 // Show your cities (return from state browsing)
@@ -625,19 +724,20 @@ function showYourCities() {
     announceToScreenReader('Returned to your cities list');
 }
 
-// Display state cities
-async function displayStateCities(stateName, cityNames, totalCount = null) {
-    // Hide state selector section and show city list section with state cities
+// Display location cities (US state or international country)
+async function displayLocationCities(locationName, cityNames, totalCount = null, locationType = 'us') {
+    // Hide state selector section and show city list section with location cities
     const stateSelectorSection = document.querySelector('.state-selector-section');
     const cityListSection = document.querySelector('.city-list-section');
     const heading = document.getElementById('your-cities-heading');
     const container = document.getElementById('city-list');
     
     const displayTotal = totalCount || cityNames.length;
+    const locationLabel = locationType === 'us' ? 'State' : 'Country';
     
     // Keep state selector visible and update heading
     stateSelectorSection.hidden = false;
-    heading.innerHTML = `Cities in ${stateName} <button id="back-to-your-cities-btn" class="back-btn">← Back to Your Cities</button>`;
+    heading.innerHTML = `Cities in ${locationName} <button id="back-to-your-cities-btn" class="back-btn">← Back to Your Cities</button>`;
     container.innerHTML = '<p class="loading-text">Loading weather data... (0/' + cityNames.length + ')</p>';
     cityListSection.hidden = false;
     
@@ -646,43 +746,42 @@ async function displayStateCities(stateName, cityNames, totalCount = null) {
         showYourCities();
     });
     
-    console.log('displayStateCities called with', cityNames.length, 'cities');
-    console.log('Cached data available:', cachedCityCoordinates ? Object.keys(cachedCityCoordinates) : 'none');
-    console.log(`Looking for cached data for state: "${stateName}" (length: ${stateName.length}, charCodes: ${[...stateName].map(c => c.charCodeAt(0)).join(',')})`);
+    console.log(`displayLocationCities called with ${cityNames.length} cities for ${locationName} (${locationType})`);
     
-    // Debug: Check exact match
-    if (cachedCityCoordinates) {
-        const cacheKeys = Object.keys(cachedCityCoordinates);
-        console.log('Exact match test:');
-        cacheKeys.forEach(key => {
-            if (key.toLowerCase().includes('alabama') || stateName.toLowerCase().includes('alabama')) {
-                console.log(`  Cache key "${key}" (${key.length} chars) === "${stateName}" (${stateName.length} chars)? ${key === stateName}`);
-            }
-        });
-    }
+    // Select appropriate cache based on location type
+    const cache = locationType === 'us' ? cachedCityCoordinates : cachedInternationalCoordinates;
+    const cacheLabel = locationType === 'us' ? 'US states' : 'countries';
     
-    console.log(`Cache has "${stateName}":`, cachedCityCoordinates && cachedCityCoordinates[stateName] ? 'YES' : 'NO');
+    console.log('Cached data available:', cache ? Object.keys(cache).join(', ') : 'none');
+    console.log(`Looking for cached data for ${locationLabel}: "${locationName}" (length: ${locationName.length}, charCodes: ${[...locationName].map(c => c.charCodeAt(0)).join(',')})`);
+    console.log(`Cache has "${locationName}":`, cache && cache[locationName] ? 'YES' : 'NO');
     
     const citiesData = [];
     
-    // Check if we have cached coordinates for this state
-    const useCached = cachedCityCoordinates && cachedCityCoordinates[stateName];
+    // Check if we have cached coordinates for this location
+    const useCached = cache && cache[locationName];
     
     if (useCached) {
         // Use cached coordinates - much faster!
-        console.log(`✓ Using cached coordinates for ${stateName} (${cachedCityCoordinates[stateName].length} cities in cache)`);
+        console.log(`✓ Using cached coordinates for ${locationName} (${cache[locationName].length} cities in cache)`);
         
         // Build city info objects with coordinates
         const cityInfos = [];
         for (const cityName of cityNames) {
-            const cachedCity = cachedCityCoordinates[stateName].find(c => c.name === cityName);
+            const cachedCity = cache[locationName].find(c => c.name === cityName);
             
             if (cachedCity) {
-                const state = cachedCity.state || stateName;
-                const country = cachedCity.country || 'United States';
+                const state = cachedCity.state || '';
+                const country = locationType === 'us' ? 'United States' : locationName;
+                
+                // For international cities, use clean display without native state/country names
+                const display = locationType === 'us' 
+                    ? `${cityName}, ${state}, ${country}`
+                    : `${cityName}, ${country}`;
+                
                 cityInfos.push({
                     name: cityName,
-                    display: `${cityName}, ${state}, ${country}`,
+                    display: display,
                     state: state,
                     country: country,
                     lat: cachedCity.lat,
@@ -716,27 +815,34 @@ async function displayStateCities(stateName, cityNames, totalCount = null) {
         
     } else {
         // Fall back to geocoding if no cached data
-        console.warn(`⚠ No cached data found for "${stateName}", falling back to geocoding (this will be slow)`);
+        console.warn(`⚠ No cached data found for "${locationName}", falling back to geocoding (this will be slow)`);
         console.log('Possible reasons:');
         console.log('  1. JSON file not loaded (check network tab)');
-        console.log('  2. State name mismatch (check spelling/capitalization)');
-        console.log('  3. State not yet added to cache');
-        if (cachedCityCoordinates) {
-            console.log('  Available states:', Object.keys(cachedCityCoordinates));
+        console.log('  2. Location name mismatch (check spelling/capitalization)');
+        console.log('  3. Location not yet added to cache');
+        if (cache) {
+            console.log(`  Available ${cacheLabel}:`, Object.keys(cache));
         }
         const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+        const countryCode = locationType === 'us' ? 'us' : '';
         
         for (let i = 0; i < cityNames.length; i++) {
             const cityName = cityNames[i];
             try {
-                const fullName = `${cityName}, ${stateName}`;
-                const matches = await geocodeCity(fullName, 'us');
+                const fullName = `${cityName}, ${locationName}`;
+                const matches = await geocodeCity(fullName, countryCode);
                 if (matches && matches.length > 0) {
+                    const country = locationType === 'us' ? 'United States' : locationName;
+                    // For international cities, use clean display format
+                    const display = locationType === 'us'
+                        ? matches[0].display
+                        : `${cityName}, ${country}`;
+                    
                     const cityInfo = {
                         name: cityName,
-                        display: matches[0].display,
-                        state: stateName,
-                        country: 'United States',
+                        display: display,
+                        state: locationType === 'us' ? locationName : '',
+                        country: country,
                         lat: matches[0].lat,
                         lon: matches[0].lon,
                         weather: null
@@ -772,13 +878,13 @@ async function displayStateCities(stateName, cityNames, totalCount = null) {
     // Render the cities list
     console.log('Rendering', citiesData.length, 'cities');
     if (citiesData.length > 0) {
-        // Store state cities for view switching
+        // Store location cities for view switching
         currentStateCities = citiesData;
-        currentStateName = stateName;
+        currentStateName = locationName;
         
-        heading.innerHTML = `Cities in ${stateName} (${citiesData.length}) <button id="back-to-your-cities-btn" class="back-btn">← Back to Your Cities</button>`;
+        heading.innerHTML = `Cities in ${locationName} (${citiesData.length}) <button id="back-to-your-cities-btn" class="back-btn">← Back to Your Cities</button>`;
         renderStateCitiesWithWeather(container, citiesData);
-        announceToScreenReader(`Loaded ${citiesData.length} cities with weather for ${stateName}`);
+        announceToScreenReader(`Loaded ${citiesData.length} cities with weather for ${locationName}`);
         
         // Re-attach event listener for back button
         document.getElementById('back-to-your-cities-btn').addEventListener('click', () => {

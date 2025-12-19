@@ -1,0 +1,5824 @@
+{
+  "Argentina": [
+    {
+      "name": "Buenos Aires",
+      "state": "Ciudad Autónoma de Buenos Aires",
+      "country": "Argentina",
+      "lat": -34.6095579,
+      "lon": -58.3887904
+    },
+    {
+      "name": "Córdoba",
+      "state": "Córdoba",
+      "country": "Argentina",
+      "lat": -31.4166867,
+      "lon": -64.1834193
+    },
+    {
+      "name": "Rosario",
+      "state": "Santa Fe",
+      "country": "Argentina",
+      "lat": -32.9593609,
+      "lon": -60.6617024
+    },
+    {
+      "name": "Mendoza",
+      "state": "Mendoza",
+      "country": "Argentina",
+      "lat": -34.5970325,
+      "lon": -68.7304797
+    },
+    {
+      "name": "La Plata",
+      "state": "Buenos Aires",
+      "country": "Argentina",
+      "lat": -34.9206797,
+      "lon": -57.9537638
+    },
+    {
+      "name": "San Miguel de Tucumán",
+      "state": "Tucumán",
+      "country": "Argentina",
+      "lat": -26.8303703,
+      "lon": -65.2038133
+    },
+    {
+      "name": "Mar del Plata",
+      "state": "Buenos Aires",
+      "country": "Argentina",
+      "lat": -37.9976168,
+      "lon": -57.5482079
+    },
+    {
+      "name": "Salta",
+      "state": "Salta",
+      "country": "Argentina",
+      "lat": -25.2269908,
+      "lon": -64.5911956
+    },
+    {
+      "name": "Santa Fe",
+      "state": "Santa Fe",
+      "country": "Argentina",
+      "lat": -30.3154739,
+      "lon": -61.1645076
+    },
+    {
+      "name": "San Juan",
+      "state": "San Juan",
+      "country": "Argentina",
+      "lat": -30.7054363,
+      "lon": -69.1988222
+    },
+    {
+      "name": "Resistencia",
+      "state": "Chaco",
+      "country": "Argentina",
+      "lat": -27.6048829,
+      "lon": -59.1932003
+    },
+    {
+      "name": "Santiago del Estero",
+      "state": "Santiago del Estero",
+      "country": "Argentina",
+      "lat": -27.6431016,
+      "lon": -63.5408542
+    },
+    {
+      "name": "Corrientes",
+      "state": "Corrientes",
+      "country": "Argentina",
+      "lat": -29.0177384,
+      "lon": -57.8869739
+    },
+    {
+      "name": "Posadas",
+      "state": "Misiones",
+      "country": "Argentina",
+      "lat": -27.4035083,
+      "lon": -55.9497118
+    },
+    {
+      "name": "Bahía Blanca",
+      "state": "Buenos Aires",
+      "country": "Argentina",
+      "lat": -38.7176522,
+      "lon": -62.2654871
+    },
+    {
+      "name": "Paraná",
+      "state": "",
+      "country": "Argentina",
+      "lat": -31.7330145,
+      "lon": -60.5298511
+    },
+    {
+      "name": "Neuquén",
+      "state": "Neuquén",
+      "country": "Argentina",
+      "lat": -38.8502546,
+      "lon": -69.832275
+    },
+    {
+      "name": "Formosa",
+      "state": "Formosa",
+      "country": "Argentina",
+      "lat": -24.5955306,
+      "lon": -60.4289718
+    },
+    {
+      "name": "San Salvador de Jujuy",
+      "state": "Jujuy",
+      "country": "Argentina",
+      "lat": -24.1852569,
+      "lon": -65.2994789
+    },
+    {
+      "name": "La Rioja",
+      "state": "La Rioja",
+      "country": "Argentina",
+      "lat": -29.7824554,
+      "lon": -67.1147124
+    }
+  ],
+  "Australia": [
+    {
+      "name": "Sydney",
+      "state": "New South Wales",
+      "country": "Australia",
+      "lat": -33.8698439,
+      "lon": 151.2082848
+    },
+    {
+      "name": "Melbourne",
+      "state": "Victoria",
+      "country": "Australia",
+      "lat": -37.8142454,
+      "lon": 144.9631732
+    },
+    {
+      "name": "Brisbane",
+      "state": "Queensland",
+      "country": "Australia",
+      "lat": -27.4689623,
+      "lon": 153.0235009
+    },
+    {
+      "name": "Perth",
+      "state": "Western Australia",
+      "country": "Australia",
+      "lat": -31.9558967,
+      "lon": 115.8605784
+    },
+    {
+      "name": "Adelaide",
+      "state": "South Australia",
+      "country": "Australia",
+      "lat": -34.9281805,
+      "lon": 138.5999312
+    },
+    {
+      "name": "Gold Coast",
+      "state": "Queensland",
+      "country": "Australia",
+      "lat": -28.0023731,
+      "lon": 153.4145987
+    },
+    {
+      "name": "Newcastle",
+      "state": "New South Wales",
+      "country": "Australia",
+      "lat": -32.9192953,
+      "lon": 151.7795348
+    },
+    {
+      "name": "Canberra",
+      "state": "",
+      "country": "Australia",
+      "lat": -35.2975906,
+      "lon": 149.1012676
+    },
+    {
+      "name": "Wollongong",
+      "state": "New South Wales",
+      "country": "Australia",
+      "lat": -34.4243941,
+      "lon": 150.89385
+    },
+    {
+      "name": "Hobart",
+      "state": "Tasmania",
+      "country": "Australia",
+      "lat": -42.8825088,
+      "lon": 147.3281233
+    },
+    {
+      "name": "Geelong",
+      "state": "Victoria",
+      "country": "Australia",
+      "lat": -38.1493248,
+      "lon": 144.3598241
+    },
+    {
+      "name": "Townsville",
+      "state": "Queensland",
+      "country": "Australia",
+      "lat": -19.2569391,
+      "lon": 146.8239537
+    },
+    {
+      "name": "Cairns",
+      "state": "Queensland",
+      "country": "Australia",
+      "lat": -16.9206657,
+      "lon": 145.7721854
+    },
+    {
+      "name": "Darwin",
+      "state": "",
+      "country": "Australia",
+      "lat": -12.46044,
+      "lon": 130.8410469
+    },
+    {
+      "name": "Toowoomba",
+      "state": "Queensland",
+      "country": "Australia",
+      "lat": -27.5610193,
+      "lon": 151.953351
+    },
+    {
+      "name": "Ballarat",
+      "state": "Victoria",
+      "country": "Australia",
+      "lat": -37.5623013,
+      "lon": 143.8605645
+    },
+    {
+      "name": "Bendigo",
+      "state": "Victoria",
+      "country": "Australia",
+      "lat": -36.7590183,
+      "lon": 144.2826718
+    },
+    {
+      "name": "Albury",
+      "state": "New South Wales",
+      "country": "Australia",
+      "lat": -36.0737734,
+      "lon": 146.9135265
+    },
+    {
+      "name": "Launceston",
+      "state": "Tasmania",
+      "country": "Australia",
+      "lat": -41.4340813,
+      "lon": 147.1373496
+    },
+    {
+      "name": "Mackay",
+      "state": "Queensland",
+      "country": "Australia",
+      "lat": -21.141956,
+      "lon": 149.1865149
+    }
+  ],
+  "Austria": [
+    {
+      "name": "Vienna",
+      "state": "",
+      "country": "Österreich",
+      "lat": 48.2083537,
+      "lon": 16.3725042
+    },
+    {
+      "name": "Graz",
+      "state": "Steiermark",
+      "country": "Österreich",
+      "lat": 47.0708678,
+      "lon": 15.4382786
+    },
+    {
+      "name": "Linz",
+      "state": "Oberösterreich",
+      "country": "Österreich",
+      "lat": 48.3059078,
+      "lon": 14.286198
+    },
+    {
+      "name": "Salzburg",
+      "state": "Salzburg",
+      "country": "Österreich",
+      "lat": 47.7981346,
+      "lon": 13.0464806
+    },
+    {
+      "name": "Innsbruck",
+      "state": "Tirol",
+      "country": "Österreich",
+      "lat": 47.2654296,
+      "lon": 11.3927685
+    },
+    {
+      "name": "Klagenfurt",
+      "state": "Kärnten",
+      "country": "Österreich",
+      "lat": 46.623943,
+      "lon": 14.3075976
+    },
+    {
+      "name": "Villach",
+      "state": "Kärnten",
+      "country": "Österreich",
+      "lat": 46.6167284,
+      "lon": 13.8500268
+    },
+    {
+      "name": "Wels",
+      "state": "Oberösterreich",
+      "country": "Österreich",
+      "lat": 48.1565472,
+      "lon": 14.0243752
+    },
+    {
+      "name": "Sankt Pölten",
+      "state": "Niederösterreich",
+      "country": "Österreich",
+      "lat": 48.2043985,
+      "lon": 15.6229118
+    },
+    {
+      "name": "Dornbirn",
+      "state": "Vorarlberg",
+      "country": "Österreich",
+      "lat": 47.4136351,
+      "lon": 9.7423762
+    },
+    {
+      "name": "Wiener Neustadt",
+      "state": "Niederösterreich",
+      "country": "Österreich",
+      "lat": 47.8131847,
+      "lon": 16.2441166
+    },
+    {
+      "name": "Steyr",
+      "state": "Oberösterreich",
+      "country": "Österreich",
+      "lat": 48.0390046,
+      "lon": 14.4191276
+    },
+    {
+      "name": "Feldkirch",
+      "state": "Vorarlberg",
+      "country": "Österreich",
+      "lat": 47.2375671,
+      "lon": 9.5981724
+    },
+    {
+      "name": "Bregenz",
+      "state": "Vorarlberg",
+      "country": "Österreich",
+      "lat": 47.5025779,
+      "lon": 9.7472924
+    },
+    {
+      "name": "Leonding",
+      "state": "Oberösterreich",
+      "country": "Österreich",
+      "lat": 48.2793314,
+      "lon": 14.2487457
+    },
+    {
+      "name": "Klosterneuburg",
+      "state": "Niederösterreich",
+      "country": "Österreich",
+      "lat": 48.30499,
+      "lon": 16.323756
+    },
+    {
+      "name": "Baden",
+      "state": "Niederösterreich",
+      "country": "Österreich",
+      "lat": 48.0076713,
+      "lon": 16.2343693
+    },
+    {
+      "name": "Wolfsberg",
+      "state": "Kärnten",
+      "country": "Österreich",
+      "lat": 46.8390583,
+      "lon": 14.8452061
+    },
+    {
+      "name": "Leoben",
+      "state": "Steiermark",
+      "country": "Österreich",
+      "lat": 47.3805128,
+      "lon": 15.0947756
+    },
+    {
+      "name": "Krems",
+      "state": "Niederösterreich",
+      "country": "Österreich",
+      "lat": 48.4108382,
+      "lon": 15.6003717
+    }
+  ],
+  "Belgium": [
+    {
+      "name": "Brussels",
+      "state": "Région de Bruxelles-Capitale - Brussels Hoofdstedelijk Gewest",
+      "country": "België / Belgique / Belgien",
+      "lat": 50.8465573,
+      "lon": 4.351697
+    },
+    {
+      "name": "Antwerp",
+      "state": "Antwerpen",
+      "country": "België / Belgique / Belgien",
+      "lat": 51.2211097,
+      "lon": 4.3997081
+    },
+    {
+      "name": "Ghent",
+      "state": "Oost-Vlaanderen",
+      "country": "België / Belgique / Belgien",
+      "lat": 51.0538286,
+      "lon": 3.7250121
+    },
+    {
+      "name": "Charleroi",
+      "state": "Hainaut",
+      "country": "België / Belgique / Belgien",
+      "lat": 50.4116233,
+      "lon": 4.444528
+    },
+    {
+      "name": "Liège",
+      "state": "Liège",
+      "country": "België / Belgique / Belgien",
+      "lat": 50.6450944,
+      "lon": 5.5736112
+    },
+    {
+      "name": "Bruges",
+      "state": "West-Vlaanderen",
+      "country": "België / Belgique / Belgien",
+      "lat": 51.2085526,
+      "lon": 3.226772
+    },
+    {
+      "name": "Namur",
+      "state": "Namur",
+      "country": "België / Belgique / Belgien",
+      "lat": 50.4665284,
+      "lon": 4.8661892
+    },
+    {
+      "name": "Leuven",
+      "state": "Vlaams-Brabant",
+      "country": "België / Belgique / Belgien",
+      "lat": 50.879202,
+      "lon": 4.7011675
+    },
+    {
+      "name": "Mons",
+      "state": "Hainaut",
+      "country": "België / Belgique / Belgien",
+      "lat": 50.4549568,
+      "lon": 3.951958
+    },
+    {
+      "name": "Mechelen",
+      "state": "Antwerpen",
+      "country": "België / Belgique / Belgien",
+      "lat": 51.0281381,
+      "lon": 4.4803453
+    },
+    {
+      "name": "Aalst",
+      "state": "Oost-Vlaanderen",
+      "country": "België / Belgique / Belgien",
+      "lat": 50.9383226,
+      "lon": 4.0392147
+    },
+    {
+      "name": "La Louvière",
+      "state": "Hainaut",
+      "country": "België / Belgique / Belgien",
+      "lat": 50.4793576,
+      "lon": 4.18563
+    },
+    {
+      "name": "Kortrijk",
+      "state": "West-Vlaanderen",
+      "country": "België / Belgique / Belgien",
+      "lat": 50.8276429,
+      "lon": 3.2659884
+    },
+    {
+      "name": "Hasselt",
+      "state": "Limburg",
+      "country": "België / Belgique / Belgien",
+      "lat": 50.9303735,
+      "lon": 5.3378043
+    },
+    {
+      "name": "Sint-Niklaas",
+      "state": "Oost-Vlaanderen",
+      "country": "België / Belgique / Belgien",
+      "lat": 51.1646685,
+      "lon": 4.1395124
+    },
+    {
+      "name": "Ostend",
+      "state": "West-Vlaanderen",
+      "country": "België / Belgique / Belgien",
+      "lat": 51.2258565,
+      "lon": 2.919496
+    },
+    {
+      "name": "Genk",
+      "state": "Limburg",
+      "country": "België / Belgique / Belgien",
+      "lat": 50.9667627,
+      "lon": 5.4833953
+    },
+    {
+      "name": "Seraing",
+      "state": "Liège",
+      "country": "België / Belgique / Belgien",
+      "lat": 50.6152381,
+      "lon": 5.5089437
+    },
+    {
+      "name": "Roeselare",
+      "state": "West-Vlaanderen",
+      "country": "België / Belgique / Belgien",
+      "lat": 50.9444948,
+      "lon": 3.124765
+    },
+    {
+      "name": "Verviers",
+      "state": "Liège",
+      "country": "België / Belgique / Belgien",
+      "lat": 50.59324,
+      "lon": 5.867828
+    }
+  ],
+  "Brazil": [
+    {
+      "name": "São Paulo",
+      "state": "São Paulo",
+      "country": "Brasil",
+      "lat": -23.5506507,
+      "lon": -46.6333824
+    },
+    {
+      "name": "Rio de Janeiro",
+      "state": "Rio de Janeiro",
+      "country": "Brasil",
+      "lat": -22.9110137,
+      "lon": -43.2093727
+    },
+    {
+      "name": "Brasília",
+      "state": "",
+      "country": "Brasil",
+      "lat": -10.3333333,
+      "lon": -53.2
+    },
+    {
+      "name": "Salvador",
+      "state": "Bahia",
+      "country": "Brasil",
+      "lat": -12.9822499,
+      "lon": -38.4812772
+    },
+    {
+      "name": "Fortaleza",
+      "state": "Ceará",
+      "country": "Brasil",
+      "lat": -3.7304512,
+      "lon": -38.5217989
+    },
+    {
+      "name": "Belo Horizonte",
+      "state": "Minas Gerais",
+      "country": "Brasil",
+      "lat": -19.9227318,
+      "lon": -43.9450948
+    },
+    {
+      "name": "Manaus",
+      "state": "Amazonas",
+      "country": "Brasil",
+      "lat": -3.1316333,
+      "lon": -59.9825041
+    },
+    {
+      "name": "Curitiba",
+      "state": "Paraná",
+      "country": "Brasil",
+      "lat": -25.4295963,
+      "lon": -49.2712724
+    },
+    {
+      "name": "Recife",
+      "state": "Pernambuco",
+      "country": "Brasil",
+      "lat": -8.0584933,
+      "lon": -34.8848193
+    },
+    {
+      "name": "Porto Alegre",
+      "state": "Rio Grande do Sul",
+      "country": "Brasil",
+      "lat": -30.0324999,
+      "lon": -51.2303767
+    },
+    {
+      "name": "Belém",
+      "state": "Pará",
+      "country": "Brasil",
+      "lat": -1.45056,
+      "lon": -48.4682453
+    },
+    {
+      "name": "Goiânia",
+      "state": "Goiás",
+      "country": "Brasil",
+      "lat": -16.680882,
+      "lon": -49.2532691
+    },
+    {
+      "name": "Guarulhos",
+      "state": "São Paulo",
+      "country": "Brasil",
+      "lat": -23.4675941,
+      "lon": -46.5277704
+    },
+    {
+      "name": "Campinas",
+      "state": "São Paulo",
+      "country": "Brasil",
+      "lat": -22.9056391,
+      "lon": -47.059564
+    },
+    {
+      "name": "São Luís",
+      "state": "Maranhão",
+      "country": "Brasil",
+      "lat": -2.5295265,
+      "lon": -44.2963942
+    },
+    {
+      "name": "São Gonçalo",
+      "state": "Rio de Janeiro",
+      "country": "Brasil",
+      "lat": -22.821635,
+      "lon": -42.9956797
+    },
+    {
+      "name": "Maceió",
+      "state": "Alagoas",
+      "country": "Brasil",
+      "lat": -9.6476843,
+      "lon": -35.7339264
+    },
+    {
+      "name": "Duque de Caxias",
+      "state": "Rio de Janeiro",
+      "country": "Brasil",
+      "lat": -22.7896225,
+      "lon": -43.309929
+    },
+    {
+      "name": "Natal",
+      "state": "Rio Grande do Norte",
+      "country": "Brasil",
+      "lat": -5.805398,
+      "lon": -35.2080905
+    },
+    {
+      "name": "Campo Grande",
+      "state": "Mato Grosso do Sul",
+      "country": "Brasil",
+      "lat": -20.4640173,
+      "lon": -54.6162947
+    }
+  ],
+  "Canada": [
+    {
+      "name": "Toronto",
+      "state": "Ontario",
+      "country": "Canada",
+      "lat": 43.6534817,
+      "lon": -79.3839347
+    },
+    {
+      "name": "Montreal",
+      "state": "Québec",
+      "country": "Canada",
+      "lat": 45.5031824,
+      "lon": -73.5698065
+    },
+    {
+      "name": "Vancouver",
+      "state": "British Columbia",
+      "country": "Canada",
+      "lat": 49.2608724,
+      "lon": -123.113952
+    },
+    {
+      "name": "Calgary",
+      "state": "Alberta",
+      "country": "Canada",
+      "lat": 51.0456064,
+      "lon": -114.057541
+    },
+    {
+      "name": "Edmonton",
+      "state": "Alberta",
+      "country": "Canada",
+      "lat": 53.5462055,
+      "lon": -113.491241
+    },
+    {
+      "name": "Ottawa",
+      "state": "Ontario",
+      "country": "Canada",
+      "lat": 45.4208777,
+      "lon": -75.6901106
+    },
+    {
+      "name": "Winnipeg",
+      "state": "Manitoba",
+      "country": "Canada",
+      "lat": 49.8955367,
+      "lon": -97.1384584
+    },
+    {
+      "name": "Quebec City",
+      "state": "Québec",
+      "country": "Canada",
+      "lat": 46.8137431,
+      "lon": -71.2084061
+    },
+    {
+      "name": "Hamilton",
+      "state": "Ontario",
+      "country": "Canada",
+      "lat": 43.2560802,
+      "lon": -79.8728583
+    },
+    {
+      "name": "Kitchener",
+      "state": "Ontario",
+      "country": "Canada",
+      "lat": 43.451291,
+      "lon": -80.4927815
+    },
+    {
+      "name": "London",
+      "state": "Ontario",
+      "country": "Canada",
+      "lat": 42.9836747,
+      "lon": -81.2496068
+    },
+    {
+      "name": "Victoria",
+      "state": "British Columbia",
+      "country": "Canada",
+      "lat": 48.4283182,
+      "lon": -123.364953
+    },
+    {
+      "name": "Halifax",
+      "state": "Nova Scotia",
+      "country": "Canada",
+      "lat": 44.648618,
+      "lon": -63.5859487
+    },
+    {
+      "name": "Oshawa",
+      "state": "Ontario",
+      "country": "Canada",
+      "lat": 43.8975558,
+      "lon": -78.8635324
+    },
+    {
+      "name": "Windsor",
+      "state": "Ontario",
+      "country": "Canada",
+      "lat": 42.2858536,
+      "lon": -82.9780695
+    },
+    {
+      "name": "Saskatoon",
+      "state": "Saskatchewan",
+      "country": "Canada",
+      "lat": 52.131802,
+      "lon": -106.660767
+    },
+    {
+      "name": "Regina",
+      "state": "Saskatchewan",
+      "country": "Canada",
+      "lat": 50.4479733,
+      "lon": -104.6158764
+    },
+    {
+      "name": "St. Catharines",
+      "state": "Ontario",
+      "country": "Canada",
+      "lat": 43.1579812,
+      "lon": -79.2441003
+    },
+    {
+      "name": "Barrie",
+      "state": "Ontario",
+      "country": "Canada",
+      "lat": 44.3893208,
+      "lon": -79.6901302
+    },
+    {
+      "name": "Kelowna",
+      "state": "British Columbia",
+      "country": "Canada",
+      "lat": 49.8879177,
+      "lon": -119.495902
+    }
+  ],
+  "China": [
+    {
+      "name": "Beijing",
+      "state": "北京市",
+      "country": "中国",
+      "lat": 40.190632,
+      "lon": 116.412144
+    },
+    {
+      "name": "Shanghai",
+      "state": "上海市",
+      "country": "中国",
+      "lat": 31.2312707,
+      "lon": 121.4700152
+    },
+    {
+      "name": "Guangzhou",
+      "state": "广东省",
+      "country": "中国",
+      "lat": 23.1301964,
+      "lon": 113.2592945
+    },
+    {
+      "name": "Shenzhen",
+      "state": "广东省",
+      "country": "中国",
+      "lat": 22.5445741,
+      "lon": 114.0545429
+    },
+    {
+      "name": "Chengdu",
+      "state": "四川省",
+      "country": "中国",
+      "lat": 30.659867,
+      "lon": 104.063315
+    },
+    {
+      "name": "Tianjin",
+      "state": "天津市",
+      "country": "中国",
+      "lat": 39.0844897,
+      "lon": 117.1956724
+    },
+    {
+      "name": "Wuhan",
+      "state": "湖北省",
+      "country": "中国",
+      "lat": 30.5951051,
+      "lon": 114.2999353
+    },
+    {
+      "name": "Dongguan",
+      "state": "广东省",
+      "country": "中国",
+      "lat": 23.0183568,
+      "lon": 113.7452332
+    },
+    {
+      "name": "Chongqing",
+      "state": "重庆市",
+      "country": "中国",
+      "lat": 30.05518,
+      "lon": 107.8748712
+    },
+    {
+      "name": "Nanjing",
+      "state": "江苏省",
+      "country": "中国",
+      "lat": 32.0438284,
+      "lon": 118.7788631
+    },
+    {
+      "name": "Shenyang",
+      "state": "辽宁省",
+      "country": "中国",
+      "lat": 41.8026095,
+      "lon": 123.4279105
+    },
+    {
+      "name": "Hangzhou",
+      "state": "浙江省",
+      "country": "中国",
+      "lat": 30.2489634,
+      "lon": 120.2052342
+    },
+    {
+      "name": "Xi'an",
+      "state": "陕西省",
+      "country": "中国",
+      "lat": 34.261004,
+      "lon": 108.9423363
+    },
+    {
+      "name": "Harbin",
+      "state": "黑龙江省",
+      "country": "中国",
+      "lat": 45.7593633,
+      "lon": 126.6276177
+    },
+    {
+      "name": "Suzhou",
+      "state": "江苏省",
+      "country": "中国",
+      "lat": 31.311123,
+      "lon": 120.6212881
+    },
+    {
+      "name": "Qingdao",
+      "state": "山东省",
+      "country": "中国",
+      "lat": 36.0663249,
+      "lon": 120.3777659
+    },
+    {
+      "name": "Dalian",
+      "state": "辽宁省",
+      "country": "中国",
+      "lat": 38.9130495,
+      "lon": 121.6098013
+    },
+    {
+      "name": "Zhengzhou",
+      "state": "河南省",
+      "country": "中国",
+      "lat": 34.7472531,
+      "lon": 113.619321
+    },
+    {
+      "name": "Changsha",
+      "state": "湖南省",
+      "country": "中国",
+      "lat": 28.1450774,
+      "lon": 113.2384362
+    },
+    {
+      "name": "Kunming",
+      "state": "云南省",
+      "country": "中国",
+      "lat": 25.0363006,
+      "lon": 102.7086139
+    }
+  ],
+  "Denmark": [
+    {
+      "name": "Copenhagen",
+      "state": "Region Hovedstaden",
+      "country": "Danmark",
+      "lat": 55.6867243,
+      "lon": 12.5700724
+    },
+    {
+      "name": "Aarhus",
+      "state": "Region Midtjylland",
+      "country": "Danmark",
+      "lat": 56.1496278,
+      "lon": 10.2134046
+    },
+    {
+      "name": "Odense",
+      "state": "Region Syddanmark",
+      "country": "Danmark",
+      "lat": 55.3997225,
+      "lon": 10.3852104
+    },
+    {
+      "name": "Aalborg",
+      "state": "Region Nordjylland",
+      "country": "Danmark",
+      "lat": 57.0462626,
+      "lon": 9.9215263
+    },
+    {
+      "name": "Esbjerg",
+      "state": "Region Syddanmark",
+      "country": "Danmark",
+      "lat": 55.4664892,
+      "lon": 8.4520751
+    },
+    {
+      "name": "Randers",
+      "state": "Region Midtjylland",
+      "country": "Danmark",
+      "lat": 56.4355428,
+      "lon": 10.0425957
+    },
+    {
+      "name": "Kolding",
+      "state": "Region Syddanmark",
+      "country": "Danmark",
+      "lat": 55.4894999,
+      "lon": 9.47905
+    },
+    {
+      "name": "Horsens",
+      "state": "Region Midtjylland",
+      "country": "Danmark",
+      "lat": 55.8611696,
+      "lon": 9.8444774
+    },
+    {
+      "name": "Vejle",
+      "state": "Region Syddanmark",
+      "country": "Danmark",
+      "lat": 55.707931,
+      "lon": 9.5329419
+    },
+    {
+      "name": "Roskilde",
+      "state": "Region Sjælland",
+      "country": "Danmark",
+      "lat": 55.6433478,
+      "lon": 12.0819247
+    },
+    {
+      "name": "Herning",
+      "state": "Region Midtjylland",
+      "country": "Danmark",
+      "lat": 56.1379757,
+      "lon": 8.9746623
+    },
+    {
+      "name": "Silkeborg",
+      "state": "Region Midtjylland",
+      "country": "Danmark",
+      "lat": 56.169453,
+      "lon": 9.5495141
+    },
+    {
+      "name": "Næstved",
+      "state": "Region Sjælland",
+      "country": "Danmark",
+      "lat": 55.2328252,
+      "lon": 11.7674102
+    },
+    {
+      "name": "Fredericia",
+      "state": "Region Syddanmark",
+      "country": "Danmark",
+      "lat": 55.565268,
+      "lon": 9.7562169
+    },
+    {
+      "name": "Viborg",
+      "state": "Region Midtjylland",
+      "country": "Danmark",
+      "lat": 56.4469128,
+      "lon": 9.4059354
+    },
+    {
+      "name": "Køge",
+      "state": "Region Sjælland",
+      "country": "Danmark",
+      "lat": 55.4565009,
+      "lon": 12.1818964
+    },
+    {
+      "name": "Holstebro",
+      "state": "Region Midtjylland",
+      "country": "Danmark",
+      "lat": 56.3590324,
+      "lon": 8.6159188
+    },
+    {
+      "name": "Taastrup",
+      "state": "Region Hovedstaden",
+      "country": "Danmark",
+      "lat": 55.6522136,
+      "lon": 12.292049
+    },
+    {
+      "name": "Slagelse",
+      "state": "Region Sjælland",
+      "country": "Danmark",
+      "lat": 55.4061196,
+      "lon": 11.3525415
+    },
+    {
+      "name": "Hillerød",
+      "state": "Region Hovedstaden",
+      "country": "Danmark",
+      "lat": 55.9285735,
+      "lon": 12.3063909
+    }
+  ],
+  "Finland": [
+    {
+      "name": "Helsinki",
+      "state": "Uusimaa",
+      "country": "Suomi / Finland",
+      "lat": 60.1666204,
+      "lon": 24.9435408
+    },
+    {
+      "name": "Espoo",
+      "state": "Uusimaa",
+      "country": "Suomi / Finland",
+      "lat": 60.2049651,
+      "lon": 24.6559808
+    },
+    {
+      "name": "Tampere",
+      "state": "Pirkanmaa",
+      "country": "Suomi / Finland",
+      "lat": 61.4977929,
+      "lon": 23.7616372
+    },
+    {
+      "name": "Vantaa",
+      "state": "Uusimaa",
+      "country": "Suomi / Finland",
+      "lat": 60.292997,
+      "lon": 25.0435254
+    },
+    {
+      "name": "Oulu",
+      "state": "Pohjois-Pohjanmaa",
+      "country": "Suomi / Finland",
+      "lat": 65.0117869,
+      "lon": 25.4701983
+    },
+    {
+      "name": "Turku",
+      "state": "Varsinais-Suomi",
+      "country": "Suomi / Finland",
+      "lat": 60.4515944,
+      "lon": 22.2669983
+    },
+    {
+      "name": "Jyväskylä",
+      "state": "Keski-Suomi",
+      "country": "Suomi / Finland",
+      "lat": 62.241672,
+      "lon": 25.7495806
+    },
+    {
+      "name": "Lahti",
+      "state": "Päijät-Häme",
+      "country": "Suomi / Finland",
+      "lat": 60.982628,
+      "lon": 25.6613418
+    },
+    {
+      "name": "Kuopio",
+      "state": "Pohjois-Savo",
+      "country": "Suomi / Finland",
+      "lat": 62.8924641,
+      "lon": 27.6783597
+    },
+    {
+      "name": "Pori",
+      "state": "Satakunta",
+      "country": "Suomi / Finland",
+      "lat": 61.4866126,
+      "lon": 21.7972071
+    },
+    {
+      "name": "Joensuu",
+      "state": "Pohjois-Karjala",
+      "country": "Suomi / Finland",
+      "lat": 62.6005753,
+      "lon": 29.7622128
+    },
+    {
+      "name": "Lappeenranta",
+      "state": "Etelä-Karjala",
+      "country": "Suomi / Finland",
+      "lat": 61.0583417,
+      "lon": 28.1862293
+    },
+    {
+      "name": "Hämeenlinna",
+      "state": "Kanta-Häme",
+      "country": "Suomi / Finland",
+      "lat": 60.9966192,
+      "lon": 24.465141
+    },
+    {
+      "name": "Vaasa",
+      "state": "Österbotten",
+      "country": "Suomi / Finland",
+      "lat": 63.0957722,
+      "lon": 21.6159187
+    },
+    {
+      "name": "Rovaniemi",
+      "state": "Lappi",
+      "country": "Suomi / Finland",
+      "lat": 66.5025657,
+      "lon": 25.73122
+    },
+    {
+      "name": "Seinäjoki",
+      "state": "Etelä-Pohjanmaa",
+      "country": "Suomi / Finland",
+      "lat": 62.7906684,
+      "lon": 22.8398019
+    },
+    {
+      "name": "Mikkeli",
+      "state": "Etelä-Savo",
+      "country": "Suomi / Finland",
+      "lat": 61.6877823,
+      "lon": 27.2731918
+    },
+    {
+      "name": "Kotka",
+      "state": "Kymenlaakso",
+      "country": "Suomi / Finland",
+      "lat": 60.4672661,
+      "lon": 26.9459439
+    },
+    {
+      "name": "Salo",
+      "state": "Varsinais-Suomi",
+      "country": "Suomi / Finland",
+      "lat": 60.3879158,
+      "lon": 23.1248694
+    },
+    {
+      "name": "Porvoo",
+      "state": "Uusimaa",
+      "country": "Suomi / Finland",
+      "lat": 60.3944372,
+      "lon": 25.661997
+    }
+  ],
+  "France": [
+    {
+      "name": "Paris",
+      "state": "Île-de-France",
+      "country": "France",
+      "lat": 48.8588897,
+      "lon": 2.320041
+    },
+    {
+      "name": "Marseille",
+      "state": "Provence-Alpes-Côte d'Azur",
+      "country": "France",
+      "lat": 43.2961743,
+      "lon": 5.3699525
+    },
+    {
+      "name": "Lyon",
+      "state": "Auvergne-Rhône-Alpes",
+      "country": "France",
+      "lat": 45.7578137,
+      "lon": 4.8320114
+    },
+    {
+      "name": "Toulouse",
+      "state": "Occitanie",
+      "country": "France",
+      "lat": 43.6044638,
+      "lon": 1.4442433
+    },
+    {
+      "name": "Nice",
+      "state": "Provence-Alpes-Côte d'Azur",
+      "country": "France",
+      "lat": 43.7009358,
+      "lon": 7.2683912
+    },
+    {
+      "name": "Nantes",
+      "state": "Pays de la Loire",
+      "country": "France",
+      "lat": 47.2186371,
+      "lon": -1.5541362
+    },
+    {
+      "name": "Strasbourg",
+      "state": "Grand Est",
+      "country": "France",
+      "lat": 48.584614,
+      "lon": 7.7507127
+    },
+    {
+      "name": "Montpellier",
+      "state": "Occitanie",
+      "country": "France",
+      "lat": 43.6112422,
+      "lon": 3.8767337
+    },
+    {
+      "name": "Bordeaux",
+      "state": "Nouvelle-Aquitaine",
+      "country": "France",
+      "lat": 44.841225,
+      "lon": -0.5800364
+    },
+    {
+      "name": "Lille",
+      "state": "Hauts-de-France",
+      "country": "France",
+      "lat": 50.6365654,
+      "lon": 3.0635282
+    },
+    {
+      "name": "Rennes",
+      "state": "Bretagne",
+      "country": "France",
+      "lat": 48.1113387,
+      "lon": -1.6800198
+    },
+    {
+      "name": "Reims",
+      "state": "Grand Est",
+      "country": "France",
+      "lat": 49.2577886,
+      "lon": 4.031926
+    },
+    {
+      "name": "Le Havre",
+      "state": "Normandie",
+      "country": "France",
+      "lat": 49.4938975,
+      "lon": 0.1079732
+    },
+    {
+      "name": "Saint-Étienne",
+      "state": "Auvergne-Rhône-Alpes",
+      "country": "France",
+      "lat": 45.4401467,
+      "lon": 4.3873058
+    },
+    {
+      "name": "Toulon",
+      "state": "Provence-Alpes-Côte d'Azur",
+      "country": "France",
+      "lat": 43.1257311,
+      "lon": 5.9304919
+    },
+    {
+      "name": "Grenoble",
+      "state": "Auvergne-Rhône-Alpes",
+      "country": "France",
+      "lat": 45.1875602,
+      "lon": 5.7357819
+    },
+    {
+      "name": "Dijon",
+      "state": "Bourgogne-Franche-Comté",
+      "country": "France",
+      "lat": 47.3215806,
+      "lon": 5.0414701
+    },
+    {
+      "name": "Angers",
+      "state": "Pays de la Loire",
+      "country": "France",
+      "lat": 47.4739884,
+      "lon": -0.5515588
+    },
+    {
+      "name": "Nîmes",
+      "state": "Occitanie",
+      "country": "France",
+      "lat": 43.8374249,
+      "lon": 4.3600687
+    },
+    {
+      "name": "Villeurbanne",
+      "state": "Auvergne-Rhône-Alpes",
+      "country": "France",
+      "lat": 45.7733573,
+      "lon": 4.8868454
+    }
+  ],
+  "Germany": [
+    {
+      "name": "Berlin",
+      "state": "",
+      "country": "Deutschland",
+      "lat": 52.5173885,
+      "lon": 13.3951309
+    },
+    {
+      "name": "Hamburg",
+      "state": "",
+      "country": "Deutschland",
+      "lat": 53.550341,
+      "lon": 10.000654
+    },
+    {
+      "name": "Munich",
+      "state": "Bayern",
+      "country": "Deutschland",
+      "lat": 48.1371079,
+      "lon": 11.5753822
+    },
+    {
+      "name": "Cologne",
+      "state": "Nordrhein-Westfalen",
+      "country": "Deutschland",
+      "lat": 50.938361,
+      "lon": 6.959974
+    },
+    {
+      "name": "Frankfurt",
+      "state": "Hessen",
+      "country": "Deutschland",
+      "lat": 50.1106444,
+      "lon": 8.6820917
+    },
+    {
+      "name": "Stuttgart",
+      "state": "Baden-Württemberg",
+      "country": "Deutschland",
+      "lat": 48.7784485,
+      "lon": 9.1800132
+    },
+    {
+      "name": "Düsseldorf",
+      "state": "Nordrhein-Westfalen",
+      "country": "Deutschland",
+      "lat": 51.2254018,
+      "lon": 6.7763137
+    },
+    {
+      "name": "Dortmund",
+      "state": "Nordrhein-Westfalen",
+      "country": "Deutschland",
+      "lat": 51.5142273,
+      "lon": 7.4652789
+    },
+    {
+      "name": "Essen",
+      "state": "Nordrhein-Westfalen",
+      "country": "Deutschland",
+      "lat": 51.4582235,
+      "lon": 7.0158171
+    },
+    {
+      "name": "Leipzig",
+      "state": "Sachsen",
+      "country": "Deutschland",
+      "lat": 51.3406321,
+      "lon": 12.3747329
+    },
+    {
+      "name": "Bremen",
+      "state": "Bremen",
+      "country": "Deutschland",
+      "lat": 53.0758196,
+      "lon": 8.8071646
+    },
+    {
+      "name": "Dresden",
+      "state": "Sachsen",
+      "country": "Deutschland",
+      "lat": 51.0493286,
+      "lon": 13.7381437
+    },
+    {
+      "name": "Hanover",
+      "state": "Niedersachsen",
+      "country": "Deutschland",
+      "lat": 52.3744779,
+      "lon": 9.7385532
+    },
+    {
+      "name": "Nuremberg",
+      "state": "Bayern",
+      "country": "Deutschland",
+      "lat": 49.453872,
+      "lon": 11.077298
+    },
+    {
+      "name": "Duisburg",
+      "state": "Nordrhein-Westfalen",
+      "country": "Deutschland",
+      "lat": 51.434999,
+      "lon": 6.759562
+    },
+    {
+      "name": "Bochum",
+      "state": "Nordrhein-Westfalen",
+      "country": "Deutschland",
+      "lat": 51.4818111,
+      "lon": 7.2196635
+    },
+    {
+      "name": "Wuppertal",
+      "state": "Nordrhein-Westfalen",
+      "country": "Deutschland",
+      "lat": 51.264018,
+      "lon": 7.1780374
+    },
+    {
+      "name": "Bielefeld",
+      "state": "Nordrhein-Westfalen",
+      "country": "Deutschland",
+      "lat": 52.0191005,
+      "lon": 8.531007
+    },
+    {
+      "name": "Bonn",
+      "state": "Nordrhein-Westfalen",
+      "country": "Deutschland",
+      "lat": 50.7352621,
+      "lon": 7.1024635
+    },
+    {
+      "name": "Münster",
+      "state": "Nordrhein-Westfalen",
+      "country": "Deutschland",
+      "lat": 51.9625101,
+      "lon": 7.6251879
+    }
+  ],
+  "India": [
+    {
+      "name": "Mumbai",
+      "state": "Maharashtra",
+      "country": "India",
+      "lat": 19.054999,
+      "lon": 72.8692035
+    },
+    {
+      "name": "Delhi",
+      "state": "",
+      "country": "India",
+      "lat": 28.6138954,
+      "lon": 77.2090057
+    },
+    {
+      "name": "Bangalore",
+      "state": "Karnataka",
+      "country": "India",
+      "lat": 12.9767936,
+      "lon": 77.590082
+    },
+    {
+      "name": "Hyderabad",
+      "state": "Telangana",
+      "country": "India",
+      "lat": 17.360589,
+      "lon": 78.4740613
+    },
+    {
+      "name": "Chennai",
+      "state": "Tamil Nadu",
+      "country": "India",
+      "lat": 13.0836939,
+      "lon": 80.270186
+    },
+    {
+      "name": "Kolkata",
+      "state": "West Bengal",
+      "country": "India",
+      "lat": 22.5726459,
+      "lon": 88.3638953
+    },
+    {
+      "name": "Pune",
+      "state": "Maharashtra",
+      "country": "India",
+      "lat": 18.5213738,
+      "lon": 73.8545071
+    },
+    {
+      "name": "Ahmedabad",
+      "state": "Gujarat",
+      "country": "India",
+      "lat": 23.0215374,
+      "lon": 72.5800568
+    },
+    {
+      "name": "Surat",
+      "state": "Gujarat",
+      "country": "India",
+      "lat": 21.2094892,
+      "lon": 72.8317058
+    },
+    {
+      "name": "Jaipur",
+      "state": "Rajasthan",
+      "country": "India",
+      "lat": 26.9154576,
+      "lon": 75.8189817
+    },
+    {
+      "name": "Lucknow",
+      "state": "Uttar Pradesh",
+      "country": "India",
+      "lat": 26.8381,
+      "lon": 80.9346001
+    },
+    {
+      "name": "Kanpur",
+      "state": "Uttar Pradesh",
+      "country": "India",
+      "lat": 26.4609135,
+      "lon": 80.3217588
+    },
+    {
+      "name": "Nagpur",
+      "state": "Maharashtra",
+      "country": "India",
+      "lat": 21.1498134,
+      "lon": 79.0820556
+    },
+    {
+      "name": "Indore",
+      "state": "Madhya Pradesh",
+      "country": "India",
+      "lat": 22.7203616,
+      "lon": 75.8681996
+    },
+    {
+      "name": "Thane",
+      "state": "Maharashtra",
+      "country": "India",
+      "lat": 19.3653598,
+      "lon": 73.3685437
+    },
+    {
+      "name": "Bhopal",
+      "state": "Madhya Pradesh",
+      "country": "India",
+      "lat": 23.2584857,
+      "lon": 77.401989
+    },
+    {
+      "name": "Visakhapatnam",
+      "state": "Andhra Pradesh",
+      "country": "India",
+      "lat": 17.6935526,
+      "lon": 83.2921297
+    },
+    {
+      "name": "Pimpri-Chinchwad",
+      "state": "Maharashtra",
+      "country": "India",
+      "lat": 18.6279288,
+      "lon": 73.8009829
+    },
+    {
+      "name": "Patna",
+      "state": "Bihar",
+      "country": "India",
+      "lat": 25.6093239,
+      "lon": 85.1235252
+    },
+    {
+      "name": "Vadodara",
+      "state": "Gujarat",
+      "country": "India",
+      "lat": 22.2973142,
+      "lon": 73.1942567
+    }
+  ],
+  "Ireland": [
+    {
+      "name": "Dublin",
+      "state": "Leinster",
+      "country": "Éire / Ireland",
+      "lat": 53.3493795,
+      "lon": -6.2605593
+    },
+    {
+      "name": "Cork",
+      "state": "Munster",
+      "country": "Éire / Ireland",
+      "lat": 51.8985136,
+      "lon": -8.4726423
+    },
+    {
+      "name": "Limerick",
+      "state": "Munster",
+      "country": "Éire / Ireland",
+      "lat": 52.661252,
+      "lon": -8.6301239
+    },
+    {
+      "name": "Galway",
+      "state": "Connacht",
+      "country": "Éire / Ireland",
+      "lat": 53.2744122,
+      "lon": -9.0490601
+    },
+    {
+      "name": "Waterford",
+      "state": "Munster",
+      "country": "Éire / Ireland",
+      "lat": 52.2609997,
+      "lon": -7.1119081
+    },
+    {
+      "name": "Drogheda",
+      "state": "Leinster",
+      "country": "Éire / Ireland",
+      "lat": 53.7149877,
+      "lon": -6.3524183
+    },
+    {
+      "name": "Dundalk",
+      "state": "Leinster",
+      "country": "Éire / Ireland",
+      "lat": 54.0046033,
+      "lon": -6.4008879
+    },
+    {
+      "name": "Swords",
+      "state": "Leinster",
+      "country": "Éire / Ireland",
+      "lat": 53.4594799,
+      "lon": -6.219175
+    },
+    {
+      "name": "Bray",
+      "state": "Leinster",
+      "country": "Éire / Ireland",
+      "lat": 53.2014604,
+      "lon": -6.1105049
+    },
+    {
+      "name": "Navan",
+      "state": "The Municipal District of Navan",
+      "country": "Éire / Ireland",
+      "lat": 53.6530941,
+      "lon": -6.6840434
+    },
+    {
+      "name": "Ennis",
+      "state": "Ennis Municipal District",
+      "country": "Éire / Ireland",
+      "lat": 52.8435152,
+      "lon": -8.983747
+    },
+    {
+      "name": "Kilkenny",
+      "state": "Leinster",
+      "country": "Éire / Ireland",
+      "lat": 52.6506255,
+      "lon": -7.2514438
+    },
+    {
+      "name": "Carlow",
+      "state": "Leinster",
+      "country": "Éire / Ireland",
+      "lat": 52.8408344,
+      "lon": -6.9261131
+    },
+    {
+      "name": "Tralee",
+      "state": "Munster",
+      "country": "Éire / Ireland",
+      "lat": 52.2692116,
+      "lon": -9.7057047
+    },
+    {
+      "name": "Newbridge",
+      "state": "The Municipal District of Kildare — Newbridge",
+      "country": "Éire / Ireland",
+      "lat": 53.1801492,
+      "lon": -6.7981931
+    },
+    {
+      "name": "Naas",
+      "state": "The Municipal District of Naas",
+      "country": "Éire / Ireland",
+      "lat": 53.2214677,
+      "lon": -6.6574093
+    },
+    {
+      "name": "Sligo",
+      "state": "Sligo Municipal Borough District",
+      "country": "Éire / Ireland",
+      "lat": 54.2720696,
+      "lon": -8.4751357
+    },
+    {
+      "name": "Mullingar",
+      "state": "The Municipal District of Mullingar — Kinnegad",
+      "country": "Éire / Ireland",
+      "lat": 53.5229058,
+      "lon": -7.345688
+    },
+    {
+      "name": "Wexford",
+      "state": "Leinster",
+      "country": "Éire / Ireland",
+      "lat": 52.3367671,
+      "lon": -6.4601397
+    },
+    {
+      "name": "Letterkenny",
+      "state": "Letterkenny Municipal District",
+      "country": "Éire / Ireland",
+      "lat": 54.9517941,
+      "lon": -7.7354368
+    }
+  ],
+  "Italy": [
+    {
+      "name": "Rome",
+      "state": "Lazio",
+      "country": "Italia",
+      "lat": 41.8933203,
+      "lon": 12.4829321
+    },
+    {
+      "name": "Milan",
+      "state": "Lombardia",
+      "country": "Italia",
+      "lat": 45.4641943,
+      "lon": 9.1896346
+    },
+    {
+      "name": "Naples",
+      "state": "Campania",
+      "country": "Italia",
+      "lat": 40.8358846,
+      "lon": 14.2487679
+    },
+    {
+      "name": "Turin",
+      "state": "Piemonte",
+      "country": "Italia",
+      "lat": 45.0677551,
+      "lon": 7.6824892
+    },
+    {
+      "name": "Palermo",
+      "state": "Sicilia",
+      "country": "Italia",
+      "lat": 38.1112268,
+      "lon": 13.3524434
+    },
+    {
+      "name": "Genoa",
+      "state": "Liguria",
+      "country": "Italia",
+      "lat": 44.40726,
+      "lon": 8.9338624
+    },
+    {
+      "name": "Bologna",
+      "state": "Emilia-Romagna",
+      "country": "Italia",
+      "lat": 44.4938203,
+      "lon": 11.3426327
+    },
+    {
+      "name": "Florence",
+      "state": "Toscana",
+      "country": "Italia",
+      "lat": 43.7697955,
+      "lon": 11.2556404
+    },
+    {
+      "name": "Bari",
+      "state": "Puglia",
+      "country": "Italia",
+      "lat": 41.1257843,
+      "lon": 16.8620293
+    },
+    {
+      "name": "Catania",
+      "state": "Sicilia",
+      "country": "Italia",
+      "lat": 37.5023612,
+      "lon": 15.0873718
+    },
+    {
+      "name": "Venice",
+      "state": "Veneto",
+      "country": "Italia",
+      "lat": 45.4371908,
+      "lon": 12.3345898
+    },
+    {
+      "name": "Verona",
+      "state": "Veneto",
+      "country": "Italia",
+      "lat": 45.4424977,
+      "lon": 10.9857377
+    },
+    {
+      "name": "Messina",
+      "state": "Sicilia",
+      "country": "Italia",
+      "lat": 38.1937571,
+      "lon": 15.5542082
+    },
+    {
+      "name": "Padua",
+      "state": "Veneto",
+      "country": "Italia",
+      "lat": 45.4077172,
+      "lon": 11.8734455
+    },
+    {
+      "name": "Trieste",
+      "state": "Friuli-Venezia Giulia",
+      "country": "Italia",
+      "lat": 45.6496485,
+      "lon": 13.7772781
+    },
+    {
+      "name": "Brescia",
+      "state": "Lombardia",
+      "country": "Italia",
+      "lat": 45.7795805,
+      "lon": 10.425873
+    },
+    {
+      "name": "Taranto",
+      "state": "Puglia",
+      "country": "Italia",
+      "lat": 40.5488156,
+      "lon": 17.0805801
+    },
+    {
+      "name": "Prato",
+      "state": "Toscana",
+      "country": "Italia",
+      "lat": 43.9357181,
+      "lon": 11.0941473
+    },
+    {
+      "name": "Reggio Calabria",
+      "state": "Calabria",
+      "country": "Italia",
+      "lat": 38.1035389,
+      "lon": 15.6397556
+    },
+    {
+      "name": "Modena",
+      "state": "Emilia-Romagna",
+      "country": "Italia",
+      "lat": 44.5384728,
+      "lon": 10.9359609
+    }
+  ],
+  "Japan": [
+    {
+      "name": "Tokyo",
+      "state": "東京都",
+      "country": "日本",
+      "lat": 35.6768601,
+      "lon": 139.7638947
+    },
+    {
+      "name": "Yokohama",
+      "state": "神奈川県",
+      "country": "日本",
+      "lat": 35.4503381,
+      "lon": 139.6343802
+    },
+    {
+      "name": "Osaka",
+      "state": "大阪府",
+      "country": "日本",
+      "lat": 34.6198813,
+      "lon": 135.490357
+    },
+    {
+      "name": "Nagoya",
+      "state": "愛知県",
+      "country": "日本",
+      "lat": 35.1851045,
+      "lon": 136.8998438
+    },
+    {
+      "name": "Sapporo",
+      "state": "北海道",
+      "country": "日本",
+      "lat": 43.061936,
+      "lon": 141.3542924
+    },
+    {
+      "name": "Fukuoka",
+      "state": "福岡県",
+      "country": "日本",
+      "lat": 33.6251241,
+      "lon": 130.6180016
+    },
+    {
+      "name": "Kobe",
+      "state": "兵庫県",
+      "country": "日本",
+      "lat": 34.6932379,
+      "lon": 135.1943764
+    },
+    {
+      "name": "Kyoto",
+      "state": "京都府",
+      "country": "日本",
+      "lat": 35.0115754,
+      "lon": 135.7681441
+    },
+    {
+      "name": "Kawasaki",
+      "state": "神奈川県",
+      "country": "日本",
+      "lat": 35.5306639,
+      "lon": 139.7037668
+    },
+    {
+      "name": "Saitama",
+      "state": "埼玉県",
+      "country": "日本",
+      "lat": 35.9754168,
+      "lon": 139.4160114
+    },
+    {
+      "name": "Hiroshima",
+      "state": "広島県",
+      "country": "日本",
+      "lat": 34.3917241,
+      "lon": 132.4517589
+    },
+    {
+      "name": "Sendai",
+      "state": "宮城県",
+      "country": "日本",
+      "lat": 38.2677554,
+      "lon": 140.8691498
+    },
+    {
+      "name": "Kitakyushu",
+      "state": "福岡県",
+      "country": "日本",
+      "lat": 33.8829996,
+      "lon": 130.8749015
+    },
+    {
+      "name": "Chiba",
+      "state": "千葉県",
+      "country": "日本",
+      "lat": 35.549399,
+      "lon": 140.2647303
+    },
+    {
+      "name": "Sakai",
+      "state": "大阪府",
+      "country": "日本",
+      "lat": 34.5737364,
+      "lon": 135.4828866
+    },
+    {
+      "name": "Niigata",
+      "state": "新潟県",
+      "country": "日本",
+      "lat": 37.6452283,
+      "lon": 138.7669125
+    },
+    {
+      "name": "Hamamatsu",
+      "state": "静岡県",
+      "country": "日本",
+      "lat": 34.7109786,
+      "lon": 137.7259431
+    },
+    {
+      "name": "Kumamoto",
+      "state": "熊本県",
+      "country": "日本",
+      "lat": 32.6450475,
+      "lon": 130.6341345
+    },
+    {
+      "name": "Sagamihara",
+      "state": "神奈川県",
+      "country": "日本",
+      "lat": 35.5714621,
+      "lon": 139.3731052
+    },
+    {
+      "name": "Shizuoka",
+      "state": "静岡県",
+      "country": "日本",
+      "lat": 34.9751974,
+      "lon": 138.3831697
+    }
+  ],
+  "Mexico": [
+    {
+      "name": "Mexico City",
+      "state": "Ciudad de México",
+      "country": "México",
+      "lat": 19.3207722,
+      "lon": -99.1514678
+    },
+    {
+      "name": "Guadalajara",
+      "state": "Jalisco",
+      "country": "México",
+      "lat": 20.6720375,
+      "lon": -103.338396
+    },
+    {
+      "name": "Monterrey",
+      "state": "Nuevo León",
+      "country": "México",
+      "lat": 25.6802019,
+      "lon": -100.315258
+    },
+    {
+      "name": "Puebla",
+      "state": "Puebla",
+      "country": "México",
+      "lat": 18.833333,
+      "lon": -98.0
+    },
+    {
+      "name": "Tijuana",
+      "state": "Baja California",
+      "country": "México",
+      "lat": 32.5317397,
+      "lon": -117.019529
+    },
+    {
+      "name": "León",
+      "state": "Guanajuato",
+      "country": "México",
+      "lat": 21.121965,
+      "lon": -101.6829766
+    },
+    {
+      "name": "Juárez",
+      "state": "Chihuahua",
+      "country": "México",
+      "lat": 31.6907979,
+      "lon": -106.4253215
+    },
+    {
+      "name": "Zapopan",
+      "state": "Jalisco",
+      "country": "México",
+      "lat": 20.7211203,
+      "lon": -103.3913671
+    },
+    {
+      "name": "Mérida",
+      "state": "Yucatán",
+      "country": "México",
+      "lat": 20.9670759,
+      "lon": -89.6237402
+    },
+    {
+      "name": "San Luis Potosí",
+      "state": "San Luis Potosí",
+      "country": "México",
+      "lat": 22.5000001,
+      "lon": -100.4949145
+    },
+    {
+      "name": "Aguascalientes",
+      "state": "Aguascalientes",
+      "country": "México",
+      "lat": 21.880487,
+      "lon": -102.2967195
+    },
+    {
+      "name": "Hermosillo",
+      "state": "Sonora",
+      "country": "México",
+      "lat": 29.0948207,
+      "lon": -110.9692202
+    },
+    {
+      "name": "Saltillo",
+      "state": "Coahuila",
+      "country": "México",
+      "lat": 25.4230425,
+      "lon": -100.9927509
+    },
+    {
+      "name": "Mexicali",
+      "state": "Baja California",
+      "country": "México",
+      "lat": 32.6245314,
+      "lon": -115.452604
+    },
+    {
+      "name": "Culiacán",
+      "state": "Sinaloa",
+      "country": "México",
+      "lat": 24.7978965,
+      "lon": -107.393395
+    },
+    {
+      "name": "Querétaro",
+      "state": "Querétaro",
+      "country": "México",
+      "lat": 20.8052225,
+      "lon": -99.8837376
+    },
+    {
+      "name": "Chihuahua",
+      "state": "Chihuahua",
+      "country": "México",
+      "lat": 28.5000001,
+      "lon": -106.0000001
+    },
+    {
+      "name": "Morelia",
+      "state": "Michoacán",
+      "country": "México",
+      "lat": 19.6546004,
+      "lon": -101.2623797
+    },
+    {
+      "name": "Toluca",
+      "state": "Estado de México",
+      "country": "México",
+      "lat": 19.292545,
+      "lon": -99.6569007
+    },
+    {
+      "name": "Cancún",
+      "state": "Quintana Roo",
+      "country": "México",
+      "lat": 21.1527467,
+      "lon": -86.8425761
+    }
+  ],
+  "Netherlands": [
+    {
+      "name": "Amsterdam",
+      "state": "Noord-Holland",
+      "country": "Nederland",
+      "lat": 52.3730796,
+      "lon": 4.8924534
+    },
+    {
+      "name": "Rotterdam",
+      "state": "Zuid-Holland",
+      "country": "Nederland",
+      "lat": 51.9244424,
+      "lon": 4.47775
+    },
+    {
+      "name": "The Hague",
+      "state": "Zuid-Holland",
+      "country": "Nederland",
+      "lat": 52.0749456,
+      "lon": 4.2696802
+    },
+    {
+      "name": "Utrecht",
+      "state": "Utrecht",
+      "country": "Nederland",
+      "lat": 52.0907006,
+      "lon": 5.1215634
+    },
+    {
+      "name": "Eindhoven",
+      "state": "Noord-Brabant",
+      "country": "Nederland",
+      "lat": 51.4392648,
+      "lon": 5.478633
+    },
+    {
+      "name": "Tilburg",
+      "state": "Noord-Brabant",
+      "country": "Nederland",
+      "lat": 51.5856184,
+      "lon": 5.0660616
+    },
+    {
+      "name": "Groningen",
+      "state": "Groningen",
+      "country": "Nederland",
+      "lat": 53.2190652,
+      "lon": 6.5680077
+    },
+    {
+      "name": "Almere",
+      "state": "Flevoland",
+      "country": "Nederland",
+      "lat": 52.4417513,
+      "lon": 5.2092943
+    },
+    {
+      "name": "Breda",
+      "state": "Noord-Brabant",
+      "country": "Nederland",
+      "lat": 51.5887845,
+      "lon": 4.7760237
+    },
+    {
+      "name": "Nijmegen",
+      "state": "Gelderland",
+      "country": "Nederland",
+      "lat": 51.8474946,
+      "lon": 5.8637771
+    },
+    {
+      "name": "Enschede",
+      "state": "Overijssel",
+      "country": "Nederland",
+      "lat": 52.2209855,
+      "lon": 6.8940537
+    },
+    {
+      "name": "Haarlem",
+      "state": "Noord-Holland",
+      "country": "Nederland",
+      "lat": 52.3837058,
+      "lon": 4.6435597
+    },
+    {
+      "name": "Arnhem",
+      "state": "Gelderland",
+      "country": "Nederland",
+      "lat": 51.984257,
+      "lon": 5.9108573
+    },
+    {
+      "name": "Zaanstad",
+      "state": "Noord-Holland",
+      "country": "Nederland",
+      "lat": 52.4689235,
+      "lon": 4.7737835
+    },
+    {
+      "name": "Amersfoort",
+      "state": "Utrecht",
+      "country": "Nederland",
+      "lat": 52.1562499,
+      "lon": 5.3896944
+    },
+    {
+      "name": "Apeldoorn",
+      "state": "Gelderland",
+      "country": "Nederland",
+      "lat": 52.1795738,
+      "lon": 5.9300775
+    },
+    {
+      "name": "Hoofddorp",
+      "state": "Noord-Holland",
+      "country": "Nederland",
+      "lat": 52.305554,
+      "lon": 4.6926644
+    },
+    {
+      "name": "Maastricht",
+      "state": "Limburg",
+      "country": "Nederland",
+      "lat": 50.8512438,
+      "lon": 5.6909768
+    },
+    {
+      "name": "Leiden",
+      "state": "Zuid-Holland",
+      "country": "Nederland",
+      "lat": 52.1594747,
+      "lon": 4.4908843
+    },
+    {
+      "name": "Dordrecht",
+      "state": "Zuid-Holland",
+      "country": "Nederland",
+      "lat": 51.7689546,
+      "lon": 4.6867891
+    }
+  ],
+  "New Zealand": [
+    {
+      "name": "Auckland",
+      "state": "Auckland",
+      "country": "New Zealand / Aotearoa",
+      "lat": -36.852095,
+      "lon": 174.7631803
+    },
+    {
+      "name": "Wellington",
+      "state": "Wellington",
+      "country": "New Zealand / Aotearoa",
+      "lat": -41.2887953,
+      "lon": 174.7772114
+    },
+    {
+      "name": "Christchurch",
+      "state": "Canterbury",
+      "country": "New Zealand / Aotearoa",
+      "lat": -43.530955,
+      "lon": 172.6364343
+    },
+    {
+      "name": "Hamilton",
+      "state": "Waikato",
+      "country": "New Zealand / Aotearoa",
+      "lat": -37.7878809,
+      "lon": 175.281788
+    },
+    {
+      "name": "Tauranga",
+      "state": "Bay of Plenty",
+      "country": "New Zealand / Aotearoa",
+      "lat": -37.6859006,
+      "lon": 176.167505
+    },
+    {
+      "name": "Dunedin",
+      "state": "Otago",
+      "country": "New Zealand / Aotearoa",
+      "lat": -45.8740984,
+      "lon": 170.5035755
+    },
+    {
+      "name": "Palmerston North",
+      "state": "Manawatū-Whanganui",
+      "country": "New Zealand / Aotearoa",
+      "lat": -40.356317,
+      "lon": 175.6112388
+    },
+    {
+      "name": "Napier",
+      "state": "Hawke's Bay",
+      "country": "New Zealand / Aotearoa",
+      "lat": -39.4902099,
+      "lon": 176.917839
+    },
+    {
+      "name": "Porirua",
+      "state": "Wellington",
+      "country": "New Zealand / Aotearoa",
+      "lat": -41.1354217,
+      "lon": 174.8397824
+    },
+    {
+      "name": "Hibiscus Coast",
+      "state": "Auckland",
+      "country": "New Zealand / Aotearoa",
+      "lat": -36.6095336,
+      "lon": 174.7086237
+    },
+    {
+      "name": "New Plymouth",
+      "state": "Taranaki",
+      "country": "New Zealand / Aotearoa",
+      "lat": -39.0579941,
+      "lon": 174.0806474
+    },
+    {
+      "name": "Rotorua",
+      "state": "Bay of Plenty",
+      "country": "New Zealand / Aotearoa",
+      "lat": -38.136073,
+      "lon": 176.2525434
+    },
+    {
+      "name": "Whangarei",
+      "state": "Northland",
+      "country": "New Zealand / Aotearoa",
+      "lat": -35.7275268,
+      "lon": 174.3194202
+    },
+    {
+      "name": "Nelson",
+      "state": "Nelson",
+      "country": "New Zealand / Aotearoa",
+      "lat": -41.2710849,
+      "lon": 173.2836756
+    },
+    {
+      "name": "Hastings",
+      "state": "Hawke's Bay",
+      "country": "New Zealand / Aotearoa",
+      "lat": -39.6417678,
+      "lon": 176.8430781
+    },
+    {
+      "name": "Invercargill",
+      "state": "Southland",
+      "country": "New Zealand / Aotearoa",
+      "lat": -46.4118465,
+      "lon": 168.3470632
+    },
+    {
+      "name": "Upper Hutt",
+      "state": "Wellington",
+      "country": "New Zealand / Aotearoa",
+      "lat": -41.1240674,
+      "lon": 175.0699589
+    },
+    {
+      "name": "Gisborne",
+      "state": "Gisborne",
+      "country": "New Zealand / Aotearoa",
+      "lat": -38.661326,
+      "lon": 178.0206487
+    },
+    {
+      "name": "Taupo",
+      "state": "Waikato",
+      "country": "New Zealand / Aotearoa",
+      "lat": -38.6866197,
+      "lon": 176.0694773
+    },
+    {
+      "name": "Blenheim",
+      "state": "Marlborough",
+      "country": "New Zealand / Aotearoa",
+      "lat": -41.5118691,
+      "lon": 173.9545856
+    }
+  ],
+  "Norway": [
+    {
+      "name": "Oslo",
+      "state": "",
+      "country": "Norge",
+      "lat": 59.9133301,
+      "lon": 10.7389701
+    },
+    {
+      "name": "Bergen",
+      "state": "",
+      "country": "Norge",
+      "lat": 60.3943055,
+      "lon": 5.3259192
+    },
+    {
+      "name": "Stavanger",
+      "state": "",
+      "country": "Norge",
+      "lat": 58.9699675,
+      "lon": 5.7318101
+    },
+    {
+      "name": "Trondheim",
+      "state": "",
+      "country": "Norge",
+      "lat": 63.4304475,
+      "lon": 10.3952118
+    },
+    {
+      "name": "Drammen",
+      "state": "",
+      "country": "Norge",
+      "lat": 59.6964936,
+      "lon": 10.175642
+    },
+    {
+      "name": "Fredrikstad",
+      "state": "",
+      "country": "Norge",
+      "lat": 59.1862013,
+      "lon": 10.8680241
+    },
+    {
+      "name": "Kristiansand",
+      "state": "",
+      "country": "Norge",
+      "lat": 58.0856276,
+      "lon": 7.931858
+    },
+    {
+      "name": "Sandnes",
+      "state": "",
+      "country": "Norge",
+      "lat": 58.983132,
+      "lon": 6.394641
+    },
+    {
+      "name": "Tromsø",
+      "state": "",
+      "country": "Norge",
+      "lat": 69.6516345,
+      "lon": 18.9558585
+    },
+    {
+      "name": "Sarpsborg",
+      "state": "",
+      "country": "Norge",
+      "lat": 59.254955,
+      "lon": 11.2297811
+    },
+    {
+      "name": "Skien",
+      "state": "",
+      "country": "Norge",
+      "lat": 59.2662883,
+      "lon": 9.5311354
+    },
+    {
+      "name": "Ålesund",
+      "state": "",
+      "country": "Norge",
+      "lat": 62.4802363,
+      "lon": 6.5550739
+    },
+    {
+      "name": "Sandefjord",
+      "state": "",
+      "country": "Norge",
+      "lat": 59.0799004,
+      "lon": 10.2804322
+    },
+    {
+      "name": "Haugesund",
+      "state": "",
+      "country": "Norge",
+      "lat": 59.4682479,
+      "lon": 5.0827612
+    },
+    {
+      "name": "Tønsberg",
+      "state": "",
+      "country": "Norge",
+      "lat": 59.3549795,
+      "lon": 10.2820491
+    },
+    {
+      "name": "Moss",
+      "state": "",
+      "country": "Norge",
+      "lat": 59.4146675,
+      "lon": 10.6596578
+    },
+    {
+      "name": "Porsgrunn",
+      "state": "",
+      "country": "Norge",
+      "lat": 59.103735,
+      "lon": 9.7363538
+    },
+    {
+      "name": "Bodø",
+      "state": "",
+      "country": "Norge",
+      "lat": 67.2844313,
+      "lon": 14.3817503
+    },
+    {
+      "name": "Arendal",
+      "state": "",
+      "country": "Norge",
+      "lat": 58.4267301,
+      "lon": 8.9469491
+    },
+    {
+      "name": "Hamar",
+      "state": "",
+      "country": "Norge",
+      "lat": 61.0014937,
+      "lon": 11.1647964
+    }
+  ],
+  "Poland": [
+    {
+      "name": "Warsaw",
+      "state": "województwo mazowieckie",
+      "country": "Polska",
+      "lat": 52.2333742,
+      "lon": 21.0711489
+    },
+    {
+      "name": "Kraków",
+      "state": "województwo małopolskie",
+      "country": "Polska",
+      "lat": 50.0469432,
+      "lon": 19.9971534
+    },
+    {
+      "name": "Łódź",
+      "state": "województwo łódzkie",
+      "country": "Polska",
+      "lat": 51.7728245,
+      "lon": 19.4784857
+    },
+    {
+      "name": "Wrocław",
+      "state": "województwo dolnośląskie",
+      "country": "Polska",
+      "lat": 51.1263106,
+      "lon": 16.9781963
+    },
+    {
+      "name": "Poznań",
+      "state": "województwo wielkopolskie",
+      "country": "Polska",
+      "lat": 52.4082663,
+      "lon": 16.9335199
+    },
+    {
+      "name": "Gdańsk",
+      "state": "województwo pomorskie",
+      "country": "Polska",
+      "lat": 54.4288032,
+      "lon": 18.798327
+    },
+    {
+      "name": "Szczecin",
+      "state": "województwo zachodniopomorskie",
+      "country": "Polska",
+      "lat": 53.4298114,
+      "lon": 14.5928676
+    },
+    {
+      "name": "Bydgoszcz",
+      "state": "województwo kujawsko-pomorskie",
+      "country": "Polska",
+      "lat": 53.1297127,
+      "lon": 18.0294488
+    },
+    {
+      "name": "Lublin",
+      "state": "województwo lubelskie",
+      "country": "Polska",
+      "lat": 51.250559,
+      "lon": 22.5701022
+    },
+    {
+      "name": "Katowice",
+      "state": "województwo śląskie",
+      "country": "Polska",
+      "lat": 50.2137315,
+      "lon": 19.0058848
+    },
+    {
+      "name": "Białystok",
+      "state": "województwo podlaskie",
+      "country": "Polska",
+      "lat": 53.1275051,
+      "lon": 23.1470509
+    },
+    {
+      "name": "Gdynia",
+      "state": "województwo pomorskie",
+      "country": "Polska",
+      "lat": 54.5233304,
+      "lon": 18.6040279
+    },
+    {
+      "name": "Częstochowa",
+      "state": "województwo śląskie",
+      "country": "Polska",
+      "lat": 50.8120466,
+      "lon": 19.113213
+    },
+    {
+      "name": "Radom",
+      "state": "województwo mazowieckie",
+      "country": "Polska",
+      "lat": 51.4171606,
+      "lon": 21.1609448
+    },
+    {
+      "name": "Sosnowiec",
+      "state": "województwo śląskie",
+      "country": "Polska",
+      "lat": 50.2780834,
+      "lon": 19.1342944
+    },
+    {
+      "name": "Toruń",
+      "state": "województwo kujawsko-pomorskie",
+      "country": "Polska",
+      "lat": 53.0102721,
+      "lon": 18.6048094
+    },
+    {
+      "name": "Kielce",
+      "state": "województwo świętokrzyskie",
+      "country": "Polska",
+      "lat": 50.8540285,
+      "lon": 20.6099157
+    },
+    {
+      "name": "Gliwice",
+      "state": "województwo śląskie",
+      "country": "Polska",
+      "lat": 50.3011315,
+      "lon": 18.6623472
+    },
+    {
+      "name": "Zabrze",
+      "state": "województwo śląskie",
+      "country": "Polska",
+      "lat": 50.3142806,
+      "lon": 18.7815763
+    },
+    {
+      "name": "Bytom",
+      "state": "województwo śląskie",
+      "country": "Polska",
+      "lat": 50.3470387,
+      "lon": 18.9231857
+    }
+  ],
+  "South Korea": [
+    {
+      "name": "Seoul",
+      "state": "",
+      "country": "대한민국",
+      "lat": 37.5666791,
+      "lon": 126.9782914
+    },
+    {
+      "name": "Busan",
+      "state": "",
+      "country": "대한민국",
+      "lat": 35.1799528,
+      "lon": 129.0752365
+    },
+    {
+      "name": "Incheon",
+      "state": "",
+      "country": "대한민국",
+      "lat": 37.456,
+      "lon": 126.7052
+    },
+    {
+      "name": "Daegu",
+      "state": "",
+      "country": "대한민국",
+      "lat": 35.8713,
+      "lon": 128.6018
+    },
+    {
+      "name": "Daejeon",
+      "state": "",
+      "country": "대한민국",
+      "lat": 36.3497007,
+      "lon": 127.3849016
+    },
+    {
+      "name": "Gwangju",
+      "state": "",
+      "country": "대한민국",
+      "lat": 35.1594647,
+      "lon": 126.8515034
+    },
+    {
+      "name": "Suwon",
+      "state": "경기도",
+      "country": "대한민국",
+      "lat": 37.2633325,
+      "lon": 127.0287472
+    },
+    {
+      "name": "Ulsan",
+      "state": "",
+      "country": "대한민국",
+      "lat": 35.5391697,
+      "lon": 129.3119136
+    },
+    {
+      "name": "Changwon",
+      "state": "경상남도",
+      "country": "대한민국",
+      "lat": 35.227956,
+      "lon": 128.6818586
+    },
+    {
+      "name": "Seongnam",
+      "state": "",
+      "country": "대한민국",
+      "lat": 37.4201556,
+      "lon": 127.1262092
+    },
+    {
+      "name": "Goyang",
+      "state": "",
+      "country": "대한민국",
+      "lat": 37.6581862,
+      "lon": 126.8319452
+    },
+    {
+      "name": "Yongin",
+      "state": "",
+      "country": "대한민국",
+      "lat": 37.2405741,
+      "lon": 127.1785572
+    },
+    {
+      "name": "Bucheon",
+      "state": "",
+      "country": "대한민국",
+      "lat": 37.5014422,
+      "lon": 126.7660139
+    },
+    {
+      "name": "Cheongju",
+      "state": "충청북도",
+      "country": "대한민국",
+      "lat": 36.6421169,
+      "lon": 127.4891742
+    },
+    {
+      "name": "Ansan",
+      "state": "경기도",
+      "country": "대한민국",
+      "lat": 37.3217152,
+      "lon": 126.8308604
+    },
+    {
+      "name": "Jeonju",
+      "state": "전북특별자치도",
+      "country": "대한민국",
+      "lat": 35.8237631,
+      "lon": 127.1472805
+    },
+    {
+      "name": "Cheonan",
+      "state": "충청남도",
+      "country": "대한민국",
+      "lat": 36.8150283,
+      "lon": 127.1140654
+    },
+    {
+      "name": "Pohang",
+      "state": "경상북도",
+      "country": "대한민국",
+      "lat": 36.0189315,
+      "lon": 129.3429384
+    },
+    {
+      "name": "Gimhae",
+      "state": "경상남도",
+      "country": "대한민국",
+      "lat": 35.2310947,
+      "lon": 128.8908228
+    },
+    {
+      "name": "Jeju City",
+      "state": "제주특별자치도",
+      "country": "대한민국",
+      "lat": 33.4998289,
+      "lon": 126.5313902
+    }
+  ],
+  "Spain": [
+    {
+      "name": "Madrid",
+      "state": "Comunidad de Madrid",
+      "country": "España",
+      "lat": 40.416782,
+      "lon": -3.703507
+    },
+    {
+      "name": "Barcelona",
+      "state": "Catalunya",
+      "country": "España",
+      "lat": 41.3825802,
+      "lon": 2.177073
+    },
+    {
+      "name": "Valencia",
+      "state": "Comunitat Valenciana",
+      "country": "España",
+      "lat": 39.4697065,
+      "lon": -0.3763353
+    },
+    {
+      "name": "Seville",
+      "state": "Andalucía",
+      "country": "España",
+      "lat": 37.3886303,
+      "lon": -5.9953403
+    },
+    {
+      "name": "Zaragoza",
+      "state": "Aragón",
+      "country": "España",
+      "lat": 41.6521342,
+      "lon": -0.8809428
+    },
+    {
+      "name": "Málaga",
+      "state": "Andalucía",
+      "country": "España",
+      "lat": 36.7213028,
+      "lon": -4.4216366
+    },
+    {
+      "name": "Murcia",
+      "state": "Región de Murcia",
+      "country": "España",
+      "lat": 37.9923795,
+      "lon": -1.1305431
+    },
+    {
+      "name": "Palma",
+      "state": "Illes Balears",
+      "country": "España",
+      "lat": 39.5695818,
+      "lon": 2.6500745
+    },
+    {
+      "name": "Las Palmas",
+      "state": "Canarias",
+      "country": "España",
+      "lat": 27.9580004,
+      "lon": -15.6062305
+    },
+    {
+      "name": "Bilbao",
+      "state": "Euskadi",
+      "country": "España",
+      "lat": 43.2630018,
+      "lon": -2.9350039
+    },
+    {
+      "name": "Alicante",
+      "state": "Comunitat Valenciana",
+      "country": "España",
+      "lat": 38.3436365,
+      "lon": -0.4881708
+    },
+    {
+      "name": "Córdoba",
+      "state": "Andalucía",
+      "country": "España",
+      "lat": 37.8845813,
+      "lon": -4.7760138
+    },
+    {
+      "name": "Valladolid",
+      "state": "Castilla y León",
+      "country": "España",
+      "lat": 41.6521807,
+      "lon": -4.728605
+    },
+    {
+      "name": "Vigo",
+      "state": "Galicia",
+      "country": "España",
+      "lat": 42.2376602,
+      "lon": -8.7247205
+    },
+    {
+      "name": "Gijón",
+      "state": "Asturias / Asturies",
+      "country": "España",
+      "lat": 43.5449422,
+      "lon": -5.66275
+    },
+    {
+      "name": "Hospitalet de Llobregat",
+      "state": "Catalunya",
+      "country": "España",
+      "lat": 41.3598601,
+      "lon": 2.0997927
+    },
+    {
+      "name": "A Coruña",
+      "state": "Galicia",
+      "country": "España",
+      "lat": 43.3709703,
+      "lon": -8.3959425
+    },
+    {
+      "name": "Granada",
+      "state": "Andalucía",
+      "country": "España",
+      "lat": 37.1734995,
+      "lon": -3.5995337
+    },
+    {
+      "name": "Vitoria-Gasteiz",
+      "state": "Euskadi",
+      "country": "España",
+      "lat": 42.8465088,
+      "lon": -2.6724025
+    },
+    {
+      "name": "Elche",
+      "state": "Comunitat Valenciana",
+      "country": "España",
+      "lat": 38.2653307,
+      "lon": -0.6988391
+    }
+  ],
+  "Sweden": [
+    {
+      "name": "Stockholm",
+      "state": "",
+      "country": "Sverige",
+      "lat": 59.3251172,
+      "lon": 18.0710935
+    },
+    {
+      "name": "Gothenburg",
+      "state": "",
+      "country": "Sverige",
+      "lat": 57.7072326,
+      "lon": 11.9670171
+    },
+    {
+      "name": "Malmö",
+      "state": "",
+      "country": "Sverige",
+      "lat": 55.6052931,
+      "lon": 13.0001566
+    },
+    {
+      "name": "Uppsala",
+      "state": "",
+      "country": "Sverige",
+      "lat": 59.8586126,
+      "lon": 17.6387436
+    },
+    {
+      "name": "Västerås",
+      "state": "",
+      "country": "Sverige",
+      "lat": 59.6110992,
+      "lon": 16.5463679
+    },
+    {
+      "name": "Örebro",
+      "state": "",
+      "country": "Sverige",
+      "lat": 59.2747287,
+      "lon": 15.2151181
+    },
+    {
+      "name": "Linköping",
+      "state": "",
+      "country": "Sverige",
+      "lat": 58.4098135,
+      "lon": 15.6245252
+    },
+    {
+      "name": "Helsingborg",
+      "state": "",
+      "country": "Sverige",
+      "lat": 56.0442098,
+      "lon": 12.703706
+    },
+    {
+      "name": "Jönköping",
+      "state": "",
+      "country": "Sverige",
+      "lat": 57.7825634,
+      "lon": 14.165719
+    },
+    {
+      "name": "Norrköping",
+      "state": "",
+      "country": "Sverige",
+      "lat": 58.5909124,
+      "lon": 16.1903511
+    },
+    {
+      "name": "Lund",
+      "state": "",
+      "country": "Sverige",
+      "lat": 55.7029296,
+      "lon": 13.1929449
+    },
+    {
+      "name": "Umeå",
+      "state": "",
+      "country": "Sverige",
+      "lat": 63.8256568,
+      "lon": 20.2630745
+    },
+    {
+      "name": "Gävle",
+      "state": "",
+      "country": "Sverige",
+      "lat": 60.6750132,
+      "lon": 17.1467019
+    },
+    {
+      "name": "Borås",
+      "state": "",
+      "country": "Sverige",
+      "lat": 57.7210839,
+      "lon": 12.9407407
+    },
+    {
+      "name": "Södertälje",
+      "state": "",
+      "country": "Sverige",
+      "lat": 59.1964289,
+      "lon": 17.6271663
+    },
+    {
+      "name": "Eskilstuna",
+      "state": "",
+      "country": "Sverige",
+      "lat": 59.3717379,
+      "lon": 16.5051474
+    },
+    {
+      "name": "Halmstad",
+      "state": "",
+      "country": "Sverige",
+      "lat": 56.6739826,
+      "lon": 12.8574827
+    },
+    {
+      "name": "Växjö",
+      "state": "",
+      "country": "Sverige",
+      "lat": 56.8787183,
+      "lon": 14.8094385
+    },
+    {
+      "name": "Karlstad",
+      "state": "",
+      "country": "Sverige",
+      "lat": 59.3809146,
+      "lon": 13.5027631
+    },
+    {
+      "name": "Sundsvall",
+      "state": "",
+      "country": "Sverige",
+      "lat": 62.3907552,
+      "lon": 17.3071024
+    }
+  ],
+  "Switzerland": [
+    {
+      "name": "Zürich",
+      "state": "Zürich",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 47.3744489,
+      "lon": 8.5410422
+    },
+    {
+      "name": "Geneva",
+      "state": "Genève",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 46.2017559,
+      "lon": 6.1466014
+    },
+    {
+      "name": "Basel",
+      "state": "Basel-Stadt",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 47.5581077,
+      "lon": 7.5878261
+    },
+    {
+      "name": "Lausanne",
+      "state": "Vaud",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 46.5218269,
+      "lon": 6.6327025
+    },
+    {
+      "name": "Bern",
+      "state": "Bern/Berne",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 46.9484742,
+      "lon": 7.4521749
+    },
+    {
+      "name": "Winterthur",
+      "state": "Zürich",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 47.4991723,
+      "lon": 8.7291498
+    },
+    {
+      "name": "Lucerne",
+      "state": "Luzern",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 47.0505452,
+      "lon": 8.3054682
+    },
+    {
+      "name": "St. Gallen",
+      "state": "St. Gallen",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 47.425618,
+      "lon": 9.3762397
+    },
+    {
+      "name": "Lugano",
+      "state": "Ticino",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 46.0050102,
+      "lon": 8.9520281
+    },
+    {
+      "name": "Biel/Bienne",
+      "state": "Bern/Berne",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 47.1402077,
+      "lon": 7.2439029
+    },
+    {
+      "name": "Thun",
+      "state": "Bern/Berne",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 46.7582827,
+      "lon": 7.628086
+    },
+    {
+      "name": "Köniz",
+      "state": "Bern/Berne",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 46.9222385,
+      "lon": 7.4130582
+    },
+    {
+      "name": "La Chaux-de-Fonds",
+      "state": "Neuchâtel",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 47.1031321,
+      "lon": 6.8325778
+    },
+    {
+      "name": "Schaffhausen",
+      "state": "Schaffhausen",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 47.6960491,
+      "lon": 8.634513
+    },
+    {
+      "name": "Fribourg",
+      "state": "Fribourg/Freiburg",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 46.6789116,
+      "lon": 7.1027113
+    },
+    {
+      "name": "Vernier",
+      "state": "Genève",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 46.2131843,
+      "lon": 6.0815756
+    },
+    {
+      "name": "Chur",
+      "state": "Graubünden/Grischun/Grigioni",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 46.854747,
+      "lon": 9.5264904
+    },
+    {
+      "name": "Neuchâtel",
+      "state": "Neuchâtel",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 46.9895828,
+      "lon": 6.9292641
+    },
+    {
+      "name": "Uster",
+      "state": "Zürich",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 47.3512065,
+      "lon": 8.7179221
+    },
+    {
+      "name": "Sion",
+      "state": "Valais/Wallis",
+      "country": "Schweiz/Suisse/Svizzera/Svizra",
+      "lat": 46.2311749,
+      "lon": 7.3588795
+    }
+  ],
+  "United Kingdom": [
+    {
+      "name": "London",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 51.5074456,
+      "lon": -0.1277653
+    },
+    {
+      "name": "Birmingham",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 52.4796992,
+      "lon": -1.9026911
+    },
+    {
+      "name": "Manchester",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 53.4794892,
+      "lon": -2.2451148
+    },
+    {
+      "name": "Glasgow",
+      "state": "Alba / Scotland",
+      "country": "United Kingdom",
+      "lat": 55.861155,
+      "lon": -4.2501687
+    },
+    {
+      "name": "Liverpool",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 53.4071991,
+      "lon": -2.99168
+    },
+    {
+      "name": "Leeds",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 53.7974185,
+      "lon": -1.5437941
+    },
+    {
+      "name": "Sheffield",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 53.3806626,
+      "lon": -1.4702278
+    },
+    {
+      "name": "Edinburgh",
+      "state": "Alba / Scotland",
+      "country": "United Kingdom",
+      "lat": 55.9533456,
+      "lon": -3.1883749
+    },
+    {
+      "name": "Bristol",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 51.4538022,
+      "lon": -2.5972985
+    },
+    {
+      "name": "Cardiff",
+      "state": "Cymru / Wales",
+      "country": "United Kingdom",
+      "lat": 51.4816546,
+      "lon": -3.1791934
+    },
+    {
+      "name": "Leicester",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 52.6362,
+      "lon": -1.1331969
+    },
+    {
+      "name": "Bradford",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 53.7944229,
+      "lon": -1.7519186
+    },
+    {
+      "name": "Belfast",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.5975805,
+      "lon": -5.9277097
+    },
+    {
+      "name": "Nottingham",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 52.9534193,
+      "lon": -1.1496461
+    },
+    {
+      "name": "Newcastle",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 54.9738474,
+      "lon": -1.6131572
+    },
+    {
+      "name": "Southampton",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 50.9025349,
+      "lon": -1.404189
+    },
+    {
+      "name": "Portsmouth",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 50.800031,
+      "lon": -1.0906023
+    },
+    {
+      "name": "Plymouth",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 50.3714122,
+      "lon": -4.1424451
+    },
+    {
+      "name": "Stoke-on-Trent",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 53.0162014,
+      "lon": -2.1812607
+    },
+    {
+      "name": "Wolverhampton",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 52.5847651,
+      "lon": -2.127567
+    }
+  ],
+  "Bangladesh": [
+    {
+      "name": "Dhaka",
+      "state": "ঢাকা বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 23.7643863,
+      "lon": 90.3890144
+    },
+    {
+      "name": "Chittagong",
+      "state": "চট্টগ্রাম বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 22.333778,
+      "lon": 91.8344348
+    },
+    {
+      "name": "Khulna",
+      "state": "খুলনা বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 22.9372087,
+      "lon": 89.2852741
+    },
+    {
+      "name": "Rajshahi",
+      "state": "রাজশাহী বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 24.6285432,
+      "lon": 89.0376862
+    },
+    {
+      "name": "Sylhet",
+      "state": "সিলেট বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 24.89922,
+      "lon": 91.8685271
+    },
+    {
+      "name": "Barisal",
+      "state": "বরিশাল বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 22.4934035,
+      "lon": 90.3548015
+    },
+    {
+      "name": "Rangpur",
+      "state": "রংপুর বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 25.6376135,
+      "lon": 89.0826381
+    },
+    {
+      "name": "Mymensingh",
+      "state": "ময়মনসিংহ বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 24.8889305,
+      "lon": 90.3845187
+    },
+    {
+      "name": "Comilla",
+      "state": "চট্টগ্রাম বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 23.4628834,
+      "lon": 91.1827987
+    },
+    {
+      "name": "Narayanganj",
+      "state": "ঢাকা বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 23.6236732,
+      "lon": 90.4988075
+    },
+    {
+      "name": "Gazipur",
+      "state": "ঢাকা বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 23.9997558,
+      "lon": 90.4173629
+    },
+    {
+      "name": "Brahmanbaria",
+      "state": "চট্টগ্রাম বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 23.9605999,
+      "lon": 91.1190893
+    },
+    {
+      "name": "Tongi",
+      "state": "ঢাকা বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 23.9084932,
+      "lon": 90.3980037
+    },
+    {
+      "name": "Cox's Bazar",
+      "state": "চট্টগ্রাম বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 21.1766471,
+      "lon": 92.003505
+    },
+    {
+      "name": "Jessore",
+      "state": "খুলনা বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 23.1665256,
+      "lon": 89.2094419
+    },
+    {
+      "name": "Bogra",
+      "state": "রাজশাহী বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 24.8500662,
+      "lon": 89.3728431
+    },
+    {
+      "name": "Dinajpur",
+      "state": "রংপুর বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 25.6260712,
+      "lon": 88.6346228
+    },
+    {
+      "name": "Pabna",
+      "state": "রাজশাহী বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 24.0068082,
+      "lon": 89.2448341
+    },
+    {
+      "name": "Kushtia",
+      "state": "খুলনা বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 23.8987955,
+      "lon": 89.1295536
+    },
+    {
+      "name": "Jamalpur",
+      "state": "ময়মনসিংহ বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 24.9255866,
+      "lon": 89.9436684
+    }
+  ],
+  "Egypt": [
+    {
+      "name": "Cairo",
+      "state": "القاهرة",
+      "country": "مصر",
+      "lat": 30.0443879,
+      "lon": 31.2357257
+    },
+    {
+      "name": "Alexandria",
+      "state": "الإسكندرية",
+      "country": "مصر",
+      "lat": 31.1991806,
+      "lon": 29.8951716
+    },
+    {
+      "name": "Giza",
+      "state": "الجيزة",
+      "country": "مصر",
+      "lat": 29.9870753,
+      "lon": 31.2118063
+    },
+    {
+      "name": "Shubra El Kheima",
+      "state": "القليوبية",
+      "country": "مصر",
+      "lat": 30.1285988,
+      "lon": 31.242218
+    },
+    {
+      "name": "Port Said",
+      "state": "بورسعيد",
+      "country": "مصر",
+      "lat": 31.263235,
+      "lon": 32.305505
+    },
+    {
+      "name": "Suez",
+      "state": "السويس",
+      "country": "مصر",
+      "lat": 29.974498,
+      "lon": 32.537086
+    },
+    {
+      "name": "Luxor",
+      "state": "الأقصر",
+      "country": "مصر",
+      "lat": 25.702096,
+      "lon": 32.647186
+    },
+    {
+      "name": "Mansoura",
+      "state": "الدقهلية",
+      "country": "مصر",
+      "lat": 31.0407772,
+      "lon": 31.3581295
+    },
+    {
+      "name": "Tanta",
+      "state": "الغربية",
+      "country": "مصر",
+      "lat": 30.7833666,
+      "lon": 30.9982536
+    },
+    {
+      "name": "Asyut",
+      "state": "أسيوط",
+      "country": "مصر",
+      "lat": 27.1832822,
+      "lon": 31.1853836
+    },
+    {
+      "name": "Ismailia",
+      "state": "الإسماعيلية",
+      "country": "مصر",
+      "lat": 30.6043775,
+      "lon": 32.2770825
+    },
+    {
+      "name": "Faiyum",
+      "state": "الفيوم",
+      "country": "مصر",
+      "lat": 29.3074076,
+      "lon": 30.8399651
+    },
+    {
+      "name": "Zagazig",
+      "state": "الشرقية",
+      "country": "مصر",
+      "lat": 30.5853431,
+      "lon": 31.5035127
+    },
+    {
+      "name": "Aswan",
+      "state": "أسوان",
+      "country": "مصر",
+      "lat": 24.091071,
+      "lon": 32.897306
+    },
+    {
+      "name": "Damietta",
+      "state": "دمياط",
+      "country": "مصر",
+      "lat": 31.4167427,
+      "lon": 31.8213657
+    },
+    {
+      "name": "Minya",
+      "state": "المنيا",
+      "country": "مصر",
+      "lat": 28.2125404,
+      "lon": 30.9123741
+    },
+    {
+      "name": "Damanhur",
+      "state": "البحيرة",
+      "country": "مصر",
+      "lat": 31.0374982,
+      "lon": 30.4710625
+    },
+    {
+      "name": "Beni Suef",
+      "state": "بنى سويف",
+      "country": "مصر",
+      "lat": 28.8382688,
+      "lon": 30.8544768
+    },
+    {
+      "name": "Hurghada",
+      "state": "البحر الأحمر",
+      "country": "مصر",
+      "lat": 27.222556,
+      "lon": 33.8307062
+    },
+    {
+      "name": "Qena",
+      "state": "قنا",
+      "country": "مصر",
+      "lat": 26.2408267,
+      "lon": 32.9084243
+    }
+  ],
+  "Ethiopia": [
+    {
+      "name": "Addis Ababa",
+      "state": "አዲስ አበባ أديس أبابا",
+      "country": "ኢትዮጵያ",
+      "lat": 9.0358287,
+      "lon": 38.7524127
+    },
+    {
+      "name": "Dire Dawa",
+      "state": "ድሬዳዋ دير داوا",
+      "country": "ኢትዮጵያ",
+      "lat": 9.5912196,
+      "lon": 41.9797191
+    },
+    {
+      "name": "Mekelle",
+      "state": "ትግራይ تجراى",
+      "country": "ኢትዮጵያ",
+      "lat": 13.4966644,
+      "lon": 39.4768259
+    },
+    {
+      "name": "Gondar",
+      "state": "አማራ ክልል Amhara أمحرة",
+      "country": "ኢትዮጵያ",
+      "lat": 12.610368,
+      "lon": 37.466766
+    },
+    {
+      "name": "Hawassa",
+      "state": "ሲዳማ ክልል Sidama سيداما",
+      "country": "ኢትዮጵያ",
+      "lat": 7.0481029,
+      "lon": 38.47861
+    },
+    {
+      "name": "Bahir Dar",
+      "state": "አማራ ክልል Amhara أمحرة",
+      "country": "ኢትዮጵያ",
+      "lat": 11.5949663,
+      "lon": 37.3882251
+    },
+    {
+      "name": "Jimma",
+      "state": "ኦሮሚያ ክልል Oromia أوروميا",
+      "country": "ኢትዮጵያ",
+      "lat": 7.6756152,
+      "lon": 36.8478779
+    },
+    {
+      "name": "Dessie",
+      "state": "አማራ ክልል Amhara أمحرة",
+      "country": "ኢትዮጵያ",
+      "lat": 11.122604,
+      "lon": 39.634982
+    },
+    {
+      "name": "Harar",
+      "state": "ሐረሪ ሕዝብ ክልል Harar هرر",
+      "country": "ኢትዮጵያ",
+      "lat": 9.3118397,
+      "lon": 42.1284445
+    },
+    {
+      "name": "Sodo",
+      "state": "ደቡብ ኢትዮጵያ ክልላዊ መንግስት South Ethiopia Regional State ولاية جنوب إثيوبيا الإقليمية",
+      "country": "ኢትዮጵያ",
+      "lat": 6.864163,
+      "lon": 37.762762
+    },
+    {
+      "name": "Arba Minch",
+      "state": "ደቡብ ኢትዮጵያ ክልላዊ መንግስት South Ethiopia Regional State ولاية جنوب إثيوبيا الإقليمية",
+      "country": "ኢትዮጵያ",
+      "lat": 6.0215142,
+      "lon": 37.5539809
+    },
+    {
+      "name": "Nekemte",
+      "state": "ኦሮሚያ ክልል Oromia أوروميا",
+      "country": "ኢትዮጵያ",
+      "lat": 9.0905237,
+      "lon": 36.5481573
+    },
+    {
+      "name": "Adama",
+      "state": "ኦሮሚያ ክልል Oromia أوروميا",
+      "country": "ኢትዮጵያ",
+      "lat": 8.5410261,
+      "lon": 39.2705461
+    },
+    {
+      "name": "Jijiga",
+      "state": "ሶማሌ ክልል Somali صومالى",
+      "country": "ኢትዮጵያ",
+      "lat": 9.3508526,
+      "lon": 42.8003788
+    },
+    {
+      "name": "Debre Markos",
+      "state": "አማራ ክልል Amhara أمحرة",
+      "country": "ኢትዮጵያ",
+      "lat": 10.3358665,
+      "lon": 37.7285604
+    },
+    {
+      "name": "Shashemene",
+      "state": "ኦሮሚያ ክልል Oromia أوروميا",
+      "country": "ኢትዮጵያ",
+      "lat": 8.78333,
+      "lon": 38.71667
+    },
+    {
+      "name": "Dilla",
+      "state": "ደቡብ ኢትዮጵያ ክልላዊ መንግስት South Ethiopia Regional State ولاية جنوب إثيوبيا الإقليمية",
+      "country": "ኢትዮጵያ",
+      "lat": 6.4099614,
+      "lon": 38.3102763
+    },
+    {
+      "name": "Hosaena",
+      "state": "ማዕከላዊ ኢትዮጵያ ክልላዊ መንግስት Central Ethiopia Regional State الولاية الإقليمية الإثيوبية المركزية",
+      "country": "ኢትዮጵያ",
+      "lat": 7.5501651,
+      "lon": 37.8528153
+    },
+    {
+      "name": "Adigrat",
+      "state": "ትግራይ تجراى",
+      "country": "ኢትዮጵያ",
+      "lat": 14.2774132,
+      "lon": 39.4614983
+    },
+    {
+      "name": "Debre Birhan",
+      "state": "አማራ ክልል Amhara أمحرة",
+      "country": "ኢትዮጵያ",
+      "lat": 9.6752117,
+      "lon": 39.5324899
+    }
+  ],
+  "Indonesia": [
+    {
+      "name": "Jakarta",
+      "state": "Jawa",
+      "country": "Indonesia",
+      "lat": -6.1754049,
+      "lon": 106.827168
+    },
+    {
+      "name": "Surabaya",
+      "state": "Jawa Timur",
+      "country": "Indonesia",
+      "lat": -7.2462836,
+      "lon": 112.7377674
+    },
+    {
+      "name": "Bandung",
+      "state": "Jawa",
+      "country": "Indonesia",
+      "lat": -6.9218457,
+      "lon": 107.6070833
+    },
+    {
+      "name": "Medan",
+      "state": "Sumatera Utara",
+      "country": "Indonesia",
+      "lat": 3.5894617,
+      "lon": 98.6741623
+    },
+    {
+      "name": "Semarang",
+      "state": "Jawa Tengah",
+      "country": "Indonesia",
+      "lat": -6.9903988,
+      "lon": 110.4229104
+    },
+    {
+      "name": "Makassar",
+      "state": "Sulawesi Selatan",
+      "country": "Indonesia",
+      "lat": -5.1342962,
+      "lon": 119.4124282
+    },
+    {
+      "name": "Palembang",
+      "state": "Sumatera Selatan",
+      "country": "Indonesia",
+      "lat": -2.9888243,
+      "lon": 104.7568507
+    },
+    {
+      "name": "Tangerang",
+      "state": "Banten",
+      "country": "Indonesia",
+      "lat": -6.1761924,
+      "lon": 106.6382161
+    },
+    {
+      "name": "Depok",
+      "state": "Jawa Barat",
+      "country": "Indonesia",
+      "lat": -6.40719,
+      "lon": 106.8158371
+    },
+    {
+      "name": "Bekasi",
+      "state": "Jawa Barat",
+      "country": "Indonesia",
+      "lat": -6.2349858,
+      "lon": 106.9945444
+    },
+    {
+      "name": "South Tangerang",
+      "state": "Banten",
+      "country": "Indonesia",
+      "lat": -6.3227016,
+      "lon": 106.7085737
+    },
+    {
+      "name": "Bogor",
+      "state": "Jawa Barat",
+      "country": "Indonesia",
+      "lat": -6.5963564,
+      "lon": 106.7973188
+    },
+    {
+      "name": "Batam",
+      "state": "Kepulauan Riau",
+      "country": "Indonesia",
+      "lat": 1.1030815,
+      "lon": 104.0383696
+    },
+    {
+      "name": "Pekanbaru",
+      "state": "Riau",
+      "country": "Indonesia",
+      "lat": 0.5262455,
+      "lon": 101.4515727
+    },
+    {
+      "name": "Bandar Lampung",
+      "state": "Lampung",
+      "country": "Indonesia",
+      "lat": -5.4460713,
+      "lon": 105.2643742
+    },
+    {
+      "name": "Padang",
+      "state": "Sumatra Barat",
+      "country": "Indonesia",
+      "lat": -0.9247587,
+      "lon": 100.3632561
+    },
+    {
+      "name": "Malang",
+      "state": "Jawa Timur",
+      "country": "Indonesia",
+      "lat": -7.9771308,
+      "lon": 112.6340265
+    },
+    {
+      "name": "Denpasar",
+      "state": "Bali",
+      "country": "Indonesia",
+      "lat": -8.6524973,
+      "lon": 115.2191175
+    },
+    {
+      "name": "Samarinda",
+      "state": "Kalimantan Timur",
+      "country": "Indonesia",
+      "lat": -0.5017804,
+      "lon": 117.1393089
+    },
+    {
+      "name": "Balikpapan",
+      "state": "Kalimantan Timur",
+      "country": "Indonesia",
+      "lat": -1.2398711,
+      "lon": 116.8593379
+    }
+  ],
+  "Kenya": [
+    {
+      "name": "Nairobi",
+      "state": "Nairobi",
+      "country": "Kenya",
+      "lat": -1.2890006,
+      "lon": 36.8172812
+    },
+    {
+      "name": "Mombasa",
+      "state": "Mombasa",
+      "country": "Kenya",
+      "lat": -4.05052,
+      "lon": 39.667169
+    },
+    {
+      "name": "Kisumu",
+      "state": "Kisumu",
+      "country": "Kenya",
+      "lat": -0.1029109,
+      "lon": 34.7541761
+    },
+    {
+      "name": "Nakuru",
+      "state": "Nakuru",
+      "country": "Kenya",
+      "lat": -0.2802724,
+      "lon": 36.0712048
+    },
+    {
+      "name": "Eldoret",
+      "state": "Uasin Gishu",
+      "country": "Kenya",
+      "lat": 0.5198329,
+      "lon": 35.2715481
+    },
+    {
+      "name": "Ruiru",
+      "state": "Kiambu",
+      "country": "Kenya",
+      "lat": -1.1774574,
+      "lon": 36.9824291
+    },
+    {
+      "name": "Kikuyu",
+      "state": "Kiambu",
+      "country": "Kenya",
+      "lat": -1.2362919,
+      "lon": 36.590477
+    },
+    {
+      "name": "Thika",
+      "state": "Kiambu",
+      "country": "Kenya",
+      "lat": -1.036648,
+      "lon": 37.077523
+    },
+    {
+      "name": "Malindi",
+      "state": "Kilifi",
+      "country": "Kenya",
+      "lat": -3.2295935,
+      "lon": 39.9750882
+    },
+    {
+      "name": "Kitale",
+      "state": "Trans Nzoia",
+      "country": "Kenya",
+      "lat": 1.018076,
+      "lon": 35.000236
+    },
+    {
+      "name": "Garissa",
+      "state": "Garissa",
+      "country": "Kenya",
+      "lat": -0.5236333,
+      "lon": 40.3564053
+    },
+    {
+      "name": "Kakamega",
+      "state": "Kakamega",
+      "country": "Kenya",
+      "lat": 0.4957104,
+      "lon": 34.8015489
+    },
+    {
+      "name": "Nyeri",
+      "state": "Nyeri",
+      "country": "Kenya",
+      "lat": -0.3212105,
+      "lon": 36.9295615
+    },
+    {
+      "name": "Meru",
+      "state": "Meru",
+      "country": "Kenya",
+      "lat": 0.2254509,
+      "lon": 37.7772624
+    },
+    {
+      "name": "Machakos",
+      "state": "Machakos",
+      "country": "Kenya",
+      "lat": -1.2790047,
+      "lon": 37.3952698
+    },
+    {
+      "name": "Naivasha",
+      "state": "Nakuru",
+      "country": "Kenya",
+      "lat": -0.7224425,
+      "lon": 36.4387834
+    },
+    {
+      "name": "Voi",
+      "state": "Taita Taveta",
+      "country": "Kenya",
+      "lat": -3.5592753,
+      "lon": 38.8036049
+    },
+    {
+      "name": "Kisii",
+      "state": "Kisii",
+      "country": "Kenya",
+      "lat": -0.7389425,
+      "lon": 34.7539855
+    },
+    {
+      "name": "Kitui",
+      "state": "Kitui",
+      "country": "Kenya",
+      "lat": -1.5642219,
+      "lon": 38.3728116
+    },
+    {
+      "name": "Lamu",
+      "state": "Lamu",
+      "country": "Kenya",
+      "lat": -2.2675396,
+      "lon": 40.9010641
+    }
+  ],
+  "Malaysia": [
+    {
+      "name": "Kuala Lumpur",
+      "state": "Kuala Lumpur",
+      "country": "Malaysia",
+      "lat": 3.1526589,
+      "lon": 101.7022205
+    },
+    {
+      "name": "George Town",
+      "state": "Pulau Pinang",
+      "country": "Malaysia",
+      "lat": 5.4141619,
+      "lon": 100.3287352
+    },
+    {
+      "name": "Ipoh",
+      "state": "Perak",
+      "country": "Malaysia",
+      "lat": 4.5986817,
+      "lon": 101.0900236
+    },
+    {
+      "name": "Shah Alam",
+      "state": "Selangor",
+      "country": "Malaysia",
+      "lat": 3.0739429,
+      "lon": 101.5185278
+    },
+    {
+      "name": "Petaling Jaya",
+      "state": "Selangor",
+      "country": "Malaysia",
+      "lat": 3.0988792,
+      "lon": 101.6454202
+    },
+    {
+      "name": "Johor Bahru",
+      "state": "Johor",
+      "country": "Malaysia",
+      "lat": 1.4581986,
+      "lon": 103.7649059
+    },
+    {
+      "name": "Malacca City",
+      "state": "Melaka",
+      "country": "Malaysia",
+      "lat": 2.1942647,
+      "lon": 102.2486651
+    },
+    {
+      "name": "Alor Setar",
+      "state": "Kedah",
+      "country": "Malaysia",
+      "lat": 6.1231908,
+      "lon": 100.3683962
+    },
+    {
+      "name": "Seremban",
+      "state": "Negeri Sembilan",
+      "country": "Malaysia",
+      "lat": 2.723099,
+      "lon": 101.9400601
+    },
+    {
+      "name": "Kuching",
+      "state": "Sarawak",
+      "country": "Malaysia",
+      "lat": 1.5597561,
+      "lon": 110.345397
+    },
+    {
+      "name": "Kota Kinabalu",
+      "state": "Sabah",
+      "country": "Malaysia",
+      "lat": 5.9780066,
+      "lon": 116.0728988
+    },
+    {
+      "name": "Kuala Terengganu",
+      "state": "Terengganu",
+      "country": "Malaysia",
+      "lat": 5.3296461,
+      "lon": 103.1383265
+    },
+    {
+      "name": "Kuantan",
+      "state": "Pahang",
+      "country": "Malaysia",
+      "lat": 3.7985637,
+      "lon": 103.32199
+    },
+    {
+      "name": "Klang",
+      "state": "Selangor",
+      "country": "Malaysia",
+      "lat": 3.0448394,
+      "lon": 101.4447363
+    },
+    {
+      "name": "Iskandar Puteri",
+      "state": "Johor",
+      "country": "Malaysia",
+      "lat": 1.4522711,
+      "lon": 103.6144729
+    },
+    {
+      "name": "Sandakan",
+      "state": "Sabah",
+      "country": "Malaysia",
+      "lat": 5.8391274,
+      "lon": 118.1158598
+    },
+    {
+      "name": "Taiping",
+      "state": "Perak",
+      "country": "Malaysia",
+      "lat": 4.8546772,
+      "lon": 100.7438831
+    },
+    {
+      "name": "Bintulu",
+      "state": "Sarawak",
+      "country": "Malaysia",
+      "lat": 3.1874261,
+      "lon": 113.0472803
+    },
+    {
+      "name": "Miri",
+      "state": "Sarawak",
+      "country": "Malaysia",
+      "lat": 4.3940102,
+      "lon": 113.9880199
+    },
+    {
+      "name": "Sibu",
+      "state": "Sarawak",
+      "country": "Malaysia",
+      "lat": 2.2996601,
+      "lon": 111.8710012
+    }
+  ],
+  "Morocco": [
+    {
+      "name": "Casablanca",
+      "state": "Casablanca-Settat ⵜⴰⴷⴷⴰⵔⵜ ⵜⵓⵎⵍⵉⵍⵜ-ⵙⵟⵟⴰⵜ الدار البيضاء-سطات",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 33.5945144,
+      "lon": -7.6200284
+    },
+    {
+      "name": "Rabat",
+      "state": "Rabat-Salé-Kénitra ⵔⴱⴰⵟ-ⵙⵍⴰ-ⵇⵏⵉⵟⵔⴰ الرباط-سلا-القنيطرة",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 34.0218454,
+      "lon": -6.8408929
+    },
+    {
+      "name": "Fes",
+      "state": "Fès-Meknès ⴼⴰⵙ-ⵎⴽⵏⴰⵙ فاس-مكناس",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 34.0346534,
+      "lon": -5.0161926
+    },
+    {
+      "name": "Marrakesh",
+      "state": "Marrakech-Safi ⵎⵕⵕⴰⴽⵛ-ⴰⵙⴼⵉ مراكش-أسفي",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 31.6258257,
+      "lon": -7.9891608
+    },
+    {
+      "name": "Tangier",
+      "state": "Tanger-Tétouan-Al Hoceïma ⵟⴰⵏⵊ-ⵟⵉⵜⴰⵡⵉⵏ-ⵍⵃⵓⵙⵉⵎⴰ طنجة تطوان الحسيمة",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 35.7696302,
+      "lon": -5.8033522
+    },
+    {
+      "name": "Salé",
+      "state": "Rabat-Salé-Kénitra ⵔⴱⴰⵟ-ⵙⵍⴰ-ⵇⵏⵉⵟⵔⴰ الرباط-سلا-القنيطرة",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 34.044889,
+      "lon": -6.814017
+    },
+    {
+      "name": "Meknes",
+      "state": "Fès-Meknès ⴼⴰⵙ-ⵎⴽⵏⴰⵙ فاس-مكناس",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 33.8984131,
+      "lon": -5.5321582
+    },
+    {
+      "name": "Oujda",
+      "state": "Oriental ⵜⴰⵏⴳⵎⵓⴹⵜ الشرقية",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 34.677874,
+      "lon": -1.929306
+    },
+    {
+      "name": "Kenitra",
+      "state": "Rabat-Salé-Kénitra ⵔⴱⴰⵟ-ⵙⵍⴰ-ⵇⵏⵉⵟⵔⴰ الرباط-سلا-القنيطرة",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 34.26457,
+      "lon": -6.570169
+    },
+    {
+      "name": "Agadir",
+      "state": "Souss-Massa ⵙⵓⵙⵙ-ⵎⴰⵙⵙⴰ سوس-ماسة",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 30.4205162,
+      "lon": -9.5838532
+    },
+    {
+      "name": "Tetouan",
+      "state": "Tanger-Tétouan-Al Hoceïma ⵟⴰⵏⵊ-ⵟⵉⵜⴰⵡⵉⵏ-ⵍⵃⵓⵙⵉⵎⴰ طنجة تطوان الحسيمة",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 35.202941,
+      "lon": -5.5510167
+    },
+    {
+      "name": "Temara",
+      "state": "Rabat-Salé-Kénitra ⵔⴱⴰⵟ-ⵙⵍⴰ-ⵇⵏⵉⵟⵔⴰ الرباط-سلا-القنيطرة",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 33.917166,
+      "lon": -6.923804
+    },
+    {
+      "name": "Safi",
+      "state": "Marrakech-Safi ⵎⵕⵕⴰⴽⵛ-ⴰⵙⴼⵉ مراكش-أسفي",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 32.299424,
+      "lon": -9.239533
+    },
+    {
+      "name": "Mohammedia",
+      "state": "Casablanca-Settat ⵜⴰⴷⴷⴰⵔⵜ ⵜⵓⵎⵍⵉⵍⵜ-ⵙⵟⵟⴰⵜ الدار البيضاء-سطات",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 33.6958383,
+      "lon": -7.3893292
+    },
+    {
+      "name": "Khouribga",
+      "state": "Béni Mellal-Khénifra ⴰⵢⵜ ⵎⵍⵍⴰⵍ-ⵅⵏⵉⴼⵕⴰ بني ملال-خنيفرة",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 32.8856482,
+      "lon": -6.908798
+    },
+    {
+      "name": "El Jadida",
+      "state": "Casablanca-Settat ⵜⴰⴷⴷⴰⵔⵜ ⵜⵓⵎⵍⵉⵍⵜ-ⵙⵟⵟⴰⵜ الدار البيضاء-سطات",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 33.2433309,
+      "lon": -8.49884
+    },
+    {
+      "name": "Beni Mellal",
+      "state": "Béni Mellal-Khénifra ⴰⵢⵜ ⵎⵍⵍⴰⵍ-ⵅⵏⵉⴼⵕⴰ بني ملال-خنيفرة",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 32.334193,
+      "lon": -6.353335
+    },
+    {
+      "name": "Nador",
+      "state": "Oriental ⵜⴰⵏⴳⵎⵓⴹⵜ الشرقية",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 35.1739922,
+      "lon": -2.9281198
+    },
+    {
+      "name": "Taza",
+      "state": "Fès-Meknès ⴼⴰⵙ-ⵎⴽⵏⴰⵙ فاس-مكناس",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 34.230155,
+      "lon": -4.010104
+    },
+    {
+      "name": "Settat",
+      "state": "Casablanca-Settat ⵜⴰⴷⴷⴰⵔⵜ ⵜⵓⵎⵍⵉⵍⵜ-ⵙⵟⵟⴰⵜ الدار البيضاء-سطات",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 33.002397,
+      "lon": -7.619867
+    }
+  ],
+  "Nigeria": [
+    {
+      "name": "Lagos",
+      "state": "Lagos",
+      "country": "Nigeria",
+      "lat": 6.4550575,
+      "lon": 3.3941795
+    },
+    {
+      "name": "Kano",
+      "state": "Kano",
+      "country": "Nigeria",
+      "lat": 11.9939978,
+      "lon": 8.5219738
+    },
+    {
+      "name": "Ibadan",
+      "state": "Oyo",
+      "country": "Nigeria",
+      "lat": 7.3786064,
+      "lon": 3.8969928
+    },
+    {
+      "name": "Abuja",
+      "state": "Federal Capital Territory",
+      "country": "Nigeria",
+      "lat": 9.0643305,
+      "lon": 7.4892974
+    },
+    {
+      "name": "Port Harcourt",
+      "state": "Rivers",
+      "country": "Nigeria",
+      "lat": 4.7676576,
+      "lon": 7.0188527
+    },
+    {
+      "name": "Benin City",
+      "state": "Edo",
+      "country": "Nigeria",
+      "lat": 6.3330586,
+      "lon": 5.6221058
+    },
+    {
+      "name": "Kaduna",
+      "state": "Kaduna",
+      "country": "Nigeria",
+      "lat": 10.5182899,
+      "lon": 7.4359863
+    },
+    {
+      "name": "Maiduguri",
+      "state": "Borno",
+      "country": "Nigeria",
+      "lat": 11.8395375,
+      "lon": 13.1536214
+    },
+    {
+      "name": "Zaria",
+      "state": "Kaduna",
+      "country": "Nigeria",
+      "lat": 11.0248119,
+      "lon": 7.6518533
+    },
+    {
+      "name": "Aba",
+      "state": "Abia",
+      "country": "Nigeria",
+      "lat": 5.1128008,
+      "lon": 7.3651376
+    },
+    {
+      "name": "Jos",
+      "state": "Plateau",
+      "country": "Nigeria",
+      "lat": 9.9175125,
+      "lon": 8.8979401
+    },
+    {
+      "name": "Ilorin",
+      "state": "Kwara",
+      "country": "Nigeria",
+      "lat": 8.4963657,
+      "lon": 4.5480484
+    },
+    {
+      "name": "Oyo",
+      "state": "Oyo",
+      "country": "Nigeria",
+      "lat": 8.2151249,
+      "lon": 3.5642897
+    },
+    {
+      "name": "Enugu",
+      "state": "Enugu",
+      "country": "Nigeria",
+      "lat": 6.4496519,
+      "lon": 7.5136856
+    },
+    {
+      "name": "Abeokuta",
+      "state": "Ogun",
+      "country": "Nigeria",
+      "lat": 7.161,
+      "lon": 3.348
+    },
+    {
+      "name": "Onitsha",
+      "state": "Anambra",
+      "country": "Nigeria",
+      "lat": 6.1461619,
+      "lon": 6.8019088
+    },
+    {
+      "name": "Warri",
+      "state": "Delta",
+      "country": "Nigeria",
+      "lat": 5.5186186,
+      "lon": 5.7480196
+    },
+    {
+      "name": "Sokoto",
+      "state": "Sokoto",
+      "country": "Nigeria",
+      "lat": 13.0611195,
+      "lon": 5.3152203
+    },
+    {
+      "name": "Calabar",
+      "state": "Cross River",
+      "country": "Nigeria",
+      "lat": 4.9795999,
+      "lon": 8.3373597
+    },
+    {
+      "name": "Akure",
+      "state": "Ondo",
+      "country": "Nigeria",
+      "lat": 7.2525595,
+      "lon": 5.1932647
+    }
+  ],
+  "Pakistan": [
+    {
+      "name": "Karachi",
+      "state": "سندھ",
+      "country": "پاکستان",
+      "lat": 24.8546842,
+      "lon": 67.0207055
+    },
+    {
+      "name": "Lahore",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 31.5656822,
+      "lon": 74.3141829
+    },
+    {
+      "name": "Faisalabad",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 31.4220558,
+      "lon": 73.0923253
+    },
+    {
+      "name": "Rawalpindi",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 33.6037053,
+      "lon": 73.0483132
+    },
+    {
+      "name": "Multan",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 30.197838,
+      "lon": 71.4719683
+    },
+    {
+      "name": "Hyderabad",
+      "state": "سندھ",
+      "country": "پاکستان",
+      "lat": 25.4075358,
+      "lon": 68.3613456
+    },
+    {
+      "name": "Gujranwala",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 32.1525312,
+      "lon": 74.1933745
+    },
+    {
+      "name": "Peshawar",
+      "state": "خیبر پختونخوا",
+      "country": "پاکستان",
+      "lat": 34.0123846,
+      "lon": 71.5787458
+    },
+    {
+      "name": "Quetta",
+      "state": "بلوچستان",
+      "country": "پاکستان",
+      "lat": 30.1916268,
+      "lon": 67.0007561
+    },
+    {
+      "name": "Islamabad",
+      "state": "وفاقی دارالحکومت اسلام آباد",
+      "country": "پاکستان",
+      "lat": 33.6938118,
+      "lon": 73.0651511
+    },
+    {
+      "name": "Bahawalpur",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 29.40295,
+      "lon": 71.6523454
+    },
+    {
+      "name": "Sargodha",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 32.0836514,
+      "lon": 72.676461
+    },
+    {
+      "name": "Sialkot",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 32.4935378,
+      "lon": 74.5411575
+    },
+    {
+      "name": "Sukkur",
+      "state": "",
+      "country": "پاکستان",
+      "lat": 27.7007522,
+      "lon": 68.8663081
+    },
+    {
+      "name": "Larkana",
+      "state": "سندھ",
+      "country": "پاکستان",
+      "lat": 27.5564798,
+      "lon": 68.2101509
+    },
+    {
+      "name": "Sheikhupura",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 31.7085285,
+      "lon": 73.9864014
+    },
+    {
+      "name": "Jhang",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 31.2728805,
+      "lon": 72.3103071
+    },
+    {
+      "name": "Rahim Yar Khan",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 28.4225413,
+      "lon": 70.3034237
+    },
+    {
+      "name": "Gujrat",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 32.5627852,
+      "lon": 74.064535
+    },
+    {
+      "name": "Mardan",
+      "state": "خیبر پختونخوا",
+      "country": "پاکستان",
+      "lat": 34.1937969,
+      "lon": 72.0451467
+    }
+  ],
+  "Philippines": [
+    {
+      "name": "Manila",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.5904492,
+      "lon": 120.9803621
+    },
+    {
+      "name": "Quezon City",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.6510546,
+      "lon": 121.0486254
+    },
+    {
+      "name": "Davao City",
+      "state": "Davao Region",
+      "country": "Philippines",
+      "lat": 7.0648306,
+      "lon": 125.6080623
+    },
+    {
+      "name": "Caloocan",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.651348,
+      "lon": 120.9724002
+    },
+    {
+      "name": "Cebu City",
+      "state": "Central Visayas",
+      "country": "Philippines",
+      "lat": 10.2934946,
+      "lon": 123.9018183
+    },
+    {
+      "name": "Zamboanga City",
+      "state": "Zamboanga Peninsula",
+      "country": "Philippines",
+      "lat": 6.9046876,
+      "lon": 122.0764868
+    },
+    {
+      "name": "Taguig",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.5270538,
+      "lon": 121.0744942
+    },
+    {
+      "name": "Antipolo",
+      "state": "Rizal",
+      "country": "Philippines",
+      "lat": 14.5871972,
+      "lon": 121.1759246
+    },
+    {
+      "name": "Pasig",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.5605166,
+      "lon": 121.0764343
+    },
+    {
+      "name": "Cagayan de Oro",
+      "state": "Northern Mindanao",
+      "country": "Philippines",
+      "lat": 8.4756417,
+      "lon": 124.6421532
+    },
+    {
+      "name": "Parañaque",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.5008116,
+      "lon": 120.9915327
+    },
+    {
+      "name": "Valenzuela",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.6916903,
+      "lon": 120.9694534
+    },
+    {
+      "name": "Las Piñas",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.4809012,
+      "lon": 120.9817861
+    },
+    {
+      "name": "Makati",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.5567949,
+      "lon": 121.0211226
+    },
+    {
+      "name": "Dasmarinas",
+      "state": "Cavite",
+      "country": "Philippines",
+      "lat": 14.3270819,
+      "lon": 120.9370871
+    },
+    {
+      "name": "Bacoor",
+      "state": "Cavite",
+      "country": "Philippines",
+      "lat": 14.458816,
+      "lon": 120.959579
+    },
+    {
+      "name": "General Santos",
+      "state": "Soccsksargen",
+      "country": "Philippines",
+      "lat": 6.1122217,
+      "lon": 125.1721893
+    },
+    {
+      "name": "Muntinlupa",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.3892634,
+      "lon": 121.0449101
+    },
+    {
+      "name": "Marikina",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.6331084,
+      "lon": 121.0993541
+    },
+    {
+      "name": "Iloilo City",
+      "state": "Western Visayas",
+      "country": "Philippines",
+      "lat": 10.6932884,
+      "lon": 122.5732604
+    }
+  ],
+  "Singapore": [
+    {
+      "name": "Singapore",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.357107,
+      "lon": 103.8194992
+    },
+    {
+      "name": "Woodlands",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.436897,
+      "lon": 103.786216
+    },
+    {
+      "name": "Tampines",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3541234,
+      "lon": 103.9438554
+    },
+    {
+      "name": "Jurong West",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.341612,
+      "lon": 103.7049027
+    },
+    {
+      "name": "Bedok",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3240702,
+      "lon": 103.9283972
+    },
+    {
+      "name": "Hougang",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3636374,
+      "lon": 103.8898002
+    },
+    {
+      "name": "Yishun",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.4293839,
+      "lon": 103.8350282
+    },
+    {
+      "name": "Ang Mo Kio",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3800939,
+      "lon": 103.8420975
+    },
+    {
+      "name": "Bukit Batok",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3556584,
+      "lon": 103.7547317
+    },
+    {
+      "name": "Choa Chu Kang",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3857186,
+      "lon": 103.7445876
+    },
+    {
+      "name": "Punggol",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.4054163,
+      "lon": 103.9100375
+    },
+    {
+      "name": "Sengkang",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3912793,
+      "lon": 103.8877082
+    },
+    {
+      "name": "Bishan",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3519117,
+      "lon": 103.8489708
+    },
+    {
+      "name": "Toa Payoh",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.335592,
+      "lon": 103.8481461
+    },
+    {
+      "name": "Clementi",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3175909,
+      "lon": 103.7607506
+    },
+    {
+      "name": "Pasir Ris",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3786232,
+      "lon": 103.9483209
+    },
+    {
+      "name": "Bukit Panjang",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3668222,
+      "lon": 103.772998
+    },
+    {
+      "name": "Serangoon",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.351692,
+      "lon": 103.8708846
+    },
+    {
+      "name": "Kallang",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3111254,
+      "lon": 103.8665434
+    },
+    {
+      "name": "Geylang",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3208955,
+      "lon": 103.8895225
+    }
+  ],
+  "South Africa": [
+    {
+      "name": "Johannesburg",
+      "state": "Gauteng",
+      "country": "South Africa",
+      "lat": -26.205,
+      "lon": 28.049722
+    },
+    {
+      "name": "Cape Town",
+      "state": "Western Cape",
+      "country": "South Africa",
+      "lat": -33.9288301,
+      "lon": 18.4172197
+    },
+    {
+      "name": "Durban",
+      "state": "KwaZulu-Natal",
+      "country": "South Africa",
+      "lat": -29.861825,
+      "lon": 31.009909
+    },
+    {
+      "name": "Pretoria",
+      "state": "Gauteng",
+      "country": "South Africa",
+      "lat": -25.7459277,
+      "lon": 28.1879101
+    },
+    {
+      "name": "Port Elizabeth",
+      "state": "Eastern Cape",
+      "country": "South Africa",
+      "lat": -33.9618598,
+      "lon": 25.6186731
+    },
+    {
+      "name": "Bloemfontein",
+      "state": "Free State",
+      "country": "South Africa",
+      "lat": -29.116395,
+      "lon": 26.215496
+    },
+    {
+      "name": "East London",
+      "state": "Eastern Cape",
+      "country": "South Africa",
+      "lat": -33.0191604,
+      "lon": 27.8998573
+    },
+    {
+      "name": "Polokwane",
+      "state": "Limpopo",
+      "country": "South Africa",
+      "lat": -23.9058333,
+      "lon": 29.4613889
+    },
+    {
+      "name": "Pietermaritzburg",
+      "state": "KwaZulu-Natal",
+      "country": "South Africa",
+      "lat": -29.6,
+      "lon": 30.3788889
+    },
+    {
+      "name": "Nelspruit",
+      "state": "Mpumalanga",
+      "country": "South Africa",
+      "lat": -25.4729094,
+      "lon": 30.9772719
+    },
+    {
+      "name": "Kimberley",
+      "state": "Northern Cape",
+      "country": "South Africa",
+      "lat": -28.7383012,
+      "lon": 24.7642251
+    },
+    {
+      "name": "Rustenburg",
+      "state": "North West",
+      "country": "South Africa",
+      "lat": -25.665655,
+      "lon": 27.241448
+    },
+    {
+      "name": "George",
+      "state": "Western Cape",
+      "country": "South Africa",
+      "lat": -33.9597212,
+      "lon": 22.4587148
+    },
+    {
+      "name": "Soweto",
+      "state": "Gauteng",
+      "country": "South Africa",
+      "lat": -26.2227778,
+      "lon": 27.89
+    },
+    {
+      "name": "Midrand",
+      "state": "Gauteng",
+      "country": "South Africa",
+      "lat": -25.999262,
+      "lon": 28.125912
+    },
+    {
+      "name": "Benoni",
+      "state": "Gauteng",
+      "country": "South Africa",
+      "lat": -26.1930356,
+      "lon": 28.3082376
+    },
+    {
+      "name": "Boksburg",
+      "state": "Gauteng",
+      "country": "South Africa",
+      "lat": -26.2124639,
+      "lon": 28.2617471
+    },
+    {
+      "name": "Vanderbijlpark",
+      "state": "Gauteng",
+      "country": "South Africa",
+      "lat": -26.706891,
+      "lon": 27.836271
+    },
+    {
+      "name": "Krugersdorp",
+      "state": "Gauteng",
+      "country": "South Africa",
+      "lat": -26.095556,
+      "lon": 27.775556
+    },
+    {
+      "name": "Vereeniging",
+      "state": "Gauteng",
+      "country": "South Africa",
+      "lat": -26.6747222,
+      "lon": 27.9261111
+    }
+  ],
+  "Taiwan": [
+    {
+      "name": "Taipei",
+      "state": "",
+      "country": "臺灣",
+      "lat": 25.0375198,
+      "lon": 121.5636796
+    },
+    {
+      "name": "Kaohsiung",
+      "state": "",
+      "country": "臺灣",
+      "lat": 22.6203348,
+      "lon": 120.3120375
+    },
+    {
+      "name": "Taichung",
+      "state": "",
+      "country": "臺灣",
+      "lat": 24.163162,
+      "lon": 120.6478282
+    },
+    {
+      "name": "Tainan",
+      "state": "",
+      "country": "臺灣",
+      "lat": 22.9912348,
+      "lon": 120.184982
+    },
+    {
+      "name": "Taoyuan",
+      "state": "",
+      "country": "臺灣",
+      "lat": 24.9929995,
+      "lon": 121.3010003
+    },
+    {
+      "name": "Hsinchu",
+      "state": "",
+      "country": "臺灣",
+      "lat": 24.8066333,
+      "lon": 120.9686833
+    },
+    {
+      "name": "Keelung",
+      "state": "",
+      "country": "臺灣",
+      "lat": 25.1317232,
+      "lon": 121.744652
+    },
+    {
+      "name": "Chiayi",
+      "state": "",
+      "country": "臺灣",
+      "lat": 23.4591664,
+      "lon": 120.2930004
+    },
+    {
+      "name": "Changhua",
+      "state": "",
+      "country": "臺灣",
+      "lat": 24.0755667,
+      "lon": 120.5444667
+    },
+    {
+      "name": "Zhongli",
+      "state": "",
+      "country": "臺灣",
+      "lat": 24.9653531,
+      "lon": 121.224926
+    },
+    {
+      "name": "Pingtung",
+      "state": "",
+      "country": "臺灣",
+      "lat": 22.6828017,
+      "lon": 120.487928
+    },
+    {
+      "name": "Yilan",
+      "state": "",
+      "country": "臺灣",
+      "lat": 24.7519538,
+      "lon": 121.7533344
+    },
+    {
+      "name": "Hualien",
+      "state": "",
+      "country": "臺灣",
+      "lat": 23.9913421,
+      "lon": 121.6197276
+    },
+    {
+      "name": "Taitung",
+      "state": "",
+      "country": "臺灣",
+      "lat": 22.7553667,
+      "lon": 121.1506
+    },
+    {
+      "name": "Miaoli",
+      "state": "",
+      "country": "臺灣",
+      "lat": 24.5647667,
+      "lon": 120.8205167
+    },
+    {
+      "name": "Douliu",
+      "state": "",
+      "country": "臺灣",
+      "lat": 23.7050525,
+      "lon": 120.5372523
+    },
+    {
+      "name": "Nantou",
+      "state": "",
+      "country": "臺灣",
+      "lat": 23.90235,
+      "lon": 120.6909167
+    },
+    {
+      "name": "Magong",
+      "state": "",
+      "country": "臺灣",
+      "lat": 23.5663766,
+      "lon": 119.5784885
+    },
+    {
+      "name": "Jincheng",
+      "state": "",
+      "country": "臺灣",
+      "lat": 24.4328,
+      "lon": 118.3205667
+    },
+    {
+      "name": "Matsu",
+      "state": "",
+      "country": "臺灣",
+      "lat": 26.1944443,
+      "lon": 119.9665904
+    }
+  ],
+  "Thailand": [
+    {
+      "name": "Bangkok",
+      "state": "",
+      "country": "ประเทศไทย",
+      "lat": 13.7524938,
+      "lon": 100.4935089
+    },
+    {
+      "name": "Chiang Mai",
+      "state": "จังหวัดเชียงใหม่",
+      "country": "ประเทศไทย",
+      "lat": 18.7882778,
+      "lon": 98.9858802
+    },
+    {
+      "name": "Nakhon Ratchasima",
+      "state": "จังหวัดนครราชสีมา",
+      "country": "ประเทศไทย",
+      "lat": 14.9747339,
+      "lon": 102.0981161
+    },
+    {
+      "name": "Hat Yai",
+      "state": "จังหวัดสงขลา",
+      "country": "ประเทศไทย",
+      "lat": 7.0074644,
+      "lon": 100.4689889
+    },
+    {
+      "name": "Udon Thani",
+      "state": "จังหวัดอุดรธานี",
+      "country": "ประเทศไทย",
+      "lat": 17.5211917,
+      "lon": 102.6680012
+    },
+    {
+      "name": "Surat Thani",
+      "state": "จังหวัดสุราษฎร์ธานี",
+      "country": "ประเทศไทย",
+      "lat": 9.4674663,
+      "lon": 98.830042
+    },
+    {
+      "name": "Khon Kaen",
+      "state": "จังหวัดขอนแก่น",
+      "country": "ประเทศไทย",
+      "lat": 16.6022387,
+      "lon": 102.6352933
+    },
+    {
+      "name": "Nakhon Si Thammarat",
+      "state": "จังหวัดนครศรีธรรมราช",
+      "country": "ประเทศไทย",
+      "lat": 8.6772337,
+      "lon": 99.7309635
+    },
+    {
+      "name": "Chiang Rai",
+      "state": "จังหวัดเชียงราย",
+      "country": "ประเทศไทย",
+      "lat": 19.7589517,
+      "lon": 99.6734592
+    },
+    {
+      "name": "Lampang",
+      "state": "จังหวัดลำปาง",
+      "country": "ประเทศไทย",
+      "lat": 18.6799728,
+      "lon": 99.7332501
+    },
+    {
+      "name": "Phuket",
+      "state": "จังหวัดภูเก็ต",
+      "country": "ประเทศไทย",
+      "lat": 7.9366015,
+      "lon": 98.3529292
+    },
+    {
+      "name": "Nakhon Sawan",
+      "state": "จังหวัดนครสวรรค์",
+      "country": "ประเทศไทย",
+      "lat": 15.7054772,
+      "lon": 99.9288481
+    },
+    {
+      "name": "Ubon Ratchathani",
+      "state": "จังหวัดอุบลราชธานี",
+      "country": "ประเทศไทย",
+      "lat": 15.1879684,
+      "lon": 105.3269544
+    },
+    {
+      "name": "Sakon Nakhon",
+      "state": "จังหวัดสกลนคร",
+      "country": "ประเทศไทย",
+      "lat": 17.1904453,
+      "lon": 103.9730898
+    },
+    {
+      "name": "Phitsanulok",
+      "state": "จังหวัดพิษณุโลก",
+      "country": "ประเทศไทย",
+      "lat": 16.9779975,
+      "lon": 100.3848239
+    },
+    {
+      "name": "Rayong",
+      "state": "จังหวัดระยอง",
+      "country": "ประเทศไทย",
+      "lat": 12.7943716,
+      "lon": 101.3705344
+    },
+    {
+      "name": "Pattaya",
+      "state": "จังหวัดชลบุรี",
+      "country": "ประเทศไทย",
+      "lat": 12.9366924,
+      "lon": 100.8865002
+    },
+    {
+      "name": "Krabi",
+      "state": "จังหวัดกระบี่",
+      "country": "ประเทศไทย",
+      "lat": 8.1111653,
+      "lon": 99.1097298
+    },
+    {
+      "name": "Songkhla",
+      "state": "จังหวัดสงขลา",
+      "country": "ประเทศไทย",
+      "lat": 6.8790221,
+      "lon": 100.5498542
+    },
+    {
+      "name": "Nonthaburi",
+      "state": "จังหวัดนนทบุรี",
+      "country": "ประเทศไทย",
+      "lat": 13.8610918,
+      "lon": 100.3456772
+    }
+  ],
+  "Turkey": [
+    {
+      "name": "Istanbul",
+      "state": "İstanbul",
+      "country": "Türkiye",
+      "lat": 41.006381,
+      "lon": 28.9758715
+    },
+    {
+      "name": "Ankara",
+      "state": "Ankara",
+      "country": "Türkiye",
+      "lat": 39.9207759,
+      "lon": 32.8540497
+    },
+    {
+      "name": "Izmir",
+      "state": "İzmir",
+      "country": "Türkiye",
+      "lat": 38.4192537,
+      "lon": 27.128469
+    },
+    {
+      "name": "Bursa",
+      "state": "Bursa",
+      "country": "Türkiye",
+      "lat": 40.1825734,
+      "lon": 29.0675039
+    },
+    {
+      "name": "Adana",
+      "state": "Adana",
+      "country": "Türkiye",
+      "lat": 36.9863599,
+      "lon": 35.3252861
+    },
+    {
+      "name": "Gaziantep",
+      "state": "Gaziantep",
+      "country": "Türkiye",
+      "lat": 37.0628317,
+      "lon": 37.3792617
+    },
+    {
+      "name": "Konya",
+      "state": "Konya",
+      "country": "Türkiye",
+      "lat": 37.872734,
+      "lon": 32.4924376
+    },
+    {
+      "name": "Antalya",
+      "state": "Antalya",
+      "country": "Türkiye",
+      "lat": 36.8865728,
+      "lon": 30.7030242
+    },
+    {
+      "name": "Kayseri",
+      "state": "Kayseri",
+      "country": "Türkiye",
+      "lat": 38.7219011,
+      "lon": 35.4873214
+    },
+    {
+      "name": "Mersin",
+      "state": "Mersin",
+      "country": "Türkiye",
+      "lat": 36.7978381,
+      "lon": 34.6298391
+    },
+    {
+      "name": "Diyarbakır",
+      "state": "Diyarbakır",
+      "country": "Türkiye",
+      "lat": 37.9162222,
+      "lon": 40.2363542
+    },
+    {
+      "name": "Eskişehir",
+      "state": "Eskişehir",
+      "country": "Türkiye",
+      "lat": 39.7743941,
+      "lon": 30.519116
+    },
+    {
+      "name": "Samsun",
+      "state": "Samsun",
+      "country": "Türkiye",
+      "lat": 41.2303557,
+      "lon": 35.9683338
+    },
+    {
+      "name": "Denizli",
+      "state": "Denizli",
+      "country": "Türkiye",
+      "lat": 37.8275892,
+      "lon": 29.2389539
+    },
+    {
+      "name": "Şanlıurfa",
+      "state": "Şanlıurfa",
+      "country": "Türkiye",
+      "lat": 37.2595198,
+      "lon": 39.0408174
+    },
+    {
+      "name": "Adapazarı",
+      "state": "Sakarya",
+      "country": "Türkiye",
+      "lat": 40.7755188,
+      "lon": 30.4020898
+    },
+    {
+      "name": "Malatya",
+      "state": "Malatya",
+      "country": "Türkiye",
+      "lat": 38.4820156,
+      "lon": 38.1035355
+    },
+    {
+      "name": "Kahramanmaraş",
+      "state": "Kahramanmaraş",
+      "country": "Türkiye",
+      "lat": 37.7830345,
+      "lon": 36.830655
+    },
+    {
+      "name": "Erzurum",
+      "state": "Erzurum",
+      "country": "Türkiye",
+      "lat": 39.90632,
+      "lon": 41.2727715
+    },
+    {
+      "name": "Van",
+      "state": "Van",
+      "country": "Türkiye",
+      "lat": 38.3249599,
+      "lon": 43.6589825
+    }
+  ],
+  "Vietnam": [
+    {
+      "name": "Ho Chi Minh City",
+      "state": "",
+      "country": "Việt Nam",
+      "lat": 10.7755254,
+      "lon": 106.7021047
+    },
+    {
+      "name": "Hanoi",
+      "state": "",
+      "country": "Việt Nam",
+      "lat": 21.0283334,
+      "lon": 105.854041
+    },
+    {
+      "name": "Da Nang",
+      "state": "",
+      "country": "Việt Nam",
+      "lat": 16.068,
+      "lon": 108.212
+    },
+    {
+      "name": "Hai Phong",
+      "state": "",
+      "country": "Việt Nam",
+      "lat": 20.8623278,
+      "lon": 106.6799266
+    },
+    {
+      "name": "Can Tho",
+      "state": "",
+      "country": "Việt Nam",
+      "lat": 10.0362046,
+      "lon": 105.7872656
+    },
+    {
+      "name": "Bien Hoa",
+      "state": "Tỉnh Đồng Nai",
+      "country": "Việt Nam",
+      "lat": 10.9507929,
+      "lon": 106.8263284
+    },
+    {
+      "name": "Hue",
+      "state": "Thành phố Huế",
+      "country": "Việt Nam",
+      "lat": 16.4639321,
+      "lon": 107.5863388
+    },
+    {
+      "name": "Nha Trang",
+      "state": "Tỉnh Khánh Hòa",
+      "country": "Việt Nam",
+      "lat": 12.2084991,
+      "lon": 109.2871204
+    },
+    {
+      "name": "Buon Ma Thuot",
+      "state": "Tỉnh Đắk Lắk",
+      "country": "Việt Nam",
+      "lat": 12.6612624,
+      "lon": 108.0310213
+    },
+    {
+      "name": "Vung Tau",
+      "state": "",
+      "country": "Việt Nam",
+      "lat": 10.3478994,
+      "lon": 107.0744665
+    },
+    {
+      "name": "Phan Thiet",
+      "state": "Tỉnh Lâm Đồng",
+      "country": "Việt Nam",
+      "lat": 10.9296264,
+      "lon": 108.1043869
+    },
+    {
+      "name": "Rach Gia",
+      "state": "Tỉnh An Giang",
+      "country": "Việt Nam",
+      "lat": 10.0271632,
+      "lon": 105.0904813
+    },
+    {
+      "name": "Quy Nhon",
+      "state": "Tỉnh Gia Lai",
+      "country": "Việt Nam",
+      "lat": 13.7549492,
+      "lon": 109.1767597
+    },
+    {
+      "name": "Long Xuyen",
+      "state": "Tỉnh An Giang",
+      "country": "Việt Nam",
+      "lat": 10.3719625,
+      "lon": 105.4149066
+    },
+    {
+      "name": "My Tho",
+      "state": "Tỉnh Đồng Tháp",
+      "country": "Việt Nam",
+      "lat": 10.3627685,
+      "lon": 106.3590864
+    },
+    {
+      "name": "Nam Dinh",
+      "state": "Tỉnh Ninh Bình",
+      "country": "Việt Nam",
+      "lat": 19.9952624,
+      "lon": 106.485807
+    },
+    {
+      "name": "Thai Nguyen",
+      "state": "Tỉnh Thái Nguyên",
+      "country": "Việt Nam",
+      "lat": 21.9610968,
+      "lon": 105.8440789
+    },
+    {
+      "name": "Thanh Hoa",
+      "state": "Tỉnh Thanh Hóa",
+      "country": "Việt Nam",
+      "lat": 19.9781573,
+      "lon": 105.4816107
+    },
+    {
+      "name": "Vinh",
+      "state": "Tỉnh Nghệ An",
+      "country": "Việt Nam",
+      "lat": 18.7358406,
+      "lon": 105.6906101
+    },
+    {
+      "name": "Da Lat",
+      "state": "Tỉnh Lâm Đồng",
+      "country": "Việt Nam",
+      "lat": 11.9402416,
+      "lon": 108.4375758
+    }
+  ]
+}

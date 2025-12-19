@@ -894,14 +894,16 @@ legend {
 }
 
 /* === Tabs === */
-.tabs {
+.tabs,
+.location-tabs {
     display: flex;
     gap: var(--spacing-xs);
     border-bottom: 2px solid var(--border-color);
     margin-bottom: var(--spacing-lg);
 }
 
-.tabs button {
+.tabs button,
+.location-tabs button {
     background-color: transparent;
     color: var(--text-secondary);
     border: none;
@@ -913,20 +915,24 @@ legend {
     transition: all 0.2s ease;
 }
 
-.tabs button:hover {
+.tabs button:hover,
+.location-tabs button:hover {
     background-color: var(--secondary-bg);
     color: var(--text-primary);
     transform: none;
     box-shadow: none;
 }
 
-.tabs button[aria-selected="true"] {
-    color: var(--button-primary);
+.tabs button[aria-selected="true"],
+.location-tabs button[aria-selected="true"] {
+    color: var(--text-primary);
+    background-color: var(--secondary-bg);
     border-bottom-color: var(--button-primary);
     font-weight: 600;
 }
 
-.tab-panel[hidden] {
+.tab-panel[hidden],
+[role="tabpanel"][hidden] {
     display: none;
 }
 
