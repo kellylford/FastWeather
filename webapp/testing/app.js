@@ -536,23 +536,33 @@ function closeCitySelectionDialog() {
 async function addCity(cityData, skipRender = false) {
     const key = cityData.display;
     
+    console.log('addCity called:', key, 'skipRender:', skipRender);
+    console.log('Current cities before add:', Object.keys(cities));
+    
     if (cities[key]) {
         announceToScreenReader(`${key} is already in your list`);
+        console.log('City already in list');
         return false;
     }
     
     cities[key] = [cityData.lat, cityData.lon];
     saveCitiesToStorage();
+    console.log('City added to cities object, cities count:', Object.keys(cities).length);
     
     // Only render city list if not in state browsing mode
     if (!skipRender) {
+        console.log('Calling renderCityList');
         renderCityList();
+    } else {
+        console.log('Skipping render');
     }
     
     announceToScreenReader(`${key} added to list`);
     
     // Fetch weather for new city
+    console.log('Fetching weather for', key);
     await fetchWeatherForCity(key, cityData.lat, cityData.lon);
+    console.log('Weather fetched for', key);
     
     return true;
 }
@@ -1615,10 +1625,20 @@ async function fetchWeatherForCity(cityName, lat, lon, detailed = false) {
 
 // Render city list
 function renderCityList() {
+    console.log('renderCityList called, cities count:', Object.keys(cities).length);
+    console.log('Current view:', currentView);
+    console.log('City keys:', Object.keys(cities));
+    
     const container = document.getElementById('city-list');
     const emptyState = document.getElementById('empty-state');
     
+    if (!container) {
+        console.error('city-list container not found!');
+        return;
+    }
+    
     if (Object.keys(cities).length === 0) {
+        console.log('No cities, showing empty state');
         container.innerHTML = '';
         emptyState.hidden = false;
         // Clean up list view controls if they exist
@@ -1629,6 +1649,7 @@ function renderCityList() {
         return;
     }
     
+    console.log('Cities exist, rendering');
     emptyState.hidden = true;
     container.innerHTML = '';
     
@@ -1646,12 +1667,17 @@ function renderCityList() {
     
     // Render based on current view
     if (currentView === 'table') {
+        console.log('Rendering table view');
         renderTableView(container);
     } else if (currentView === 'list') {
+        console.log('Rendering list view');
         renderListView(container);
     } else {
+        console.log('Rendering flat view');
         renderFlatView(container);
     }
+    
+    console.log('renderCityList completed, container children:', container.children.length);
 }
 
 // View menu functions
@@ -1719,6 +1745,18 @@ function handleViewMenuKeydown(e) {
         case 'End':
             e.preventDefault();
             items[items.length - 1].focus();
+            handled = true;
+            break;
+            
+        case 'Enter':
+        case ' ':
+            e.preventDefault();
+            if (document.activeElement && document.activeElement.dataset.view) {
+                const view = document.activeElement.dataset.view;
+                switchView(view);
+                closeViewMenu();
+                document.getElementById('view-menu-btn').focus();
+            }
             handled = true;
             break;
     }
@@ -1935,13 +1973,30 @@ function addDetail(dl, label, value) {
     dl.appendChild(dd);
 }
 
-function createButton(text, onClick, ariaLabel = null) {
+function createButton(text, ariaLabelOrOnClick, onClickIfThreeParams = null) {
     const btn = document.createElement('button');
     btn.innerHTML = text;
-    if (ariaLabel) {
+    
+    // Handle both old signature (text, ariaLabel, onClick) and new signature (text, onClick, ariaLabel)
+    let onClick, ariaLabel;
+    if (typeof ariaLabelOrOnClick === 'function') {
+        // New signature: (text, onClick, ariaLabel?)
+        onClick = ariaLabelOrOnClick;
+        ariaLabel = onClickIfThreeParams;
+    } else {
+        // Old signature: (text, ariaLabel, onClick)
+        ariaLabel = ariaLabelOrOnClick;
+        onClick = onClickIfThreeParams;
+    }
+    
+    if (ariaLabel && typeof ariaLabel === 'string') {
         btn.setAttribute('aria-label', ariaLabel);
     }
-    btn.addEventListener('click', onClick);
+    
+    if (onClick) {
+        btn.addEventListener('click', onClick);
+    }
+    
     return btn;
 }
 
