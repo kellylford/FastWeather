@@ -249,5 +249,65 @@ const INTERNATIONAL_CITIES_BY_COUNTRY = {
         "Bien Hoa", "Hue", "Nha Trang", "Buon Ma Thuot", "Vung Tau",
         "Phan Thiet", "Rach Gia", "Quy Nhon", "Long Xuyen", "My Tho",
         "Nam Dinh", "Thai Nguyen", "Thanh Hoa", "Vinh", "Da Lat"
+    ],
+    "Russia": [
+        "Moscow", "Saint Petersburg", "Novosibirsk", "Yekaterinburg", "Kazan",
+        "Nizhny Novgorod", "Chelyabinsk", "Samara", "Omsk", "Rostov-on-Don",
+        "Ufa", "Krasnoyarsk", "Voronezh", "Perm", "Volgograd",
+        "Krasnodar", "Saratov", "Tyumen", "Tolyatti", "Izhevsk"
+    ],
+    "Ukraine": [
+        "Kyiv", "Kharkiv", "Odesa", "Dnipro", "Donetsk",
+        "Zaporizhzhia", "Lviv", "Kryvyi Rih", "Mykolaiv", "Mariupol",
+        "Luhansk", "Vinnytsia", "Simferopol", "Makiivka", "Sevastopol",
+        "Chernihiv", "Poltava", "Kherson", "Khmelnytskyi", "Cherkasy"
+    ],
+    "Saudi Arabia": [
+        "Riyadh", "Jeddah", "Mecca", "Medina", "Dammam",
+        "Khobar", "Tabuk", "Buraidah", "Khamis Mushait", "Hofuf",
+        "Taif", "Najran", "Jubail", "Abha", "Yanbu",
+        "Al Qatif", "Sakakah", "Jizan", "Arar", "Hail"
+    ],
+    "United Arab Emirates": [
+        "Dubai", "Abu Dhabi", "Sharjah", "Al Ain", "Ajman",
+        "Ras Al Khaimah", "Fujairah", "Umm Al Quwain", "Khor Fakkan", "Dibba Al-Fujairah",
+        "Dhaid", "Jebel Ali", "Ruwais", "Madinat Zayed", "Liwa Oasis",
+        "Kalba", "Ghayathi", "Al Dhafra", "Sweihan", "Al Sila"
+    ],
+    "Israel": [
+        "Jerusalem", "Tel Aviv", "Haifa", "Rishon LeZion", "Petah Tikva",
+        "Ashdod", "Netanya", "Beersheba", "Holon", "Bnei Brak",
+        "Ramat Gan", "Ashkelon", "Rehovot", "Bat Yam", "Beit Shemesh",
+        "Herzliya", "Kfar Saba", "Hadera", "Modiin", "Nazareth"
+    ],
+    "Iraq": [
+        "Baghdad", "Basra", "Mosul", "Erbil", "Kirkuk",
+        "Najaf", "Karbala", "Sulaymaniyah", "Nasiriyah", "Amarah",
+        "Duhok", "Kut", "Ramadi", "Hillah", "Samarra",
+        "Diwaniyah", "Tikrit", "Baqubah", "Fallujah", "Zakho"
+    ],
+    "Iran": [
+        "Tehran", "Mashhad", "Isfahan", "Karaj", "Shiraz",
+        "Tabriz", "Qom", "Ahvaz", "Kermanshah", "Urmia",
+        "Rasht", "Zahedan", "Hamadan", "Yazd", "Ardabil",
+        "Bandar Abbas", "Arak", "Eslamshahr", "Zanjan", "Sanandaj"
+    ],
+    "Jordan": [
+        "Amman", "Zarqa", "Irbid", "Russeifa", "Aqaba",
+        "Madaba", "Sahab", "Mafraq", "Jerash", "Ajloun",
+        "Karak", "Salt", "Tafilah", "Ma'an", "Ramtha",
+        "Azraq", "Petra", "Wadi Musa", "Umm Qais", "Fuheis"
+    ],
+    "Qatar": [
+        "Doha", "Al Rayyan", "Umm Salal", "Al Wakrah", "Al Khor",
+        "Mesaieed", "Dukhan", "Al Shamal", "Madinat ash Shamal", "Al Ghuwariyah",
+        "Simaisma", "Al Jumailiyah", "Al Wukair", "Al Khawr", "Lusail",
+        "Al Daayen", "Al Shahaniya", "Fuwayrit", "Rawdat Rashed", "Umm Bab"
+    ],
+    "Kuwait": [
+        "Kuwait City", "Hawalli", "Salmiya", "Jabriya", "Farwaniya",
+        "Ahmadi", "Sabah Al Salem", "Fahaheel", "Mangaf", "Fintas",
+        "Mahboula", "Jahra", "Salwa", "Bayan", "Mishref",
+        "Rumaithiya", "Abdullah Al-Mubarak", "Jleeb Al-Shuyoukh", "Khaitan", "Ardiya"
     ]
 };
