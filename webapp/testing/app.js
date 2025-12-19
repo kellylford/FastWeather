@@ -68,8 +68,11 @@ const DEFAULT_CONFIG = {
         wind_speed: true,
         wind_direction: true,
         high_temp: true,
-        low_temp: true
+        low_temp: true,
+        sunrise: false,
+        sunset: false
     },
+    cityListOrder: ['temperature', 'conditions', 'feels_like', 'humidity', 'wind_speed', 'wind_direction', 'high_temp', 'low_temp', 'sunrise', 'sunset'],
     units: {
         temperature: 'F',
         wind_speed: 'mph',
@@ -230,6 +233,16 @@ function handleKeyboardShortcuts(e) {
     if (e.ctrlKey && e.key === 'r') {
         e.preventDefault();
         refreshAllCities();
+    }
+    
+    // Alt+V: Open view menu
+    if (e.altKey && e.key === 'v') {
+        e.preventDefault();
+        const viewMenuBtn = document.getElementById('view-menu-btn');
+        if (viewMenuBtn && !document.getElementById('config-dialog').hidden === false) {
+            toggleViewMenu();
+            announceToScreenReader('View menu opened');
+        }
     }
 }
 
