@@ -672,14 +672,15 @@ async function displayStateCities(stateName, cityNames, totalCount = null) {
         // Use cached coordinates - much faster!
         console.log(`✓ Using cached coordinates for ${stateName} (${cachedCityCoordinates[stateName].length} cities in cache)`);
         
-        for (let i = 0; i < cityNames.length; i++) {
-            const cityName = cityNames[i];
+        // Build city info objects with coordinates
+        const cityInfos = [];
+        for (const cityName of cityNames) {
             const cachedCity = cachedCityCoordinates[stateName].find(c => c.name === cityName);
             
             if (cachedCity) {
                 const state = cachedCity.state || stateName;
                 const country = cachedCity.country || 'United States';
-                const cityInfo = {
+                cityInfos.push({
                     name: cityName,
                     display: `${cityName}, ${state}, ${country}`,
                     state: state,
@@ -687,25 +688,32 @@ async function displayStateCities(stateName, cityNames, totalCount = null) {
                     lat: cachedCity.lat,
                     lon: cachedCity.lon,
                     weather: null
-                };
-                
-                // Fetch weather data for this city
-                try {
-                    const weather = await fetchWeatherData(cityInfo.lat, cityInfo.lon);
-                    cityInfo.weather = weather;
-                    console.log(`Loaded weather for ${cityName}`);
-                } catch (weatherError) {
-                    console.error(`Error fetching weather for ${cityName}:`, weatherError);
-                }
-                
-                citiesData.push(cityInfo);
-                
-                // Update progress
-                container.innerHTML = `<p class="loading-text">Loading weather data... (${i + 1}/${cityNames.length})</p>`;
+                });
             } else {
                 console.warn(`City ${cityName} not found in cache`);
             }
         }
+        
+        // Fetch weather data for all cities in parallel
+        console.log(`Fetching weather data for ${cityInfos.length} cities in parallel...`);
+        const weatherPromises = cityInfos.map(async (cityInfo, index) => {
+            try {
+                const weather = await fetchWeatherData(cityInfo.lat, cityInfo.lon);
+                cityInfo.weather = weather;
+                console.log(`Loaded weather for ${cityInfo.name} (${index + 1}/${cityInfos.length})`);
+            } catch (weatherError) {
+                console.error(`Error fetching weather for ${cityInfo.name}:`, weatherError);
+            }
+            return cityInfo;
+        });
+        
+        // Wait for all weather data to load
+        const results = await Promise.all(weatherPromises);
+        citiesData.push(...results);
+        
+        // Sort cities alphabetically by name
+        citiesData.sort((a, b) => a.name.localeCompare(b.name));
+        
     } else {
         // Fall back to geocoding if no cached data
         console.warn(`⚠ No cached data found for "${stateName}", falling back to geocoding (this will be slow)`);
@@ -756,6 +764,9 @@ async function displayStateCities(stateName, cityNames, totalCount = null) {
                 console.error(`Error geocoding ${cityName}:`, error);
             }
         }
+        
+        // Sort cities alphabetically by name
+        citiesData.sort((a, b) => a.name.localeCompare(b.name));
     }
     
     // Render the cities list
