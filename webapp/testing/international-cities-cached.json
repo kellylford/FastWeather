@@ -425,6 +425,148 @@
       "lon": 15.6003717
     }
   ],
+  "Bangladesh": [
+    {
+      "name": "Dhaka",
+      "state": "ঢাকা বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 23.7643863,
+      "lon": 90.3890144
+    },
+    {
+      "name": "Chittagong",
+      "state": "চট্টগ্রাম বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 22.333778,
+      "lon": 91.8344348
+    },
+    {
+      "name": "Khulna",
+      "state": "খুলনা বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 22.9372087,
+      "lon": 89.2852741
+    },
+    {
+      "name": "Rajshahi",
+      "state": "রাজশাহী বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 24.6285432,
+      "lon": 89.0376862
+    },
+    {
+      "name": "Sylhet",
+      "state": "সিলেট বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 24.89922,
+      "lon": 91.8685271
+    },
+    {
+      "name": "Barisal",
+      "state": "বরিশাল বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 22.4934035,
+      "lon": 90.3548015
+    },
+    {
+      "name": "Rangpur",
+      "state": "রংপুর বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 25.6376135,
+      "lon": 89.0826381
+    },
+    {
+      "name": "Mymensingh",
+      "state": "ময়মনসিংহ বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 24.8889305,
+      "lon": 90.3845187
+    },
+    {
+      "name": "Comilla",
+      "state": "চট্টগ্রাম বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 23.4628834,
+      "lon": 91.1827987
+    },
+    {
+      "name": "Narayanganj",
+      "state": "ঢাকা বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 23.6236732,
+      "lon": 90.4988075
+    },
+    {
+      "name": "Gazipur",
+      "state": "ঢাকা বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 23.9997558,
+      "lon": 90.4173629
+    },
+    {
+      "name": "Brahmanbaria",
+      "state": "চট্টগ্রাম বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 23.9605999,
+      "lon": 91.1190893
+    },
+    {
+      "name": "Tongi",
+      "state": "ঢাকা বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 23.9084932,
+      "lon": 90.3980037
+    },
+    {
+      "name": "Cox's Bazar",
+      "state": "চট্টগ্রাম বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 21.1766471,
+      "lon": 92.003505
+    },
+    {
+      "name": "Jessore",
+      "state": "খুলনা বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 23.1665256,
+      "lon": 89.2094419
+    },
+    {
+      "name": "Bogra",
+      "state": "রাজশাহী বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 24.8500662,
+      "lon": 89.3728431
+    },
+    {
+      "name": "Dinajpur",
+      "state": "রংপুর বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 25.6260712,
+      "lon": 88.6346228
+    },
+    {
+      "name": "Pabna",
+      "state": "রাজশাহী বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 24.0068082,
+      "lon": 89.2448341
+    },
+    {
+      "name": "Kushtia",
+      "state": "খুলনা বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 23.8987955,
+      "lon": 89.1295536
+    },
+    {
+      "name": "Jamalpur",
+      "state": "ময়মনসিংহ বিভাগ",
+      "country": "বাংলাদেশ",
+      "lat": 24.9255866,
+      "lon": 89.9436684
+    }
+  ],
   "Belgium": [
     {
       "name": "Brussels",
@@ -1135,6 +1277,290 @@
       "lon": 12.3063909
     }
   ],
+  "Egypt": [
+    {
+      "name": "Cairo",
+      "state": "القاهرة",
+      "country": "مصر",
+      "lat": 30.0443879,
+      "lon": 31.2357257
+    },
+    {
+      "name": "Alexandria",
+      "state": "الإسكندرية",
+      "country": "مصر",
+      "lat": 31.1991806,
+      "lon": 29.8951716
+    },
+    {
+      "name": "Giza",
+      "state": "الجيزة",
+      "country": "مصر",
+      "lat": 29.9870753,
+      "lon": 31.2118063
+    },
+    {
+      "name": "Shubra El Kheima",
+      "state": "القليوبية",
+      "country": "مصر",
+      "lat": 30.1285988,
+      "lon": 31.242218
+    },
+    {
+      "name": "Port Said",
+      "state": "بورسعيد",
+      "country": "مصر",
+      "lat": 31.263235,
+      "lon": 32.305505
+    },
+    {
+      "name": "Suez",
+      "state": "السويس",
+      "country": "مصر",
+      "lat": 29.974498,
+      "lon": 32.537086
+    },
+    {
+      "name": "Luxor",
+      "state": "الأقصر",
+      "country": "مصر",
+      "lat": 25.702096,
+      "lon": 32.647186
+    },
+    {
+      "name": "Mansoura",
+      "state": "الدقهلية",
+      "country": "مصر",
+      "lat": 31.0407772,
+      "lon": 31.3581295
+    },
+    {
+      "name": "Tanta",
+      "state": "الغربية",
+      "country": "مصر",
+      "lat": 30.7833666,
+      "lon": 30.9982536
+    },
+    {
+      "name": "Asyut",
+      "state": "أسيوط",
+      "country": "مصر",
+      "lat": 27.1832822,
+      "lon": 31.1853836
+    },
+    {
+      "name": "Ismailia",
+      "state": "الإسماعيلية",
+      "country": "مصر",
+      "lat": 30.6043775,
+      "lon": 32.2770825
+    },
+    {
+      "name": "Faiyum",
+      "state": "الفيوم",
+      "country": "مصر",
+      "lat": 29.3074076,
+      "lon": 30.8399651
+    },
+    {
+      "name": "Zagazig",
+      "state": "الشرقية",
+      "country": "مصر",
+      "lat": 30.5853431,
+      "lon": 31.5035127
+    },
+    {
+      "name": "Aswan",
+      "state": "أسوان",
+      "country": "مصر",
+      "lat": 24.091071,
+      "lon": 32.897306
+    },
+    {
+      "name": "Damietta",
+      "state": "دمياط",
+      "country": "مصر",
+      "lat": 31.4167427,
+      "lon": 31.8213657
+    },
+    {
+      "name": "Minya",
+      "state": "المنيا",
+      "country": "مصر",
+      "lat": 28.2125404,
+      "lon": 30.9123741
+    },
+    {
+      "name": "Damanhur",
+      "state": "البحيرة",
+      "country": "مصر",
+      "lat": 31.0374982,
+      "lon": 30.4710625
+    },
+    {
+      "name": "Beni Suef",
+      "state": "بنى سويف",
+      "country": "مصر",
+      "lat": 28.8382688,
+      "lon": 30.8544768
+    },
+    {
+      "name": "Hurghada",
+      "state": "البحر الأحمر",
+      "country": "مصر",
+      "lat": 27.222556,
+      "lon": 33.8307062
+    },
+    {
+      "name": "Qena",
+      "state": "قنا",
+      "country": "مصر",
+      "lat": 26.2408267,
+      "lon": 32.9084243
+    }
+  ],
+  "Ethiopia": [
+    {
+      "name": "Addis Ababa",
+      "state": "አዲስ አበባ أديس أبابا",
+      "country": "ኢትዮጵያ",
+      "lat": 9.0358287,
+      "lon": 38.7524127
+    },
+    {
+      "name": "Dire Dawa",
+      "state": "ድሬዳዋ دير داوا",
+      "country": "ኢትዮጵያ",
+      "lat": 9.5912196,
+      "lon": 41.9797191
+    },
+    {
+      "name": "Mekelle",
+      "state": "ትግራይ تجراى",
+      "country": "ኢትዮጵያ",
+      "lat": 13.4966644,
+      "lon": 39.4768259
+    },
+    {
+      "name": "Gondar",
+      "state": "አማራ ክልል Amhara أمحرة",
+      "country": "ኢትዮጵያ",
+      "lat": 12.610368,
+      "lon": 37.466766
+    },
+    {
+      "name": "Hawassa",
+      "state": "ሲዳማ ክልል Sidama سيداما",
+      "country": "ኢትዮጵያ",
+      "lat": 7.0481029,
+      "lon": 38.47861
+    },
+    {
+      "name": "Bahir Dar",
+      "state": "አማራ ክልል Amhara أمحرة",
+      "country": "ኢትዮጵያ",
+      "lat": 11.5949663,
+      "lon": 37.3882251
+    },
+    {
+      "name": "Jimma",
+      "state": "ኦሮሚያ ክልል Oromia أوروميا",
+      "country": "ኢትዮጵያ",
+      "lat": 7.6756152,
+      "lon": 36.8478779
+    },
+    {
+      "name": "Dessie",
+      "state": "አማራ ክልል Amhara أمحرة",
+      "country": "ኢትዮጵያ",
+      "lat": 11.122604,
+      "lon": 39.634982
+    },
+    {
+      "name": "Harar",
+      "state": "ሐረሪ ሕዝብ ክልል Harar هرر",
+      "country": "ኢትዮጵያ",
+      "lat": 9.3118397,
+      "lon": 42.1284445
+    },
+    {
+      "name": "Sodo",
+      "state": "ደቡብ ኢትዮጵያ ክልላዊ መንግስት South Ethiopia Regional State ولاية جنوب إثيوبيا الإقليمية",
+      "country": "ኢትዮጵያ",
+      "lat": 6.864163,
+      "lon": 37.762762
+    },
+    {
+      "name": "Arba Minch",
+      "state": "ደቡብ ኢትዮጵያ ክልላዊ መንግስት South Ethiopia Regional State ولاية جنوب إثيوبيا الإقليمية",
+      "country": "ኢትዮጵያ",
+      "lat": 6.0215142,
+      "lon": 37.5539809
+    },
+    {
+      "name": "Nekemte",
+      "state": "ኦሮሚያ ክልል Oromia أوروميا",
+      "country": "ኢትዮጵያ",
+      "lat": 9.0905237,
+      "lon": 36.5481573
+    },
+    {
+      "name": "Adama",
+      "state": "ኦሮሚያ ክልል Oromia أوروميا",
+      "country": "ኢትዮጵያ",
+      "lat": 8.5410261,
+      "lon": 39.2705461
+    },
+    {
+      "name": "Jijiga",
+      "state": "ሶማሌ ክልል Somali صومالى",
+      "country": "ኢትዮጵያ",
+      "lat": 9.3508526,
+      "lon": 42.8003788
+    },
+    {
+      "name": "Debre Markos",
+      "state": "አማራ ክልል Amhara أمحرة",
+      "country": "ኢትዮጵያ",
+      "lat": 10.3358665,
+      "lon": 37.7285604
+    },
+    {
+      "name": "Shashemene",
+      "state": "ኦሮሚያ ክልል Oromia أوروميا",
+      "country": "ኢትዮጵያ",
+      "lat": 8.78333,
+      "lon": 38.71667
+    },
+    {
+      "name": "Dilla",
+      "state": "ደቡብ ኢትዮጵያ ክልላዊ መንግስት South Ethiopia Regional State ولاية جنوب إثيوبيا الإقليمية",
+      "country": "ኢትዮጵያ",
+      "lat": 6.4099614,
+      "lon": 38.3102763
+    },
+    {
+      "name": "Hosaena",
+      "state": "ማዕከላዊ ኢትዮጵያ ክልላዊ መንግስት Central Ethiopia Regional State الولاية الإقليمية الإثيوبية المركزية",
+      "country": "ኢትዮጵያ",
+      "lat": 7.5501651,
+      "lon": 37.8528153
+    },
+    {
+      "name": "Adigrat",
+      "state": "ትግራይ تجراى",
+      "country": "ኢትዮጵያ",
+      "lat": 14.2774132,
+      "lon": 39.4614983
+    },
+    {
+      "name": "Debre Birhan",
+      "state": "አማራ ክልል Amhara أمحرة",
+      "country": "ኢትዮጵያ",
+      "lat": 9.6752117,
+      "lon": 39.5324899
+    }
+  ],
   "Finland": [
     {
       "name": "Helsinki",
@@ -1703,6 +2129,432 @@
       "lon": 73.1942567
     }
   ],
+  "Indonesia": [
+    {
+      "name": "Jakarta",
+      "state": "Jawa",
+      "country": "Indonesia",
+      "lat": -6.1754049,
+      "lon": 106.827168
+    },
+    {
+      "name": "Surabaya",
+      "state": "Jawa Timur",
+      "country": "Indonesia",
+      "lat": -7.2462836,
+      "lon": 112.7377674
+    },
+    {
+      "name": "Bandung",
+      "state": "Jawa",
+      "country": "Indonesia",
+      "lat": -6.9218457,
+      "lon": 107.6070833
+    },
+    {
+      "name": "Medan",
+      "state": "Sumatera Utara",
+      "country": "Indonesia",
+      "lat": 3.5894617,
+      "lon": 98.6741623
+    },
+    {
+      "name": "Semarang",
+      "state": "Jawa Tengah",
+      "country": "Indonesia",
+      "lat": -6.9903988,
+      "lon": 110.4229104
+    },
+    {
+      "name": "Makassar",
+      "state": "Sulawesi Selatan",
+      "country": "Indonesia",
+      "lat": -5.1342962,
+      "lon": 119.4124282
+    },
+    {
+      "name": "Palembang",
+      "state": "Sumatera Selatan",
+      "country": "Indonesia",
+      "lat": -2.9888243,
+      "lon": 104.7568507
+    },
+    {
+      "name": "Tangerang",
+      "state": "Banten",
+      "country": "Indonesia",
+      "lat": -6.1761924,
+      "lon": 106.6382161
+    },
+    {
+      "name": "Depok",
+      "state": "Jawa Barat",
+      "country": "Indonesia",
+      "lat": -6.40719,
+      "lon": 106.8158371
+    },
+    {
+      "name": "Bekasi",
+      "state": "Jawa Barat",
+      "country": "Indonesia",
+      "lat": -6.2349858,
+      "lon": 106.9945444
+    },
+    {
+      "name": "South Tangerang",
+      "state": "Banten",
+      "country": "Indonesia",
+      "lat": -6.3227016,
+      "lon": 106.7085737
+    },
+    {
+      "name": "Bogor",
+      "state": "Jawa Barat",
+      "country": "Indonesia",
+      "lat": -6.5963564,
+      "lon": 106.7973188
+    },
+    {
+      "name": "Batam",
+      "state": "Kepulauan Riau",
+      "country": "Indonesia",
+      "lat": 1.1030815,
+      "lon": 104.0383696
+    },
+    {
+      "name": "Pekanbaru",
+      "state": "Riau",
+      "country": "Indonesia",
+      "lat": 0.5262455,
+      "lon": 101.4515727
+    },
+    {
+      "name": "Bandar Lampung",
+      "state": "Lampung",
+      "country": "Indonesia",
+      "lat": -5.4460713,
+      "lon": 105.2643742
+    },
+    {
+      "name": "Padang",
+      "state": "Sumatra Barat",
+      "country": "Indonesia",
+      "lat": -0.9247587,
+      "lon": 100.3632561
+    },
+    {
+      "name": "Malang",
+      "state": "Jawa Timur",
+      "country": "Indonesia",
+      "lat": -7.9771308,
+      "lon": 112.6340265
+    },
+    {
+      "name": "Denpasar",
+      "state": "Bali",
+      "country": "Indonesia",
+      "lat": -8.6524973,
+      "lon": 115.2191175
+    },
+    {
+      "name": "Samarinda",
+      "state": "Kalimantan Timur",
+      "country": "Indonesia",
+      "lat": -0.5017804,
+      "lon": 117.1393089
+    },
+    {
+      "name": "Balikpapan",
+      "state": "Kalimantan Timur",
+      "country": "Indonesia",
+      "lat": -1.2398711,
+      "lon": 116.8593379
+    }
+  ],
+  "Iran": [
+    {
+      "name": "Tehran",
+      "state": "استان تهران",
+      "country": "ایران",
+      "lat": 35.6892523,
+      "lon": 51.3896004
+    },
+    {
+      "name": "Mashhad",
+      "state": "استان خراسان رضوی",
+      "country": "ایران",
+      "lat": 36.2974945,
+      "lon": 59.6059232
+    },
+    {
+      "name": "Isfahan",
+      "state": "استان اصفهان",
+      "country": "ایران",
+      "lat": 32.6707877,
+      "lon": 51.6650002
+    },
+    {
+      "name": "Karaj",
+      "state": "استان البرز",
+      "country": "ایران",
+      "lat": 35.8224892,
+      "lon": 50.9904681
+    },
+    {
+      "name": "Shiraz",
+      "state": "استان فارس",
+      "country": "ایران",
+      "lat": 29.6060218,
+      "lon": 52.5378041
+    },
+    {
+      "name": "Tabriz",
+      "state": "استان آذربایجان شرقی",
+      "country": "ایران",
+      "lat": 38.0738612,
+      "lon": 46.2978789
+    },
+    {
+      "name": "Qom",
+      "state": "استان قم",
+      "country": "ایران",
+      "lat": 34.6422939,
+      "lon": 50.8801184
+    },
+    {
+      "name": "Ahvaz",
+      "state": "استان خوزستان",
+      "country": "ایران",
+      "lat": 31.2462916,
+      "lon": 48.7597528
+    },
+    {
+      "name": "Kermanshah",
+      "state": "استان کرمانشاه",
+      "country": "ایران",
+      "lat": 34.3789744,
+      "lon": 46.7010122
+    },
+    {
+      "name": "Urmia",
+      "state": "استان آذربایجان غربی",
+      "country": "ایران",
+      "lat": 37.548341,
+      "lon": 45.0667111
+    },
+    {
+      "name": "Rasht",
+      "state": "استان گیلان",
+      "country": "ایران",
+      "lat": 37.2793607,
+      "lon": 49.5846102
+    },
+    {
+      "name": "Zahedan",
+      "state": "استان سیستان و بلوچستان",
+      "country": "ایران",
+      "lat": 29.4928874,
+      "lon": 60.8503017
+    },
+    {
+      "name": "Hamadan",
+      "state": "استان همدان",
+      "country": "ایران",
+      "lat": 34.9726302,
+      "lon": 48.6563818
+    },
+    {
+      "name": "Yazd",
+      "state": "استان یزد",
+      "country": "ایران",
+      "lat": 32.0406164,
+      "lon": 54.6657189
+    },
+    {
+      "name": "Ardabil",
+      "state": "استان اردبیل",
+      "country": "ایران",
+      "lat": 38.4583983,
+      "lon": 47.9313001
+    },
+    {
+      "name": "Bandar Abbas",
+      "state": "استان هرمزگان",
+      "country": "ایران",
+      "lat": 27.1793466,
+      "lon": 56.2781423
+    },
+    {
+      "name": "Arak",
+      "state": "استان مرکزی",
+      "country": "ایران",
+      "lat": 34.0862719,
+      "lon": 49.6893884
+    },
+    {
+      "name": "Eslamshahr",
+      "state": "استان تهران",
+      "country": "ایران",
+      "lat": 35.5478513,
+      "lon": 51.2318676
+    },
+    {
+      "name": "Zanjan",
+      "state": "استان زنجان",
+      "country": "ایران",
+      "lat": 36.515854,
+      "lon": 48.4777616
+    },
+    {
+      "name": "Sanandaj",
+      "state": "استان کردستان",
+      "country": "ایران",
+      "lat": 35.3126047,
+      "lon": 46.9978639
+    }
+  ],
+  "Iraq": [
+    {
+      "name": "Baghdad",
+      "state": "محافظة بغداد",
+      "country": "العراق",
+      "lat": 33.3061701,
+      "lon": 44.3872213
+    },
+    {
+      "name": "Basra",
+      "state": "محافظة البصرة",
+      "country": "العراق",
+      "lat": 30.4952371,
+      "lon": 47.8090981
+    },
+    {
+      "name": "Mosul",
+      "state": "محافظة نینوى",
+      "country": "العراق",
+      "lat": 36.3436941,
+      "lon": 43.0997156
+    },
+    {
+      "name": "Erbil",
+      "state": "پارێزگای ھەولێر",
+      "country": "العراق",
+      "lat": 36.1911744,
+      "lon": 44.0094145
+    },
+    {
+      "name": "Kirkuk",
+      "state": "محافظة كركوك",
+      "country": "العراق",
+      "lat": 35.4719308,
+      "lon": 44.3953896
+    },
+    {
+      "name": "Najaf",
+      "state": "محافظة النجف",
+      "country": "العراق",
+      "lat": 32.0010227,
+      "lon": 44.3299926
+    },
+    {
+      "name": "Karbala",
+      "state": "محافظة كربلاء",
+      "country": "العراق",
+      "lat": 32.5984057,
+      "lon": 44.0157931
+    },
+    {
+      "name": "Sulaymaniyah",
+      "state": "پارێزگای سلێمانی",
+      "country": "العراق",
+      "lat": 35.5570501,
+      "lon": 45.4425963
+    },
+    {
+      "name": "Nasiriyah",
+      "state": "محافظة ذي قار",
+      "country": "العراق",
+      "lat": 31.0439957,
+      "lon": 46.2399386
+    },
+    {
+      "name": "Amarah",
+      "state": "محافظة ميسان",
+      "country": "العراق",
+      "lat": 31.8497708,
+      "lon": 47.1496466
+    },
+    {
+      "name": "Duhok",
+      "state": "پارێزگای دھۆک",
+      "country": "العراق",
+      "lat": 36.8542598,
+      "lon": 42.9924528
+    },
+    {
+      "name": "Kut",
+      "state": "محافظة واسط",
+      "country": "العراق",
+      "lat": 32.5010274,
+      "lon": 45.8296334
+    },
+    {
+      "name": "Ramadi",
+      "state": "محافظة الأنبار",
+      "country": "العراق",
+      "lat": 33.4259859,
+      "lon": 43.2999218
+    },
+    {
+      "name": "Hillah",
+      "state": "محافظة بابل",
+      "country": "العراق",
+      "lat": 32.482245,
+      "lon": 44.4328131
+    },
+    {
+      "name": "Samarra",
+      "state": "محافظة صلاح الدين",
+      "country": "العراق",
+      "lat": 34.2,
+      "lon": 43.9
+    },
+    {
+      "name": "Diwaniyah",
+      "state": "محافظة القادسية",
+      "country": "العراق",
+      "lat": 31.9853304,
+      "lon": 44.9236266
+    },
+    {
+      "name": "Tikrit",
+      "state": "محافظة صلاح الدين",
+      "country": "العراق",
+      "lat": 34.615807,
+      "lon": 43.678606
+    },
+    {
+      "name": "Baqubah",
+      "state": "محافظة ديالى",
+      "country": "العراق",
+      "lat": 33.7447393,
+      "lon": 44.6328472
+    },
+    {
+      "name": "Fallujah",
+      "state": "محافظة الأنبار",
+      "country": "العراق",
+      "lat": 33.3532137,
+      "lon": 43.7875674
+    },
+    {
+      "name": "Zakho",
+      "state": "پارێزگای دھۆک",
+      "country": "العراق",
+      "lat": 37.1433762,
+      "lon": 42.6822907
+    }
+  ],
   "Ireland": [
     {
       "name": "Dublin",
@@ -1843,6 +2695,148 @@
       "country": "Éire / Ireland",
       "lat": 54.9517941,
       "lon": -7.7354368
+    }
+  ],
+  "Israel": [
+    {
+      "name": "Jerusalem",
+      "state": "מחוז ירושלים",
+      "country": "ישראל",
+      "lat": 31.7788472,
+      "lon": 35.2257856
+    },
+    {
+      "name": "Tel Aviv",
+      "state": "מחוז תל אביב",
+      "country": "ישראל",
+      "lat": 32.0852997,
+      "lon": 34.7818064
+    },
+    {
+      "name": "Haifa",
+      "state": "מחוז חיפה",
+      "country": "ישראל",
+      "lat": 32.8191218,
+      "lon": 34.9983856
+    },
+    {
+      "name": "Rishon LeZion",
+      "state": "מחוז המרכז",
+      "country": "ישראל",
+      "lat": 31.9747693,
+      "lon": 34.778334
+    },
+    {
+      "name": "Petah Tikva",
+      "state": "מחוז המרכז",
+      "country": "ישראל",
+      "lat": 32.0906242,
+      "lon": 34.8839799
+    },
+    {
+      "name": "Ashdod",
+      "state": "מחוז הדרום",
+      "country": "ישראל",
+      "lat": 31.7957411,
+      "lon": 34.6488659
+    },
+    {
+      "name": "Netanya",
+      "state": "מחוז המרכז",
+      "country": "ישראל",
+      "lat": 32.3073499,
+      "lon": 34.8628611
+    },
+    {
+      "name": "Beersheba",
+      "state": "מחוז הדרום",
+      "country": "ישראל",
+      "lat": 31.2457442,
+      "lon": 34.7925181
+    },
+    {
+      "name": "Holon",
+      "state": "מחוז תל אביב",
+      "country": "ישראל",
+      "lat": 32.0193121,
+      "lon": 34.7804076
+    },
+    {
+      "name": "Bnei Brak",
+      "state": "מחוז תל אביב",
+      "country": "ישראל",
+      "lat": 32.0873899,
+      "lon": 34.8324376
+    },
+    {
+      "name": "Ramat Gan",
+      "state": "מחוז תל אביב",
+      "country": "ישראל",
+      "lat": 32.0686867,
+      "lon": 34.8246812
+    },
+    {
+      "name": "Ashkelon",
+      "state": "מחוז הדרום",
+      "country": "ישראל",
+      "lat": 31.6687545,
+      "lon": 34.5740485
+    },
+    {
+      "name": "Rehovot",
+      "state": "מחוז המרכז",
+      "country": "ישראל",
+      "lat": 31.8952532,
+      "lon": 34.8105616
+    },
+    {
+      "name": "Bat Yam",
+      "state": "מחוז תל אביב",
+      "country": "ישראל",
+      "lat": 32.0154565,
+      "lon": 34.7505283
+    },
+    {
+      "name": "Beit Shemesh",
+      "state": "מחוז ירושלים",
+      "country": "ישראל",
+      "lat": 31.746214,
+      "lon": 34.9886825
+    },
+    {
+      "name": "Herzliya",
+      "state": "מחוז תל אביב",
+      "country": "ישראל",
+      "lat": 32.1676842,
+      "lon": 34.8308279
+    },
+    {
+      "name": "Kfar Saba",
+      "state": "מחוז המרכז",
+      "country": "ישראל",
+      "lat": 32.1802349,
+      "lon": 34.9180542
+    },
+    {
+      "name": "Hadera",
+      "state": "מחוז חיפה",
+      "country": "ישראל",
+      "lat": 32.440742,
+      "lon": 34.9401053
+    },
+    {
+      "name": "Modiin",
+      "state": "מחוז המרכז",
+      "country": "ישראל",
+      "lat": 31.9085744,
+      "lon": 35.0069297
+    },
+    {
+      "name": "Nazareth",
+      "state": "מחוז הצפון",
+      "country": "ישראל",
+      "lat": 32.7046364,
+      "lon": 35.2971854
     }
   ],
   "Italy": [
@@ -2129,6 +3123,574 @@
       "lon": 138.3831697
     }
   ],
+  "Jordan": [
+    {
+      "name": "Amman",
+      "state": "عمان",
+      "country": "الأردن",
+      "lat": 31.9515694,
+      "lon": 35.9239625
+    },
+    {
+      "name": "Zarqa",
+      "state": "الزرقاء",
+      "country": "الأردن",
+      "lat": 32.0668425,
+      "lon": 36.0885771
+    },
+    {
+      "name": "Irbid",
+      "state": "إربد",
+      "country": "الأردن",
+      "lat": 32.4010093,
+      "lon": 35.5607928
+    },
+    {
+      "name": "Russeifa",
+      "state": "الزرقاء",
+      "country": "الأردن",
+      "lat": 32.0174989,
+      "lon": 36.0434611
+    },
+    {
+      "name": "Aqaba",
+      "state": "العقبة",
+      "country": "الأردن",
+      "lat": 29.5266483,
+      "lon": 35.0075433
+    },
+    {
+      "name": "Madaba",
+      "state": "مادبا",
+      "country": "الأردن",
+      "lat": 31.7165941,
+      "lon": 35.7943856
+    },
+    {
+      "name": "Sahab",
+      "state": "عمان",
+      "country": "الأردن",
+      "lat": 31.8786659,
+      "lon": 36.0043148
+    },
+    {
+      "name": "Mafraq",
+      "state": "المفرق",
+      "country": "الأردن",
+      "lat": 32.5386102,
+      "lon": 38.1307328
+    },
+    {
+      "name": "Jerash",
+      "state": "جرش",
+      "country": "الأردن",
+      "lat": 32.278448,
+      "lon": 35.8896803
+    },
+    {
+      "name": "Ajloun",
+      "state": "عجلون",
+      "country": "الأردن",
+      "lat": 32.3323294,
+      "lon": 35.7520522
+    },
+    {
+      "name": "Karak",
+      "state": "الكرك",
+      "country": "الأردن",
+      "lat": 31.1257036,
+      "lon": 35.824704
+    },
+    {
+      "name": "Salt",
+      "state": "البلقاء",
+      "country": "الأردن",
+      "lat": 32.0390779,
+      "lon": 35.7269843
+    },
+    {
+      "name": "Tafilah",
+      "state": "الطفيلة",
+      "country": "الأردن",
+      "lat": 30.7997469,
+      "lon": 35.7377626
+    },
+    {
+      "name": "Ma'an",
+      "state": "معان",
+      "country": "الأردن",
+      "lat": 30.2,
+      "lon": 35.7333329
+    },
+    {
+      "name": "Ramtha",
+      "state": "إربد",
+      "country": "الأردن",
+      "lat": 32.559167,
+      "lon": 36.006944
+    },
+    {
+      "name": "Azraq",
+      "state": "الزرقاء",
+      "country": "الأردن",
+      "lat": 31.9014764,
+      "lon": 36.5849074
+    },
+    {
+      "name": "Petra",
+      "state": "معان",
+      "country": "الأردن",
+      "lat": 30.3258363,
+      "lon": 35.4745669
+    },
+    {
+      "name": "Wadi Musa",
+      "state": "معان",
+      "country": "الأردن",
+      "lat": 30.3216568,
+      "lon": 35.4800889
+    },
+    {
+      "name": "Umm Qais",
+      "state": "إربد",
+      "country": "الأردن",
+      "lat": 32.6540334,
+      "lon": 35.6844601
+    },
+    {
+      "name": "Fuheis",
+      "state": "البلقاء",
+      "country": "الأردن",
+      "lat": 32.0097413,
+      "lon": 35.7689844
+    }
+  ],
+  "Kenya": [
+    {
+      "name": "Nairobi",
+      "state": "Nairobi",
+      "country": "Kenya",
+      "lat": -1.2890006,
+      "lon": 36.8172812
+    },
+    {
+      "name": "Mombasa",
+      "state": "Mombasa",
+      "country": "Kenya",
+      "lat": -4.05052,
+      "lon": 39.667169
+    },
+    {
+      "name": "Kisumu",
+      "state": "Kisumu",
+      "country": "Kenya",
+      "lat": -0.1029109,
+      "lon": 34.7541761
+    },
+    {
+      "name": "Nakuru",
+      "state": "Nakuru",
+      "country": "Kenya",
+      "lat": -0.2802724,
+      "lon": 36.0712048
+    },
+    {
+      "name": "Eldoret",
+      "state": "Uasin Gishu",
+      "country": "Kenya",
+      "lat": 0.5198329,
+      "lon": 35.2715481
+    },
+    {
+      "name": "Ruiru",
+      "state": "Kiambu",
+      "country": "Kenya",
+      "lat": -1.1774574,
+      "lon": 36.9824291
+    },
+    {
+      "name": "Kikuyu",
+      "state": "Kiambu",
+      "country": "Kenya",
+      "lat": -1.2362919,
+      "lon": 36.590477
+    },
+    {
+      "name": "Thika",
+      "state": "Kiambu",
+      "country": "Kenya",
+      "lat": -1.036648,
+      "lon": 37.077523
+    },
+    {
+      "name": "Malindi",
+      "state": "Kilifi",
+      "country": "Kenya",
+      "lat": -3.2295935,
+      "lon": 39.9750882
+    },
+    {
+      "name": "Kitale",
+      "state": "Trans Nzoia",
+      "country": "Kenya",
+      "lat": 1.018076,
+      "lon": 35.000236
+    },
+    {
+      "name": "Garissa",
+      "state": "Garissa",
+      "country": "Kenya",
+      "lat": -0.5236333,
+      "lon": 40.3564053
+    },
+    {
+      "name": "Kakamega",
+      "state": "Kakamega",
+      "country": "Kenya",
+      "lat": 0.4957104,
+      "lon": 34.8015489
+    },
+    {
+      "name": "Nyeri",
+      "state": "Nyeri",
+      "country": "Kenya",
+      "lat": -0.3212105,
+      "lon": 36.9295615
+    },
+    {
+      "name": "Meru",
+      "state": "Meru",
+      "country": "Kenya",
+      "lat": 0.2254509,
+      "lon": 37.7772624
+    },
+    {
+      "name": "Machakos",
+      "state": "Machakos",
+      "country": "Kenya",
+      "lat": -1.2790047,
+      "lon": 37.3952698
+    },
+    {
+      "name": "Naivasha",
+      "state": "Nakuru",
+      "country": "Kenya",
+      "lat": -0.7224425,
+      "lon": 36.4387834
+    },
+    {
+      "name": "Voi",
+      "state": "Taita Taveta",
+      "country": "Kenya",
+      "lat": -3.5592753,
+      "lon": 38.8036049
+    },
+    {
+      "name": "Kisii",
+      "state": "Kisii",
+      "country": "Kenya",
+      "lat": -0.7389425,
+      "lon": 34.7539855
+    },
+    {
+      "name": "Kitui",
+      "state": "Kitui",
+      "country": "Kenya",
+      "lat": -1.5642219,
+      "lon": 38.3728116
+    },
+    {
+      "name": "Lamu",
+      "state": "Lamu",
+      "country": "Kenya",
+      "lat": -2.2675396,
+      "lon": 40.9010641
+    }
+  ],
+  "Kuwait": [
+    {
+      "name": "Kuwait City",
+      "state": "محافظة العاصمة",
+      "country": "الكويت",
+      "lat": 29.3796532,
+      "lon": 47.9734174
+    },
+    {
+      "name": "Hawalli",
+      "state": "محافظة حولي",
+      "country": "الكويت",
+      "lat": 29.3236609,
+      "lon": 48.1153148
+    },
+    {
+      "name": "Salmiya",
+      "state": "محافظة حولي",
+      "country": "الكويت",
+      "lat": 29.3327834,
+      "lon": 48.0684884
+    },
+    {
+      "name": "Jabriya",
+      "state": "محافظة حولي",
+      "country": "الكويت",
+      "lat": 29.3192521,
+      "lon": 48.0329577
+    },
+    {
+      "name": "Farwaniya",
+      "state": "محافظة الفروانية",
+      "country": "الكويت",
+      "lat": 29.2482539,
+      "lon": 47.9136755
+    },
+    {
+      "name": "Ahmadi",
+      "state": "محافظة الأحمدي",
+      "country": "الكويت",
+      "lat": 28.8538571,
+      "lon": 48.1652377
+    },
+    {
+      "name": "Sabah Al Salem",
+      "state": "محافظة مبارك الكبير",
+      "country": "الكويت",
+      "lat": 29.2538763,
+      "lon": 48.0677454
+    },
+    {
+      "name": "Fahaheel",
+      "state": "محافظة الأحمدي",
+      "country": "الكويت",
+      "lat": 29.081324,
+      "lon": 48.1275121
+    },
+    {
+      "name": "Mangaf",
+      "state": "محافظة الأحمدي",
+      "country": "الكويت",
+      "lat": 29.1059112,
+      "lon": 48.1281441
+    },
+    {
+      "name": "Fintas",
+      "state": "محافظة الأحمدي",
+      "country": "الكويت",
+      "lat": 29.1717715,
+      "lon": 48.117815
+    },
+    {
+      "name": "Mahboula",
+      "state": "محافظة الأحمدي",
+      "country": "الكويت",
+      "lat": 29.1490219,
+      "lon": 48.1210101
+    },
+    {
+      "name": "Jahra",
+      "state": "محافظة الجهراء",
+      "country": "الكويت",
+      "lat": 29.5205177,
+      "lon": 47.306211
+    },
+    {
+      "name": "Salwa",
+      "state": "محافظة حولي",
+      "country": "الكويت",
+      "lat": 29.2892859,
+      "lon": 48.0807358
+    },
+    {
+      "name": "Bayan",
+      "state": "محافظة حولي",
+      "country": "الكويت",
+      "lat": 29.2975129,
+      "lon": 48.0478482
+    },
+    {
+      "name": "Mishref",
+      "state": "محافظة حولي",
+      "country": "الكويت",
+      "lat": 29.2790336,
+      "lon": 48.0661118
+    },
+    {
+      "name": "Rumaithiya",
+      "state": "محافظة حولي",
+      "country": "الكويت",
+      "lat": 29.3151348,
+      "lon": 48.0705355
+    },
+    {
+      "name": "Abdullah Al-Mubarak",
+      "state": "محافظة الفروانية",
+      "country": "الكويت",
+      "lat": 29.2459923,
+      "lon": 47.9091952
+    },
+    {
+      "name": "Jleeb Al-Shuyoukh",
+      "state": "محافظة الفروانية",
+      "country": "الكويت",
+      "lat": 29.2596016,
+      "lon": 47.9336667
+    },
+    {
+      "name": "Khaitan",
+      "state": "محافظة الفروانية",
+      "country": "الكويت",
+      "lat": 29.2853097,
+      "lon": 47.9759379
+    },
+    {
+      "name": "Ardiya",
+      "state": "محافظة الفروانية",
+      "country": "الكويت",
+      "lat": 29.2893416,
+      "lon": 47.8946694
+    }
+  ],
+  "Malaysia": [
+    {
+      "name": "Kuala Lumpur",
+      "state": "Kuala Lumpur",
+      "country": "Malaysia",
+      "lat": 3.1526589,
+      "lon": 101.7022205
+    },
+    {
+      "name": "George Town",
+      "state": "Pulau Pinang",
+      "country": "Malaysia",
+      "lat": 5.4141619,
+      "lon": 100.3287352
+    },
+    {
+      "name": "Ipoh",
+      "state": "Perak",
+      "country": "Malaysia",
+      "lat": 4.5986817,
+      "lon": 101.0900236
+    },
+    {
+      "name": "Shah Alam",
+      "state": "Selangor",
+      "country": "Malaysia",
+      "lat": 3.0739429,
+      "lon": 101.5185278
+    },
+    {
+      "name": "Petaling Jaya",
+      "state": "Selangor",
+      "country": "Malaysia",
+      "lat": 3.0988792,
+      "lon": 101.6454202
+    },
+    {
+      "name": "Johor Bahru",
+      "state": "Johor",
+      "country": "Malaysia",
+      "lat": 1.4581986,
+      "lon": 103.7649059
+    },
+    {
+      "name": "Malacca City",
+      "state": "Melaka",
+      "country": "Malaysia",
+      "lat": 2.1942647,
+      "lon": 102.2486651
+    },
+    {
+      "name": "Alor Setar",
+      "state": "Kedah",
+      "country": "Malaysia",
+      "lat": 6.1231908,
+      "lon": 100.3683962
+    },
+    {
+      "name": "Seremban",
+      "state": "Negeri Sembilan",
+      "country": "Malaysia",
+      "lat": 2.723099,
+      "lon": 101.9400601
+    },
+    {
+      "name": "Kuching",
+      "state": "Sarawak",
+      "country": "Malaysia",
+      "lat": 1.5597561,
+      "lon": 110.345397
+    },
+    {
+      "name": "Kota Kinabalu",
+      "state": "Sabah",
+      "country": "Malaysia",
+      "lat": 5.9780066,
+      "lon": 116.0728988
+    },
+    {
+      "name": "Kuala Terengganu",
+      "state": "Terengganu",
+      "country": "Malaysia",
+      "lat": 5.3296461,
+      "lon": 103.1383265
+    },
+    {
+      "name": "Kuantan",
+      "state": "Pahang",
+      "country": "Malaysia",
+      "lat": 3.7985637,
+      "lon": 103.32199
+    },
+    {
+      "name": "Klang",
+      "state": "Selangor",
+      "country": "Malaysia",
+      "lat": 3.0448394,
+      "lon": 101.4447363
+    },
+    {
+      "name": "Iskandar Puteri",
+      "state": "Johor",
+      "country": "Malaysia",
+      "lat": 1.4522711,
+      "lon": 103.6144729
+    },
+    {
+      "name": "Sandakan",
+      "state": "Sabah",
+      "country": "Malaysia",
+      "lat": 5.8391274,
+      "lon": 118.1158598
+    },
+    {
+      "name": "Taiping",
+      "state": "Perak",
+      "country": "Malaysia",
+      "lat": 4.8546772,
+      "lon": 100.7438831
+    },
+    {
+      "name": "Bintulu",
+      "state": "Sarawak",
+      "country": "Malaysia",
+      "lat": 3.1874261,
+      "lon": 113.0472803
+    },
+    {
+      "name": "Miri",
+      "state": "Sarawak",
+      "country": "Malaysia",
+      "lat": 4.3940102,
+      "lon": 113.9880199
+    },
+    {
+      "name": "Sibu",
+      "state": "Sarawak",
+      "country": "Malaysia",
+      "lat": 2.2996601,
+      "lon": 111.8710012
+    }
+  ],
   "Mexico": [
     {
       "name": "Mexico City",
@@ -2269,6 +3831,148 @@
       "country": "México",
       "lat": 21.1527467,
       "lon": -86.8425761
+    }
+  ],
+  "Morocco": [
+    {
+      "name": "Casablanca",
+      "state": "Casablanca-Settat ⵜⴰⴷⴷⴰⵔⵜ ⵜⵓⵎⵍⵉⵍⵜ-ⵙⵟⵟⴰⵜ الدار البيضاء-سطات",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 33.5945144,
+      "lon": -7.6200284
+    },
+    {
+      "name": "Rabat",
+      "state": "Rabat-Salé-Kénitra ⵔⴱⴰⵟ-ⵙⵍⴰ-ⵇⵏⵉⵟⵔⴰ الرباط-سلا-القنيطرة",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 34.0218454,
+      "lon": -6.8408929
+    },
+    {
+      "name": "Fes",
+      "state": "Fès-Meknès ⴼⴰⵙ-ⵎⴽⵏⴰⵙ فاس-مكناس",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 34.0346534,
+      "lon": -5.0161926
+    },
+    {
+      "name": "Marrakesh",
+      "state": "Marrakech-Safi ⵎⵕⵕⴰⴽⵛ-ⴰⵙⴼⵉ مراكش-أسفي",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 31.6258257,
+      "lon": -7.9891608
+    },
+    {
+      "name": "Tangier",
+      "state": "Tanger-Tétouan-Al Hoceïma ⵟⴰⵏⵊ-ⵟⵉⵜⴰⵡⵉⵏ-ⵍⵃⵓⵙⵉⵎⴰ طنجة تطوان الحسيمة",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 35.7696302,
+      "lon": -5.8033522
+    },
+    {
+      "name": "Salé",
+      "state": "Rabat-Salé-Kénitra ⵔⴱⴰⵟ-ⵙⵍⴰ-ⵇⵏⵉⵟⵔⴰ الرباط-سلا-القنيطرة",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 34.044889,
+      "lon": -6.814017
+    },
+    {
+      "name": "Meknes",
+      "state": "Fès-Meknès ⴼⴰⵙ-ⵎⴽⵏⴰⵙ فاس-مكناس",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 33.8984131,
+      "lon": -5.5321582
+    },
+    {
+      "name": "Oujda",
+      "state": "Oriental ⵜⴰⵏⴳⵎⵓⴹⵜ الشرقية",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 34.677874,
+      "lon": -1.929306
+    },
+    {
+      "name": "Kenitra",
+      "state": "Rabat-Salé-Kénitra ⵔⴱⴰⵟ-ⵙⵍⴰ-ⵇⵏⵉⵟⵔⴰ الرباط-سلا-القنيطرة",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 34.26457,
+      "lon": -6.570169
+    },
+    {
+      "name": "Agadir",
+      "state": "Souss-Massa ⵙⵓⵙⵙ-ⵎⴰⵙⵙⴰ سوس-ماسة",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 30.4205162,
+      "lon": -9.5838532
+    },
+    {
+      "name": "Tetouan",
+      "state": "Tanger-Tétouan-Al Hoceïma ⵟⴰⵏⵊ-ⵟⵉⵜⴰⵡⵉⵏ-ⵍⵃⵓⵙⵉⵎⴰ طنجة تطوان الحسيمة",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 35.202941,
+      "lon": -5.5510167
+    },
+    {
+      "name": "Temara",
+      "state": "Rabat-Salé-Kénitra ⵔⴱⴰⵟ-ⵙⵍⴰ-ⵇⵏⵉⵟⵔⴰ الرباط-سلا-القنيطرة",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 33.917166,
+      "lon": -6.923804
+    },
+    {
+      "name": "Safi",
+      "state": "Marrakech-Safi ⵎⵕⵕⴰⴽⵛ-ⴰⵙⴼⵉ مراكش-أسفي",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 32.299424,
+      "lon": -9.239533
+    },
+    {
+      "name": "Mohammedia",
+      "state": "Casablanca-Settat ⵜⴰⴷⴷⴰⵔⵜ ⵜⵓⵎⵍⵉⵍⵜ-ⵙⵟⵟⴰⵜ الدار البيضاء-سطات",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 33.6958383,
+      "lon": -7.3893292
+    },
+    {
+      "name": "Khouribga",
+      "state": "Béni Mellal-Khénifra ⴰⵢⵜ ⵎⵍⵍⴰⵍ-ⵅⵏⵉⴼⵕⴰ بني ملال-خنيفرة",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 32.8856482,
+      "lon": -6.908798
+    },
+    {
+      "name": "El Jadida",
+      "state": "Casablanca-Settat ⵜⴰⴷⴷⴰⵔⵜ ⵜⵓⵎⵍⵉⵍⵜ-ⵙⵟⵟⴰⵜ الدار البيضاء-سطات",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 33.2433309,
+      "lon": -8.49884
+    },
+    {
+      "name": "Beni Mellal",
+      "state": "Béni Mellal-Khénifra ⴰⵢⵜ ⵎⵍⵍⴰⵍ-ⵅⵏⵉⴼⵕⴰ بني ملال-خنيفرة",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 32.334193,
+      "lon": -6.353335
+    },
+    {
+      "name": "Nador",
+      "state": "Oriental ⵜⴰⵏⴳⵎⵓⴹⵜ الشرقية",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 35.1739922,
+      "lon": -2.9281198
+    },
+    {
+      "name": "Taza",
+      "state": "Fès-Meknès ⴼⴰⵙ-ⵎⴽⵏⴰⵙ فاس-مكناس",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 34.230155,
+      "lon": -4.010104
+    },
+    {
+      "name": "Settat",
+      "state": "Casablanca-Settat ⵜⴰⴷⴷⴰⵔⵜ ⵜⵓⵎⵍⵉⵍⵜ-ⵙⵟⵟⴰⵜ الدار البيضاء-سطات",
+      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
+      "lat": 33.002397,
+      "lon": -7.619867
     }
   ],
   "Netherlands": [
@@ -2555,6 +4259,148 @@
       "lon": 173.9545856
     }
   ],
+  "Nigeria": [
+    {
+      "name": "Lagos",
+      "state": "Lagos",
+      "country": "Nigeria",
+      "lat": 6.4550575,
+      "lon": 3.3941795
+    },
+    {
+      "name": "Kano",
+      "state": "Kano",
+      "country": "Nigeria",
+      "lat": 11.9939978,
+      "lon": 8.5219738
+    },
+    {
+      "name": "Ibadan",
+      "state": "Oyo",
+      "country": "Nigeria",
+      "lat": 7.3786064,
+      "lon": 3.8969928
+    },
+    {
+      "name": "Abuja",
+      "state": "Federal Capital Territory",
+      "country": "Nigeria",
+      "lat": 9.0643305,
+      "lon": 7.4892974
+    },
+    {
+      "name": "Port Harcourt",
+      "state": "Rivers",
+      "country": "Nigeria",
+      "lat": 4.7676576,
+      "lon": 7.0188527
+    },
+    {
+      "name": "Benin City",
+      "state": "Edo",
+      "country": "Nigeria",
+      "lat": 6.3330586,
+      "lon": 5.6221058
+    },
+    {
+      "name": "Kaduna",
+      "state": "Kaduna",
+      "country": "Nigeria",
+      "lat": 10.5182899,
+      "lon": 7.4359863
+    },
+    {
+      "name": "Maiduguri",
+      "state": "Borno",
+      "country": "Nigeria",
+      "lat": 11.8395375,
+      "lon": 13.1536214
+    },
+    {
+      "name": "Zaria",
+      "state": "Kaduna",
+      "country": "Nigeria",
+      "lat": 11.0248119,
+      "lon": 7.6518533
+    },
+    {
+      "name": "Aba",
+      "state": "Abia",
+      "country": "Nigeria",
+      "lat": 5.1128008,
+      "lon": 7.3651376
+    },
+    {
+      "name": "Jos",
+      "state": "Plateau",
+      "country": "Nigeria",
+      "lat": 9.9175125,
+      "lon": 8.8979401
+    },
+    {
+      "name": "Ilorin",
+      "state": "Kwara",
+      "country": "Nigeria",
+      "lat": 8.4963657,
+      "lon": 4.5480484
+    },
+    {
+      "name": "Oyo",
+      "state": "Oyo",
+      "country": "Nigeria",
+      "lat": 8.2151249,
+      "lon": 3.5642897
+    },
+    {
+      "name": "Enugu",
+      "state": "Enugu",
+      "country": "Nigeria",
+      "lat": 6.4496519,
+      "lon": 7.5136856
+    },
+    {
+      "name": "Abeokuta",
+      "state": "Ogun",
+      "country": "Nigeria",
+      "lat": 7.161,
+      "lon": 3.348
+    },
+    {
+      "name": "Onitsha",
+      "state": "Anambra",
+      "country": "Nigeria",
+      "lat": 6.1461619,
+      "lon": 6.8019088
+    },
+    {
+      "name": "Warri",
+      "state": "Delta",
+      "country": "Nigeria",
+      "lat": 5.5186186,
+      "lon": 5.7480196
+    },
+    {
+      "name": "Sokoto",
+      "state": "Sokoto",
+      "country": "Nigeria",
+      "lat": 13.0611195,
+      "lon": 5.3152203
+    },
+    {
+      "name": "Calabar",
+      "state": "Cross River",
+      "country": "Nigeria",
+      "lat": 4.9795999,
+      "lon": 8.3373597
+    },
+    {
+      "name": "Akure",
+      "state": "Ondo",
+      "country": "Nigeria",
+      "lat": 7.2525595,
+      "lon": 5.1932647
+    }
+  ],
   "Norway": [
     {
       "name": "Oslo",
@@ -2697,6 +4543,290 @@
       "lon": 11.1647964
     }
   ],
+  "Pakistan": [
+    {
+      "name": "Karachi",
+      "state": "سندھ",
+      "country": "پاکستان",
+      "lat": 24.8546842,
+      "lon": 67.0207055
+    },
+    {
+      "name": "Lahore",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 31.5656822,
+      "lon": 74.3141829
+    },
+    {
+      "name": "Faisalabad",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 31.4220558,
+      "lon": 73.0923253
+    },
+    {
+      "name": "Rawalpindi",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 33.6037053,
+      "lon": 73.0483132
+    },
+    {
+      "name": "Multan",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 30.197838,
+      "lon": 71.4719683
+    },
+    {
+      "name": "Hyderabad",
+      "state": "سندھ",
+      "country": "پاکستان",
+      "lat": 25.4075358,
+      "lon": 68.3613456
+    },
+    {
+      "name": "Gujranwala",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 32.1525312,
+      "lon": 74.1933745
+    },
+    {
+      "name": "Peshawar",
+      "state": "خیبر پختونخوا",
+      "country": "پاکستان",
+      "lat": 34.0123846,
+      "lon": 71.5787458
+    },
+    {
+      "name": "Quetta",
+      "state": "بلوچستان",
+      "country": "پاکستان",
+      "lat": 30.1916268,
+      "lon": 67.0007561
+    },
+    {
+      "name": "Islamabad",
+      "state": "وفاقی دارالحکومت اسلام آباد",
+      "country": "پاکستان",
+      "lat": 33.6938118,
+      "lon": 73.0651511
+    },
+    {
+      "name": "Bahawalpur",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 29.40295,
+      "lon": 71.6523454
+    },
+    {
+      "name": "Sargodha",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 32.0836514,
+      "lon": 72.676461
+    },
+    {
+      "name": "Sialkot",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 32.4935378,
+      "lon": 74.5411575
+    },
+    {
+      "name": "Sukkur",
+      "state": "",
+      "country": "پاکستان",
+      "lat": 27.7007522,
+      "lon": 68.8663081
+    },
+    {
+      "name": "Larkana",
+      "state": "سندھ",
+      "country": "پاکستان",
+      "lat": 27.5564798,
+      "lon": 68.2101509
+    },
+    {
+      "name": "Sheikhupura",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 31.7085285,
+      "lon": 73.9864014
+    },
+    {
+      "name": "Jhang",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 31.2728805,
+      "lon": 72.3103071
+    },
+    {
+      "name": "Rahim Yar Khan",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 28.4225413,
+      "lon": 70.3034237
+    },
+    {
+      "name": "Gujrat",
+      "state": "پنجاب",
+      "country": "پاکستان",
+      "lat": 32.5627852,
+      "lon": 74.064535
+    },
+    {
+      "name": "Mardan",
+      "state": "خیبر پختونخوا",
+      "country": "پاکستان",
+      "lat": 34.1937969,
+      "lon": 72.0451467
+    }
+  ],
+  "Philippines": [
+    {
+      "name": "Manila",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.5904492,
+      "lon": 120.9803621
+    },
+    {
+      "name": "Quezon City",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.6510546,
+      "lon": 121.0486254
+    },
+    {
+      "name": "Davao City",
+      "state": "Davao Region",
+      "country": "Philippines",
+      "lat": 7.0648306,
+      "lon": 125.6080623
+    },
+    {
+      "name": "Caloocan",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.651348,
+      "lon": 120.9724002
+    },
+    {
+      "name": "Cebu City",
+      "state": "Central Visayas",
+      "country": "Philippines",
+      "lat": 10.2934946,
+      "lon": 123.9018183
+    },
+    {
+      "name": "Zamboanga City",
+      "state": "Zamboanga Peninsula",
+      "country": "Philippines",
+      "lat": 6.9046876,
+      "lon": 122.0764868
+    },
+    {
+      "name": "Taguig",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.5270538,
+      "lon": 121.0744942
+    },
+    {
+      "name": "Antipolo",
+      "state": "Rizal",
+      "country": "Philippines",
+      "lat": 14.5871972,
+      "lon": 121.1759246
+    },
+    {
+      "name": "Pasig",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.5605166,
+      "lon": 121.0764343
+    },
+    {
+      "name": "Cagayan de Oro",
+      "state": "Northern Mindanao",
+      "country": "Philippines",
+      "lat": 8.4756417,
+      "lon": 124.6421532
+    },
+    {
+      "name": "Parañaque",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.5008116,
+      "lon": 120.9915327
+    },
+    {
+      "name": "Valenzuela",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.6916903,
+      "lon": 120.9694534
+    },
+    {
+      "name": "Las Piñas",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.4809012,
+      "lon": 120.9817861
+    },
+    {
+      "name": "Makati",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.5567949,
+      "lon": 121.0211226
+    },
+    {
+      "name": "Dasmarinas",
+      "state": "Cavite",
+      "country": "Philippines",
+      "lat": 14.3270819,
+      "lon": 120.9370871
+    },
+    {
+      "name": "Bacoor",
+      "state": "Cavite",
+      "country": "Philippines",
+      "lat": 14.458816,
+      "lon": 120.959579
+    },
+    {
+      "name": "General Santos",
+      "state": "Soccsksargen",
+      "country": "Philippines",
+      "lat": 6.1122217,
+      "lon": 125.1721893
+    },
+    {
+      "name": "Muntinlupa",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.3892634,
+      "lon": 121.0449101
+    },
+    {
+      "name": "Marikina",
+      "state": "Metro Manila",
+      "country": "Philippines",
+      "lat": 14.6331084,
+      "lon": 121.0993541
+    },
+    {
+      "name": "Iloilo City",
+      "state": "Western Visayas",
+      "country": "Philippines",
+      "lat": 10.6932884,
+      "lon": 122.5732604
+    }
+  ],
   "Poland": [
     {
       "name": "Warsaw",
@@ -2837,6 +4967,709 @@
       "country": "Polska",
       "lat": 50.3470387,
       "lon": 18.9231857
+    }
+  ],
+  "Qatar": [
+    {
+      "name": "Doha",
+      "state": "",
+      "country": "قطر",
+      "lat": 25.2856329,
+      "lon": 51.5264162
+    },
+    {
+      "name": "Al Rayyan",
+      "state": "الريان",
+      "country": "قطر",
+      "lat": 24.9304741,
+      "lon": 50.9776888
+    },
+    {
+      "name": "Umm Salal",
+      "state": "أم صلال",
+      "country": "قطر",
+      "lat": 25.4647654,
+      "lon": 51.3383996
+    },
+    {
+      "name": "Al Wakrah",
+      "state": "",
+      "country": "قطر",
+      "lat": 25.1566623,
+      "lon": 51.6013212
+    },
+    {
+      "name": "Al Khor",
+      "state": "",
+      "country": "قطر",
+      "lat": 25.6837333,
+      "lon": 51.5031212
+    },
+    {
+      "name": "Mesaieed",
+      "state": "",
+      "country": "قطر",
+      "lat": 24.9953944,
+      "lon": 51.5493583
+    },
+    {
+      "name": "Dukhan",
+      "state": "الشحانية",
+      "country": "قطر",
+      "lat": 25.4188602,
+      "lon": 50.7876198
+    },
+    {
+      "name": "Al Shamal",
+      "state": "الشمال",
+      "country": "قطر",
+      "lat": 26.0017139,
+      "lon": 51.2174082
+    },
+    {
+      "name": "Madinat ash Shamal",
+      "state": "الشمال",
+      "country": "قطر",
+      "lat": 26.1182868,
+      "lon": 51.2156827
+    },
+    {
+      "name": "Al Ghuwariyah",
+      "state": "الشحانية",
+      "country": "قطر",
+      "lat": 25.8444937,
+      "lon": 51.2673
+    },
+    {
+      "name": "Simaisma",
+      "state": "الضعاين",
+      "country": "قطر",
+      "lat": 25.5772027,
+      "lon": 51.4838309
+    },
+    {
+      "name": "Al Wukair",
+      "state": "",
+      "country": "قطر",
+      "lat": 25.150147,
+      "lon": 51.5440883
+    },
+    {
+      "name": "Al Khawr",
+      "state": "",
+      "country": "قطر",
+      "lat": 25.6837333,
+      "lon": 51.5031212
+    },
+    {
+      "name": "Lusail",
+      "state": "الضعاين",
+      "country": "قطر",
+      "lat": 25.4228888,
+      "lon": 51.5197163
+    },
+    {
+      "name": "Al Daayen",
+      "state": "الضعاين",
+      "country": "قطر",
+      "lat": 25.509742,
+      "lon": 51.4422699
+    },
+    {
+      "name": "Al Shahaniya",
+      "state": "الشحانية",
+      "country": "قطر",
+      "lat": 25.4450415,
+      "lon": 51.0111063
+    },
+    {
+      "name": "Fuwayrit",
+      "state": "الشمال",
+      "country": "قطر",
+      "lat": 26.0249974,
+      "lon": 51.3723603
+    },
+    {
+      "name": "Rawdat Rashed",
+      "state": "الشحانية",
+      "country": "قطر",
+      "lat": 25.2347842,
+      "lon": 51.205327
+    },
+    {
+      "name": "Umm Bab",
+      "state": "الشحانية",
+      "country": "قطر",
+      "lat": 25.2091532,
+      "lon": 50.8011349
+    }
+  ],
+  "Russia": [
+    {
+      "name": "Moscow",
+      "state": "Москва",
+      "country": "Россия",
+      "lat": 55.625578,
+      "lon": 37.6063916
+    },
+    {
+      "name": "Saint Petersburg",
+      "state": "Санкт-Петербург",
+      "country": "Россия",
+      "lat": 59.9606739,
+      "lon": 30.1586551
+    },
+    {
+      "name": "Novosibirsk",
+      "state": "Новосибирская область",
+      "country": "Россия",
+      "lat": 54.9678145,
+      "lon": 82.9515989
+    },
+    {
+      "name": "Yekaterinburg",
+      "state": "Свердловская область",
+      "country": "Россия",
+      "lat": 56.8382071,
+      "lon": 60.6007886
+    },
+    {
+      "name": "Kazan",
+      "state": "Татарстан",
+      "country": "Россия",
+      "lat": 55.7946485,
+      "lon": 49.1115022
+    },
+    {
+      "name": "Nizhny Novgorod",
+      "state": "Нижегородская область",
+      "country": "Россия",
+      "lat": 56.2769292,
+      "lon": 43.9212981
+    },
+    {
+      "name": "Chelyabinsk",
+      "state": "Челябинская область",
+      "country": "Россия",
+      "lat": 55.1559312,
+      "lon": 61.3997019
+    },
+    {
+      "name": "Samara",
+      "state": "Самарская область",
+      "country": "Россия",
+      "lat": 53.1956255,
+      "lon": 50.1014927
+    },
+    {
+      "name": "Omsk",
+      "state": "Омская область",
+      "country": "Россия",
+      "lat": 54.9830067,
+      "lon": 73.3745224
+    },
+    {
+      "name": "Rostov-on-Don",
+      "state": "Ростовская область",
+      "country": "Россия",
+      "lat": 47.2610441,
+      "lon": 39.7249086
+    },
+    {
+      "name": "Ufa",
+      "state": "Башкортостан",
+      "country": "Россия",
+      "lat": 54.7261409,
+      "lon": 55.947499
+    },
+    {
+      "name": "Krasnoyarsk",
+      "state": "Красноярский край",
+      "country": "Россия",
+      "lat": 56.0091173,
+      "lon": 92.872586
+    },
+    {
+      "name": "Voronezh",
+      "state": "Воронежская область",
+      "country": "Россия",
+      "lat": 51.6800081,
+      "lon": 39.183725
+    },
+    {
+      "name": "Perm",
+      "state": "Пермский край",
+      "country": "Россия",
+      "lat": 58.0108531,
+      "lon": 56.2318528
+    },
+    {
+      "name": "Volgograd",
+      "state": "Волгоградская область",
+      "country": "Россия",
+      "lat": 48.7081906,
+      "lon": 44.5153353
+    },
+    {
+      "name": "Krasnodar",
+      "state": "Краснодарский край",
+      "country": "Россия",
+      "lat": 45.0351532,
+      "lon": 38.9772396
+    },
+    {
+      "name": "Saratov",
+      "state": "Саратовская область",
+      "country": "Россия",
+      "lat": 51.530018,
+      "lon": 46.034683
+    },
+    {
+      "name": "Tyumen",
+      "state": "Тюменская область",
+      "country": "Россия",
+      "lat": 57.153534,
+      "lon": 65.542274
+    },
+    {
+      "name": "Tolyatti",
+      "state": "Самарская область",
+      "country": "Россия",
+      "lat": 53.5098845,
+      "lon": 49.4189187
+    },
+    {
+      "name": "Izhevsk",
+      "state": "Удмуртия",
+      "country": "Россия",
+      "lat": 56.8529729,
+      "lon": 53.2103071
+    }
+  ],
+  "Saudi Arabia": [
+    {
+      "name": "Riyadh",
+      "state": "منطقة الرياض",
+      "country": "السعودية",
+      "lat": 23.333333,
+      "lon": 45.333333
+    },
+    {
+      "name": "Jeddah",
+      "state": "منطقة مكة المكرمة",
+      "country": "السعودية",
+      "lat": 21.5504432,
+      "lon": 39.1742363
+    },
+    {
+      "name": "Mecca",
+      "state": "منطقة مكة المكرمة",
+      "country": "السعودية",
+      "lat": 21.420847,
+      "lon": 39.826869
+    },
+    {
+      "name": "Medina",
+      "state": "منطقة المدينة المنورة",
+      "country": "السعودية",
+      "lat": 24.471153,
+      "lon": 39.6111216
+    },
+    {
+      "name": "Dammam",
+      "state": "المنطقة الشرقية",
+      "country": "السعودية",
+      "lat": 26.4367824,
+      "lon": 50.1039991
+    },
+    {
+      "name": "Khobar",
+      "state": "المنطقة الشرقية",
+      "country": "السعودية",
+      "lat": 26.3039999,
+      "lon": 50.1960237
+    },
+    {
+      "name": "Tabuk",
+      "state": "منطقة تبوك",
+      "country": "السعودية",
+      "lat": 28.3251866,
+      "lon": 37.6328648
+    },
+    {
+      "name": "Buraidah",
+      "state": "منطقة القصيم",
+      "country": "السعودية",
+      "lat": 26.331667,
+      "lon": 43.971667
+    },
+    {
+      "name": "Khamis Mushait",
+      "state": "منطقة عسير",
+      "country": "السعودية",
+      "lat": 18.3,
+      "lon": 42.733333
+    },
+    {
+      "name": "Hofuf",
+      "state": "المنطقة الشرقية",
+      "country": "السعودية",
+      "lat": 25.3696585,
+      "lon": 49.5865224
+    },
+    {
+      "name": "Taif",
+      "state": "منطقة مكة المكرمة",
+      "country": "السعودية",
+      "lat": 21.2702801,
+      "lon": 40.4158308
+    },
+    {
+      "name": "Najran",
+      "state": "منطقة نجران",
+      "country": "السعودية",
+      "lat": 18.0,
+      "lon": 45.666667
+    },
+    {
+      "name": "Jubail",
+      "state": "المنطقة الشرقية",
+      "country": "السعودية",
+      "lat": 27.0006968,
+      "lon": 49.6532161
+    },
+    {
+      "name": "Abha",
+      "state": "منطقة عسير",
+      "country": "السعودية",
+      "lat": 18.2164282,
+      "lon": 42.5043596
+    },
+    {
+      "name": "Yanbu",
+      "state": "منطقة المدينة المنورة",
+      "country": "السعودية",
+      "lat": 24.089019,
+      "lon": 38.0687076
+    },
+    {
+      "name": "Al Qatif",
+      "state": "المنطقة الشرقية",
+      "country": "السعودية",
+      "lat": 26.5586004,
+      "lon": 50.0087399
+    },
+    {
+      "name": "Sakakah",
+      "state": "منطقة الجوف",
+      "country": "السعودية",
+      "lat": 29.9784008,
+      "lon": 40.2047701
+    },
+    {
+      "name": "Jizan",
+      "state": "منطقة جازان",
+      "country": "السعودية",
+      "lat": 17.333333,
+      "lon": 42.666667
+    },
+    {
+      "name": "Arar",
+      "state": "منطقة الحدود الشمالية",
+      "country": "السعودية",
+      "lat": 30.9815531,
+      "lon": 41.0164788
+    },
+    {
+      "name": "Hail",
+      "state": "منطقة حائل",
+      "country": "السعودية",
+      "lat": 26.9920987,
+      "lon": 41.4892578
+    }
+  ],
+  "Singapore": [
+    {
+      "name": "Singapore",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.357107,
+      "lon": 103.8194992
+    },
+    {
+      "name": "Woodlands",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.436897,
+      "lon": 103.786216
+    },
+    {
+      "name": "Tampines",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3541234,
+      "lon": 103.9438554
+    },
+    {
+      "name": "Jurong West",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.341612,
+      "lon": 103.7049027
+    },
+    {
+      "name": "Bedok",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3240702,
+      "lon": 103.9283972
+    },
+    {
+      "name": "Hougang",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3636374,
+      "lon": 103.8898002
+    },
+    {
+      "name": "Yishun",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.4293839,
+      "lon": 103.8350282
+    },
+    {
+      "name": "Ang Mo Kio",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3800939,
+      "lon": 103.8420975
+    },
+    {
+      "name": "Bukit Batok",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3556584,
+      "lon": 103.7547317
+    },
+    {
+      "name": "Choa Chu Kang",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3857186,
+      "lon": 103.7445876
+    },
+    {
+      "name": "Punggol",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.4054163,
+      "lon": 103.9100375
+    },
+    {
+      "name": "Sengkang",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3912793,
+      "lon": 103.8877082
+    },
+    {
+      "name": "Bishan",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3519117,
+      "lon": 103.8489708
+    },
+    {
+      "name": "Toa Payoh",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.335592,
+      "lon": 103.8481461
+    },
+    {
+      "name": "Clementi",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3175909,
+      "lon": 103.7607506
+    },
+    {
+      "name": "Pasir Ris",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3786232,
+      "lon": 103.9483209
+    },
+    {
+      "name": "Bukit Panjang",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3668222,
+      "lon": 103.772998
+    },
+    {
+      "name": "Serangoon",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.351692,
+      "lon": 103.8708846
+    },
+    {
+      "name": "Kallang",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3111254,
+      "lon": 103.8665434
+    },
+    {
+      "name": "Geylang",
+      "state": "",
+      "country": "Singapore",
+      "lat": 1.3208955,
+      "lon": 103.8895225
+    }
+  ],
+  "South Africa": [
+    {
+      "name": "Johannesburg",
+      "state": "Gauteng",
+      "country": "South Africa",
+      "lat": -26.205,
+      "lon": 28.049722
+    },
+    {
+      "name": "Cape Town",
+      "state": "Western Cape",
+      "country": "South Africa",
+      "lat": -33.9288301,
+      "lon": 18.4172197
+    },
+    {
+      "name": "Durban",
+      "state": "KwaZulu-Natal",
+      "country": "South Africa",
+      "lat": -29.861825,
+      "lon": 31.009909
+    },
+    {
+      "name": "Pretoria",
+      "state": "Gauteng",
+      "country": "South Africa",
+      "lat": -25.7459277,
+      "lon": 28.1879101
+    },
+    {
+      "name": "Port Elizabeth",
+      "state": "Eastern Cape",
+      "country": "South Africa",
+      "lat": -33.9618598,
+      "lon": 25.6186731
+    },
+    {
+      "name": "Bloemfontein",
+      "state": "Free State",
+      "country": "South Africa",
+      "lat": -29.116395,
+      "lon": 26.215496
+    },
+    {
+      "name": "East London",
+      "state": "Eastern Cape",
+      "country": "South Africa",
+      "lat": -33.0191604,
+      "lon": 27.8998573
+    },
+    {
+      "name": "Polokwane",
+      "state": "Limpopo",
+      "country": "South Africa",
+      "lat": -23.9058333,
+      "lon": 29.4613889
+    },
+    {
+      "name": "Pietermaritzburg",
+      "state": "KwaZulu-Natal",
+      "country": "South Africa",
+      "lat": -29.6,
+      "lon": 30.3788889
+    },
+    {
+      "name": "Nelspruit",
+      "state": "Mpumalanga",
+      "country": "South Africa",
+      "lat": -25.4729094,
+      "lon": 30.9772719
+    },
+    {
+      "name": "Kimberley",
+      "state": "Northern Cape",
+      "country": "South Africa",
+      "lat": -28.7383012,
+      "lon": 24.7642251
+    },
+    {
+      "name": "Rustenburg",
+      "state": "North West",
+      "country": "South Africa",
+      "lat": -25.665655,
+      "lon": 27.241448
+    },
+    {
+      "name": "George",
+      "state": "Western Cape",
+      "country": "South Africa",
+      "lat": -33.9597212,
+      "lon": 22.4587148
+    },
+    {
+      "name": "Soweto",
+      "state": "Gauteng",
+      "country": "South Africa",
+      "lat": -26.2227778,
+      "lon": 27.89
+    },
+    {
+      "name": "Midrand",
+      "state": "Gauteng",
+      "country": "South Africa",
+      "lat": -25.999262,
+      "lon": 28.125912
+    },
+    {
+      "name": "Benoni",
+      "state": "Gauteng",
+      "country": "South Africa",
+      "lat": -26.1930356,
+      "lon": 28.3082376
+    },
+    {
+      "name": "Boksburg",
+      "state": "Gauteng",
+      "country": "South Africa",
+      "lat": -26.2124639,
+      "lon": 28.2617471
+    },
+    {
+      "name": "Vanderbijlpark",
+      "state": "Gauteng",
+      "country": "South Africa",
+      "lat": -26.706891,
+      "lon": 27.836271
+    },
+    {
+      "name": "Krugersdorp",
+      "state": "Gauteng",
+      "country": "South Africa",
+      "lat": -26.095556,
+      "lon": 27.775556
+    },
+    {
+      "name": "Vereeniging",
+      "state": "Gauteng",
+      "country": "South Africa",
+      "lat": -26.6747222,
+      "lon": 27.9261111
     }
   ],
   "South Korea": [
@@ -3407,1852 +6240,6 @@
       "lon": 7.3588795
     }
   ],
-  "United Kingdom": [
-    {
-      "name": "London",
-      "state": "England",
-      "country": "United Kingdom",
-      "lat": 51.5074456,
-      "lon": -0.1277653
-    },
-    {
-      "name": "Birmingham",
-      "state": "England",
-      "country": "United Kingdom",
-      "lat": 52.4796992,
-      "lon": -1.9026911
-    },
-    {
-      "name": "Manchester",
-      "state": "England",
-      "country": "United Kingdom",
-      "lat": 53.4794892,
-      "lon": -2.2451148
-    },
-    {
-      "name": "Glasgow",
-      "state": "Alba / Scotland",
-      "country": "United Kingdom",
-      "lat": 55.861155,
-      "lon": -4.2501687
-    },
-    {
-      "name": "Liverpool",
-      "state": "England",
-      "country": "United Kingdom",
-      "lat": 53.4071991,
-      "lon": -2.99168
-    },
-    {
-      "name": "Leeds",
-      "state": "England",
-      "country": "United Kingdom",
-      "lat": 53.7974185,
-      "lon": -1.5437941
-    },
-    {
-      "name": "Sheffield",
-      "state": "England",
-      "country": "United Kingdom",
-      "lat": 53.3806626,
-      "lon": -1.4702278
-    },
-    {
-      "name": "Edinburgh",
-      "state": "Alba / Scotland",
-      "country": "United Kingdom",
-      "lat": 55.9533456,
-      "lon": -3.1883749
-    },
-    {
-      "name": "Bristol",
-      "state": "England",
-      "country": "United Kingdom",
-      "lat": 51.4538022,
-      "lon": -2.5972985
-    },
-    {
-      "name": "Cardiff",
-      "state": "Cymru / Wales",
-      "country": "United Kingdom",
-      "lat": 51.4816546,
-      "lon": -3.1791934
-    },
-    {
-      "name": "Leicester",
-      "state": "England",
-      "country": "United Kingdom",
-      "lat": 52.6362,
-      "lon": -1.1331969
-    },
-    {
-      "name": "Bradford",
-      "state": "England",
-      "country": "United Kingdom",
-      "lat": 53.7944229,
-      "lon": -1.7519186
-    },
-    {
-      "name": "Belfast",
-      "state": "Northern Ireland / Tuaisceart Éireann",
-      "country": "United Kingdom",
-      "lat": 54.5975805,
-      "lon": -5.9277097
-    },
-    {
-      "name": "Nottingham",
-      "state": "England",
-      "country": "United Kingdom",
-      "lat": 52.9534193,
-      "lon": -1.1496461
-    },
-    {
-      "name": "Newcastle",
-      "state": "England",
-      "country": "United Kingdom",
-      "lat": 54.9738474,
-      "lon": -1.6131572
-    },
-    {
-      "name": "Southampton",
-      "state": "England",
-      "country": "United Kingdom",
-      "lat": 50.9025349,
-      "lon": -1.404189
-    },
-    {
-      "name": "Portsmouth",
-      "state": "England",
-      "country": "United Kingdom",
-      "lat": 50.800031,
-      "lon": -1.0906023
-    },
-    {
-      "name": "Plymouth",
-      "state": "England",
-      "country": "United Kingdom",
-      "lat": 50.3714122,
-      "lon": -4.1424451
-    },
-    {
-      "name": "Stoke-on-Trent",
-      "state": "England",
-      "country": "United Kingdom",
-      "lat": 53.0162014,
-      "lon": -2.1812607
-    },
-    {
-      "name": "Wolverhampton",
-      "state": "England",
-      "country": "United Kingdom",
-      "lat": 52.5847651,
-      "lon": -2.127567
-    }
-  ],
-  "Bangladesh": [
-    {
-      "name": "Dhaka",
-      "state": "ঢাকা বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 23.7643863,
-      "lon": 90.3890144
-    },
-    {
-      "name": "Chittagong",
-      "state": "চট্টগ্রাম বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 22.333778,
-      "lon": 91.8344348
-    },
-    {
-      "name": "Khulna",
-      "state": "খুলনা বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 22.9372087,
-      "lon": 89.2852741
-    },
-    {
-      "name": "Rajshahi",
-      "state": "রাজশাহী বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 24.6285432,
-      "lon": 89.0376862
-    },
-    {
-      "name": "Sylhet",
-      "state": "সিলেট বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 24.89922,
-      "lon": 91.8685271
-    },
-    {
-      "name": "Barisal",
-      "state": "বরিশাল বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 22.4934035,
-      "lon": 90.3548015
-    },
-    {
-      "name": "Rangpur",
-      "state": "রংপুর বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 25.6376135,
-      "lon": 89.0826381
-    },
-    {
-      "name": "Mymensingh",
-      "state": "ময়মনসিংহ বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 24.8889305,
-      "lon": 90.3845187
-    },
-    {
-      "name": "Comilla",
-      "state": "চট্টগ্রাম বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 23.4628834,
-      "lon": 91.1827987
-    },
-    {
-      "name": "Narayanganj",
-      "state": "ঢাকা বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 23.6236732,
-      "lon": 90.4988075
-    },
-    {
-      "name": "Gazipur",
-      "state": "ঢাকা বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 23.9997558,
-      "lon": 90.4173629
-    },
-    {
-      "name": "Brahmanbaria",
-      "state": "চট্টগ্রাম বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 23.9605999,
-      "lon": 91.1190893
-    },
-    {
-      "name": "Tongi",
-      "state": "ঢাকা বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 23.9084932,
-      "lon": 90.3980037
-    },
-    {
-      "name": "Cox's Bazar",
-      "state": "চট্টগ্রাম বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 21.1766471,
-      "lon": 92.003505
-    },
-    {
-      "name": "Jessore",
-      "state": "খুলনা বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 23.1665256,
-      "lon": 89.2094419
-    },
-    {
-      "name": "Bogra",
-      "state": "রাজশাহী বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 24.8500662,
-      "lon": 89.3728431
-    },
-    {
-      "name": "Dinajpur",
-      "state": "রংপুর বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 25.6260712,
-      "lon": 88.6346228
-    },
-    {
-      "name": "Pabna",
-      "state": "রাজশাহী বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 24.0068082,
-      "lon": 89.2448341
-    },
-    {
-      "name": "Kushtia",
-      "state": "খুলনা বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 23.8987955,
-      "lon": 89.1295536
-    },
-    {
-      "name": "Jamalpur",
-      "state": "ময়মনসিংহ বিভাগ",
-      "country": "বাংলাদেশ",
-      "lat": 24.9255866,
-      "lon": 89.9436684
-    }
-  ],
-  "Egypt": [
-    {
-      "name": "Cairo",
-      "state": "القاهرة",
-      "country": "مصر",
-      "lat": 30.0443879,
-      "lon": 31.2357257
-    },
-    {
-      "name": "Alexandria",
-      "state": "الإسكندرية",
-      "country": "مصر",
-      "lat": 31.1991806,
-      "lon": 29.8951716
-    },
-    {
-      "name": "Giza",
-      "state": "الجيزة",
-      "country": "مصر",
-      "lat": 29.9870753,
-      "lon": 31.2118063
-    },
-    {
-      "name": "Shubra El Kheima",
-      "state": "القليوبية",
-      "country": "مصر",
-      "lat": 30.1285988,
-      "lon": 31.242218
-    },
-    {
-      "name": "Port Said",
-      "state": "بورسعيد",
-      "country": "مصر",
-      "lat": 31.263235,
-      "lon": 32.305505
-    },
-    {
-      "name": "Suez",
-      "state": "السويس",
-      "country": "مصر",
-      "lat": 29.974498,
-      "lon": 32.537086
-    },
-    {
-      "name": "Luxor",
-      "state": "الأقصر",
-      "country": "مصر",
-      "lat": 25.702096,
-      "lon": 32.647186
-    },
-    {
-      "name": "Mansoura",
-      "state": "الدقهلية",
-      "country": "مصر",
-      "lat": 31.0407772,
-      "lon": 31.3581295
-    },
-    {
-      "name": "Tanta",
-      "state": "الغربية",
-      "country": "مصر",
-      "lat": 30.7833666,
-      "lon": 30.9982536
-    },
-    {
-      "name": "Asyut",
-      "state": "أسيوط",
-      "country": "مصر",
-      "lat": 27.1832822,
-      "lon": 31.1853836
-    },
-    {
-      "name": "Ismailia",
-      "state": "الإسماعيلية",
-      "country": "مصر",
-      "lat": 30.6043775,
-      "lon": 32.2770825
-    },
-    {
-      "name": "Faiyum",
-      "state": "الفيوم",
-      "country": "مصر",
-      "lat": 29.3074076,
-      "lon": 30.8399651
-    },
-    {
-      "name": "Zagazig",
-      "state": "الشرقية",
-      "country": "مصر",
-      "lat": 30.5853431,
-      "lon": 31.5035127
-    },
-    {
-      "name": "Aswan",
-      "state": "أسوان",
-      "country": "مصر",
-      "lat": 24.091071,
-      "lon": 32.897306
-    },
-    {
-      "name": "Damietta",
-      "state": "دمياط",
-      "country": "مصر",
-      "lat": 31.4167427,
-      "lon": 31.8213657
-    },
-    {
-      "name": "Minya",
-      "state": "المنيا",
-      "country": "مصر",
-      "lat": 28.2125404,
-      "lon": 30.9123741
-    },
-    {
-      "name": "Damanhur",
-      "state": "البحيرة",
-      "country": "مصر",
-      "lat": 31.0374982,
-      "lon": 30.4710625
-    },
-    {
-      "name": "Beni Suef",
-      "state": "بنى سويف",
-      "country": "مصر",
-      "lat": 28.8382688,
-      "lon": 30.8544768
-    },
-    {
-      "name": "Hurghada",
-      "state": "البحر الأحمر",
-      "country": "مصر",
-      "lat": 27.222556,
-      "lon": 33.8307062
-    },
-    {
-      "name": "Qena",
-      "state": "قنا",
-      "country": "مصر",
-      "lat": 26.2408267,
-      "lon": 32.9084243
-    }
-  ],
-  "Ethiopia": [
-    {
-      "name": "Addis Ababa",
-      "state": "አዲስ አበባ أديس أبابا",
-      "country": "ኢትዮጵያ",
-      "lat": 9.0358287,
-      "lon": 38.7524127
-    },
-    {
-      "name": "Dire Dawa",
-      "state": "ድሬዳዋ دير داوا",
-      "country": "ኢትዮጵያ",
-      "lat": 9.5912196,
-      "lon": 41.9797191
-    },
-    {
-      "name": "Mekelle",
-      "state": "ትግራይ تجراى",
-      "country": "ኢትዮጵያ",
-      "lat": 13.4966644,
-      "lon": 39.4768259
-    },
-    {
-      "name": "Gondar",
-      "state": "አማራ ክልል Amhara أمحرة",
-      "country": "ኢትዮጵያ",
-      "lat": 12.610368,
-      "lon": 37.466766
-    },
-    {
-      "name": "Hawassa",
-      "state": "ሲዳማ ክልል Sidama سيداما",
-      "country": "ኢትዮጵያ",
-      "lat": 7.0481029,
-      "lon": 38.47861
-    },
-    {
-      "name": "Bahir Dar",
-      "state": "አማራ ክልል Amhara أمحرة",
-      "country": "ኢትዮጵያ",
-      "lat": 11.5949663,
-      "lon": 37.3882251
-    },
-    {
-      "name": "Jimma",
-      "state": "ኦሮሚያ ክልል Oromia أوروميا",
-      "country": "ኢትዮጵያ",
-      "lat": 7.6756152,
-      "lon": 36.8478779
-    },
-    {
-      "name": "Dessie",
-      "state": "አማራ ክልል Amhara أمحرة",
-      "country": "ኢትዮጵያ",
-      "lat": 11.122604,
-      "lon": 39.634982
-    },
-    {
-      "name": "Harar",
-      "state": "ሐረሪ ሕዝብ ክልል Harar هرر",
-      "country": "ኢትዮጵያ",
-      "lat": 9.3118397,
-      "lon": 42.1284445
-    },
-    {
-      "name": "Sodo",
-      "state": "ደቡብ ኢትዮጵያ ክልላዊ መንግስት South Ethiopia Regional State ولاية جنوب إثيوبيا الإقليمية",
-      "country": "ኢትዮጵያ",
-      "lat": 6.864163,
-      "lon": 37.762762
-    },
-    {
-      "name": "Arba Minch",
-      "state": "ደቡብ ኢትዮጵያ ክልላዊ መንግስት South Ethiopia Regional State ولاية جنوب إثيوبيا الإقليمية",
-      "country": "ኢትዮጵያ",
-      "lat": 6.0215142,
-      "lon": 37.5539809
-    },
-    {
-      "name": "Nekemte",
-      "state": "ኦሮሚያ ክልል Oromia أوروميا",
-      "country": "ኢትዮጵያ",
-      "lat": 9.0905237,
-      "lon": 36.5481573
-    },
-    {
-      "name": "Adama",
-      "state": "ኦሮሚያ ክልል Oromia أوروميا",
-      "country": "ኢትዮጵያ",
-      "lat": 8.5410261,
-      "lon": 39.2705461
-    },
-    {
-      "name": "Jijiga",
-      "state": "ሶማሌ ክልል Somali صومالى",
-      "country": "ኢትዮጵያ",
-      "lat": 9.3508526,
-      "lon": 42.8003788
-    },
-    {
-      "name": "Debre Markos",
-      "state": "አማራ ክልል Amhara أمحرة",
-      "country": "ኢትዮጵያ",
-      "lat": 10.3358665,
-      "lon": 37.7285604
-    },
-    {
-      "name": "Shashemene",
-      "state": "ኦሮሚያ ክልል Oromia أوروميا",
-      "country": "ኢትዮጵያ",
-      "lat": 8.78333,
-      "lon": 38.71667
-    },
-    {
-      "name": "Dilla",
-      "state": "ደቡብ ኢትዮጵያ ክልላዊ መንግስት South Ethiopia Regional State ولاية جنوب إثيوبيا الإقليمية",
-      "country": "ኢትዮጵያ",
-      "lat": 6.4099614,
-      "lon": 38.3102763
-    },
-    {
-      "name": "Hosaena",
-      "state": "ማዕከላዊ ኢትዮጵያ ክልላዊ መንግስት Central Ethiopia Regional State الولاية الإقليمية الإثيوبية المركزية",
-      "country": "ኢትዮጵያ",
-      "lat": 7.5501651,
-      "lon": 37.8528153
-    },
-    {
-      "name": "Adigrat",
-      "state": "ትግራይ تجراى",
-      "country": "ኢትዮጵያ",
-      "lat": 14.2774132,
-      "lon": 39.4614983
-    },
-    {
-      "name": "Debre Birhan",
-      "state": "አማራ ክልል Amhara أمحرة",
-      "country": "ኢትዮጵያ",
-      "lat": 9.6752117,
-      "lon": 39.5324899
-    }
-  ],
-  "Indonesia": [
-    {
-      "name": "Jakarta",
-      "state": "Jawa",
-      "country": "Indonesia",
-      "lat": -6.1754049,
-      "lon": 106.827168
-    },
-    {
-      "name": "Surabaya",
-      "state": "Jawa Timur",
-      "country": "Indonesia",
-      "lat": -7.2462836,
-      "lon": 112.7377674
-    },
-    {
-      "name": "Bandung",
-      "state": "Jawa",
-      "country": "Indonesia",
-      "lat": -6.9218457,
-      "lon": 107.6070833
-    },
-    {
-      "name": "Medan",
-      "state": "Sumatera Utara",
-      "country": "Indonesia",
-      "lat": 3.5894617,
-      "lon": 98.6741623
-    },
-    {
-      "name": "Semarang",
-      "state": "Jawa Tengah",
-      "country": "Indonesia",
-      "lat": -6.9903988,
-      "lon": 110.4229104
-    },
-    {
-      "name": "Makassar",
-      "state": "Sulawesi Selatan",
-      "country": "Indonesia",
-      "lat": -5.1342962,
-      "lon": 119.4124282
-    },
-    {
-      "name": "Palembang",
-      "state": "Sumatera Selatan",
-      "country": "Indonesia",
-      "lat": -2.9888243,
-      "lon": 104.7568507
-    },
-    {
-      "name": "Tangerang",
-      "state": "Banten",
-      "country": "Indonesia",
-      "lat": -6.1761924,
-      "lon": 106.6382161
-    },
-    {
-      "name": "Depok",
-      "state": "Jawa Barat",
-      "country": "Indonesia",
-      "lat": -6.40719,
-      "lon": 106.8158371
-    },
-    {
-      "name": "Bekasi",
-      "state": "Jawa Barat",
-      "country": "Indonesia",
-      "lat": -6.2349858,
-      "lon": 106.9945444
-    },
-    {
-      "name": "South Tangerang",
-      "state": "Banten",
-      "country": "Indonesia",
-      "lat": -6.3227016,
-      "lon": 106.7085737
-    },
-    {
-      "name": "Bogor",
-      "state": "Jawa Barat",
-      "country": "Indonesia",
-      "lat": -6.5963564,
-      "lon": 106.7973188
-    },
-    {
-      "name": "Batam",
-      "state": "Kepulauan Riau",
-      "country": "Indonesia",
-      "lat": 1.1030815,
-      "lon": 104.0383696
-    },
-    {
-      "name": "Pekanbaru",
-      "state": "Riau",
-      "country": "Indonesia",
-      "lat": 0.5262455,
-      "lon": 101.4515727
-    },
-    {
-      "name": "Bandar Lampung",
-      "state": "Lampung",
-      "country": "Indonesia",
-      "lat": -5.4460713,
-      "lon": 105.2643742
-    },
-    {
-      "name": "Padang",
-      "state": "Sumatra Barat",
-      "country": "Indonesia",
-      "lat": -0.9247587,
-      "lon": 100.3632561
-    },
-    {
-      "name": "Malang",
-      "state": "Jawa Timur",
-      "country": "Indonesia",
-      "lat": -7.9771308,
-      "lon": 112.6340265
-    },
-    {
-      "name": "Denpasar",
-      "state": "Bali",
-      "country": "Indonesia",
-      "lat": -8.6524973,
-      "lon": 115.2191175
-    },
-    {
-      "name": "Samarinda",
-      "state": "Kalimantan Timur",
-      "country": "Indonesia",
-      "lat": -0.5017804,
-      "lon": 117.1393089
-    },
-    {
-      "name": "Balikpapan",
-      "state": "Kalimantan Timur",
-      "country": "Indonesia",
-      "lat": -1.2398711,
-      "lon": 116.8593379
-    }
-  ],
-  "Kenya": [
-    {
-      "name": "Nairobi",
-      "state": "Nairobi",
-      "country": "Kenya",
-      "lat": -1.2890006,
-      "lon": 36.8172812
-    },
-    {
-      "name": "Mombasa",
-      "state": "Mombasa",
-      "country": "Kenya",
-      "lat": -4.05052,
-      "lon": 39.667169
-    },
-    {
-      "name": "Kisumu",
-      "state": "Kisumu",
-      "country": "Kenya",
-      "lat": -0.1029109,
-      "lon": 34.7541761
-    },
-    {
-      "name": "Nakuru",
-      "state": "Nakuru",
-      "country": "Kenya",
-      "lat": -0.2802724,
-      "lon": 36.0712048
-    },
-    {
-      "name": "Eldoret",
-      "state": "Uasin Gishu",
-      "country": "Kenya",
-      "lat": 0.5198329,
-      "lon": 35.2715481
-    },
-    {
-      "name": "Ruiru",
-      "state": "Kiambu",
-      "country": "Kenya",
-      "lat": -1.1774574,
-      "lon": 36.9824291
-    },
-    {
-      "name": "Kikuyu",
-      "state": "Kiambu",
-      "country": "Kenya",
-      "lat": -1.2362919,
-      "lon": 36.590477
-    },
-    {
-      "name": "Thika",
-      "state": "Kiambu",
-      "country": "Kenya",
-      "lat": -1.036648,
-      "lon": 37.077523
-    },
-    {
-      "name": "Malindi",
-      "state": "Kilifi",
-      "country": "Kenya",
-      "lat": -3.2295935,
-      "lon": 39.9750882
-    },
-    {
-      "name": "Kitale",
-      "state": "Trans Nzoia",
-      "country": "Kenya",
-      "lat": 1.018076,
-      "lon": 35.000236
-    },
-    {
-      "name": "Garissa",
-      "state": "Garissa",
-      "country": "Kenya",
-      "lat": -0.5236333,
-      "lon": 40.3564053
-    },
-    {
-      "name": "Kakamega",
-      "state": "Kakamega",
-      "country": "Kenya",
-      "lat": 0.4957104,
-      "lon": 34.8015489
-    },
-    {
-      "name": "Nyeri",
-      "state": "Nyeri",
-      "country": "Kenya",
-      "lat": -0.3212105,
-      "lon": 36.9295615
-    },
-    {
-      "name": "Meru",
-      "state": "Meru",
-      "country": "Kenya",
-      "lat": 0.2254509,
-      "lon": 37.7772624
-    },
-    {
-      "name": "Machakos",
-      "state": "Machakos",
-      "country": "Kenya",
-      "lat": -1.2790047,
-      "lon": 37.3952698
-    },
-    {
-      "name": "Naivasha",
-      "state": "Nakuru",
-      "country": "Kenya",
-      "lat": -0.7224425,
-      "lon": 36.4387834
-    },
-    {
-      "name": "Voi",
-      "state": "Taita Taveta",
-      "country": "Kenya",
-      "lat": -3.5592753,
-      "lon": 38.8036049
-    },
-    {
-      "name": "Kisii",
-      "state": "Kisii",
-      "country": "Kenya",
-      "lat": -0.7389425,
-      "lon": 34.7539855
-    },
-    {
-      "name": "Kitui",
-      "state": "Kitui",
-      "country": "Kenya",
-      "lat": -1.5642219,
-      "lon": 38.3728116
-    },
-    {
-      "name": "Lamu",
-      "state": "Lamu",
-      "country": "Kenya",
-      "lat": -2.2675396,
-      "lon": 40.9010641
-    }
-  ],
-  "Malaysia": [
-    {
-      "name": "Kuala Lumpur",
-      "state": "Kuala Lumpur",
-      "country": "Malaysia",
-      "lat": 3.1526589,
-      "lon": 101.7022205
-    },
-    {
-      "name": "George Town",
-      "state": "Pulau Pinang",
-      "country": "Malaysia",
-      "lat": 5.4141619,
-      "lon": 100.3287352
-    },
-    {
-      "name": "Ipoh",
-      "state": "Perak",
-      "country": "Malaysia",
-      "lat": 4.5986817,
-      "lon": 101.0900236
-    },
-    {
-      "name": "Shah Alam",
-      "state": "Selangor",
-      "country": "Malaysia",
-      "lat": 3.0739429,
-      "lon": 101.5185278
-    },
-    {
-      "name": "Petaling Jaya",
-      "state": "Selangor",
-      "country": "Malaysia",
-      "lat": 3.0988792,
-      "lon": 101.6454202
-    },
-    {
-      "name": "Johor Bahru",
-      "state": "Johor",
-      "country": "Malaysia",
-      "lat": 1.4581986,
-      "lon": 103.7649059
-    },
-    {
-      "name": "Malacca City",
-      "state": "Melaka",
-      "country": "Malaysia",
-      "lat": 2.1942647,
-      "lon": 102.2486651
-    },
-    {
-      "name": "Alor Setar",
-      "state": "Kedah",
-      "country": "Malaysia",
-      "lat": 6.1231908,
-      "lon": 100.3683962
-    },
-    {
-      "name": "Seremban",
-      "state": "Negeri Sembilan",
-      "country": "Malaysia",
-      "lat": 2.723099,
-      "lon": 101.9400601
-    },
-    {
-      "name": "Kuching",
-      "state": "Sarawak",
-      "country": "Malaysia",
-      "lat": 1.5597561,
-      "lon": 110.345397
-    },
-    {
-      "name": "Kota Kinabalu",
-      "state": "Sabah",
-      "country": "Malaysia",
-      "lat": 5.9780066,
-      "lon": 116.0728988
-    },
-    {
-      "name": "Kuala Terengganu",
-      "state": "Terengganu",
-      "country": "Malaysia",
-      "lat": 5.3296461,
-      "lon": 103.1383265
-    },
-    {
-      "name": "Kuantan",
-      "state": "Pahang",
-      "country": "Malaysia",
-      "lat": 3.7985637,
-      "lon": 103.32199
-    },
-    {
-      "name": "Klang",
-      "state": "Selangor",
-      "country": "Malaysia",
-      "lat": 3.0448394,
-      "lon": 101.4447363
-    },
-    {
-      "name": "Iskandar Puteri",
-      "state": "Johor",
-      "country": "Malaysia",
-      "lat": 1.4522711,
-      "lon": 103.6144729
-    },
-    {
-      "name": "Sandakan",
-      "state": "Sabah",
-      "country": "Malaysia",
-      "lat": 5.8391274,
-      "lon": 118.1158598
-    },
-    {
-      "name": "Taiping",
-      "state": "Perak",
-      "country": "Malaysia",
-      "lat": 4.8546772,
-      "lon": 100.7438831
-    },
-    {
-      "name": "Bintulu",
-      "state": "Sarawak",
-      "country": "Malaysia",
-      "lat": 3.1874261,
-      "lon": 113.0472803
-    },
-    {
-      "name": "Miri",
-      "state": "Sarawak",
-      "country": "Malaysia",
-      "lat": 4.3940102,
-      "lon": 113.9880199
-    },
-    {
-      "name": "Sibu",
-      "state": "Sarawak",
-      "country": "Malaysia",
-      "lat": 2.2996601,
-      "lon": 111.8710012
-    }
-  ],
-  "Morocco": [
-    {
-      "name": "Casablanca",
-      "state": "Casablanca-Settat ⵜⴰⴷⴷⴰⵔⵜ ⵜⵓⵎⵍⵉⵍⵜ-ⵙⵟⵟⴰⵜ الدار البيضاء-سطات",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 33.5945144,
-      "lon": -7.6200284
-    },
-    {
-      "name": "Rabat",
-      "state": "Rabat-Salé-Kénitra ⵔⴱⴰⵟ-ⵙⵍⴰ-ⵇⵏⵉⵟⵔⴰ الرباط-سلا-القنيطرة",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 34.0218454,
-      "lon": -6.8408929
-    },
-    {
-      "name": "Fes",
-      "state": "Fès-Meknès ⴼⴰⵙ-ⵎⴽⵏⴰⵙ فاس-مكناس",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 34.0346534,
-      "lon": -5.0161926
-    },
-    {
-      "name": "Marrakesh",
-      "state": "Marrakech-Safi ⵎⵕⵕⴰⴽⵛ-ⴰⵙⴼⵉ مراكش-أسفي",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 31.6258257,
-      "lon": -7.9891608
-    },
-    {
-      "name": "Tangier",
-      "state": "Tanger-Tétouan-Al Hoceïma ⵟⴰⵏⵊ-ⵟⵉⵜⴰⵡⵉⵏ-ⵍⵃⵓⵙⵉⵎⴰ طنجة تطوان الحسيمة",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 35.7696302,
-      "lon": -5.8033522
-    },
-    {
-      "name": "Salé",
-      "state": "Rabat-Salé-Kénitra ⵔⴱⴰⵟ-ⵙⵍⴰ-ⵇⵏⵉⵟⵔⴰ الرباط-سلا-القنيطرة",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 34.044889,
-      "lon": -6.814017
-    },
-    {
-      "name": "Meknes",
-      "state": "Fès-Meknès ⴼⴰⵙ-ⵎⴽⵏⴰⵙ فاس-مكناس",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 33.8984131,
-      "lon": -5.5321582
-    },
-    {
-      "name": "Oujda",
-      "state": "Oriental ⵜⴰⵏⴳⵎⵓⴹⵜ الشرقية",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 34.677874,
-      "lon": -1.929306
-    },
-    {
-      "name": "Kenitra",
-      "state": "Rabat-Salé-Kénitra ⵔⴱⴰⵟ-ⵙⵍⴰ-ⵇⵏⵉⵟⵔⴰ الرباط-سلا-القنيطرة",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 34.26457,
-      "lon": -6.570169
-    },
-    {
-      "name": "Agadir",
-      "state": "Souss-Massa ⵙⵓⵙⵙ-ⵎⴰⵙⵙⴰ سوس-ماسة",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 30.4205162,
-      "lon": -9.5838532
-    },
-    {
-      "name": "Tetouan",
-      "state": "Tanger-Tétouan-Al Hoceïma ⵟⴰⵏⵊ-ⵟⵉⵜⴰⵡⵉⵏ-ⵍⵃⵓⵙⵉⵎⴰ طنجة تطوان الحسيمة",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 35.202941,
-      "lon": -5.5510167
-    },
-    {
-      "name": "Temara",
-      "state": "Rabat-Salé-Kénitra ⵔⴱⴰⵟ-ⵙⵍⴰ-ⵇⵏⵉⵟⵔⴰ الرباط-سلا-القنيطرة",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 33.917166,
-      "lon": -6.923804
-    },
-    {
-      "name": "Safi",
-      "state": "Marrakech-Safi ⵎⵕⵕⴰⴽⵛ-ⴰⵙⴼⵉ مراكش-أسفي",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 32.299424,
-      "lon": -9.239533
-    },
-    {
-      "name": "Mohammedia",
-      "state": "Casablanca-Settat ⵜⴰⴷⴷⴰⵔⵜ ⵜⵓⵎⵍⵉⵍⵜ-ⵙⵟⵟⴰⵜ الدار البيضاء-سطات",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 33.6958383,
-      "lon": -7.3893292
-    },
-    {
-      "name": "Khouribga",
-      "state": "Béni Mellal-Khénifra ⴰⵢⵜ ⵎⵍⵍⴰⵍ-ⵅⵏⵉⴼⵕⴰ بني ملال-خنيفرة",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 32.8856482,
-      "lon": -6.908798
-    },
-    {
-      "name": "El Jadida",
-      "state": "Casablanca-Settat ⵜⴰⴷⴷⴰⵔⵜ ⵜⵓⵎⵍⵉⵍⵜ-ⵙⵟⵟⴰⵜ الدار البيضاء-سطات",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 33.2433309,
-      "lon": -8.49884
-    },
-    {
-      "name": "Beni Mellal",
-      "state": "Béni Mellal-Khénifra ⴰⵢⵜ ⵎⵍⵍⴰⵍ-ⵅⵏⵉⴼⵕⴰ بني ملال-خنيفرة",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 32.334193,
-      "lon": -6.353335
-    },
-    {
-      "name": "Nador",
-      "state": "Oriental ⵜⴰⵏⴳⵎⵓⴹⵜ الشرقية",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 35.1739922,
-      "lon": -2.9281198
-    },
-    {
-      "name": "Taza",
-      "state": "Fès-Meknès ⴼⴰⵙ-ⵎⴽⵏⴰⵙ فاس-مكناس",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 34.230155,
-      "lon": -4.010104
-    },
-    {
-      "name": "Settat",
-      "state": "Casablanca-Settat ⵜⴰⴷⴷⴰⵔⵜ ⵜⵓⵎⵍⵉⵍⵜ-ⵙⵟⵟⴰⵜ الدار البيضاء-سطات",
-      "country": "Maroc ⵍⵎⵖⵔⵉⴱ المغرب",
-      "lat": 33.002397,
-      "lon": -7.619867
-    }
-  ],
-  "Nigeria": [
-    {
-      "name": "Lagos",
-      "state": "Lagos",
-      "country": "Nigeria",
-      "lat": 6.4550575,
-      "lon": 3.3941795
-    },
-    {
-      "name": "Kano",
-      "state": "Kano",
-      "country": "Nigeria",
-      "lat": 11.9939978,
-      "lon": 8.5219738
-    },
-    {
-      "name": "Ibadan",
-      "state": "Oyo",
-      "country": "Nigeria",
-      "lat": 7.3786064,
-      "lon": 3.8969928
-    },
-    {
-      "name": "Abuja",
-      "state": "Federal Capital Territory",
-      "country": "Nigeria",
-      "lat": 9.0643305,
-      "lon": 7.4892974
-    },
-    {
-      "name": "Port Harcourt",
-      "state": "Rivers",
-      "country": "Nigeria",
-      "lat": 4.7676576,
-      "lon": 7.0188527
-    },
-    {
-      "name": "Benin City",
-      "state": "Edo",
-      "country": "Nigeria",
-      "lat": 6.3330586,
-      "lon": 5.6221058
-    },
-    {
-      "name": "Kaduna",
-      "state": "Kaduna",
-      "country": "Nigeria",
-      "lat": 10.5182899,
-      "lon": 7.4359863
-    },
-    {
-      "name": "Maiduguri",
-      "state": "Borno",
-      "country": "Nigeria",
-      "lat": 11.8395375,
-      "lon": 13.1536214
-    },
-    {
-      "name": "Zaria",
-      "state": "Kaduna",
-      "country": "Nigeria",
-      "lat": 11.0248119,
-      "lon": 7.6518533
-    },
-    {
-      "name": "Aba",
-      "state": "Abia",
-      "country": "Nigeria",
-      "lat": 5.1128008,
-      "lon": 7.3651376
-    },
-    {
-      "name": "Jos",
-      "state": "Plateau",
-      "country": "Nigeria",
-      "lat": 9.9175125,
-      "lon": 8.8979401
-    },
-    {
-      "name": "Ilorin",
-      "state": "Kwara",
-      "country": "Nigeria",
-      "lat": 8.4963657,
-      "lon": 4.5480484
-    },
-    {
-      "name": "Oyo",
-      "state": "Oyo",
-      "country": "Nigeria",
-      "lat": 8.2151249,
-      "lon": 3.5642897
-    },
-    {
-      "name": "Enugu",
-      "state": "Enugu",
-      "country": "Nigeria",
-      "lat": 6.4496519,
-      "lon": 7.5136856
-    },
-    {
-      "name": "Abeokuta",
-      "state": "Ogun",
-      "country": "Nigeria",
-      "lat": 7.161,
-      "lon": 3.348
-    },
-    {
-      "name": "Onitsha",
-      "state": "Anambra",
-      "country": "Nigeria",
-      "lat": 6.1461619,
-      "lon": 6.8019088
-    },
-    {
-      "name": "Warri",
-      "state": "Delta",
-      "country": "Nigeria",
-      "lat": 5.5186186,
-      "lon": 5.7480196
-    },
-    {
-      "name": "Sokoto",
-      "state": "Sokoto",
-      "country": "Nigeria",
-      "lat": 13.0611195,
-      "lon": 5.3152203
-    },
-    {
-      "name": "Calabar",
-      "state": "Cross River",
-      "country": "Nigeria",
-      "lat": 4.9795999,
-      "lon": 8.3373597
-    },
-    {
-      "name": "Akure",
-      "state": "Ondo",
-      "country": "Nigeria",
-      "lat": 7.2525595,
-      "lon": 5.1932647
-    }
-  ],
-  "Pakistan": [
-    {
-      "name": "Karachi",
-      "state": "سندھ",
-      "country": "پاکستان",
-      "lat": 24.8546842,
-      "lon": 67.0207055
-    },
-    {
-      "name": "Lahore",
-      "state": "پنجاب",
-      "country": "پاکستان",
-      "lat": 31.5656822,
-      "lon": 74.3141829
-    },
-    {
-      "name": "Faisalabad",
-      "state": "پنجاب",
-      "country": "پاکستان",
-      "lat": 31.4220558,
-      "lon": 73.0923253
-    },
-    {
-      "name": "Rawalpindi",
-      "state": "پنجاب",
-      "country": "پاکستان",
-      "lat": 33.6037053,
-      "lon": 73.0483132
-    },
-    {
-      "name": "Multan",
-      "state": "پنجاب",
-      "country": "پاکستان",
-      "lat": 30.197838,
-      "lon": 71.4719683
-    },
-    {
-      "name": "Hyderabad",
-      "state": "سندھ",
-      "country": "پاکستان",
-      "lat": 25.4075358,
-      "lon": 68.3613456
-    },
-    {
-      "name": "Gujranwala",
-      "state": "پنجاب",
-      "country": "پاکستان",
-      "lat": 32.1525312,
-      "lon": 74.1933745
-    },
-    {
-      "name": "Peshawar",
-      "state": "خیبر پختونخوا",
-      "country": "پاکستان",
-      "lat": 34.0123846,
-      "lon": 71.5787458
-    },
-    {
-      "name": "Quetta",
-      "state": "بلوچستان",
-      "country": "پاکستان",
-      "lat": 30.1916268,
-      "lon": 67.0007561
-    },
-    {
-      "name": "Islamabad",
-      "state": "وفاقی دارالحکومت اسلام آباد",
-      "country": "پاکستان",
-      "lat": 33.6938118,
-      "lon": 73.0651511
-    },
-    {
-      "name": "Bahawalpur",
-      "state": "پنجاب",
-      "country": "پاکستان",
-      "lat": 29.40295,
-      "lon": 71.6523454
-    },
-    {
-      "name": "Sargodha",
-      "state": "پنجاب",
-      "country": "پاکستان",
-      "lat": 32.0836514,
-      "lon": 72.676461
-    },
-    {
-      "name": "Sialkot",
-      "state": "پنجاب",
-      "country": "پاکستان",
-      "lat": 32.4935378,
-      "lon": 74.5411575
-    },
-    {
-      "name": "Sukkur",
-      "state": "",
-      "country": "پاکستان",
-      "lat": 27.7007522,
-      "lon": 68.8663081
-    },
-    {
-      "name": "Larkana",
-      "state": "سندھ",
-      "country": "پاکستان",
-      "lat": 27.5564798,
-      "lon": 68.2101509
-    },
-    {
-      "name": "Sheikhupura",
-      "state": "پنجاب",
-      "country": "پاکستان",
-      "lat": 31.7085285,
-      "lon": 73.9864014
-    },
-    {
-      "name": "Jhang",
-      "state": "پنجاب",
-      "country": "پاکستان",
-      "lat": 31.2728805,
-      "lon": 72.3103071
-    },
-    {
-      "name": "Rahim Yar Khan",
-      "state": "پنجاب",
-      "country": "پاکستان",
-      "lat": 28.4225413,
-      "lon": 70.3034237
-    },
-    {
-      "name": "Gujrat",
-      "state": "پنجاب",
-      "country": "پاکستان",
-      "lat": 32.5627852,
-      "lon": 74.064535
-    },
-    {
-      "name": "Mardan",
-      "state": "خیبر پختونخوا",
-      "country": "پاکستان",
-      "lat": 34.1937969,
-      "lon": 72.0451467
-    }
-  ],
-  "Philippines": [
-    {
-      "name": "Manila",
-      "state": "Metro Manila",
-      "country": "Philippines",
-      "lat": 14.5904492,
-      "lon": 120.9803621
-    },
-    {
-      "name": "Quezon City",
-      "state": "Metro Manila",
-      "country": "Philippines",
-      "lat": 14.6510546,
-      "lon": 121.0486254
-    },
-    {
-      "name": "Davao City",
-      "state": "Davao Region",
-      "country": "Philippines",
-      "lat": 7.0648306,
-      "lon": 125.6080623
-    },
-    {
-      "name": "Caloocan",
-      "state": "Metro Manila",
-      "country": "Philippines",
-      "lat": 14.651348,
-      "lon": 120.9724002
-    },
-    {
-      "name": "Cebu City",
-      "state": "Central Visayas",
-      "country": "Philippines",
-      "lat": 10.2934946,
-      "lon": 123.9018183
-    },
-    {
-      "name": "Zamboanga City",
-      "state": "Zamboanga Peninsula",
-      "country": "Philippines",
-      "lat": 6.9046876,
-      "lon": 122.0764868
-    },
-    {
-      "name": "Taguig",
-      "state": "Metro Manila",
-      "country": "Philippines",
-      "lat": 14.5270538,
-      "lon": 121.0744942
-    },
-    {
-      "name": "Antipolo",
-      "state": "Rizal",
-      "country": "Philippines",
-      "lat": 14.5871972,
-      "lon": 121.1759246
-    },
-    {
-      "name": "Pasig",
-      "state": "Metro Manila",
-      "country": "Philippines",
-      "lat": 14.5605166,
-      "lon": 121.0764343
-    },
-    {
-      "name": "Cagayan de Oro",
-      "state": "Northern Mindanao",
-      "country": "Philippines",
-      "lat": 8.4756417,
-      "lon": 124.6421532
-    },
-    {
-      "name": "Parañaque",
-      "state": "Metro Manila",
-      "country": "Philippines",
-      "lat": 14.5008116,
-      "lon": 120.9915327
-    },
-    {
-      "name": "Valenzuela",
-      "state": "Metro Manila",
-      "country": "Philippines",
-      "lat": 14.6916903,
-      "lon": 120.9694534
-    },
-    {
-      "name": "Las Piñas",
-      "state": "Metro Manila",
-      "country": "Philippines",
-      "lat": 14.4809012,
-      "lon": 120.9817861
-    },
-    {
-      "name": "Makati",
-      "state": "Metro Manila",
-      "country": "Philippines",
-      "lat": 14.5567949,
-      "lon": 121.0211226
-    },
-    {
-      "name": "Dasmarinas",
-      "state": "Cavite",
-      "country": "Philippines",
-      "lat": 14.3270819,
-      "lon": 120.9370871
-    },
-    {
-      "name": "Bacoor",
-      "state": "Cavite",
-      "country": "Philippines",
-      "lat": 14.458816,
-      "lon": 120.959579
-    },
-    {
-      "name": "General Santos",
-      "state": "Soccsksargen",
-      "country": "Philippines",
-      "lat": 6.1122217,
-      "lon": 125.1721893
-    },
-    {
-      "name": "Muntinlupa",
-      "state": "Metro Manila",
-      "country": "Philippines",
-      "lat": 14.3892634,
-      "lon": 121.0449101
-    },
-    {
-      "name": "Marikina",
-      "state": "Metro Manila",
-      "country": "Philippines",
-      "lat": 14.6331084,
-      "lon": 121.0993541
-    },
-    {
-      "name": "Iloilo City",
-      "state": "Western Visayas",
-      "country": "Philippines",
-      "lat": 10.6932884,
-      "lon": 122.5732604
-    }
-  ],
-  "Singapore": [
-    {
-      "name": "Singapore",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.357107,
-      "lon": 103.8194992
-    },
-    {
-      "name": "Woodlands",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.436897,
-      "lon": 103.786216
-    },
-    {
-      "name": "Tampines",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.3541234,
-      "lon": 103.9438554
-    },
-    {
-      "name": "Jurong West",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.341612,
-      "lon": 103.7049027
-    },
-    {
-      "name": "Bedok",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.3240702,
-      "lon": 103.9283972
-    },
-    {
-      "name": "Hougang",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.3636374,
-      "lon": 103.8898002
-    },
-    {
-      "name": "Yishun",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.4293839,
-      "lon": 103.8350282
-    },
-    {
-      "name": "Ang Mo Kio",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.3800939,
-      "lon": 103.8420975
-    },
-    {
-      "name": "Bukit Batok",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.3556584,
-      "lon": 103.7547317
-    },
-    {
-      "name": "Choa Chu Kang",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.3857186,
-      "lon": 103.7445876
-    },
-    {
-      "name": "Punggol",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.4054163,
-      "lon": 103.9100375
-    },
-    {
-      "name": "Sengkang",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.3912793,
-      "lon": 103.8877082
-    },
-    {
-      "name": "Bishan",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.3519117,
-      "lon": 103.8489708
-    },
-    {
-      "name": "Toa Payoh",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.335592,
-      "lon": 103.8481461
-    },
-    {
-      "name": "Clementi",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.3175909,
-      "lon": 103.7607506
-    },
-    {
-      "name": "Pasir Ris",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.3786232,
-      "lon": 103.9483209
-    },
-    {
-      "name": "Bukit Panjang",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.3668222,
-      "lon": 103.772998
-    },
-    {
-      "name": "Serangoon",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.351692,
-      "lon": 103.8708846
-    },
-    {
-      "name": "Kallang",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.3111254,
-      "lon": 103.8665434
-    },
-    {
-      "name": "Geylang",
-      "state": "",
-      "country": "Singapore",
-      "lat": 1.3208955,
-      "lon": 103.8895225
-    }
-  ],
-  "South Africa": [
-    {
-      "name": "Johannesburg",
-      "state": "Gauteng",
-      "country": "South Africa",
-      "lat": -26.205,
-      "lon": 28.049722
-    },
-    {
-      "name": "Cape Town",
-      "state": "Western Cape",
-      "country": "South Africa",
-      "lat": -33.9288301,
-      "lon": 18.4172197
-    },
-    {
-      "name": "Durban",
-      "state": "KwaZulu-Natal",
-      "country": "South Africa",
-      "lat": -29.861825,
-      "lon": 31.009909
-    },
-    {
-      "name": "Pretoria",
-      "state": "Gauteng",
-      "country": "South Africa",
-      "lat": -25.7459277,
-      "lon": 28.1879101
-    },
-    {
-      "name": "Port Elizabeth",
-      "state": "Eastern Cape",
-      "country": "South Africa",
-      "lat": -33.9618598,
-      "lon": 25.6186731
-    },
-    {
-      "name": "Bloemfontein",
-      "state": "Free State",
-      "country": "South Africa",
-      "lat": -29.116395,
-      "lon": 26.215496
-    },
-    {
-      "name": "East London",
-      "state": "Eastern Cape",
-      "country": "South Africa",
-      "lat": -33.0191604,
-      "lon": 27.8998573
-    },
-    {
-      "name": "Polokwane",
-      "state": "Limpopo",
-      "country": "South Africa",
-      "lat": -23.9058333,
-      "lon": 29.4613889
-    },
-    {
-      "name": "Pietermaritzburg",
-      "state": "KwaZulu-Natal",
-      "country": "South Africa",
-      "lat": -29.6,
-      "lon": 30.3788889
-    },
-    {
-      "name": "Nelspruit",
-      "state": "Mpumalanga",
-      "country": "South Africa",
-      "lat": -25.4729094,
-      "lon": 30.9772719
-    },
-    {
-      "name": "Kimberley",
-      "state": "Northern Cape",
-      "country": "South Africa",
-      "lat": -28.7383012,
-      "lon": 24.7642251
-    },
-    {
-      "name": "Rustenburg",
-      "state": "North West",
-      "country": "South Africa",
-      "lat": -25.665655,
-      "lon": 27.241448
-    },
-    {
-      "name": "George",
-      "state": "Western Cape",
-      "country": "South Africa",
-      "lat": -33.9597212,
-      "lon": 22.4587148
-    },
-    {
-      "name": "Soweto",
-      "state": "Gauteng",
-      "country": "South Africa",
-      "lat": -26.2227778,
-      "lon": 27.89
-    },
-    {
-      "name": "Midrand",
-      "state": "Gauteng",
-      "country": "South Africa",
-      "lat": -25.999262,
-      "lon": 28.125912
-    },
-    {
-      "name": "Benoni",
-      "state": "Gauteng",
-      "country": "South Africa",
-      "lat": -26.1930356,
-      "lon": 28.3082376
-    },
-    {
-      "name": "Boksburg",
-      "state": "Gauteng",
-      "country": "South Africa",
-      "lat": -26.2124639,
-      "lon": 28.2617471
-    },
-    {
-      "name": "Vanderbijlpark",
-      "state": "Gauteng",
-      "country": "South Africa",
-      "lat": -26.706891,
-      "lon": 27.836271
-    },
-    {
-      "name": "Krugersdorp",
-      "state": "Gauteng",
-      "country": "South Africa",
-      "lat": -26.095556,
-      "lon": 27.775556
-    },
-    {
-      "name": "Vereeniging",
-      "state": "Gauteng",
-      "country": "South Africa",
-      "lat": -26.6747222,
-      "lon": 27.9261111
-    }
-  ],
   "Taiwan": [
     {
       "name": "Taipei",
@@ -5677,6 +6664,432 @@
       "country": "Türkiye",
       "lat": 38.3249599,
       "lon": 43.6589825
+    }
+  ],
+  "Ukraine": [
+    {
+      "name": "Kyiv",
+      "state": "",
+      "country": "Україна",
+      "lat": 50.4500336,
+      "lon": 30.5241361
+    },
+    {
+      "name": "Kharkiv",
+      "state": "Харківська область",
+      "country": "Україна",
+      "lat": 49.9923181,
+      "lon": 36.2310146
+    },
+    {
+      "name": "Odesa",
+      "state": "Одеська область",
+      "country": "Україна",
+      "lat": 46.4843023,
+      "lon": 30.7322878
+    },
+    {
+      "name": "Dnipro",
+      "state": "",
+      "country": "Україна",
+      "lat": 51.9191343,
+      "lon": 30.8243039
+    },
+    {
+      "name": "Donetsk",
+      "state": "Донецька область",
+      "country": "Україна",
+      "lat": 47.9212914,
+      "lon": 37.7809825
+    },
+    {
+      "name": "Zaporizhzhia",
+      "state": "Запорізька область",
+      "country": "Україна",
+      "lat": 47.8507859,
+      "lon": 35.1182867
+    },
+    {
+      "name": "Lviv",
+      "state": "Львівська область",
+      "country": "Україна",
+      "lat": 49.841952,
+      "lon": 24.0315921
+    },
+    {
+      "name": "Kryvyi Rih",
+      "state": "Дніпропетровська область",
+      "country": "Україна",
+      "lat": 47.9102734,
+      "lon": 33.3917703
+    },
+    {
+      "name": "Mykolaiv",
+      "state": "Миколаївська область",
+      "country": "Україна",
+      "lat": 46.9758615,
+      "lon": 31.9939666
+    },
+    {
+      "name": "Mariupol",
+      "state": "Донецька область",
+      "country": "Україна",
+      "lat": 47.0957648,
+      "lon": 37.5499621
+    },
+    {
+      "name": "Luhansk",
+      "state": "Луганська область",
+      "country": "Україна",
+      "lat": 49.2724587,
+      "lon": 38.9150477
+    },
+    {
+      "name": "Vinnytsia",
+      "state": "Вінницька область",
+      "country": "Україна",
+      "lat": 48.8990315,
+      "lon": 28.516068
+    },
+    {
+      "name": "Simferopol",
+      "state": "Республика Крым",
+      "country": "Україна",
+      "lat": 44.9521459,
+      "lon": 34.1024858
+    },
+    {
+      "name": "Makiivka",
+      "state": "Донецька область",
+      "country": "Україна",
+      "lat": 48.0448144,
+      "lon": 37.9635093
+    },
+    {
+      "name": "Sevastopol",
+      "state": "Севастополь",
+      "country": "Україна",
+      "lat": 44.6054434,
+      "lon": 33.5220842
+    },
+    {
+      "name": "Chernihiv",
+      "state": "Чернігівська область",
+      "country": "Україна",
+      "lat": 51.272593,
+      "lon": 31.7417235
+    },
+    {
+      "name": "Poltava",
+      "state": "Полтавська область",
+      "country": "Україна",
+      "lat": 49.8607809,
+      "lon": 33.7498787
+    },
+    {
+      "name": "Kherson",
+      "state": "Херсонська область",
+      "country": "Україна",
+      "lat": 46.5421715,
+      "lon": 33.4079326
+    },
+    {
+      "name": "Khmelnytskyi",
+      "state": "Хмельницька область",
+      "country": "Україна",
+      "lat": 49.268624,
+      "lon": 27.0635998
+    },
+    {
+      "name": "Cherkasy",
+      "state": "Черкаська область",
+      "country": "Україна",
+      "lat": 49.1460165,
+      "lon": 31.2271744
+    }
+  ],
+  "United Arab Emirates": [
+    {
+      "name": "Dubai",
+      "state": "دبي",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 25.0742823,
+      "lon": 55.1885387
+    },
+    {
+      "name": "Abu Dhabi",
+      "state": "أبو ظبي",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 24.4538352,
+      "lon": 54.3774014
+    },
+    {
+      "name": "Sharjah",
+      "state": "الشارقة",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 25.2797555,
+      "lon": 56.2775651
+    },
+    {
+      "name": "Al Ain",
+      "state": "أبو ظبي",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 24.2248697,
+      "lon": 55.7452211
+    },
+    {
+      "name": "Ajman",
+      "state": "إمارة عجمان",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 24.8075165,
+      "lon": 56.069513
+    },
+    {
+      "name": "Ras Al Khaimah",
+      "state": "رأس الخيمة",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 25.7737705,
+      "lon": 55.938232
+    },
+    {
+      "name": "Fujairah",
+      "state": "الفجيرة",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 25.4147357,
+      "lon": 56.2313667
+    },
+    {
+      "name": "Umm Al Quwain",
+      "state": "أم القيوين",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 25.5144944,
+      "lon": 55.718292
+    },
+    {
+      "name": "Khor Fakkan",
+      "state": "الشارقة",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 25.3491721,
+      "lon": 56.3478105
+    },
+    {
+      "name": "Dibba Al-Fujairah",
+      "state": "الفجيرة",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 25.602261,
+      "lon": 56.3070733
+    },
+    {
+      "name": "Dhaid",
+      "state": "الشارقة",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 25.2840972,
+      "lon": 55.914676
+    },
+    {
+      "name": "Jebel Ali",
+      "state": "دبي",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 24.9775987,
+      "lon": 55.0910742
+    },
+    {
+      "name": "Ruwais",
+      "state": "أبو ظبي",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 24.1697648,
+      "lon": 52.628207
+    },
+    {
+      "name": "Madinat Zayed",
+      "state": "أبو ظبي",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 23.6520354,
+      "lon": 53.7046617
+    },
+    {
+      "name": "Liwa Oasis",
+      "state": "أبو ظبي",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 24.4137781,
+      "lon": 54.590073
+    },
+    {
+      "name": "Kalba",
+      "state": "الشارقة",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 25.0512959,
+      "lon": 56.3542189
+    },
+    {
+      "name": "Ghayathi",
+      "state": "أبو ظبي",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 23.8993434,
+      "lon": 52.801847
+    },
+    {
+      "name": "Al Dhafra",
+      "state": "أبو ظبي",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 24.2635607,
+      "lon": 54.5289294
+    },
+    {
+      "name": "Sweihan",
+      "state": "أبو ظبي",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 24.3825881,
+      "lon": 55.4677429
+    },
+    {
+      "name": "Al Sila",
+      "state": "أبو ظبي",
+      "country": "الإمارات العربية المتحدة",
+      "lat": 24.0965166,
+      "lon": 51.7520245
+    }
+  ],
+  "United Kingdom": [
+    {
+      "name": "London",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 51.5074456,
+      "lon": -0.1277653
+    },
+    {
+      "name": "Birmingham",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 52.4796992,
+      "lon": -1.9026911
+    },
+    {
+      "name": "Manchester",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 53.4794892,
+      "lon": -2.2451148
+    },
+    {
+      "name": "Glasgow",
+      "state": "Alba / Scotland",
+      "country": "United Kingdom",
+      "lat": 55.861155,
+      "lon": -4.2501687
+    },
+    {
+      "name": "Liverpool",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 53.4071991,
+      "lon": -2.99168
+    },
+    {
+      "name": "Leeds",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 53.7974185,
+      "lon": -1.5437941
+    },
+    {
+      "name": "Sheffield",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 53.3806626,
+      "lon": -1.4702278
+    },
+    {
+      "name": "Edinburgh",
+      "state": "Alba / Scotland",
+      "country": "United Kingdom",
+      "lat": 55.9533456,
+      "lon": -3.1883749
+    },
+    {
+      "name": "Bristol",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 51.4538022,
+      "lon": -2.5972985
+    },
+    {
+      "name": "Cardiff",
+      "state": "Cymru / Wales",
+      "country": "United Kingdom",
+      "lat": 51.4816546,
+      "lon": -3.1791934
+    },
+    {
+      "name": "Leicester",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 52.6362,
+      "lon": -1.1331969
+    },
+    {
+      "name": "Bradford",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 53.7944229,
+      "lon": -1.7519186
+    },
+    {
+      "name": "Belfast",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.5975805,
+      "lon": -5.9277097
+    },
+    {
+      "name": "Nottingham",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 52.9534193,
+      "lon": -1.1496461
+    },
+    {
+      "name": "Newcastle",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 54.9738474,
+      "lon": -1.6131572
+    },
+    {
+      "name": "Southampton",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 50.9025349,
+      "lon": -1.404189
+    },
+    {
+      "name": "Portsmouth",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 50.800031,
+      "lon": -1.0906023
+    },
+    {
+      "name": "Plymouth",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 50.3714122,
+      "lon": -4.1424451
+    },
+    {
+      "name": "Stoke-on-Trent",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 53.0162014,
+      "lon": -2.1812607
+    },
+    {
+      "name": "Wolverhampton",
+      "state": "England",
+      "country": "United Kingdom",
+      "lat": 52.5847651,
+      "lon": -2.127567
     }
   ],
   "Vietnam": [
