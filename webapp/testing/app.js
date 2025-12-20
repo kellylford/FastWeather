@@ -2119,7 +2119,7 @@ function createButton(text, ariaLabelOrOnClick, onClickIfThreeParams = null) {
 
 // Table view
 function renderTableView(container) {
-    container.setAttribute('role', 'region');
+    container.removeAttribute('role');
     container.removeAttribute('tabindex');
     container.removeAttribute('aria-activedescendant');
     
@@ -2295,7 +2295,12 @@ function renderTableView(container) {
     });
     
     table.appendChild(tbody);
-    container.appendChild(table);
+    
+    // Wrap table in scrollable container to preserve table semantics
+    const wrapper = document.createElement('div');
+    wrapper.className = 'table-wrapper';
+    wrapper.appendChild(table);
+    container.appendChild(wrapper);
 }
 
 // List view (compact, keyboard navigable)

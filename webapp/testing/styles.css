@@ -275,12 +275,17 @@ section {
 }
 
 /* === Table View === */
+.table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--border-radius);
+    background: var(--bg-secondary);
+}
+
 .weather-table {
     width: 100%;
     border-collapse: collapse;
     background: var(--bg-secondary);
-    border-radius: var(--border-radius);
-    overflow: hidden;
 }
 
 .weather-table th,
@@ -288,6 +293,7 @@ section {
     padding: var(--spacing-md);
     text-align: left;
     border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
 }
 
 .weather-table thead th {
@@ -1091,20 +1097,7 @@ a:hover {
         width: 100%;
     }
     
-    /* Make table scrollable on mobile */
-    .weather-table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
-    
-    .weather-table thead,
-    .weather-table tbody,
-    .weather-table tr {
-        display: table;
-        width: 100%;
-        table-layout: auto;
-    }
+    /* Table scrolling handled by wrapper - no display changes needed */
     
     .city-card-header {
         flex-direction: column;
