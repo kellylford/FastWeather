@@ -2683,7 +2683,7 @@ function renderFullWeatherDetails(weather) {
     // Next 24 hours hourly forecast
     if (weather.hourly) {
         html += '<section><h4>Next 24 Hours</h4>';
-        html += '<div class="hourly-forecast">';
+        html += '<ul class="hourly-forecast">';
         
         // Get current time and find the starting hour index
         const now = new Date();
@@ -2710,8 +2710,8 @@ function renderFullWeatherDetails(weather) {
                 hour12: true 
             });
             
-            html += '<article class="hourly-item">';
-            html += `<h5>${timeStr}</h5>`;
+            html += '<li class="hourly-item">';
+            html += `<strong>${timeStr}</strong>`;
             html += `<p class="hourly-weather">${WEATHER_CODES[weather.hourly.weathercode[i]] || 'Unknown'}</p>`;
             html += `<p class="hourly-temp">${convertTemperature(weather.hourly.temperature_2m[i])}°${currentConfig.units.temperature}</p>`;
             
@@ -2735,16 +2735,16 @@ function renderFullWeatherDetails(weather) {
                 html += `<p>Clouds: ${weather.hourly.cloudcover[i]}%</p>`;
             }
             
-            html += '</article>';
+            html += '</li>';
         }
         
-        html += '</div></section>';
+        html += '</ul></section>';
     }
     
     // 16-day forecast
     if (weather.daily) {
         html += '<section><h4>16-Day Forecast</h4>';
-        html += '<div class="forecast-grid">';
+        html += '<ul class="forecast-grid">';
         
         for (let i = 0; i < 16 && i < weather.daily.time.length; i++) {
             const date = new Date(weather.daily.time[i]);
@@ -2758,8 +2758,8 @@ function renderFullWeatherDetails(weather) {
                 dayLabel = `${weekday}, ${monthDay}`;
             }
             
-            html += '<article class="forecast-day">';
-            html += `<h5>${dayLabel}</h5>`;
+            html += '<li class="forecast-day">';
+            html += `<strong>${dayLabel}</strong>`;
             html += `<p class="forecast-weather">${WEATHER_CODES[weather.daily.weathercode[i]] || 'Unknown'}</p>`;
             html += `<p class="forecast-temp">High: ${convertTemperature(weather.daily.temperature_2m_max[i])}°${currentConfig.units.temperature}</p>`;
             html += `<p class="forecast-temp">Low: ${convertTemperature(weather.daily.temperature_2m_min[i])}°${currentConfig.units.temperature}</p>`;
@@ -2782,10 +2782,10 @@ function renderFullWeatherDetails(weather) {
                 html += `<p>🌙 ${sunset}</p>`;
             }
             
-            html += '</article>';
+            html += '</li>';
         }
         
-        html += '</div></section>';
+        html += '</ul></section>';
     }
     
     html += '</div>';
