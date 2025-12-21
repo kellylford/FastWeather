@@ -275,12 +275,17 @@ section {
 }
 
 /* === Table View === */
+.table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--border-radius);
+    background: var(--bg-secondary);
+}
+
 .weather-table {
     width: 100%;
     border-collapse: collapse;
     background: var(--bg-secondary);
-    border-radius: var(--border-radius);
-    overflow: hidden;
 }
 
 .weather-table th,
@@ -288,15 +293,13 @@ section {
     padding: var(--spacing-md);
     text-align: left;
     border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
 }
 
 .weather-table thead th {
     background: var(--bg-primary);
     font-weight: 600;
     color: var(--text-primary);
-    position: sticky;
-    top: 0;
-    z-index: 1;
 }
 
 .weather-table tbody th {
@@ -524,12 +527,27 @@ button:disabled {
     background-color: var(--button-secondary-hover);
 }
 
-.remove-btn {
+.remove-btn, .remove-btn-small {
     background-color: var(--button-danger);
 }
 
-.remove-btn:hover {
+.remove-btn:hover, .remove-btn-small:hover {
     background-color: var(--button-danger-hover);
+}
+
+.back-btn {
+    background-color: var(--button-secondary);
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-xs) var(--spacing-md);
+    min-width: auto;
+    min-height: auto;
+    margin-left: var(--spacing-md);
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.back-btn:hover {
+    background-color: var(--button-secondary-hover);
 }
 
 /* === Checkboxes and Radio Buttons === */
@@ -879,14 +897,16 @@ legend {
 }
 
 /* === Tabs === */
-.tabs {
+.tabs,
+.location-tabs {
     display: flex;
     gap: var(--spacing-xs);
     border-bottom: 2px solid var(--border-color);
     margin-bottom: var(--spacing-lg);
 }
 
-.tabs button {
+.tabs button,
+.location-tabs button {
     background-color: transparent;
     color: var(--text-secondary);
     border: none;
@@ -898,20 +918,24 @@ legend {
     transition: all 0.2s ease;
 }
 
-.tabs button:hover {
+.tabs button:hover,
+.location-tabs button:hover {
     background-color: var(--secondary-bg);
     color: var(--text-primary);
     transform: none;
     box-shadow: none;
 }
 
-.tabs button[aria-selected="true"] {
-    color: var(--button-primary);
+.tabs button[aria-selected="true"],
+.location-tabs button[aria-selected="true"] {
+    color: var(--text-primary);
+    background-color: var(--secondary-bg);
     border-bottom-color: var(--button-primary);
     font-weight: 600;
 }
 
-.tab-panel[hidden] {
+.tab-panel[hidden],
+[role="tabpanel"][hidden] {
     display: none;
 }
 
@@ -1070,20 +1094,7 @@ a:hover {
         width: 100%;
     }
     
-    /* Make table scrollable on mobile */
-    .weather-table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
-    
-    .weather-table thead,
-    .weather-table tbody,
-    .weather-table tr {
-        display: table;
-        width: 100%;
-        table-layout: auto;
-    }
+    /* Table scrolling handled by wrapper - no display changes needed */
     
     .city-card-header {
         flex-direction: column;
@@ -1166,6 +1177,134 @@ a:hover {
         animation: none;
         border-top-color: var(--border-color);
     }
+}
+
+/* === State Selector Section === */
+.state-selector-section {
+    background: var(--card-bg);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-xl);
+    box-shadow: var(--box-shadow);
+}
+
+.state-selector-section h2 {
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+.state-selector-section h3 {
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+#state-cities-section {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+}
+
+#state-cities-list {
+    margin-top: var(--spacing-md);
+}
+
+/* === Add to Cities Buttons === */
+.add-city-btn {
+    background: var(--button-primary);
+    color: white;
+    border: none;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.add-city-btn:hover {
+    background: var(--button-primary-hover);
+}
+
+.add-city-btn:active {
+    transform: scale(0.98);
+}
+
+.add-city-btn:focus {
+    outline: 2px solid var(--focus-outline);
+    outline-offset: 2px;
+}
+
+.add-city-btn-small {
+    background: var(--button-primary);
+    color: white;
+    border: none;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    white-space: nowrap;
+}
+
+.add-city-btn-small:hover {
+    background: var(--button-primary-hover);
+}
+
+.add-city-btn-small:active {
+    transform: scale(0.98);
+}
+
+.add-city-btn-small:focus {
+    outline: 2px solid var(--focus-outline);
+    outline-offset: 2px;
+}
+
+.add-city-btn-small.inline {
+    margin-left: var(--spacing-md);
+}
+
+/* === State City Cards === */
+.state-city-card {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    background: var(--card-bg);
+    box-shadow: var(--box-shadow);
+    transition: box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.state-city-card:hover {
+    box-shadow: var(--box-shadow-lg);
+    transform: translateY(-2px);
+}
+
+.state-city-card h4 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+    font-size: var(--font-size-lg);
+}
+
+.state-city-card .coordinates {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.state-city-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md);
+}
+
+.state-city-item span {
+    flex: 1;
 }
 
 /* === Dark Mode Support === */

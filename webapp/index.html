@@ -16,9 +16,9 @@
     </header>
 
     <main id="main-content" role="main">
-        <section class="city-management" aria-labelledby="manage-cities-heading">
+        <section class="city-management">
             <h2 id="manage-cities-heading">Add New City</h2>
-            <form id="add-city-form" aria-label="Add city form">
+            <form id="add-city-form">
                 <div class="input-group">
                     <label for="city-input">Enter city name or zip code:</label>
                     <input 
@@ -38,31 +38,57 @@
                         <option value="ar">Argentina</option>
                         <option value="au">Australia</option>
                         <option value="at">Austria</option>
+                        <option value="bd">Bangladesh</option>
                         <option value="be">Belgium</option>
                         <option value="br">Brazil</option>
                         <option value="ca">Canada</option>
                         <option value="cn">China</option>
                         <option value="dk">Denmark</option>
+                        <option value="eg">Egypt</option>
+                        <option value="et">Ethiopia</option>
                         <option value="fi">Finland</option>
                         <option value="fr">France</option>
                         <option value="de">Germany</option>
                         <option value="in">India</option>
+                        <option value="id">Indonesia</option>
+                        <option value="ir">Iran</option>
+                        <option value="iq">Iraq</option>
                         <option value="ie">Ireland</option>
+                        <option value="il">Israel</option>
                         <option value="it">Italy</option>
                         <option value="jp">Japan</option>
+                        <option value="jo">Jordan</option>
+                        <option value="ke">Kenya</option>
+                        <option value="kw">Kuwait</option>
+                        <option value="my">Malaysia</option>
                         <option value="mx">Mexico</option>
+                        <option value="ma">Morocco</option>
                         <option value="nl">Netherlands</option>
                         <option value="nz">New Zealand</option>
+                        <option value="ng">Nigeria</option>
                         <option value="no">Norway</option>
+                        <option value="pk">Pakistan</option>
+                        <option value="ph">Philippines</option>
                         <option value="pl">Poland</option>
+                        <option value="qa">Qatar</option>
+                        <option value="ru">Russia</option>
+                        <option value="sa">Saudi Arabia</option>
+                        <option value="sg">Singapore</option>
+                        <option value="za">South Africa</option>
                         <option value="kr">South Korea</option>
                         <option value="es">Spain</option>
                         <option value="se">Sweden</option>
                         <option value="ch">Switzerland</option>
+                        <option value="tw">Taiwan</option>
+                        <option value="th">Thailand</option>
+                        <option value="tr">Turkey</option>
+                        <option value="ua">Ukraine</option>
+                        <option value="ae">United Arab Emirates</option>
                         <option value="gb">United Kingdom</option>
                         <option value="us">United States</option>
+                        <option value="vn">Vietnam</option>
                     </select>
-                    <button type="submit" id="add-city-btn" aria-label="Add city to your list">
+                    <button type="submit" id="add-city-btn">
                         Add City
                     </button>
                 </div>
@@ -91,7 +117,152 @@
             </div>
         </section>
 
-        <section class="city-list-section" aria-labelledby="your-cities-heading">
+        <section class="state-selector-section">
+            <h2 id="state-selector-heading">Browse Cities</h2>
+            
+            <div class="location-tabs" role="tablist">
+                <button role="tab" aria-selected="true" aria-controls="us-states-panel" id="us-states-tab" tabindex="0">
+                    U.S. States
+                </button>
+                <button role="tab" aria-selected="false" aria-controls="international-panel" id="international-tab" tabindex="-1">
+                    International
+                </button>
+            </div>
+            
+            <form id="state-selector-form">
+                <div class="input-group" id="us-states-panel" role="tabpanel" aria-labelledby="us-states-tab">
+                    <label for="state-select">Select a U.S. State:</label>
+                    <select id="state-select" name="state">
+                        <option value="">-- Select a State --</option>
+                        <option value="Alabama">Alabama</option>
+                        <option value="Alaska">Alaska</option>
+                        <option value="Arizona">Arizona</option>
+                        <option value="Arkansas">Arkansas</option>
+                        <option value="California">California</option>
+                        <option value="Colorado">Colorado</option>
+                        <option value="Connecticut">Connecticut</option>
+                        <option value="Delaware">Delaware</option>
+                        <option value="Florida">Florida</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Hawaii">Hawaii</option>
+                        <option value="Idaho">Idaho</option>
+                        <option value="Illinois">Illinois</option>
+                        <option value="Indiana">Indiana</option>
+                        <option value="Iowa">Iowa</option>
+                        <option value="Kansas">Kansas</option>
+                        <option value="Kentucky">Kentucky</option>
+                        <option value="Louisiana">Louisiana</option>
+                        <option value="Maine">Maine</option>
+                        <option value="Maryland">Maryland</option>
+                        <option value="Massachusetts">Massachusetts</option>
+                        <option value="Michigan">Michigan</option>
+                        <option value="Minnesota">Minnesota</option>
+                        <option value="Mississippi">Mississippi</option>
+                        <option value="Missouri">Missouri</option>
+                        <option value="Montana">Montana</option>
+                        <option value="Nebraska">Nebraska</option>
+                        <option value="Nevada">Nevada</option>
+                        <option value="New Hampshire">New Hampshire</option>
+                        <option value="New Jersey">New Jersey</option>
+                        <option value="New Mexico">New Mexico</option>
+                        <option value="New York">New York</option>
+                        <option value="North Carolina">North Carolina</option>
+                        <option value="North Dakota">North Dakota</option>
+                        <option value="Ohio">Ohio</option>
+                        <option value="Oklahoma">Oklahoma</option>
+                        <option value="Oregon">Oregon</option>
+                        <option value="Pennsylvania">Pennsylvania</option>
+                        <option value="Rhode Island">Rhode Island</option>
+                        <option value="South Carolina">South Carolina</option>
+                        <option value="South Dakota">South Dakota</option>
+                        <option value="Tennessee">Tennessee</option>
+                        <option value="Texas">Texas</option>
+                        <option value="Utah">Utah</option>
+                        <option value="Vermont">Vermont</option>
+                        <option value="Virginia">Virginia</option>
+                        <option value="Washington">Washington</option>
+                        <option value="West Virginia">West Virginia</option>
+                        <option value="Wisconsin">Wisconsin</option>
+                        <option value="Wyoming">Wyoming</option>
+                    </select>
+                    <button type="submit" id="choose-state-btn">
+                        Load Cities
+                    </button>
+                </div>
+                
+                <div class="input-group" id="international-panel" role="tabpanel" aria-labelledby="international-tab" hidden>
+                    <label for="country-select-browse">Select a Country:</label>
+                    <select id="country-select-browse" name="country">
+                        <option value="">-- Select a Country --</option>
+                        <option value="Argentina">Argentina</option>
+                        <option value="Australia">Australia</option>
+                        <option value="Austria">Austria</option>
+                        <option value="Bangladesh">Bangladesh</option>
+                        <option value="Belgium">Belgium</option>
+                        <option value="Brazil">Brazil</option>
+                        <option value="Canada">Canada</option>
+                        <option value="China">China</option>
+                        <option value="Denmark">Denmark</option>
+                        <option value="Egypt">Egypt</option>
+                        <option value="Ethiopia">Ethiopia</option>
+                        <option value="Finland">Finland</option>
+                        <option value="France">France</option>
+                        <option value="Germany">Germany</option>
+                        <option value="India">India</option>
+                        <option value="Indonesia">Indonesia</option>
+                        <option value="Iran">Iran</option>
+                        <option value="Iraq">Iraq</option>
+                        <option value="Ireland">Ireland</option>
+                        <option value="Israel">Israel</option>
+                        <option value="Italy">Italy</option>
+                        <option value="Japan">Japan</option>
+                        <option value="Jordan">Jordan</option>
+                        <option value="Kenya">Kenya</option>
+                        <option value="Kuwait">Kuwait</option>
+                        <option value="Malaysia">Malaysia</option>
+                        <option value="Mexico">Mexico</option>
+                        <option value="Morocco">Morocco</option>
+                        <option value="Netherlands">Netherlands</option>
+                        <option value="New Zealand">New Zealand</option>
+                        <option value="Nigeria">Nigeria</option>
+                        <option value="Norway">Norway</option>
+                        <option value="Pakistan">Pakistan</option>
+                        <option value="Philippines">Philippines</option>
+                        <option value="Poland">Poland</option>
+                        <option value="Qatar">Qatar</option>
+                        <option value="Russia">Russia</option>
+                        <option value="Saudi Arabia">Saudi Arabia</option>
+                        <option value="Singapore">Singapore</option>
+                        <option value="South Africa">South Africa</option>
+                        <option value="South Korea">South Korea</option>
+                        <option value="Spain">Spain</option>
+                        <option value="Sweden">Sweden</option>
+                        <option value="Switzerland">Switzerland</option>
+                        <option value="Taiwan">Taiwan</option>
+                        <option value="Thailand">Thailand</option>
+                        <option value="Turkey">Turkey</option>
+                        <option value="Ukraine">Ukraine</option>
+                        <option value="United Arab Emirates">United Arab Emirates</option>
+                        <option value="United Kingdom">United Kingdom</option>
+                        <option value="Vietnam">Vietnam</option>
+                    </select>
+                    <button type="submit" id="choose-country-btn">
+                        Load Cities
+                    </button>
+                </div>
+                
+                <div id="state-selector-error" role="alert" aria-live="polite" class="error-message"></div>
+            </form>
+
+            <div id="state-cities-section" hidden>
+                <h3 id="state-cities-heading">Cities in <span id="selected-state-name"></span></h3>
+                <div id="state-cities-list" role="list" aria-label="List of cities in selected state">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <section class="city-list-section">
             <div class="section-header">
                 <h2 id="your-cities-heading">Your Cities</h2>
                 <div class="controls">
@@ -111,10 +282,10 @@
                             </li>
                         </ul>
                     </div>
-                    <button id="configure-btn" aria-label="Configure weather display settings">
+                    <button id="configure-btn">
                         <span aria-hidden="true">⚙️</span> Configure
                     </button>
-                    <button id="refresh-all-btn" aria-label="Refresh all city weather data">
+                    <button id="refresh-all-btn">
                         <span aria-hidden="true">🔄</span> Refresh All
                     </button>
                 </div>
@@ -310,6 +481,8 @@
         <p>FastWeather v1.1 &copy; 2025 Kelly Ford | <a href="https://github.com/kellylford/FastWeather">GitHub</a> | <a href="https://github.com/kellylford/FastWeather/issues/new" target="_blank" rel="noopener noreferrer">Report an Issue</a></p>
     </footer>
 
+    <script src="us-cities-data.js"></script>
+    <script src="international-cities-data.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
