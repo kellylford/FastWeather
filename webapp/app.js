@@ -1730,12 +1730,10 @@ async function fetchWeatherForCity(cityName, lat, lon, detailed = false) {
         weatherData[cityName] = data;
         
         renderCityList();
-        announceToScreenReader(`Weather data updated for ${cityName}`);
         
         return data;
     } catch (error) {
         console.error(`Error fetching weather for ${cityName}:`, error);
-        announceToScreenReader(`Failed to fetch weather for ${cityName}`);
         throw error;
     }
 }
@@ -1950,8 +1948,6 @@ function createCityCard(cityName, lat, lon, weather, index) {
         
         const summary = document.createElement('div');
         summary.className = 'weather-summary';
-        summary.setAttribute('role', 'status');
-        summary.setAttribute('aria-live', 'polite');
         
         const details = document.createElement('dl');
         details.className = 'weather-details';
