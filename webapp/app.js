@@ -624,7 +624,7 @@ async function addCity(cityData, skipRender = false) {
     
     // Fetch weather for new city
     console.log('Fetching weather for', key);
-    await fetchWeatherForCity(key, cityData.lat, cityData.lon);
+    await fetchWeatherForCity(key, cityData.lat, cityData.lon, false, true); // silent since we announce "added to list"
     console.log('Weather fetched for', key);
     
     return true;
@@ -1704,7 +1704,7 @@ function renderStateCitiesListWithWeather(container, citiesData) {
 }
 
 // Fetch weather data
-async function fetchWeatherForCity(cityName, lat, lon, detailed = false) {
+async function fetchWeatherForCity(cityName, lat, lon, detailed = false, silent = false) {
     try {
         const params = new URLSearchParams({
             latitude: lat,
@@ -1731,9 +1731,16 @@ async function fetchWeatherForCity(cityName, lat, lon, detailed = false) {
         
         renderCityList();
         
+        if (!silent) {
+            announceToScreenReader(`Weather data updated for ${cityName}`);
+        }
+        
         return data;
     } catch (error) {
         console.error(`Error fetching weather for ${cityName}:`, error);
+        if (!silent) {
+            announceToScreenReader(`Failed to fetch weather for ${cityName}`);
+        }
         throw error;
     }
 }
@@ -1880,6 +1887,10 @@ function handleViewMenuKeydown(e) {
 // View switcher
 function switchView(view) {
     currentView = view;
+    
+    // Save the view preference
+    currentConfig.defaultView = view;
+    saveConfigToStorage();
     
     // Update menu item states
     document.querySelectorAll('#view-menu [role="menuitem"]').forEach(item => {
@@ -2132,24 +2143,25 @@ function renderTableView(container) {
     cityHeader.scope = 'col';
     headerRow.appendChild(cityHeader);
     
-    // Add headers based on config
-    const columnConfig = [
-        { key: 'temperature', label: 'Temperature' },
-        { key: 'conditions', label: 'Conditions' },
-        { key: 'feels_like', label: 'Feels Like' },
-        { key: 'humidity', label: 'Humidity' },
-        { key: 'wind_speed', label: 'Wind Speed' },
-        { key: 'wind_direction', label: 'Wind Direction' },
-        { key: 'high_temp', label: 'High' },
-        { key: 'low_temp', label: 'Low' },
-        { key: 'sunrise', label: 'Sunrise' },
-        { key: 'sunset', label: 'Sunset' }
-    ];
+    // Label mapping for column headers
+    const columnLabels = {
+        'temperature': 'Temperature',
+        'conditions': 'Conditions',
+        'feels_like': 'Feels Like',
+        'humidity': 'Humidity',
+        'wind_speed': 'Wind Speed',
+        'wind_direction': 'Wind Direction',
+        'high_temp': 'High',
+        'low_temp': 'Low',
+        'sunrise': 'Sunrise',
+        'sunset': 'Sunset'
+    };
     
-    columnConfig.forEach(col => {
-        if (currentConfig.cityList[col.key]) {
+    // Add headers based on config order (must match data order)
+    currentConfig.cityListOrder.forEach(key => {
+        if (currentConfig.cityList[key] && columnLabels[key]) {
             const th = document.createElement('th');
-            th.textContent = col.label;
+            th.textContent = columnLabels[key];
             th.scope = 'col';
             headerRow.appendChild(th);
         }
@@ -2615,7 +2627,7 @@ async function refreshAllCities() {
     announceToScreenReader('Refreshing all cities');
     
     const promises = Object.entries(cities).map(([cityName, [lat, lon]]) => 
-        fetchWeatherForCity(cityName, lat, lon)
+        fetchWeatherForCity(cityName, lat, lon, false, true) // silent = true, we announce at start/end
     );
     
     try {
@@ -3088,7 +3100,7 @@ function loadCitiesFromStorage() {
     
     // Fetch weather for all cities
     Object.entries(cities).forEach(([cityName, [lat, lon]]) => {
-        fetchWeatherForCity(cityName, lat, lon);
+        fetchWeatherForCity(cityName, lat, lon, false, true); // silent = true on page load
     });
 }
 
