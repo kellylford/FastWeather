@@ -1,0 +1,17 @@
+# Xcode
+*.xcuserstate
+xcuserdata/
+UserInterfaceState.xcuserstate
+
+# Build products
+build/
+*.app
+*.dSYM
+DerivedData/
+
+# Distribution
+*.dmg
+*.pkg
+
+# macOS
+.DS_Store
