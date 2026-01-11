@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="FastWeather - A fast, accessible weather application providing current conditions and detailed forecasts">
+    <meta name="theme-color" content="#2563eb">
     <title>FastWeather - Accessible Weather App</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -484,5 +487,49 @@
     <script src="us-cities-data.js"></script>
     <script src="international-cities-data.js"></script>
     <script src="app.js"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        // Register service worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration.scope);
+                        
+                        // Check for updates periodically
+                        setInterval(() => {
+                            registration.update();
+                        }, 60000); // Check every minute
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+            
+            // Handle service worker updates
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    console.log('New service worker activated, reloading page...');
+                    window.location.reload();
+                }
+            });
+        }
+        
+        // Detect if running as installed PWA
+        window.addEventListener('DOMContentLoaded', () => {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
+                || window.navigator.standalone 
+                || document.referrer.includes('android-app://');
+            
+            if (isStandalone) {
+                console.log('Running as installed PWA');
+                document.body.classList.add('pwa-mode');
+            }
+        });
+    </script>
+
 </body>
 </html>
