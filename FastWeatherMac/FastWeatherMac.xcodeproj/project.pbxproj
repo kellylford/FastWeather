@@ -11,6 +11,8 @@
 		FA0003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0002 /* ContentView.swift */; };
 		FA0005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA0004 /* Assets.xcassets */; };
 		FA0007 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA0006 /* Preview Assets.xcassets */; };
+		FA0017 /* us-cities-cached.json in Resources */ = {isa = PBXBuildFile; fileRef = FA0017R /* us-cities-cached.json */; };
+		FA0018 /* international-cities-cached.json in Resources */ = {isa = PBXBuildFile; fileRef = FA0018R /* international-cities-cached.json */; };
 		FA0010 /* WeatherModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0009 /* WeatherModels.swift */; };
 		FA0011 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000A /* WeatherService.swift */; };
 		FA0012 /* CityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000B /* CityManager.swift */; };
@@ -32,6 +34,8 @@
 		FA000D /* CitySearchSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitySearchSheet.swift; sourceTree = "<group>"; };
 		FA000E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		FA000F /* LocationBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationBrowserView.swift; sourceTree = "<group>"; };
+		FA0017R /* us-cities-cached.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "us-cities-cached.json"; sourceTree = "<group>"; };
+		FA0018R /* international-cities-cached.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "international-cities-cached.json"; sourceTree = "<group>"; };
 		FAAPP /* FastWeatherMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FastWeatherMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAENT /* FastWeatherMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FastWeatherMac.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -53,6 +57,8 @@
 			files = (
 				FA0007 /* Preview Assets.xcassets in Resources */,
 				FA0005 /* Assets.xcassets in Resources */,
+				FA0017 /* us-cities-cached.json in Resources */,
+				FA0018 /* international-cities-cached.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,9 +88,19 @@
 			isa = PBXGroup;
 			children = (
 				FAGROUP1 /* FastWeatherMac */,
+				FADATA /* Data */,
 				FAPRODUCTS /* Products */,
 			);
 			sourceTree = "<group>";
+		};
+		FADATA /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				FA0017R /* us-cities-cached.json */,
+				FA0018R /* international-cities-cached.json */,
+			);
+			name = Data;
+			sourceTree = SOURCE_ROOT;
 		};
 		FAGROUP1 /* FastWeatherMac */ = {
 			isa = PBXGroup;
