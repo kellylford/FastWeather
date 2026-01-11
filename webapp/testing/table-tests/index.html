@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table Accessibility Test Suite - Index</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #1a1a1a;
+            border-bottom: 3px solid #0066cc;
+            padding-bottom: 10px;
+        }
+        .intro {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-grid {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .test-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .test-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .test-card h2 {
+            margin-top: 0;
+            color: #0066cc;
+            font-size: 1.25rem;
+        }
+        .test-card p {
+            margin: 10px 0;
+            color: #4a4a4a;
+        }
+        .test-card a {
+            display: inline-block;
+            background: #0066cc;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .test-card a:hover {
+            background: #0052a3;
+        }
+        .severity {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .severity.low {
+            background: #d4edda;
+            color: #155724;
+        }
+        .severity.medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .severity.high {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .severity.fix {
+            background: #cce5ff;
+            color: #004085;
+        }
+        .instructions {
+            background: #e7f3ff;
+            border-left: 4px solid #0066cc;
+            padding: 15px 20px;
+            margin: 20px 0;
+        }
+        .instructions h3 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>FastWeather Table Accessibility Test Suite</h1>
+    
+    <div class="intro">
+        <p><strong>Purpose:</strong> This test suite isolates individual CSS properties and patterns that may interfere with iOS VoiceOver table navigation.</p>
+        <p><strong>Problem:</strong> VoiceOver recognizes the table initially but loses table semantics after swiping into it.</p>
+        <p><strong>Goal:</strong> Identify which specific styling causes the issue.</p>
+    </div>
+
+    <div class="instructions">
+        <h3>Testing Instructions</h3>
+        <ol>
+            <li>Test each page on an iOS device (iPhone or iPad) with Safari, Chrome, and Edge</li>
+            <li>Enable VoiceOver: Settings → Accessibility → VoiceOver → On</li>
+            <li>Navigate to each table and check all items on the checklist</li>
+            <li>Document which specific behaviors fail on which pages</li>
+            <li>Compare failing tests to identify the common problematic properties</li>
+        </ol>
+    </div>
+
+    <div class="test-grid">
+        <div class="test-card">
+            <h2>Test 1: Baseline<span class="severity low">Control</span></h2>
+            <p>Pure HTML table with minimal CSS. No problematic modifications.</p>
+            <p><strong>Expected:</strong> Perfect VoiceOver navigation</p>
+            <a href="baseline.html">Run Test 1</a>
+        </div>
+
+        <div class="test-card">
+            <h2>Test 2: overflow: hidden<span class="severity medium">Medium Risk</span></h2>
+            <p>Tests impact of <code>overflow: hidden</code> on the table element (used for border-radius).</p>
+            <p><strong>Issue:</strong> Creates new formatting context</p>
+            <a href="with-overflow-hidden.html">Run Test 2</a>
+        </div>
+
+        <div class="test-card">
+            <h2>Test 3: Sticky Headers<span class="severity high">High Risk</span></h2>
+            <p>Tests <code>position: sticky</code> on header cells.</p>
+            <p><strong>Issue:</strong> Creates stacking context, may break navigation</p>
+            <a href="with-sticky-headers.html">Run Test 3</a>
+        </div>
+
+        <div class="test-card">
+            <h2>Test 4: display: block<span class="severity high">CRITICAL</span></h2>
+            <p>Tests mobile responsive pattern with <code>display: block</code> for scrolling.</p>
+            <p><strong>Issue:</strong> Destroys table semantics at CSS level</p>
+            <a href="with-display-block.html">Run Test 4</a>
+        </div>
+
+        <div class="test-card">
+            <h2>Test 5: role="region"<span class="severity medium">Medium Risk</span></h2>
+            <p>Tests table wrapped in container with <code>role="region"</code>.</p>
+            <p><strong>Issue:</strong> Nested landmarks may interfere</p>
+            <a href="with-role-region.html">Run Test 5</a>
+        </div>
+
+        <div class="test-card">
+            <h2>Test 6: Links in Cells<span class="severity medium">Medium Risk</span></h2>
+            <p>Tests interactive links inside table cells.</p>
+            <p><strong>Issue:</strong> May disrupt table navigation mode</p>
+            <a href="with-links.html">Run Test 6</a>
+        </div>
+
+        <div class="test-card">
+            <h2>Test 7: All Problems Combined<span class="severity high">Production</span></h2>
+            <p>Replicates your app's exact styling with all problematic properties.</p>
+            <p><strong>Expected:</strong> Reproduces the exact issue</p>
+            <a href="full-app-styles.html">Run Test 7</a>
+        </div>
+
+        <div class="test-card">
+            <h2>Test 8: Recommended Fix<span class="severity fix">Solution ✅</span></h2>
+            <p>Accessible alternative using wrapper div for scrolling.</p>
+            <p><strong>Expected:</strong> Perfect navigation + horizontal scrolling</p>
+            <a href="recommended-fix.html">Run Test 8</a>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h3>What to Record</h3>
+        <p>For each test, note:</p>
+        <ul>
+            <li>✅ Which behaviors work correctly</li>
+            <li>❌ Which behaviors fail</li>
+            <li>📱 Any differences between browsers (Safari, Chrome, Edge)</li>
+            <li>🔍 Exact VoiceOver announcements when entering/navigating the table</li>
+        </ul>
+        <p><strong>Most Important:</strong> Identify at what point VoiceOver loses table context (immediately, after first swipe, when touching certain elements, etc.)</p>
+    </div>
+</body>
+</html>

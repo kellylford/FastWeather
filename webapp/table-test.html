@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Table Test for VoiceOver</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background: #f5f5f5;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        thead th {
+            background: #333;
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        
+        tbody th {
+            font-weight: 600;
+            background: #f0f0f0;
+        }
+        
+        tbody tr:hover {
+            background: #f9f9f9;
+        }
+        
+        tbody tr:last-child td,
+        tbody tr:last-child th {
+            border-bottom: none;
+        }
+        
+        .table-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        /* Applying actual app CSS for #city-list */
+        #city-list {
+            display: grid;
+            gap: 24px;
+        }
+        
+        /* CRITICAL: Forcing mobile styles with explicit display: table-cell */
+        .weather-table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .weather-table thead,
+        .weather-table tbody,
+        .weather-table tr {
+            display: table;
+            width: 100%;
+            table-layout: auto;
+        }
+        
+        .weather-table th,
+        .weather-table td {
+            display: table-cell;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simple Weather Table Test</h1>
+    <p>Use VoiceOver table navigation (Ctrl+Option+Arrow keys) to test row navigation.</p>
+    <p><strong>TEST: Table built dynamically with JavaScript (exact app sequence)</strong></p>
+    <p style="color: red; font-weight: bold;">Check if dynamically built table breaks VoiceOver!</p>
+    
+    <div id="city-list" role="list" aria-label="List of your saved cities">
+        <!-- Table will be inserted here by JavaScript -->
+    </div>
+    
+    <script>
+        // Replicate EXACT app behavior
+        const container = document.getElementById('city-list');
+        
+        // Step 1: Clear container (like app does)
+        container.innerHTML = '';
+        
+        // Step 2: Change role from 'list' to 'region'
+        container.setAttribute('role', 'region');
+        
+        // Step 3: Build table dynamically
+        const table = document.createElement('table');
+        table.className = 'weather-table';
+        
+        // Build thead
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        
+        const headers = ['City', 'Temperature', 'Conditions', 'Humidity', 'Wind Speed', 'High', 'Low', 'Actions'];
+        headers.forEach(headerText => {
+            const th = document.createElement('th');
+            th.scope = 'col';
+            th.textContent = headerText;
+            headerRow.appendChild(th);
+        });
+        
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+        
+        // Build tbody
+        const tbody = document.createElement('tbody');
+        
+        const cities = [
+            ['San Francisco, California', '62°F', 'Partly Cloudy', '65%', '12 mph', '68°F', '54°F'],
+            ['New York, New York', '45°F', 'Clear', '48%', '8 mph', '52°F', '38°F'],
+            ['Chicago, Illinois', '38°F', 'Overcast', '72%', '15 mph', '42°F', '32°F']
+        ];
+        
+        cities.forEach((cityData, index) => {
+            const row = document.createElement('tr');
+            
+            // City name (row header)
+            const cityCell = document.createElement('th');
+            cityCell.scope = 'row';
+            cityCell.textContent = cityData[0];
+            row.appendChild(cityCell);
+            
+            // Data cells
+            for (let i = 1; i < cityData.length; i++) {
+                const td = document.createElement('td');
+                td.textContent = cityData[i];
+                row.appendChild(td);
+            }
+            
+            // Actions cell
+            const actionsCell = document.createElement('td');
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'table-actions';
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'icon-btn-small';
+            removeBtn.setAttribute('aria-label', `Remove ${cityData[0]}`);
+            removeBtn.textContent = '🗑️';
+            actionsDiv.appendChild(removeBtn);
+            
+            actionsCell.appendChild(actionsDiv);
+            row.appendChild(actionsCell);
+            
+            tbody.appendChild(row);
+        });
+        
+        table.appendChild(tbody);
+        container.appendChild(table);
+    </script>
+</body>
+</html>

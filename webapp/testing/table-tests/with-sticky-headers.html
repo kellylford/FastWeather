@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test 3: Table with Sticky Headers</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .info {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        thead th {
+            background: #f0f0f0;
+            font-weight: 600;
+            position: sticky; /* ⚠️ TESTING THIS */
+            top: 0;           /* ⚠️ TESTING THIS */
+            z-index: 1;       /* ⚠️ TESTING THIS */
+        }
+        tbody th {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h1>Test 3: position: sticky Headers</h1>
+        <p><strong>What's different:</strong> Added <code>position: sticky; top: 0; z-index: 1;</code> to header cells.</p>
+        <p><strong>Potential issue:</strong> Creates a new stacking context that may break screen reader table navigation.</p>
+        <p><strong>Note:</strong> Scroll down to see headers stick to the top.</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">City</th>
+                <th scope="col">Temperature</th>
+                <th scope="col">Conditions</th>
+                <th scope="col">Humidity</th>
+                <th scope="col">Wind Speed</th>
+                <th scope="col">High</th>
+                <th scope="col">Low</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">San Diego, California</th>
+                <td>72°F</td>
+                <td>Partly Cloudy</td>
+                <td>65%</td>
+                <td>8 mph</td>
+                <td>75°F</td>
+                <td>58°F</td>
+            </tr>
+            <tr>
+                <th scope="row">Seattle, Washington</th>
+                <td>55°F</td>
+                <td>Rainy</td>
+                <td>85%</td>
+                <td>12 mph</td>
+                <td>58°F</td>
+                <td>48°F</td>
+            </tr>
+            <tr>
+                <th scope="row">Phoenix, Arizona</th>
+                <td>85°F</td>
+                <td>Clear</td>
+                <td>25%</td>
+                <td>5 mph</td>
+                <td>88°F</td>
+                <td>65°F</td>
+            </tr>
+            <tr>
+                <th scope="row">New York, New York</th>
+                <td>62°F</td>
+                <td>Cloudy</td>
+                <td>70%</td>
+                <td>10 mph</td>
+                <td>65°F</td>
+                <td>52°F</td>
+            </tr>
+            <tr>
+                <th scope="row">Miami, Florida</th>
+                <td>82°F</td>
+                <td>Thunderstorms</td>
+                <td>90%</td>
+                <td>15 mph</td>
+                <td>85°F</td>
+                <td>75°F</td>
+            </tr>
+            <tr>
+                <th scope="row">Chicago, Illinois</th>
+                <td>58°F</td>
+                <td>Windy</td>
+                <td>60%</td>
+                <td>20 mph</td>
+                <td>62°F</td>
+                <td>50°F</td>
+            </tr>
+            <tr>
+                <th scope="row">Denver, Colorado</th>
+                <td>68°F</td>
+                <td>Clear</td>
+                <td>30%</td>
+                <td>8 mph</td>
+                <td>72°F</td>
+                <td>45°F</td>
+            </tr>
+            <tr>
+                <th scope="row">Boston, Massachusetts</th>
+                <td>60°F</td>
+                <td>Partly Cloudy</td>
+                <td>68%</td>
+                <td>12 mph</td>
+                <td>64°F</td>
+                <td>52°F</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="info" style="margin-top: 20px;">
+        <h2>VoiceOver Test Checklist</h2>
+        <ul>
+            <li>☐ Table dimensions announced on first encounter?</li>
+            <li>☐ Table context maintained after swiping in?</li>
+            <li>☐ Rotor shows "Rows" option?</li>
+            <li>☐ Can navigate between rows with rotor?</li>
+            <li>☐ Can navigate between columns with rotor?</li>
+            <li>☐ Row headers announced when moving?</li>
+            <li>☐ Column headers announced when moving?</li>
+            <li>☐ Direct touch announces position correctly?</li>
+        </ul>
+    </div>
+</body>
+</html>
