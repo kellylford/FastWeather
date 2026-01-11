@@ -15,6 +15,7 @@ struct ContentView: View {
     @State private var selectedCity: City?
     @State private var showingWeatherDetail = false
     @State private var showingAddCitySheet = false
+    @State private var showingLocationBrowser = false
     @State private var showingError = false
     @State private var errorMessage = ""
     
@@ -34,6 +35,9 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showingAddCitySheet) {
             CitySearchSheet(cityManager: cityManager, isPresented: $showingAddCitySheet)
+        }
+        .sheet(isPresented: $showingLocationBrowser) {
+            LocationBrowserView(cityManager: cityManager, isPresented: $showingLocationBrowser)
         }
         .alert("Error", isPresented: $showingError) {
             Button("OK", role: .cancel) { }
@@ -100,6 +104,15 @@ struct ContentView: View {
                 .accessibilityLabel("Add City")
                 .accessibilityHint(addCityHint)
             }
+            
+            // Browse Cities Button
+            Button(action: { showingLocationBrowser = true }) {
+                Label("Browse Cities by State/Country", systemImage: "map")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .accessibilityLabel("Browse cities by state or country")
+            .accessibilityHint("Open a dialog to browse and add multiple cities from a state or country")
         }
         .padding()
         .background(Color(nsColor: .controlBackgroundColor))
