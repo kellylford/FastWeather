@@ -17,6 +17,7 @@
 		FA0013 /* WeatherDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000C /* WeatherDetailView.swift */; };
 		FA0014 /* CitySearchSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000D /* CitySearchSheet.swift */; };
 		FA0015 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000E /* SettingsView.swift */; };
+		FA0016 /* LocationBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA000F /* LocationBrowserView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		FA000C /* WeatherDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherDetailView.swift; sourceTree = "<group>"; };
 		FA000D /* CitySearchSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitySearchSheet.swift; sourceTree = "<group>"; };
 		FA000E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		FA000F /* LocationBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationBrowserView.swift; sourceTree = "<group>"; };
 		FAAPP /* FastWeatherMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FastWeatherMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAENT /* FastWeatherMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FastWeatherMac.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -69,6 +71,7 @@
 				FA0013 /* WeatherDetailView.swift in Sources */,
 				FA0014 /* CitySearchSheet.swift in Sources */,
 				FA0015 /* SettingsView.swift in Sources */,
+				FA0016 /* LocationBrowserView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -104,6 +107,7 @@
 				FA000C /* WeatherDetailView.swift */,
 				FA000D /* CitySearchSheet.swift */,
 				FA000E /* SettingsView.swift */,
+				FA000F /* LocationBrowserView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
