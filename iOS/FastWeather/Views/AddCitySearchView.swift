@@ -37,7 +37,6 @@ struct AddCitySearchView: View {
                             }
                             .accessibilityLabel("City search field")
                             .accessibilityHint("Enter a city name or zip code to search")
-                            .accessibilityValue(searchText.isEmpty ? "Empty" : searchText)
                         
                         Button(action: {
                             performSearch()
@@ -199,11 +198,74 @@ struct AddCitySearchView: View {
     }
     
     private func addCity(_ result: GeocodingResult) {
-        // Parse display name to extract city, state, country
+        // Parse display name to extract clean city, state, country
         let components = result.displayName.components(separatedBy: ", ")
-        let cityName = result.name
-        let state = components.count > 1 ? components[1] : nil
-        let country = components.last ?? "Unknown"
+        
+        // Clean city name - remove any zip codes or county suffixes
+        var cityName = result.name
+        
+        // If the name is just a zip code, extract the actual city from displayName
+        if cityName.range(of: "^\\d{5}$", options: .regularExpression) != nil {
+            // Name is just a zip code
+            // DisplayName format: "53718, Madison, Dane County, Wisconsin, United States"
+            // So city is at index 1, not 0
+            if components.count > 1 {
+                cityName = components[1]
+            } else if !components.isEmpty {
+                cityName = components[0]
+            }
+        }
+        
+        // Remove zip code if present within the name (e.g., "54935, Fond du Lac")
+        if let zipRange = cityName.range(of: "\\d{5},?\\s*", options: .regularExpression) {
+            cityName = cityName.replacingCharacters(in: zipRange, with: "").trimmingCharacters(in: .whitespaces)
+        }
+        
+        // Remove "County" suffix if present
+        if cityName.hasSuffix(" County") {
+            cityName = String(cityName.dropLast(7)).trimmingCharacters(in: .whitespaces)
+        }
+        
+        // Extract state and country intelligently
+        var state: String? = nil
+        var country = "Unknown"
+        
+        // Look for US states (2-letter codes or full names)
+        let usStates = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
+        
+        for component in components {
+            let trimmed = component.trimmingCharacters(in: .whitespaces)
+            
+            // Check if it's a US state code
+            if usStates.contains(trimmed) {
+                state = trimmed
+                country = "United States"
+                break
+            }
+            
+            // Check for country indicators
+            if trimmed == "United States" || trimmed == "USA" {
+                country = "United States"
+            } else if trimmed.count > 2 && !usStates.contains(trimmed) && components.last == trimmed {
+                // Last component is likely the country if it's not a state
+                country = trimmed
+            }
+        }
+        
+        // If we found US but no state, try to extract state from components
+        if country == "United States" && state == nil && components.count > 2 {
+            // Second to last component might be the state
+            let potentialState = components[components.count - 2].trimmingCharacters(in: .whitespaces)
+            if usStates.contains(potentialState) {
+                state = potentialState
+            } else if components.count > 3 {
+                // Try one more back
+                let anotherPotentialState = components[components.count - 3].trimmingCharacters(in: .whitespaces)
+                if usStates.contains(anotherPotentialState) {
+                    state = anotherPotentialState
+                }
+            }
+        }
         
         let city = City(
             name: cityName,
@@ -216,7 +278,7 @@ struct AddCitySearchView: View {
         weatherService.addCity(city)
         
         // Announce to VoiceOver
-        UIAccessibility.post(notification: .announcement, argument: "\(cityName) added to My Cities")
+        UIAccessibility.post(notification: .announcement, argument: "\(city.displayName) added to My Cities")
         
         dismiss()
     }

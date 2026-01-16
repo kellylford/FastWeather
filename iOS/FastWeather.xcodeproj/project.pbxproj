@@ -27,6 +27,7 @@
 		A10000023 /* international-cities-cached.json in Resources */ = {isa = PBXBuildFile; fileRef = A10000022 /* international-cities-cached.json */; };
 		A10000025 /* AddCitySearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000026 /* AddCitySearchView.swift */; };
 		A10000028 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A10000027 /* Assets.xcassets */; };
+		A10000029 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1000002A /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +53,7 @@
 		A10000024 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A10000026 /* AddCitySearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddCitySearchView.swift; sourceTree = "<group>"; };
 		A10000027 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A1000002A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +78,7 @@
 		A0FFFFFC0 /* FastWeather */ = {
 			isa = PBXGroup;
 			children = (
+				A1000002A /* PrivacyInfo.xcprivacy */,
 				A10000024 /* Info.plist */,
 				A10000000 /* WeatherFastApp.swift */,
 				A0FFFFFE0 /* Models */,
@@ -202,6 +205,7 @@
 				A10000028 /* Assets.xcassets in Resources */,
 				A10000021 /* us-cities-cached.json in Resources */,
 				A10000023 /* international-cities-cached.json in Resources */,
+				A10000029 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

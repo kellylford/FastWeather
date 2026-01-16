@@ -17,7 +17,15 @@ struct City: Identifiable, Codable, Hashable {
     
     var displayName: String {
         if let state = state, !state.isEmpty {
+            // For US cities, show City, State format (without country)
+            if country == "United States" || country == "USA" {
+                return "\(name), \(state)"
+            }
             return "\(name), \(state), \(country)"
+        }
+        // For international cities without state, just show City, Country
+        if country == "United States" || country == "USA" {
+            return name
         }
         return "\(name), \(country)"
     }

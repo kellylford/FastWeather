@@ -14,7 +14,8 @@ struct FlatView: View {
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
-                ForEach(weatherService.savedCities) { city in
+                ForEach(weatherService.savedCities.indices, id: \.self) { index in
+                    let city = weatherService.savedCities[index]
                     NavigationLink(destination: CityDetailView(city: city)) {
                         CityCardView(city: city)
                     }
@@ -23,10 +24,52 @@ struct FlatView: View {
                     .accessibilityAction(named: "Remove") {
                         weatherService.removeCity(city)
                     }
+                    .accessibilityAction(named: "Move Up") {
+                        moveCityUp(at: index)
+                    }
+                    .accessibilityAction(named: "Move Down") {
+                        moveCityDown(at: index)
+                    }
+                    .accessibilityAction(named: "Move to Top") {
+                        moveCityToTop(at: index)
+                    }
+                    .accessibilityAction(named: "Move to Bottom") {
+                        moveCityToBottom(at: index)
+                    }
                 }
             }
             .padding()
         }
+    }
+    
+    private func moveCityUp(at index: Int) {
+        guard index > 0 else { return }
+        let cityName = weatherService.savedCities[index].displayName
+        let aboveCityName = weatherService.savedCities[index - 1].displayName
+        weatherService.moveCity(from: IndexSet(integer: index), to: index - 1)
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(cityName) above \(aboveCityName)")
+    }
+    
+    private func moveCityDown(at index: Int) {
+        guard index < weatherService.savedCities.count - 1 else { return }
+        let cityName = weatherService.savedCities[index].displayName
+        let belowCityName = weatherService.savedCities[index + 1].displayName
+        weatherService.moveCity(from: IndexSet(integer: index), to: index + 2)
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(cityName) below \(belowCityName)")
+    }
+    
+    private func moveCityToTop(at index: Int) {
+        guard index > 0 else { return }
+        let cityName = weatherService.savedCities[index].displayName
+        weatherService.moveCity(from: IndexSet(integer: index), to: 0)
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(cityName) to top of list")
+    }
+    
+    private func moveCityToBottom(at index: Int) {
+        guard index < weatherService.savedCities.count - 1 else { return }
+        let cityName = weatherService.savedCities[index].displayName
+        weatherService.moveCity(from: IndexSet(integer: index), to: weatherService.savedCities.count)
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(cityName) to bottom of list")
     }
 }
 
