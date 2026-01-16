@@ -1,6 +1,6 @@
 //
 //  BrowseCitiesView.swift
-//  FastWeather
+//  Weather Fast
 //
 //  View for browsing cities by state (US) or country (International)
 //

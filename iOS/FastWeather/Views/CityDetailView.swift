@@ -1,6 +1,6 @@
 //
 //  CityDetailView.swift
-//  FastWeather
+//  Weather Fast
 //
 //  Detailed weather view for a city
 //

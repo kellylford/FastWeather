@@ -1,6 +1,6 @@
-# FastWeather iOS - Distribution Guide
+# Weather Fast iOS - Distribution Guide
 
-This guide explains how to prepare and distribute the FastWeather iOS application.
+This guide explains how to prepare and distribute the Weather Fast iOS application.
 
 ## Prerequisites
 
@@ -99,8 +99,8 @@ xcodebuild -exportArchive \
 
 1. Create a new app in [App Store Connect](https://appstoreconnect.apple.com)
 2. Fill in app information:
-   - **Name**: FastWeather
-   - **Bundle ID**: com.fastweather.app (or your chosen ID)
+   - **Name**: Weather Fast
+   - **Bundle ID**: com.weatherfast.app (or your chosen ID)
    - **SKU**: Unique identifier
    - **Primary Language**: English
 

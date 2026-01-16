@@ -1,6 +1,6 @@
 //
-//  FastWeatherApp.swift
-//  FastWeather
+//  WeatherFastApp.swift
+//  Weather Fast
 //
 //  Created on 2026
 //
@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct FastWeatherApp: App {
+struct WeatherFastApp: App {
     @StateObject private var weatherService = WeatherService()
     @StateObject private var settingsManager = SettingsManager()
     

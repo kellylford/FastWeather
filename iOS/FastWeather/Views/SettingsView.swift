@@ -1,6 +1,6 @@
 //
 //  SettingsView.swift
-//  FastWeather
+//  Weather Fast
 //
 //  Settings and preferences view
 //

@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  FastWeather
+//  Weather Fast
 //
 //  Main view with tab navigation
 //

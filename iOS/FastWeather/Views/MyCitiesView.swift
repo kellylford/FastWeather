@@ -1,6 +1,6 @@
 //
 //  MyCitiesView.swift
-//  FastWeather
+//  Weather Fast
 //
 //  View for displaying saved cities with three view options: Flat, Table, List
 //
@@ -73,7 +73,7 @@ struct MyCitiesView: View {
                     }
                 }
             }
-            .navigationTitle("FastWeather")
+            .navigationTitle("Weather Fast")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {

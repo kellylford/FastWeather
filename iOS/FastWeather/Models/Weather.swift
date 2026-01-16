@@ -1,6 +1,6 @@
 //
 //  Weather.swift
-//  FastWeather
+//  Weather Fast
 //
 //  Weather data models
 //

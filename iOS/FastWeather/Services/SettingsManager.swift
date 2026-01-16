@@ -1,6 +1,6 @@
 //
 //  SettingsManager.swift
-//  FastWeather
+//  Weather Fast
 //
 //  Manager for app settings and preferences
 //

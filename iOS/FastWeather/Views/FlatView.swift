@@ -1,6 +1,6 @@
 //
 //  FlatView.swift
-//  FastWeather
+//  Weather Fast
 //
 //  Card-based flat view for displaying weather
 //

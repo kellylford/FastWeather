@@ -1,6 +1,6 @@
 //
 //  WeatherService.swift
-//  FastWeather
+//  Weather Fast
 //
 //  Service for fetching weather data from Open-Meteo API
 //

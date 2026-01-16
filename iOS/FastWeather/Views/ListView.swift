@@ -1,6 +1,6 @@
 //
 //  ListView.swift
-//  FastWeather
+//  Weather Fast
 //
 //  Compact list view for displaying weather
 //

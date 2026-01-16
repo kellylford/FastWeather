@@ -1,6 +1,6 @@
 //
 //  Settings.swift
-//  FastWeather
+//  Weather Fast
 //
 //  App settings and configuration
 //

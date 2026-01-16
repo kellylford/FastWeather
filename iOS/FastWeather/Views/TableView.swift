@@ -1,6 +1,6 @@
 //
 //  TableView.swift
-//  FastWeather
+//  Weather Fast
 //
 //  Table view for displaying weather data in a compact tabular format
 //
