@@ -14,6 +14,8 @@ import argparse
 from datetime import datetime, timedelta
 import threading
 import os
+import time
+from concurrent.futures import ThreadPoolExecutor
 import wx
 import wx.adv
 import wx.lib.newevent
@@ -24,6 +26,10 @@ MM_TO_INCHES = 0.0393701
 HPA_TO_INHG = 0.02953
 OPEN_METEO_API_URL = "https://api.open-meteo.com/v1/forecast"
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
+
+# Performance settings
+WEATHER_CACHE_MINUTES = 10  # Cache weather data for 10 minutes
+MAX_CONCURRENT_REQUESTS = 5  # Limit parallel API calls to be respectful
 
 # Default Cities
 DEFAULT_CITIES = {
