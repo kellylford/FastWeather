@@ -19,21 +19,27 @@ struct ContentView: View {
                     Label("My Cities", systemImage: "list.bullet")
                 }
                 .tag(0)
-                .accessibilityLabel("My Cities Tab")
+                .accessibilityLabel("My Cities")
+                .accessibilityHint("Tab 1 of 3")
+                .accessibilityAddTraits(.isButton)
             
             BrowseCitiesView()
                 .tabItem {
                     Label("Browse", systemImage: "magnifyingglass")
                 }
                 .tag(1)
-                .accessibilityLabel("Browse Cities Tab")
+                .accessibilityLabel("Browse Cities")
+                .accessibilityHint("Tab 2 of 3")
+                .accessibilityAddTraits(.isButton)
             
             SettingsView()
                 .tabItem {
                     Label("Settings", systemImage: "gear")
                 }
                 .tag(2)
-                .accessibilityLabel("Settings Tab")
+                .accessibilityLabel("Settings")
+                .accessibilityHint("Tab 3 of 3")
+                .accessibilityAddTraits(.isButton)
         }
         .accessibilityElement(children: .contain)
     }

@@ -74,34 +74,6 @@ struct MyCitiesView: View {
                 }
             }
             .navigationTitle("Weather Fast")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        Picker("View Style", selection: $settingsManager.settings.defaultView) {
-                            ForEach(ViewType.allCases, id: \.self) { viewType in
-                                Label(viewType.rawValue, systemImage: iconForViewType(viewType))
-                                    .tag(viewType)
-                            }
-                        }
-                        .onChange(of: settingsManager.settings.defaultView) {
-                            settingsManager.saveSettings()
-                        }
-                        
-                        Divider()
-                        
-                        Button(action: {
-                            Task {
-                                await weatherService.refreshAllWeather()
-                            }
-                        }) {
-                            Label("Refresh All", systemImage: "arrow.clockwise")
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
-                            .accessibilityLabel("Options Menu")
-                    }
-                }
-            }
             .sheet(isPresented: $showingAddCity) {
                 AddCitySearchView(initialSearchText: quickSearchText)
             }
@@ -117,18 +89,8 @@ struct MyCitiesView: View {
         switch settingsManager.settings.defaultView {
         case .flat:
             FlatView()
-        case .table:
-            TableView()
         case .list:
             ListView()
-        }
-    }
-    
-    private func iconForViewType(_ viewType: ViewType) -> String {
-        switch viewType {
-        case .flat: return "square.grid.2x2"
-        case .table: return "tablecells"
-        case .list: return "list.bullet"
         }
     }
 }

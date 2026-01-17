@@ -72,6 +72,7 @@ struct CountryCitiesView: View {
 struct CityLocationRow: View {
     let cityLocation: CityLocation
     @EnvironmentObject var weatherService: WeatherService
+    @EnvironmentObject var settingsManager: SettingsManager
     @State private var weatherData: WeatherData?
     @State private var isLoadingWeather = false
     
@@ -95,7 +96,7 @@ struct CityLocationRow: View {
                             Image(systemName: weatherCode.systemImageName)
                                 .foregroundColor(.blue)
                         }
-                        Text(String(format: "%.0f°", weatherData.current.temperature2m))
+                        Text(formatTemperature(weatherData.current.temperature2m))
                             .font(.headline)
                             .foregroundColor(.primary)
                         if let weatherCode = weatherData.current.weatherCodeEnum {
@@ -132,7 +133,7 @@ struct CityLocationRow: View {
     private var weatherAccessibilityLabel: String {
         var label = cityLocation.displayName
         if let weatherData = weatherData {
-            let temp = String(format: "%.0f degrees", weatherData.current.temperature2m)
+            let temp = formatTemperature(weatherData.current.temperature2m)
             let desc = weatherData.current.weatherCodeEnum?.description ?? "unknown conditions"
             label += ", \(temp), \(desc)"
         } else if isLoadingWeather {
@@ -169,6 +170,11 @@ struct CityLocationRow: View {
         
         // Announce to VoiceOver
         UIAccessibility.post(notification: .announcement, argument: "\(cityLocation.displayName) added to My Cities")
+    }
+    
+    private func formatTemperature(_ celsius: Double) -> String {
+        let temp = settingsManager.settings.temperatureUnit.convert(celsius)
+        return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
     }
 }
 

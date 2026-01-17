@@ -113,7 +113,7 @@ struct CityCardView: View {
                         if settingsManager.settings.showTemperature {
                             Text(formatTemperature(weather.current.temperature2m))
                                 .font(.system(size: 48, weight: .bold))
-                                .accessibilityLabel("Temperature \(formatTemperature(weather.current.temperature2m))")
+                                .accessibilityLabel(formatTemperature(weather.current.temperature2m))
                         }
                         
                         if settingsManager.settings.showConditions,
@@ -125,7 +125,7 @@ struct CityCardView: View {
                                     .font(.body)
                             }
                             .accessibilityElement(children: .combine)
-                            .accessibilityLabel("Conditions: \(weatherCode.description)")
+                            .accessibilityLabel(weatherCode.description)
                         }
                     }
                     
@@ -242,15 +242,12 @@ struct WeatherDetailItem: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(label)
-                .font(.caption)
-                .foregroundColor(.secondary)
             Text(value)
                 .font(.body)
                 .fontWeight(.medium)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(label): \(value)")
+        .accessibilityLabel(value)
     }
 }
 

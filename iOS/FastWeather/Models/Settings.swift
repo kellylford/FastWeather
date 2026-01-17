@@ -9,7 +9,6 @@ import Foundation
 
 enum ViewType: String, CaseIterable, Codable {
     case flat = "Flat"
-    case table = "Table"
     case list = "List"
 }
 
