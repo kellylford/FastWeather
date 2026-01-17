@@ -68,7 +68,8 @@ class WeatherService: ObservableObject {
         
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
-            let response = try JSONDecoder().decode(WeatherResponse.self, from: data)
+            let decoder = JSONDecoder()
+            let response = try decoder.decode(WeatherResponse.self, from: data)
             
             await MainActor.run {
                 self.weatherCache[city.id] = WeatherData(current: response.current, daily: response.daily)
@@ -76,6 +77,7 @@ class WeatherService: ObservableObject {
         } catch {
             await MainActor.run {
                 self.errorMessage = "Failed to fetch weather: \(error.localizedDescription)"
+                print("Weather fetch error for \(city.name): \(error)")
             }
         }
     }
@@ -99,9 +101,17 @@ class WeatherService: ObservableObject {
         }
         
         let (data, _) = try await URLSession.shared.data(from: url)
-        let response = try JSONDecoder().decode(WeatherResponse.self, from: data)
         
-        return WeatherData(current: response.current, daily: response.daily)
+        do {
+            let response = try JSONDecoder().decode(WeatherResponse.self, from: data)
+            return WeatherData(current: response.current, daily: response.daily)
+        } catch {
+            print("❌ Browse weather decode error: \(error)")
+            if let decodingError = error as? DecodingError {
+                print("Decoding error details: \(decodingError)")
+            }
+            throw error
+        }
     }
     
     func refreshAllWeather() async {
