@@ -209,8 +209,9 @@ struct ListRowView: View {
         guard let date = formatter.date(from: isoString) else { return "" }
         
         let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "h:mm a"
-        return timeFormatter.string(from: date)
+        timeFormatter.dateFormat = "h:mma"
+        let result = timeFormatter.string(from: date)
+        return result.replacingOccurrences(of: "AM", with: "A").replacingOccurrences(of: "PM", with: "P")
     }
 }
 

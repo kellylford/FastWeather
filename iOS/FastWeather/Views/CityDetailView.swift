@@ -231,8 +231,9 @@ struct CityDetailView: View {
         guard let date = formatter.date(from: isoString) else { return isoString }
         
         let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "h:mm a"
-        return timeFormatter.string(from: date)
+        timeFormatter.dateFormat = "h:mma"
+        let result = timeFormatter.string(from: date)
+        return result.replacingOccurrences(of: "AM", with: "A").replacingOccurrences(of: "PM", with: "P")
     }
 }
 
@@ -265,8 +266,9 @@ struct HourlyForecastCard: View {
         guard let date = formatter.date(from: time) else { return "" }
         
         let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "h a"
-        return timeFormatter.string(from: date)
+        timeFormatter.dateFormat = "h:mma"
+        let result = timeFormatter.string(from: date)
+        return result.replacingOccurrences(of: "AM", with: "A").replacingOccurrences(of: "PM", with: "P")
     }
     
     private var weatherCodeEnum: WeatherCode? {
@@ -306,9 +308,7 @@ struct HourlyForecastCard: View {
         .padding(.horizontal, 8)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
         .cornerRadius(10)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Hour")
-        .accessibilityValue("\(formattedTime), \(weatherCodeEnum?.description ?? "unknown conditions"), \(formatTemperature(temperature))\(precipitation > 0 ? ", \(formatPrecipitation(precipitation)) precipitation" : "")")
+        .accessibilityElement(children: .combine)
     }
     
     private func formatTemperature(_ celsius: Double) -> String {
@@ -358,6 +358,15 @@ struct DailyForecastRow: View {
         return nil
     }
     
+    private var accessibilityText: String {
+        let conditions = weatherCodeEnum?.description ?? "Unknown conditions"
+        var text = "\(dayName), \(conditions), High \(formatTemperature(high)), Low \(formatTemperature(low))"
+        if let precip = precipitation, precip > 0 {
+            text += ", \(formatPrecipitation(precip))"
+        }
+        return text
+    }
+    
     var body: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
@@ -398,9 +407,7 @@ struct DailyForecastRow: View {
             }
         }
         .padding(.vertical, 8)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Day")
-        .accessibilityValue("\(dayName), \(weatherCodeEnum?.description ?? "unknown conditions"), High \(formatTemperature(high)), Low \(formatTemperature(low))\(precipitation != nil && precipitation! > 0 ? ", \(formatPrecipitation(precipitation!)) precipitation" : "")")
+        .accessibilityElement(children: .combine)
     }
     
     private func formatTemperature(_ celsius: Double) -> String {
