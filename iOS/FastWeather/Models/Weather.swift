@@ -1,6 +1,6 @@
 //
 //  Weather.swift
-//  Weather Fast
+//  Fast Weather
 //
 //  Weather data models
 //
@@ -104,6 +104,7 @@ enum WeatherCode: Int, Codable {
 struct WeatherData: Codable {
     let current: CurrentWeather
     let daily: DailyWeather?
+    let hourly: HourlyWeather?
     
     struct CurrentWeather: Codable {
         let temperature2m: Double
@@ -148,12 +149,34 @@ struct WeatherData: Codable {
         let temperature2mMin: [Double]
         let sunrise: [String]
         let sunset: [String]
+        let weatherCode: [Int]
+        let precipitationSum: [Double]
         
         enum CodingKeys: String, CodingKey {
             case temperature2mMax = "temperature_2m_max"
             case temperature2mMin = "temperature_2m_min"
             case sunrise
             case sunset
+            case weatherCode = "weather_code"
+            case precipitationSum = "precipitation_sum"
+        }
+    }
+    
+    struct HourlyWeather: Codable {
+        let time: [String]
+        let temperature2m: [Double]
+        let weatherCode: [Int]
+        let precipitation: [Double]
+        let relativeHumidity2m: [Int]
+        let windSpeed10m: [Double]
+        
+        enum CodingKeys: String, CodingKey {
+            case time
+            case temperature2m = "temperature_2m"
+            case weatherCode = "weather_code"
+            case precipitation
+            case relativeHumidity2m = "relative_humidity_2m"
+            case windSpeed10m = "wind_speed_10m"
         }
     }
 }
@@ -162,4 +185,5 @@ struct WeatherData: Codable {
 struct WeatherResponse: Codable {
     let current: WeatherData.CurrentWeather
     let daily: WeatherData.DailyWeather?
+    let hourly: WeatherData.HourlyWeather?
 }

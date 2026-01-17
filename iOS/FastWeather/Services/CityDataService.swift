@@ -1,6 +1,6 @@
 //
 //  CityDataService.swift
-//  Weather Fast
+//  Fast Weather
 //
 //  Service for browsing cities by state and country
 //

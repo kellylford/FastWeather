@@ -1,6 +1,6 @@
 //
 //  WeatherFastApp.swift
-//  Weather Fast
+//  Fast Weather
 //
 //  Created on 2026
 //

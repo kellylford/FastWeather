@@ -1,6 +1,6 @@
 //
 //  CityDetailView.swift
-//  Weather Fast
+//  Fast Weather
 //
 //  Detailed weather view for a city
 //
@@ -53,7 +53,7 @@ struct CityDetailView: View {
                             Divider()
                             DetailRow(label: "Wind Direction", value: formatWindDirection(weather.current.windDirection10m))
                             Divider()
-                            DetailRow(label: "Pressure", value: String(format: "%.1f hPa", weather.current.pressureMsl))
+                            DetailRow(label: "Pressure", value: formatPressure(weather.current.pressureMsl))
                             Divider()
                             DetailRow(label: "Visibility", value: formatVisibility(weather.current.visibility))
                             Divider()
@@ -104,6 +104,53 @@ struct CityDetailView: View {
                         }
                         .padding(.horizontal)
                         .accessibilityElement(children: .contain)
+                    }
+                    
+                    // Hourly forecast (24 hours)
+                    if let hourly = weather.hourly, !hourly.time.isEmpty {
+                        GroupBox(label: Label("24-Hour Forecast", systemImage: "clock")) {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 16) {
+                                    ForEach(0..<min(24, hourly.time.count), id: \.self) { index in
+                                        HourlyForecastCard(
+                                            time: hourly.time[index],
+                                            temperature: hourly.temperature2m[index],
+                                            weatherCode: hourly.weatherCode[index],
+                                            precipitation: hourly.precipitation[index],
+                                            settingsManager: settingsManager
+                                        )
+                                    }
+                                }
+                                .padding(.horizontal)
+                                .padding(.vertical, 8)
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                    
+                    // 16-day forecast
+                    if let daily = weather.daily, daily.temperature2mMax.count > 1 {
+                        GroupBox(label: Label("16-Day Forecast", systemImage: "calendar")) {
+                            VStack(spacing: 0) {
+                                ForEach(0..<min(16, daily.temperature2mMax.count), id: \.self) { index in
+                                    DailyForecastRow(
+                                        dayIndex: index,
+                                        sunrise: daily.sunrise[index],
+                                        high: daily.temperature2mMax[index],
+                                        low: daily.temperature2mMin[index],
+                                        weatherCode: index < daily.weatherCode.count ? daily.weatherCode[index] : nil,
+                                        precipitation: index < daily.precipitationSum.count ? daily.precipitationSum[index] : nil,
+                                        settingsManager: settingsManager
+                                    )
+                                    if index < min(15, daily.temperature2mMax.count - 1) {
+                                        Divider()
+                                            .padding(.leading)
+                                    }
+                                }
+                            }
+                            .padding(.vertical, 8)
+                        }
+                        .padding(.horizontal)
                     }
                     
                     // Location info
@@ -168,6 +215,12 @@ struct CityDetailView: View {
         return String(format: "%.2f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
     }
     
+    private func formatPressure(_ hPa: Double) -> String {
+        let pressure = settingsManager.settings.pressureUnit.convert(hPa)
+        let formatString = settingsManager.settings.pressureUnit == .hPa ? "%.0f %@" : "%.2f %@"
+        return String(format: formatString, pressure, settingsManager.settings.pressureUnit.rawValue)
+    }
+    
     private func formatVisibility(_ meters: Double) -> String {
         let miles = meters * 0.000621371
         return String(format: "%.1f mi", miles)
@@ -178,7 +231,7 @@ struct CityDetailView: View {
         guard let date = formatter.date(from: isoString) else { return isoString }
         
         let timeFormatter = DateFormatter()
-        timeFormatter.timeStyle = .short
+        timeFormatter.dateFormat = "h:mm a"
         return timeFormatter.string(from: date)
     }
 }
@@ -197,6 +250,167 @@ struct DetailRow: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(label): \(value)")
+    }
+}
+
+struct HourlyForecastCard: View {
+    let time: String
+    let temperature: Double
+    let weatherCode: Int
+    let precipitation: Double
+    let settingsManager: SettingsManager
+    
+    private var formattedTime: String {
+        let formatter = ISO8601DateFormatter()
+        guard let date = formatter.date(from: time) else { return "" }
+        
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateFormat = "h a"
+        return timeFormatter.string(from: date)
+    }
+    
+    private var weatherCodeEnum: WeatherCode? {
+        WeatherCode(rawValue: weatherCode)
+    }
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            Text(formattedTime)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            
+            if let weatherCode = weatherCodeEnum {
+                Image(systemName: weatherCode.systemImageName)
+                    .font(.title3)
+                    .foregroundColor(.blue)
+                    .frame(height: 30)
+            }
+            
+            Text(formatTemperature(temperature))
+                .font(.body)
+                .fontWeight(.semibold)
+            
+            if precipitation > 0 {
+                HStack(spacing: 2) {
+                    Image(systemName: "drop.fill")
+                        .font(.caption2)
+                        .foregroundColor(.blue)
+                    Text(formatPrecipitation(precipitation))
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+        .frame(width: 70)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 8)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .cornerRadius(10)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Hour")
+        .accessibilityValue("\(formattedTime), \(weatherCodeEnum?.description ?? "unknown conditions"), \(formatTemperature(temperature))\(precipitation > 0 ? ", \(formatPrecipitation(precipitation)) precipitation" : "")")
+    }
+    
+    private func formatTemperature(_ celsius: Double) -> String {
+        let temp = settingsManager.settings.temperatureUnit.convert(celsius)
+        return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
+    }
+    
+    private func formatPrecipitation(_ mm: Double) -> String {
+        let precip = settingsManager.settings.precipitationUnit.convert(mm)
+        return String(format: "%.2f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
+    }
+}
+
+struct DailyForecastRow: View {
+    let dayIndex: Int
+    let sunrise: String
+    let high: Double
+    let low: Double
+    let weatherCode: Int?
+    let precipitation: Double?
+    let settingsManager: SettingsManager
+    
+    private var dayName: String {
+        let formatter = ISO8601DateFormatter()
+        guard let date = formatter.date(from: sunrise) else { return "" }
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MMM d"
+        let dateString = dateFormatter.string(from: date)
+        
+        if dayIndex == 0 {
+            return "Today, \(dateString)"
+        } else if dayIndex == 1 {
+            return "Tomorrow, \(dateString)"
+        } else {
+            let dayFormatter = DateFormatter()
+            dayFormatter.dateFormat = "EEEE"
+            let weekdayName = dayFormatter.string(from: date)
+            return "\(weekdayName), \(dateString)"
+        }
+    }
+    
+    private var weatherCodeEnum: WeatherCode? {
+        if let code = weatherCode {
+            return WeatherCode(rawValue: code)
+        }
+        return nil
+    }
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(dayName)
+                    .font(.body)
+            }
+            .frame(width: 140, alignment: .leading)
+            
+            if let weatherCode = weatherCodeEnum {
+                Image(systemName: weatherCode.systemImageName)
+                    .font(.title3)
+                    .foregroundColor(.blue)
+                    .frame(width: 30)
+            }
+            
+            Spacer()
+            
+            if let precip = precipitation, precip > 0 {
+                HStack(spacing: 4) {
+                    Image(systemName: "drop.fill")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                    Text(formatPrecipitation(precip))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .frame(width: 60)
+            }
+            
+            HStack(spacing: 8) {
+                Text(formatTemperature(low))
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                
+                Text(formatTemperature(high))
+                    .font(.body)
+                    .fontWeight(.semibold)
+            }
+        }
+        .padding(.vertical, 8)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Day")
+        .accessibilityValue("\(dayName), \(weatherCodeEnum?.description ?? "unknown conditions"), High \(formatTemperature(high)), Low \(formatTemperature(low))\(precipitation != nil && precipitation! > 0 ? ", \(formatPrecipitation(precipitation!)) precipitation" : "")")
+    }
+    
+    private func formatTemperature(_ celsius: Double) -> String {
+        let temp = settingsManager.settings.temperatureUnit.convert(celsius)
+        return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
+    }
+    
+    private func formatPrecipitation(_ mm: Double) -> String {
+        let precip = settingsManager.settings.precipitationUnit.convert(mm)
+        return String(format: "%.2f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
     }
 }
 

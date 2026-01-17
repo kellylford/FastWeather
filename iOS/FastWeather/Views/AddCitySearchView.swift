@@ -1,6 +1,6 @@
 //
 //  AddCitySearchView.swift
-//  Weather Fast
+//  Fast Weather
 //
 //  Direct city search by name or zip code
 //
@@ -181,7 +181,7 @@ struct AddCitySearchView: View {
         }
         
         var request = URLRequest(url: url)
-        request.setValue("Weather Fast iOS App", forHTTPHeaderField: "User-Agent")
+        request.setValue("Fast Weather iOS App", forHTTPHeaderField: "User-Agent")
         
         let (data, _) = try await URLSession.shared.data(for: request)
         let results = try JSONDecoder().decode([NominatimResult].self, from: data)

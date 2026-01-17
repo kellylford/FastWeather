@@ -1,6 +1,6 @@
 //
 //  ListView.swift
-//  Weather Fast
+//  Fast Weather
 //
 //  Compact list view for displaying weather
 //
@@ -10,6 +10,7 @@ import SwiftUI
 struct ListView: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
+    @Environment(\.editMode) var editMode
     
     var body: some View {
         List {
@@ -19,6 +20,7 @@ struct ListView: View {
                     ListRowView(city: city)
                 }
                 .accessibilityElement(children: .combine)
+                .accessibilityAddTraits(editMode?.wrappedValue.isEditing == true ? [.allowsDirectInteraction] : [])
                 .accessibilityAction(named: "Remove") {
                     weatherService.removeCity(city)
                 }
@@ -39,6 +41,11 @@ struct ListView: View {
             .onDelete(perform: deleteCities)
         }
         .listStyle(.plain)
+        .toolbar {
+            EditButton()
+                .accessibilityLabel(editMode?.wrappedValue.isEditing == true ? "Done editing" : "Edit cities")
+                .accessibilityHint("Tap to reorder or delete cities")
+        }
     }
     
     private func moveCityUp(at index: Int) {
@@ -109,8 +116,9 @@ struct ListRowView: View {
             
             Spacer()
             
+            // Show temperature on right side if it's enabled
             if let weather = weather,
-               settingsManager.settings.showTemperature {
+               settingsManager.settings.weatherFields.first(where: { $0.type == .temperature })?.isEnabled == true {
                 Text(formatTemperature(weather.current.temperature2m))
                     .font(.title3)
                     .fontWeight(.semibold)
@@ -121,34 +129,60 @@ struct ListRowView: View {
     
     private func buildWeatherSummary(_ weather: WeatherData) -> String {
         var parts: [String] = []
+        let isDetails = settingsManager.settings.displayMode == .details
         
-        if settingsManager.settings.showConditions,
-           let weatherCode = weather.current.weatherCodeEnum {
-            parts.append(weatherCode.description)
-        }
-        
-        if settingsManager.settings.showFeelsLike {
-            parts.append("Feels: \(formatTemperature(weather.current.apparentTemperature))")
-        }
-        
-        if settingsManager.settings.showHumidity {
-            parts.append("Humidity: \(weather.current.relativeHumidity2m)%")
-        }
-        
-        if settingsManager.settings.showWindSpeed {
-            parts.append("Wind: \(formatWindSpeed(weather.current.windSpeed10m))")
-        }
-        
-        if settingsManager.settings.showHighTemp,
-           let daily = weather.daily,
-           !daily.temperature2mMax.isEmpty {
-            parts.append("High: \(formatTemperature(daily.temperature2mMax[0]))")
-        }
-        
-        if settingsManager.settings.showLowTemp,
-           let daily = weather.daily,
-           !daily.temperature2mMin.isEmpty {
-            parts.append("Low: \(formatTemperature(daily.temperature2mMin[0]))")
+        // Use the ordered and filtered weather fields from settings
+        for field in settingsManager.settings.weatherFields where field.isEnabled {
+            switch field.type {
+            case .temperature:
+                // Skip temperature in summary since it's shown separately on the right
+                break
+                
+            case .conditions:
+                if let weatherCode = weather.current.weatherCodeEnum {
+                    parts.append(isDetails ? "Conditions: \(weatherCode.description)" : weatherCode.description)
+                }
+                
+            case .feelsLike:
+                let value = formatTemperature(weather.current.apparentTemperature)
+                parts.append(isDetails ? "Feels Like: \(value)" : value)
+                
+            case .humidity:
+                let value = "\(weather.current.relativeHumidity2m)%"
+                parts.append(isDetails ? "Humidity: \(value)" : value)
+                
+            case .windSpeed:
+                let value = formatWindSpeed(weather.current.windSpeed10m)
+                parts.append(isDetails ? "Wind Speed: \(value)" : value)
+                
+            case .windDirection:
+                let value = formatWindDirection(weather.current.windDirection10m)
+                parts.append(isDetails ? "Wind Direction: \(value)" : value)
+                
+            case .highTemp:
+                if let daily = weather.daily, !daily.temperature2mMax.isEmpty {
+                    let value = formatTemperature(daily.temperature2mMax[0])
+                    parts.append(isDetails ? "High: \(value)" : value)
+                }
+                
+            case .lowTemp:
+                if let daily = weather.daily, !daily.temperature2mMin.isEmpty {
+                    let value = formatTemperature(daily.temperature2mMin[0])
+                    parts.append(isDetails ? "Low: \(value)" : value)
+                }
+                
+            case .sunrise:
+                if let daily = weather.daily, !daily.sunrise.isEmpty {
+                    let value = formatTime(daily.sunrise[0])
+                    parts.append(isDetails ? "Sunrise: \(value)" : value)
+                }
+                
+            case .sunset:
+                if let daily = weather.daily, !daily.sunset.isEmpty {
+                    let value = formatTime(daily.sunset[0])
+                    parts.append(isDetails ? "Sunset: \(value)" : value)
+                }
+            }
         }
         
         return parts.joined(separator: " • ")
@@ -162,6 +196,21 @@ struct ListRowView: View {
     private func formatWindSpeed(_ kmh: Double) -> String {
         let speed = settingsManager.settings.windSpeedUnit.convert(kmh)
         return String(format: "%.0f %@", speed, settingsManager.settings.windSpeedUnit.rawValue)
+    }
+    
+    private func formatWindDirection(_ degrees: Int) -> String {
+        let directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+        let index = Int((Double(degrees) + 22.5) / 45.0) % 8
+        return directions[index]
+    }
+    
+    private func formatTime(_ isoString: String) -> String {
+        let formatter = ISO8601DateFormatter()
+        guard let date = formatter.date(from: isoString) else { return "" }
+        
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateFormat = "h:mm a"
+        return timeFormatter.string(from: date)
     }
 }
 

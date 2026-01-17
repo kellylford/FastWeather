@@ -1,6 +1,6 @@
 //
 //  FlatView.swift
-//  Weather Fast
+//  Fast Weather
 //
 //  Card-based flat view for displaying weather
 //
@@ -110,13 +110,17 @@ struct CityCardView: View {
                 HStack(alignment: .top, spacing: 20) {
                     // Temperature and condition
                     VStack(alignment: .leading, spacing: 4) {
-                        if settingsManager.settings.showTemperature {
+                        // Check if temperature should be shown
+                        if let tempField = settingsManager.settings.weatherFields.first(where: { $0.type == .temperature }),
+                           tempField.isEnabled {
                             Text(formatTemperature(weather.current.temperature2m))
                                 .font(.system(size: 48, weight: .bold))
                                 .accessibilityLabel(formatTemperature(weather.current.temperature2m))
                         }
                         
-                        if settingsManager.settings.showConditions,
+                        // Check if conditions should be shown
+                        if let condField = settingsManager.settings.weatherFields.first(where: { $0.type == .conditions }),
+                           condField.isEnabled,
                            let weatherCode = weather.current.weatherCodeEnum {
                             HStack(spacing: 8) {
                                 Image(systemName: weatherCode.systemImageName)
@@ -132,70 +136,17 @@ struct CityCardView: View {
                     Spacer()
                 }
                 
-                // Weather Details Grid
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                    if settingsManager.settings.showFeelsLike {
-                        WeatherDetailItem(
-                            label: "Feels Like",
-                            value: formatTemperature(weather.current.apparentTemperature)
-                        )
-                    }
-                    
-                    if settingsManager.settings.showHumidity {
-                        WeatherDetailItem(
-                            label: "Humidity",
-                            value: "\(weather.current.relativeHumidity2m)%"
-                        )
-                    }
-                    
-                    if settingsManager.settings.showWindSpeed {
-                        WeatherDetailItem(
-                            label: "Wind Speed",
-                            value: formatWindSpeed(weather.current.windSpeed10m)
-                        )
-                    }
-                    
-                    if settingsManager.settings.showWindDirection {
-                        WeatherDetailItem(
-                            label: "Wind Direction",
-                            value: formatWindDirection(weather.current.windDirection10m)
-                        )
-                    }
-                    
-                    if settingsManager.settings.showHighTemp,
-                       let daily = weather.daily,
-                       !daily.temperature2mMax.isEmpty {
-                        WeatherDetailItem(
-                            label: "High",
-                            value: formatTemperature(daily.temperature2mMax[0])
-                        )
-                    }
-                    
-                    if settingsManager.settings.showLowTemp,
-                       let daily = weather.daily,
-                       !daily.temperature2mMin.isEmpty {
-                        WeatherDetailItem(
-                            label: "Low",
-                            value: formatTemperature(daily.temperature2mMin[0])
-                        )
-                    }
-                    
-                    if settingsManager.settings.showSunrise,
-                       let daily = weather.daily,
-                       !daily.sunrise.isEmpty {
-                        WeatherDetailItem(
-                            label: "Sunrise",
-                            value: formatTime(daily.sunrise[0])
-                        )
-                    }
-                    
-                    if settingsManager.settings.showSunset,
-                       let daily = weather.daily,
-                       !daily.sunset.isEmpty {
-                        WeatherDetailItem(
-                            label: "Sunset",
-                            value: formatTime(daily.sunset[0])
-                        )
+                // Weather Details Grid - using ordered fields from settings
+                let enabledFields = settingsManager.settings.weatherFields.filter { $0.isEnabled && $0.type != .temperature && $0.type != .conditions }
+                let isDetails = settingsManager.settings.displayMode == .details
+                
+                if !enabledFields.isEmpty {
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                        ForEach(enabledFields) { field in
+                            if let (label, value) = getFieldLabelAndValue(for: field.type, weather: weather, showLabel: isDetails) {
+                                WeatherDetailItem(label: label, value: value)
+                            }
+                        }
                     }
                 }
             } else {
@@ -213,6 +164,41 @@ struct CityCardView: View {
     private func formatTemperature(_ celsius: Double) -> String {
         let temp = settingsManager.settings.temperatureUnit.convert(celsius)
         return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
+    }
+    
+    private func getFieldLabelAndValue(for fieldType: WeatherFieldType, weather: WeatherData, showLabel: Bool) -> (String, String)? {
+        switch fieldType {
+        case .temperature, .conditions:
+            return nil
+            
+        case .feelsLike:
+            return (showLabel ? "Feels Like" : "", formatTemperature(weather.current.apparentTemperature))
+            
+        case .humidity:
+            return (showLabel ? "Humidity" : "", "\(weather.current.relativeHumidity2m)%")
+            
+        case .windSpeed:
+            return (showLabel ? "Wind Speed" : "", formatWindSpeed(weather.current.windSpeed10m))
+            
+        case .windDirection:
+            return (showLabel ? "Wind Direction" : "", formatWindDirection(weather.current.windDirection10m))
+            
+        case .highTemp:
+            guard let daily = weather.daily, !daily.temperature2mMax.isEmpty else { return nil }
+            return (showLabel ? "High" : "", formatTemperature(daily.temperature2mMax[0]))
+            
+        case .lowTemp:
+            guard let daily = weather.daily, !daily.temperature2mMin.isEmpty else { return nil }
+            return (showLabel ? "Low" : "", formatTemperature(daily.temperature2mMin[0]))
+            
+        case .sunrise:
+            guard let daily = weather.daily, !daily.sunrise.isEmpty else { return nil }
+            return (showLabel ? "Sunrise" : "", formatTime(daily.sunrise[0]))
+            
+        case .sunset:
+            guard let daily = weather.daily, !daily.sunset.isEmpty else { return nil }
+            return (showLabel ? "Sunset" : "", formatTime(daily.sunset[0]))
+        }
     }
     
     private func formatWindSpeed(_ kmh: Double) -> String {
@@ -242,12 +228,17 @@ struct WeatherDetailItem: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
+            if !label.isEmpty {
+                Text(label)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
             Text(value)
                 .font(.body)
                 .fontWeight(.medium)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(value)
+        .accessibilityLabel(label.isEmpty ? value : "\(label): \(value)")
     }
 }
 

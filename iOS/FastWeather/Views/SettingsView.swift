@@ -1,6 +1,6 @@
 //
 //  SettingsView.swift
-//  Weather Fast
+//  Fast Weather
 //
 //  Settings and preferences view
 //
@@ -17,102 +17,116 @@ struct SettingsView: View {
             Form {
                 // Units section
                 Section(header: Text("Units")) {
-                    Picker("Temperature", selection: $settingsManager.settings.temperatureUnit) {
+                    Picker(selection: $settingsManager.settings.temperatureUnit) {
                         ForEach(TemperatureUnit.allCases, id: \.self) { unit in
                             Text(unit.rawValue).tag(unit)
+                        }
+                    } label: {
+                        HStack {
+                            Text("Temperature")
+                            Spacer()
+                            Text(settingsManager.settings.temperatureUnit.rawValue)
+                                .foregroundColor(.secondary)
                         }
                     }
                     .onChange(of: settingsManager.settings.temperatureUnit) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Temperature unit")
+                    .accessibilityLabel("Temperature unit, currently \(settingsManager.settings.temperatureUnit.rawValue)")
                     
-                    Picker("Wind Speed", selection: $settingsManager.settings.windSpeedUnit) {
+                    Picker(selection: $settingsManager.settings.windSpeedUnit) {
                         ForEach(WindSpeedUnit.allCases, id: \.self) { unit in
                             Text(unit.rawValue).tag(unit)
+                        }
+                    } label: {
+                        HStack {
+                            Text("Wind Speed")
+                            Spacer()
+                            Text(settingsManager.settings.windSpeedUnit.rawValue)
+                                .foregroundColor(.secondary)
                         }
                     }
                     .onChange(of: settingsManager.settings.windSpeedUnit) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Wind speed unit")
+                    .accessibilityLabel("Wind speed unit, currently \(settingsManager.settings.windSpeedUnit.rawValue)")
                     
-                    Picker("Precipitation", selection: $settingsManager.settings.precipitationUnit) {
+                    Picker(selection: $settingsManager.settings.precipitationUnit) {
                         ForEach(PrecipitationUnit.allCases, id: \.self) { unit in
                             Text(unit.rawValue).tag(unit)
+                        }
+                    } label: {
+                        HStack {
+                            Text("Precipitation")
+                            Spacer()
+                            Text(settingsManager.settings.precipitationUnit.rawValue)
+                                .foregroundColor(.secondary)
                         }
                     }
                     .onChange(of: settingsManager.settings.precipitationUnit) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Precipitation unit")
+                    .accessibilityLabel("Precipitation unit, currently \(settingsManager.settings.precipitationUnit.rawValue)")
+                    
+                    Picker(selection: $settingsManager.settings.pressureUnit) {
+                        ForEach(PressureUnit.allCases, id: \.self) { unit in
+                            Text(unit.rawValue).tag(unit)
+                        }
+                    } label: {
+                        HStack {
+                            Text("Pressure")
+                            Spacer()
+                            Text(settingsManager.settings.pressureUnit.rawValue)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .onChange(of: settingsManager.settings.pressureUnit) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Pressure unit, currently \(settingsManager.settings.pressureUnit.rawValue)")
                 }
                 
                 // Display preferences section
-                Section(header: Text("Display Preferences")) {
-                    Picker("Default View", selection: $settingsManager.settings.defaultView) {
-                        ForEach(ViewType.allCases, id: \.self) { viewType in
-                            Text(viewType.rawValue).tag(viewType)
+                Section(header: Text("Display Mode")) {
+                    Picker("Display Mode", selection: $settingsManager.settings.displayMode) {
+                        ForEach(DisplayMode.allCases, id: \.self) { mode in
+                            Text(mode.rawValue).tag(mode)
                         }
                     }
-                    .onChange(of: settingsManager.settings.defaultView) {
+                    .onChange(of: settingsManager.settings.displayMode) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Default view type")
+                    .accessibilityLabel("Weather display mode")
+                    .accessibilityHint("Condensed shows values only, Details shows labels with values")
                 }
+                .listRowSeparator(.visible)
                 
-                // City list fields section
-                Section(header: Text("City List Fields"),
-                       footer: Text("Select which information to display in the city list")) {
-                    Toggle("Temperature", isOn: $settingsManager.settings.showTemperature)
-                        .onChange(of: settingsManager.settings.showTemperature) {
-                            settingsManager.saveSettings()
+                // Weather fields section with reordering
+                Section(header: Text("Weather Fields"),
+                       footer: Text("Drag to reorder. City info is always shown first. Toggle to show/hide each field.")) {
+                    ForEach($settingsManager.settings.weatherFields) { $field in
+                        HStack {
+                            Image(systemName: "line.3.horizontal")
+                                .foregroundColor(.secondary)
+                                .accessibilityHidden(true)
+                            
+                            Toggle(isOn: $field.isEnabled) {
+                                Text(field.type.rawValue)
+                                    .font(.body)
+                            }
+                            .onChange(of: field.isEnabled) {
+                                settingsManager.saveSettings()
+                            }
+                            .accessibilityLabel("\(field.type.rawValue)")
+                            .accessibilityHint(field.isEnabled ? "Enabled, double tap to disable" : "Disabled, double tap to enable")
                         }
-                    
-                    Toggle("Conditions", isOn: $settingsManager.settings.showConditions)
-                        .onChange(of: settingsManager.settings.showConditions) {
-                            settingsManager.saveSettings()
-                        }
-                    
-                    Toggle("Feels Like", isOn: $settingsManager.settings.showFeelsLike)
-                        .onChange(of: settingsManager.settings.showFeelsLike) {
-                            settingsManager.saveSettings()
-                        }
-                    
-                    Toggle("Humidity", isOn: $settingsManager.settings.showHumidity)
-                        .onChange(of: settingsManager.settings.showHumidity) {
-                            settingsManager.saveSettings()
-                        }
-                    
-                    Toggle("Wind Speed", isOn: $settingsManager.settings.showWindSpeed)
-                        .onChange(of: settingsManager.settings.showWindSpeed) {
-                            settingsManager.saveSettings()
-                        }
-                    
-                    Toggle("Wind Direction", isOn: $settingsManager.settings.showWindDirection)
-                        .onChange(of: settingsManager.settings.showWindDirection) {
-                            settingsManager.saveSettings()
-                        }
-                    
-                    Toggle("High Temperature", isOn: $settingsManager.settings.showHighTemp)
-                        .onChange(of: settingsManager.settings.showHighTemp) {
-                            settingsManager.saveSettings()
-                        }
-                    
-                    Toggle("Low Temperature", isOn: $settingsManager.settings.showLowTemp)
-                        .onChange(of: settingsManager.settings.showLowTemp) {
-                            settingsManager.saveSettings()
-                        }
-                    
-                    Toggle("Sunrise", isOn: $settingsManager.settings.showSunrise)
-                        .onChange(of: settingsManager.settings.showSunrise) {
-                            settingsManager.saveSettings()
-                        }
-                    
-                    Toggle("Sunset", isOn: $settingsManager.settings.showSunset)
-                        .onChange(of: settingsManager.settings.showSunset) {
-                            settingsManager.saveSettings()
-                        }
+                        .accessibilityElement(children: .combine)
+                        .accessibilityAddTraits(.isButton)
+                    }
+                    .onMove { from, to in
+                        settingsManager.settings.weatherFields.move(fromOffsets: from, toOffset: to)
+                        settingsManager.saveSettings()
+                    }
                 }
                 
                 // Data management section
@@ -145,6 +159,11 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .toolbar {
+                EditButton()
+                    .accessibilityLabel("Edit weather fields order")
+                    .accessibilityHint("Tap to enable reordering of weather fields")
+            }
             .alert("Clear All Cities", isPresented: $showingResetAlert) {
                 Button("Cancel", role: .cancel) { }
                 Button("Clear", role: .destructive) {

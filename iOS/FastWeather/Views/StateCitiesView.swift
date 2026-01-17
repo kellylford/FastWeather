@@ -1,6 +1,6 @@
 //
 //  StateCitiesView.swift
-//  Weather Fast
+//  Fast Weather
 //
 //  View for displaying cities in a specific US state
 //

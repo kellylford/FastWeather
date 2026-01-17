@@ -1,6 +1,6 @@
 //
 //  MyCitiesView.swift
-//  Weather Fast
+//  Fast Weather
 //
 //  View for displaying saved cities with three view options: Flat, Table, List
 //
@@ -69,11 +69,11 @@ struct MyCitiesView: View {
                     if weatherService.savedCities.isEmpty {
                         EmptyStateView()
                     } else {
-                        viewContent
+                        ListView()
                     }
                 }
             }
-            .navigationTitle("Weather Fast")
+            .navigationTitle("Fast Weather")
             .sheet(isPresented: $showingAddCity) {
                 AddCitySearchView(initialSearchText: quickSearchText)
             }
@@ -82,16 +82,6 @@ struct MyCitiesView: View {
             }
         }
         .navigationViewStyle(.stack)
-    }
-    
-    @ViewBuilder
-    private var viewContent: some View {
-        switch settingsManager.settings.defaultView {
-        case .flat:
-            FlatView()
-        case .list:
-            ListView()
-        }
     }
 }
 

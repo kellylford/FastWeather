@@ -1,15 +1,40 @@
 //
 //  Settings.swift
-//  Weather Fast
+//  Fast Weather
 //
 //  App settings and configuration
 //
 
 import Foundation
 
-enum ViewType: String, CaseIterable, Codable {
-    case flat = "Flat"
-    case list = "List"
+enum DisplayMode: String, CaseIterable, Codable {
+    case condensed = "Condensed"
+    case details = "Details"
+}
+
+enum WeatherFieldType: String, CaseIterable, Codable {
+    case temperature = "Temperature"
+    case conditions = "Conditions"
+    case feelsLike = "Feels Like"
+    case humidity = "Humidity"
+    case windSpeed = "Wind Speed"
+    case windDirection = "Wind Direction"
+    case highTemp = "High Temperature"
+    case lowTemp = "Low Temperature"
+    case sunrise = "Sunrise"
+    case sunset = "Sunset"
+}
+
+struct WeatherField: Codable, Identifiable, Equatable {
+    let id: String
+    let type: WeatherFieldType
+    var isEnabled: Bool
+    
+    init(type: WeatherFieldType, isEnabled: Bool = true) {
+        self.id = type.rawValue
+        self.type = type
+        self.isEnabled = isEnabled
+    }
 }
 
 enum TemperatureUnit: String, CaseIterable, Codable {
@@ -54,13 +79,45 @@ enum PrecipitationUnit: String, CaseIterable, Codable {
     }
 }
 
+enum PressureUnit: String, CaseIterable, Codable {
+    case hPa = "hPa"
+    case inHg = "inHg"
+    case mmHg = "mmHg"
+    
+    func convert(_ hPa: Double) -> Double {
+        switch self {
+        case .hPa:
+            return hPa
+        case .inHg:
+            return hPa * 0.02953
+        case .mmHg:
+            return hPa * 0.750062
+        }
+    }
+}
+
 struct AppSettings: Codable {
-    var defaultView: ViewType = .flat
+    var displayMode: DisplayMode = .condensed
     var temperatureUnit: TemperatureUnit = .fahrenheit
     var windSpeedUnit: WindSpeedUnit = .mph
     var precipitationUnit: PrecipitationUnit = .inches
+    var pressureUnit: PressureUnit = .inHg
     
-    // Display settings for city list
+    // Ordered weather fields with enable/disable state
+    var weatherFields: [WeatherField] = [
+        WeatherField(type: .temperature, isEnabled: true),
+        WeatherField(type: .conditions, isEnabled: true),
+        WeatherField(type: .feelsLike, isEnabled: true),
+        WeatherField(type: .humidity, isEnabled: true),
+        WeatherField(type: .windSpeed, isEnabled: true),
+        WeatherField(type: .windDirection, isEnabled: true),
+        WeatherField(type: .highTemp, isEnabled: true),
+        WeatherField(type: .lowTemp, isEnabled: true),
+        WeatherField(type: .sunrise, isEnabled: true),
+        WeatherField(type: .sunset, isEnabled: true)
+    ]
+    
+    // Legacy properties for backward compatibility (deprecated)
     var showTemperature: Bool = true
     var showConditions: Bool = true
     var showFeelsLike: Bool = true

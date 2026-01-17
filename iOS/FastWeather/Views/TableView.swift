@@ -1,6 +1,6 @@
 //
 //  TableView.swift
-//  Weather Fast
+//  Fast Weather
 //
 //  Table view for displaying weather data in a compact tabular format
 //
@@ -94,85 +94,13 @@ struct TableRowView: View {
                 .font(.headline)
             
             if let weather = weather {
+                let isDetails = settingsManager.settings.displayMode == .details
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 16) {
-                        if settingsManager.settings.showTemperature {
-                            CompactWeatherItem(
-                                label: "Temp",
-                                value: formatTemperature(weather.current.temperature2m)
-                            )
-                        }
-                        
-                        if settingsManager.settings.showConditions,
-                           let weatherCode = weather.current.weatherCodeEnum {
-                            CompactWeatherItem(
-                                label: "Conditions",
-                                value: weatherCode.description
-                            )
-                        }
-                        
-                        if settingsManager.settings.showFeelsLike {
-                            CompactWeatherItem(
-                                label: "Feels",
-                                value: formatTemperature(weather.current.apparentTemperature)
-                            )
-                        }
-                        
-                        if settingsManager.settings.showHumidity {
-                            CompactWeatherItem(
-                                label: "Humidity",
-                                value: "\(weather.current.relativeHumidity2m)%"
-                            )
-                        }
-                        
-                        if settingsManager.settings.showWindSpeed {
-                            CompactWeatherItem(
-                                label: "Wind",
-                                value: formatWindSpeed(weather.current.windSpeed10m)
-                            )
-                        }
-                        
-                        if settingsManager.settings.showWindDirection {
-                            CompactWeatherItem(
-                                label: "Direction",
-                                value: formatWindDirection(weather.current.windDirection10m)
-                            )
-                        }
-                        
-                        if settingsManager.settings.showHighTemp,
-                           let daily = weather.daily,
-                           !daily.temperature2mMax.isEmpty {
-                            CompactWeatherItem(
-                                label: "High",
-                                value: formatTemperature(daily.temperature2mMax[0])
-                            )
-                        }
-                        
-                        if settingsManager.settings.showLowTemp,
-                           let daily = weather.daily,
-                           !daily.temperature2mMin.isEmpty {
-                            CompactWeatherItem(
-                                label: "Low",
-                                value: formatTemperature(daily.temperature2mMin[0])
-                            )
-                        }
-                        
-                        if settingsManager.settings.showSunrise,
-                           let daily = weather.daily,
-                           !daily.sunrise.isEmpty {
-                            CompactWeatherItem(
-                                label: "Sunrise",
-                                value: formatTime(daily.sunrise[0])
-                            )
-                        }
-                        
-                        if settingsManager.settings.showSunset,
-                           let daily = weather.daily,
-                           !daily.sunset.isEmpty {
-                            CompactWeatherItem(
-                                label: "Sunset",
-                                value: formatTime(daily.sunset[0])
-                            )
+                        ForEach(settingsManager.settings.weatherFields.filter { $0.isEnabled }) { field in
+                            if let (label, value) = getFieldLabelAndValue(for: field.type, weather: weather, showLabel: isDetails) {
+                                CompactWeatherItem(label: label, value: value)
+                            }
                         }
                     }
                 }
@@ -187,6 +115,45 @@ struct TableRowView: View {
     private func formatTemperature(_ celsius: Double) -> String {
         let temp = settingsManager.settings.temperatureUnit.convert(celsius)
         return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
+    }
+    
+    private func getFieldLabelAndValue(for fieldType: WeatherFieldType, weather: WeatherData, showLabel: Bool) -> (String, String)? {
+        switch fieldType {
+        case .temperature:
+            return (showLabel ? "Temperature" : "", formatTemperature(weather.current.temperature2m))
+            
+        case .conditions:
+            guard let weatherCode = weather.current.weatherCodeEnum else { return nil }
+            return (showLabel ? "Conditions" : "", weatherCode.description)
+            
+        case .feelsLike:
+            return (showLabel ? "Feels Like" : "", formatTemperature(weather.current.apparentTemperature))
+            
+        case .humidity:
+            return (showLabel ? "Humidity" : "", "\(weather.current.relativeHumidity2m)%")
+            
+        case .windSpeed:
+            return (showLabel ? "Wind Speed" : "", formatWindSpeed(weather.current.windSpeed10m))
+            
+        case .windDirection:
+            return (showLabel ? "Wind Direction" : "", formatWindDirection(weather.current.windDirection10m))
+            
+        case .highTemp:
+            guard let daily = weather.daily, !daily.temperature2mMax.isEmpty else { return nil }
+            return (showLabel ? "High" : "", formatTemperature(daily.temperature2mMax[0]))
+            
+        case .lowTemp:
+            guard let daily = weather.daily, !daily.temperature2mMin.isEmpty else { return nil }
+            return (showLabel ? "Low" : "", formatTemperature(daily.temperature2mMin[0]))
+            
+        case .sunrise:
+            guard let daily = weather.daily, !daily.sunrise.isEmpty else { return nil }
+            return (showLabel ? "Sunrise" : "", formatTime(daily.sunrise[0]))
+            
+        case .sunset:
+            guard let daily = weather.daily, !daily.sunset.isEmpty else { return nil }
+            return (showLabel ? "Sunset" : "", formatTime(daily.sunset[0]))
+        }
     }
     
     private func formatWindSpeed(_ kmh: Double) -> String {
@@ -216,15 +183,17 @@ struct CompactWeatherItem: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(label)
-                .font(.caption2)
-                .foregroundColor(.secondary)
+            if !label.isEmpty {
+                Text(label)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
             Text(value)
                 .font(.caption)
                 .fontWeight(.medium)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(label): \(value)")
+        .accessibilityLabel(label.isEmpty ? value : "\(label): \(value)")
     }
 }
 

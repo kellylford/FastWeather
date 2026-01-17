@@ -1,6 +1,6 @@
 //
 //  City.swift
-//  Weather Fast
+//  Fast Weather
 //
 //  Model for city data
 //

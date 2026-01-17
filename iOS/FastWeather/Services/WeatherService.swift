@@ -1,6 +1,6 @@
 //
 //  WeatherService.swift
-//  Weather Fast
+//  Fast Weather
 //
 //  Service for fetching weather data from Open-Meteo API
 //
@@ -51,8 +51,10 @@ class WeatherService: ObservableObject {
             "latitude": String(city.latitude),
             "longitude": String(city.longitude),
             "current": "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility",
-            "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset",
-            "forecast_days": "1",
+            "hourly": "temperature_2m,weather_code,precipitation,relative_humidity_2m,wind_speed_10m",
+            "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum",
+            "forecast_days": "16",
+            "forecast_hours": "24",
             "timezone": "auto"
         ]
         
@@ -72,7 +74,7 @@ class WeatherService: ObservableObject {
             let response = try decoder.decode(WeatherResponse.self, from: data)
             
             await MainActor.run {
-                self.weatherCache[city.id] = WeatherData(current: response.current, daily: response.daily)
+                self.weatherCache[city.id] = WeatherData(current: response.current, daily: response.daily, hourly: response.hourly)
             }
         } catch {
             await MainActor.run {
@@ -88,8 +90,10 @@ class WeatherService: ObservableObject {
             "latitude": String(latitude),
             "longitude": String(longitude),
             "current": "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility",
-            "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset",
-            "forecast_days": "1",
+            "hourly": "temperature_2m,weather_code,precipitation,relative_humidity_2m,wind_speed_10m",
+            "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum",
+            "forecast_days": "16",
+            "forecast_hours": "24",
             "timezone": "auto"
         ]
         
@@ -104,7 +108,7 @@ class WeatherService: ObservableObject {
         
         do {
             let response = try JSONDecoder().decode(WeatherResponse.self, from: data)
-            return WeatherData(current: response.current, daily: response.daily)
+            return WeatherData(current: response.current, daily: response.daily, hourly: response.hourly)
         } catch {
             print("❌ Browse weather decode error: \(error)")
             if let decodingError = error as? DecodingError {
