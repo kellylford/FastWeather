@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 class CityDataService: ObservableObject {
     @Published var usCitiesByState: [String: [CityLocation]] = [:]
