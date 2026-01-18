@@ -81,6 +81,10 @@ def main():
         "--onefile",   # Single executable file
         "--icon=NONE", # No icon (you can add one later)
         "--add-data", "city.json;.", # Embed city.json as a resource
+        "--add-data", "us-cities-cached.json;.", # Embed US cities cache
+        "--add-data", "international-cities-cached.json;.", # Embed international cities cache
+        "--hidden-import=wx", # Explicitly include wxPython
+        "--collect-all=wx", # Collect all wxPython modules and resources
         "--exclude-module=tkinter", # Exclude unnecessary standard library GUI
         "fastweather.py"
     ]

@@ -14,6 +14,8 @@ import argparse
 from datetime import datetime, timedelta
 import threading
 import os
+import time
+from concurrent.futures import ThreadPoolExecutor
 import wx
 import wx.adv
 import wx.lib.newevent
@@ -24,6 +26,10 @@ MM_TO_INCHES = 0.0393701
 HPA_TO_INHG = 0.02953
 OPEN_METEO_API_URL = "https://api.open-meteo.com/v1/forecast"
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
+
+# Performance settings
+WEATHER_CACHE_MINUTES = 10  # Cache weather data for 10 minutes
+MAX_CONCURRENT_REQUESTS = 5  # Limit parallel API calls to be respectful
 
 # Default Cities
 DEFAULT_CITIES = {
@@ -163,77 +169,52 @@ class CitySelectionDialog(wx.Dialog):
             event.Skip()
 
 class LocationBrowserDialog(wx.Dialog):
-    """Dialog for browsing cities by US State or International Country"""
+    """Dialog for browsing cities by US State or International Country with hierarchical navigation"""
     def __init__(self, parent, us_cities_cache, intl_cities_cache):
         super().__init__(parent, title="Browse Cities by Location", size=(700, 600))
         self.us_cities_cache = us_cities_cache
         self.intl_cities_cache = intl_cities_cache
         self.selected_cities = []  # List of (city_name, lat, lon) tuples
         
+        # Navigation state
+        self.nav_level = 'root'  # 'root', 'states', 'countries', 'cities'
+        self.current_location = None  # Current state or country name
+        self.current_type = None  # 'us' or 'intl'
+        
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
         
-        # Notebook for US States / International tabs
-        self.notebook = wx.Notebook(panel)
+        # Title label (dynamic based on navigation level)
+        self.title_label = wx.StaticText(panel, label="Browse by Location Type")
+        self.title_label.SetFont(wx.Font(12, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
+        vbox.Add(self.title_label, 0, wx.ALL, 10)
         
-        # US States Tab
-        us_panel = wx.Panel(self.notebook)
-        us_sizer = wx.BoxSizer(wx.VERTICAL)
+        # Navigation buttons
+        nav_box = wx.BoxSizer(wx.HORIZONTAL)
+        self.back_btn = wx.Button(panel, label="<- Back")
+        self.back_btn.Enable(False)
+        nav_box.Add(self.back_btn, 0, wx.RIGHT, 5)
+        vbox.Add(nav_box, 0, wx.EXPAND | wx.ALL, 10)
         
-        us_sizer.Add(wx.StaticText(us_panel, label="Select a U.S. State:"), 0, wx.ALL, 10)
-        self.state_choice = wx.Choice(us_panel)
-        if us_cities_cache:
-            states = sorted(us_cities_cache.keys())
-            self.state_choice.Append("-- Select a State --")
-            for state in states:
-                self.state_choice.Append(state)
-            self.state_choice.SetSelection(0)
-        us_sizer.Add(self.state_choice, 0, wx.EXPAND | wx.ALL, 10)
+        # Main list (for navigation items, states/countries, or cities)
+        vbox.Add(wx.StaticText(panel, label="Select an item:"), 0, wx.LEFT | wx.RIGHT, 10)
+        self.main_list = wx.ListBox(panel, style=wx.LB_SINGLE)
+        vbox.Add(self.main_list, 1, wx.EXPAND | wx.ALL, 10)
         
-        self.load_state_btn = wx.Button(us_panel, label="Load Cities")
-        us_sizer.Add(self.load_state_btn, 0, wx.ALIGN_CENTER | wx.ALL, 10)
-        us_panel.SetSizer(us_sizer)
-        
-        # International Tab
-        intl_panel = wx.Panel(self.notebook)
-        intl_sizer = wx.BoxSizer(wx.VERTICAL)
-        
-        intl_sizer.Add(wx.StaticText(intl_panel, label="Select a Country:"), 0, wx.ALL, 10)
-        self.country_choice = wx.Choice(intl_panel)
-        if intl_cities_cache:
-            countries = sorted(intl_cities_cache.keys())
-            self.country_choice.Append("-- Select a Country --")
-            for country in countries:
-                self.country_choice.Append(country)
-            self.country_choice.SetSelection(0)
-        intl_sizer.Add(self.country_choice, 0, wx.EXPAND | wx.ALL, 10)
-        
-        self.load_country_btn = wx.Button(intl_panel, label="Load Cities")
-        intl_sizer.Add(self.load_country_btn, 0, wx.ALIGN_CENTER | wx.ALL, 10)
-        intl_panel.SetSizer(intl_sizer)
-        
-        self.notebook.AddPage(us_panel, "U.S. States")
-        self.notebook.AddPage(intl_panel, "International")
-        vbox.Add(self.notebook, 0, wx.EXPAND | wx.ALL, 10)
-        
-        # Cities list with checkboxes
-        vbox.Add(wx.StaticText(panel, label="Select cities to add (check multiple cities):"), 0, wx.ALL, 10)
-        self.cities_list = wx.CheckListBox(panel)
-        vbox.Add(self.cities_list, 1, wx.EXPAND | wx.ALL, 10)
-        
-        # Selection controls
-        sel_box = wx.BoxSizer(wx.HORIZONTAL)
-        self.select_all_btn = wx.Button(panel, label="Select All")
-        self.deselect_all_btn = wx.Button(panel, label="Deselect All")
-        sel_box.Add(self.select_all_btn, 0, wx.RIGHT, 5)
-        sel_box.Add(self.deselect_all_btn, 0)
-        vbox.Add(sel_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
+        # Action buttons (context-sensitive)
+        action_box = wx.BoxSizer(wx.HORIZONTAL)
+        self.select_btn = wx.Button(panel, label="Select")
+        self.add_btn = wx.Button(panel, label="Add to My Cities")
+        self.add_btn.Enable(False)
+        action_box.Add(self.select_btn, 0, wx.RIGHT, 5)
+        action_box.Add(self.add_btn, 0)
+        vbox.Add(action_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
         
         # Dialog buttons
         btns = wx.StdDialogButtonSizer()
-        add_btn = wx.Button(panel, wx.ID_OK, "Add Selected Cities")
+        done_btn = wx.Button(panel, wx.ID_OK, "Done")
         cancel_btn = wx.Button(panel, wx.ID_CANCEL)
-        btns.AddButton(add_btn)
+        btns.AddButton(done_btn)
         btns.AddButton(cancel_btn)
         btns.Realize()
         vbox.Add(btns, 0, wx.ALIGN_CENTER | wx.ALL, 10)
@@ -241,80 +222,164 @@ class LocationBrowserDialog(wx.Dialog):
         panel.SetSizer(vbox)
         
         # Bind events
-        self.Bind(wx.EVT_BUTTON, self.on_load_state, self.load_state_btn)
-        self.Bind(wx.EVT_BUTTON, self.on_load_country, self.load_country_btn)
-        self.Bind(wx.EVT_BUTTON, self.on_select_all, self.select_all_btn)
-        self.Bind(wx.EVT_BUTTON, self.on_deselect_all, self.deselect_all_btn)
-        self.Bind(wx.EVT_BUTTON, self.on_add_cities, id=wx.ID_OK)
+        self.Bind(wx.EVT_BUTTON, self.on_back, self.back_btn)
+        self.Bind(wx.EVT_BUTTON, self.on_select, self.select_btn)
+        self.Bind(wx.EVT_BUTTON, self.on_add_city, self.add_btn)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.on_list_dclick, self.main_list)
+        self.Bind(wx.EVT_LISTBOX, self.on_list_select, self.main_list)
+        
+        # Initialize with root level
+        self.show_root_level()
     
-    def on_load_state(self, event):
-        sel = self.state_choice.GetSelection()
-        if sel == 0 or sel == wx.NOT_FOUND:
-            wx.MessageBox("Please select a state", "No Selection", wx.OK | wx.ICON_WARNING)
+    def show_root_level(self):
+        """Show the root level with U.S. States and International options"""
+        self.nav_level = 'root'
+        self.current_location = None
+        self.current_type = None
+        
+        self.title_label.SetLabel("Browse by Location Type")
+        self.back_btn.Enable(False)
+        self.add_btn.Enable(False)
+        
+        self.main_list.Clear()
+        self.main_list.Append("U.S. States")
+        self.main_list.Append("International")
+        self.main_list.SetSelection(0)
+    
+    def show_states_list(self):
+        """Show list of U.S. states"""
+        self.nav_level = 'states'
+        self.current_type = 'us'
+        
+        self.title_label.SetLabel("Select a U.S. State")
+        self.back_btn.Enable(True)
+        self.add_btn.Enable(False)
+        
+        self.main_list.Clear()
+        if self.us_cities_cache:
+            states = sorted(self.us_cities_cache.keys())
+            for state in states:
+                self.main_list.Append(state)
+            if self.main_list.GetCount() > 0:
+                self.main_list.SetSelection(0)
+    
+    def show_countries_list(self):
+        """Show list of international countries"""
+        self.nav_level = 'countries'
+        self.current_type = 'intl'
+        
+        self.title_label.SetLabel("Select a Country")
+        self.back_btn.Enable(True)
+        self.add_btn.Enable(False)
+        
+        self.main_list.Clear()
+        if self.intl_cities_cache:
+            countries = sorted(self.intl_cities_cache.keys())
+            for country in countries:
+                self.main_list.Append(country)
+            if self.main_list.GetCount() > 0:
+                self.main_list.SetSelection(0)
+    
+    def show_cities_list(self, location_name):
+        """Show list of cities for the selected state or country"""
+        self.nav_level = 'cities'
+        self.current_location = location_name
+        
+        self.title_label.SetLabel(f"Cities in {location_name}")
+        self.back_btn.Enable(True)
+        
+        self.main_list.Clear()
+        
+        # Load cities based on type
+        cities = []
+        if self.current_type == 'us' and location_name in self.us_cities_cache:
+            cities = self.us_cities_cache[location_name]
+        elif self.current_type == 'intl' and location_name in self.intl_cities_cache:
+            cities = self.intl_cities_cache[location_name]
+        
+        # Populate list
+        for city_data in cities:
+            # Build display name
+            parts = [city_data['name']]
+            if city_data.get('state'):
+                parts.append(city_data['state'])
+            parts.append(city_data['country'])
+            display = ", ".join(parts)
+            
+            self.main_list.Append(display)
+            # Store city data as client data
+            self.main_list.SetClientData(self.main_list.GetCount() - 1, city_data)
+        
+        if self.main_list.GetCount() > 0:
+            self.main_list.SetSelection(0)
+            self.add_btn.Enable(True)
+        else:
+            self.add_btn.Enable(False)
+    
+    def on_back(self, event):
+        """Navigate back to previous level"""
+        if self.nav_level == 'cities':
+            # Go back to states or countries list
+            if self.current_type == 'us':
+                self.show_states_list()
+            else:
+                self.show_countries_list()
+        elif self.nav_level in ('states', 'countries'):
+            # Go back to root
+            self.show_root_level()
+    
+    def on_select(self, event):
+        """Handle select button - navigate deeper or add city"""
+        sel = self.main_list.GetSelection()
+        if sel == wx.NOT_FOUND:
             return
         
-        state_name = self.state_choice.GetString(sel)
-        if state_name in self.us_cities_cache:
-            self.cities_list.Clear()
-            cities = self.us_cities_cache[state_name]
-            for city_data in cities:
-                display = f"{city_data['name']}, {city_data['state']}, {city_data['country']}"
-                self.cities_list.Append(display)
-                self.cities_list.SetClientData(self.cities_list.GetCount() - 1, 
-                                               (city_data['name'], city_data['lat'], city_data['lon'], 
-                                                city_data['state'], city_data['country']))
+        if self.nav_level == 'root':
+            # Navigate to states or countries
+            selection = self.main_list.GetString(sel)
+            if selection == "U.S. States":
+                self.show_states_list()
+            elif selection == "International":
+                self.show_countries_list()
+        elif self.nav_level in ('states', 'countries'):
+            # Navigate to cities for selected location
+            location_name = self.main_list.GetString(sel)
+            self.show_cities_list(location_name)
+        elif self.nav_level == 'cities':
+            # Add city is handled by the Add button
+            self.on_add_city(event)
     
-    def on_load_country(self, event):
-        sel = self.country_choice.GetSelection()
-        if sel == 0 or sel == wx.NOT_FOUND:
-            wx.MessageBox("Please select a country", "No Selection", wx.OK | wx.ICON_WARNING)
+    def on_list_dclick(self, event):
+        """Handle double-click as select"""
+        self.on_select(event)
+    
+    def on_list_select(self, event):
+        """Handle list selection change"""
+        # Enable/disable Add button based on context
+        if self.nav_level == 'cities':
+            self.add_btn.Enable(self.main_list.GetSelection() != wx.NOT_FOUND)
+        else:
+            self.add_btn.Enable(False)
+    
+    def on_add_city(self, event):
+        """Add selected city to the list"""
+        if self.nav_level != 'cities':
             return
         
-        country_name = self.country_choice.GetString(sel)
-        if country_name in self.intl_cities_cache:
-            self.cities_list.Clear()
-            cities = self.intl_cities_cache[country_name]
-            for city_data in cities:
-                # Build clean display name
-                parts = [city_data['name']]
-                if city_data.get('state'):
-                    parts.append(city_data['state'])
-                parts.append(country_name)
-                display = ", ".join(parts)
-                
-                self.cities_list.Append(display)
-                self.cities_list.SetClientData(self.cities_list.GetCount() - 1, 
-                                               (city_data['name'], city_data['lat'], city_data['lon'],
-                                                city_data.get('state', ''), country_name))
-    
-    def on_select_all(self, event):
-        for i in range(self.cities_list.GetCount()):
-            self.cities_list.Check(i, True)
-    
-    def on_deselect_all(self, event):
-        for i in range(self.cities_list.GetCount()):
-            self.cities_list.Check(i, False)
-    
-    def on_add_cities(self, event):
-        self.selected_cities = []
-        for i in range(self.cities_list.GetCount()):
-            if self.cities_list.IsChecked(i):
-                city_data = self.cities_list.GetClientData(i)
-                name, lat, lon, state, country = city_data
-                # Create full display name
-                parts = [name]
-                if state:
-                    parts.append(state)
-                parts.append(country)
-                display_name = ", ".join(parts)
-                self.selected_cities.append((display_name, lat, lon))
-        
-        if not self.selected_cities:
-            wx.MessageBox("Please select at least one city to add", "No Cities Selected", 
-                         wx.OK | wx.ICON_WARNING)
+        sel = self.main_list.GetSelection()
+        if sel == wx.NOT_FOUND:
             return
         
-        self.EndModal(wx.ID_OK)
+        city_data = self.main_list.GetClientData(sel)
+        display_name = self.main_list.GetString(sel)
+        
+        # Add to selected cities
+        city_tuple = (display_name, city_data['lat'], city_data['lon'])
+        if city_tuple not in self.selected_cities:
+            self.selected_cities.append(city_tuple)
+            # Visual feedback
+            wx.MessageBox(f"Added {display_name} to your selection.\n\nTotal cities selected: {len(self.selected_cities)}", 
+                         "City Added", wx.OK | wx.ICON_INFORMATION)
     
     def get_selected_cities(self):
         return self.selected_cities
@@ -524,6 +589,10 @@ class AccessibleWeatherApp(wx.Frame):
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.book = wx.Simplebook(self.panel)
         
+        # Browse navigation state
+        self.browse_stack = []  # Navigation stack for browse view
+        self.browse_cities_data = {}  # Store city data for browse view
+        
         # Main View
         self.main_view = wx.Panel(self.book)
         mv_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -587,8 +656,37 @@ class AccessibleWeatherApp(wx.Frame):
         fv_sizer.Add(self.weather_display, 1, wx.EXPAND | wx.ALL, 10)
         self.full_view.SetSizer(fv_sizer)
         
+        # Browse View (Gopher-style navigation)
+        self.browse_view = wx.Panel(self.book)
+        bv_sizer = wx.BoxSizer(wx.VERTICAL)
+        
+        browse_head_row = wx.BoxSizer(wx.HORIZONTAL)
+        self.btn_browse_back = wx.Button(self.browse_view, label="<- Back")
+        self.lbl_browse_title = wx.StaticText(self.browse_view, label="Browse Locations")
+        self.lbl_browse_title.SetFont(wx.Font(14, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
+        browse_head_row.Add(self.btn_browse_back, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 10)
+        browse_head_row.Add(self.lbl_browse_title, 1, wx.ALIGN_CENTER_VERTICAL)
+        bv_sizer.Add(browse_head_row, 0, wx.EXPAND | wx.ALL, 10)
+        
+        # Browse list
+        sb_browse = wx.StaticBox(self.browse_view, label="Locations")
+        browse_list_box = wx.StaticBoxSizer(sb_browse, wx.VERTICAL)
+        self.browse_list = wx.ListBox(self.browse_view, style=wx.LB_SINGLE | wx.WANTS_CHARS)
+        browse_list_box.Add(self.browse_list, 1, wx.EXPAND | wx.ALL, 5)
+        
+        # Browse action buttons
+        browse_btn_row = wx.BoxSizer(wx.HORIZONTAL)
+        self.btn_browse_add = wx.Button(self.browse_view, label="Add to My Cities")
+        self.btn_browse_add.Enable(False)
+        browse_btn_row.Add(self.btn_browse_add, 0, wx.RIGHT, 5)
+        browse_list_box.Add(browse_btn_row, 0, wx.ALIGN_CENTER | wx.ALL, 5)
+        bv_sizer.Add(browse_list_box, 1, wx.EXPAND | wx.ALL, 10)
+        
+        self.browse_view.SetSizer(bv_sizer)
+        
         self.book.AddPage(self.main_view, "Main")
         self.book.AddPage(self.full_view, "Full")
+        self.book.AddPage(self.browse_view, "Browse")
         self.sizer.Add(self.book, 1, wx.EXPAND)
         self.panel.SetSizer(self.sizer)
         
@@ -611,6 +709,13 @@ class AccessibleWeatherApp(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.on_config, self.btn_config)
         self.Bind(wx.EVT_BUTTON, self.on_config, self.btn_config_main)
         self.city_list.Bind(wx.EVT_KEY_DOWN, self.on_list_key)
+        
+        # Browse view bindings
+        self.Bind(wx.EVT_BUTTON, self.on_browse_back, self.btn_browse_back)
+        self.Bind(wx.EVT_BUTTON, self.on_browse_add_city, self.btn_browse_add)
+        self.browse_list.Bind(wx.EVT_LISTBOX_DCLICK, self.on_browse_select)
+        self.browse_list.Bind(wx.EVT_KEY_DOWN, self.on_browse_key)
+        self.Bind(wx.EVT_LISTBOX, self.on_browse_list_select, self.browse_list)
         
         self.update_city_list()
 
@@ -662,7 +767,16 @@ class AccessibleWeatherApp(wx.Frame):
         self.SetAcceleratorTable(wx.AcceleratorTable(accel))
 
     def on_escape(self, event):
-        if self.book.GetSelection() == 1: self.on_back(event)
+        """Handle Escape key for hierarchical navigation back"""
+        current_page = self.book.GetSelection()
+        
+        if current_page == 1:
+            # Full weather view - go back to main
+            self.on_back(event)
+        elif current_page == 2:
+            # Browse view - navigate back through hierarchy
+            self.on_browse_back(event)
+        # If on main view (0), Escape does nothing (already at root)
     
     def on_focus_new_city(self, event):
         """Focus the new city input field (Alt+N)"""
@@ -843,7 +957,7 @@ class AccessibleWeatherApp(wx.Frame):
         self.update_buttons()
     
     def on_browse_cities(self, event):
-        """Open dialog to browse cities by state/country"""
+        """Navigate to browse view - Gopher-style hierarchical navigation"""
         if not self.us_cities_cache and not self.intl_cities_cache:
             wx.MessageBox(
                 "City data files not found. Please ensure us-cities-cached.json and "
@@ -853,33 +967,194 @@ class AccessibleWeatherApp(wx.Frame):
             )
             return
         
-        dlg = LocationBrowserDialog(self, self.us_cities_cache, self.intl_cities_cache)
-        if dlg.ShowModal() == wx.ID_OK:
-            cities_to_add = dlg.get_selected_cities()
-            added_count = 0
-            skipped_count = 0
+        # Initialize browse navigation at root level
+        self.browse_stack = []
+        self.browse_cities_data = {}
+        self.show_browse_root()
+        self.book.SetSelection(2)  # Switch to browse view
+        self.browse_list.SetFocus()
+    
+    def show_browse_root(self):
+        """Show root level of browse navigation"""
+        self.lbl_browse_title.SetLabel("Browse by Location Type")
+        self.btn_browse_back.Enable(False)
+        self.btn_browse_add.Enable(False)
+        
+        self.browse_list.Clear()
+        self.browse_list.Append("U.S. States")
+        self.browse_list.Append("International")
+        self.browse_list.SetSelection(0)
+    
+    def show_browse_states(self):
+        """Show list of U.S. states"""
+        self.lbl_browse_title.SetLabel("U.S. States")
+        self.btn_browse_back.Enable(True)
+        self.btn_browse_add.Enable(False)
+        
+        self.browse_list.Clear()
+        if self.us_cities_cache:
+            states = sorted(self.us_cities_cache.keys())
+            for state in states:
+                self.browse_list.Append(state)
+            if self.browse_list.GetCount() > 0:
+                self.browse_list.SetSelection(0)
+    
+    def show_browse_countries(self):
+        """Show list of international countries"""
+        self.lbl_browse_title.SetLabel("International Countries")
+        self.btn_browse_back.Enable(True)
+        self.btn_browse_add.Enable(False)
+        
+        self.browse_list.Clear()
+        if self.intl_cities_cache:
+            countries = sorted(self.intl_cities_cache.keys())
+            for country in countries:
+                self.browse_list.Append(country)
+            if self.browse_list.GetCount() > 0:
+                self.browse_list.SetSelection(0)
+    
+    def show_browse_cities(self, location_name, location_type):
+        """Show cities for selected state/country with weather data"""
+        self.lbl_browse_title.SetLabel(f"Cities in {location_name}")
+        self.btn_browse_back.Enable(True)
+        self.btn_browse_add.Enable(True)
+        
+        self.browse_list.Clear()
+        self.browse_cities_data = {}
+        
+        # Get cities based on type
+        cities = []
+        if location_type == 'us' and location_name in self.us_cities_cache:
+            cities = self.us_cities_cache[location_name]
+        elif location_type == 'intl' and location_name in self.intl_cities_cache:
+            cities = self.intl_cities_cache[location_name]
+        
+        # Sort cities alphabetically by name (handles international characters properly)
+        cities = sorted(cities, key=lambda x: x['name'].lower())
+        
+        # Add cities to list with "Loading..." status
+        for idx, city_data in enumerate(cities):
+            parts = [city_data['name']]
+            if city_data.get('state'):
+                parts.append(city_data['state'])
+            parts.append(city_data['country'])
+            display_name = ", ".join(parts)
             
-            for city_name, lat, lon in cities_to_add:
-                if city_name not in self.city_data:
-                    self.city_data[city_name] = [lat, lon]
-                    added_count += 1
-                else:
-                    skipped_count += 1
+            self.browse_list.Append(f"{display_name} - Loading...")
+            self.browse_cities_data[display_name] = {
+                'lat': city_data['lat'],
+                'lon': city_data['lon'],
+                'name': city_data['name']
+            }
             
-            if added_count > 0:
-                self.save_city_data()
-                self.update_city_list()
-                
-                msg = f"Added {added_count} cit{'y' if added_count == 1 else 'ies'}"
-                if skipped_count > 0:
-                    msg += f" ({skipped_count} already in list)"
-                wx.MessageBox(msg, "Cities Added", wx.OK | wx.ICON_INFORMATION)
-            elif skipped_count > 0:
-                wx.MessageBox(
-                    f"All {skipped_count} selected cit{'y was' if skipped_count == 1 else 'ies were'} already in your list",
-                    "No New Cities",
-                    wx.OK | wx.ICON_INFORMATION
-                )
+            # Start loading weather immediately (all in parallel like web app)
+            WeatherFetchThread(self, display_name, city_data['lat'], city_data['lon'], "basic")
+        
+        if self.browse_list.GetCount() > 0:
+            self.browse_list.SetSelection(0)
+    
+    def on_browse_select(self, event):
+        """Handle double-click or Enter key in browse list"""
+        sel = self.browse_list.GetSelection()
+        if sel == wx.NOT_FOUND:
+            return
+        
+        selection = self.browse_list.GetString(sel)
+        
+        # Determine what level we're at based on navigation stack
+        if len(self.browse_stack) == 0:
+            # Root level - navigate to states or countries
+            if selection == "U.S. States":
+                self.browse_stack.append(('root', selection))
+                self.show_browse_states()
+            elif selection == "International":
+                self.browse_stack.append(('root', selection))
+                self.show_browse_countries()
+        elif len(self.browse_stack) == 1:
+            # State/Country list - navigate to cities
+            location_type = 'us' if self.browse_stack[0][1] == "U.S. States" else 'intl'
+            self.browse_stack.append((location_type, selection))
+            self.show_browse_cities(selection, location_type)
+        elif len(self.browse_stack) == 2:
+            # City level - show full weather
+            city_name = selection.split(" - ")[0]
+            if city_name in self.browse_cities_data:
+                city_info = self.browse_cities_data[city_name]
+                self.current_full_city = (city_name, city_info['lat'], city_info['lon'])
+                self.lbl_full_title.SetLabel(f"Full Weather - {city_name}")
+                self.weather_display.Clear()
+                self.weather_display.Append("Loading...")
+                self.book.SetSelection(1)  # Switch to full weather view
+                self.weather_display.SetFocus()
+                WeatherFetchThread(self, city_name, city_info['lat'], city_info['lon'], "full")
+    
+    def on_browse_key(self, event):
+        """Handle keyboard navigation in browse list"""
+        keycode = event.GetKeyCode()
+        if keycode == wx.WXK_RETURN or keycode == wx.WXK_NUMPAD_ENTER:
+            self.on_browse_select(event)
+        elif keycode == wx.WXK_TAB:
+            # Manually handle Tab navigation
+            flags = wx.NavigationKeyEvent.IsForward
+            if event.ShiftDown():
+                flags = wx.NavigationKeyEvent.IsBackward
+            self.browse_list.Navigate(flags)
+        else:
+            event.Skip()
+    
+    def on_browse_back(self, event):
+        """Navigate back in browse hierarchy"""
+        if len(self.browse_stack) == 0:
+            # Already at root, go back to main view
+            self.book.SetSelection(0)
+            self.city_list.SetFocus()
+        elif len(self.browse_stack) == 1:
+            # Go back to root
+            self.browse_stack.pop()
+            self.show_browse_root()
+        elif len(self.browse_stack) == 2:
+            # Go back to states or countries list
+            self.browse_stack.pop()
+            if self.browse_stack[0][1] == "U.S. States":
+                self.show_browse_states()
+            else:
+                self.show_browse_countries()
+    
+    def on_browse_list_select(self, event):
+        """Handle browse list selection change"""
+        # Enable Add button only if we're at city level
+        at_city_level = len(self.browse_stack) == 2
+        self.btn_browse_add.Enable(at_city_level and self.browse_list.GetSelection() != wx.NOT_FOUND)
+    
+    def on_browse_add_city(self, event):
+        """Add selected city from browse view to main city list"""
+        if len(self.browse_stack) != 2:
+            return
+        
+        sel = self.browse_list.GetSelection()
+        if sel == wx.NOT_FOUND:
+            return
+        
+        # Extract city name (remove " - temperature..." suffix)
+        full_text = self.browse_list.GetString(sel)
+        city_name = full_text.split(" - ")[0]
+        
+        if city_name in self.browse_cities_data:
+            city_info = self.browse_cities_data[city_name]
+            
+            # Check if already in list
+            if city_name in self.city_data:
+                wx.MessageBox(f"{city_name} is already in your city list", 
+                             "Already Added", wx.OK | wx.ICON_INFORMATION)
+                return
+            
+            # Add to city data
+            self.city_data[city_name] = [city_info['lat'], city_info['lon']]
+            self.save_city_data()
+            
+            # Provide feedback
+            wx.MessageBox(f"Added {city_name} to your cities", 
+                         "City Added", wx.OK | wx.ICON_INFORMATION)
         
         dlg.Destroy()
 
@@ -936,8 +1211,16 @@ class AccessibleWeatherApp(wx.Frame):
         WeatherFetchThread(self, city, lat, lon, "full")
 
     def on_back(self, event):
-        self.book.SetSelection(0)
-        self.city_list.SetFocus()
+        """Navigate back from full weather view"""
+        # Check if we came from browse view
+        if len(self.browse_stack) == 2:
+            # Return to browse cities view
+            self.book.SetSelection(2)
+            self.browse_list.SetFocus()
+        else:
+            # Return to main city list
+            self.book.SetSelection(0)
+            self.city_list.SetFocus()
 
     def on_config(self, event):
         dlg = WeatherConfigDialog(self, self.weather_config)
@@ -1072,9 +1355,16 @@ class AccessibleWeatherApp(wx.Frame):
             temp_display = self.format_temperature_short(temp_c)
             new_text = f"{city} - {temp_display}{cloud_text}{precip_text}{daily_temps}"
             
+            # Update main city list
             for i in range(self.city_list.GetCount()):
                 if self.city_list.GetString(i).startswith(city + " - "):
                     self.city_list.SetString(i, new_text)
+                    break
+            
+            # Update browse list if active
+            for i in range(self.browse_list.GetCount()):
+                if self.browse_list.GetString(i).startswith(city + " - "):
+                    self.browse_list.SetString(i, new_text)
                     break
 
         # Update full view if active
