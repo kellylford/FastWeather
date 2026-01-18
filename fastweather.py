@@ -688,9 +688,27 @@ class AccessibleWeatherApp(wx.Frame):
         
         self.browse_view.SetSizer(bv_sizer)
         
+        # Help View
+        self.help_view = wx.Panel(self.book)
+        help_sizer = wx.BoxSizer(wx.VERTICAL)
+        
+        help_head_row = wx.BoxSizer(wx.HORIZONTAL)
+        self.btn_help_back = wx.Button(self.help_view, label="<- Back")
+        help_title = wx.StaticText(self.help_view, label="Keyboard Shortcuts")
+        help_title.SetFont(wx.Font(14, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
+        help_head_row.Add(self.btn_help_back, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 10)
+        help_head_row.Add(help_title, 1, wx.ALIGN_CENTER_VERTICAL)
+        help_sizer.Add(help_head_row, 0, wx.EXPAND | wx.ALL, 10)
+        
+        self.help_display = wx.ListBox(self.help_view, style=wx.LB_SINGLE)
+        self.help_display.SetFont(wx.Font(10, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+        help_sizer.Add(self.help_display, 1, wx.EXPAND | wx.ALL, 10)
+        self.help_view.SetSizer(help_sizer)
+        
         self.book.AddPage(self.main_view, "Main")
         self.book.AddPage(self.full_view, "Full")
         self.book.AddPage(self.browse_view, "Browse")
+        self.book.AddPage(self.help_view, "Help")
         self.sizer.Add(self.book, 1, wx.EXPAND)
         self.panel.SetSizer(self.sizer)
         
@@ -721,6 +739,9 @@ class AccessibleWeatherApp(wx.Frame):
         self.browse_list.Bind(wx.EVT_KEY_DOWN, self.on_browse_key)
         self.Bind(wx.EVT_LISTBOX, self.on_browse_list_select, self.browse_list)
         
+        # Help view bindings
+        self.Bind(wx.EVT_BUTTON, self.on_help_back, self.btn_help_back)
+        
         self.update_city_list()
 
     def on_list_key(self, event):
@@ -746,6 +767,9 @@ class AccessibleWeatherApp(wx.Frame):
         self.ID_FULL_WEATHER = wx.NewIdRef()
         self.ID_NEW_CITY = wx.NewIdRef()
         self.ID_CONFIGURE = wx.NewIdRef()
+        self.ID_BROWSE_CITIES = wx.NewIdRef()
+        self.ID_BROWSE_ADD = wx.NewIdRef()
+        self.ID_HELP = wx.NewIdRef()
         
         # Bind IDs to methods
         self.Bind(wx.EVT_MENU, self.on_refresh, id=self.ID_REFRESH)
@@ -756,6 +780,9 @@ class AccessibleWeatherApp(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_full_weather, id=self.ID_FULL_WEATHER)
         self.Bind(wx.EVT_MENU, self.on_focus_new_city, id=self.ID_NEW_CITY)
         self.Bind(wx.EVT_MENU, self.on_config, id=self.ID_CONFIGURE)
+        self.Bind(wx.EVT_MENU, self.on_browse_cities, id=self.ID_BROWSE_CITIES)
+        self.Bind(wx.EVT_MENU, self.on_browse_add_city, id=self.ID_BROWSE_ADD)
+        self.Bind(wx.EVT_MENU, self.on_show_help, id=self.ID_HELP)
         
         accel = [
             (wx.ACCEL_NORMAL, wx.WXK_F5, self.ID_REFRESH),
@@ -766,7 +793,11 @@ class AccessibleWeatherApp(wx.Frame):
             (wx.ACCEL_NORMAL, wx.WXK_ESCAPE, self.ID_ESCAPE),
             (wx.ACCEL_ALT, ord('F'), self.ID_FULL_WEATHER),
             (wx.ACCEL_ALT, ord('N'), self.ID_NEW_CITY),
-            (wx.ACCEL_ALT, ord('C'), self.ID_CONFIGURE)
+            (wx.ACCEL_ALT, ord('C'), self.ID_CONFIGURE),
+            (wx.ACCEL_ALT, ord('W'), self.ID_BROWSE_CITIES),
+            (wx.ACCEL_ALT, ord('A'), self.ID_BROWSE_ADD),
+            (wx.ACCEL_NORMAL, wx.WXK_F1, self.ID_HELP),
+            (wx.ACCEL_SHIFT, ord('?'), self.ID_HELP)
         ]
         self.SetAcceleratorTable(wx.AcceleratorTable(accel))
 
@@ -780,12 +811,72 @@ class AccessibleWeatherApp(wx.Frame):
         elif current_page == 2:
             # Browse view - navigate back through hierarchy
             self.on_browse_back(event)
+        elif current_page == 3:
+            # Help view - go back to main
+            self.on_help_back(event)
         # If on main view (0), Escape does nothing (already at root)
     
     def on_focus_new_city(self, event):
         """Focus the new city input field (Alt+N)"""
         if self.book.GetSelection() == 0:  # Only on main view
             self.city_input.SetFocus()
+    
+    def on_show_help(self, event):
+        """Show keyboard shortcuts help"""
+        self.help_display.Clear()
+        
+        shortcuts = [
+            "KEYBOARD SHORTCUTS",
+            "="*60,
+            "",
+            "Navigation:",
+            "  F1 or ?              Show this help",
+            "  Escape               Go back / Close dialog",
+            "  Tab                  Move to next control",
+            "  Shift+Tab            Move to previous control",
+            "  Up/Down Arrow        Navigate lists",
+            "  Enter                Activate/Select item",
+            "",
+            "City Management:",
+            "  Alt+N                Focus new city input",
+            "  Alt+W                Browse cities by state/country",
+            "  Delete               Remove selected city",
+            "  Alt+U                Move city up in list",
+            "  Alt+D                Move city down in list",
+            "",
+            "Weather:",
+            "  F5 or Ctrl+R         Refresh weather for selected city",
+            "  Alt+F                Show full weather details",
+            "  Alt+C                Configure weather display",
+            "",
+            "Browse Navigation:",
+            "  Enter                Navigate into selection",
+            "  Escape               Go back one level",
+            "  Double-click         Navigate or add city",
+            "  Alt+A                Add selected city to your list",
+            "",
+            "Accessibility:",
+            "  All controls are fully accessible with screen readers",
+            "  Keyboard navigation available throughout",
+            "  Focus indicators show current position",
+            "",
+            "="*60,
+            "Press Escape to close this help"
+        ]
+        
+        for line in shortcuts:
+            self.help_display.Append(line)
+        
+        if self.help_display.GetCount() > 0:
+            self.help_display.SetSelection(0)
+        
+        self.book.SetSelection(3)  # Switch to help view
+        self.help_display.SetFocus()
+    
+    def on_help_back(self, event):
+        """Go back from help view to main view"""
+        self.book.SetSelection(0)
+        self.city_list.SetFocus()
 
     def set_initial_focus(self):
         if self.city_list.GetCount() > 0:
