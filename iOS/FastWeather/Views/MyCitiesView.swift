@@ -12,70 +12,30 @@ struct MyCitiesView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @State private var showingSettings = false
     @State private var showingAddCity = false
-    @State private var quickSearchText = ""
-    @FocusState private var isSearchFieldFocused: Bool
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                // Quick search field at top
-                HStack(spacing: 12) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.secondary)
-                        TextField("Search for a city or zip code", text: $quickSearchText)
-                            .textFieldStyle(.plain)
-                            .autocapitalization(.none)
-                            .disableAutocorrection(true)
-                            .focused($isSearchFieldFocused)
-                            .accessibilityLabel("Quick city search")
-                            .accessibilityHint("Enter city name or zip code to search")
-                            .accessibilityValue(quickSearchText.isEmpty ? "Empty" : quickSearchText)
-                        
-                        if !quickSearchText.isEmpty {
-                            Button(action: {
-                                quickSearchText = ""
-                            }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.secondary)
-                            }
-                            .accessibilityLabel("Clear search")
-                        }
-                    }
-                    .padding(8)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(10)
-                    
-                    Button(action: {
-                        showingAddCity = true
-                    }) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title2)
-                    }
-                    .accessibilityLabel("Add City")
-                    .accessibilityHint("Opens advanced search to add a new city")
-                }
-                .padding()
-                .background(Color(.systemBackground))
-                .onSubmit {
-                    if !quickSearchText.isEmpty {
-                        showingAddCity = true
-                    }
-                }
-                
-                Divider()
-                
-                Group {
-                    if weatherService.savedCities.isEmpty {
-                        EmptyStateView()
-                    } else {
-                        ListView()
-                    }
+            Group {
+                if weatherService.savedCities.isEmpty {
+                    EmptyStateView()
+                } else {
+                    ListView()
                 }
             }
             .navigationTitle("Fast Weather")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        showingAddCity = true
+                    }) {
+                        Label("Add City", systemImage: "plus")
+                    }
+                    .accessibilityLabel("Add City")
+                    .accessibilityHint("Opens search to add a new city")
+                }
+            }
             .sheet(isPresented: $showingAddCity) {
-                AddCitySearchView(initialSearchText: quickSearchText)
+                AddCitySearchView(initialSearchText: "")
             }
             .refreshable {
                 await weatherService.refreshAllWeather()

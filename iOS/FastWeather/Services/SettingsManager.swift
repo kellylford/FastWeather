@@ -33,3 +33,71 @@ class SettingsManager: ObservableObject {
         saveSettings()
     }
 }
+
+// MARK: - DateParser
+/// Centralized date/time parsing for Open-Meteo API responses
+/// Open-Meteo uses the format "2026-01-18T06:50" (no timezone, no seconds)
+struct DateParser {
+    /// Parses Open-Meteo date/time strings to Date objects
+    /// - Parameter isoString: Date/time string from Open-Meteo API (e.g., "2026-01-18T06:50")
+    /// - Returns: Parsed Date object, or nil if parsing fails
+    static func parse(_ isoString: String) -> Date? {
+        // Primary: Open-Meteo's specific format "yyyy-MM-dd'T'HH:mm"
+        let primaryFormatter = DateFormatter()
+        primaryFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm"
+        
+        if let date = primaryFormatter.date(from: isoString) {
+            return date
+        }
+        
+        // Fallback: Try ISO8601DateFormatter with various options
+        let iso8601Formatter = ISO8601DateFormatter()
+        iso8601Formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        var parsedDate = iso8601Formatter.date(from: isoString)
+        
+        if parsedDate == nil {
+            iso8601Formatter.formatOptions = [.withInternetDateTime]
+            parsedDate = iso8601Formatter.date(from: isoString)
+        }
+        
+        if parsedDate == nil {
+            iso8601Formatter.formatOptions = [.withFullDate, .withTime, .withColonSeparatorInTime]
+            parsedDate = iso8601Formatter.date(from: isoString)
+        }
+        
+        if parsedDate == nil {
+            print("⚠️ DateParser failed to parse: '\(isoString)'")
+        }
+        
+        return parsedDate
+    }
+}
+
+// MARK: - FormatHelper
+/// Centralized formatting utilities for dates, times, and weather data
+struct FormatHelper {
+    /// Formats an ISO8601 timestamp to 12-hour time format (e.g., "6:50 AM" or "3 PM")
+    /// - Parameter isoString: ISO8601 formatted time string (e.g., "2026-01-18T06:50")
+    /// - Returns: Formatted time string in 12-hour format with AM/PM
+    static func formatTime(_ isoString: String) -> String {
+        guard let date = DateParser.parse(isoString) else {
+            print("⚠️ FormatHelper.formatTime failed to parse: '\(isoString)'")
+            return isoString // Return original if parsing fails
+        }
+        
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateFormat = "h:mm a"
+        return timeFormatter.string(from: date)
+    }
+    
+    /// Formats an ISO8601 timestamp to 12-hour time format, omitting minutes if :00
+    /// - Parameter isoString: ISO8601 formatted time string
+    /// - Returns: Formatted time string (e.g., "3 PM" instead of "3:00 PM")
+    static func formatTimeCompact(_ isoString: String) -> String {
+        let fullTime = formatTime(isoString)
+        if fullTime.contains(":00") {
+            return fullTime.replacingOccurrences(of: ":00", with: "")
+        }
+        return fullTime
+    }
+}

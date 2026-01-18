@@ -213,8 +213,7 @@ struct CityCardView: View {
     }
     
     private func formatTime(_ isoString: String) -> String {
-        let formatter = ISO8601DateFormatter()
-        guard let date = formatter.date(from: isoString) else { return isoString }
+        guard let date = DateParser.parse(isoString) else { return isoString }
         
         let timeFormatter = DateFormatter()
         timeFormatter.timeStyle = .short

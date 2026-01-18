@@ -63,6 +63,10 @@ struct CityLocation: Codable, Hashable {
         return name
     }
     
+    var cacheKey: String {
+        "\(latitude),\(longitude)"
+    }
+    
     func toCity() -> City {
         City(name: name, state: state, country: country, latitude: latitude, longitude: longitude)
     }

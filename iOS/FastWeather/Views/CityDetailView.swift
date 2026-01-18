@@ -22,6 +22,11 @@ struct CityDetailView: View {
                 if let weather = weather {
                     // Main weather display
                     VStack(spacing: 16) {
+                        // Current temperature - read first after city name
+                        Text(formatTemperature(weather.current.temperature2m))
+                            .font(.system(size: 72, weight: .bold))
+                            .accessibilityLabel("Current temperature \(formatTemperature(weather.current.temperature2m))")
+                        
                         // Temperature and condition
                         if let weatherCode = weather.current.weatherCodeEnum {
                             Image(systemName: weatherCode.systemImageName)
@@ -33,10 +38,6 @@ struct CityDetailView: View {
                                 .font(.title2)
                                 .accessibilityLabel("Conditions: \(weatherCode.description)")
                         }
-                        
-                        Text(formatTemperature(weather.current.temperature2m))
-                            .font(.system(size: 72, weight: .bold))
-                            .accessibilityLabel("Temperature \(formatTemperature(weather.current.temperature2m))")
                         
                         Text("Feels like \(formatTemperature(weather.current.apparentTemperature))")
                             .font(.title3)
@@ -111,7 +112,12 @@ struct CityDetailView: View {
                         GroupBox(label: Label("24-Hour Forecast", systemImage: "clock")) {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 16) {
-                                    ForEach(0..<min(24, hourly.time.count), id: \.self) { index in
+                                    // Find the index of the current hour to start from
+                                    let currentHourIndex = findCurrentHourIndex(in: hourly.time)
+                                    let startIndex = currentHourIndex >= 0 ? currentHourIndex : 0
+                                    let endIndex = min(startIndex + 24, hourly.time.count)
+                                    
+                                    ForEach(startIndex..<endIndex, id: \.self) { index in
                                         HourlyForecastCard(
                                             time: hourly.time[index],
                                             temperature: hourly.temperature2m[index],
@@ -227,12 +233,25 @@ struct CityDetailView: View {
     }
     
     private func formatTime(_ isoString: String) -> String {
-        let formatter = ISO8601DateFormatter()
-        guard let date = formatter.date(from: isoString) else { return isoString }
+        FormatHelper.formatTime(isoString)
+    }
+    
+    private func findCurrentHourIndex(in times: [String]) -> Int {
+        let now = Date()
+        let calendar = Calendar.current
+        let currentHour = calendar.component(.hour, from: now)
         
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "h:mm a"
-        return timeFormatter.string(from: date)
+        // Parse each time and find the one matching or after current hour
+        for (index, timeString) in times.enumerated() {
+            if let time = DateParser.parse(timeString) {
+                let hour = calendar.component(.hour, from: time)
+                if hour >= currentHour {
+                    return index
+                }
+            }
+        }
+        
+        return 0 // Fallback to start if not found
     }
 }
 
@@ -261,12 +280,7 @@ struct HourlyForecastCard: View {
     let settingsManager: SettingsManager
     
     private var formattedTime: String {
-        let formatter = ISO8601DateFormatter()
-        guard let date = formatter.date(from: time) else { return "" }
-        
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "h a"
-        return timeFormatter.string(from: date)
+        FormatHelper.formatTimeCompact(time)
     }
     
     private var weatherCodeEnum: WeatherCode? {
@@ -307,8 +321,32 @@ struct HourlyForecastCard: View {
         .background(Color(uiColor: .secondarySystemGroupedBackground))
         .cornerRadius(10)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Hour")
-        .accessibilityValue("\(formattedTime), \(weatherCodeEnum?.description ?? "unknown conditions"), \(formatTemperature(temperature))\(precipitation > 0 ? ", \(formatPrecipitation(precipitation)) precipitation" : "")")
+        .accessibilityLabel(createAccessibilityLabel())
+    }
+    
+    private func createAccessibilityLabel() -> String {
+        // Extract hour for more natural speech
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        
+        var hourDescription = formattedTime
+        if let date = formatter.date(from: time) {
+            let calendar = Calendar.current
+            let hour = calendar.component(.hour, from: date)
+            let minute = calendar.component(.minute, from: date)
+            let ampm = hour < 12 ? "AM" : "PM"
+            let hour12 = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour)
+            hourDescription = minute > 0 ? "\(hour12):\(String(format: "%02d", minute)) \(ampm)" : "\(hour12) \(ampm)"
+        }
+        
+        var label = "\(hourDescription), \(formatTemperature(temperature))"
+        if let weatherCode = weatherCodeEnum {
+            label += ", \(weatherCode.description)"
+        }
+        if precipitation > 0 {
+            label += ", precipitation \(formatPrecipitation(precipitation))"
+        }
+        return label
     }
     
     private func formatTemperature(_ celsius: Double) -> String {
@@ -332,8 +370,7 @@ struct DailyForecastRow: View {
     let settingsManager: SettingsManager
     
     private var dayName: String {
-        let formatter = ISO8601DateFormatter()
-        guard let date = formatter.date(from: sunrise) else { return "" }
+        guard let date = DateParser.parse(sunrise) else { return "" }
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MMM d"
@@ -358,6 +395,18 @@ struct DailyForecastRow: View {
         return nil
     }
     
+    private var accessibilityText: String {
+        var text = "\(dayName)"
+        if let weatherCode = weatherCodeEnum {
+            text += ", \(weatherCode.description)"
+        }
+        text += ", High \(formatTemperature(high)), Low \(formatTemperature(low))"
+        if let precip = precipitation, precip > 0 {
+            text += ", precipitation \(formatPrecipitation(precip))"
+        }
+        return text
+    }
+    
     var body: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
@@ -365,12 +414,14 @@ struct DailyForecastRow: View {
                     .font(.body)
             }
             .frame(width: 140, alignment: .leading)
+            .accessibilityHidden(true)
             
             if let weatherCode = weatherCodeEnum {
                 Image(systemName: weatherCode.systemImageName)
                     .font(.title3)
                     .foregroundColor(.blue)
                     .frame(width: 30)
+                    .accessibilityHidden(true)
             }
             
             Spacer()
@@ -385,6 +436,7 @@ struct DailyForecastRow: View {
                         .foregroundColor(.secondary)
                 }
                 .frame(width: 60)
+                .accessibilityHidden(true)
             }
             
             HStack(spacing: 8) {
@@ -396,11 +448,11 @@ struct DailyForecastRow: View {
                     .font(.body)
                     .fontWeight(.semibold)
             }
+            .accessibilityHidden(true)
         }
         .padding(.vertical, 8)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Day")
-        .accessibilityValue("\(dayName), \(weatherCodeEnum?.description ?? "unknown conditions"), High \(formatTemperature(high)), Low \(formatTemperature(low))\(precipitation != nil && precipitation! > 0 ? ", \(formatPrecipitation(precipitation!)) precipitation" : "")")
+        .accessibilityLabel(accessibilityText)
     }
     
     private func formatTemperature(_ celsius: Double) -> String {
