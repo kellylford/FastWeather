@@ -12,6 +12,8 @@ struct StateCitiesView: View {
     @ObservedObject var cityDataService: CityDataService
     @EnvironmentObject var weatherService: WeatherService
     @State private var searchText = ""
+    @State private var weatherData: [String: WeatherData] = [:]
+    @State private var isLoadingWeather = false
     
     private var cities: [CityLocation] {
         cityDataService.cities(forState: state)
@@ -28,13 +30,32 @@ struct StateCitiesView: View {
         List {
             ForEach(filteredCities, id: \.self) { cityLocation in
                 NavigationLink(destination: CityLocationDetailView(cityLocation: cityLocation)) {
-                    CityLocationRow(cityLocation: cityLocation)
+                    CityLocationRowOptimized(
+                        cityLocation: cityLocation,
+                        weatherData: weatherData[cityLocation.cacheKey]
+                    )
                 }
             }
         }
         .navigationTitle(state)
         .searchable(text: $searchText, prompt: "Search cities in \(state)")
         .accessibilityElement(children: .contain)
+        .task {
+            await loadAllWeather()
+        }
+    }
+    
+    private func loadAllWeather() async {
+        guard weatherData.isEmpty && !isLoadingWeather else { return }
+        isLoadingWeather = true
+        
+        let locations = cities.map { (latitude: $0.latitude, longitude: $0.longitude) }
+        let results = await weatherService.batchFetchWeatherBasic(for: locations)
+        
+        await MainActor.run {
+            weatherData = results
+            isLoadingWeather = false
+        }
     }
 }
 
@@ -43,6 +64,8 @@ struct CountryCitiesView: View {
     @ObservedObject var cityDataService: CityDataService
     @EnvironmentObject var weatherService: WeatherService
     @State private var searchText = ""
+    @State private var weatherData: [String: WeatherData] = [:]
+    @State private var isLoadingWeather = false
     
     private var cities: [CityLocation] {
         cityDataService.cities(forCountry: country)
@@ -59,16 +82,114 @@ struct CountryCitiesView: View {
         List {
             ForEach(filteredCities, id: \.self) { cityLocation in
                 NavigationLink(destination: CityLocationDetailView(cityLocation: cityLocation)) {
-                    CityLocationRow(cityLocation: cityLocation)
+                    CityLocationRowOptimized(
+                        cityLocation: cityLocation,
+                        weatherData: weatherData[cityLocation.cacheKey]
+                    )
                 }
             }
         }
         .navigationTitle(country)
         .searchable(text: $searchText, prompt: "Search cities in \(country)")
         .accessibilityElement(children: .contain)
+        .task {
+            await loadAllWeather()
+        }
+    }
+    
+    private func loadAllWeather() async {
+        guard weatherData.isEmpty && !isLoadingWeather else { return }
+        isLoadingWeather = true
+        
+        let locations = cities.map { (latitude: $0.latitude, longitude: $0.longitude) }
+        let results = await weatherService.batchFetchWeatherBasic(for: locations)
+        
+        await MainActor.run {
+            weatherData = results
+            isLoadingWeather = false
+        }
     }
 }
 
+// Optimized row that uses pre-loaded weather data
+struct CityLocationRowOptimized: View {
+    let cityLocation: CityLocation
+    let weatherData: WeatherData?
+    @EnvironmentObject var weatherService: WeatherService
+    @EnvironmentObject var settingsManager: SettingsManager
+    
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(cityLocation.displayName)
+                    .font(.body)
+                
+                if let weatherData = weatherData {
+                    HStack(spacing: 8) {
+                        if let weatherCode = weatherData.current.weatherCodeEnum {
+                            Image(systemName: weatherCode.systemImageName)
+                                .foregroundColor(.blue)
+                        }
+                        Text(formatTemperature(weatherData.current.temperature2m))
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        if let weatherCode = weatherData.current.weatherCodeEnum {
+                            Text(weatherCode.description)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                } else {
+                    HStack(spacing: 4) {
+                        ProgressView()
+                            .scaleEffect(0.7)
+                        Text("Loading...")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            
+            Spacer()
+            
+            Image(systemName: "chevron.right")
+                .foregroundColor(.secondary)
+                .font(.caption)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(weatherAccessibilityLabel)
+        .accessibilityAction(named: "Add to My Cities") {
+            addCity()
+        }
+    }
+    
+    private var weatherAccessibilityLabel: String {
+        var label = cityLocation.displayName
+        if let weatherData = weatherData {
+            let temp = formatTemperature(weatherData.current.temperature2m)
+            let desc = weatherData.current.weatherCodeEnum?.description ?? "unknown conditions"
+            label += ", \(temp), \(desc)"
+        } else {
+            label += ", loading weather"
+        }
+        return label
+    }
+    
+    private func addCity() {
+        let city = cityLocation.toCity()
+        weatherService.addCity(city)
+        
+        // Announce to VoiceOver
+        UIAccessibility.post(notification: .announcement, argument: "\(cityLocation.displayName) added to My Cities")
+    }
+    
+    private func formatTemperature(_ celsius: Double) -> String {
+        let temp = settingsManager.settings.temperatureUnit.convert(celsius)
+        return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
+    }
+}
+
+// Legacy row with on-demand loading (kept for backward compatibility)
 struct CityLocationRow: View {
     let cityLocation: CityLocation
     @EnvironmentObject var weatherService: WeatherService
@@ -148,7 +269,7 @@ struct CityLocationRow: View {
         
         Task {
             do {
-                let fetchedWeather = try await weatherService.fetchWeather(
+                let fetchedWeather = try await weatherService.fetchWeatherBasic(
                     latitude: cityLocation.latitude,
                     longitude: cityLocation.longitude
                 )
@@ -310,7 +431,7 @@ struct CityLocationDetailView: View {
         isLoadingWeather = true
         Task {
             do {
-                let fetchedWeather = try await weatherService.fetchWeather(
+                let fetchedWeather = try await weatherService.fetchWeatherFull(
                     latitude: cityLocation.latitude,
                     longitude: cityLocation.longitude
                 )

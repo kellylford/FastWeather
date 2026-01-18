@@ -88,15 +88,22 @@ struct SettingsView: View {
                 
                 // Display preferences section
                 Section(header: Text("Display Mode")) {
-                    Picker("Display Mode", selection: $settingsManager.settings.displayMode) {
+                    Picker(selection: $settingsManager.settings.displayMode) {
                         ForEach(DisplayMode.allCases, id: \.self) { mode in
                             Text(mode.rawValue).tag(mode)
+                        }
+                    } label: {
+                        HStack {
+                            Text("Display Mode")
+                            Spacer()
+                            Text(settingsManager.settings.displayMode.rawValue)
+                                .foregroundColor(.secondary)
                         }
                     }
                     .onChange(of: settingsManager.settings.displayMode) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Weather display mode")
+                    .accessibilityLabel("Weather display mode, currently \(settingsManager.settings.displayMode.rawValue)")
                     .accessibilityHint("Condensed shows values only, Details shows labels with values")
                 }
                 .listRowSeparator(.visible)
@@ -104,24 +111,33 @@ struct SettingsView: View {
                 // Weather fields section with reordering
                 Section(header: Text("Weather Fields"),
                        footer: Text("Drag to reorder. City info is always shown first. Toggle to show/hide each field.")) {
-                    ForEach($settingsManager.settings.weatherFields) { $field in
+                    ForEach(Array(settingsManager.settings.weatherFields.enumerated()), id: \.element.id) { index, field in
                         HStack {
                             Image(systemName: "line.3.horizontal")
                                 .foregroundColor(.secondary)
                                 .accessibilityHidden(true)
                             
-                            Toggle(isOn: $field.isEnabled) {
+                            Toggle(isOn: Binding(
+                                get: { field.isEnabled },
+                                set: { newValue in
+                                    settingsManager.settings.weatherFields[index].isEnabled = newValue
+                                    settingsManager.saveSettings()
+                                }
+                            )) {
                                 Text(field.type.rawValue)
                                     .font(.body)
-                            }
-                            .onChange(of: field.isEnabled) {
-                                settingsManager.saveSettings()
                             }
                             .accessibilityLabel("\(field.type.rawValue)")
                             .accessibilityHint(field.isEnabled ? "Enabled, double tap to disable" : "Disabled, double tap to enable")
                         }
                         .accessibilityElement(children: .combine)
                         .accessibilityAddTraits(.isButton)
+                        .accessibilityAction(named: "Move Up") {
+                            moveFieldUp(at: index)
+                        }
+                        .accessibilityAction(named: "Move Down") {
+                            moveFieldDown(at: index)
+                        }
                     }
                     .onMove { from, to in
                         settingsManager.settings.weatherFields.move(fromOffsets: from, toOffset: to)
@@ -175,6 +191,26 @@ struct SettingsView: View {
             }
         }
         .navigationViewStyle(.stack)
+    }
+    
+    // MARK: - Helper Methods
+    
+    private func moveFieldUp(at index: Int) {
+        guard index > 0 else { return }
+        let fieldName = settingsManager.settings.weatherFields[index].type.rawValue
+        let aboveFieldName = settingsManager.settings.weatherFields[index - 1].type.rawValue
+        settingsManager.settings.weatherFields.move(fromOffsets: IndexSet(integer: index), toOffset: index - 1)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) above \(aboveFieldName)")
+    }
+    
+    private func moveFieldDown(at index: Int) {
+        guard index < settingsManager.settings.weatherFields.count - 1 else { return }
+        let fieldName = settingsManager.settings.weatherFields[index].type.rawValue
+        let belowFieldName = settingsManager.settings.weatherFields[index + 1].type.rawValue
+        settingsManager.settings.weatherFields.move(fromOffsets: IndexSet(integer: index), toOffset: index + 2)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) below \(belowFieldName)")
     }
 }
 
