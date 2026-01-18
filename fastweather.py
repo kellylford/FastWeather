@@ -567,6 +567,10 @@ class AccessibleWeatherApp(wx.Frame):
             'units': {'temperature': 'F', 'wind_speed': 'mph', 'precipitation': 'in'}
         }
         
+        # Performance optimizations: weather cache and thread pool
+        self.weather_cache = {}  # {cache_key: {'data': {...}, 'timestamp': datetime}}
+        self.weather_executor = ThreadPoolExecutor(max_workers=MAX_CONCURRENT_REQUESTS)
+        
         # Load cached city coordinates for browsing
         self.us_cities_cache = None
         self.intl_cities_cache = None
@@ -916,7 +920,7 @@ class AccessibleWeatherApp(wx.Frame):
             city = self.city_list.GetString(i).split(" - ")[0]
             if city in self.city_data:
                 lat, lon = self.city_data[city]
-                WeatherFetchThread(self, city, lat, lon, "basic")
+                self.fetch_weather_with_cache(city, lat, lon, "basic")
 
     def on_add_city(self, event):
         val = self.city_input.GetValue().strip()
@@ -1047,8 +1051,8 @@ class AccessibleWeatherApp(wx.Frame):
                 'name': city_data['name']
             }
             
-            # Start loading weather immediately (all in parallel like web app)
-            WeatherFetchThread(self, display_name, city_data['lat'], city_data['lon'], "basic")
+            # Load weather with thread pool (respects MAX_CONCURRENT_REQUESTS limit)
+            self.fetch_weather_with_cache(display_name, city_data['lat'], city_data['lon'], "basic")
         
         if self.browse_list.GetCount() > 0:
             self.browse_list.SetSelection(0)
@@ -1086,7 +1090,7 @@ class AccessibleWeatherApp(wx.Frame):
                 self.weather_display.Append("Loading...")
                 self.book.SetSelection(1)  # Switch to full weather view
                 self.weather_display.SetFocus()
-                WeatherFetchThread(self, city_name, city_info['lat'], city_info['lon'], "full")
+                self.fetch_weather_with_cache(city_name, city_info['lat'], city_info['lon'], "full")
     
     def on_browse_key(self, event):
         """Handle keyboard navigation in browse list"""
@@ -1151,12 +1155,19 @@ class AccessibleWeatherApp(wx.Frame):
             # Add to city data
             self.city_data[city_name] = [city_info['lat'], city_info['lon']]
             self.save_city_data()
+            self.update_city_list()
+            
+            # Select the newly added city in the main list
+            for i in range(self.city_list.GetCount()):
+                if self.city_list.GetString(i).startswith(city_name + " - "):
+                    self.city_list.SetSelection(i)
+                    self.selectedCity = self.city_list.GetString(i)
+                    break
+            self.update_buttons()
             
             # Provide feedback
             wx.MessageBox(f"Added {city_name} to your cities", 
                          "City Added", wx.OK | wx.ICON_INFORMATION)
-        
-        dlg.Destroy()
 
     def on_select(self, event): self.update_buttons()
 
@@ -1195,7 +1206,11 @@ class AccessibleWeatherApp(wx.Frame):
         if sel != wx.NOT_FOUND:
             city = self.city_list.GetString(sel).split(" - ")[0]
             lat, lon = self.city_data[city]
-            WeatherFetchThread(self, city, lat, lon, "basic")
+            # Clear cache for this city to force refresh
+            cache_key = f"{city}_basic"
+            if cache_key in self.weather_cache:
+                del self.weather_cache[cache_key]
+            self.fetch_weather_with_cache(city, lat, lon, "basic")
 
     def on_full_weather(self, event):
         sel = self.city_list.GetSelection()
@@ -1208,7 +1223,7 @@ class AccessibleWeatherApp(wx.Frame):
         self.weather_display.Append("Loading...")
         self.book.SetSelection(1)
         self.weather_display.SetFocus()
-        WeatherFetchThread(self, city, lat, lon, "full")
+        self.fetch_weather_with_cache(city, lat, lon, "full")
 
     def on_back(self, event):
         """Navigate back from full weather view"""
@@ -1245,6 +1260,54 @@ class AccessibleWeatherApp(wx.Frame):
         directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
         index = round(degrees / 45) % 8
         return directions[index]
+    
+    def fetch_weather_with_cache(self, city_name, lat, lon, detail="basic", forecast_days=16):
+        """Fetch weather with caching and thread pooling to prevent system overload"""
+        cache_key = f"{city_name}_{detail}"
+        
+        # Check cache first
+        if cache_key in self.weather_cache:
+            cached = self.weather_cache[cache_key]
+            age_seconds = (datetime.now() - cached['timestamp']).total_seconds()
+            if age_seconds < WEATHER_CACHE_MINUTES * 60:
+                # Use cached data - post event on main thread
+                wx.CallAfter(lambda: wx.PostEvent(self, WeatherReadyEvent(data=(city_name, cached['data']))))
+                return
+        
+        # Submit to thread pool for async fetch
+        def worker():
+            try:
+                params = {
+                    "latitude": lat,
+                    "longitude": lon,
+                    "current": "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m,visibility",
+                    "timezone": "auto",
+                }
+                
+                if detail == "full":
+                    params["hourly"] = "temperature_2m,apparent_temperature,relative_humidity_2m,dewpoint_2m,precipitation,precipitation_probability,rain,showers,snowfall,snow_depth,weathercode,pressure_msl,surface_pressure,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,visibility,evapotranspiration,et0_fao_evapotranspiration,vapor_pressure_deficit,windspeed_10m,winddirection_10m,windgusts_10m,uv_index,uv_index_clear_sky,is_day,cape,freezing_level_height,soil_temperature_0cm"
+                    params["daily"] = "weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,uv_index_clear_sky_max,precipitation_sum,rain_sum,showers_sum,snowfall_sum,precipitation_hours,precipitation_probability_max,windspeed_10m_max,windgusts_10m_max,winddirection_10m_dominant,shortwave_radiation_sum,et0_fao_evapotranspiration"
+                    params["forecast_days"] = forecast_days
+                else:
+                    params["hourly"] = "cloudcover"
+                    params["daily"] = "temperature_2m_max,temperature_2m_min"
+                    params["forecast_days"] = 1
+                
+                response = requests.get(OPEN_METEO_API_URL, params=params, timeout=10)
+                response.raise_for_status()
+                data = response.json()
+                
+                # Cache the result
+                self.weather_cache[cache_key] = {
+                    'data': data,
+                    'timestamp': datetime.now()
+                }
+                
+                wx.PostEvent(self, WeatherReadyEvent(data=(city_name, data)))
+            except Exception as e:
+                wx.PostEvent(self, WeatherErrorEvent(data=(city_name, str(e))))
+        
+        self.weather_executor.submit(worker)
     
     def format_temperature(self, temp_c):
         """Convert temperature to configured unit and format"""
