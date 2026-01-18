@@ -1069,15 +1069,15 @@ class AccessibleWeatherApp(wx.Frame):
         if len(self.browse_stack) == 0:
             # Root level - navigate to states or countries
             if selection == "U.S. States":
-                self.browse_stack.append(('root', selection))
+                self.browse_stack.append(('root', selection, sel))
                 self.show_browse_states()
             elif selection == "International":
-                self.browse_stack.append(('root', selection))
+                self.browse_stack.append(('root', selection, sel))
                 self.show_browse_countries()
         elif len(self.browse_stack) == 1:
             # State/Country list - navigate to cities
             location_type = 'us' if self.browse_stack[0][1] == "U.S. States" else 'intl'
-            self.browse_stack.append((location_type, selection))
+            self.browse_stack.append((location_type, selection, sel))
             self.show_browse_cities(selection, location_type)
         elif len(self.browse_stack) == 2:
             # City level - show full weather
@@ -1114,15 +1114,24 @@ class AccessibleWeatherApp(wx.Frame):
             self.city_list.SetFocus()
         elif len(self.browse_stack) == 1:
             # Go back to root
+            prev_selection_idx = self.browse_stack[0][2] if len(self.browse_stack[0]) > 2 else 0
             self.browse_stack.pop()
             self.show_browse_root()
+            # Restore previous selection
+            if prev_selection_idx < self.browse_list.GetCount():
+                self.browse_list.SetSelection(prev_selection_idx)
         elif len(self.browse_stack) == 2:
             # Go back to states or countries list
+            prev_selection_idx = self.browse_stack[1][2] if len(self.browse_stack[1]) > 2 else 0
             self.browse_stack.pop()
             if self.browse_stack[0][1] == "U.S. States":
                 self.show_browse_states()
             else:
                 self.show_browse_countries()
+            # Restore previous selection (state or country)
+            if prev_selection_idx < self.browse_list.GetCount():
+                self.browse_list.SetSelection(prev_selection_idx)
+                self.browse_list.SetFocus()
     
     def on_browse_list_select(self, event):
         """Handle browse list selection change"""
