@@ -41,11 +41,6 @@ struct ListView: View {
             .onDelete(perform: deleteCities)
         }
         .listStyle(.plain)
-        .toolbar {
-            EditButton()
-                .accessibilityLabel(editMode?.wrappedValue.isEditing == true ? "Done editing" : "Edit cities")
-                .accessibilityHint("Tap to reorder or delete cities")
-        }
     }
     
     private func moveCityUp(at index: Int) {
@@ -125,6 +120,8 @@ struct ListRowView: View {
             }
         }
         .padding(.vertical, 8)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(buildAccessibilityLabel())
     }
     
     private func buildWeatherSummary(_ weather: WeatherData) -> String {
@@ -188,6 +185,82 @@ struct ListRowView: View {
         return parts.joined(separator: " • ")
     }
     
+    private func buildAccessibilityLabel() -> String {
+        guard let weather = weather else {
+            return "\(city.displayName), Loading"
+        }
+        
+        // Start with city name, then temperature
+        var label = "\(city.displayName), \(formatTemperature(weather.current.temperature2m))"
+        
+        // Add all other weather details in order
+        let isDetails = settingsManager.settings.displayMode == .details
+        
+        for field in settingsManager.settings.weatherFields where field.isEnabled {
+            switch field.type {
+            case .temperature:
+                // Already added after city name
+                break
+                
+            case .conditions:
+                if let weatherCode = weather.current.weatherCodeEnum {
+                    label += ", "
+                    label += isDetails ? "Conditions: \(weatherCode.description)" : weatherCode.description
+                }
+                
+            case .feelsLike:
+                let value = formatTemperature(weather.current.apparentTemperature)
+                label += ", "
+                label += isDetails ? "Feels Like: \(value)" : value
+                
+            case .humidity:
+                let value = "\(weather.current.relativeHumidity2m)%"
+                label += ", "
+                label += isDetails ? "Humidity: \(value)" : value
+                
+            case .windSpeed:
+                let value = formatWindSpeed(weather.current.windSpeed10m)
+                label += ", "
+                label += isDetails ? "Wind Speed: \(value)" : value
+                
+            case .windDirection:
+                let value = formatWindDirection(weather.current.windDirection10m)
+                label += ", "
+                label += isDetails ? "Wind Direction: \(value)" : value
+                
+            case .highTemp:
+                if let daily = weather.daily, !daily.temperature2mMax.isEmpty {
+                    let value = formatTemperature(daily.temperature2mMax[0])
+                    label += ", "
+                    label += isDetails ? "High: \(value)" : value
+                }
+                
+            case .lowTemp:
+                if let daily = weather.daily, !daily.temperature2mMin.isEmpty {
+                    let value = formatTemperature(daily.temperature2mMin[0])
+                    label += ", "
+                    label += isDetails ? "Low: \(value)" : value
+                }
+                
+            case .sunrise:
+                if let daily = weather.daily, !daily.sunrise.isEmpty {
+                    let value = formatTime(daily.sunrise[0])
+                    label += ", "
+                    label += isDetails ? "Sunrise: \(value)" : value
+                }
+                
+            case .sunset:
+                if let daily = weather.daily, !daily.sunset.isEmpty {
+                    let value = formatTime(daily.sunset[0])
+                    label += ", "
+                    label += isDetails ? "Sunset: \(value)" : value
+                }
+            }
+        }
+        
+        return label
+    }
+    
     private func formatTemperature(_ celsius: Double) -> String {
         let temp = settingsManager.settings.temperatureUnit.convert(celsius)
         return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
@@ -205,13 +278,7 @@ struct ListRowView: View {
     }
     
     private func formatTime(_ isoString: String) -> String {
-        let formatter = ISO8601DateFormatter()
-        guard let date = formatter.date(from: isoString) else { return "" }
-        
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "h:mma"
-        let result = timeFormatter.string(from: date)
-        return result.replacingOccurrences(of: "AM", with: "A").replacingOccurrences(of: "PM", with: "P")
+        FormatHelper.formatTime(isoString)
     }
 }
 

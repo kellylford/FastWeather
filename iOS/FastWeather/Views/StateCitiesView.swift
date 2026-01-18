@@ -164,15 +164,13 @@ struct CityLocationRowOptimized: View {
     }
     
     private var weatherAccessibilityLabel: String {
-        var label = cityLocation.displayName
         if let weatherData = weatherData {
             let temp = formatTemperature(weatherData.current.temperature2m)
             let desc = weatherData.current.weatherCodeEnum?.description ?? "unknown conditions"
-            label += ", \(temp), \(desc)"
+            return "\(temp), \(desc), \(cityLocation.displayName)"
         } else {
-            label += ", loading weather"
+            return "\(cityLocation.displayName), loading weather"
         }
-        return label
     }
     
     private func addCity() {
@@ -252,15 +250,14 @@ struct CityLocationRow: View {
     }
     
     private var weatherAccessibilityLabel: String {
-        var label = cityLocation.displayName
         if let weatherData = weatherData {
             let temp = formatTemperature(weatherData.current.temperature2m)
             let desc = weatherData.current.weatherCodeEnum?.description ?? "unknown conditions"
-            label += ", \(temp), \(desc)"
+            return "\(temp), \(desc), \(cityLocation.displayName)"
         } else if isLoadingWeather {
-            label += ", loading weather"
+            return "\(cityLocation.displayName), loading weather"
         }
-        return label
+        return cityLocation.displayName
     }
     
     private func loadWeather() {
@@ -491,8 +488,7 @@ struct CityLocationDetailView: View {
     }
     
     private func formatTime(_ isoString: String) -> String {
-        let formatter = ISO8601DateFormatter()
-        guard let date = formatter.date(from: isoString) else { return isoString }
+        guard let date = DateParser.parse(isoString) else { return isoString }
         
         let timeFormatter = DateFormatter()
         timeFormatter.timeStyle = .short

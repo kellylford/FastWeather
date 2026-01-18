@@ -12,6 +12,19 @@ All platforms share a common architecture: Open-Meteo API for weather, OpenStree
 
 ## Critical Architectural Patterns
 
+### Open-Meteo API Date/Time Format
+**CRITICAL**: Open-Meteo API returns timestamps in format `"2026-01-18T06:50"` (no timezone, no seconds)
+- This is **NOT** standard ISO8601 - `ISO8601DateFormatter` will fail to parse it
+- **iOS/Swift**: Use centralized `DateParser.parse()` utility in [SettingsManager.swift](../iOS/FastWeather/Services/SettingsManager.swift)
+- **All platforms must use**: `DateFormatter` with pattern `"yyyy-MM-dd'T'HH:mm"` as primary parser
+- **Fallback only**: ISO8601DateFormatter with various format options
+- **Never duplicate parsing logic**: Always use centralized utilities to avoid inconsistent behavior
+
+When you fix a date/time parsing bug:
+1. Search entire codebase for `ISO8601DateFormatter` or `dateFormat.*yyyy-MM-dd`
+2. Replace ALL instances with centralized parser
+3. Add logging for parse failures to catch issues early
+
 ### Shared Weather/Geocoding Services
 All platforms implement the same API integration pattern:
 - **Weather**: `https://api.open-meteo.com/v1/forecast` - No API key required
@@ -51,6 +64,63 @@ All platforms are **WCAG 2.2 AA compliant**. When modifying or creating UI:
 - **Semantic HTML/ARIA**: `role="alert"`, `aria-live="polite"`, `aria-describedby`
 - **Status announcements**: Announce weather updates, errors, city additions
 - Examples: [index.html#L14-L37](../webapp/index.html#L14-L37), [ACCESSIBILITY.md](../iOS/ACCESSIBILITY.md#L13-L29)
+
+#### CRITICAL: SwiftUI Accessibility Label Best Practices
+When creating custom accessibility labels in SwiftUI, follow these rules to avoid VoiceOver reading information in the wrong order:
+
+1. **Use `.accessibilityElement(children: .ignore)` with custom labels**:
+   ```swift
+   .accessibilityElement(children: .ignore)  // NOT .combine!
+   .accessibilityLabel("Custom label text")
+   ```
+   - `.combine` will read both visual text AND your custom label (duplicates/wrong order)
+   - `.ignore` ensures ONLY your custom label is read
+
+2. **Order matters - put most important info first**:
+   ```swift
+   // GOOD: City name, temperature, then details
+   "San Diego, California, 72°F, Conditions: Clear"
+   
+   // BAD: Details first, temperature last
+   "Conditions: Clear, San Diego, California, 72°F"
+   ```
+
+3. **Date/time formatting must be user-friendly**:
+   ```swift
+   // GOOD: "6:50 AM" or "Today, Jan 18"
+   FormatHelper.formatTime(isoString)
+   
+   // BAD: "2026-01-18T06:50" (raw ISO8601)
+   ```
+
+4. **Centralize formatting logic**:
+   - Create shared `FormatHelper` utilities to avoid duplicate formatting code
+   - Multiple copies of the same function = bugs when updating only one
+   - Example: Sunrise/sunset formatting was duplicated in ListView and CityDetailView
+
+5. **Always test with actual VoiceOver**:
+   - AI cannot predict VoiceOver behavior from code alone
+   - User feedback on screen reader output is essential
+   - Test on actual device, not just simulator
+
+6. **Time/Date formatting specifics**:
+   - Open-Meteo API returns sunrise/sunset as: `"2026-01-18T06:50"` (no timezone, no seconds)
+   - **NEVER use `ISO8601DateFormatter` directly** - it cannot parse Open-Meteo's format
+   - **iOS/Swift**: Use `DateParser.parse()` for parsing, `FormatHelper.formatTime()` for display
+   - Output format: `"h:mm a"` for 12-hour time (e.g., "6:50 AM")
+   - Hourly forecasts can omit `:00` (e.g., "3 PM" instead of "3:00 PM" using `formatTimeCompact()`)
+   - See centralized utilities in [SettingsManager.swift](../iOS/FastWeather/Services/SettingsManager.swift)
+
+7. **Silent failures are dangerous**:
+   - `guard let date = formatter.date(from: string) else { return "" }` hides bugs
+   - Empty strings cause VoiceOver to skip info (e.g., ", Overcast..." instead of "Today, Overcast...")
+   - Always log parse failures: `print("⚠️ Failed to parse: '\(string)'")`
+   - Better to show "Unknown" than silently hide data
+
+8. **Common VoiceOver pitfalls in FastWeather**:
+   - Temperature shown on right side visually but needs to be announced early in label
+   - Hour/day information must be included in hourly/daily forecast labels
+   - Field labels should come before values ("Sunrise: 6:50 AM" not "6:50 AM Sunrise")
 
 ### Keyboard Navigation
 - **Tab order**: Logical flow, visible focus indicators (6.1:1 contrast ratio minimum)
