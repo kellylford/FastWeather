@@ -1,4 +1,4 @@
-# Weather Fast iOS
+# Fast Weather iOS
 
 A native iOS weather application built with SwiftUI that provides fast, accessible weather information.
 
@@ -50,7 +50,7 @@ A native iOS weather application built with SwiftUI that provides fast, accessib
 
 ### Using Xcode
 1. Open `FastWeather.xcodeproj` in Xcode
-   - The project name remains FastWeather.xcodeproj for now, but the app displays as "Weather Fast"
+   - The app displays as "Fast Weather"
 2. Select your target device or simulator
 3. Press Cmd+R to build and run
 

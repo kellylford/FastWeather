@@ -25,6 +25,27 @@ enum WeatherFieldType: String, CaseIterable, Codable {
     case sunset = "Sunset"
 }
 
+enum DetailCategory: String, CaseIterable, Codable {
+    case currentConditions = "Current Conditions"
+    case precipitation = "Precipitation"
+    case todaysForecast = "Today's Forecast"
+    case hourlyForecast = "24-Hour Forecast"
+    case dailyForecast = "16-Day Forecast"
+    case location = "Location"
+}
+
+struct DetailCategoryField: Codable, Identifiable, Equatable {
+    let id: String
+    let category: DetailCategory
+    var isEnabled: Bool
+    
+    init(category: DetailCategory, isEnabled: Bool = true) {
+        self.id = category.rawValue
+        self.category = category
+        self.isEnabled = isEnabled
+    }
+}
+
 struct WeatherField: Codable, Identifiable, Equatable {
     let id: String
     let type: WeatherFieldType
@@ -115,6 +136,16 @@ struct AppSettings: Codable {
         WeatherField(type: .lowTemp, isEnabled: true),
         WeatherField(type: .sunrise, isEnabled: true),
         WeatherField(type: .sunset, isEnabled: true)
+    ]
+    
+    // Detail categories with enable/disable and order control
+    var detailCategories: [DetailCategoryField] = [
+        DetailCategoryField(category: .currentConditions, isEnabled: true),
+        DetailCategoryField(category: .precipitation, isEnabled: true),
+        DetailCategoryField(category: .todaysForecast, isEnabled: true),
+        DetailCategoryField(category: .hourlyForecast, isEnabled: true),
+        DetailCategoryField(category: .dailyForecast, isEnabled: true),
+        DetailCategoryField(category: .location, isEnabled: true)
     ]
     
     // Legacy properties for backward compatibility (deprecated)

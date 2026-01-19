@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Build Weather Fast iOS App
-# This script builds the Weather Fast iOS application using xcodebuild
+# Build Fast Weather iOS App
+# This script builds the Fast Weather iOS application using xcodebuild
 
 set -e  # Exit on any error
 
@@ -11,7 +11,7 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}Weather Fast iOS Build Script${NC}"
+echo -e "${BLUE}Fast Weather iOS Build Script${NC}"
 echo ""
 
 # Configuration

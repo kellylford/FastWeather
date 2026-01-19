@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct WeatherFastApp: App {
+struct FastWeatherApp: App {
     @StateObject private var weatherService = WeatherService()
     @StateObject private var settingsManager = SettingsManager()
     

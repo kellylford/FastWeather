@@ -1,10 +1,10 @@
-# Weather Fast iOS - Accessibility Guide
+# Fast Weather iOS - Accessibility Guide
 
-This document outlines the accessibility features implemented in the Weather Fast iOS application to ensure compliance with WCAG 2.2 Level AA standards and provide an excellent experience for all users.
+This document outlines the accessibility features implemented in the Fast Weather iOS application to ensure compliance with WCAG 2.2 Level AA standards and provide an excellent experience for all users.
 
 ## Overview
 
-Weather Fast is designed with accessibility as a core principle, not an afterthought. The app is fully usable with VoiceOver, Switch Control, and other assistive technologies.
+Fast Weather is designed with accessibility as a core principle, not an afterthought. The app is fully usable with VoiceOver, Switch Control, and other assistive technologies.
 
 ## Accessibility Features
 

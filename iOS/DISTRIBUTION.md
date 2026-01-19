@@ -1,6 +1,6 @@
-# Weather Fast iOS - Distribution Guide
+# Fast Weather iOS - Distribution Guide
 
-This guide explains how to prepare and distribute the Weather Fast iOS application.
+This guide explains how to prepare and distribute the Fast Weather iOS application.
 
 ## Prerequisites
 

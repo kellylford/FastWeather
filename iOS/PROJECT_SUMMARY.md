@@ -1,4 +1,4 @@
-# Weather Fast iOS - Project Summary
+# Fast Weather iOS - Project Summary
 
 ## Overview
 A complete native iOS weather application built with SwiftUI, featuring city browsing by state/country, three view modes (Flat, Table, List), and comprehensive accessibility support.
@@ -247,7 +247,7 @@ See LICENSE file in repository root
 
 ## 👨‍💻 Author
 
-Built for the Weather Fast project
+Built for the Fast Weather project
 Created: January 2026
 Version: 1.0.0
 

@@ -1,6 +1,6 @@
-# Weather Fast iOS - Quick Start Guide
+# Fast Weather iOS - Quick Start Guide
 
-Get up and running with Weather Fast iOS development in minutes.
+Get up and running with Fast Weather iOS development in minutes.
 
 ## Prerequisites
 

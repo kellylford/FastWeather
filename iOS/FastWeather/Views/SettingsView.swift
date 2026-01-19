@@ -110,7 +110,7 @@ struct SettingsView: View {
                 
                 // Weather fields section with reordering
                 Section(header: Text("Weather Fields"),
-                       footer: Text("Drag to reorder. City info is always shown first. Toggle to show/hide each field.")) {
+                       footer: Text("Toggle to show/hide fields. Use VoiceOver actions to reorder.")) {
                     ForEach(Array(settingsManager.settings.weatherFields.enumerated()), id: \.element.id) { index, field in
                         HStack {
                             Image(systemName: "line.3.horizontal")
@@ -141,6 +141,49 @@ struct SettingsView: View {
                     }
                     .onMove { from, to in
                         settingsManager.settings.weatherFields.move(fromOffsets: from, toOffset: to)
+                        settingsManager.saveSettings()
+                    }
+                }
+                
+                // Detail Categories section with reordering
+                Section(header: Text("Detail Categories"),
+                       footer: Text("Toggle to show/hide detail sections. Use VoiceOver actions to reorder.")) {
+                    ForEach(Array(settingsManager.settings.detailCategories.enumerated()), id: \.element.id) { index, category in
+                        HStack {
+                            Image(systemName: "line.3.horizontal")
+                                .foregroundColor(.secondary)
+                                .accessibilityHidden(true)
+                            
+                            Toggle(isOn: Binding(
+                                get: { category.isEnabled },
+                                set: { newValue in
+                                    settingsManager.settings.detailCategories[index].isEnabled = newValue
+                                    settingsManager.saveSettings()
+                                }
+                            )) {
+                                Text(category.category.rawValue)
+                                    .font(.body)
+                            }
+                            .accessibilityLabel("\(category.category.rawValue)")
+                            .accessibilityHint(category.isEnabled ? "Enabled, double tap to disable" : "Disabled, double tap to enable")
+                        }
+                        .accessibilityElement(children: .combine)
+                        .accessibilityAddTraits(.isButton)
+                        .accessibilityAction(named: "Move Up") {
+                            moveCategoryUp(at: index)
+                        }
+                        .accessibilityAction(named: "Move Down") {
+                            moveCategoryDown(at: index)
+                        }
+                        .accessibilityAction(named: "Move to Top") {
+                            moveCategoryToTop(at: index)
+                        }
+                        .accessibilityAction(named: "Move to Bottom") {
+                            moveCategoryToBottom(at: index)
+                        }
+                    }
+                    .onMove { from, to in
+                        settingsManager.settings.detailCategories.move(fromOffsets: from, toOffset: to)
                         settingsManager.saveSettings()
                     }
                 }
@@ -194,6 +237,40 @@ struct SettingsView: View {
     }
     
     // MARK: - Helper Methods
+    
+    private func moveCategoryUp(at index: Int) {
+        guard index > 0 else { return }
+        let categoryName = settingsManager.settings.detailCategories[index].category.rawValue
+        let aboveCategoryName = settingsManager.settings.detailCategories[index - 1].category.rawValue
+        settingsManager.settings.detailCategories.move(fromOffsets: IndexSet(integer: index), toOffset: index - 1)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(categoryName) above \(aboveCategoryName)")
+    }
+    
+    private func moveCategoryDown(at index: Int) {
+        guard index < settingsManager.settings.detailCategories.count - 1 else { return }
+        let categoryName = settingsManager.settings.detailCategories[index].category.rawValue
+        let belowCategoryName = settingsManager.settings.detailCategories[index + 1].category.rawValue
+        settingsManager.settings.detailCategories.move(fromOffsets: IndexSet(integer: index), toOffset: index + 2)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(categoryName) below \(belowCategoryName)")
+    }
+    
+    private func moveCategoryToTop(at index: Int) {
+        guard index > 0 else { return }
+        let categoryName = settingsManager.settings.detailCategories[index].category.rawValue
+        settingsManager.settings.detailCategories.move(fromOffsets: IndexSet(integer: index), toOffset: 0)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(categoryName) to top")
+    }
+    
+    private func moveCategoryToBottom(at index: Int) {
+        guard index < settingsManager.settings.detailCategories.count - 1 else { return }
+        let categoryName = settingsManager.settings.detailCategories[index].category.rawValue
+        settingsManager.settings.detailCategories.move(fromOffsets: IndexSet(integer: index), toOffset: settingsManager.settings.detailCategories.count)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(categoryName) to bottom")
+    }
     
     private func moveFieldUp(at index: Int) {
         guard index > 0 else { return }

@@ -16,6 +16,146 @@ struct CityDetailView: View {
         weatherService.weatherCache[city.id]
     }
     
+    private func isCategoryEnabled(_ category: DetailCategory) -> Bool {
+        return settingsManager.settings.detailCategories.first(where: { $0.category == category })?.isEnabled ?? true
+    }
+    
+    @ViewBuilder
+    private func detailSection(for category: DetailCategory, weather: WeatherData) -> some View {
+        switch category {
+        case .todaysForecast:
+            if let daily = weather.daily {
+                GroupBox(label: Label("Today's Forecast", systemImage: "calendar")) {
+                    VStack(spacing: 12) {
+                        if !daily.temperature2mMax.isEmpty {
+                            DetailRow(label: "High", value: formatTemperature(daily.temperature2mMax[0]))
+                            Divider()
+                        }
+                        if !daily.temperature2mMin.isEmpty {
+                            DetailRow(label: "Low", value: formatTemperature(daily.temperature2mMin[0]))
+                            Divider()
+                        }
+                        if !daily.sunrise.isEmpty {
+                            DetailRow(label: "Sunrise", value: formatTime(daily.sunrise[0]))
+                            Divider()
+                        }
+                        if !daily.sunset.isEmpty {
+                            DetailRow(label: "Sunset", value: formatTime(daily.sunset[0]))
+                        }
+                    }
+                    .padding(.vertical, 8)
+                }
+                .padding(.horizontal)
+                .accessibilityElement(children: .contain)
+            }
+            
+        case .currentConditions:
+            GroupBox(label: Label("Current Conditions", systemImage: "thermometer")) {
+                VStack(spacing: 12) {
+                    DetailRow(label: "Humidity", value: "\(weather.current.relativeHumidity2m)%")
+                    Divider()
+                    DetailRow(label: "Wind Speed", value: formatWindSpeed(weather.current.windSpeed10m))
+                    Divider()
+                    DetailRow(label: "Wind Direction", value: formatWindDirection(weather.current.windDirection10m))
+                    Divider()
+                    DetailRow(label: "Pressure", value: formatPressure(weather.current.pressureMsl))
+                    Divider()
+                    DetailRow(label: "Visibility", value: formatVisibility(weather.current.visibility))
+                    Divider()
+                    DetailRow(label: "Cloud Cover", value: "\(weather.current.cloudCover)%")
+                }
+                .padding(.vertical, 8)
+            }
+            .padding(.horizontal)
+            .accessibilityElement(children: .contain)
+            
+        case .precipitation:
+            GroupBox(label: Label("Precipitation", systemImage: "cloud.rain")) {
+                VStack(spacing: 12) {
+                    DetailRow(label: "Total", value: formatPrecipitation(weather.current.precipitation))
+                    Divider()
+                    DetailRow(label: "Rain", value: formatPrecipitation(weather.current.rain))
+                    Divider()
+                    DetailRow(label: "Showers", value: formatPrecipitation(weather.current.showers))
+                    Divider()
+                    DetailRow(label: "Snowfall", value: formatPrecipitation(weather.current.snowfall))
+                }
+                .padding(.vertical, 8)
+            }
+            .padding(.horizontal)
+            .accessibilityElement(children: .contain)
+            
+        case .hourlyForecast:
+            if let hourly = weather.hourly, !hourly.time.isEmpty {
+                GroupBox(label: Label("24-Hour Forecast", systemImage: "clock")) {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 16) {
+                            let currentHourIndex = findCurrentHourIndex(in: hourly.time)
+                            let startIndex = currentHourIndex >= 0 ? currentHourIndex : 0
+                            let endIndex = min(startIndex + 24, hourly.time.count)
+                            
+                            ForEach(startIndex..<endIndex, id: \.self) { index in
+                                HourlyForecastCard(
+                                    time: hourly.time[index],
+                                    temperature: hourly.temperature2m[index],
+                                    weatherCode: hourly.weatherCode[index],
+                                    precipitation: hourly.precipitation[index],
+                                    settingsManager: settingsManager
+                                )
+                            }
+                        }
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
+                    }
+                }
+                .padding(.horizontal)
+            }
+            
+        case .dailyForecast:
+            if let daily = weather.daily, daily.temperature2mMax.count > 1 {
+                GroupBox(label: Label("16-Day Forecast", systemImage: "calendar")) {
+                    VStack(spacing: 0) {
+                        ForEach(0..<min(16, daily.temperature2mMax.count), id: \.self) { index in
+                            DailyForecastRow(
+                                dayIndex: index,
+                                sunrise: daily.sunrise[index],
+                                high: daily.temperature2mMax[index],
+                                low: daily.temperature2mMin[index],
+                                weatherCode: index < daily.weatherCode.count ? daily.weatherCode[index] : nil,
+                                precipitation: index < daily.precipitationSum.count ? daily.precipitationSum[index] : nil,
+                                settingsManager: settingsManager
+                            )
+                            if index < min(15, daily.temperature2mMax.count - 1) {
+                                Divider()
+                                    .padding(.leading)
+                            }
+                        }
+                    }
+                    .padding(.vertical, 8)
+                }
+                .padding(.horizontal)
+            }
+            
+        case .location:
+            GroupBox(label: Label("Location", systemImage: "mappin.and.ellipse")) {
+                VStack(spacing: 12) {
+                    DetailRow(label: "City", value: city.name)
+                    if let state = city.state {
+                        Divider()
+                        DetailRow(label: "State", value: state)
+                    }
+                    Divider()
+                    DetailRow(label: "Country", value: city.country)
+                    Divider()
+                    DetailRow(label: "Coordinates", value: String(format: "%.4f, %.4f", city.latitude, city.longitude))
+                }
+                .padding(.vertical, 8)
+            }
+            .padding(.horizontal)
+            .accessibilityElement(children: .contain)
+        }
+    }
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
@@ -45,137 +185,12 @@ struct CityDetailView: View {
                     }
                     .padding()
                     
-                    // Current conditions
-                    GroupBox(label: Label("Current Conditions", systemImage: "thermometer")) {
-                        VStack(spacing: 12) {
-                            DetailRow(label: "Humidity", value: "\(weather.current.relativeHumidity2m)%")
-                            Divider()
-                            DetailRow(label: "Wind Speed", value: formatWindSpeed(weather.current.windSpeed10m))
-                            Divider()
-                            DetailRow(label: "Wind Direction", value: formatWindDirection(weather.current.windDirection10m))
-                            Divider()
-                            DetailRow(label: "Pressure", value: formatPressure(weather.current.pressureMsl))
-                            Divider()
-                            DetailRow(label: "Visibility", value: formatVisibility(weather.current.visibility))
-                            Divider()
-                            DetailRow(label: "Cloud Cover", value: "\(weather.current.cloudCover)%")
+                    // Dynamically render detail sections based on settings order
+                    ForEach(settingsManager.settings.detailCategories) { categoryField in
+                        if categoryField.isEnabled {
+                            detailSection(for: categoryField.category, weather: weather)
                         }
-                        .padding(.vertical, 8)
                     }
-                    .padding(.horizontal)
-                    .accessibilityElement(children: .contain)
-                    
-                    // Precipitation
-                    GroupBox(label: Label("Precipitation", systemImage: "cloud.rain")) {
-                        VStack(spacing: 12) {
-                            DetailRow(label: "Total", value: formatPrecipitation(weather.current.precipitation))
-                            Divider()
-                            DetailRow(label: "Rain", value: formatPrecipitation(weather.current.rain))
-                            Divider()
-                            DetailRow(label: "Showers", value: formatPrecipitation(weather.current.showers))
-                            Divider()
-                            DetailRow(label: "Snowfall", value: formatPrecipitation(weather.current.snowfall))
-                        }
-                        .padding(.vertical, 8)
-                    }
-                    .padding(.horizontal)
-                    .accessibilityElement(children: .contain)
-                    
-                    // Today's forecast
-                    if let daily = weather.daily {
-                        GroupBox(label: Label("Today's Forecast", systemImage: "calendar")) {
-                            VStack(spacing: 12) {
-                                if !daily.temperature2mMax.isEmpty {
-                                    DetailRow(label: "High", value: formatTemperature(daily.temperature2mMax[0]))
-                                    Divider()
-                                }
-                                if !daily.temperature2mMin.isEmpty {
-                                    DetailRow(label: "Low", value: formatTemperature(daily.temperature2mMin[0]))
-                                    Divider()
-                                }
-                                if !daily.sunrise.isEmpty {
-                                    DetailRow(label: "Sunrise", value: formatTime(daily.sunrise[0]))
-                                    Divider()
-                                }
-                                if !daily.sunset.isEmpty {
-                                    DetailRow(label: "Sunset", value: formatTime(daily.sunset[0]))
-                                }
-                            }
-                            .padding(.vertical, 8)
-                        }
-                        .padding(.horizontal)
-                        .accessibilityElement(children: .contain)
-                    }
-                    
-                    // Hourly forecast (24 hours)
-                    if let hourly = weather.hourly, !hourly.time.isEmpty {
-                        GroupBox(label: Label("24-Hour Forecast", systemImage: "clock")) {
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 16) {
-                                    // Find the index of the current hour to start from
-                                    let currentHourIndex = findCurrentHourIndex(in: hourly.time)
-                                    let startIndex = currentHourIndex >= 0 ? currentHourIndex : 0
-                                    let endIndex = min(startIndex + 24, hourly.time.count)
-                                    
-                                    ForEach(startIndex..<endIndex, id: \.self) { index in
-                                        HourlyForecastCard(
-                                            time: hourly.time[index],
-                                            temperature: hourly.temperature2m[index],
-                                            weatherCode: hourly.weatherCode[index],
-                                            precipitation: hourly.precipitation[index],
-                                            settingsManager: settingsManager
-                                        )
-                                    }
-                                }
-                                .padding(.horizontal)
-                                .padding(.vertical, 8)
-                            }
-                        }
-                        .padding(.horizontal)
-                    }
-                    
-                    // 16-day forecast
-                    if let daily = weather.daily, daily.temperature2mMax.count > 1 {
-                        GroupBox(label: Label("16-Day Forecast", systemImage: "calendar")) {
-                            VStack(spacing: 0) {
-                                ForEach(0..<min(16, daily.temperature2mMax.count), id: \.self) { index in
-                                    DailyForecastRow(
-                                        dayIndex: index,
-                                        sunrise: daily.sunrise[index],
-                                        high: daily.temperature2mMax[index],
-                                        low: daily.temperature2mMin[index],
-                                        weatherCode: index < daily.weatherCode.count ? daily.weatherCode[index] : nil,
-                                        precipitation: index < daily.precipitationSum.count ? daily.precipitationSum[index] : nil,
-                                        settingsManager: settingsManager
-                                    )
-                                    if index < min(15, daily.temperature2mMax.count - 1) {
-                                        Divider()
-                                            .padding(.leading)
-                                    }
-                                }
-                            }
-                            .padding(.vertical, 8)
-                        }
-                        .padding(.horizontal)
-                    }
-                    
-                    // Location info
-                    GroupBox(label: Label("Location", systemImage: "mappin.and.ellipse")) {
-                        VStack(spacing: 12) {
-                            DetailRow(label: "City", value: city.name)
-                            if let state = city.state {
-                                Divider()
-                                DetailRow(label: "State", value: state)
-                            }
-                            Divider()
-                            DetailRow(label: "Country", value: city.country)
-                            Divider()
-                            DetailRow(label: "Coordinates", value: String(format: "%.4f, %.4f", city.latitude, city.longitude))
-                        }
-                        .padding(.vertical, 8)
-                    }
-                    .padding(.horizontal)
-                    .accessibilityElement(children: .contain)
                     
                 } else {
                     ProgressView("Loading weather data...")
