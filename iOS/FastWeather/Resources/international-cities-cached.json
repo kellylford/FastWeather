@@ -4972,10 +4972,10 @@
   "Qatar": [
     {
       "name": "Doha",
-      "state": "",
+      "state": "الدوحة",
       "country": "قطر",
-      "lat": 25.2856329,
-      "lon": 51.5264162
+      "lat": 25.3108807,
+      "lon": 51.5081812
     },
     {
       "name": "Al Rayyan",
@@ -4993,21 +4993,21 @@
     },
     {
       "name": "Al Wakrah",
-      "state": "",
+      "state": "الوكرة",
       "country": "قطر",
-      "lat": 25.1566623,
-      "lon": 51.6013212
+      "lat": 25.0037453,
+      "lon": 51.4103338
     },
     {
       "name": "Al Khor",
-      "state": "",
+      "state": "الخور والذخيرة",
       "country": "قطر",
-      "lat": 25.6837333,
-      "lon": 51.5031212
+      "lat": 25.7567822,
+      "lon": 51.3269839
     },
     {
       "name": "Mesaieed",
-      "state": "",
+      "state": "الوكرة",
       "country": "قطر",
       "lat": 24.9953944,
       "lon": 51.5493583
@@ -5023,8 +5023,8 @@
       "name": "Al Shamal",
       "state": "الشمال",
       "country": "قطر",
-      "lat": 26.0017139,
-      "lon": 51.2174082
+      "lat": 26.0517166,
+      "lon": 51.2005821
     },
     {
       "name": "Madinat ash Shamal",
@@ -5035,7 +5035,7 @@
     },
     {
       "name": "Al Ghuwariyah",
-      "state": "الشحانية",
+      "state": "الخور والذخيرة",
       "country": "قطر",
       "lat": 25.8444937,
       "lon": 51.2673
@@ -5049,17 +5049,17 @@
     },
     {
       "name": "Al Wukair",
-      "state": "",
+      "state": "الوكرة",
       "country": "قطر",
       "lat": 25.150147,
       "lon": 51.5440883
     },
     {
       "name": "Al Khawr",
-      "state": "",
+      "state": "الخور والذخيرة",
       "country": "قطر",
-      "lat": 25.6837333,
-      "lon": 51.5031212
+      "lat": 25.7567822,
+      "lon": 51.3269839
     },
     {
       "name": "Lusail",
@@ -7232,6 +7232,7078 @@
       "country": "Việt Nam",
       "lat": 11.9402416,
       "lon": 108.4375758
+    }
+  ],
+  "Colombia": [
+    {
+      "name": "Bogotá",
+      "state": "Bogotá, Distrito Capital",
+      "country": "Colombia",
+      "lat": 4.6533817,
+      "lon": -74.0836331
+    },
+    {
+      "name": "Medellín",
+      "state": "Antioquia",
+      "country": "Colombia",
+      "lat": 6.2697325,
+      "lon": -75.6025597
+    },
+    {
+      "name": "Cali",
+      "state": "Valle del Cauca",
+      "country": "Colombia",
+      "lat": 3.4519988,
+      "lon": -76.5325259
+    },
+    {
+      "name": "Barranquilla",
+      "state": "Atlántico",
+      "country": "Colombia",
+      "lat": 11.0101922,
+      "lon": -74.8231794
+    },
+    {
+      "name": "Cartagena",
+      "state": "Bolívar",
+      "country": "Colombia",
+      "lat": 10.4265566,
+      "lon": -75.5441671
+    },
+    {
+      "name": "Cúcuta",
+      "state": "Norte de Santander",
+      "country": "Colombia",
+      "lat": 8.0776187,
+      "lon": -72.4689002
+    },
+    {
+      "name": "Bucaramanga",
+      "state": "Santander",
+      "country": "Colombia",
+      "lat": 7.1669842,
+      "lon": -73.1047294
+    },
+    {
+      "name": "Pereira",
+      "state": "Risaralda",
+      "country": "Colombia",
+      "lat": 4.7854606,
+      "lon": -75.788322
+    },
+    {
+      "name": "Santa Marta",
+      "state": "Magdalena",
+      "country": "Colombia",
+      "lat": 11.2320944,
+      "lon": -74.1950916
+    },
+    {
+      "name": "Ibagué",
+      "state": "Tolima",
+      "country": "Colombia",
+      "lat": 4.4386033,
+      "lon": -75.2108857
+    },
+    {
+      "name": "Pasto",
+      "state": "Nariño",
+      "country": "Colombia",
+      "lat": 1.2140275,
+      "lon": -77.2785096
+    },
+    {
+      "name": "Manizales",
+      "state": "Caldas",
+      "country": "Colombia",
+      "lat": 5.0743694,
+      "lon": -75.5081167
+    },
+    {
+      "name": "Neiva",
+      "state": "Huila",
+      "country": "Colombia",
+      "lat": 3.0332554,
+      "lon": -75.2794303
+    },
+    {
+      "name": "Villavicencio",
+      "state": "Meta",
+      "country": "Colombia",
+      "lat": 4.1114595,
+      "lon": -73.4967836
+    },
+    {
+      "name": "Armenia",
+      "state": "Quindío",
+      "country": "Colombia",
+      "lat": 4.4919761,
+      "lon": -75.7413509
+    },
+    {
+      "name": "Valledupar",
+      "state": "Cesar",
+      "country": "Colombia",
+      "lat": 10.4651733,
+      "lon": -73.2529512
+    },
+    {
+      "name": "Montería",
+      "state": "Córdoba",
+      "country": "Colombia",
+      "lat": 8.6046053,
+      "lon": -75.9783203
+    },
+    {
+      "name": "Popayán",
+      "state": "Cauca",
+      "country": "Colombia",
+      "lat": 2.4422295,
+      "lon": -76.6072368
+    },
+    {
+      "name": "Buenaventura",
+      "state": "Valle del Cauca",
+      "country": "Colombia",
+      "lat": 3.8881929,
+      "lon": -77.0738324
+    },
+    {
+      "name": "Palmira",
+      "state": "Valle del Cauca",
+      "country": "Colombia",
+      "lat": 3.5308373,
+      "lon": -76.2988048
+    }
+  ],
+  "Peru": [
+    {
+      "name": "Lima",
+      "state": "Lima",
+      "country": "Perú",
+      "lat": -12.0459808,
+      "lon": -77.0305912
+    },
+    {
+      "name": "Arequipa",
+      "state": "Arequipa",
+      "country": "Perú",
+      "lat": -16.3988667,
+      "lon": -71.5369607
+    },
+    {
+      "name": "Trujillo",
+      "state": "La Libertad",
+      "country": "Perú",
+      "lat": -8.1116778,
+      "lon": -79.0287742
+    },
+    {
+      "name": "Chiclayo",
+      "state": "Lambayeque",
+      "country": "Perú",
+      "lat": -6.7716146,
+      "lon": -79.8387175
+    },
+    {
+      "name": "Piura",
+      "state": "Piura",
+      "country": "Perú",
+      "lat": -5.0,
+      "lon": -80.333333
+    },
+    {
+      "name": "Iquitos",
+      "state": "Loreto",
+      "country": "Perú",
+      "lat": -3.749365,
+      "lon": -73.2444145
+    },
+    {
+      "name": "Cusco",
+      "state": "Cusco",
+      "country": "Perú",
+      "lat": -13.5170887,
+      "lon": -71.9785356
+    },
+    {
+      "name": "Huancayo",
+      "state": "Junín",
+      "country": "Perú",
+      "lat": -12.068098,
+      "lon": -75.2100953
+    },
+    {
+      "name": "Chimbote",
+      "state": "Ancash",
+      "country": "Perú",
+      "lat": -9.0744966,
+      "lon": -78.593609
+    },
+    {
+      "name": "Tacna",
+      "state": "Tacna",
+      "country": "Perú",
+      "lat": -18.01386,
+      "lon": -70.2511032
+    },
+    {
+      "name": "Juliaca",
+      "state": "Puno",
+      "country": "Perú",
+      "lat": -15.4932314,
+      "lon": -70.1356177
+    },
+    {
+      "name": "Ica",
+      "state": "Ica",
+      "country": "Perú",
+      "lat": -14.3325,
+      "lon": -75.499722
+    },
+    {
+      "name": "Sullana",
+      "state": "Piura",
+      "country": "Perú",
+      "lat": -4.8900643,
+      "lon": -80.6873604
+    },
+    {
+      "name": "Ayacucho",
+      "state": "Ayacucho",
+      "country": "Perú",
+      "lat": -14.0,
+      "lon": -74.0
+    },
+    {
+      "name": "Cajamarca",
+      "state": "Cajamarca",
+      "country": "Perú",
+      "lat": -6.25,
+      "lon": -78.833333
+    },
+    {
+      "name": "Pucallpa",
+      "state": "Ucayali",
+      "country": "Perú",
+      "lat": -8.3820737,
+      "lon": -74.5387507
+    },
+    {
+      "name": "Huánuco",
+      "state": "Huánuco",
+      "country": "Perú",
+      "lat": -9.5,
+      "lon": -75.833333
+    },
+    {
+      "name": "Tarapoto",
+      "state": "San Martín",
+      "country": "Perú",
+      "lat": -6.4877198,
+      "lon": -76.3598708
+    },
+    {
+      "name": "Chincha Alta",
+      "state": "Ica",
+      "country": "Perú",
+      "lat": -13.417488,
+      "lon": -76.1325726
+    },
+    {
+      "name": "Huaraz",
+      "state": "Ancash",
+      "country": "Perú",
+      "lat": -9.5298511,
+      "lon": -77.5289981
+    }
+  ],
+  "Chile": [
+    {
+      "name": "Santiago",
+      "state": "Región Metropolitana de Santiago",
+      "country": "Chile",
+      "lat": -33.4377756,
+      "lon": -70.6504502
+    },
+    {
+      "name": "Valparaíso",
+      "state": "Región de Valparaíso",
+      "country": "Chile",
+      "lat": -33.0458456,
+      "lon": -71.6196749
+    },
+    {
+      "name": "Concepción",
+      "state": "Región del Biobío",
+      "country": "Chile",
+      "lat": -36.8270698,
+      "lon": -73.0502064
+    },
+    {
+      "name": "La Serena",
+      "state": "Región de Coquimbo",
+      "country": "Chile",
+      "lat": -29.902631,
+      "lon": -71.2520253
+    },
+    {
+      "name": "Antofagasta",
+      "state": "Región de Antofagasta",
+      "country": "Chile",
+      "lat": -23.6463741,
+      "lon": -70.3980033
+    },
+    {
+      "name": "Temuco",
+      "state": "Región de la Araucanía",
+      "country": "Chile",
+      "lat": -38.7358908,
+      "lon": -72.590538
+    },
+    {
+      "name": "Rancagua",
+      "state": "Región del Libertador General Bernardo O'Higgins",
+      "country": "Chile",
+      "lat": -34.1702433,
+      "lon": -70.740718
+    },
+    {
+      "name": "Talca",
+      "state": "Región del Maule",
+      "country": "Chile",
+      "lat": -35.4265343,
+      "lon": -71.6660322
+    },
+    {
+      "name": "Arica",
+      "state": "Región de Arica y Parinacota",
+      "country": "Chile",
+      "lat": -18.4785288,
+      "lon": -70.3211394
+    },
+    {
+      "name": "Chillán",
+      "state": "Región de Ñuble",
+      "country": "Chile",
+      "lat": -36.6066616,
+      "lon": -72.1033194
+    },
+    {
+      "name": "Iquique",
+      "state": "Región de Tarapacá",
+      "country": "Chile",
+      "lat": -20.2140657,
+      "lon": -70.1524646
+    },
+    {
+      "name": "Los Ángeles",
+      "state": "Región del Biobío",
+      "country": "Chile",
+      "lat": -37.4707455,
+      "lon": -72.351686
+    },
+    {
+      "name": "Puerto Montt",
+      "state": "Región de Los Lagos",
+      "country": "Chile",
+      "lat": -41.471798,
+      "lon": -72.9395915
+    },
+    {
+      "name": "Coquimbo",
+      "state": "Región de Coquimbo",
+      "country": "Chile",
+      "lat": -30.7546652,
+      "lon": -70.9005536
+    },
+    {
+      "name": "Osorno",
+      "state": "Región de Los Lagos",
+      "country": "Chile",
+      "lat": -40.5736955,
+      "lon": -73.1358091
+    },
+    {
+      "name": "Valdivia",
+      "state": "Región de Los Ríos",
+      "country": "Chile",
+      "lat": -39.8141262,
+      "lon": -73.2459859
+    },
+    {
+      "name": "Punta Arenas",
+      "state": "Región de Magallanes y de la Antártica Chilena",
+      "country": "Chile",
+      "lat": -53.1625688,
+      "lon": -70.907822
+    },
+    {
+      "name": "Copiapó",
+      "state": "Región de Atacama",
+      "country": "Chile",
+      "lat": -27.3664685,
+      "lon": -70.3322753
+    },
+    {
+      "name": "Quilpué",
+      "state": "Región de Valparaíso",
+      "country": "Chile",
+      "lat": -33.0498135,
+      "lon": -71.4415282
+    },
+    {
+      "name": "Curicó",
+      "state": "Región del Maule",
+      "country": "Chile",
+      "lat": -34.985368,
+      "lon": -71.2393705
+    }
+  ],
+  "Greece": [
+    {
+      "name": "Athens",
+      "state": "Περιφέρεια Αττικής",
+      "country": "Ελλάς",
+      "lat": 37.9755648,
+      "lon": 23.7348324
+    },
+    {
+      "name": "Thessaloniki",
+      "state": "Περιφέρεια Κεντρικής Μακεδονίας",
+      "country": "Ελλάς",
+      "lat": 40.6403167,
+      "lon": 22.9352716
+    },
+    {
+      "name": "Patras",
+      "state": "Περιφέρεια Δυτικής Ελλάδας",
+      "country": "Ελλάς",
+      "lat": 38.246242,
+      "lon": 21.7350847
+    },
+    {
+      "name": "Heraklion",
+      "state": "Περιφέρεια Κρήτης",
+      "country": "Ελλάς",
+      "lat": 35.33908,
+      "lon": 25.1332843
+    },
+    {
+      "name": "Larissa",
+      "state": "Περιφέρεια Θεσσαλίας",
+      "country": "Ελλάς",
+      "lat": 39.6383092,
+      "lon": 22.4160706
+    },
+    {
+      "name": "Volos",
+      "state": "Περιφέρεια Θεσσαλίας",
+      "country": "Ελλάς",
+      "lat": 39.3624833,
+      "lon": 22.9401864
+    },
+    {
+      "name": "Rhodes",
+      "state": "Αποκεντρωμένη Διοίκηση Αιγαίου",
+      "country": "Ελλάς",
+      "lat": 36.1725297,
+      "lon": 27.9194016
+    },
+    {
+      "name": "Ioannina",
+      "state": "Περιφέρεια Ηπείρου",
+      "country": "Ελλάς",
+      "lat": 39.6639818,
+      "lon": 20.8522784
+    },
+    {
+      "name": "Chania",
+      "state": "Περιφέρεια Κρήτης",
+      "country": "Ελλάς",
+      "lat": 35.5120831,
+      "lon": 24.0191544
+    },
+    {
+      "name": "Agrinio",
+      "state": "Περιφέρεια Δυτικής Ελλάδας",
+      "country": "Ελλάς",
+      "lat": 38.6248275,
+      "lon": 21.4094206
+    },
+    {
+      "name": "Katerini",
+      "state": "Περιφέρεια Κεντρικής Μακεδονίας",
+      "country": "Ελλάς",
+      "lat": 40.2713616,
+      "lon": 22.5087618
+    },
+    {
+      "name": "Kalamata",
+      "state": "Περιφέρεια Πελοποννήσου",
+      "country": "Ελλάς",
+      "lat": 37.0372714,
+      "lon": 22.110707
+    },
+    {
+      "name": "Kavala",
+      "state": "Περιφέρεια Ανατολικής Μακεδονίας και Θράκης",
+      "country": "Ελλάς",
+      "lat": 40.9369224,
+      "lon": 24.4122766
+    },
+    {
+      "name": "Serres",
+      "state": "Περιφέρεια Κεντρικής Μακεδονίας",
+      "country": "Ελλάς",
+      "lat": 41.0910711,
+      "lon": 23.5498031
+    },
+    {
+      "name": "Chalcis",
+      "state": "Περιφέρεια Στερεάς Ελλάδας",
+      "country": "Ελλάς",
+      "lat": 38.4623664,
+      "lon": 23.5946877
+    },
+    {
+      "name": "Lamia",
+      "state": "Περιφέρεια Στερεάς Ελλάδας",
+      "country": "Ελλάς",
+      "lat": 38.8993832,
+      "lon": 22.433582
+    },
+    {
+      "name": "Komotini",
+      "state": "Περιφέρεια Ανατολικής Μακεδονίας και Θράκης",
+      "country": "Ελλάς",
+      "lat": 41.1182,
+      "lon": 25.4035708
+    },
+    {
+      "name": "Kozani",
+      "state": "Περιφέρεια Δυτικής Μακεδονίας",
+      "country": "Ελλάς",
+      "lat": 40.3007259,
+      "lon": 21.7883119
+    },
+    {
+      "name": "Alexandroupoli",
+      "state": "Περιφέρεια Ανατολικής Μακεδονίας και Θράκης",
+      "country": "Ελλάς",
+      "lat": 40.845666,
+      "lon": 25.8778814
+    },
+    {
+      "name": "Veria",
+      "state": "Περιφέρεια Κεντρικής Μακεδονίας",
+      "country": "Ελλάς",
+      "lat": 40.5215342,
+      "lon": 22.2036834
+    }
+  ],
+  "Portugal": [
+    {
+      "name": "Lisbon",
+      "state": "",
+      "country": "Portugal",
+      "lat": 38.7077507,
+      "lon": -9.1365919
+    },
+    {
+      "name": "Porto",
+      "state": "",
+      "country": "Portugal",
+      "lat": 41.1502195,
+      "lon": -8.6103497
+    },
+    {
+      "name": "Vila Nova de Gaia",
+      "state": "",
+      "country": "Portugal",
+      "lat": 41.1292264,
+      "lon": -8.6057396
+    },
+    {
+      "name": "Amadora",
+      "state": "",
+      "country": "Portugal",
+      "lat": 38.758959,
+      "lon": -9.2365233
+    },
+    {
+      "name": "Braga",
+      "state": "",
+      "country": "Portugal",
+      "lat": 41.5510583,
+      "lon": -8.4280045
+    },
+    {
+      "name": "Funchal",
+      "state": "",
+      "country": "Portugal",
+      "lat": 32.6496497,
+      "lon": -16.9086783
+    },
+    {
+      "name": "Coimbra",
+      "state": "",
+      "country": "Portugal",
+      "lat": 40.2111931,
+      "lon": -8.4294632
+    },
+    {
+      "name": "Setúbal",
+      "state": "",
+      "country": "Portugal",
+      "lat": 38.5241783,
+      "lon": -8.8932341
+    },
+    {
+      "name": "Almada",
+      "state": "",
+      "country": "Portugal",
+      "lat": 38.6831302,
+      "lon": -9.1576301
+    },
+    {
+      "name": "Agualva-Cacém",
+      "state": "",
+      "country": "Portugal",
+      "lat": 38.7665177,
+      "lon": -9.2984777
+    },
+    {
+      "name": "Queluz",
+      "state": "",
+      "country": "Portugal",
+      "lat": 38.7565837,
+      "lon": -9.2545225
+    },
+    {
+      "name": "Rio de Mouro",
+      "state": "",
+      "country": "Portugal",
+      "lat": 38.7723657,
+      "lon": -9.3256751
+    },
+    {
+      "name": "Corroios",
+      "state": "",
+      "country": "Portugal",
+      "lat": 38.6415327,
+      "lon": -9.1522335
+    },
+    {
+      "name": "Barreiro",
+      "state": "",
+      "country": "Portugal",
+      "lat": 38.6340657,
+      "lon": -9.0478559
+    },
+    {
+      "name": "Évora",
+      "state": "",
+      "country": "Portugal",
+      "lat": 38.5707742,
+      "lon": -7.9092808
+    },
+    {
+      "name": "Faro",
+      "state": "",
+      "country": "Portugal",
+      "lat": 37.0162944,
+      "lon": -7.935182
+    },
+    {
+      "name": "Aveiro",
+      "state": "",
+      "country": "Portugal",
+      "lat": 40.640496,
+      "lon": -8.6537841
+    },
+    {
+      "name": "Viseu",
+      "state": "",
+      "country": "Portugal",
+      "lat": 40.6574713,
+      "lon": -7.9138664
+    },
+    {
+      "name": "Guimarães",
+      "state": "",
+      "country": "Portugal",
+      "lat": 41.4417677,
+      "lon": -8.2955712
+    },
+    {
+      "name": "Leiria",
+      "state": "",
+      "country": "Portugal",
+      "lat": 39.7437902,
+      "lon": -8.8071119
+    }
+  ],
+  "Czech Republic": [
+    {
+      "name": "Prague",
+      "state": "Praha",
+      "country": "Česko",
+      "lat": 50.0874654,
+      "lon": 14.4212535
+    },
+    {
+      "name": "Brno",
+      "state": "Jihomoravský kraj",
+      "country": "Česko",
+      "lat": 49.1922443,
+      "lon": 16.6113382
+    },
+    {
+      "name": "Ostrava",
+      "state": "Moravskoslezský kraj",
+      "country": "Česko",
+      "lat": 49.8349139,
+      "lon": 18.2820084
+    },
+    {
+      "name": "Plzeň",
+      "state": "Plzeňský kraj",
+      "country": "Česko",
+      "lat": 49.7477415,
+      "lon": 13.3775249
+    },
+    {
+      "name": "Liberec",
+      "state": "Liberecký kraj",
+      "country": "Česko",
+      "lat": 50.7702648,
+      "lon": 15.0583947
+    },
+    {
+      "name": "Olomouc",
+      "state": "Olomoucký kraj",
+      "country": "Česko",
+      "lat": 49.5940567,
+      "lon": 17.251143
+    },
+    {
+      "name": "České Budějovice",
+      "state": "Jihočeský kraj",
+      "country": "Česko",
+      "lat": 48.9747357,
+      "lon": 14.474285
+    },
+    {
+      "name": "Hradec Králové",
+      "state": "Královéhradecký kraj",
+      "country": "Česko",
+      "lat": 50.2092113,
+      "lon": 15.8327512
+    },
+    {
+      "name": "Ústí nad Labem",
+      "state": "Ústecký kraj",
+      "country": "Česko",
+      "lat": 50.6603327,
+      "lon": 14.0381357
+    },
+    {
+      "name": "Pardubice",
+      "state": "Pardubický kraj",
+      "country": "Česko",
+      "lat": 50.0385812,
+      "lon": 15.7791356
+    },
+    {
+      "name": "Zlín",
+      "state": "Zlínský kraj",
+      "country": "Česko",
+      "lat": 49.226766,
+      "lon": 17.6667415
+    },
+    {
+      "name": "Havířov",
+      "state": "Moravskoslezský kraj",
+      "country": "Česko",
+      "lat": 49.7801136,
+      "lon": 18.4368451
+    },
+    {
+      "name": "Kladno",
+      "state": "Pardubický kraj",
+      "country": "Česko",
+      "lat": 49.7724743,
+      "lon": 15.9822811
+    },
+    {
+      "name": "Most",
+      "state": "Ústecký kraj",
+      "country": "Česko",
+      "lat": 50.5032737,
+      "lon": 13.636112
+    },
+    {
+      "name": "Opava",
+      "state": "Moravskoslezský kraj",
+      "country": "Česko",
+      "lat": 49.9389004,
+      "lon": 17.9024174
+    },
+    {
+      "name": "Frýdek-Místek",
+      "state": "Moravskoslezský kraj",
+      "country": "Česko",
+      "lat": 49.685635,
+      "lon": 18.3483416
+    },
+    {
+      "name": "Jihlava",
+      "state": "Kraj Vysočina",
+      "country": "Česko",
+      "lat": 49.396064,
+      "lon": 15.5903065
+    },
+    {
+      "name": "Teplice",
+      "state": "Ústecký kraj",
+      "country": "Česko",
+      "lat": 50.6406644,
+      "lon": 13.8244461
+    },
+    {
+      "name": "Karviná",
+      "state": "Moravskoslezský kraj",
+      "country": "Česko",
+      "lat": 49.8542719,
+      "lon": 18.5416556
+    },
+    {
+      "name": "Děčín",
+      "state": "Ústecký kraj",
+      "country": "Česko",
+      "lat": 50.7824196,
+      "lon": 14.2147221
+    }
+  ],
+  "Hungary": [
+    {
+      "name": "Budapest",
+      "state": "Budapest",
+      "country": "Magyarország",
+      "lat": 47.4978789,
+      "lon": 19.0402383
+    },
+    {
+      "name": "Debrecen",
+      "state": "Észak-Alföld",
+      "country": "Magyarország",
+      "lat": 47.531399,
+      "lon": 21.6259782
+    },
+    {
+      "name": "Szeged",
+      "state": "Dél-Alföld",
+      "country": "Magyarország",
+      "lat": 46.2546312,
+      "lon": 20.1486016
+    },
+    {
+      "name": "Miskolc",
+      "state": "Észak-Magyarország",
+      "country": "Magyarország",
+      "lat": 48.1030643,
+      "lon": 20.7900429
+    },
+    {
+      "name": "Pécs",
+      "state": "Dél-Dunántúl",
+      "country": "Magyarország",
+      "lat": 46.0765092,
+      "lon": 18.2280317
+    },
+    {
+      "name": "Győr",
+      "state": "Nyugat-Dunántúl",
+      "country": "Magyarország",
+      "lat": 47.6835029,
+      "lon": 17.6342832
+    },
+    {
+      "name": "Nyíregyháza",
+      "state": "Észak-Alföld",
+      "country": "Magyarország",
+      "lat": 47.9557802,
+      "lon": 21.7167982
+    },
+    {
+      "name": "Kecskemét",
+      "state": "Dél-Alföld",
+      "country": "Magyarország",
+      "lat": 46.9073883,
+      "lon": 19.6917206
+    },
+    {
+      "name": "Székesfehérvár",
+      "state": "Közép-Dunántúl",
+      "country": "Magyarország",
+      "lat": 47.1910169,
+      "lon": 18.410811
+    },
+    {
+      "name": "Szombathely",
+      "state": "Nyugat-Dunántúl",
+      "country": "Magyarország",
+      "lat": 47.2291184,
+      "lon": 16.6187625
+    },
+    {
+      "name": "Szolnok",
+      "state": "Észak-Alföld",
+      "country": "Magyarország",
+      "lat": 47.1753833,
+      "lon": 20.1946279
+    },
+    {
+      "name": "Tatabánya",
+      "state": "Közép-Dunántúl",
+      "country": "Magyarország",
+      "lat": 47.583845,
+      "lon": 18.3979855
+    },
+    {
+      "name": "Kaposvár",
+      "state": "Dél-Dunántúl",
+      "country": "Magyarország",
+      "lat": 46.3564692,
+      "lon": 17.7886886
+    },
+    {
+      "name": "Érd",
+      "state": "Közép-Magyarország",
+      "country": "Magyarország",
+      "lat": 47.3772495,
+      "lon": 18.9213833
+    },
+    {
+      "name": "Veszprém",
+      "state": "Közép-Dunántúl",
+      "country": "Magyarország",
+      "lat": 47.0933824,
+      "lon": 17.9080406
+    },
+    {
+      "name": "Zalaegerszeg",
+      "state": "Nyugat-Dunántúl",
+      "country": "Magyarország",
+      "lat": 46.8415803,
+      "lon": 16.8456316
+    },
+    {
+      "name": "Sopron",
+      "state": "Nyugat-Dunántúl",
+      "country": "Magyarország",
+      "lat": 47.6803063,
+      "lon": 16.5983457
+    },
+    {
+      "name": "Eger",
+      "state": "Észak-Magyarország",
+      "country": "Magyarország",
+      "lat": 47.8989887,
+      "lon": 20.3743665
+    },
+    {
+      "name": "Nagykanizsa",
+      "state": "Nyugat-Dunántúl",
+      "country": "Magyarország",
+      "lat": 46.4548261,
+      "lon": 16.9923923
+    },
+    {
+      "name": "Dunakeszi",
+      "state": "Közép-Magyarország",
+      "country": "Magyarország",
+      "lat": 47.6316697,
+      "lon": 19.1294055
+    }
+  ],
+  "Romania": [
+    {
+      "name": "Bucharest",
+      "state": "",
+      "country": "România",
+      "lat": 44.4361414,
+      "lon": 26.102684
+    },
+    {
+      "name": "Cluj-Napoca",
+      "state": "",
+      "country": "România",
+      "lat": 46.769379,
+      "lon": 23.5899542
+    },
+    {
+      "name": "Timișoara",
+      "state": "",
+      "country": "România",
+      "lat": 45.7538355,
+      "lon": 21.2257474
+    },
+    {
+      "name": "Iași",
+      "state": "",
+      "country": "România",
+      "lat": 47.1615598,
+      "lon": 27.5837814
+    },
+    {
+      "name": "Constanța",
+      "state": "",
+      "country": "România",
+      "lat": 44.1767161,
+      "lon": 28.6507598
+    },
+    {
+      "name": "Craiova",
+      "state": "",
+      "country": "România",
+      "lat": 44.3190159,
+      "lon": 23.7965614
+    },
+    {
+      "name": "Brașov",
+      "state": "",
+      "country": "România",
+      "lat": 45.6525105,
+      "lon": 25.6105654
+    },
+    {
+      "name": "Galați",
+      "state": "",
+      "country": "România",
+      "lat": 45.4338215,
+      "lon": 28.0549395
+    },
+    {
+      "name": "Ploiești",
+      "state": "",
+      "country": "România",
+      "lat": 44.9417468,
+      "lon": 26.0236504
+    },
+    {
+      "name": "Oradea",
+      "state": "",
+      "country": "România",
+      "lat": 47.0549163,
+      "lon": 21.9285231
+    },
+    {
+      "name": "Brăila",
+      "state": "",
+      "country": "România",
+      "lat": 45.2716092,
+      "lon": 27.9742932
+    },
+    {
+      "name": "Arad",
+      "state": "",
+      "country": "România",
+      "lat": 46.1753793,
+      "lon": 21.3196342
+    },
+    {
+      "name": "Pitești",
+      "state": "",
+      "country": "România",
+      "lat": 44.8572882,
+      "lon": 24.8721156
+    },
+    {
+      "name": "Sibiu",
+      "state": "",
+      "country": "România",
+      "lat": 45.7973912,
+      "lon": 24.1519202
+    },
+    {
+      "name": "Bacău",
+      "state": "",
+      "country": "România",
+      "lat": 46.5560493,
+      "lon": 26.9153557
+    },
+    {
+      "name": "Târgu Mureș",
+      "state": "",
+      "country": "România",
+      "lat": 46.5446253,
+      "lon": 24.561196
+    },
+    {
+      "name": "Baia Mare",
+      "state": "",
+      "country": "România",
+      "lat": 47.6565584,
+      "lon": 23.5719843
+    },
+    {
+      "name": "Buzău",
+      "state": "",
+      "country": "România",
+      "lat": 45.2692582,
+      "lon": 26.7748173
+    },
+    {
+      "name": "Botoșani",
+      "state": "",
+      "country": "România",
+      "lat": 47.8528263,
+      "lon": 26.759334
+    },
+    {
+      "name": "Satu Mare",
+      "state": "",
+      "country": "România",
+      "lat": 47.7891763,
+      "lon": 22.8725598
+    }
+  ],
+  "Venezuela": [
+    {
+      "name": "Caracas",
+      "state": "Distrito Capital",
+      "country": "Venezuela",
+      "lat": 10.5060934,
+      "lon": -66.9146008
+    },
+    {
+      "name": "Maracaibo",
+      "state": "Zulia",
+      "country": "Venezuela",
+      "lat": 10.6498095,
+      "lon": -71.6443596
+    },
+    {
+      "name": "Valencia",
+      "state": "Carabobo",
+      "country": "Venezuela",
+      "lat": 10.170026,
+      "lon": -68.0003987
+    },
+    {
+      "name": "Barquisimeto",
+      "state": "Lara",
+      "country": "Venezuela",
+      "lat": 10.0774374,
+      "lon": -69.3222293
+    },
+    {
+      "name": "Maracay",
+      "state": "Aragua",
+      "country": "Venezuela",
+      "lat": 10.2375144,
+      "lon": -67.5890216
+    },
+    {
+      "name": "Ciudad Guayana",
+      "state": "Bolívar",
+      "country": "Venezuela",
+      "lat": 8.3223763,
+      "lon": -62.6896622
+    },
+    {
+      "name": "Barcelona",
+      "state": "Anzoátegui",
+      "country": "Venezuela",
+      "lat": 10.1325951,
+      "lon": -64.6819583
+    },
+    {
+      "name": "Maturín",
+      "state": "Monagas",
+      "country": "Venezuela",
+      "lat": 9.7422774,
+      "lon": -63.1888854
+    },
+    {
+      "name": "Puerto La Cruz",
+      "state": "Anzoátegui",
+      "country": "Venezuela",
+      "lat": 10.2028617,
+      "lon": -64.6307626
+    },
+    {
+      "name": "Petare",
+      "state": "Miranda",
+      "country": "Venezuela",
+      "lat": 10.4787104,
+      "lon": -66.8072228
+    },
+    {
+      "name": "Turmero",
+      "state": "Aragua",
+      "country": "Venezuela",
+      "lat": 10.2217183,
+      "lon": -67.4865808
+    },
+    {
+      "name": "Ciudad Bolívar",
+      "state": "Bolívar",
+      "country": "Venezuela",
+      "lat": 8.1028532,
+      "lon": -63.5469562
+    },
+    {
+      "name": "Mérida",
+      "state": "Mérida",
+      "country": "Venezuela",
+      "lat": 8.5816963,
+      "lon": -71.1658075
+    },
+    {
+      "name": "Santa Teresa del Tuy",
+      "state": "Miranda",
+      "country": "Venezuela",
+      "lat": 10.2388567,
+      "lon": -66.6722608
+    },
+    {
+      "name": "Cumaná",
+      "state": "Sucre",
+      "country": "Venezuela",
+      "lat": 10.4495706,
+      "lon": -64.1578046
+    },
+    {
+      "name": "San Cristóbal",
+      "state": "Táchira",
+      "country": "Venezuela",
+      "lat": 7.7756663,
+      "lon": -72.2214154
+    },
+    {
+      "name": "Cabimas",
+      "state": "Zulia",
+      "country": "Venezuela",
+      "lat": 10.395075,
+      "lon": -71.4414049
+    },
+    {
+      "name": "Barinas",
+      "state": "Barinas",
+      "country": "Venezuela",
+      "lat": 8.1739775,
+      "lon": -69.9755552
+    },
+    {
+      "name": "Guatire",
+      "state": "Miranda",
+      "country": "Venezuela",
+      "lat": 10.4684588,
+      "lon": -66.5431115
+    },
+    {
+      "name": "Los Teques",
+      "state": "Miranda",
+      "country": "Venezuela",
+      "lat": 10.3437382,
+      "lon": -67.0453091
+    }
+  ],
+  "Kazakhstan": [
+    {
+      "name": "Almaty",
+      "state": "",
+      "country": "Қазақстан",
+      "lat": 43.2363924,
+      "lon": 76.9457275
+    },
+    {
+      "name": "Astana",
+      "state": "Астана",
+      "country": "Қазақстан",
+      "lat": 51.1282205,
+      "lon": 71.4306682
+    },
+    {
+      "name": "Shymkent",
+      "state": "",
+      "country": "Қазақстан",
+      "lat": 42.3146962,
+      "lon": 69.5883282
+    },
+    {
+      "name": "Karaganda",
+      "state": "Қарағанды облысы",
+      "country": "Қазақстан",
+      "lat": 49.1767322,
+      "lon": 74.1811272
+    },
+    {
+      "name": "Aktobe",
+      "state": "Ақтөбе облысы",
+      "country": "Қазақстан",
+      "lat": 50.3003589,
+      "lon": 57.1545752
+    },
+    {
+      "name": "Taraz",
+      "state": "Жамбыл облысы",
+      "country": "Қазақстан",
+      "lat": 42.8778381,
+      "lon": 71.3519903
+    },
+    {
+      "name": "Pavlodar",
+      "state": "Павлодар облысы",
+      "country": "Қазақстан",
+      "lat": 51.8111545,
+      "lon": 76.4285287
+    },
+    {
+      "name": "Ust-Kamenogorsk",
+      "state": "Шығыс Қазақстан облысы",
+      "country": "Қазақстан",
+      "lat": 49.9484438,
+      "lon": 82.6274791
+    },
+    {
+      "name": "Semey",
+      "state": "Абай облысы",
+      "country": "Қазақстан",
+      "lat": 50.404377,
+      "lon": 80.2496637
+    },
+    {
+      "name": "Atyrau",
+      "state": "Атырау облысы",
+      "country": "Қазақстан",
+      "lat": 47.6605827,
+      "lon": 50.806203
+    },
+    {
+      "name": "Kostanay",
+      "state": "Қостанай облысы",
+      "country": "Қазақстан",
+      "lat": 52.0615626,
+      "lon": 62.9372689
+    },
+    {
+      "name": "Kyzylorda",
+      "state": "Қызылорда облысы",
+      "country": "Қазақстан",
+      "lat": 45.2058853,
+      "lon": 63.9155202
+    },
+    {
+      "name": "Oral",
+      "state": "Батыс Қазақстан облысы",
+      "country": "Қазақстан",
+      "lat": 51.2040697,
+      "lon": 51.3707863
+    },
+    {
+      "name": "Petropavl",
+      "state": "Солтүстік Қазақстан облысы",
+      "country": "Қазақстан",
+      "lat": 54.8668104,
+      "lon": 69.1334984
+    },
+    {
+      "name": "Aktau",
+      "state": "Маңғыстау облысы",
+      "country": "Қазақстан",
+      "lat": 43.6353364,
+      "lon": 51.168222
+    },
+    {
+      "name": "Temirtau",
+      "state": "Қарағанды облысы",
+      "country": "Қазақстан",
+      "lat": 50.0587825,
+      "lon": 72.9535681
+    },
+    {
+      "name": "Turkistan",
+      "state": "Түркістан облысы",
+      "country": "Қазақстан",
+      "lat": 43.3019457,
+      "lon": 68.2703698
+    },
+    {
+      "name": "Kokshetau",
+      "state": "Ақмола облысы",
+      "country": "Қазақстан",
+      "lat": 53.2852054,
+      "lon": 69.3814676
+    },
+    {
+      "name": "Rudny",
+      "state": "Қостанай облысы",
+      "country": "Қазақстан",
+      "lat": 52.964458,
+      "lon": 63.133488
+    },
+    {
+      "name": "Ekibastuz",
+      "state": "Павлодар облысы",
+      "country": "Қазақстан",
+      "lat": 51.7275817,
+      "lon": 75.3288511
+    }
+  ],
+  "Ecuador": [
+    {
+      "name": "Quito",
+      "state": "",
+      "country": "Ecuador",
+      "lat": -0.2201641,
+      "lon": -78.5123274
+    },
+    {
+      "name": "Guayaquil",
+      "state": "Guayas",
+      "country": "Ecuador",
+      "lat": -2.1900572,
+      "lon": -79.8868669
+    },
+    {
+      "name": "Cuenca",
+      "state": "Azuay",
+      "country": "Ecuador",
+      "lat": -2.8974072,
+      "lon": -79.0041726
+    },
+    {
+      "name": "Santo Domingo",
+      "state": "Santo Domingo de los Tsáchilas",
+      "country": "Ecuador",
+      "lat": -0.2546212,
+      "lon": -79.1686724
+    },
+    {
+      "name": "Machala",
+      "state": "El Oro",
+      "country": "Ecuador",
+      "lat": -3.3148937,
+      "lon": -79.9512804
+    },
+    {
+      "name": "Durán",
+      "state": "Guayas",
+      "country": "Ecuador",
+      "lat": -2.2127014,
+      "lon": -79.7895887
+    },
+    {
+      "name": "Manta",
+      "state": "Manabí",
+      "country": "Ecuador",
+      "lat": -0.9486443,
+      "lon": -80.7190822
+    },
+    {
+      "name": "Portoviejo",
+      "state": "Manabí",
+      "country": "Ecuador",
+      "lat": -1.05282,
+      "lon": -80.4534134
+    },
+    {
+      "name": "Loja",
+      "state": "Loja",
+      "country": "Ecuador",
+      "lat": -4.0528506,
+      "lon": -79.8053425
+    },
+    {
+      "name": "Ambato",
+      "state": "Tungurahua",
+      "country": "Ecuador",
+      "lat": -1.2422413,
+      "lon": -78.6287594
+    },
+    {
+      "name": "Esmeraldas",
+      "state": "Esmeraldas",
+      "country": "Ecuador",
+      "lat": 0.7343619,
+      "lon": -79.3858867
+    },
+    {
+      "name": "Quevedo",
+      "state": "Los Ríos",
+      "country": "Ecuador",
+      "lat": -1.0669701,
+      "lon": -79.4776812
+    },
+    {
+      "name": "Riobamba",
+      "state": "Chimborazo",
+      "country": "Ecuador",
+      "lat": -1.6732765,
+      "lon": -78.6482479
+    },
+    {
+      "name": "Milagro",
+      "state": "Guayas",
+      "country": "Ecuador",
+      "lat": -2.1179635,
+      "lon": -79.5552042
+    },
+    {
+      "name": "Ibarra",
+      "state": "Imbabura",
+      "country": "Ecuador",
+      "lat": 0.515937,
+      "lon": -78.1329448
+    },
+    {
+      "name": "La Libertad",
+      "state": "Santa Elena",
+      "country": "Ecuador",
+      "lat": -2.2208117,
+      "lon": -80.9077647
+    },
+    {
+      "name": "Babahoyo",
+      "state": "Los Ríos",
+      "country": "Ecuador",
+      "lat": -1.8762599,
+      "lon": -79.5068917
+    },
+    {
+      "name": "Sangolquí",
+      "state": "",
+      "country": "Ecuador",
+      "lat": -0.3288822,
+      "lon": -78.4483476
+    },
+    {
+      "name": "Latacunga",
+      "state": "Cotopaxi",
+      "country": "Ecuador",
+      "lat": -0.9340311,
+      "lon": -78.6145758
+    },
+    {
+      "name": "Daule",
+      "state": "Guayas",
+      "country": "Ecuador",
+      "lat": -1.9200069,
+      "lon": -79.9129307
+    }
+  ],
+  "Bolivia": [
+    {
+      "name": "Santa Cruz de la Sierra",
+      "state": "Santa Cruz",
+      "country": "Bolivia",
+      "lat": -17.7834217,
+      "lon": -63.1820853
+    },
+    {
+      "name": "La Paz",
+      "state": "La Paz",
+      "country": "Bolivia",
+      "lat": -16.4955455,
+      "lon": -68.1336229
+    },
+    {
+      "name": "El Alto",
+      "state": "La Paz",
+      "country": "Bolivia",
+      "lat": -16.5048228,
+      "lon": -68.1624337
+    },
+    {
+      "name": "Cochabamba",
+      "state": "Cochabamba",
+      "country": "Bolivia",
+      "lat": -17.4012458,
+      "lon": -66.1675681
+    },
+    {
+      "name": "Sucre",
+      "state": "Chuquisaca",
+      "country": "Bolivia",
+      "lat": -19.0477251,
+      "lon": -65.2594306
+    },
+    {
+      "name": "Oruro",
+      "state": "Oruro",
+      "country": "Bolivia",
+      "lat": -18.666667,
+      "lon": -67.666667
+    },
+    {
+      "name": "Tarija",
+      "state": "Tarija",
+      "country": "Bolivia",
+      "lat": -21.583333,
+      "lon": -63.833333
+    },
+    {
+      "name": "Potosí",
+      "state": "Potosí",
+      "country": "Bolivia",
+      "lat": -19.5892896,
+      "lon": -65.7534713
+    },
+    {
+      "name": "Sacaba",
+      "state": "Cochabamba",
+      "country": "Bolivia",
+      "lat": -17.320452,
+      "lon": -66.0459591
+    },
+    {
+      "name": "Montero",
+      "state": "Santa Cruz",
+      "country": "Bolivia",
+      "lat": -17.3420202,
+      "lon": -63.2557687
+    },
+    {
+      "name": "Trinidad",
+      "state": "Beni",
+      "country": "Bolivia",
+      "lat": -14.8349438,
+      "lon": -64.9044936
+    },
+    {
+      "name": "Yacuiba",
+      "state": "Tarija",
+      "country": "Bolivia",
+      "lat": -22.0136831,
+      "lon": -63.6781103
+    },
+    {
+      "name": "Riberalta",
+      "state": "Beni",
+      "country": "Bolivia",
+      "lat": -10.997342,
+      "lon": -66.0751504
+    },
+    {
+      "name": "Quillacollo",
+      "state": "Cochabamba",
+      "country": "Bolivia",
+      "lat": -17.3754214,
+      "lon": -66.3669373
+    },
+    {
+      "name": "Warnes",
+      "state": "Santa Cruz",
+      "country": "Bolivia",
+      "lat": -17.5100818,
+      "lon": -63.1647184
+    },
+    {
+      "name": "Cobija",
+      "state": "Pando",
+      "country": "Bolivia",
+      "lat": -11.0184614,
+      "lon": -68.7538149
+    },
+    {
+      "name": "Villamontes",
+      "state": "Tarija",
+      "country": "Bolivia",
+      "lat": -21.2589001,
+      "lon": -63.4722606
+    },
+    {
+      "name": "Guayaramerín",
+      "state": "Beni",
+      "country": "Bolivia",
+      "lat": -10.818915,
+      "lon": -65.3550455
+    },
+    {
+      "name": "Bermejo",
+      "state": "Tarija",
+      "country": "Bolivia",
+      "lat": -22.7327163,
+      "lon": -64.3427757
+    },
+    {
+      "name": "Camiri",
+      "state": "Santa Cruz",
+      "country": "Bolivia",
+      "lat": -20.0390682,
+      "lon": -63.5203507
+    }
+  ],
+  "Uruguay": [
+    {
+      "name": "Montevideo",
+      "state": "Montevideo",
+      "country": "Uruguay",
+      "lat": -34.9058916,
+      "lon": -56.1913095
+    },
+    {
+      "name": "Salto",
+      "state": "Salto",
+      "country": "Uruguay",
+      "lat": -31.38889,
+      "lon": -57.9608876
+    },
+    {
+      "name": "Ciudad de la Costa",
+      "state": "Canelones",
+      "country": "Uruguay",
+      "lat": -34.8255833,
+      "lon": -55.958956
+    },
+    {
+      "name": "Paysandú",
+      "state": "Paysandú",
+      "country": "Uruguay",
+      "lat": -32.3217257,
+      "lon": -58.0892136
+    },
+    {
+      "name": "Las Piedras",
+      "state": "Canelones",
+      "country": "Uruguay",
+      "lat": -34.7274904,
+      "lon": -56.2164982
+    },
+    {
+      "name": "Rivera",
+      "state": "Rivera",
+      "country": "Uruguay",
+      "lat": -30.900058,
+      "lon": -55.5408151
+    },
+    {
+      "name": "Maldonado",
+      "state": "Maldonado",
+      "country": "Uruguay",
+      "lat": -34.9087162,
+      "lon": -54.9582718
+    },
+    {
+      "name": "Tacuarembó",
+      "state": "Tacuarembó",
+      "country": "Uruguay",
+      "lat": -32.166667,
+      "lon": -55.5
+    },
+    {
+      "name": "Melo",
+      "state": "Cerro Largo",
+      "country": "Uruguay",
+      "lat": -32.3680849,
+      "lon": -54.1697146
+    },
+    {
+      "name": "Mercedes",
+      "state": "Soriano",
+      "country": "Uruguay",
+      "lat": -33.2484204,
+      "lon": -58.0298671
+    },
+    {
+      "name": "Artigas",
+      "state": "Artigas",
+      "country": "Uruguay",
+      "lat": -30.6170756,
+      "lon": -56.9373451
+    },
+    {
+      "name": "Minas",
+      "state": "Lavalleja",
+      "country": "Uruguay",
+      "lat": -34.3773987,
+      "lon": -55.2382144
+    },
+    {
+      "name": "San José de Mayo",
+      "state": "San José",
+      "country": "Uruguay",
+      "lat": -34.3396521,
+      "lon": -56.7143155
+    },
+    {
+      "name": "Durazno",
+      "state": "Durazno",
+      "country": "Uruguay",
+      "lat": -33.0833329,
+      "lon": -56.0833331
+    },
+    {
+      "name": "Florida",
+      "state": "Florida",
+      "country": "Uruguay",
+      "lat": -33.833333,
+      "lon": -55.916667
+    },
+    {
+      "name": "Treinta y Tres",
+      "state": "Treinta y Tres",
+      "country": "Uruguay",
+      "lat": -33.0,
+      "lon": -54.25
+    },
+    {
+      "name": "Rocha",
+      "state": "Rocha",
+      "country": "Uruguay",
+      "lat": -34.0,
+      "lon": -54.0
+    },
+    {
+      "name": "Colonia del Sacramento",
+      "state": "Colonia",
+      "country": "Uruguay",
+      "lat": -34.4698592,
+      "lon": -57.8433679
+    },
+    {
+      "name": "Fray Bentos",
+      "state": "Río Negro",
+      "country": "Uruguay",
+      "lat": -33.1165167,
+      "lon": -58.3130977
+    },
+    {
+      "name": "Carmelo",
+      "state": "Colonia",
+      "country": "Uruguay",
+      "lat": -33.9967827,
+      "lon": -58.2836485
+    }
+  ],
+  "Paraguay": [
+    {
+      "name": "Asunción",
+      "state": "Distrito Capital",
+      "country": "Paraguay / Paraguái",
+      "lat": -25.2800459,
+      "lon": -57.6343814
+    },
+    {
+      "name": "Ciudad del Este",
+      "state": "Alto Paraná",
+      "country": "Paraguay / Paraguái",
+      "lat": -25.5169015,
+      "lon": -54.6168645
+    },
+    {
+      "name": "San Lorenzo",
+      "state": "Central",
+      "country": "Paraguay / Paraguái",
+      "lat": -25.3425224,
+      "lon": -57.509397
+    },
+    {
+      "name": "Luque",
+      "state": "Central",
+      "country": "Paraguay / Paraguái",
+      "lat": -25.2665417,
+      "lon": -57.4926928
+    },
+    {
+      "name": "Capiatá",
+      "state": "Central",
+      "country": "Paraguay / Paraguái",
+      "lat": -25.3548171,
+      "lon": -57.4427315
+    },
+    {
+      "name": "Lambaré",
+      "state": "Central",
+      "country": "Paraguay / Paraguái",
+      "lat": -25.3455354,
+      "lon": -57.6261456
+    },
+    {
+      "name": "Fernando de la Mora",
+      "state": "Central",
+      "country": "Paraguay / Paraguái",
+      "lat": -25.3281673,
+      "lon": -57.5521492
+    },
+    {
+      "name": "Limpio",
+      "state": "Central",
+      "country": "Paraguay / Paraguái",
+      "lat": -25.1728768,
+      "lon": -57.4778284
+    },
+    {
+      "name": "Ñemby",
+      "state": "Central",
+      "country": "Paraguay / Paraguái",
+      "lat": -25.3924542,
+      "lon": -57.5471112
+    },
+    {
+      "name": "Encarnación",
+      "state": "Itapúa",
+      "country": "Paraguay / Paraguái",
+      "lat": -27.2755835,
+      "lon": -55.8750796
+    },
+    {
+      "name": "Mariano Roque Alonso",
+      "state": "Central",
+      "country": "Paraguay / Paraguái",
+      "lat": -25.2118123,
+      "lon": -57.5346458
+    },
+    {
+      "name": "Pedro Juan Caballero",
+      "state": "Amambay",
+      "country": "Paraguay / Paraguái",
+      "lat": -22.5497781,
+      "lon": -55.7384312
+    },
+    {
+      "name": "Itauguá",
+      "state": "Central",
+      "country": "Paraguay / Paraguái",
+      "lat": -25.3947318,
+      "lon": -57.3532892
+    },
+    {
+      "name": "Villa Elisa",
+      "state": "Central",
+      "country": "Paraguay / Paraguái",
+      "lat": -25.3715212,
+      "lon": -57.5898279
+    },
+    {
+      "name": "Caaguazú",
+      "state": "Caaguazú",
+      "country": "Paraguay / Paraguái",
+      "lat": -25.333333,
+      "lon": -55.833333
+    },
+    {
+      "name": "Villarrica",
+      "state": "Guairá",
+      "country": "Paraguay / Paraguái",
+      "lat": -25.7809839,
+      "lon": -56.4478765
+    },
+    {
+      "name": "Coronel Oviedo",
+      "state": "Región Oriental",
+      "country": "Paraguay / Paraguái",
+      "lat": -25.450055,
+      "lon": -56.4406994
+    },
+    {
+      "name": "Concepción",
+      "state": "Concepción",
+      "country": "Paraguay / Paraguái",
+      "lat": -23.1775,
+      "lon": -57.1675
+    },
+    {
+      "name": "Presidente Franco",
+      "state": "Alto Paraná",
+      "country": "Paraguay / Paraguái",
+      "lat": -25.5651763,
+      "lon": -54.6156341
+    },
+    {
+      "name": "San Antonio",
+      "state": "Central",
+      "country": "Paraguay / Paraguái",
+      "lat": -25.411516,
+      "lon": -57.5758258
+    }
+  ],
+  "Dominican Republic": [
+    {
+      "name": "Santo Domingo",
+      "state": "Distrito Nacional",
+      "country": "República Dominicana",
+      "lat": 18.4713858,
+      "lon": -69.8918436
+    },
+    {
+      "name": "Santiago de los Caballeros",
+      "state": "Santiago",
+      "country": "República Dominicana",
+      "lat": 19.4503932,
+      "lon": -70.6909047
+    },
+    {
+      "name": "La Romana",
+      "state": "La Romana",
+      "country": "República Dominicana",
+      "lat": 18.4230137,
+      "lon": -68.9661104
+    },
+    {
+      "name": "San Pedro de Macorís",
+      "state": "San Pedro de Macorís",
+      "country": "República Dominicana",
+      "lat": 18.6078948,
+      "lon": -69.4885492
+    },
+    {
+      "name": "San Cristóbal",
+      "state": "San Cristóbal",
+      "country": "República Dominicana",
+      "lat": 18.4174531,
+      "lon": -70.1103346
+    },
+    {
+      "name": "Puerto Plata",
+      "state": "Puerto Plata",
+      "country": "República Dominicana",
+      "lat": 19.7891616,
+      "lon": -70.6926181
+    },
+    {
+      "name": "San Francisco de Macorís",
+      "state": "Duarte",
+      "country": "República Dominicana",
+      "lat": 19.2972812,
+      "lon": -70.2533206
+    },
+    {
+      "name": "La Vega",
+      "state": "La Vega",
+      "country": "República Dominicana",
+      "lat": 19.0311497,
+      "lon": -70.7274246
+    },
+    {
+      "name": "Higüey",
+      "state": "La Altagracia",
+      "country": "República Dominicana",
+      "lat": 18.6131313,
+      "lon": -68.7114484
+    },
+    {
+      "name": "Concepción de La Vega",
+      "state": "La Vega",
+      "country": "República Dominicana",
+      "lat": 19.2243992,
+      "lon": -70.5303435
+    },
+    {
+      "name": "Moca",
+      "state": "Espaillat",
+      "country": "República Dominicana",
+      "lat": 19.394647,
+      "lon": -70.5261566
+    },
+    {
+      "name": "Boca Chica",
+      "state": "Santo Domingo",
+      "country": "República Dominicana",
+      "lat": 18.4570748,
+      "lon": -69.61487
+    },
+    {
+      "name": "Baní",
+      "state": "Peravia",
+      "country": "República Dominicana",
+      "lat": 18.2777204,
+      "lon": -70.3320746
+    },
+    {
+      "name": "Bonao",
+      "state": "Monseñor Nouel",
+      "country": "República Dominicana",
+      "lat": 18.9426446,
+      "lon": -70.4414197
+    },
+    {
+      "name": "San Juan de la Maguana",
+      "state": "San Juan",
+      "country": "República Dominicana",
+      "lat": 18.8973876,
+      "lon": -71.2411711
+    },
+    {
+      "name": "Cotuí",
+      "state": "Sánchez Ramírez",
+      "country": "República Dominicana",
+      "lat": 19.058468,
+      "lon": -70.1533738
+    },
+    {
+      "name": "Azua",
+      "state": "Azua",
+      "country": "República Dominicana",
+      "lat": 18.6257252,
+      "lon": -70.9046478
+    },
+    {
+      "name": "Hato Mayor",
+      "state": "Hato Mayor",
+      "country": "República Dominicana",
+      "lat": 18.7089525,
+      "lon": -69.3256524
+    },
+    {
+      "name": "Nagua",
+      "state": "María Trinidad Sánchez",
+      "country": "República Dominicana",
+      "lat": 19.3769296,
+      "lon": -69.8462589
+    },
+    {
+      "name": "Mao",
+      "state": "Valverde",
+      "country": "República Dominicana",
+      "lat": 19.5336525,
+      "lon": -71.0416476
+    }
+  ],
+  "Panama": [
+    {
+      "name": "Panama City",
+      "state": "Provincia de Panamá",
+      "country": "Panamá",
+      "lat": 8.9714493,
+      "lon": -79.5341802
+    },
+    {
+      "name": "San Miguelito",
+      "state": "Provincia de Panamá",
+      "country": "Panamá",
+      "lat": 9.0551061,
+      "lon": -79.4933063
+    },
+    {
+      "name": "Tocumen",
+      "state": "Provincia de Panamá",
+      "country": "Panamá",
+      "lat": 9.0920363,
+      "lon": -79.3816691
+    },
+    {
+      "name": "David",
+      "state": "Chiriquí",
+      "country": "Panamá",
+      "lat": 8.4371469,
+      "lon": -82.4286281
+    },
+    {
+      "name": "Arraiján",
+      "state": "Panamá Oeste",
+      "country": "Panamá",
+      "lat": 8.9898564,
+      "lon": -79.6793267
+    },
+    {
+      "name": "Colón",
+      "state": "Colón",
+      "country": "Panamá",
+      "lat": 9.3553005,
+      "lon": -79.8974085
+    },
+    {
+      "name": "Las Cumbres",
+      "state": "Provincia de Panamá",
+      "country": "Panamá",
+      "lat": 9.0923462,
+      "lon": -79.5556268
+    },
+    {
+      "name": "La Chorrera",
+      "state": "Panamá Oeste",
+      "country": "Panamá",
+      "lat": 8.883567,
+      "lon": -79.7799498
+    },
+    {
+      "name": "Pacora",
+      "state": "Provincia de Panamá",
+      "country": "Panamá",
+      "lat": 9.0829832,
+      "lon": -79.2903667
+    },
+    {
+      "name": "Santiago",
+      "state": "Veraguas",
+      "country": "Panamá",
+      "lat": 8.0989867,
+      "lon": -80.9803978
+    },
+    {
+      "name": "Chitré",
+      "state": "Herrera",
+      "country": "Panamá",
+      "lat": 7.9633096,
+      "lon": -80.4283492
+    },
+    {
+      "name": "Penonomé",
+      "state": "Coclé",
+      "country": "Panamá",
+      "lat": 8.5204989,
+      "lon": -80.359579
+    },
+    {
+      "name": "La Concepción",
+      "state": "Chiriquí",
+      "country": "Panamá",
+      "lat": 8.5174522,
+      "lon": -82.6156125
+    },
+    {
+      "name": "Aguadulce",
+      "state": "Coclé",
+      "country": "Panamá",
+      "lat": 8.2088484,
+      "lon": -80.6035665
+    },
+    {
+      "name": "Changuinola",
+      "state": "Bocas del Toro",
+      "country": "Panamá",
+      "lat": 9.3991899,
+      "lon": -82.4936546
+    },
+    {
+      "name": "Vista Alegre",
+      "state": "Emberá-Wounaan",
+      "country": "Panamá",
+      "lat": 8.1200787,
+      "lon": -77.6156272
+    },
+    {
+      "name": "Alcalde Díaz",
+      "state": "Provincia de Panamá",
+      "country": "Panamá",
+      "lat": 9.1174831,
+      "lon": -79.5408882
+    },
+    {
+      "name": "Bugaba",
+      "state": "Chiriquí",
+      "country": "Panamá",
+      "lat": 8.5815951,
+      "lon": -82.6936679
+    },
+    {
+      "name": "Los Santos",
+      "state": "Los Santos",
+      "country": "Panamá",
+      "lat": 7.7056416,
+      "lon": -80.0873345
+    },
+    {
+      "name": "Pedregal",
+      "state": "Chiriquí",
+      "country": "Panamá",
+      "lat": 8.3678082,
+      "lon": -82.4347489
+    }
+  ],
+  "Costa Rica": [
+    {
+      "name": "San José",
+      "state": "San José",
+      "country": "Costa Rica",
+      "lat": 9.9327707,
+      "lon": -84.0796144
+    },
+    {
+      "name": "Limón",
+      "state": "Limón",
+      "country": "Costa Rica",
+      "lat": 10.0999089,
+      "lon": -83.3431873
+    },
+    {
+      "name": "Alajuela",
+      "state": "Alajuela",
+      "country": "Costa Rica",
+      "lat": 10.4523317,
+      "lon": -84.4663284
+    },
+    {
+      "name": "Heredia",
+      "state": "Heredia",
+      "country": "Costa Rica",
+      "lat": 10.3767813,
+      "lon": -84.0139721
+    },
+    {
+      "name": "Cartago",
+      "state": "Cartago",
+      "country": "Costa Rica",
+      "lat": 9.8157323,
+      "lon": -83.6943809
+    },
+    {
+      "name": "Puntarenas",
+      "state": "Puntarenas",
+      "country": "Costa Rica",
+      "lat": 9.095328,
+      "lon": -84.2003038
+    },
+    {
+      "name": "Liberia",
+      "state": "Guanacaste",
+      "country": "Costa Rica",
+      "lat": 10.62967,
+      "lon": -85.4382519
+    },
+    {
+      "name": "Paraíso",
+      "state": "Cartago",
+      "country": "Costa Rica",
+      "lat": 9.7312992,
+      "lon": -83.7737072
+    },
+    {
+      "name": "Pococí",
+      "state": "Limón",
+      "country": "Costa Rica",
+      "lat": 10.5017988,
+      "lon": -83.6557954
+    },
+    {
+      "name": "San Vicente",
+      "state": "San José",
+      "country": "Costa Rica",
+      "lat": 9.963659,
+      "lon": -84.0472869
+    },
+    {
+      "name": "San Isidro",
+      "state": "Heredia",
+      "country": "Costa Rica",
+      "lat": 10.0297134,
+      "lon": -84.0321109
+    },
+    {
+      "name": "Curridabat",
+      "state": "San José",
+      "country": "Costa Rica",
+      "lat": 9.9161655,
+      "lon": -84.0308421
+    },
+    {
+      "name": "San Carlos",
+      "state": "Alajuela",
+      "country": "Costa Rica",
+      "lat": 10.6203663,
+      "lon": -84.425816
+    },
+    {
+      "name": "Desamparados",
+      "state": "San José",
+      "country": "Costa Rica",
+      "lat": 9.8112357,
+      "lon": -84.0699087
+    },
+    {
+      "name": "Purral",
+      "state": "San José",
+      "country": "Costa Rica",
+      "lat": 9.9552135,
+      "lon": -84.0307191
+    },
+    {
+      "name": "San Felipe",
+      "state": "San José",
+      "country": "Costa Rica",
+      "lat": 9.9125008,
+      "lon": -84.1149472
+    },
+    {
+      "name": "Pérez Zeledón",
+      "state": "San José",
+      "country": "Costa Rica",
+      "lat": 9.3364652,
+      "lon": -83.6484115
+    },
+    {
+      "name": "Escazú",
+      "state": "San José",
+      "country": "Costa Rica",
+      "lat": 9.9160325,
+      "lon": -84.1409844
+    },
+    {
+      "name": "Guadalupe",
+      "state": "San José",
+      "country": "Costa Rica",
+      "lat": 9.9465312,
+      "lon": -84.0535081
+    },
+    {
+      "name": "Ipís",
+      "state": "San José",
+      "country": "Costa Rica",
+      "lat": 9.9657474,
+      "lon": -84.0177317
+    }
+  ],
+  "Guatemala": [
+    {
+      "name": "Guatemala City",
+      "state": "Departamento de Guatemala",
+      "country": "Guatemala",
+      "lat": 14.6416142,
+      "lon": -90.5132836
+    },
+    {
+      "name": "Mixco",
+      "state": "Departamento de Guatemala",
+      "country": "Guatemala",
+      "lat": 14.6307175,
+      "lon": -90.6061595
+    },
+    {
+      "name": "Villa Nueva",
+      "state": "Departamento de Guatemala",
+      "country": "Guatemala",
+      "lat": 14.5308826,
+      "lon": -90.5963325
+    },
+    {
+      "name": "Petapa",
+      "state": "Departamento de Guatemala",
+      "country": "Guatemala",
+      "lat": 14.4976914,
+      "lon": -90.5560333
+    },
+    {
+      "name": "San Juan Sacatepéquez",
+      "state": "Departamento de Guatemala",
+      "country": "Guatemala",
+      "lat": 14.7841077,
+      "lon": -90.6579566
+    },
+    {
+      "name": "Quetzaltenango",
+      "state": "Quetzaltenango",
+      "country": "Guatemala",
+      "lat": 14.8464612,
+      "lon": -91.5194208
+    },
+    {
+      "name": "Villa Canales",
+      "state": "Departamento de Guatemala",
+      "country": "Guatemala",
+      "lat": 14.483333,
+      "lon": -90.533333
+    },
+    {
+      "name": "Escuintla",
+      "state": "Escuintla",
+      "country": "Guatemala",
+      "lat": 14.1921288,
+      "lon": -91.0263791
+    },
+    {
+      "name": "Chinautla",
+      "state": "Departamento de Guatemala",
+      "country": "Guatemala",
+      "lat": 14.7422136,
+      "lon": -90.4830554
+    },
+    {
+      "name": "Chimaltenango",
+      "state": "Chimaltenango",
+      "country": "Guatemala",
+      "lat": 14.6539748,
+      "lon": -90.9272741
+    },
+    {
+      "name": "Huehuetenango",
+      "state": "Huehuetenango",
+      "country": "Guatemala",
+      "lat": 15.606418,
+      "lon": -91.6442217
+    },
+    {
+      "name": "Amatitlán",
+      "state": "Departamento de Guatemala",
+      "country": "Guatemala",
+      "lat": 14.4792381,
+      "lon": -90.6195248
+    },
+    {
+      "name": "Totonicapán",
+      "state": "Totonicapán",
+      "country": "Guatemala",
+      "lat": 15.0423435,
+      "lon": -91.4061458
+    },
+    {
+      "name": "Santa Lucía Cotzumalguapa",
+      "state": "Escuintla",
+      "country": "Guatemala",
+      "lat": 14.3001911,
+      "lon": -91.077711
+    },
+    {
+      "name": "Cobán",
+      "state": "Alta Verapaz",
+      "country": "Guatemala",
+      "lat": 15.4702001,
+      "lon": -90.3735065
+    },
+    {
+      "name": "Puerto Barrios",
+      "state": "Izabal",
+      "country": "Guatemala",
+      "lat": 15.7275154,
+      "lon": -88.5952506
+    },
+    {
+      "name": "San Marcos",
+      "state": "San Marcos",
+      "country": "Guatemala",
+      "lat": 14.9533135,
+      "lon": -91.9120444
+    },
+    {
+      "name": "Jalapa",
+      "state": "Jalapa",
+      "country": "Guatemala",
+      "lat": 14.6507936,
+      "lon": -89.9390853
+    },
+    {
+      "name": "Jutiapa",
+      "state": "Jutiapa",
+      "country": "Guatemala",
+      "lat": 14.147686,
+      "lon": -89.8872508
+    },
+    {
+      "name": "Chichicastenango",
+      "state": "Quiché",
+      "country": "Guatemala",
+      "lat": 14.898012,
+      "lon": -91.1019477
+    }
+  ],
+  "El Salvador": [
+    {
+      "name": "San Salvador",
+      "state": "San Salvador",
+      "country": "El Salvador",
+      "lat": 13.697629,
+      "lon": -89.191156
+    },
+    {
+      "name": "Soyapango",
+      "state": "San Salvador",
+      "country": "El Salvador",
+      "lat": 13.7036577,
+      "lon": -89.1501583
+    },
+    {
+      "name": "Santa Ana",
+      "state": "Santa Ana",
+      "country": "El Salvador",
+      "lat": 13.9947753,
+      "lon": -89.5566069
+    },
+    {
+      "name": "San Miguel",
+      "state": "San Miguel",
+      "country": "El Salvador",
+      "lat": 13.4803899,
+      "lon": -88.17722
+    },
+    {
+      "name": "Mejicanos",
+      "state": "San Salvador",
+      "country": "El Salvador",
+      "lat": 13.7373603,
+      "lon": -89.2316573
+    },
+    {
+      "name": "Delgado",
+      "state": "San Salvador",
+      "country": "El Salvador",
+      "lat": 13.7126863,
+      "lon": -89.17374
+    },
+    {
+      "name": "Apopa",
+      "state": "San Salvador",
+      "country": "El Salvador",
+      "lat": 13.8013036,
+      "lon": -89.1790784
+    },
+    {
+      "name": "Ilopango",
+      "state": "San Salvador",
+      "country": "El Salvador",
+      "lat": 13.6708753,
+      "lon": -89.044847
+    },
+    {
+      "name": "Cuscatancingo",
+      "state": "San Salvador",
+      "country": "El Salvador",
+      "lat": 13.7272783,
+      "lon": -89.1807753
+    },
+    {
+      "name": "Usulután",
+      "state": "Usulután",
+      "country": "El Salvador",
+      "lat": 13.4324703,
+      "lon": -88.5398358
+    },
+    {
+      "name": "Ahuachapán",
+      "state": "Ahuachapán",
+      "country": "El Salvador",
+      "lat": 13.8634993,
+      "lon": -89.9273861
+    },
+    {
+      "name": "La Libertad",
+      "state": "La Libertad",
+      "country": "El Salvador",
+      "lat": 13.7449622,
+      "lon": -89.3610819
+    },
+    {
+      "name": "Zacatecoluca",
+      "state": "La Paz",
+      "country": "El Salvador",
+      "lat": 13.5073161,
+      "lon": -88.8702064
+    },
+    {
+      "name": "Sonsonate",
+      "state": "Sonsonate",
+      "country": "El Salvador",
+      "lat": 13.7115105,
+      "lon": -89.6605842
+    },
+    {
+      "name": "San Martín",
+      "state": "San Salvador",
+      "country": "El Salvador",
+      "lat": 13.7386182,
+      "lon": -89.055216
+    },
+    {
+      "name": "Cojutepeque",
+      "state": "Cuscatlán",
+      "country": "El Salvador",
+      "lat": 13.7217396,
+      "lon": -88.9345406
+    },
+    {
+      "name": "Chalatenango",
+      "state": "Chalatenango",
+      "country": "El Salvador",
+      "lat": 14.1765311,
+      "lon": -89.0932963
+    },
+    {
+      "name": "La Unión",
+      "state": "La Unión",
+      "country": "El Salvador",
+      "lat": 13.5326319,
+      "lon": -87.902582
+    },
+    {
+      "name": "Sensuntepeque",
+      "state": "Cabañas",
+      "country": "El Salvador",
+      "lat": 13.8761841,
+      "lon": -88.6284918
+    },
+    {
+      "name": "Metapán",
+      "state": "Santa Ana",
+      "country": "El Salvador",
+      "lat": 14.3078461,
+      "lon": -89.4064594
+    }
+  ],
+  "Honduras": [
+    {
+      "name": "Tegucigalpa",
+      "state": "Francisco Morazán",
+      "country": "Honduras",
+      "lat": 14.1058135,
+      "lon": -87.2047053
+    },
+    {
+      "name": "San Pedro Sula",
+      "state": "Cortés",
+      "country": "Honduras",
+      "lat": 15.5053535,
+      "lon": -88.0250839
+    },
+    {
+      "name": "Choloma",
+      "state": "Cortés",
+      "country": "Honduras",
+      "lat": 15.6127426,
+      "lon": -87.950694
+    },
+    {
+      "name": "La Ceiba",
+      "state": "Atlántida",
+      "country": "Honduras",
+      "lat": 15.7833743,
+      "lon": -86.7917749
+    },
+    {
+      "name": "El Progreso",
+      "state": "Yoro",
+      "country": "Honduras",
+      "lat": 15.4009458,
+      "lon": -87.8120187
+    },
+    {
+      "name": "Villanueva",
+      "state": "Cortés",
+      "country": "Honduras",
+      "lat": 15.3157045,
+      "lon": -87.9932276
+    },
+    {
+      "name": "Choluteca",
+      "state": "Choluteca",
+      "country": "Honduras",
+      "lat": 13.3714203,
+      "lon": -87.0713958
+    },
+    {
+      "name": "Comayagua",
+      "state": "Comayagua",
+      "country": "Honduras",
+      "lat": 14.4527976,
+      "lon": -87.6379227
+    },
+    {
+      "name": "Puerto Cortés",
+      "state": "Cortés",
+      "country": "Honduras",
+      "lat": 15.851465,
+      "lon": -87.9426681
+    },
+    {
+      "name": "La Lima",
+      "state": "Cortés",
+      "country": "Honduras",
+      "lat": 15.4402726,
+      "lon": -87.9277925
+    },
+    {
+      "name": "Danlí",
+      "state": "El Paraíso",
+      "country": "Honduras",
+      "lat": 14.0324698,
+      "lon": -86.5682844
+    },
+    {
+      "name": "Siguatepeque",
+      "state": "Comayagua",
+      "country": "Honduras",
+      "lat": 14.5978089,
+      "lon": -87.8353071
+    },
+    {
+      "name": "Juticalpa",
+      "state": "Olancho",
+      "country": "Honduras",
+      "lat": 14.6672029,
+      "lon": -86.2195829
+    },
+    {
+      "name": "Tocoa",
+      "state": "Colón",
+      "country": "Honduras",
+      "lat": 15.657581,
+      "lon": -86.0049706
+    },
+    {
+      "name": "Tela",
+      "state": "Atlántida",
+      "country": "Honduras",
+      "lat": 15.7824826,
+      "lon": -87.4514026
+    },
+    {
+      "name": "Santa Rosa de Copán",
+      "state": "Copán",
+      "country": "Honduras",
+      "lat": 14.7675556,
+      "lon": -88.7780977
+    },
+    {
+      "name": "Olanchito",
+      "state": "Yoro",
+      "country": "Honduras",
+      "lat": 15.4836326,
+      "lon": -86.5725014
+    },
+    {
+      "name": "Catacamas",
+      "state": "Olancho",
+      "country": "Honduras",
+      "lat": 14.8483829,
+      "lon": -85.8935619
+    },
+    {
+      "name": "Cofradía",
+      "state": "Cortés",
+      "country": "Honduras",
+      "lat": 15.4153283,
+      "lon": -88.1571488
+    },
+    {
+      "name": "Potrerillos",
+      "state": "El Paraíso",
+      "country": "Honduras",
+      "lat": 14.0047107,
+      "lon": -86.7667527
+    }
+  ],
+  "Croatia": [
+    {
+      "name": "Zagreb",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 45.8130967,
+      "lon": 15.9772795
+    },
+    {
+      "name": "Split",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 43.5116383,
+      "lon": 16.4399659
+    },
+    {
+      "name": "Rijeka",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 45.3267976,
+      "lon": 14.442208
+    },
+    {
+      "name": "Osijek",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 45.5548793,
+      "lon": 18.6953685
+    },
+    {
+      "name": "Zadar",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 44.1168594,
+      "lon": 15.2353257
+    },
+    {
+      "name": "Slavonski Brod",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 45.1584339,
+      "lon": 18.0125553
+    },
+    {
+      "name": "Pula",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 44.8702281,
+      "lon": 13.8455311
+    },
+    {
+      "name": "Sesvete",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 45.8272646,
+      "lon": 16.1100872
+    },
+    {
+      "name": "Karlovac",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 45.4892522,
+      "lon": 15.5486303
+    },
+    {
+      "name": "Varaždin",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 46.3079645,
+      "lon": 16.3378198
+    },
+    {
+      "name": "Šibenik",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 43.7340647,
+      "lon": 15.8944767
+    },
+    {
+      "name": "Sisak",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 45.4891656,
+      "lon": 16.374592
+    },
+    {
+      "name": "Dubrovnik",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 42.6491029,
+      "lon": 18.0939501
+    },
+    {
+      "name": "Bjelovar",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 45.8986869,
+      "lon": 16.8421977
+    },
+    {
+      "name": "Velika Gorica",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 45.7155672,
+      "lon": 16.0717164
+    },
+    {
+      "name": "Vinkovci",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 45.2883771,
+      "lon": 18.8045248
+    },
+    {
+      "name": "Vukovar",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 45.3444094,
+      "lon": 19.002376
+    },
+    {
+      "name": "Samobor",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 45.8018625,
+      "lon": 15.7097105
+    },
+    {
+      "name": "Koprivnica",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 46.1623335,
+      "lon": 16.8307909
+    },
+    {
+      "name": "Zaprešić",
+      "state": "",
+      "country": "Hrvatska",
+      "lat": 45.8572728,
+      "lon": 15.8050436
+    }
+  ],
+  "Serbia": [
+    {
+      "name": "Belgrade",
+      "state": "Централна Србија",
+      "country": "Србија",
+      "lat": 44.8153318,
+      "lon": 20.4456588
+    },
+    {
+      "name": "Novi Sad",
+      "state": "Војводина",
+      "country": "Србија",
+      "lat": 45.2551338,
+      "lon": 19.8451756
+    },
+    {
+      "name": "Niš",
+      "state": "Централна Србија",
+      "country": "Србија",
+      "lat": 43.3211301,
+      "lon": 21.8959232
+    },
+    {
+      "name": "Kragujevac",
+      "state": "Централна Србија",
+      "country": "Србија",
+      "lat": 44.0131786,
+      "lon": 20.9196353
+    },
+    {
+      "name": "Subotica",
+      "state": "Војводина",
+      "country": "Србија",
+      "lat": 46.1002058,
+      "lon": 19.6653273
+    },
+    {
+      "name": "Zrenjanin",
+      "state": "Војводина",
+      "country": "Србија",
+      "lat": 45.3802683,
+      "lon": 20.3907614
+    },
+    {
+      "name": "Pančevo",
+      "state": "Војводина",
+      "country": "Србија",
+      "lat": 44.8705686,
+      "lon": 20.6399643
+    },
+    {
+      "name": "Čačak",
+      "state": "Централна Србија",
+      "country": "Србија",
+      "lat": 43.8914332,
+      "lon": 20.3491624
+    },
+    {
+      "name": "Novi Pazar",
+      "state": "Централна Србија",
+      "country": "Србија",
+      "lat": 43.1406913,
+      "lon": 20.518057
+    },
+    {
+      "name": "Kruševac",
+      "state": "Централна Србија",
+      "country": "Србија",
+      "lat": 43.58264,
+      "lon": 21.3264811
+    },
+    {
+      "name": "Leskovac",
+      "state": "Централна Србија",
+      "country": "Србија",
+      "lat": 42.9951304,
+      "lon": 21.9464271
+    },
+    {
+      "name": "Kraljevo",
+      "state": "Централна Србија",
+      "country": "Србија",
+      "lat": 43.7234519,
+      "lon": 20.6870792
+    },
+    {
+      "name": "Smederevo",
+      "state": "Централна Србија",
+      "country": "Србија",
+      "lat": 44.6651048,
+      "lon": 20.9271115
+    },
+    {
+      "name": "Valjevo",
+      "state": "Централна Србија",
+      "country": "Србија",
+      "lat": 44.2708719,
+      "lon": 19.8863297
+    },
+    {
+      "name": "Šabac",
+      "state": "Централна Србија",
+      "country": "Србија",
+      "lat": 44.7571535,
+      "lon": 19.6953972
+    },
+    {
+      "name": "Užice",
+      "state": "Централна Србија",
+      "country": "Србија",
+      "lat": 43.8564957,
+      "lon": 19.840273
+    },
+    {
+      "name": "Sombor",
+      "state": "Војводина",
+      "country": "Србија",
+      "lat": 45.7727397,
+      "lon": 19.1147036
+    },
+    {
+      "name": "Požarevac",
+      "state": "Централна Србија",
+      "country": "Србија",
+      "lat": 44.6199926,
+      "lon": 21.1854
+    },
+    {
+      "name": "Pirot",
+      "state": "Централна Србија",
+      "country": "Србија",
+      "lat": 43.1547342,
+      "lon": 22.5865039
+    },
+    {
+      "name": "Zaječar",
+      "state": "Централна Србија",
+      "country": "Србија",
+      "lat": 43.9030925,
+      "lon": 22.2785536
+    }
+  ],
+  "Bulgaria": [
+    {
+      "name": "Sofia",
+      "state": "София-град",
+      "country": "България",
+      "lat": 42.6977028,
+      "lon": 23.3217359
+    },
+    {
+      "name": "Plovdiv",
+      "state": "Пловдив",
+      "country": "България",
+      "lat": 42.1418541,
+      "lon": 24.7499297
+    },
+    {
+      "name": "Varna",
+      "state": "Варна",
+      "country": "България",
+      "lat": 43.2073873,
+      "lon": 27.9166653
+    },
+    {
+      "name": "Burgas",
+      "state": "Бургас",
+      "country": "България",
+      "lat": 42.4936616,
+      "lon": 27.4721276
+    },
+    {
+      "name": "Ruse",
+      "state": "Русе",
+      "country": "България",
+      "lat": 43.8480413,
+      "lon": 25.9542057
+    },
+    {
+      "name": "Stara Zagora",
+      "state": "Стара Загора",
+      "country": "България",
+      "lat": 42.4248111,
+      "lon": 25.6257479
+    },
+    {
+      "name": "Pleven",
+      "state": "Плевен",
+      "country": "България",
+      "lat": 43.4809895,
+      "lon": 24.6060665
+    },
+    {
+      "name": "Sliven",
+      "state": "Сливен",
+      "country": "България",
+      "lat": 42.64169,
+      "lon": 26.2634283
+    },
+    {
+      "name": "Dobrich",
+      "state": "Добрич",
+      "country": "България",
+      "lat": 43.6637775,
+      "lon": 27.9002123
+    },
+    {
+      "name": "Shumen",
+      "state": "Шумен",
+      "country": "България",
+      "lat": 43.3088188,
+      "lon": 27.0197261
+    },
+    {
+      "name": "Pernik",
+      "state": "Перник",
+      "country": "България",
+      "lat": 42.628442,
+      "lon": 22.8823119
+    },
+    {
+      "name": "Haskovo",
+      "state": "Хасково",
+      "country": "България",
+      "lat": 41.763101,
+      "lon": 25.9256255
+    },
+    {
+      "name": "Yambol",
+      "state": "Ямбол",
+      "country": "България",
+      "lat": 42.311889,
+      "lon": 26.5636852
+    },
+    {
+      "name": "Pazardzhik",
+      "state": "Пазарджик",
+      "country": "България",
+      "lat": 42.1486841,
+      "lon": 24.1531871
+    },
+    {
+      "name": "Blagoevgrad",
+      "state": "Благоевград",
+      "country": "България",
+      "lat": 41.750287,
+      "lon": 23.4873411
+    },
+    {
+      "name": "Veliko Tarnovo",
+      "state": "Велико Търново",
+      "country": "България",
+      "lat": 43.0820584,
+      "lon": 25.6321312
+    },
+    {
+      "name": "Vratsa",
+      "state": "Враца",
+      "country": "България",
+      "lat": 43.400307,
+      "lon": 23.716675
+    },
+    {
+      "name": "Gabrovo",
+      "state": "Габрово",
+      "country": "България",
+      "lat": 42.9638895,
+      "lon": 25.2119538
+    },
+    {
+      "name": "Asenovgrad",
+      "state": "Пловдив",
+      "country": "България",
+      "lat": 42.0073633,
+      "lon": 24.8762702
+    },
+    {
+      "name": "Vidin",
+      "state": "Видин",
+      "country": "България",
+      "lat": 43.9857242,
+      "lon": 22.8772194
+    }
+  ],
+  "Slovakia": [
+    {
+      "name": "Bratislava",
+      "state": "Bratislavský kraj",
+      "country": "Slovensko",
+      "lat": 48.1559178,
+      "lon": 17.1313541
+    },
+    {
+      "name": "Košice",
+      "state": "Košický kraj",
+      "country": "Slovensko",
+      "lat": 48.7172272,
+      "lon": 21.2496774
+    },
+    {
+      "name": "Prešov",
+      "state": "Prešovský kraj",
+      "country": "Slovensko",
+      "lat": 48.9889341,
+      "lon": 21.2190987
+    },
+    {
+      "name": "Žilina",
+      "state": "Žilinský kraj",
+      "country": "Slovensko",
+      "lat": 49.2234674,
+      "lon": 18.7393139
+    },
+    {
+      "name": "Nitra",
+      "state": "Nitriansky kraj",
+      "country": "Slovensko",
+      "lat": 48.31295,
+      "lon": 18.0894593
+    },
+    {
+      "name": "Banská Bystrica",
+      "state": "Banskobystrický kraj",
+      "country": "Slovensko",
+      "lat": 48.7383895,
+      "lon": 19.1585805
+    },
+    {
+      "name": "Trnava",
+      "state": "Trnavský kraj",
+      "country": "Slovensko",
+      "lat": 48.3767652,
+      "lon": 17.5858175
+    },
+    {
+      "name": "Martin",
+      "state": "Žilinský kraj",
+      "country": "Slovensko",
+      "lat": 49.0724921,
+      "lon": 18.929193
+    },
+    {
+      "name": "Trenčín",
+      "state": "Trenčiansky kraj",
+      "country": "Slovensko",
+      "lat": 48.8922719,
+      "lon": 18.0387465
+    },
+    {
+      "name": "Poprad",
+      "state": "Prešovský kraj",
+      "country": "Slovensko",
+      "lat": 49.0541521,
+      "lon": 20.2976401
+    },
+    {
+      "name": "Prievidza",
+      "state": "Trenčiansky kraj",
+      "country": "Slovensko",
+      "lat": 48.7718361,
+      "lon": 18.6234916
+    },
+    {
+      "name": "Zvolen",
+      "state": "Banskobystrický kraj",
+      "country": "Slovensko",
+      "lat": 48.5782517,
+      "lon": 19.1247135
+    },
+    {
+      "name": "Považská Bystrica",
+      "state": "Trenčiansky kraj",
+      "country": "Slovensko",
+      "lat": 49.1159316,
+      "lon": 18.4469936
+    },
+    {
+      "name": "Michalovce",
+      "state": "Košický kraj",
+      "country": "Slovensko",
+      "lat": 48.7514383,
+      "lon": 21.9211949
+    },
+    {
+      "name": "Spišská Nová Ves",
+      "state": "Košický kraj",
+      "country": "Slovensko",
+      "lat": 48.9435344,
+      "lon": 20.562964
+    },
+    {
+      "name": "Komárno",
+      "state": "Nitriansky kraj",
+      "country": "Slovensko",
+      "lat": 47.7574079,
+      "lon": 18.1298249
+    },
+    {
+      "name": "Levice",
+      "state": "Nitriansky kraj",
+      "country": "Slovensko",
+      "lat": 48.2163194,
+      "lon": 18.6000869
+    },
+    {
+      "name": "Humenné",
+      "state": "Prešovský kraj",
+      "country": "Slovensko",
+      "lat": 48.9350033,
+      "lon": 21.9020268
+    },
+    {
+      "name": "Bardejov",
+      "state": "Prešovský kraj",
+      "country": "Slovensko",
+      "lat": 49.2926871,
+      "lon": 21.2756031
+    },
+    {
+      "name": "Liptovský Mikuláš",
+      "state": "Žilinský kraj",
+      "country": "Slovensko",
+      "lat": 49.0835785,
+      "lon": 19.612785
+    }
+  ],
+  "Slovenia": [
+    {
+      "name": "Ljubljana",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 46.0500268,
+      "lon": 14.5069289
+    },
+    {
+      "name": "Maribor",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 46.5576439,
+      "lon": 15.6455854
+    },
+    {
+      "name": "Celje",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 46.2293889,
+      "lon": 15.2616828
+    },
+    {
+      "name": "Kranj",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 46.2432913,
+      "lon": 14.3549353
+    },
+    {
+      "name": "Velenje",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 46.3592869,
+      "lon": 15.1150301
+    },
+    {
+      "name": "Koper",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 45.5479864,
+      "lon": 13.7304781
+    },
+    {
+      "name": "Novo Mesto",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 45.8040475,
+      "lon": 15.1696684
+    },
+    {
+      "name": "Ptuj",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 46.4198096,
+      "lon": 15.8717378
+    },
+    {
+      "name": "Trbovlje",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 46.1558964,
+      "lon": 15.0540204
+    },
+    {
+      "name": "Kamnik",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 46.2257358,
+      "lon": 14.6118936
+    },
+    {
+      "name": "Jesenice",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 46.4323705,
+      "lon": 14.0623942
+    },
+    {
+      "name": "Nova Gorica",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 45.9581509,
+      "lon": 13.6474998
+    },
+    {
+      "name": "Domžale",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 46.1394296,
+      "lon": 14.5944553
+    },
+    {
+      "name": "Škofja Loka",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 46.165274,
+      "lon": 14.3067474
+    },
+    {
+      "name": "Slovenj Gradec",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 46.509144,
+      "lon": 15.0790677
+    },
+    {
+      "name": "Izola",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 45.5398936,
+      "lon": 13.65939
+    },
+    {
+      "name": "Postojna",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 45.7752847,
+      "lon": 14.2139937
+    },
+    {
+      "name": "Murska Sobota",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 46.6624644,
+      "lon": 16.1655256
+    },
+    {
+      "name": "Krško",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 45.9576446,
+      "lon": 15.4946767
+    },
+    {
+      "name": "Ajdovščina",
+      "state": "",
+      "country": "Slovenija",
+      "lat": 45.8885557,
+      "lon": 13.9048561
+    }
+  ],
+  "Algeria": [
+    {
+      "name": "Algiers",
+      "state": "Alger",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 36.7729333,
+      "lon": 3.0588445
+    },
+    {
+      "name": "Oran",
+      "state": "Oran",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 35.7044415,
+      "lon": -0.6502981
+    },
+    {
+      "name": "Constantine",
+      "state": "Constantine",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 36.3641642,
+      "lon": 6.6084281
+    },
+    {
+      "name": "Batna",
+      "state": "Batna",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 35.3384291,
+      "lon": 5.7315453
+    },
+    {
+      "name": "Djelfa",
+      "state": "Djelfa",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 34.342841,
+      "lon": 3.2172531
+    },
+    {
+      "name": "Sétif",
+      "state": "Sétif",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 36.1893494,
+      "lon": 5.4046876
+    },
+    {
+      "name": "Annaba",
+      "state": "Annaba",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 36.8982165,
+      "lon": 7.7549272
+    },
+    {
+      "name": "Sidi Bel Abbès",
+      "state": "Sidi Bel Abbès",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 34.682268,
+      "lon": -0.4357555
+    },
+    {
+      "name": "Biskra",
+      "state": "Biskra",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 34.8508816,
+      "lon": 5.729074
+    },
+    {
+      "name": "Tébessa",
+      "state": "Tébessa",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 35.124945,
+      "lon": 7.9011735
+    },
+    {
+      "name": "El Eulma",
+      "state": "Sétif",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 36.1529057,
+      "lon": 5.6911588
+    },
+    {
+      "name": "Skikda",
+      "state": "Skikda",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 36.8801317,
+      "lon": 6.9077363
+    },
+    {
+      "name": "Tiaret",
+      "state": "Tiaret",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 34.8947575,
+      "lon": 1.5945792
+    },
+    {
+      "name": "Béjaïa",
+      "state": "Béjaïa",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 36.7511783,
+      "lon": 5.0643687
+    },
+    {
+      "name": "Tlemcen",
+      "state": "Tlemcen ⵜⵍⴻⵎⵙⴻⵏ تلمسان",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 34.881789,
+      "lon": -1.316699
+    },
+    {
+      "name": "Bordj Bou Arréridj",
+      "state": "Bordj Bou Arreridj",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 36.0962029,
+      "lon": 4.6602742
+    },
+    {
+      "name": "Béchar",
+      "state": "Béchar",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 31.385726,
+      "lon": -2.0115958
+    },
+    {
+      "name": "Blida",
+      "state": "Blida",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 36.4705658,
+      "lon": 2.8274937
+    },
+    {
+      "name": "Mostaganem",
+      "state": "Mostaganem",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 35.928808,
+      "lon": 0.089978
+    },
+    {
+      "name": "Tizi Ouzou",
+      "state": "Tizi Ouzou",
+      "country": "Algérie ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+      "lat": 36.7137843,
+      "lon": 4.0493919
+    }
+  ],
+  "Tunisia": [
+    {
+      "name": "Tunis",
+      "state": "",
+      "country": "تونس",
+      "lat": 33.8439408,
+      "lon": 9.400138
+    },
+    {
+      "name": "Sfax",
+      "state": "ولاية صفاقس",
+      "country": "تونس",
+      "lat": 34.7394361,
+      "lon": 10.7604024
+    },
+    {
+      "name": "Sousse",
+      "state": "ولاية سوسة",
+      "country": "تونس",
+      "lat": 35.8288284,
+      "lon": 10.6405254
+    },
+    {
+      "name": "Kairouan",
+      "state": "ولاية القيروان",
+      "country": "تونس",
+      "lat": 35.6710101,
+      "lon": 10.10062
+    },
+    {
+      "name": "Bizerte",
+      "state": "ولاية بنزرت",
+      "country": "تونس",
+      "lat": 37.2720905,
+      "lon": 9.8708565
+    },
+    {
+      "name": "Gabès",
+      "state": "ولاية قابس",
+      "country": "تونس",
+      "lat": 33.8878082,
+      "lon": 10.10044
+    },
+    {
+      "name": "Ariana",
+      "state": "ولاية أريانة",
+      "country": "تونس",
+      "lat": 36.9685735,
+      "lon": 10.1219855
+    },
+    {
+      "name": "Gafsa",
+      "state": "ولاية قفصة",
+      "country": "تونس",
+      "lat": 34.4224374,
+      "lon": 8.7843862
+    },
+    {
+      "name": "Monastir",
+      "state": "ولاية المنستير",
+      "country": "تونس",
+      "lat": 35.7707582,
+      "lon": 10.8280511
+    },
+    {
+      "name": "Ben Arous",
+      "state": "ولاية بن عروس",
+      "country": "تونس",
+      "lat": 36.6306483,
+      "lon": 10.2100827
+    },
+    {
+      "name": "Kasserine",
+      "state": "ولاية القصرين",
+      "country": "تونس",
+      "lat": 35.1687646,
+      "lon": 8.8365654
+    },
+    {
+      "name": "Médenine",
+      "state": "ولاية مدنين",
+      "country": "تونس",
+      "lat": 32.9819987,
+      "lon": 11.2870254
+    },
+    {
+      "name": "Nabeul",
+      "state": "ولاية نابل",
+      "country": "تونس",
+      "lat": 36.4512897,
+      "lon": 10.7355915
+    },
+    {
+      "name": "Tataouine",
+      "state": "ولاية تطاوين",
+      "country": "تونس",
+      "lat": 32.9315242,
+      "lon": 10.4503959
+    },
+    {
+      "name": "Béja",
+      "state": "ولاية باجة",
+      "country": "تونس",
+      "lat": 36.7236755,
+      "lon": 9.185382
+    },
+    {
+      "name": "Jendouba",
+      "state": "ولاية جندوبة",
+      "country": "تونس",
+      "lat": 36.6779726,
+      "lon": 8.752647
+    },
+    {
+      "name": "Mahdia",
+      "state": "ولاية المهدية",
+      "country": "تونس",
+      "lat": 35.503642,
+      "lon": 11.0682429
+    },
+    {
+      "name": "Siliana",
+      "state": "ولاية سليانة",
+      "country": "تونس",
+      "lat": 35.9715323,
+      "lon": 9.3577129
+    },
+    {
+      "name": "Kef",
+      "state": "ولاية الكاف",
+      "country": "تونس",
+      "lat": 36.0357642,
+      "lon": 8.7249381
+    },
+    {
+      "name": "Tozeur",
+      "state": "ولاية توزر",
+      "country": "تونس",
+      "lat": 33.9239001,
+      "lon": 8.1370639
+    }
+  ],
+  "Ghana": [
+    {
+      "name": "Accra",
+      "state": "Greater Accra Region",
+      "country": "Ghana",
+      "lat": 5.5571096,
+      "lon": -0.2012376
+    },
+    {
+      "name": "Kumasi",
+      "state": "Ashanti Region",
+      "country": "Ghana",
+      "lat": 6.6985605,
+      "lon": -1.6233086
+    },
+    {
+      "name": "Tamale",
+      "state": "Northern Region",
+      "country": "Ghana",
+      "lat": 9.4051992,
+      "lon": -0.8423986
+    },
+    {
+      "name": "Sekondi-Takoradi",
+      "state": "Western Region",
+      "country": "Ghana",
+      "lat": 4.927456,
+      "lon": -1.7490216
+    },
+    {
+      "name": "Ashaiman",
+      "state": "Greater Accra Region",
+      "country": "Ghana",
+      "lat": 5.694385,
+      "lon": -0.029529
+    },
+    {
+      "name": "Sunyani",
+      "state": "Bono Region",
+      "country": "Ghana",
+      "lat": 7.3384389,
+      "lon": -2.3309226
+    },
+    {
+      "name": "Cape Coast",
+      "state": "Central Region",
+      "country": "Ghana",
+      "lat": 5.107467,
+      "lon": -1.2430793
+    },
+    {
+      "name": "Obuasi",
+      "state": "Ashanti Region",
+      "country": "Ghana",
+      "lat": 6.211542,
+      "lon": -1.6894045
+    },
+    {
+      "name": "Teshie",
+      "state": "Greater Accra Region",
+      "country": "Ghana",
+      "lat": 5.5822343,
+      "lon": -0.1135104
+    },
+    {
+      "name": "Tema",
+      "state": "Greater Accra Region",
+      "country": "Ghana",
+      "lat": 5.6596409,
+      "lon": -0.0096771
+    },
+    {
+      "name": "Madina",
+      "state": "Greater Accra Region",
+      "country": "Ghana",
+      "lat": 5.6864962,
+      "lon": -0.1677052
+    },
+    {
+      "name": "Koforidua",
+      "state": "Eastern Region",
+      "country": "Ghana",
+      "lat": 6.100334,
+      "lon": -0.2614572
+    },
+    {
+      "name": "Wa",
+      "state": "Upper West Region",
+      "country": "Ghana",
+      "lat": 10.0623261,
+      "lon": -2.5054273
+    },
+    {
+      "name": "Techiman",
+      "state": "Bono East Region",
+      "country": "Ghana",
+      "lat": 7.584971,
+      "lon": -1.936401
+    },
+    {
+      "name": "Ho",
+      "state": "Volta Region",
+      "country": "Ghana",
+      "lat": 6.6126598,
+      "lon": 0.4688932
+    },
+    {
+      "name": "Nungua",
+      "state": "Greater Accra Region",
+      "country": "Ghana",
+      "lat": 5.6011385,
+      "lon": -0.0703851
+    },
+    {
+      "name": "Lashibi",
+      "state": "Greater Accra Region",
+      "country": "Ghana",
+      "lat": 5.6381888,
+      "lon": -0.0628397
+    },
+    {
+      "name": "Dome",
+      "state": "Greater Accra Region",
+      "country": "Ghana",
+      "lat": 5.6554227,
+      "lon": -0.232884
+    },
+    {
+      "name": "Gbawe",
+      "state": "Greater Accra Region",
+      "country": "Ghana",
+      "lat": 5.5848819,
+      "lon": -0.3128207
+    },
+    {
+      "name": "Ejura",
+      "state": "Ashanti Region",
+      "country": "Ghana",
+      "lat": 7.3846802,
+      "lon": -1.355945
+    }
+  ],
+  "Tanzania": [
+    {
+      "name": "Dar es Salaam",
+      "state": "Coastal Zone",
+      "country": "Tanzania",
+      "lat": -6.8160837,
+      "lon": 39.2803583
+    },
+    {
+      "name": "Mwanza",
+      "state": "Mwanza",
+      "country": "Tanzania",
+      "lat": -2.5196915,
+      "lon": 32.9014417
+    },
+    {
+      "name": "Arusha",
+      "state": "Arusha",
+      "country": "Tanzania",
+      "lat": -3.3696827,
+      "lon": 36.6880794
+    },
+    {
+      "name": "Dodoma",
+      "state": "Dodoma",
+      "country": "Tanzania",
+      "lat": -6.1791181,
+      "lon": 35.7468174
+    },
+    {
+      "name": "Mbeya",
+      "state": "Mbeya",
+      "country": "Tanzania",
+      "lat": -8.6131228,
+      "lon": 33.3341957
+    },
+    {
+      "name": "Morogoro",
+      "state": "Morogoro",
+      "country": "Tanzania",
+      "lat": -7.0842931,
+      "lon": 37.4232686
+    },
+    {
+      "name": "Tanga",
+      "state": "Tanga",
+      "country": "Tanzania",
+      "lat": -5.202134,
+      "lon": 38.2275548
+    },
+    {
+      "name": "Kahama",
+      "state": "Shinyanga",
+      "country": "Tanzania",
+      "lat": -3.8289877,
+      "lon": 32.6011558
+    },
+    {
+      "name": "Tabora",
+      "state": "Tabora",
+      "country": "Tanzania",
+      "lat": -5.1913822,
+      "lon": 32.5080629
+    },
+    {
+      "name": "Zanzibar City",
+      "state": "Unguja Mjini Magharibi",
+      "country": "Tanzania",
+      "lat": -6.1664908,
+      "lon": 39.2074312
+    },
+    {
+      "name": "Kigoma",
+      "state": "Kigoma",
+      "country": "Tanzania",
+      "lat": -4.5126571,
+      "lon": 30.0050533
+    },
+    {
+      "name": "Sumbawanga",
+      "state": "Rukwa",
+      "country": "Tanzania",
+      "lat": -7.9523861,
+      "lon": 31.6231898
+    },
+    {
+      "name": "Kasulu",
+      "state": "Kigoma",
+      "country": "Tanzania",
+      "lat": -4.5773996,
+      "lon": 30.099234
+    },
+    {
+      "name": "Songea",
+      "state": "Ruvuma",
+      "country": "Tanzania",
+      "lat": -10.6787282,
+      "lon": 35.6483576
+    },
+    {
+      "name": "Moshi",
+      "state": "Kilimanjaro",
+      "country": "Tanzania",
+      "lat": -3.3486456,
+      "lon": 37.3435249
+    },
+    {
+      "name": "Musoma",
+      "state": "Lake Zone",
+      "country": "Tanzania",
+      "lat": -1.4998186,
+      "lon": 33.8083018
+    },
+    {
+      "name": "Shinyanga",
+      "state": "Shinyanga",
+      "country": "Tanzania",
+      "lat": -3.7622225,
+      "lon": 33.2320361
+    },
+    {
+      "name": "Iringa",
+      "state": "Iringa",
+      "country": "Tanzania",
+      "lat": -7.7742718,
+      "lon": 35.4826339
+    },
+    {
+      "name": "Singida",
+      "state": "Singida",
+      "country": "Tanzania",
+      "lat": -5.2902148,
+      "lon": 34.6367444
+    },
+    {
+      "name": "Njombe",
+      "state": "Njombe",
+      "country": "Tanzania",
+      "lat": -9.1210886,
+      "lon": 34.4316775
+    }
+  ],
+  "Uganda": [
+    {
+      "name": "Kampala",
+      "state": "",
+      "country": "Uganda",
+      "lat": 0.3177137,
+      "lon": 32.5813539
+    },
+    {
+      "name": "Nansana",
+      "state": "Wakiso",
+      "country": "Uganda",
+      "lat": 0.365816,
+      "lon": 32.529226
+    },
+    {
+      "name": "Kira",
+      "state": "Wakiso",
+      "country": "Uganda",
+      "lat": 0.4003408,
+      "lon": 32.6391845
+    },
+    {
+      "name": "Ssabagabo",
+      "state": "Wakiso",
+      "country": "Uganda",
+      "lat": 0.2133837,
+      "lon": 32.5791494
+    },
+    {
+      "name": "Mbarara",
+      "state": "Mbarara",
+      "country": "Uganda",
+      "lat": -0.4180848,
+      "lon": 30.5737374
+    },
+    {
+      "name": "Mukono",
+      "state": "Mukono",
+      "country": "Uganda",
+      "lat": -0.0523245,
+      "lon": 32.7262557
+    },
+    {
+      "name": "Gulu",
+      "state": "Gulu",
+      "country": "Uganda",
+      "lat": 3.0346583,
+      "lon": 32.3802374
+    },
+    {
+      "name": "Kasese",
+      "state": "Kasese",
+      "country": "Uganda",
+      "lat": 0.1310412,
+      "lon": 30.0047968
+    },
+    {
+      "name": "Masaka",
+      "state": "Masaka",
+      "country": "Uganda",
+      "lat": -0.483142,
+      "lon": 31.8318895
+    },
+    {
+      "name": "Entebbe",
+      "state": "",
+      "country": "Uganda",
+      "lat": 0.0611715,
+      "lon": 32.4698564
+    },
+    {
+      "name": "Lira",
+      "state": "Lira",
+      "country": "Uganda",
+      "lat": 2.3320326,
+      "lon": 32.9501481
+    },
+    {
+      "name": "Jinja",
+      "state": "Jinja",
+      "country": "Uganda",
+      "lat": 0.5751567,
+      "lon": 33.2805299
+    },
+    {
+      "name": "Hoima",
+      "state": "Hoima",
+      "country": "Uganda",
+      "lat": 1.5661927,
+      "lon": 31.1480968
+    },
+    {
+      "name": "Soroti",
+      "state": "Soroti",
+      "country": "Uganda",
+      "lat": 1.787906,
+      "lon": 33.5007314
+    },
+    {
+      "name": "Mbale",
+      "state": "Mbale",
+      "country": "Uganda",
+      "lat": 0.9765706,
+      "lon": 34.2021869
+    },
+    {
+      "name": "Arua",
+      "state": "Arua",
+      "country": "Uganda",
+      "lat": 2.835532,
+      "lon": 30.9607549
+    },
+    {
+      "name": "Kabale",
+      "state": "Kabale",
+      "country": "Uganda",
+      "lat": -1.3359667,
+      "lon": 30.036886
+    },
+    {
+      "name": "Fort Portal",
+      "state": "Western Region",
+      "country": "Uganda",
+      "lat": 0.6561907,
+      "lon": 30.2779432
+    },
+    {
+      "name": "Mityana",
+      "state": "Mityana",
+      "country": "Uganda",
+      "lat": 0.4560686,
+      "lon": 32.0768024
+    },
+    {
+      "name": "Lugazi",
+      "state": "Buikwe",
+      "country": "Uganda",
+      "lat": 0.3693191,
+      "lon": 32.9367405
+    }
+  ],
+  "Cameroon": [
+    {
+      "name": "Douala",
+      "state": "Littoral",
+      "country": "Cameroun",
+      "lat": 4.0429389,
+      "lon": 9.7062018
+    },
+    {
+      "name": "Yaoundé",
+      "state": "Centre",
+      "country": "Cameroun",
+      "lat": 3.8689867,
+      "lon": 11.5213344
+    },
+    {
+      "name": "Bamenda",
+      "state": "Northwest",
+      "country": "Cameroun",
+      "lat": 5.9614117,
+      "lon": 10.1516505
+    },
+    {
+      "name": "Bafoussam",
+      "state": "Ouest",
+      "country": "Cameroun",
+      "lat": 5.4758844,
+      "lon": 10.4217852
+    },
+    {
+      "name": "Garoua",
+      "state": "Nord",
+      "country": "Cameroun",
+      "lat": 9.3070698,
+      "lon": 13.3934527
+    },
+    {
+      "name": "Kousseri",
+      "state": "Extrême-Nord",
+      "country": "Cameroun",
+      "lat": 12.0831175,
+      "lon": 15.0191262
+    },
+    {
+      "name": "Maroua",
+      "state": "Extrême-Nord",
+      "country": "Cameroun",
+      "lat": 10.6033083,
+      "lon": 14.3281625
+    },
+    {
+      "name": "Ngaoundéré",
+      "state": "Adamaoua",
+      "country": "Cameroun",
+      "lat": 7.3211536,
+      "lon": 13.5878214
+    },
+    {
+      "name": "Bertoua",
+      "state": "Est",
+      "country": "Cameroun",
+      "lat": 4.5776155,
+      "lon": 13.6843792
+    },
+    {
+      "name": "Loum",
+      "state": "Littoral",
+      "country": "Cameroun",
+      "lat": 4.7200545,
+      "lon": 9.7274994
+    },
+    {
+      "name": "Kumba",
+      "state": "Southwest",
+      "country": "Cameroun",
+      "lat": 4.6378368,
+      "lon": 9.4409446
+    },
+    {
+      "name": "Nkongsamba",
+      "state": "Littoral",
+      "country": "Cameroun",
+      "lat": 4.9525115,
+      "lon": 9.9391669
+    },
+    {
+      "name": "Buea",
+      "state": "Southwest",
+      "country": "Cameroun",
+      "lat": 4.1567895,
+      "lon": 9.2315915
+    },
+    {
+      "name": "Mbouda",
+      "state": "Ouest",
+      "country": "Cameroun",
+      "lat": 5.627374,
+      "lon": 10.254744
+    },
+    {
+      "name": "Foumban",
+      "state": "Ouest",
+      "country": "Cameroun",
+      "lat": 5.7282262,
+      "lon": 10.8971603
+    },
+    {
+      "name": "Dschang",
+      "state": "Ouest",
+      "country": "Cameroun",
+      "lat": 5.4469923,
+      "lon": 10.053309
+    },
+    {
+      "name": "Limbé",
+      "state": "Southwest",
+      "country": "Cameroun",
+      "lat": 4.010289,
+      "lon": 9.207058
+    },
+    {
+      "name": "Ebolowa",
+      "state": "Sud",
+      "country": "Cameroun",
+      "lat": 2.919384,
+      "lon": 11.1516632
+    },
+    {
+      "name": "Kribi",
+      "state": "Sud",
+      "country": "Cameroun",
+      "lat": 2.9434098,
+      "lon": 9.9126989
+    },
+    {
+      "name": "Edéa",
+      "state": "Littoral",
+      "country": "Cameroun",
+      "lat": 3.7990131,
+      "lon": 10.1265567
+    }
+  ],
+  "Senegal": [
+    {
+      "name": "Dakar",
+      "state": "Région de Dakar",
+      "country": "Sénégal",
+      "lat": 14.693425,
+      "lon": -17.447938
+    },
+    {
+      "name": "Pikine",
+      "state": "Région de Dakar",
+      "country": "Sénégal",
+      "lat": 14.751544,
+      "lon": -17.396413
+    },
+    {
+      "name": "Touba",
+      "state": "Région de Diourbel",
+      "country": "Sénégal",
+      "lat": 14.864559,
+      "lon": -15.876047
+    },
+    {
+      "name": "Thiès",
+      "state": "Région de Thiès",
+      "country": "Sénégal",
+      "lat": 14.791461,
+      "lon": -16.925605
+    },
+    {
+      "name": "Kaolack",
+      "state": "Région de Kaolack",
+      "country": "Sénégal",
+      "lat": 14.138815,
+      "lon": -16.076391
+    },
+    {
+      "name": "Saint-Louis",
+      "state": "Région de Saint-Louis",
+      "country": "Sénégal",
+      "lat": 16.0280445,
+      "lon": -16.5048686
+    },
+    {
+      "name": "Mbour",
+      "state": "Région de Thiès",
+      "country": "Sénégal",
+      "lat": 14.4207396,
+      "lon": -16.971484
+    },
+    {
+      "name": "Ziguinchor",
+      "state": "Région de Ziguinchor",
+      "country": "Sénégal",
+      "lat": 12.5634929,
+      "lon": -16.2724609
+    },
+    {
+      "name": "Rufisque",
+      "state": "Région de Dakar",
+      "country": "Sénégal",
+      "lat": 14.716417,
+      "lon": -17.273844
+    },
+    {
+      "name": "Diourbel",
+      "state": "Région de Diourbel",
+      "country": "Sénégal",
+      "lat": 14.7844539,
+      "lon": -16.0316451
+    },
+    {
+      "name": "Louga",
+      "state": "Région de Louga",
+      "country": "Sénégal",
+      "lat": 15.3966884,
+      "lon": -15.6779283
+    },
+    {
+      "name": "Tambacounda",
+      "state": "Région de Tambacounda",
+      "country": "Sénégal",
+      "lat": 13.8686324,
+      "lon": -13.3190328
+    },
+    {
+      "name": "Kolda",
+      "state": "Région de Kolda",
+      "country": "Sénégal",
+      "lat": 13.1291507,
+      "lon": -14.4181474
+    },
+    {
+      "name": "Richard Toll",
+      "state": "Région de Saint-Louis",
+      "country": "Sénégal",
+      "lat": 16.466294,
+      "lon": -15.688449
+    },
+    {
+      "name": "Matam",
+      "state": "Région de Matam",
+      "country": "Sénégal",
+      "lat": 15.2681436,
+      "lon": -13.6991606
+    },
+    {
+      "name": "Sédhiou",
+      "state": "Région de Sédhiou",
+      "country": "Sénégal",
+      "lat": 12.9102548,
+      "lon": -15.5529839
+    },
+    {
+      "name": "Mbacké",
+      "state": "Région de Diourbel",
+      "country": "Sénégal",
+      "lat": 14.7971224,
+      "lon": -15.9066608
+    },
+    {
+      "name": "Tivaouane",
+      "state": "Région de Thiès",
+      "country": "Sénégal",
+      "lat": 14.951507,
+      "lon": -16.812868
+    },
+    {
+      "name": "Guédiawaye",
+      "state": "Région de Dakar",
+      "country": "Sénégal",
+      "lat": 14.7771207,
+      "lon": -17.390071
+    },
+    {
+      "name": "Fatick",
+      "state": "Région de Fatick",
+      "country": "Sénégal",
+      "lat": 13.9406041,
+      "lon": -16.4024021
+    }
+  ],
+  "Côte d'Ivoire": [
+    {
+      "name": "Abidjan",
+      "state": "Abidjan",
+      "country": "Côte d’Ivoire",
+      "lat": 5.320357,
+      "lon": -4.016107
+    },
+    {
+      "name": "Bouaké",
+      "state": "Vallée du Bandama",
+      "country": "Côte d’Ivoire",
+      "lat": 7.6890212,
+      "lon": -5.0283552
+    },
+    {
+      "name": "Daloa",
+      "state": "Sassandra-Marahoué",
+      "country": "Côte d’Ivoire",
+      "lat": 6.8869233,
+      "lon": -6.4529859
+    },
+    {
+      "name": "San-Pédro",
+      "state": "Bas-Sassandra",
+      "country": "Côte d’Ivoire",
+      "lat": 4.7589989,
+      "lon": -6.6463922
+    },
+    {
+      "name": "Yamoussoukro",
+      "state": "Yamoussoukro",
+      "country": "Côte d’Ivoire",
+      "lat": 6.8200066,
+      "lon": -5.2776034
+    },
+    {
+      "name": "Korhogo",
+      "state": "Savanes",
+      "country": "Côte d’Ivoire",
+      "lat": 9.4580698,
+      "lon": -5.6316293
+    },
+    {
+      "name": "Man",
+      "state": "Montagnes",
+      "country": "Côte d’Ivoire",
+      "lat": 7.4102584,
+      "lon": -7.5503719
+    },
+    {
+      "name": "Divo",
+      "state": "Gôh-Djiboua",
+      "country": "Côte d’Ivoire",
+      "lat": 5.8405332,
+      "lon": -5.3549049
+    },
+    {
+      "name": "Gagnoa",
+      "state": "Gôh-Djiboua",
+      "country": "Côte d’Ivoire",
+      "lat": 6.1334787,
+      "lon": -5.9510987
+    },
+    {
+      "name": "Abengourou",
+      "state": "Comoé",
+      "country": "Côte d’Ivoire",
+      "lat": 6.7269042,
+      "lon": -3.4968431
+    },
+    {
+      "name": "Anyama",
+      "state": "Abidjan",
+      "country": "Côte d’Ivoire",
+      "lat": 5.4960537,
+      "lon": -4.0512414
+    },
+    {
+      "name": "Agboville",
+      "state": "Lagunes",
+      "country": "Côte d’Ivoire",
+      "lat": 5.9307328,
+      "lon": -4.2131327
+    },
+    {
+      "name": "Grand-Bassam",
+      "state": "Comoé",
+      "country": "Côte d’Ivoire",
+      "lat": 5.212884,
+      "lon": -3.743226
+    },
+    {
+      "name": "Dabou",
+      "state": "Lagunes",
+      "country": "Côte d’Ivoire",
+      "lat": 5.3239991,
+      "lon": -4.3722982
+    },
+    {
+      "name": "Bondoukou",
+      "state": "Zanzan",
+      "country": "Côte d’Ivoire",
+      "lat": 8.0397992,
+      "lon": -2.7984258
+    },
+    {
+      "name": "Soubré",
+      "state": "Bas-Sassandra",
+      "country": "Côte d’Ivoire",
+      "lat": 5.7850195,
+      "lon": -6.5933223
+    },
+    {
+      "name": "Oumé",
+      "state": "Gôh-Djiboua",
+      "country": "Côte d’Ivoire",
+      "lat": 6.3823941,
+      "lon": -5.4175714
+    },
+    {
+      "name": "Séguéla",
+      "state": "Woroba",
+      "country": "Côte d’Ivoire",
+      "lat": 7.9614107,
+      "lon": -6.6702351
+    },
+    {
+      "name": "Bingerville",
+      "state": "Abidjan",
+      "country": "Côte d’Ivoire",
+      "lat": 5.3577727,
+      "lon": -3.8885591
+    },
+    {
+      "name": "Issia",
+      "state": "Sassandra-Marahoué",
+      "country": "Côte d’Ivoire",
+      "lat": 6.4877871,
+      "lon": -6.5887859
+    }
+  ],
+  "Zimbabwe": [
+    {
+      "name": "Harare",
+      "state": "Harare Province",
+      "country": "Zimbabwe",
+      "lat": -17.8567035,
+      "lon": 31.0601584
+    },
+    {
+      "name": "Bulawayo",
+      "state": "Bulawayo Province",
+      "country": "Zimbabwe",
+      "lat": -20.1053948,
+      "lon": 28.5426856
+    },
+    {
+      "name": "Chitungwiza",
+      "state": "Harare Province",
+      "country": "Zimbabwe",
+      "lat": -18.0143462,
+      "lon": 31.0726737
+    },
+    {
+      "name": "Mutare",
+      "state": "Manicaland",
+      "country": "Zimbabwe",
+      "lat": -18.974656,
+      "lon": 32.670473
+    },
+    {
+      "name": "Gweru",
+      "state": "Midlands",
+      "country": "Zimbabwe",
+      "lat": -19.4616316,
+      "lon": 29.8205953
+    },
+    {
+      "name": "Epworth",
+      "state": "Harare Province",
+      "country": "Zimbabwe",
+      "lat": -17.8877361,
+      "lon": 31.156797
+    },
+    {
+      "name": "Kwekwe",
+      "state": "Midlands",
+      "country": "Zimbabwe",
+      "lat": -18.9284366,
+      "lon": 29.8140035
+    },
+    {
+      "name": "Kadoma",
+      "state": "Mashonaland West",
+      "country": "Zimbabwe",
+      "lat": -18.3374033,
+      "lon": 29.9135021
+    },
+    {
+      "name": "Masvingo",
+      "state": "Masvingo",
+      "country": "Zimbabwe",
+      "lat": -20.7453957,
+      "lon": 31.334138
+    },
+    {
+      "name": "Chinhoyi",
+      "state": "Mashonaland West",
+      "country": "Zimbabwe",
+      "lat": -17.3615308,
+      "lon": 30.1929353
+    },
+    {
+      "name": "Norton",
+      "state": "Mashonaland West",
+      "country": "Zimbabwe",
+      "lat": -17.87454,
+      "lon": 30.695954
+    },
+    {
+      "name": "Marondera",
+      "state": "Mashonaland East",
+      "country": "Zimbabwe",
+      "lat": -18.190098,
+      "lon": 31.545542
+    },
+    {
+      "name": "Ruwa",
+      "state": "Mashonaland East",
+      "country": "Zimbabwe",
+      "lat": -17.897155,
+      "lon": 31.237093
+    },
+    {
+      "name": "Chegutu",
+      "state": "Mashonaland West",
+      "country": "Zimbabwe",
+      "lat": -18.1867654,
+      "lon": 30.39756
+    },
+    {
+      "name": "Zvishavane",
+      "state": "Midlands",
+      "country": "Zimbabwe",
+      "lat": -20.3159097,
+      "lon": 30.0526888
+    },
+    {
+      "name": "Bindura",
+      "state": "Mashonaland Central",
+      "country": "Zimbabwe",
+      "lat": -17.2989727,
+      "lon": 31.3299701
+    },
+    {
+      "name": "Beitbridge",
+      "state": "Matabeleland South",
+      "country": "Zimbabwe",
+      "lat": -22.1986233,
+      "lon": 29.9917535
+    },
+    {
+      "name": "Redcliff",
+      "state": "Midlands",
+      "country": "Zimbabwe",
+      "lat": -19.026094,
+      "lon": 29.779494
+    },
+    {
+      "name": "Victoria Falls",
+      "state": "Matabeleland North",
+      "country": "Zimbabwe",
+      "lat": -17.922895,
+      "lon": 25.8476849
+    },
+    {
+      "name": "Hwange",
+      "state": "Matabeleland North",
+      "country": "Zimbabwe",
+      "lat": -18.8406624,
+      "lon": 26.7310154
+    }
+  ],
+  "Mozambique": [
+    {
+      "name": "Maputo",
+      "state": "Zona Sul",
+      "country": "Moçambique",
+      "lat": -25.966213,
+      "lon": 32.56745
+    },
+    {
+      "name": "Matola",
+      "state": "Maputo",
+      "country": "Moçambique",
+      "lat": -25.966917,
+      "lon": 32.466956
+    },
+    {
+      "name": "Nampula",
+      "state": "Nampula",
+      "country": "Moçambique",
+      "lat": -14.966969,
+      "lon": 39.2707752
+    },
+    {
+      "name": "Beira",
+      "state": "Sofala",
+      "country": "Moçambique",
+      "lat": -19.834068,
+      "lon": 34.8358076
+    },
+    {
+      "name": "Chimoio",
+      "state": "Manica",
+      "country": "Moçambique",
+      "lat": -19.1437458,
+      "lon": 33.4780059
+    },
+    {
+      "name": "Nacala",
+      "state": "Nampula",
+      "country": "Moçambique",
+      "lat": -14.5583059,
+      "lon": 40.6863816
+    },
+    {
+      "name": "Quelimane",
+      "state": "Zambézia",
+      "country": "Moçambique",
+      "lat": -17.87751,
+      "lon": 36.890216
+    },
+    {
+      "name": "Tete",
+      "state": "Tete",
+      "country": "Moçambique",
+      "lat": -15.5205193,
+      "lon": 32.7682742
+    },
+    {
+      "name": "Lichinga",
+      "state": "Niassa",
+      "country": "Moçambique",
+      "lat": -13.2999118,
+      "lon": 35.2458642
+    },
+    {
+      "name": "Pemba",
+      "state": "Cabo Delgado",
+      "country": "Moçambique",
+      "lat": -12.9735551,
+      "lon": 40.5215098
+    },
+    {
+      "name": "Inhambane",
+      "state": "Inhambane",
+      "country": "Moçambique",
+      "lat": -22.779116,
+      "lon": 34.5661741
+    },
+    {
+      "name": "Xai-Xai",
+      "state": "Gaza",
+      "country": "Moçambique",
+      "lat": -25.044479,
+      "lon": 33.64073
+    },
+    {
+      "name": "Maxixe",
+      "state": "Inhambane",
+      "country": "Moçambique",
+      "lat": -23.861561,
+      "lon": 35.348934
+    },
+    {
+      "name": "Angoche",
+      "state": "Nampula",
+      "country": "Moçambique",
+      "lat": -16.0962442,
+      "lon": 39.7616724
+    },
+    {
+      "name": "Cuamba",
+      "state": "Niassa",
+      "country": "Moçambique",
+      "lat": -14.7486331,
+      "lon": 36.597456
+    },
+    {
+      "name": "Montepuez",
+      "state": "Cabo Delgado",
+      "country": "Moçambique",
+      "lat": -12.6245282,
+      "lon": 38.5890066
+    },
+    {
+      "name": "Mocuba",
+      "state": "Zambézia",
+      "country": "Moçambique",
+      "lat": -16.8519695,
+      "lon": 36.8785266
+    },
+    {
+      "name": "Gurué",
+      "state": "Zambézia",
+      "country": "Moçambique",
+      "lat": -15.4544621,
+      "lon": 36.9410455
+    },
+    {
+      "name": "Dondo",
+      "state": "Sofala",
+      "country": "Moçambique",
+      "lat": -19.4392924,
+      "lon": 34.8093383
+    },
+    {
+      "name": "Chibuto",
+      "state": "Gaza",
+      "country": "Moçambique",
+      "lat": -24.2656131,
+      "lon": 33.5490566
+    }
+  ],
+  "Angola": [
+    {
+      "name": "Luanda",
+      "state": "Luanda",
+      "country": "Angola",
+      "lat": -8.8272699,
+      "lon": 13.2439512
+    },
+    {
+      "name": "Huambo",
+      "state": "Huambo",
+      "country": "Angola",
+      "lat": -12.7772455,
+      "lon": 15.7346713
+    },
+    {
+      "name": "Lobito",
+      "state": "Benguela",
+      "country": "Angola",
+      "lat": -12.3506867,
+      "lon": 13.5464318
+    },
+    {
+      "name": "Benguela",
+      "state": "Benguela",
+      "country": "Angola",
+      "lat": -12.5790048,
+      "lon": 13.4037117
+    },
+    {
+      "name": "Lubango",
+      "state": "Huíla",
+      "country": "Angola",
+      "lat": -14.9195617,
+      "lon": 13.4897509
+    },
+    {
+      "name": "Kuito",
+      "state": "Bié",
+      "country": "Angola",
+      "lat": -12.3849374,
+      "lon": 16.9390022
+    },
+    {
+      "name": "Malanje",
+      "state": "Malanje",
+      "country": "Angola",
+      "lat": -9.535332,
+      "lon": 16.9364293
+    },
+    {
+      "name": "Namibe",
+      "state": "Namibe",
+      "country": "Angola",
+      "lat": -15.2669341,
+      "lon": 12.7064561
+    },
+    {
+      "name": "Soyo",
+      "state": "Zaire",
+      "country": "Angola",
+      "lat": -6.1387951,
+      "lon": 12.3690144
+    },
+    {
+      "name": "Cabinda",
+      "state": "Cabinda",
+      "country": "Angola",
+      "lat": -5.056395,
+      "lon": 12.3211749
+    },
+    {
+      "name": "Uíge",
+      "state": "Uíge",
+      "country": "Angola",
+      "lat": -6.9516802,
+      "lon": 15.4799164
+    },
+    {
+      "name": "Saurimo",
+      "state": "Lunda Sul",
+      "country": "Angola",
+      "lat": -9.6589303,
+      "lon": 20.3981118
+    },
+    {
+      "name": "Luena",
+      "state": "Moxico",
+      "country": "Angola",
+      "lat": -11.7790355,
+      "lon": 19.9122676
+    },
+    {
+      "name": "Menongue",
+      "state": "Cuando Cubango",
+      "country": "Angola",
+      "lat": -14.6610713,
+      "lon": 17.6820336
+    },
+    {
+      "name": "Sumbe",
+      "state": "Cuanza Sul",
+      "country": "Angola",
+      "lat": -11.2019365,
+      "lon": 13.8396845
+    },
+    {
+      "name": "N'dalatando",
+      "state": "Cuanza Norte",
+      "country": "Angola",
+      "lat": -9.2984831,
+      "lon": 14.9144981
+    },
+    {
+      "name": "Ondjiva",
+      "state": "Cunene",
+      "country": "Angola",
+      "lat": -17.0705234,
+      "lon": 15.7280115
+    },
+    {
+      "name": "Caxito",
+      "state": "Bengo",
+      "country": "Angola",
+      "lat": -8.5827504,
+      "lon": 13.6600788
+    },
+    {
+      "name": "Camacupa",
+      "state": "Bié",
+      "country": "Angola",
+      "lat": -12.0224433,
+      "lon": 17.4705214
+    },
+    {
+      "name": "Lucapa",
+      "state": "Lunda Norte",
+      "country": "Angola",
+      "lat": -8.4195244,
+      "lon": 20.7410918
+    }
+  ],
+  "Jamaica": [
+    {
+      "name": "Kingston",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 17.9712148,
+      "lon": -76.7928128
+    },
+    {
+      "name": "Spanish Town",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 17.9956926,
+      "lon": -76.9540831
+    },
+    {
+      "name": "Portmore",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 17.9717917,
+      "lon": -76.8738048
+    },
+    {
+      "name": "Montego Bay",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 18.4724603,
+      "lon": -77.9217357
+    },
+    {
+      "name": "May Pen",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 17.974637,
+      "lon": -77.2581951
+    },
+    {
+      "name": "Mandeville",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 18.0431254,
+      "lon": -77.50741
+    },
+    {
+      "name": "Old Harbour",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 17.9383872,
+      "lon": -77.1134173
+    },
+    {
+      "name": "Savanna-la-Mar",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 18.2193686,
+      "lon": -78.1326673
+    },
+    {
+      "name": "Port Antonio",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 18.175168,
+      "lon": -76.4474201
+    },
+    {
+      "name": "Saint Ann's Bay",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 18.4275497,
+      "lon": -77.1930783
+    },
+    {
+      "name": "Linstead",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 18.136603,
+      "lon": -77.0304484
+    },
+    {
+      "name": "Half Way Tree",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 18.0118757,
+      "lon": -76.7968643
+    },
+    {
+      "name": "Constant Spring",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 18.049594,
+      "lon": -76.7930813
+    },
+    {
+      "name": "Morant Bay",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 17.8820832,
+      "lon": -76.4115503
+    },
+    {
+      "name": "Ocho Rios",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 18.4081045,
+      "lon": -77.1011092
+    },
+    {
+      "name": "Bog Walk",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 18.1028531,
+      "lon": -77.0058453
+    },
+    {
+      "name": "Ewarton",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 18.1781493,
+      "lon": -77.0843612
+    },
+    {
+      "name": "Hayes",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 17.8751071,
+      "lon": -77.2400665
+    },
+    {
+      "name": "Port Maria",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 18.3732372,
+      "lon": -76.8938277
+    },
+    {
+      "name": "Santa Cruz",
+      "state": "",
+      "country": "Jamaica",
+      "lat": 18.0530404,
+      "lon": -77.6996418
+    }
+  ],
+  "Trinidad and Tobago": [
+    {
+      "name": "Port of Spain",
+      "state": "",
+      "country": "Trinidad and Tobago",
+      "lat": 10.6572678,
+      "lon": -61.5180173
+    },
+    {
+      "name": "Chaguanas",
+      "state": "",
+      "country": "Trinidad and Tobago",
+      "lat": 10.5147394,
+      "lon": -61.4076757
+    },
+    {
+      "name": "San Fernando",
+      "state": "",
+      "country": "Trinidad and Tobago",
+      "lat": 10.2807069,
+      "lon": -61.4645896
+    },
+    {
+      "name": "Arima",
+      "state": "",
+      "country": "Trinidad and Tobago",
+      "lat": 10.6372057,
+      "lon": -61.2829762
+    },
+    {
+      "name": "Marabella",
+      "state": "",
+      "country": "Trinidad and Tobago",
+      "lat": 10.3073477,
+      "lon": -61.4518649
+    },
+    {
+      "name": "Point Fortin",
+      "state": "",
+      "country": "Trinidad and Tobago",
+      "lat": 10.1759283,
+      "lon": -61.6827286
+    },
+    {
+      "name": "Tunapuna",
+      "state": "Tunapuna-Piarco",
+      "country": "Trinidad and Tobago",
+      "lat": 10.6436181,
+      "lon": -61.3907206
+    },
+    {
+      "name": "Saint Joseph",
+      "state": "Tunapuna-Piarco",
+      "country": "Trinidad and Tobago",
+      "lat": 10.6555564,
+      "lon": -61.4139447
+    },
+    {
+      "name": "Sangre Grande",
+      "state": "Sangre Grande",
+      "country": "Trinidad and Tobago",
+      "lat": 10.6375402,
+      "lon": -61.1177499
+    },
+    {
+      "name": "Princes Town",
+      "state": "Princes Town",
+      "country": "Trinidad and Tobago",
+      "lat": 10.2048003,
+      "lon": -61.2806186
+    },
+    {
+      "name": "Diego Martin",
+      "state": "Diego Martin",
+      "country": "Trinidad and Tobago",
+      "lat": 10.7138597,
+      "lon": -61.5793555
+    },
+    {
+      "name": "Couva",
+      "state": "Couva-Tabaquite-Talparo",
+      "country": "Trinidad and Tobago",
+      "lat": 10.4223291,
+      "lon": -61.458708
+    },
+    {
+      "name": "Scarborough",
+      "state": "",
+      "country": "Trinidad and Tobago",
+      "lat": 11.1852893,
+      "lon": -60.735024
+    },
+    {
+      "name": "Penal",
+      "state": "Penal-Debe",
+      "country": "Trinidad and Tobago",
+      "lat": 10.1684634,
+      "lon": -61.4526506
+    },
+    {
+      "name": "Siparia",
+      "state": "Siparia",
+      "country": "Trinidad and Tobago",
+      "lat": 10.1471607,
+      "lon": -61.5787032
+    },
+    {
+      "name": "D'Abadie",
+      "state": "Tunapuna-Piarco",
+      "country": "Trinidad and Tobago",
+      "lat": 10.6289906,
+      "lon": -61.3109079
+    },
+    {
+      "name": "Debe",
+      "state": "Penal-Debe",
+      "country": "Trinidad and Tobago",
+      "lat": 10.2107386,
+      "lon": -61.4515249
+    },
+    {
+      "name": "Arouca",
+      "state": "Tunapuna-Piarco",
+      "country": "Trinidad and Tobago",
+      "lat": 10.6349851,
+      "lon": -61.3399307
+    },
+    {
+      "name": "Curepe",
+      "state": "Tunapuna-Piarco",
+      "country": "Trinidad and Tobago",
+      "lat": 10.6502517,
+      "lon": -61.4093463
+    },
+    {
+      "name": "Fyzabad",
+      "state": "Siparia",
+      "country": "Trinidad and Tobago",
+      "lat": 10.1802665,
+      "lon": -61.5467618
+    }
+  ],
+  "Cuba": [
+    {
+      "name": "Havana",
+      "state": "La Habana",
+      "country": "Cuba",
+      "lat": 23.135305,
+      "lon": -82.3589631
+    },
+    {
+      "name": "Santiago de Cuba",
+      "state": "Santiago de Cuba",
+      "country": "Cuba",
+      "lat": 20.0214263,
+      "lon": -75.8294928
+    },
+    {
+      "name": "Camagüey",
+      "state": "Camagüey",
+      "country": "Cuba",
+      "lat": 21.3791765,
+      "lon": -77.9183681
+    },
+    {
+      "name": "Holguín",
+      "state": "Holguín",
+      "country": "Cuba",
+      "lat": 20.9115577,
+      "lon": -75.7891978
+    },
+    {
+      "name": "Guantánamo",
+      "state": "Guantánamo",
+      "country": "Cuba",
+      "lat": 19.9185556,
+      "lon": -75.1593258
+    },
+    {
+      "name": "Santa Clara",
+      "state": "Villa Clara",
+      "country": "Cuba",
+      "lat": 22.406628,
+      "lon": -79.9651013
+    },
+    {
+      "name": "Las Tunas",
+      "state": "Las Tunas",
+      "country": "Cuba",
+      "lat": 21.0887045,
+      "lon": -76.8121648
+    },
+    {
+      "name": "Bayamo",
+      "state": "Granma",
+      "country": "Cuba",
+      "lat": 20.3734145,
+      "lon": -76.6494244
+    },
+    {
+      "name": "Cienfuegos",
+      "state": "Cienfuegos",
+      "country": "Cuba",
+      "lat": 22.1459864,
+      "lon": -80.4530775
+    },
+    {
+      "name": "Pinar del Río",
+      "state": "Pinar del Río",
+      "country": "Cuba",
+      "lat": 22.4167422,
+      "lon": -83.7002582
+    },
+    {
+      "name": "Matanzas",
+      "state": "Matanzas",
+      "country": "Cuba",
+      "lat": 23.0469236,
+      "lon": -81.5783032
+    },
+    {
+      "name": "Ciego de Ávila",
+      "state": "Ciego de Ávila",
+      "country": "Cuba",
+      "lat": 21.7476686,
+      "lon": -78.729558
+    },
+    {
+      "name": "Sancti Spíritus",
+      "state": "Sancti Spíritus",
+      "country": "Cuba",
+      "lat": 21.7261281,
+      "lon": -79.613293
+    },
+    {
+      "name": "Manzanillo",
+      "state": "Granma",
+      "country": "Cuba",
+      "lat": 20.3454054,
+      "lon": -77.1201225
+    },
+    {
+      "name": "Cárdenas",
+      "state": "Matanzas",
+      "country": "Cuba",
+      "lat": 23.0372705,
+      "lon": -81.2027158
+    },
+    {
+      "name": "Palma Soriano",
+      "state": "Santiago de Cuba",
+      "country": "Cuba",
+      "lat": 20.2126686,
+      "lon": -75.9973941
+    },
+    {
+      "name": "Nuevitas",
+      "state": "Camagüey",
+      "country": "Cuba",
+      "lat": 21.5465273,
+      "lon": -77.2636267
+    },
+    {
+      "name": "Artemisa",
+      "state": "Artemisa",
+      "country": "Cuba",
+      "lat": 22.8265226,
+      "lon": -82.925932
+    },
+    {
+      "name": "Contramaestre",
+      "state": "Santiago de Cuba",
+      "country": "Cuba",
+      "lat": 20.2996013,
+      "lon": -76.2441035
+    },
+    {
+      "name": "Morón",
+      "state": "Ciego de Ávila",
+      "country": "Cuba",
+      "lat": 22.1067153,
+      "lon": -78.6269737
+    }
+  ],
+  "Cambodia": [
+    {
+      "name": "Phnom Penh",
+      "state": "រាជធានីភ្នំពេញ",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 11.5730391,
+      "lon": 104.857807
+    },
+    {
+      "name": "Siem Reap",
+      "state": "ខេត្តសៀមរាប",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 13.3617562,
+      "lon": 103.8590321
+    },
+    {
+      "name": "Battambang",
+      "state": "ខេត្តបាត់ដំបង",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 12.9256791,
+      "lon": 103.2317136
+    },
+    {
+      "name": "Sihanoukville",
+      "state": "ខេត្តព្រះសីហនុ",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 10.6220485,
+      "lon": 103.5223365
+    },
+    {
+      "name": "Poipet",
+      "state": "ខេត្តបន្ទាយមានជ័យ",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 13.6576905,
+      "lon": 102.5554958
+    },
+    {
+      "name": "Kampong Cham",
+      "state": "ខេត្តកំពង់ចាម ꨆꩌꨚꨮꩆꩁ ꨌꩌ",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 12.1174857,
+      "lon": 105.2080022
+    },
+    {
+      "name": "Prey Veng",
+      "state": "ខេត្តព្រៃវែង",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 11.3659597,
+      "lon": 105.4557277
+    },
+    {
+      "name": "Ta Khmau",
+      "state": "ខេត្តកណ្ដាល",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 11.4687395,
+      "lon": 104.9451162
+    },
+    {
+      "name": "Pursat",
+      "state": "ខេត្តពោធិ៍សាត់",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 12.4662592,
+      "lon": 103.742683
+    },
+    {
+      "name": "Kampong Speu",
+      "state": "ខេត្តកំពង់ស្ពឺ",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 11.5775368,
+      "lon": 104.2714023
+    },
+    {
+      "name": "Kampong Chhnang",
+      "state": "ខេត្តកំពង់ឆ្នាំង",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 12.1382025,
+      "lon": 104.3354098
+    },
+    {
+      "name": "Sisophon",
+      "state": "ខេត្តបន្ទាយមានជ័យ",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 13.5884004,
+      "lon": 102.9700274
+    },
+    {
+      "name": "Kratié",
+      "state": "ខេត្តក្រចេះ",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 12.6783017,
+      "lon": 106.0581733
+    },
+    {
+      "name": "Stung Treng",
+      "state": "ខេត្តស្ទឹងត្រែង",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 13.852468,
+      "lon": 106.0889849
+    },
+    {
+      "name": "Kampot",
+      "state": "ខេត្តកំពត",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 10.6314754,
+      "lon": 104.132637
+    },
+    {
+      "name": "Kep",
+      "state": "ខេត្តកែប",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 10.402154,
+      "lon": 104.2650618
+    },
+    {
+      "name": "Pailin",
+      "state": "ខេត្តប៉ៃលិន",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 12.8905328,
+      "lon": 102.6294604
+    },
+    {
+      "name": "Koh Kong",
+      "state": "ខេត្តកោះកុង",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 11.6813417,
+      "lon": 103.0258043
+    },
+    {
+      "name": "Bavet",
+      "state": "ខេត្តស្វាយរៀង",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 11.0378953,
+      "lon": 106.1348852
+    },
+    {
+      "name": "Svay Rieng",
+      "state": "ខេត្តស្វាយរៀង",
+      "country": "ព្រះរាជាណាចក្រ​កម្ពុជា",
+      "lat": 11.1950082,
+      "lon": 105.7967967
+    }
+  ],
+  "Laos": [
+    {
+      "name": "Vientiane",
+      "state": "ນະຄອນຫຼວງວຽງຈັນ",
+      "country": "ປະເທດລາວ",
+      "lat": 17.9640988,
+      "lon": 102.6133707
+    },
+    {
+      "name": "Pakse",
+      "state": "ຈຳປາສັກ",
+      "country": "ປະເທດລາວ",
+      "lat": 15.1201461,
+      "lon": 105.8043971
+    },
+    {
+      "name": "Savannakhet",
+      "state": "ສະຫວັນນະເຂດ",
+      "country": "ປະເທດລາວ",
+      "lat": 16.5001958,
+      "lon": 105.7155946
+    },
+    {
+      "name": "Luang Prabang",
+      "state": "ຫລວງພະບາງ",
+      "country": "ປະເທດລາວ",
+      "lat": 19.8887438,
+      "lon": 102.135898
+    },
+    {
+      "name": "Thakhek",
+      "state": "ຄໍາມ່ວນ",
+      "country": "ປະເທດລາວ",
+      "lat": 17.3946183,
+      "lon": 104.8064526
+    },
+    {
+      "name": "Xam Neua",
+      "state": "ຫົວພັນ",
+      "country": "ປະເທດລາວ",
+      "lat": 20.4151514,
+      "lon": 104.047364
+    },
+    {
+      "name": "Phonsavan",
+      "state": "ຊຽງຂວາງ",
+      "country": "ປະເທດລາວ",
+      "lat": 19.45189,
+      "lon": 103.206607
+    },
+    {
+      "name": "Vang Vieng",
+      "state": "ວຽງຈັນ",
+      "country": "ປະເທດລາວ",
+      "lat": 18.9538961,
+      "lon": 102.4563909
+    },
+    {
+      "name": "Muang Xay",
+      "state": "ອຸດົມໄຊ",
+      "country": "ປະເທດລາວ",
+      "lat": 20.6930134,
+      "lon": 101.9853678
+    },
+    {
+      "name": "Salavan",
+      "state": "ສາລະວັນ",
+      "country": "ປະເທດລາວ",
+      "lat": 15.87128,
+      "lon": 106.3389565
+    },
+    {
+      "name": "Attapeu",
+      "state": "ອັດຕະປື",
+      "country": "ປະເທດລາວ",
+      "lat": 14.79073,
+      "lon": 107.1008318
+    },
+    {
+      "name": "Xaignabouli",
+      "state": "ໄຊຍະບູລີ",
+      "country": "ປະເທດລາວ",
+      "lat": 19.2494811,
+      "lon": 101.7228286
+    },
+    {
+      "name": "Pakxan",
+      "state": "ບໍລິຄຳໄຊ",
+      "country": "ປະເທດລາວ",
+      "lat": 18.406456,
+      "lon": 103.7301456
+    },
+    {
+      "name": "Houayxay",
+      "state": "ບໍ່ແກ້ວ",
+      "country": "ປະເທດລາວ",
+      "lat": 20.3571219,
+      "lon": 100.6016507
+    },
+    {
+      "name": "Luang Namtha",
+      "state": "ຫລວງນໍ້າທາ",
+      "country": "ປະເທດລາວ",
+      "lat": 20.933004,
+      "lon": 101.0586737
+    },
+    {
+      "name": "Saravan",
+      "state": "ສາລະວັນ",
+      "country": "ປະເທດລາວ",
+      "lat": 15.87128,
+      "lon": 106.3389565
+    },
+    {
+      "name": "Phongsaly",
+      "state": "ຜົ້ງສາລີ",
+      "country": "ປະເທດລາວ",
+      "lat": 21.6767816,
+      "lon": 102.2773177
+    },
+    {
+      "name": "Ban Houayxay",
+      "state": "ຄໍາມ່ວນ",
+      "country": "ປະເທດລາວ",
+      "lat": 17.8609264,
+      "lon": 104.6433424
+    },
+    {
+      "name": "Muang Sing",
+      "state": "ຫລວງນໍ້າທາ",
+      "country": "ປະເທດລາວ",
+      "lat": 21.2707198,
+      "lon": 101.0577902
+    },
+    {
+      "name": "Khammouane",
+      "state": "ຄໍາມ່ວນ",
+      "country": "ປະເທດລາວ",
+      "lat": 17.5842055,
+      "lon": 105.2471325
+    }
+  ],
+  "Myanmar": [
+    {
+      "name": "Yangon",
+      "state": "ရန်ကုန်တိုင်းဒေသကြီး",
+      "country": "မြန်မာ",
+      "lat": 16.7967129,
+      "lon": 96.1609916
+    },
+    {
+      "name": "Mandalay",
+      "state": "မန္တလေးတိုင်း",
+      "country": "မြန်မာ",
+      "lat": 21.9596834,
+      "lon": 96.0948743
+    },
+    {
+      "name": "Naypyidaw",
+      "state": "နေပြည်တော် ပြည်ထောင်စုနယ်မြေ",
+      "country": "မြန်မာ",
+      "lat": 19.7753289,
+      "lon": 96.1032552
+    },
+    {
+      "name": "Mawlamyine",
+      "state": "မွန်ပြည်နယ်",
+      "country": "မြန်မာ",
+      "lat": 16.4908026,
+      "lon": 97.6284825
+    },
+    {
+      "name": "Bago",
+      "state": "ပဲခူးတိုင်းဒေသကြီး",
+      "country": "မြန်မာ",
+      "lat": 18.2457067,
+      "lon": 96.1004931
+    },
+    {
+      "name": "Pathein",
+      "state": "ဧရာဝတီတိုင်းဒေသကြီး",
+      "country": "မြန်မာ",
+      "lat": 16.783333,
+      "lon": 94.733333
+    },
+    {
+      "name": "Monywa",
+      "state": "စစ်ကိုင်းတိုင်းဒေသကြီး",
+      "country": "မြန်မာ",
+      "lat": 22.1182175,
+      "lon": 95.1324747
+    },
+    {
+      "name": "Sittwe",
+      "state": "ရခိုင်ပြည်နယ်",
+      "country": "မြန်မာ",
+      "lat": 20.139197,
+      "lon": 92.8970859
+    },
+    {
+      "name": "Meiktila",
+      "state": "မန္တလေးတိုင်း",
+      "country": "မြန်မာ",
+      "lat": 20.8814233,
+      "lon": 95.8619463
+    },
+    {
+      "name": "Taunggyi",
+      "state": "ရှမ်းပြည်နယ်",
+      "country": "မြန်မာ",
+      "lat": 20.7870108,
+      "lon": 97.0387263
+    },
+    {
+      "name": "Myeik",
+      "state": "တနင်္သာရီတိုင်း",
+      "country": "မြန်မာ",
+      "lat": 12.4319552,
+      "lon": 98.5955711
+    },
+    {
+      "name": "Magway",
+      "state": "မကွေးတိုင်းဒေသကြီး",
+      "country": "မြန်မာ",
+      "lat": 20.2747958,
+      "lon": 94.7362245
+    },
+    {
+      "name": "Lashio",
+      "state": "ရှမ်းပြည်နယ်",
+      "country": "မြန်မာ",
+      "lat": 22.9418628,
+      "lon": 97.745165
+    },
+    {
+      "name": "Pyay",
+      "state": "",
+      "country": "မြန်မာ",
+      "lat": 18.816667,
+      "lon": 95.216667
+    },
+    {
+      "name": "Hinthada",
+      "state": "ဧရာဝတီတိုင်းဒေသကြီး",
+      "country": "မြန်မာ",
+      "lat": 17.6457472,
+      "lon": 95.4609517
+    },
+    {
+      "name": "Dawei",
+      "state": "တနင်္သာရီတိုင်း",
+      "country": "မြန်မာ",
+      "lat": 14.0797232,
+      "lon": 98.1990191
+    },
+    {
+      "name": "Myingyan",
+      "state": "မန္တလေးတိုင်း",
+      "country": "မြန်မာ",
+      "lat": 21.3911546,
+      "lon": 95.5906737
+    },
+    {
+      "name": "Pakokku",
+      "state": "မကွေးတိုင်းဒေသကြီး",
+      "country": "မြန်မာ",
+      "lat": 21.3343349,
+      "lon": 95.0944271
+    },
+    {
+      "name": "Hpa-An",
+      "state": "ကရင်ပြည်နယ်",
+      "country": "မြန်မာ",
+      "lat": 16.8902634,
+      "lon": 97.6362745
+    },
+    {
+      "name": "Sagaing",
+      "state": "စစ်ကိုင်းတိုင်းဒေသကြီး",
+      "country": "မြန်မာ",
+      "lat": 24.4741444,
+      "lon": 95.4750045
+    }
+  ],
+  "Lebanon": [
+    {
+      "name": "Beirut",
+      "state": "محافظة بيروت",
+      "country": "لبنان",
+      "lat": 33.8892265,
+      "lon": 35.5025585
+    },
+    {
+      "name": "Tripoli",
+      "state": "محافظة الشمال",
+      "country": "لبنان",
+      "lat": 34.4373616,
+      "lon": 35.8348551
+    },
+    {
+      "name": "Sidon",
+      "state": "محافظة الجنوب",
+      "country": "لبنان",
+      "lat": 33.564733,
+      "lon": 35.374978
+    },
+    {
+      "name": "Tyre",
+      "state": "محافظة الجنوب",
+      "country": "لبنان",
+      "lat": 33.2721211,
+      "lon": 35.1964023
+    },
+    {
+      "name": "Nabatieh",
+      "state": "محافظة النبطية",
+      "country": "لبنان",
+      "lat": 33.3079104,
+      "lon": 35.5059689
+    },
+    {
+      "name": "Zahle",
+      "state": "محافظة البقاع",
+      "country": "لبنان",
+      "lat": 33.8477069,
+      "lon": 35.9024955
+    },
+    {
+      "name": "Baalbek",
+      "state": "محافظة بعلبك الهرمل",
+      "country": "لبنان",
+      "lat": 34.0078871,
+      "lon": 36.2118106
+    },
+    {
+      "name": "Jounieh",
+      "state": "محافظة كسروان جبيل",
+      "country": "لبنان",
+      "lat": 33.9741506,
+      "lon": 35.6200633
+    },
+    {
+      "name": "Byblos",
+      "state": "محافظة كسروان جبيل",
+      "country": "لبنان",
+      "lat": 34.1236954,
+      "lon": 35.6493557
+    },
+    {
+      "name": "Aley",
+      "state": "محافظة جبل لبنان",
+      "country": "لبنان",
+      "lat": 33.8082697,
+      "lon": 35.6061181
+    },
+    {
+      "name": "Batroun",
+      "state": "محافظة الشمال",
+      "country": "لبنان",
+      "lat": 34.2548879,
+      "lon": 35.6588567
+    },
+    {
+      "name": "Halba",
+      "state": "محافظة عكار",
+      "country": "لبنان",
+      "lat": 34.5543076,
+      "lon": 36.0723493
+    },
+    {
+      "name": "Bint Jbeil",
+      "state": "محافظة النبطية",
+      "country": "لبنان",
+      "lat": 33.1195382,
+      "lon": 35.4327933
+    },
+    {
+      "name": "Jezzine",
+      "state": "محافظة الجنوب",
+      "country": "لبنان",
+      "lat": 33.5439343,
+      "lon": 35.5843949
+    },
+    {
+      "name": "Rashaya",
+      "state": "محافظة البقاع",
+      "country": "لبنان",
+      "lat": 33.5014243,
+      "lon": 35.8448806
+    },
+    {
+      "name": "Marjayoun",
+      "state": "محافظة النبطية",
+      "country": "لبنان",
+      "lat": 33.3592529,
+      "lon": 35.5902134
+    },
+    {
+      "name": "Deir el Qamar",
+      "state": "محافظة جبل لبنان",
+      "country": "لبنان",
+      "lat": 33.6979691,
+      "lon": 35.5647431
+    },
+    {
+      "name": "Bcharré",
+      "state": "محافظة الشمال",
+      "country": "لبنان",
+      "lat": 34.2507231,
+      "lon": 36.0099915
+    },
+    {
+      "name": "Zgharta",
+      "state": "محافظة الشمال",
+      "country": "لبنان",
+      "lat": 34.3929847,
+      "lon": 35.8967113
+    }
+  ],
+  "Oman": [
+    {
+      "name": "Muscat",
+      "state": "محافظة مسقط",
+      "country": "عمان",
+      "lat": 23.6123628,
+      "lon": 58.5938134
+    },
+    {
+      "name": "Salalah",
+      "state": "محافظة ظفار",
+      "country": "عمان",
+      "lat": 17.0174945,
+      "lon": 54.1010923
+    },
+    {
+      "name": "Sohar",
+      "state": "محافظة شمال الباطنة",
+      "country": "عمان",
+      "lat": 24.3419881,
+      "lon": 56.7298385
+    },
+    {
+      "name": "Nizwa",
+      "state": "محافظة الداخلية",
+      "country": "عمان",
+      "lat": 22.9323884,
+      "lon": 57.5311
+    },
+    {
+      "name": "Sur",
+      "state": "محافظة جنوب الشرقية",
+      "country": "عمان",
+      "lat": 22.5694263,
+      "lon": 59.5297203
+    },
+    {
+      "name": "Ibri",
+      "state": "محافظة الظاهرة",
+      "country": "عمان",
+      "lat": 23.2161642,
+      "lon": 56.5153547
+    },
+    {
+      "name": "Barka",
+      "state": "محافظة جنوب الباطنة",
+      "country": "عمان",
+      "lat": 23.6665754,
+      "lon": 57.8820597
+    },
+    {
+      "name": "Rustaq",
+      "state": "محافظة جنوب الباطنة",
+      "country": "عمان",
+      "lat": 23.7772948,
+      "lon": 57.7844757
+    },
+    {
+      "name": "Al Buraimi",
+      "state": "محافظة البريمي",
+      "country": "عمان",
+      "lat": 24.1721086,
+      "lon": 56.1318808
+    },
+    {
+      "name": "Saham",
+      "state": "محافظة شمال الباطنة",
+      "country": "عمان",
+      "lat": 24.142469,
+      "lon": 56.8757899
+    },
+    {
+      "name": "Shinas",
+      "state": "محافظة شمال الباطنة",
+      "country": "عمان",
+      "lat": 24.7441619,
+      "lon": 56.4598209
+    },
+    {
+      "name": "Bahla",
+      "state": "محافظة الداخلية",
+      "country": "عمان",
+      "lat": 22.9984735,
+      "lon": 57.316806
+    },
+    {
+      "name": "Al Suwaiq",
+      "state": "محافظة شمال الباطنة",
+      "country": "عمان",
+      "lat": 23.8253802,
+      "lon": 57.4235897
+    },
+    {
+      "name": "Khasab",
+      "state": "محافظة مسندم",
+      "country": "عمان",
+      "lat": 26.1841297,
+      "lon": 56.2469789
+    },
+    {
+      "name": "Bidbid",
+      "state": "محافظة الداخلية",
+      "country": "عمان",
+      "lat": 23.41,
+      "lon": 58.13
+    },
+    {
+      "name": "Liwa",
+      "state": "محافظة شمال الباطنة",
+      "country": "عمان",
+      "lat": 24.5185885,
+      "lon": 56.5610044
+    },
+    {
+      "name": "Masirah",
+      "state": "محافظة جنوب الشرقية",
+      "country": "عمان",
+      "lat": 20.6484078,
+      "lon": 58.8746062
+    },
+    {
+      "name": "Adam",
+      "state": "محافظة الداخلية",
+      "country": "عمان",
+      "lat": 22.3840219,
+      "lon": 57.5240243
+    },
+    {
+      "name": "Izki",
+      "state": "محافظة الداخلية",
+      "country": "عمان",
+      "lat": 22.9372399,
+      "lon": 57.7570944
+    },
+    {
+      "name": "Ibra",
+      "state": "محافظة شمال الشرقية",
+      "country": "عمان",
+      "lat": 22.7081773,
+      "lon": 58.5409926
+    }
+  ],
+  "Bahrain": [
+    {
+      "name": "Manama",
+      "state": "محافظة العاصمة",
+      "country": "البحرين",
+      "lat": 26.2235041,
+      "lon": 50.5822436
+    },
+    {
+      "name": "Riffa",
+      "state": "المحافظة الجنوبية",
+      "country": "البحرين",
+      "lat": 26.1315261,
+      "lon": 50.5503431
+    },
+    {
+      "name": "Muharraq",
+      "state": "محافظة المحرق",
+      "country": "البحرين",
+      "lat": 26.2465946,
+      "lon": 50.6164127
+    },
+    {
+      "name": "Hamad Town",
+      "state": "المحافظة الشمالية",
+      "country": "البحرين",
+      "lat": 26.1267463,
+      "lon": 50.4983356
+    },
+    {
+      "name": "A'ali",
+      "state": "المحافظة الشمالية",
+      "country": "البحرين",
+      "lat": 26.1544539,
+      "lon": 50.5273639
+    },
+    {
+      "name": "Isa Town",
+      "state": "المحافظة الجنوبية",
+      "country": "البحرين",
+      "lat": 26.1741995,
+      "lon": 50.5473432
+    },
+    {
+      "name": "Sitra",
+      "state": "المحافظة الجنوبية",
+      "country": "البحرين",
+      "lat": 26.1478317,
+      "lon": 50.6320232
+    },
+    {
+      "name": "Budaiya",
+      "state": "المحافظة الشمالية",
+      "country": "البحرين",
+      "lat": 26.2156292,
+      "lon": 50.4523545
+    },
+    {
+      "name": "Jidhafs",
+      "state": "محافظة العاصمة",
+      "country": "البحرين",
+      "lat": 26.2203138,
+      "lon": 50.5400879
+    },
+    {
+      "name": "Sanabis",
+      "state": "محافظة العاصمة",
+      "country": "البحرين",
+      "lat": 26.226196,
+      "lon": 50.5452432
+    },
+    {
+      "name": "Tubli",
+      "state": "محافظة العاصمة",
+      "country": "البحرين",
+      "lat": 26.1672253,
+      "lon": 50.5916531
+    },
+    {
+      "name": "Dar Kulayb",
+      "state": "المحافظة الشمالية",
+      "country": "البحرين",
+      "lat": 26.0651104,
+      "lon": 50.5122187
+    },
+    {
+      "name": "Barbar",
+      "state": "المحافظة الشمالية",
+      "country": "البحرين",
+      "lat": 26.2261951,
+      "lon": 50.4841605
+    },
+    {
+      "name": "Galali",
+      "state": "محافظة المحرق",
+      "country": "البحرين",
+      "lat": 26.2742183,
+      "lon": 50.6519916
+    },
+    {
+      "name": "Sanad",
+      "state": "محافظة العاصمة",
+      "country": "البحرين",
+      "lat": 26.1501874,
+      "lon": 50.5841248
+    },
+    {
+      "name": "Juffair",
+      "state": "محافظة العاصمة",
+      "country": "البحرين",
+      "lat": 26.2146274,
+      "lon": 50.6041274
+    },
+    {
+      "name": "Adliya",
+      "state": "محافظة العاصمة",
+      "country": "البحرين",
+      "lat": 26.2138794,
+      "lon": 50.5861658
+    },
+    {
+      "name": "Saar",
+      "state": "المحافظة الشمالية",
+      "country": "البحرين",
+      "lat": 26.1898256,
+      "lon": 50.4941714
+    }
+  ],
+  "Azerbaijan": [
+    {
+      "name": "Baku",
+      "state": "",
+      "country": "Azərbaycan",
+      "lat": 40.3755885,
+      "lon": 49.8328009
+    },
+    {
+      "name": "Ganja",
+      "state": "",
+      "country": "Azərbaycan",
+      "lat": 40.6798083,
+      "lon": 46.3597178
+    },
+    {
+      "name": "Sumqayit",
+      "state": "",
+      "country": "Azərbaycan",
+      "lat": 40.703935,
+      "lon": 49.657693
+    },
+    {
+      "name": "Mingachevir",
+      "state": "",
+      "country": "Azərbaycan",
+      "lat": 40.7646918,
+      "lon": 47.052389
+    },
+    {
+      "name": "Lankaran",
+      "state": "",
+      "country": "Azərbaycan",
+      "lat": 38.7537311,
+      "lon": 48.8539286
+    },
+    {
+      "name": "Shirvan",
+      "state": "",
+      "country": "Azərbaycan",
+      "lat": 39.9546055,
+      "lon": 48.9464339
+    },
+    {
+      "name": "Nakhchivan",
+      "state": "Naxçıvan Muxtar Respublikası",
+      "country": "Azərbaycan",
+      "lat": 39.217497,
+      "lon": 45.4069671
+    },
+    {
+      "name": "Sheki",
+      "state": "",
+      "country": "Azərbaycan",
+      "lat": 41.2033609,
+      "lon": 47.1802623
+    },
+    {
+      "name": "Yevlakh",
+      "state": "",
+      "country": "Azərbaycan",
+      "lat": 40.6115625,
+      "lon": 47.1466579
+    },
+    {
+      "name": "Khankendi",
+      "state": "",
+      "country": "Azərbaycan",
+      "lat": 39.8182184,
+      "lon": 46.751063
+    },
+    {
+      "name": "Gəncə",
+      "state": "",
+      "country": "Azərbaycan",
+      "lat": 40.6798083,
+      "lon": 46.3597178
+    },
+    {
+      "name": "Agdam",
+      "state": "",
+      "country": "Azərbaycan",
+      "lat": 39.9932355,
+      "lon": 46.9304843
+    },
+    {
+      "name": "Shamakhi",
+      "state": "",
+      "country": "Azərbaycan",
+      "lat": 40.6338603,
+      "lon": 48.6382239
+    },
+    {
+      "name": "Quba",
+      "state": "",
+      "country": "Azərbaycan",
+      "lat": 41.1880893,
+      "lon": 48.3721452
+    },
+    {
+      "name": "Qazakh",
+      "state": "",
+      "country": "Azərbaycan",
+      "lat": 41.1707366,
+      "lon": 45.2528833
+    },
+    {
+      "name": "Balakan",
+      "state": "",
+      "country": "Azərbaycan",
+      "lat": 41.731937,
+      "lon": 46.4001881
+    },
+    {
+      "name": "Zaqatala",
+      "state": "",
+      "country": "Azərbaycan",
+      "lat": 41.6180321,
+      "lon": 46.7595126
+    },
+    {
+      "name": "Salyan",
+      "state": "",
+      "country": "Azərbaycan",
+      "lat": 39.6524101,
+      "lon": 49.1084381
+    },
+    {
+      "name": "Astara",
+      "state": "",
+      "country": "Azərbaycan",
+      "lat": 38.5155978,
+      "lon": 48.8283223
+    },
+    {
+      "name": "Goychay",
+      "state": "",
+      "country": "Azərbaycan",
+      "lat": 40.6494415,
+      "lon": 47.7412208
+    }
+  ],
+  "Georgia": [
+    {
+      "name": "Tbilisi",
+      "state": "",
+      "country": "საქართველო",
+      "lat": 41.6934591,
+      "lon": 44.8014495
+    },
+    {
+      "name": "Batumi",
+      "state": "აჭარის ავტონომიური რესპუბლიკა",
+      "country": "საქართველო",
+      "lat": 41.6509502,
+      "lon": 41.6360085
+    },
+    {
+      "name": "Kutaisi",
+      "state": "იმერეთი",
+      "country": "საქართველო",
+      "lat": 42.2596791,
+      "lon": 42.6633738
+    },
+    {
+      "name": "Rustavi",
+      "state": "ქვემო ქართლი",
+      "country": "საქართველო",
+      "lat": 41.54309,
+      "lon": 45.0112804
+    },
+    {
+      "name": "Gori",
+      "state": "შიდა ქართლი",
+      "country": "საქართველო",
+      "lat": 41.9818469,
+      "lon": 44.1117811
+    },
+    {
+      "name": "Zugdidi",
+      "state": "სამეგრელო-ზემო სვანეთი",
+      "country": "საქართველო",
+      "lat": 42.5072124,
+      "lon": 41.8716891
+    },
+    {
+      "name": "Poti",
+      "state": "სამეგრელო-ზემო სვანეთი",
+      "country": "საქართველო",
+      "lat": 42.141614,
+      "lon": 41.6748028
+    },
+    {
+      "name": "Khashuri",
+      "state": "შიდა ქართლი",
+      "country": "საქართველო",
+      "lat": 41.9972652,
+      "lon": 43.5989395
+    },
+    {
+      "name": "Samtredia",
+      "state": "იმერეთი",
+      "country": "საქართველო",
+      "lat": 42.1646492,
+      "lon": 42.3458802
+    },
+    {
+      "name": "Senaki",
+      "state": "სამეგრელო-ზემო სვანეთი",
+      "country": "საქართველო",
+      "lat": 42.2697221,
+      "lon": 42.0635021
+    },
+    {
+      "name": "Zestaponi",
+      "state": "იმერეთი",
+      "country": "საქართველო",
+      "lat": 42.1073698,
+      "lon": 43.0392502
+    },
+    {
+      "name": "Marneuli",
+      "state": "ქვემო ქართლი",
+      "country": "საქართველო",
+      "lat": 41.4718258,
+      "lon": 44.8159789
+    },
+    {
+      "name": "Telavi",
+      "state": "კახეთი",
+      "country": "საქართველო",
+      "lat": 41.9197221,
+      "lon": 45.4703169
+    },
+    {
+      "name": "Akhaltsikhe",
+      "state": "სამცხე-ჯავახეთი",
+      "country": "საქართველო",
+      "lat": 41.6395128,
+      "lon": 42.9859225
+    },
+    {
+      "name": "Kobuleti",
+      "state": "აჭარის ავტონომიური რესპუბლიკა",
+      "country": "საქართველო",
+      "lat": 41.8113601,
+      "lon": 41.7793202
+    },
+    {
+      "name": "Ozurgeti",
+      "state": "გურია",
+      "country": "საქართველო",
+      "lat": 41.9230979,
+      "lon": 42.0059263
+    },
+    {
+      "name": "Kaspi",
+      "state": "შიდა ქართლი",
+      "country": "საქართველო",
+      "lat": 41.9245899,
+      "lon": 44.4186645
+    },
+    {
+      "name": "Chiatura",
+      "state": "იმერეთი",
+      "country": "საქართველო",
+      "lat": 42.2910245,
+      "lon": 43.2888362
+    },
+    {
+      "name": "Tsqaltubo",
+      "state": "იმერეთი",
+      "country": "საქართველო",
+      "lat": 42.3253518,
+      "lon": 42.5979488
+    },
+    {
+      "name": "Sagarejo",
+      "state": "კახეთი",
+      "country": "საქართველო",
+      "lat": 41.7369023,
+      "lon": 45.3259549
+    }
+  ],
+  "Armenia": [
+    {
+      "name": "Yerevan",
+      "state": "",
+      "country": "Հայաստան",
+      "lat": 40.1777112,
+      "lon": 44.5126233
+    },
+    {
+      "name": "Gyumri",
+      "state": "Շիրակի մարզ",
+      "country": "Հայաստան",
+      "lat": 40.7852085,
+      "lon": 43.8416095
+    },
+    {
+      "name": "Vanadzor",
+      "state": "Լոռու մարզ",
+      "country": "Հայաստան",
+      "lat": 40.8112384,
+      "lon": 44.4851821
+    },
+    {
+      "name": "Vagharshapat",
+      "state": "Արմավիրի մարզ",
+      "country": "Հայաստան",
+      "lat": 40.1627757,
+      "lon": 44.2931665
+    },
+    {
+      "name": "Hrazdan",
+      "state": "Կոտայքի մարզ",
+      "country": "Հայաստան",
+      "lat": 40.5196871,
+      "lon": 44.7500706
+    },
+    {
+      "name": "Abovyan",
+      "state": "Կոտայքի մարզ",
+      "country": "Հայաստան",
+      "lat": 40.2714761,
+      "lon": 44.6333951
+    },
+    {
+      "name": "Kapan",
+      "state": "Սյունիքի մարզ",
+      "country": "Հայաստան",
+      "lat": 39.207636,
+      "lon": 46.4049074
+    },
+    {
+      "name": "Armavir",
+      "state": "Արմավիրի մարզ",
+      "country": "Հայաստան",
+      "lat": 40.1556494,
+      "lon": 44.038797
+    },
+    {
+      "name": "Gavar",
+      "state": "Գեղարքունիքի մարզ",
+      "country": "Հայաստան",
+      "lat": 40.3513976,
+      "lon": 45.1273162
+    },
+    {
+      "name": "Artashat",
+      "state": "Արարատի մարզ",
+      "country": "Հայաստան",
+      "lat": 39.9566633,
+      "lon": 44.5471007
+    },
+    {
+      "name": "Goris",
+      "state": "Սյունիքի մարզ",
+      "country": "Հայաստան",
+      "lat": 39.5052419,
+      "lon": 46.3442334
+    },
+    {
+      "name": "Ashtarak",
+      "state": "Արագածոտնի մարզ",
+      "country": "Հայաստան",
+      "lat": 40.2886849,
+      "lon": 44.3613061
+    },
+    {
+      "name": "Sevan",
+      "state": "Գեղարքունիքի մարզ",
+      "country": "Հայաստան",
+      "lat": 40.3925199,
+      "lon": 45.3460867
+    },
+    {
+      "name": "Ijevan",
+      "state": "Տավուշի մարզ",
+      "country": "Հայաստան",
+      "lat": 40.8779943,
+      "lon": 45.1437542
+    },
+    {
+      "name": "Charentsavan",
+      "state": "Կոտայքի մարզ",
+      "country": "Հայաստան",
+      "lat": 40.4094705,
+      "lon": 44.6458543
+    },
+    {
+      "name": "Ararat",
+      "state": "Արարատի մարզ",
+      "country": "Հայաստան",
+      "lat": 40.0053589,
+      "lon": 44.7315157
+    },
+    {
+      "name": "Vardenis",
+      "state": "Գեղարքունիքի մարզ",
+      "country": "Հայաստան",
+      "lat": 40.184574,
+      "lon": 45.7269788
+    },
+    {
+      "name": "Sisian",
+      "state": "Սյունիքի մարզ",
+      "country": "Հայաստան",
+      "lat": 39.5235435,
+      "lon": 46.0235784
+    },
+    {
+      "name": "Dilijan",
+      "state": "Տավուշի մարզ",
+      "country": "Հայաստան",
+      "lat": 40.7417126,
+      "lon": 44.872221
+    },
+    {
+      "name": "Metsamor",
+      "state": "Արմավիրի մարզ",
+      "country": "Հայաստան",
+      "lat": 40.1443582,
+      "lon": 44.1192082
+    }
+  ],
+  "Uzbekistan": [
+    {
+      "name": "Tashkent",
+      "state": "",
+      "country": "Oʻzbekiston",
+      "lat": 41.3123363,
+      "lon": 69.2787079
+    },
+    {
+      "name": "Namangan",
+      "state": "Namangan Viloyati",
+      "country": "Oʻzbekiston",
+      "lat": 40.9996482,
+      "lon": 71.6726238
+    },
+    {
+      "name": "Samarkand",
+      "state": "Samarqand Viloyati",
+      "country": "Oʻzbekiston",
+      "lat": 39.6550017,
+      "lon": 66.9756954
+    },
+    {
+      "name": "Andijan",
+      "state": "Andijon Viloyati",
+      "country": "Oʻzbekiston",
+      "lat": 40.7833471,
+      "lon": 72.3506746
+    },
+    {
+      "name": "Bukhara",
+      "state": "Buxoro Viloyati",
+      "country": "Oʻzbekiston",
+      "lat": 39.7759835,
+      "lon": 64.415153
+    },
+    {
+      "name": "Nukus",
+      "state": "Qaraqalpaqstan Respublikası",
+      "country": "Oʻzbekiston",
+      "lat": 42.4600229,
+      "lon": 59.6176603
+    },
+    {
+      "name": "Qarshi",
+      "state": "Qashqadaryo Viloyati",
+      "country": "Oʻzbekiston",
+      "lat": 38.839824,
+      "lon": 65.7927794
+    },
+    {
+      "name": "Kokand",
+      "state": "Farg'ona Viloyati",
+      "country": "Oʻzbekiston",
+      "lat": 40.5408463,
+      "lon": 70.9473889
+    },
+    {
+      "name": "Fergana",
+      "state": "Farg'ona Viloyati",
+      "country": "Oʻzbekiston",
+      "lat": 40.396877,
+      "lon": 71.7847942
+    },
+    {
+      "name": "Margilan",
+      "state": "Farg'ona Viloyati",
+      "country": "Oʻzbekiston",
+      "lat": 40.4739429,
+      "lon": 71.7240763
+    },
+    {
+      "name": "Jizzakh",
+      "state": "Jizzax Viloyati",
+      "country": "Oʻzbekiston",
+      "lat": 40.3319095,
+      "lon": 67.4551198
+    },
+    {
+      "name": "Urgench",
+      "state": "Xorazm Viloyati",
+      "country": "Oʻzbekiston",
+      "lat": 41.556975,
+      "lon": 60.6327004
+    },
+    {
+      "name": "Navoi",
+      "state": "Navoiy Viloyati",
+      "country": "Oʻzbekiston",
+      "lat": 42.0,
+      "lon": 64.0
+    },
+    {
+      "name": "Termez",
+      "state": "Surxondaryo Viloyati",
+      "country": "Oʻzbekiston",
+      "lat": 37.2442466,
+      "lon": 67.283151
+    },
+    {
+      "name": "Chirchiq",
+      "state": "Toshkent Viloyati",
+      "country": "Oʻzbekiston",
+      "lat": 41.4726157,
+      "lon": 69.5811915
+    },
+    {
+      "name": "Angren",
+      "state": "Toshkent Viloyati",
+      "country": "Oʻzbekiston",
+      "lat": 41.0212207,
+      "lon": 70.0795361
+    },
+    {
+      "name": "Khiva",
+      "state": "Xorazm Viloyati",
+      "country": "Oʻzbekiston",
+      "lat": 41.3775101,
+      "lon": 60.3634553
+    },
+    {
+      "name": "Gulistan",
+      "state": "Sirdaryo Viloyati",
+      "country": "Oʻzbekiston",
+      "lat": 40.4959816,
+      "lon": 68.7758675
+    },
+    {
+      "name": "Bekabad",
+      "state": "Toshkent Viloyati",
+      "country": "Oʻzbekiston",
+      "lat": 40.2198721,
+      "lon": 69.2477842
+    }
+  ],
+  "Greenland": [
+    {
+      "name": "Nuuk",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 64.1767049,
+      "lon": -51.7361444
+    },
+    {
+      "name": "Sisimiut",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 66.9371906,
+      "lon": -53.6664816
+    },
+    {
+      "name": "Ilulissat",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 69.2197127,
+      "lon": -51.0986385
+    },
+    {
+      "name": "Qaqortoq",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 60.718202,
+      "lon": -46.0385214
+    },
+    {
+      "name": "Aasiaat",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 68.709588,
+      "lon": -52.8512976
+    },
+    {
+      "name": "Maniitsoq",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 65.4174357,
+      "lon": -52.8967817
+    },
+    {
+      "name": "Tasiilaq",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 65.6140754,
+      "lon": -37.6392199
+    },
+    {
+      "name": "Narsaq",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 60.9127453,
+      "lon": -46.0452698
+    },
+    {
+      "name": "Paamiut",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 61.994618,
+      "lon": -49.6659478
+    },
+    {
+      "name": "Nanortalik",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 60.1400246,
+      "lon": -45.2428523
+    },
+    {
+      "name": "Uummannaq",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 70.6746156,
+      "lon": -52.1267637
+    },
+    {
+      "name": "Upernavik",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 72.7847392,
+      "lon": -56.1469625
+    },
+    {
+      "name": "Qeqertarsuaq",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 69.246235,
+      "lon": -53.5353658
+    },
+    {
+      "name": "Qaanaaq",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 77.4686357,
+      "lon": -69.2222746
+    },
+    {
+      "name": "Ittoqqortoormiit",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 70.4856214,
+      "lon": -21.961726
+    },
+    {
+      "name": "Kangaatsiaq",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 68.3091537,
+      "lon": -53.4614913
+    },
+    {
+      "name": "Kullorsuaq",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 74.579066,
+      "lon": -57.2198151
+    },
+    {
+      "name": "Qaarsut",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 70.7309464,
+      "lon": -52.6379667
+    },
+    {
+      "name": "Saattut",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 70.8109426,
+      "lon": -51.6352674
+    },
+    {
+      "name": "Kangerlussuaq",
+      "state": "",
+      "country": "Kalaallit Nunaat",
+      "lat": 66.9996299,
+      "lon": -50.7399266
     }
   ]
 }

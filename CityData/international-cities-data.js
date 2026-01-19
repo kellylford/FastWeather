@@ -52,6 +52,12 @@ const INTERNATIONAL_CITIES_BY_COUNTRY = {
         "Herning", "Silkeborg", "Næstved", "Fredericia", "Viborg",
         "Køge", "Holstebro", "Taastrup", "Slagelse", "Hillerød"
     ],
+    "Greenland": [
+        "Nuuk", "Sisimiut", "Ilulissat", "Qaqortoq", "Aasiaat",
+        "Maniitsoq", "Tasiilaq", "Narsaq", "Paamiut", "Nanortalik",
+        "Uummannaq", "Upernavik", "Qeqertarsuaq", "Qaanaaq", "Ittoqqortoormiit",
+        "Kangaatsiaq", "Kullorsuaq", "Qaarsut", "Saattut", "Kangerlussuaq"
+    ],
     "Finland": [
         "Helsinki", "Espoo", "Tampere", "Vantaa", "Oulu",
         "Turku", "Jyväskylä", "Lahti", "Kuopio", "Pori",
@@ -309,5 +315,299 @@ const INTERNATIONAL_CITIES_BY_COUNTRY = {
         "Ahmadi", "Sabah Al Salem", "Fahaheel", "Mangaf", "Fintas",
         "Mahboula", "Jahra", "Salwa", "Bayan", "Mishref",
         "Rumaithiya", "Abdullah Al-Mubarak", "Jleeb Al-Shuyoukh", "Khaitan", "Ardiya"
+    ],
+    "Colombia": [
+        "Bogotá", "Medellín", "Cali", "Barranquilla", "Cartagena",
+        "Cúcuta", "Bucaramanga", "Pereira", "Santa Marta", "Ibagué",
+        "Pasto", "Manizales", "Neiva", "Villavicencio", "Armenia",
+        "Valledupar", "Montería", "Popayán", "Buenaventura", "Palmira"
+    ],
+    "Peru": [
+        "Lima", "Arequipa", "Trujillo", "Chiclayo", "Piura",
+        "Iquitos", "Cusco", "Huancayo", "Chimbote", "Tacna",
+        "Juliaca", "Ica", "Sullana", "Ayacucho", "Cajamarca",
+        "Pucallpa", "Huánuco", "Tarapoto", "Chincha Alta", "Huaraz"
+    ],
+    "Chile": [
+        "Santiago", "Valparaíso", "Concepción", "La Serena", "Antofagasta",
+        "Temuco", "Rancagua", "Talca", "Arica", "Chillán",
+        "Iquique", "Los Ángeles", "Puerto Montt", "Coquimbo", "Osorno",
+        "Valdivia", "Punta Arenas", "Copiapó", "Quilpué", "Curicó"
+    ],
+    "Greece": [
+        "Athens", "Thessaloniki", "Patras", "Heraklion", "Larissa",
+        "Volos", "Rhodes", "Ioannina", "Chania", "Agrinio",
+        "Katerini", "Kalamata", "Kavala", "Serres", "Chalcis",
+        "Lamia", "Komotini", "Kozani", "Alexandroupoli", "Veria"
+    ],
+    "Portugal": [
+        "Lisbon", "Porto", "Vila Nova de Gaia", "Amadora", "Braga",
+        "Funchal", "Coimbra", "Setúbal", "Almada", "Agualva-Cacém",
+        "Queluz", "Rio de Mouro", "Corroios", "Barreiro", "Évora",
+        "Faro", "Aveiro", "Viseu", "Guimarães", "Leiria"
+    ],
+    "Czech Republic": [
+        "Prague", "Brno", "Ostrava", "Plzeň", "Liberec",
+        "Olomouc", "České Budějovice", "Hradec Králové", "Ústí nad Labem", "Pardubice",
+        "Zlín", "Havířov", "Kladno", "Most", "Opava",
+        "Frýdek-Místek", "Jihlava", "Teplice", "Karviná", "Děčín"
+    ],
+    "Hungary": [
+        "Budapest", "Debrecen", "Szeged", "Miskolc", "Pécs",
+        "Győr", "Nyíregyháza", "Kecskemét", "Székesfehérvár", "Szombathely",
+        "Szolnok", "Tatabánya", "Kaposvár", "Érd", "Veszprém",
+        "Zalaegerszeg", "Sopron", "Eger", "Nagykanizsa", "Dunakeszi"
+    ],
+    "Romania": [
+        "Bucharest", "Cluj-Napoca", "Timișoara", "Iași", "Constanța",
+        "Craiova", "Brașov", "Galați", "Ploiești", "Oradea",
+        "Brăila", "Arad", "Pitești", "Sibiu", "Bacău",
+        "Târgu Mureș", "Baia Mare", "Buzău", "Botoșani", "Satu Mare"
+    ],
+    "Venezuela": [
+        "Caracas", "Maracaibo", "Valencia", "Barquisimeto", "Maracay",
+        "Ciudad Guayana", "Barcelona", "Maturín", "Puerto La Cruz", "Petare",
+        "Turmero", "Ciudad Bolívar", "Mérida", "Santa Teresa del Tuy", "Cumaná",
+        "San Cristóbal", "Cabimas", "Barinas", "Guatire", "Los Teques"
+    ],
+    "Kazakhstan": [
+        "Almaty", "Astana", "Shymkent", "Karaganda", "Aktobe",
+        "Taraz", "Pavlodar", "Ust-Kamenogorsk", "Semey", "Atyrau",
+        "Kostanay", "Kyzylorda", "Oral", "Petropavl", "Aktau",
+        "Temirtau", "Turkistan", "Kokshetau", "Rudny", "Ekibastuz"
+    ],
+    "Ecuador": [
+        "Quito", "Guayaquil", "Cuenca", "Santo Domingo", "Machala",
+        "Durán", "Manta", "Portoviejo", "Loja", "Ambato",
+        "Esmeraldas", "Quevedo", "Riobamba", "Milagro", "Ibarra",
+        "La Libertad", "Babahoyo", "Sangolquí", "Latacunga", "Daule"
+    ],
+    "Bolivia": [
+        "Santa Cruz de la Sierra", "La Paz", "El Alto", "Cochabamba", "Sucre",
+        "Oruro", "Tarija", "Potosí", "Sacaba", "Montero",
+        "Trinidad", "Yacuiba", "Riberalta", "Quillacollo", "Warnes",
+        "Cobija", "Villamontes", "Guayaramerín", "Bermejo", "Camiri"
+    ],
+    "Uruguay": [
+        "Montevideo", "Salto", "Ciudad de la Costa", "Paysandú", "Las Piedras",
+        "Rivera", "Maldonado", "Tacuarembó", "Melo", "Mercedes",
+        "Artigas", "Minas", "San José de Mayo", "Durazno", "Florida",
+        "Treinta y Tres", "Rocha", "Colonia del Sacramento", "Fray Bentos", "Carmelo"
+    ],
+    "Paraguay": [
+        "Asunción", "Ciudad del Este", "San Lorenzo", "Luque", "Capiatá",
+        "Lambaré", "Fernando de la Mora", "Limpio", "Ñemby", "Encarnación",
+        "Mariano Roque Alonso", "Pedro Juan Caballero", "Itauguá", "Villa Elisa", "Caaguazú",
+        "Villarrica", "Coronel Oviedo", "Concepción", "Presidente Franco", "San Antonio"
+    ],
+    "Dominican Republic": [
+        "Santo Domingo", "Santiago de los Caballeros", "La Romana", "San Pedro de Macorís", "San Cristóbal",
+        "Puerto Plata", "San Francisco de Macorís", "La Vega", "Higüey", "Concepción de La Vega",
+        "Moca", "Boca Chica", "Baní", "Bonao", "San Juan de la Maguana",
+        "Cotuí", "Azua", "Hato Mayor", "Nagua", "Mao"
+    ],
+    "Panama": [
+        "Panama City", "San Miguelito", "Tocumen", "David", "Arraiján",
+        "Colón", "Las Cumbres", "La Chorrera", "Pacora", "Santiago",
+        "Chitré", "Penonomé", "La Concepción", "Aguadulce", "Changuinola",
+        "Vista Alegre", "Alcalde Díaz", "Bugaba", "Los Santos", "Pedregal"
+    ],
+    "Costa Rica": [
+        "San José", "Limón", "Alajuela", "Heredia", "Cartago",
+        "Puntarenas", "Liberia", "Paraíso", "Pococí", "San Vicente",
+        "San Isidro", "Curridabat", "San Carlos", "Desamparados", "Purral",
+        "San Felipe", "Pérez Zeledón", "Escazú", "Guadalupe", "Ipís"
+    ],
+    "Guatemala": [
+        "Guatemala City", "Mixco", "Villa Nueva", "Petapa", "San Juan Sacatepéquez",
+        "Quetzaltenango", "Villa Canales", "Escuintla", "Chinautla", "Chimaltenango",
+        "Huehuetenango", "Amatitlán", "Totonicapán", "Santa Lucía Cotzumalguapa", "Cobán",
+        "Puerto Barrios", "San Marcos", "Jalapa", "Jutiapa", "Chichicastenango"
+    ],
+    "El Salvador": [
+        "San Salvador", "Soyapango", "Santa Ana", "San Miguel", "Mejicanos",
+        "Delgado", "Apopa", "Ilopango", "Cuscatancingo", "Usulután",
+        "Ahuachapán", "La Libertad", "Zacatecoluca", "Sonsonate", "San Martín",
+        "Cojutepeque", "Chalatenango", "La Unión", "Sensuntepeque", "Metapán"
+    ],
+    "Honduras": [
+        "Tegucigalpa", "San Pedro Sula", "Choloma", "La Ceiba", "El Progreso",
+        "Villanueva", "Choluteca", "Comayagua", "Puerto Cortés", "La Lima",
+        "Danlí", "Siguatepeque", "Juticalpa", "Tocoa", "Tela",
+        "Santa Rosa de Copán", "Olanchito", "Catacamas", "Cofradía", "Potrerillos"
+    ],
+    "Croatia": [
+        "Zagreb", "Split", "Rijeka", "Osijek", "Zadar",
+        "Slavonski Brod", "Pula", "Sesvete", "Karlovac", "Varaždin",
+        "Šibenik", "Sisak", "Dubrovnik", "Bjelovar", "Velika Gorica",
+        "Vinkovci", "Vukovar", "Samobor", "Koprivnica", "Zaprešić"
+    ],
+    "Serbia": [
+        "Belgrade", "Novi Sad", "Niš", "Kragujevac", "Subotica",
+        "Zrenjanin", "Pančevo", "Čačak", "Novi Pazar", "Kruševac",
+        "Leskovac", "Kraljevo", "Smederevo", "Valjevo", "Šabac",
+        "Užice", "Sombor", "Požarevac", "Pirot", "Zaječar"
+    ],
+    "Bulgaria": [
+        "Sofia", "Plovdiv", "Varna", "Burgas", "Ruse",
+        "Stara Zagora", "Pleven", "Sliven", "Dobrich", "Shumen",
+        "Pernik", "Haskovo", "Yambol", "Pazardzhik", "Blagoevgrad",
+        "Veliko Tarnovo", "Vratsa", "Gabrovo", "Asenovgrad", "Vidin"
+    ],
+    "Slovakia": [
+        "Bratislava", "Košice", "Prešov", "Žilina", "Nitra",
+        "Banská Bystrica", "Trnava", "Martin", "Trenčín", "Poprad",
+        "Prievidza", "Zvolen", "Považská Bystrica", "Michalovce", "Spišská Nová Ves",
+        "Komárno", "Levice", "Humenné", "Bardejov", "Liptovský Mikuláš"
+    ],
+    "Slovenia": [
+        "Ljubljana", "Maribor", "Celje", "Kranj", "Velenje",
+        "Koper", "Novo Mesto", "Ptuj", "Trbovlje", "Kamnik",
+        "Jesenice", "Nova Gorica", "Domžale", "Škofja Loka", "Slovenj Gradec",
+        "Izola", "Postojna", "Murska Sobota", "Krško", "Ajdovščina"
+    ],
+    "Algeria": [
+        "Algiers", "Oran", "Constantine", "Batna", "Djelfa",
+        "Sétif", "Annaba", "Sidi Bel Abbès", "Biskra", "Tébessa",
+        "El Eulma", "Skikda", "Tiaret", "Béjaïa", "Tlemcen",
+        "Bordj Bou Arréridj", "Béchar", "Blida", "Mostaganem", "Tizi Ouzou"
+    ],
+    "Tunisia": [
+        "Tunis", "Sfax", "Sousse", "Kairouan", "Bizerte",
+        "Gabès", "Ariana", "Gafsa", "Monastir", "Ben Arous",
+        "Kasserine", "Médenine", "Nabeul", "Tataouine", "Béja",
+        "Jendouba", "Mahdia", "Siliana", "Kef", "Tozeur"
+    ],
+    "Ghana": [
+        "Accra", "Kumasi", "Tamale", "Sekondi-Takoradi", "Ashaiman",
+        "Sunyani", "Cape Coast", "Obuasi", "Teshie", "Tema",
+        "Madina", "Koforidua", "Wa", "Techiman", "Ho",
+        "Nungua", "Lashibi", "Dome", "Gbawe", "Ejura"
+    ],
+    "Tanzania": [
+        "Dar es Salaam", "Mwanza", "Arusha", "Dodoma", "Mbeya",
+        "Morogoro", "Tanga", "Kahama", "Tabora", "Zanzibar City",
+        "Kigoma", "Sumbawanga", "Kasulu", "Songea", "Moshi",
+        "Musoma", "Shinyanga", "Iringa", "Singida", "Njombe"
+    ],
+    "Uganda": [
+        "Kampala", "Nansana", "Kira", "Ssabagabo", "Mbarara",
+        "Mukono", "Gulu", "Kasese", "Masaka", "Entebbe",
+        "Lira", "Jinja", "Hoima", "Soroti", "Mbale",
+        "Arua", "Kabale", "Fort Portal", "Mityana", "Lugazi"
+    ],
+    "Cameroon": [
+        "Douala", "Yaoundé", "Bamenda", "Bafoussam", "Garoua",
+        "Kousseri", "Maroua", "Ngaoundéré", "Bertoua", "Loum",
+        "Kumba", "Nkongsamba", "Buea", "Mbouda", "Foumban",
+        "Dschang", "Limbé", "Ebolowa", "Kribi", "Edéa"
+    ],
+    "Senegal": [
+        "Dakar", "Pikine", "Touba", "Thiès", "Kaolack",
+        "Saint-Louis", "Mbour", "Ziguinchor", "Rufisque", "Diourbel",
+        "Louga", "Tambacounda", "Kolda", "Richard Toll", "Matam",
+        "Sédhiou", "Mbacké", "Tivaouane", "Guédiawaye", "Fatick"
+    ],
+    "Côte d'Ivoire": [
+        "Abidjan", "Bouaké", "Daloa", "San-Pédro", "Yamoussoukro",
+        "Korhogo", "Man", "Divo", "Gagnoa", "Abengourou",
+        "Anyama", "Agboville", "Grand-Bassam", "Dabou", "Bondoukou",
+        "Soubré", "Oumé", "Séguéla", "Bingerville", "Issia"
+    ],
+    "Zimbabwe": [
+        "Harare", "Bulawayo", "Chitungwiza", "Mutare", "Gweru",
+        "Epworth", "Kwekwe", "Kadoma", "Masvingo", "Chinhoyi",
+        "Norton", "Marondera", "Ruwa", "Chegutu", "Zvishavane",
+        "Bindura", "Beitbridge", "Redcliff", "Victoria Falls", "Hwange"
+    ],
+    "Mozambique": [
+        "Maputo", "Matola", "Nampula", "Beira", "Chimoio",
+        "Nacala", "Quelimane", "Tete", "Lichinga", "Pemba",
+        "Inhambane", "Xai-Xai", "Maxixe", "Angoche", "Cuamba",
+        "Montepuez", "Mocuba", "Gurué", "Dondo", "Chibuto"
+    ],
+    "Angola": [
+        "Luanda", "Huambo", "Lobito", "Benguela", "Lubango",
+        "Kuito", "Malanje", "Namibe", "Soyo", "Cabinda",
+        "Uíge", "Saurimo", "Luena", "Menongue", "Sumbe",
+        "N'dalatando", "Ondjiva", "Caxito", "Camacupa", "Lucapa"
+    ],
+    "Jamaica": [
+        "Kingston", "Spanish Town", "Portmore", "Montego Bay", "May Pen",
+        "Mandeville", "Old Harbour", "Savanna-la-Mar", "Port Antonio", "Saint Ann's Bay",
+        "Linstead", "Half Way Tree", "Constant Spring", "Morant Bay", "Ocho Rios",
+        "Bog Walk", "Ewarton", "Hayes", "Port Maria", "Santa Cruz"
+    ],
+    "Trinidad and Tobago": [
+        "Port of Spain", "Chaguanas", "San Fernando", "Arima", "Marabella",
+        "Point Fortin", "Tunapuna", "Saint Joseph", "Sangre Grande", "Princes Town",
+        "Diego Martin", "Couva", "Scarborough", "Penal", "Siparia",
+        "D'Abadie", "Debe", "Arouca", "Curepe", "Fyzabad"
+    ],
+    "Cuba": [
+        "Havana", "Santiago de Cuba", "Camagüey", "Holguín", "Guantánamo",
+        "Santa Clara", "Las Tunas", "Bayamo", "Cienfuegos", "Pinar del Río",
+        "Matanzas", "Ciego de Ávila", "Sancti Spíritus", "Manzanillo", "Cárdenas",
+        "Palma Soriano", "Nuevitas", "Artemisa", "Contramaestre", "Morón"
+    ],
+    "Cambodia": [
+        "Phnom Penh", "Siem Reap", "Battambang", "Sihanoukville", "Poipet",
+        "Kampong Cham", "Prey Veng", "Ta Khmau", "Pursat", "Kampong Speu",
+        "Kampong Chhnang", "Sisophon", "Kratié", "Stung Treng", "Kampot",
+        "Kep", "Pailin", "Koh Kong", "Bavet", "Svay Rieng"
+    ],
+    "Laos": [
+        "Vientiane", "Pakse", "Savannakhet", "Luang Prabang", "Thakhek",
+        "Xam Neua", "Phonsavan", "Vang Vieng", "Muang Xay", "Salavan",
+        "Attapeu", "Xaignabouli", "Pakxan", "Houayxay", "Luang Namtha",
+        "Saravan", "Phongsaly", "Ban Houayxay", "Muang Sing", "Khammouane"
+    ],
+    "Myanmar": [
+        "Yangon", "Mandalay", "Naypyidaw", "Mawlamyine", "Bago",
+        "Pathein", "Monywa", "Sittwe", "Meiktila", "Taunggyi",
+        "Myeik", "Magway", "Lashio", "Pyay", "Hinthada",
+        "Dawei", "Myingyan", "Pakokku", "Hpa-An", "Sagaing"
+    ],
+    "Lebanon": [
+        "Beirut", "Tripoli", "Sidon", "Tyre", "Nabatieh",
+        "Zahle", "Baalbek", "Jounieh", "Byblos", "Aley",
+        "Batroun", "Halba", "Bint Jbeil", "Jezzine", "Rashaya",
+        "Marjayoun", "Hasbeya", "Deir el Qamar", "Bcharré", "Zgharta"
+    ],
+    "Oman": [
+        "Muscat", "Salalah", "Sohar", "Nizwa", "Sur",
+        "Ibri", "Barka", "Rustaq", "Al Buraimi", "Saham",
+        "Shinas", "Bahla", "Al Suwaiq", "Khasab", "Bidbid",
+        "Liwa", "Masirah", "Adam", "Izki", "Ibra"
+    ],
+    "Bahrain": [
+        "Manama", "Riffa", "Muharraq", "Hamad Town", "A'ali",
+        "Isa Town", "Sitra", "Budaiya", "Jidhafs", "Al-Malikiyah",
+        "Sanabis", "Tubli", "Dar Kulayb", "Barbar", "Galali",
+        "Sanad", "Dumistan", "Juffair", "Adliya", "Saar"
+    ],
+    "Azerbaijan": [
+        "Baku", "Ganja", "Sumqayit", "Mingachevir", "Lankaran",
+        "Shirvan", "Nakhchivan", "Sheki", "Yevlakh", "Khankendi",
+        "Gəncə", "Agdam", "Shamakhi", "Quba", "Qazakh",
+        "Balakan", "Zaqatala", "Salyan", "Astara", "Goychay"
+    ],
+    "Georgia": [
+        "Tbilisi", "Batumi", "Kutaisi", "Rustavi", "Gori",
+        "Zugdidi", "Poti", "Khashuri", "Samtredia", "Senaki",
+        "Zestaponi", "Marneuli", "Telavi", "Akhaltsikhe", "Kobuleti",
+        "Ozurgeti", "Kaspi", "Chiatura", "Tsqaltubo", "Sagarejo"
+    ],
+    "Armenia": [
+        "Yerevan", "Gyumri", "Vanadzor", "Vagharshapat", "Hrazdan",
+        "Abovyan", "Kapan", "Armavir", "Gavar", "Artashat",
+        "Goris", "Ashtarak", "Sevan", "Ijevan", "Charentsavan",
+        "Ararat", "Vardenis", "Sisian", "Dilijan", "Metsamor"
+    ],
+    "Uzbekistan": [
+        "Tashkent", "Namangan", "Samarkand", "Andijan", "Bukhara",
+        "Nukus", "Qarshi", "Kokand", "Fergana", "Margilan",
+        "Jizzakh", "Urgench", "Navoi", "Termez", "Chirchiq",
+        "Angren", "Khiva", "Gulistan", "Bekabad", "Almaliq"
     ]
 };

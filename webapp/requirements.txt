@@ -1,8 +1,0 @@
-# FastWeather Web/PWA Development Dependencies
-# Install with: pip install -r requirements.txt
-
-# HTTP Requests for Geocoding API (city cache builders)
-requests>=2.31.0
-
-# Image Processing for Icon Generation (create_icons.py)
-Pillow>=10.0.0
