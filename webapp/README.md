@@ -30,35 +30,42 @@ The state cities are displayed in the same view mode as your saved cities:
 
 - `index.html` - Enhanced HTML with state selector section
 - `app.js` - JavaScript with state selection and city rendering logic
-- `us-cities-data.js` - Data file containing 50 cities for each U.S. state
+- `us-cities-cached.json` - Pre-cached coordinates for 2,500 U.S. cities (all 50 states)
+- `international-cities-cached.json` - Pre-cached coordinates for 67 countries
 - `styles.css` - Enhanced CSS with styling for state selector and add buttons
 - `README.md` - This documentation file
 
 ### Technical Details
 
-**Caching System**: To provide fast loading times, city coordinates are pre-cached in `us-cities-cached.json`. This eliminates the need for slow geocoding API calls.
+**Caching System**: To provide fast loading times, city coordinates are pre-cached in JSON files. This eliminates the need for slow geocoding API calls.
 
 - **With Cache**: Loads 20 cities with weather in ~5 seconds
 - **Without Cache**: Would take ~22 seconds due to API rate limits
 
-**Current Status**:
-- ✅ Wisconsin: 20 cities cached
-- ⏳ Other states: Use `build-city-cache.py` to generate
+**Current Coverage**:
+- ✅ United States: All 50 states (50 cities each = 2,500 total)
+- ✅ International: 67 countries (~20 cities each = 1,340 total)
 
-**Building the Complete Cache**:
+**Managing City Data**:
+
+All geocoding scripts and source data have been moved to the centralized `CityData/` directory. To update or rebuild the cache files:
+
 ```bash
-# Install requirements
-pip install requests
+cd ../CityData
 
-# Run the cache builder (takes ~2 hours for all 50 states)
-python build-city-cache.py
+# Set up environment (first time only)
+quick-start.bat
+
+# Rebuild caches if needed
+venv\Scripts\activate
+python build-city-cache.py              # US cities (~2 hours)
+python build-international-cache.py     # International (~40-50 min)
+
+# Distribute updated caches to all platforms
+distribute-caches.bat
 ```
 
-The script:
-- Geocodes all 2,500 cities across 50 states
-- Saves progress after each state
-- Can resume if interrupted
-- Respects API rate limits (1 req/sec)
+See `../CityData/README.md` for complete documentation.
 
 ## Accessibility
 

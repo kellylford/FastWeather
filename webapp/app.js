@@ -177,13 +177,83 @@ async function loadCachedInternationalCoordinates() {
             cachedInternationalCoordinates = await response.json();
             const countryCount = cachedInternationalCoordinates ? Object.keys(cachedInternationalCoordinates).length : 0;
             const countries = cachedInternationalCoordinates ? Object.keys(cachedInternationalCoordinates).join(', ') : 'none';
-            console.log(`✓ Successfully loaded cached international city coordinates for ${countryCount} countries: ${countries}`);
+            console.log(`✓ Successfully loaded cached international city coordinates for ${countryCount} countries`);
+            
+            // Populate the country dropdown
+            populateCountryDropdown();
         } else {
             console.error(`❌ Failed to fetch cached international city coordinates: HTTP ${response.status} ${response.statusText}`);
         }
     } catch (error) {
         console.error('❌ Could not load cached international city coordinates:', error);
         console.error('Error details:', error.message, error.stack);
+    }
+}
+
+// Populate country dropdown from cached data
+function populateCountryDropdown() {
+    if (!cachedInternationalCoordinates) {
+        console.error('Cannot populate country dropdown: cachedInternationalCoordinates is not loaded');
+        return;
+    }
+    
+    // Get sorted list of countries
+    const countries = Object.keys(cachedInternationalCoordinates).sort();
+    
+    // Country name to ISO code mapping (needed for Add City filter)
+    const countryCodeMap = {
+        'Algeria': 'dz', 'Angola': 'ao', 'Argentina': 'ar', 'Armenia': 'am', 'Australia': 'au',
+        'Austria': 'at', 'Azerbaijan': 'az', 'Bahrain': 'bh', 'Bangladesh': 'bd', 'Belgium': 'be',
+        'Bolivia': 'bo', 'Brazil': 'br', 'Bulgaria': 'bg', 'Cambodia': 'kh', 'Cameroon': 'cm',
+        'Canada': 'ca', 'Chile': 'cl', 'China': 'cn', 'Colombia': 'co', 'Costa Rica': 'cr',
+        'Croatia': 'hr', "Côte d'Ivoire": 'ci', 'Cuba': 'cu', 'Czech Republic': 'cz', 'Denmark': 'dk',
+        'Dominican Republic': 'do', 'Ecuador': 'ec', 'Egypt': 'eg', 'El Salvador': 'sv', 'Ethiopia': 'et',
+        'Finland': 'fi', 'France': 'fr', 'Georgia': 'ge', 'Germany': 'de', 'Ghana': 'gh',
+        'Greece': 'gr', 'Greenland': 'gl', 'Guatemala': 'gt', 'Honduras': 'hn', 'Hungary': 'hu',
+        'India': 'in', 'Indonesia': 'id', 'Iran': 'ir', 'Iraq': 'iq', 'Ireland': 'ie',
+        'Israel': 'il', 'Italy': 'it', 'Jamaica': 'jm', 'Japan': 'jp', 'Jordan': 'jo',
+        'Kazakhstan': 'kz', 'Kenya': 'ke', 'Kuwait': 'kw', 'Laos': 'la', 'Lebanon': 'lb',
+        'Malaysia': 'my', 'Mexico': 'mx', 'Morocco': 'ma', 'Mozambique': 'mz', 'Myanmar': 'mm',
+        'Netherlands': 'nl', 'New Zealand': 'nz', 'Nigeria': 'ng', 'Norway': 'no', 'Oman': 'om',
+        'Pakistan': 'pk', 'Panama': 'pa', 'Paraguay': 'py', 'Peru': 'pe', 'Philippines': 'ph',
+        'Poland': 'pl', 'Portugal': 'pt', 'Qatar': 'qa', 'Romania': 'ro', 'Russia': 'ru',
+        'Saudi Arabia': 'sa', 'Senegal': 'sn', 'Serbia': 'rs', 'Singapore': 'sg', 'Slovakia': 'sk',
+        'Slovenia': 'si', 'South Africa': 'za', 'South Korea': 'kr', 'Spain': 'es', 'Sweden': 'se',
+        'Switzerland': 'ch', 'Taiwan': 'tw', 'Tanzania': 'tz', 'Thailand': 'th', 'Trinidad and Tobago': 'tt',
+        'Tunisia': 'tn', 'Turkey': 'tr', 'Uganda': 'ug', 'Ukraine': 'ua', 'United Arab Emirates': 'ae',
+        'United Kingdom': 'gb', 'United States': 'us', 'Uruguay': 'uy', 'Uzbekistan': 'uz',
+        'Venezuela': 've', 'Vietnam': 'vn', 'Zimbabwe': 'zw'
+    };
+    
+    // 1. Populate Browse Cities dropdown (country-select-browse) - uses country names
+    const browseSelect = document.getElementById('country-select-browse');
+    if (browseSelect) {
+        while (browseSelect.options.length > 1) {
+            browseSelect.remove(1);
+        }
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country;
+            option.textContent = country;
+            browseSelect.appendChild(option);
+        });
+        console.log(`✓ Populated Browse Cities dropdown with ${countries.length} countries`);
+    }
+    
+    // 2. Populate Add City filter dropdown (country-select) - uses ISO codes
+    const filterSelect = document.getElementById('country-select');
+    if (filterSelect) {
+        while (filterSelect.options.length > 1) {
+            filterSelect.remove(1);
+        }
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            const code = countryCodeMap[country] || country.toLowerCase().substring(0, 2);
+            option.value = code;
+            option.textContent = country;
+            filterSelect.appendChild(option);
+        });
+        console.log(`✓ Populated Add City filter dropdown with ${countries.length} countries`);
     }
 }
 
@@ -650,24 +720,27 @@ async function handleStateSelection(e) {
         
         clearError(errorDiv);
         
-        // Check if US_CITIES_BY_STATE is defined
-        if (typeof US_CITIES_BY_STATE === 'undefined') {
-            console.error('US_CITIES_BY_STATE not loaded');
+        // Check if cached coordinates are loaded
+        if (!cachedUSCoordinates) {
+            console.error('Cached US city coordinates not loaded');
             showError(errorDiv, 'City data not loaded. Please refresh the page.');
             return;
         }
         
-        // Get cities for the selected state
-        const stateCities = US_CITIES_BY_STATE[stateName];
+        // Get cities for the selected state from cached data
+        const stateCities = cachedUSCoordinates[stateName];
         
         if (!stateCities || stateCities.length === 0) {
             showError(errorDiv, 'No cities found for this state');
             return;
         }
         
+        // Convert cached format to expected format
+        const cityNames = stateCities.map(city => city.name);
+        
         // Load all cities
-        console.log('Loading all', stateCities.length, 'cities for', stateName);
-        displayLocationCities(stateName, stateCities, stateCities.length, 'us');
+        console.log('Loading all', cityNames.length, 'cities for', stateName);
+        displayLocationCities(stateName, cityNames, cityNames.length, 'us');
     } else {
         // Handle international country selection
         const countrySelect = document.getElementById('country-select-browse');
@@ -682,24 +755,27 @@ async function handleStateSelection(e) {
         
         clearError(errorDiv);
         
-        // Check if INTERNATIONAL_CITIES_BY_COUNTRY is defined
-        if (typeof INTERNATIONAL_CITIES_BY_COUNTRY === 'undefined') {
-            console.error('INTERNATIONAL_CITIES_BY_COUNTRY not loaded');
+        // Check if cached coordinates are loaded
+        if (!cachedInternationalCoordinates) {
+            console.error('Cached international city coordinates not loaded');
             showError(errorDiv, 'City data not loaded. Please refresh the page.');
             return;
         }
         
-        // Get cities for the selected country
-        const countryCities = INTERNATIONAL_CITIES_BY_COUNTRY[countryName];
+        // Get cities for the selected country from cached data
+        const countryCities = cachedInternationalCoordinates[countryName];
         
         if (!countryCities || countryCities.length === 0) {
             showError(errorDiv, 'No cities found for this country');
             return;
         }
         
+        // Convert cached format to expected format
+        const cityNames = countryCities.map(city => city.name);
+        
         // Load all cities
-        console.log('Loading all', countryCities.length, 'cities for', countryName);
-        displayLocationCities(countryName, countryCities, countryCities.length, 'international');
+        console.log('Loading all', cityNames.length, 'cities for', countryName);
+        displayLocationCities(countryName, cityNames, cityNames.length, 'international');
     }
 }
 
