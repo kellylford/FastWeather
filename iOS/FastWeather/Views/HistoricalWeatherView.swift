@@ -345,8 +345,12 @@ struct HistoricalWeatherView: View {
         if viewMode == .dailyBrowse {
             // In browse mode, go back 30 days (previous group)
             selectedDate.addDays(-30)
+        } else if viewMode == .multiYear {
+            // In multi-year mode, show older years for the same month-day
+            let yearsBack = settingsManager.settings.historicalYearsBack
+            selectedDate.addDays(-365 * yearsBack) // Go back by the configured years
         } else {
-            // In single day or multi-year mode, go back 1 day
+            // In single day mode, go back 1 day
             selectedDate.addDays(-1)
         }
         loadHistoricalData() // Automatically reload with new date
@@ -357,8 +361,12 @@ struct HistoricalWeatherView: View {
         if viewMode == .dailyBrowse {
             // In browse mode, go forward 30 days (next group)
             selectedDate.addDays(30)
+        } else if viewMode == .multiYear {
+            // In multi-year mode, show newer years for the same month-day
+            let yearsBack = settingsManager.settings.historicalYearsBack
+            selectedDate.addDays(365 * yearsBack) // Go forward by the configured years
         } else {
-            // In single day or multi-year mode, go forward 1 day
+            // In single day mode, go forward 1 day
             selectedDate.addDays(1)
         }
         loadHistoricalData() // Automatically reload with new date
@@ -372,6 +380,8 @@ struct HistoricalWeatherView: View {
         switch viewMode {
         case .dailyBrowse:
             return "Previous 30 days"
+        case .multiYear:
+            return "Previous \(settingsManager.settings.historicalYearsBack) years"
         default:
             return "Previous day"
         }
@@ -381,6 +391,8 @@ struct HistoricalWeatherView: View {
         switch viewMode {
         case .dailyBrowse:
             return "Next 30 days"
+        case .multiYear:
+            return "Next \(settingsManager.settings.historicalYearsBack) years"
         default:
             return "Next day"
         }
@@ -505,6 +517,7 @@ struct DatePickerSheet: View {
                             Text(String(year)).tag(year)
                         }
                     }
+                    .pickerStyle(.wheel)
                     .accessibilityLabel("Year, \(tempYear)")
                     
                     Picker("Month", selection: $tempMonth) {
@@ -512,6 +525,7 @@ struct DatePickerSheet: View {
                             Text(monthName(month)).tag(month)
                         }
                     }
+                    .pickerStyle(.wheel)
                     .accessibilityLabel("Month, \(monthName(tempMonth))")
                     
                     Picker("Day", selection: $tempDay) {
@@ -519,6 +533,7 @@ struct DatePickerSheet: View {
                             Text(String(day)).tag(day)
                         }
                     }
+                    .pickerStyle(.wheel)
                     .accessibilityLabel("Day, \(tempDay)")
                 }
                 

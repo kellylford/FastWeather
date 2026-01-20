@@ -205,19 +205,16 @@ struct SettingsView: View {
                 // Historical Weather section
                 Section(header: Text("Historical Weather"),
                        footer: Text("Set how many years of historical data to retrieve. Lower values load faster.")) {
-                    Stepper(value: $settingsManager.settings.historicalYearsBack, in: 1...85) {
-                        HStack {
-                            Text("Years of Data")
-                            Spacer()
-                            Text("\(settingsManager.settings.historicalYearsBack) years")
-                                .foregroundColor(.secondary)
+                    Picker("Years of Data", selection: $settingsManager.settings.historicalYearsBack) {
+                        ForEach(1...85, id: \.self) { years in
+                            Text("\(years) \(years == 1 ? "year" : "years")").tag(years)
                         }
                     }
+                    .pickerStyle(.wheel)
                     .onChange(of: settingsManager.settings.historicalYearsBack) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Years of historical data, currently \(settingsManager.settings.historicalYearsBack) years")
-                    .accessibilityHint("Swipe up to increase, swipe down to decrease")
+                    .accessibilityLabel("Years of historical data, \(settingsManager.settings.historicalYearsBack) years")
                     
                     Button("Clear Historical Cache") {
                         clearHistoricalCache()
@@ -231,11 +228,11 @@ struct SettingsView: View {
                     HStack {
                         Text("Version")
                         Spacer()
-                        Text("1.0.0")
+                        Text("1.0 (build 9)")
                             .foregroundColor(.secondary)
                     }
                     .accessibilityElement(children: .combine)
-                    .accessibilityLabel("Version 1.0.0")
+                    .accessibilityLabel("Version 1.0 build 9")
                     
                     Link("Weather Data by Open-Meteo", destination: URL(string: "https://open-meteo.com")!)
                         .accessibilityLabel("Weather data provided by Open-Meteo")
