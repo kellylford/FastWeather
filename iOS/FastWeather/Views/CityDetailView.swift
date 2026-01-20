@@ -11,6 +11,7 @@ struct CityDetailView: View {
     let city: City
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
+    @State private var showingHistoricalWeather = false
     
     private var weather: WeatherData? {
         weatherService.weatherCache[city.id]
@@ -136,6 +137,9 @@ struct CityDetailView: View {
                 .padding(.horizontal)
             }
             
+        case .historicalWeather:
+            EmptyView() // Historical weather moved to separate screen
+            
         case .location:
             GroupBox(label: Label("Location", systemImage: "mappin.and.ellipse")) {
                 VStack(spacing: 12) {
@@ -185,6 +189,24 @@ struct CityDetailView: View {
                     }
                     .padding()
                     
+                    // Historical Weather Button
+                    Button(action: { showingHistoricalWeather = true }) {
+                        HStack {
+                            Image(systemName: "clock.arrow.circlepath")
+                                .font(.title2)
+                            Text("View Historical Weather")
+                                .font(.headline)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.accentColor)
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
+                    }
+                    .padding(.horizontal)
+                    .accessibilityLabel("View Historical Weather")
+                    .accessibilityHint("Opens a screen showing historical weather data for \(city.name)")
+                    
                     // Dynamically render detail sections based on settings order
                     ForEach(settingsManager.settings.detailCategories) { categoryField in
                         if categoryField.isEnabled {
@@ -211,6 +233,20 @@ struct CityDetailView: View {
                     Image(systemName: "arrow.clockwise")
                         .accessibilityLabel("Refresh weather")
                 }
+            }
+        }
+        .sheet(isPresented: $showingHistoricalWeather) {
+            NavigationView {
+                HistoricalWeatherView(city: city)
+                    .navigationTitle("Historical Weather")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button("Done") {
+                                showingHistoricalWeather = false
+                            }
+                        }
+                    }
             }
         }
     }

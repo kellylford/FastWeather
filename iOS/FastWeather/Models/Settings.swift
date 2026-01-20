@@ -31,6 +31,7 @@ enum DetailCategory: String, CaseIterable, Codable {
     case todaysForecast = "Today's Forecast"
     case hourlyForecast = "24-Hour Forecast"
     case dailyForecast = "16-Day Forecast"
+    case historicalWeather = "Historical Weather"
     case location = "Location"
 }
 
@@ -123,6 +124,7 @@ struct AppSettings: Codable {
     var windSpeedUnit: WindSpeedUnit = .mph
     var precipitationUnit: PrecipitationUnit = .inches
     var pressureUnit: PressureUnit = .inHg
+    var historicalYearsBack: Int = 5
     
     // Ordered weather fields with enable/disable state
     var weatherFields: [WeatherField] = [
@@ -140,9 +142,9 @@ struct AppSettings: Codable {
     
     // Detail categories with enable/disable and order control
     var detailCategories: [DetailCategoryField] = [
+        DetailCategoryField(category: .todaysForecast, isEnabled: true),
         DetailCategoryField(category: .currentConditions, isEnabled: true),
         DetailCategoryField(category: .precipitation, isEnabled: true),
-        DetailCategoryField(category: .todaysForecast, isEnabled: true),
         DetailCategoryField(category: .hourlyForecast, isEnabled: true),
         DetailCategoryField(category: .dailyForecast, isEnabled: true),
         DetailCategoryField(category: .location, isEnabled: true)

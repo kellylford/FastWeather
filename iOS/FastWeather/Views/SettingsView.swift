@@ -202,6 +202,30 @@ struct SettingsView: View {
                     .accessibilityLabel("Reset all settings to default values")
                 }
                 
+                // Historical Weather section
+                Section(header: Text("Historical Weather"),
+                       footer: Text("Set how many years of historical data to retrieve. Lower values load faster.")) {
+                    Stepper(value: $settingsManager.settings.historicalYearsBack, in: 1...85) {
+                        HStack {
+                            Text("Years of Data")
+                            Spacer()
+                            Text("\(settingsManager.settings.historicalYearsBack) years")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .onChange(of: settingsManager.settings.historicalYearsBack) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Years of historical data, currently \(settingsManager.settings.historicalYearsBack) years")
+                    .accessibilityHint("Swipe up to increase, swipe down to decrease")
+                    
+                    Button("Clear Historical Cache") {
+                        clearHistoricalCache()
+                    }
+                    .accessibilityLabel("Clear all cached historical weather data")
+                    .accessibilityHint("Tap to delete cached historical data for all cities")
+                }
+                
                 // About section
                 Section(header: Text("About")) {
                     HStack {
@@ -237,6 +261,14 @@ struct SettingsView: View {
     }
     
     // MARK: - Helper Methods
+    
+    private func clearHistoricalCache() {
+        // Clear cache for all saved cities
+        for city in weatherService.savedCities {
+            HistoricalWeatherCache.shared.clearCache(for: city)
+        }
+        UIAccessibility.post(notification: .announcement, argument: "Historical weather cache cleared for all cities")
+    }
     
     private func moveCategoryUp(at index: Int) {
         guard index > 0 else { return }

@@ -52,7 +52,6 @@ struct AddCitySearchView: View {
                         .disabled(searchText.isEmpty || isSearching)
                         .accessibilityLabel("Search")
                         .accessibilityHint("Search for the city you entered")
-                        .accessibilityLabel("Search button")
                     }
                     
                     Text("Examples: \"San Diego, CA\" or \"53703\"")

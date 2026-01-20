@@ -21,6 +21,15 @@ ENV/
 *.swo
 *~
 
+# Xcode
+xcuserdata/
+*.xcuserstate
+*.xcuserdatad
+DerivedData/
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+
 # OS
 .DS_Store
 Thumbs.db

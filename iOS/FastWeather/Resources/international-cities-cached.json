@@ -14305,5 +14305,2877 @@
       "lat": 66.9996299,
       "lon": -50.7399266
     }
+  ],
+  "Afghanistan": [
+    {
+      "name": "Kabul",
+      "state": "ولایت كابل",
+      "country": "افغانستان",
+      "lat": 34.5269503,
+      "lon": 69.1850584
+    },
+    {
+      "name": "Kandahar",
+      "state": "کندهار ولايت",
+      "country": "افغانستان",
+      "lat": 31.6205738,
+      "lon": 65.7157573
+    },
+    {
+      "name": "Herat",
+      "state": "ولایت هرات",
+      "country": "افغانستان",
+      "lat": 34.3491443,
+      "lon": 62.2163252
+    },
+    {
+      "name": "Mazar-i-Sharif",
+      "state": "ولایت بلخ",
+      "country": "افغانستان",
+      "lat": 36.7090366,
+      "lon": 67.1114085
+    },
+    {
+      "name": "Jalalabad",
+      "state": "ننگرهار ولايت",
+      "country": "افغانستان",
+      "lat": 34.430195,
+      "lon": 70.460128
+    }
+  ],
+  "Albania": [
+    {
+      "name": "Tirana",
+      "state": "Shqipëria Qendrore",
+      "country": "Shqipëria",
+      "lat": 41.3281482,
+      "lon": 19.8184435
+    },
+    {
+      "name": "Durrës",
+      "state": "Shqipëria Veriore",
+      "country": "Shqipëria",
+      "lat": 41.313255,
+      "lon": 19.4462348
+    },
+    {
+      "name": "Vlorë",
+      "state": "Shqipëria Jugore",
+      "country": "Shqipëria",
+      "lat": 40.4707602,
+      "lon": 19.4912716
+    },
+    {
+      "name": "Elbasan",
+      "state": "Shqipëria Qendrore",
+      "country": "Shqipëria",
+      "lat": 41.1126792,
+      "lon": 20.0820858
+    },
+    {
+      "name": "Shkodër",
+      "state": "Shqipëria Veriore",
+      "country": "Shqipëria",
+      "lat": 42.0681371,
+      "lon": 19.5121437
+    }
+  ],
+  "Bahamas": [
+    {
+      "name": "Nassau",
+      "state": "",
+      "country": "The Bahamas",
+      "lat": 25.0782266,
+      "lon": -77.3383438
+    },
+    {
+      "name": "Freeport",
+      "state": "",
+      "country": "The Bahamas",
+      "lat": 26.535681,
+      "lon": -78.6953623
+    },
+    {
+      "name": "West End",
+      "state": "",
+      "country": "The Bahamas",
+      "lat": 26.6850232,
+      "lon": -78.9647591
+    },
+    {
+      "name": "Coopers Town",
+      "state": "",
+      "country": "The Bahamas",
+      "lat": 26.8725797,
+      "lon": -77.5135737
+    },
+    {
+      "name": "Marsh Harbour",
+      "state": "",
+      "country": "The Bahamas",
+      "lat": 26.5382728,
+      "lon": -77.0610382
+    }
+  ],
+  "Barbados": [
+    {
+      "name": "Bridgetown",
+      "state": "",
+      "country": "Barbados",
+      "lat": 13.0977832,
+      "lon": -59.6184184
+    },
+    {
+      "name": "Speightstown",
+      "state": "",
+      "country": "Barbados",
+      "lat": 13.2500531,
+      "lon": -59.6423782
+    },
+    {
+      "name": "Oistins",
+      "state": "",
+      "country": "Barbados",
+      "lat": 13.0631947,
+      "lon": -59.542242
+    },
+    {
+      "name": "Holetown",
+      "state": "",
+      "country": "Barbados",
+      "lat": 13.1856145,
+      "lon": -59.637289
+    },
+    {
+      "name": "Bathsheba",
+      "state": "",
+      "country": "Barbados",
+      "lat": 13.2129361,
+      "lon": -59.5227245
+    }
+  ],
+  "Belarus": [
+    {
+      "name": "Minsk",
+      "state": "",
+      "country": "Беларусь",
+      "lat": 53.9024716,
+      "lon": 27.5618225
+    },
+    {
+      "name": "Gomel",
+      "state": "Гомельская вобласць",
+      "country": "Беларусь",
+      "lat": 52.4238936,
+      "lon": 31.0131698
+    },
+    {
+      "name": "Mogilev",
+      "state": "Магілёўская вобласць",
+      "country": "Беларусь",
+      "lat": 53.9090245,
+      "lon": 30.3429838
+    },
+    {
+      "name": "Vitebsk",
+      "state": "Віцебская вобласць",
+      "country": "Беларусь",
+      "lat": 55.1930197,
+      "lon": 30.2070437
+    },
+    {
+      "name": "Grodno",
+      "state": "Гродзенская вобласць",
+      "country": "Беларусь",
+      "lat": 53.6834599,
+      "lon": 23.8342648
+    },
+    {
+      "name": "Brest",
+      "state": "Брэсцкая вобласць",
+      "country": "Беларусь",
+      "lat": 52.093751,
+      "lon": 23.6851851
+    }
+  ],
+  "Belize": [
+    {
+      "name": "Belize City",
+      "state": "Belize District",
+      "country": "Belize",
+      "lat": 17.5002768,
+      "lon": -88.1988737
+    },
+    {
+      "name": "San Ignacio",
+      "state": "Cayo",
+      "country": "Belize",
+      "lat": 17.1527588,
+      "lon": -89.0761718
+    },
+    {
+      "name": "Orange Walk",
+      "state": "Orange Walk",
+      "country": "Belize",
+      "lat": 17.7831833,
+      "lon": -88.8620283
+    },
+    {
+      "name": "Belmopan",
+      "state": "Cayo",
+      "country": "Belize",
+      "lat": 17.250199,
+      "lon": -88.770018
+    },
+    {
+      "name": "Dangriga",
+      "state": "Stann Creek",
+      "country": "Belize",
+      "lat": 16.9666599,
+      "lon": -88.2247368
+    }
+  ],
+  "Benin": [
+    {
+      "name": "Cotonou",
+      "state": "Littoral",
+      "country": "Bénin",
+      "lat": 6.3676953,
+      "lon": 2.4252507
+    },
+    {
+      "name": "Porto-Novo",
+      "state": "Ouémé",
+      "country": "Bénin",
+      "lat": 6.4990718,
+      "lon": 2.6253361
+    },
+    {
+      "name": "Parakou",
+      "state": "Borgou",
+      "country": "Bénin",
+      "lat": 9.3400159,
+      "lon": 2.6278258
+    },
+    {
+      "name": "Djougou",
+      "state": "Donga",
+      "country": "Bénin",
+      "lat": 9.7106683,
+      "lon": 1.6651614
+    },
+    {
+      "name": "Bohicon",
+      "state": "Zou",
+      "country": "Bénin",
+      "lat": 7.1816331,
+      "lon": 2.0695683
+    }
+  ],
+  "Bermuda": [
+    {
+      "name": "Hamilton",
+      "state": "",
+      "country": "Bermuda",
+      "lat": 32.2942679,
+      "lon": -64.7853167
+    },
+    {
+      "name": "St. George",
+      "state": "",
+      "country": "Bermuda",
+      "lat": 32.3810447,
+      "lon": -64.676717
+    },
+    {
+      "name": "Somerset",
+      "state": "Sandys",
+      "country": "Bermuda",
+      "lat": 32.2962083,
+      "lon": -64.8699524
+    },
+    {
+      "name": "Flatts Village",
+      "state": "Hamilton",
+      "country": "Bermuda",
+      "lat": 32.3211651,
+      "lon": -64.7385344
+    },
+    {
+      "name": "Tucker's Town",
+      "state": "St. George's",
+      "country": "Bermuda",
+      "lat": 32.3333006,
+      "lon": -64.6869477
+    }
+  ],
+  "Bhutan": [
+    {
+      "name": "Thimphu",
+      "state": "ཐིམ་ཕུ་རྫོང་ཁག་",
+      "country": "འབྲུག་ཡུལ།",
+      "lat": 27.4713546,
+      "lon": 89.6336729
+    },
+    {
+      "name": "Paro",
+      "state": "སྤ་རོ་རྫོང་ཁག་",
+      "country": "འབྲུག་ཡུལ།",
+      "lat": 27.4646365,
+      "lon": 89.3183409
+    },
+    {
+      "name": "Punakha",
+      "state": "སྤུ་ན་ཁ་རྫོང་ཁག་",
+      "country": "འབྲུག་ཡུལ།",
+      "lat": 27.5842857,
+      "lon": 89.8593094
+    },
+    {
+      "name": "Phuentsholing",
+      "state": "ཆུ་ཁ་རྫོང་ཁག་",
+      "country": "འབྲུག་ཡུལ།",
+      "lat": 26.8639605,
+      "lon": 89.3837363
+    },
+    {
+      "name": "Jakar",
+      "state": "བུམ་ཐང་རྫོང་ཁག་",
+      "country": "འབྲུག་ཡུལ།",
+      "lat": 27.5496387,
+      "lon": 90.7527351
+    }
+  ],
+  "Bosnia and Herzegovina": [
+    {
+      "name": "Sarajevo",
+      "state": "Federacija Bosne i Hercegovine",
+      "country": "Bosna i Hercegovina / Босна и Херцеговина",
+      "lat": 43.8570713,
+      "lon": 18.4126147
+    },
+    {
+      "name": "Banja Luka",
+      "state": "Република Српска / Republika Srpska",
+      "country": "Bosna i Hercegovina / Босна и Херцеговина",
+      "lat": 44.7720845,
+      "lon": 17.1917651
+    },
+    {
+      "name": "Tuzla",
+      "state": "Federacija Bosne i Hercegovine",
+      "country": "Bosna i Hercegovina / Босна и Херцеговина",
+      "lat": 44.5391105,
+      "lon": 18.675193
+    },
+    {
+      "name": "Zenica",
+      "state": "Federacija Bosne i Hercegovine",
+      "country": "Bosna i Hercegovina / Босна и Херцеговина",
+      "lat": 44.199828,
+      "lon": 17.9093012
+    },
+    {
+      "name": "Mostar",
+      "state": "Federacija Bosne i Hercegovine",
+      "country": "Bosna i Hercegovina / Босна и Херцеговина",
+      "lat": 43.3435855,
+      "lon": 17.8076584
+    }
+  ],
+  "Botswana": [
+    {
+      "name": "Gaborone",
+      "state": "",
+      "country": "Botswana",
+      "lat": -24.6581357,
+      "lon": 25.9088474
+    },
+    {
+      "name": "Francistown",
+      "state": "",
+      "country": "Botswana",
+      "lat": -21.16636,
+      "lon": 27.502515
+    },
+    {
+      "name": "Maun",
+      "state": "",
+      "country": "Botswana",
+      "lat": -19.9860951,
+      "lon": 23.4224352
+    },
+    {
+      "name": "Kasane",
+      "state": "Chobe District",
+      "country": "Botswana",
+      "lat": -17.799239,
+      "lon": 25.156546
+    },
+    {
+      "name": "Serowe",
+      "state": "Central District",
+      "country": "Botswana",
+      "lat": -22.39776,
+      "lon": 26.703289
+    }
+  ],
+  "Brunei": [
+    {
+      "name": "Bandar Seri Begawan",
+      "state": "",
+      "country": "Brunei",
+      "lat": 4.8895453,
+      "lon": 114.9417574
+    },
+    {
+      "name": "Kuala Belait",
+      "state": "",
+      "country": "Brunei",
+      "lat": 4.5845101,
+      "lon": 114.1932373
+    },
+    {
+      "name": "Seria",
+      "state": "",
+      "country": "Brunei",
+      "lat": 4.6141594,
+      "lon": 114.3301832
+    },
+    {
+      "name": "Tutong",
+      "state": "",
+      "country": "Brunei",
+      "lat": 4.682681,
+      "lon": 114.6562706
+    },
+    {
+      "name": "Bangar",
+      "state": "",
+      "country": "Brunei",
+      "lat": 4.7076478,
+      "lon": 115.0724439
+    }
+  ],
+  "Burkina Faso": [
+    {
+      "name": "Ouagadougou",
+      "state": "Kadiogo",
+      "country": "Burkina Faso",
+      "lat": 12.3681873,
+      "lon": -1.5270944
+    },
+    {
+      "name": "Bobo-Dioulasso",
+      "state": "Houet",
+      "country": "Burkina Faso",
+      "lat": 11.1765796,
+      "lon": -4.2961436
+    },
+    {
+      "name": "Koudougou",
+      "state": "Boulkiemdé",
+      "country": "Burkina Faso",
+      "lat": 12.2514911,
+      "lon": -2.3652267
+    },
+    {
+      "name": "Ouahigouya",
+      "state": "Yatenga",
+      "country": "Burkina Faso",
+      "lat": 13.580982,
+      "lon": -2.417699
+    },
+    {
+      "name": "Banfora",
+      "state": "Comoé",
+      "country": "Burkina Faso",
+      "lat": 10.642703,
+      "lon": -4.752639
+    }
+  ],
+  "Burundi": [
+    {
+      "name": "Gitega",
+      "state": "Gitega",
+      "country": "Burundi",
+      "lat": -3.4284953,
+      "lon": 29.9249718
+    },
+    {
+      "name": "Bujumbura",
+      "state": "Bujumbura Mairie",
+      "country": "Burundi",
+      "lat": -3.3638125,
+      "lon": 29.3675028
+    },
+    {
+      "name": "Muyinga",
+      "state": "Muyinga",
+      "country": "Burundi",
+      "lat": -2.7335985,
+      "lon": 30.3171441
+    },
+    {
+      "name": "Ngozi",
+      "state": "Ngozi",
+      "country": "Burundi",
+      "lat": -2.8776895,
+      "lon": 29.8994986
+    },
+    {
+      "name": "Rumonge",
+      "state": "Rumonge",
+      "country": "Burundi",
+      "lat": -3.8755076,
+      "lon": 29.4706207
+    }
+  ],
+  "Cape Verde": [
+    {
+      "name": "Praia",
+      "state": "",
+      "country": "Cabo Verde",
+      "lat": 14.9162811,
+      "lon": -23.5095095
+    },
+    {
+      "name": "Mindelo",
+      "state": "",
+      "country": "Cabo Verde",
+      "lat": 16.8873057,
+      "lon": -24.9864064
+    },
+    {
+      "name": "Santa Maria",
+      "state": "",
+      "country": "Cabo Verde",
+      "lat": 16.5986926,
+      "lon": -22.9050314
+    },
+    {
+      "name": "Assomada",
+      "state": "",
+      "country": "Cabo Verde",
+      "lat": 15.097635,
+      "lon": -23.6668745
+    },
+    {
+      "name": "Porto Novo",
+      "state": "",
+      "country": "Cabo Verde",
+      "lat": 17.0174637,
+      "lon": -25.2004042
+    }
+  ],
+  "Central African Republic": [
+    {
+      "name": "Bangui",
+      "state": "",
+      "country": "Ködörösêse tî Bêafrîka / République centrafricaine",
+      "lat": 4.3635118,
+      "lon": 18.5835913
+    },
+    {
+      "name": "Bimbo",
+      "state": "Ombella M'Poko",
+      "country": "Ködörösêse tî Bêafrîka / République centrafricaine",
+      "lat": 4.3228138,
+      "lon": 18.5248788
+    },
+    {
+      "name": "Berbérati",
+      "state": "Mambéré-Kadéï",
+      "country": "Ködörösêse tî Bêafrîka / République centrafricaine",
+      "lat": 4.2593379,
+      "lon": 15.7877826
+    },
+    {
+      "name": "Carnot",
+      "state": "Mambéré-Kadéï",
+      "country": "Ködörösêse tî Bêafrîka / République centrafricaine",
+      "lat": 4.9418234,
+      "lon": 15.8688285
+    },
+    {
+      "name": "Bambari",
+      "state": "Ouaka",
+      "country": "Ködörösêse tî Bêafrîka / République centrafricaine",
+      "lat": 5.7680014,
+      "lon": 20.6755705
+    }
+  ],
+  "Chad": [
+    {
+      "name": "N'Djamena",
+      "state": "",
+      "country": "Tchad تشاد",
+      "lat": 12.1191543,
+      "lon": 15.0502758
+    },
+    {
+      "name": "Moundou",
+      "state": "لوقون الغربية Logone Occidental",
+      "country": "Tchad تشاد",
+      "lat": 8.5654637,
+      "lon": 16.073831
+    },
+    {
+      "name": "Sarh",
+      "state": "Moyen-Chari شاري الأوسط",
+      "country": "Tchad تشاد",
+      "lat": 9.1406471,
+      "lon": 18.3937969
+    },
+    {
+      "name": "Abéché",
+      "state": "Ouaddaï وداي",
+      "country": "Tchad تشاد",
+      "lat": 13.8280295,
+      "lon": 20.8283652
+    },
+    {
+      "name": "Kélo",
+      "state": "Tandjilé تانجلي",
+      "country": "Tchad تشاد",
+      "lat": 9.3135075,
+      "lon": 15.7869843
+    }
+  ],
+  "Comoros": [
+    {
+      "name": "Moroni",
+      "state": "Ngazidja القمر الكبرى",
+      "country": "Comores Komori جزر القمر",
+      "lat": -11.6931255,
+      "lon": 43.2543044
+    },
+    {
+      "name": "Mutsamudu",
+      "state": "Nzwani أنجوان",
+      "country": "Comores Komori جزر القمر",
+      "lat": -12.168846,
+      "lon": 44.3942831
+    },
+    {
+      "name": "Fomboni",
+      "state": "موهيلي Mohéli",
+      "country": "Comores Komori جزر القمر",
+      "lat": -12.284054,
+      "lon": 43.742727
+    },
+    {
+      "name": "Domoni",
+      "state": "Nzwani أنجوان",
+      "country": "Comores Komori جزر القمر",
+      "lat": -12.2586544,
+      "lon": 44.528851
+    }
+  ],
+  "Congo": [
+    {
+      "name": "Brazzaville",
+      "state": "Brazzaville (département)",
+      "country": "Congo",
+      "lat": -4.2694407,
+      "lon": 15.2712256
+    },
+    {
+      "name": "Pointe-Noire",
+      "state": "Pointe-Noire (département)",
+      "country": "Congo",
+      "lat": -4.7975373,
+      "lon": 11.8503297
+    },
+    {
+      "name": "Dolisie",
+      "state": "Niari",
+      "country": "Congo",
+      "lat": -4.2005398,
+      "lon": 12.6791573
+    },
+    {
+      "name": "Nkayi",
+      "state": "Bouenza",
+      "country": "Congo",
+      "lat": -4.1840962,
+      "lon": 13.2883675
+    },
+    {
+      "name": "Owando",
+      "state": "Cuvette",
+      "country": "Congo",
+      "lat": -0.4833599,
+      "lon": 15.8974175
+    }
+  ],
+  "Cyprus": [
+    {
+      "name": "Nicosia",
+      "state": "Κύπρος",
+      "country": "Κύπρος - Kıbrıs",
+      "lat": 35.1746503,
+      "lon": 33.3638783
+    },
+    {
+      "name": "Limassol",
+      "state": "Κύπρος",
+      "country": "Κύπρος - Kıbrıs",
+      "lat": 34.6852901,
+      "lon": 33.0332657
+    },
+    {
+      "name": "Larnaca",
+      "state": "Κύπρος",
+      "country": "Κύπρος - Kıbrıs",
+      "lat": 34.9236095,
+      "lon": 33.6236184
+    },
+    {
+      "name": "Paphos",
+      "state": "Κύπρος",
+      "country": "Κύπρος - Kıbrıs",
+      "lat": 34.7743988,
+      "lon": 32.4231586
+    },
+    {
+      "name": "Famagusta",
+      "state": "",
+      "country": "Kuzey Kıbrıs",
+      "lat": 35.1205261,
+      "lon": 33.9387919
+    }
+  ],
+  "Djibouti": [
+    {
+      "name": "Ali Sabieh",
+      "state": "Ali Sabieh علي صبيح",
+      "country": "Djibouti جيبوتي",
+      "lat": 11.1630687,
+      "lon": 42.8372778
+    },
+    {
+      "name": "Tadjourah",
+      "state": "Tadjourah تجرة",
+      "country": "Djibouti جيبوتي",
+      "lat": 12.0358121,
+      "lon": 42.5174505
+    },
+    {
+      "name": "Obock",
+      "state": "Obock أبخ",
+      "country": "Djibouti جيبوتي",
+      "lat": 11.9640149,
+      "lon": 43.292228
+    },
+    {
+      "name": "Dikhil",
+      "state": "Dikhil دخيل",
+      "country": "Djibouti جيبوتي",
+      "lat": 11.1071149,
+      "lon": 42.3687433
+    }
+  ],
+  "Dominica": [
+    {
+      "name": "Roseau",
+      "state": "Saint George Parish",
+      "country": "Dominica",
+      "lat": 15.2991923,
+      "lon": -61.3872868
+    },
+    {
+      "name": "Portsmouth",
+      "state": "Saint John Parish",
+      "country": "Dominica",
+      "lat": 15.575915,
+      "lon": -61.455588
+    },
+    {
+      "name": "Marigot",
+      "state": "Saint Andrew Parish",
+      "country": "Dominica",
+      "lat": 15.5364632,
+      "lon": -61.2793643
+    },
+    {
+      "name": "Berekua",
+      "state": "Saint Patrick Parish",
+      "country": "Dominica",
+      "lat": 15.239927,
+      "lon": -61.3153342
+    },
+    {
+      "name": "Saint Joseph",
+      "state": "Saint Joseph Parish",
+      "country": "Dominica",
+      "lat": 15.4063155,
+      "lon": -61.4239093
+    }
+  ],
+  "East Timor": [
+    {
+      "name": "Dili",
+      "state": "Dili",
+      "country": "Timor-Leste",
+      "lat": -8.5536809,
+      "lon": 125.5784093
+    },
+    {
+      "name": "Baucau",
+      "state": "Baukau",
+      "country": "Timor-Leste",
+      "lat": -8.4650462,
+      "lon": 126.4585621
+    },
+    {
+      "name": "Maliana",
+      "state": "Bobonaru",
+      "country": "Timor-Leste",
+      "lat": -8.9911326,
+      "lon": 125.203312
+    },
+    {
+      "name": "Suai",
+      "state": "Kova Lima",
+      "country": "Timor-Leste",
+      "lat": -9.2485199,
+      "lon": 125.3617701
+    },
+    {
+      "name": "Liquiçá",
+      "state": "Likisá",
+      "country": "Timor-Leste",
+      "lat": -8.655061,
+      "lon": 125.2751452
+    }
+  ],
+  "Equatorial Guinea": [
+    {
+      "name": "Malabo",
+      "state": "Bioko Norte",
+      "country": "Guinea Ecuatorial",
+      "lat": 3.741877,
+      "lon": 8.7740663
+    },
+    {
+      "name": "Bata",
+      "state": "Litoral",
+      "country": "Guinea Ecuatorial",
+      "lat": 2.0064092,
+      "lon": 9.9087683
+    },
+    {
+      "name": "Ebebiyin",
+      "state": "Kié-Ntem",
+      "country": "Guinea Ecuatorial",
+      "lat": 2.1537363,
+      "lon": 11.3370815
+    },
+    {
+      "name": "Aconibe",
+      "state": "Wele-Nzas",
+      "country": "Guinea Ecuatorial",
+      "lat": 1.294916,
+      "lon": 10.944439
+    },
+    {
+      "name": "Añisoc",
+      "state": "Wele-Nzas",
+      "country": "Guinea Ecuatorial",
+      "lat": 1.844383,
+      "lon": 10.747593
+    }
+  ],
+  "Eritrea": [
+    {
+      "name": "Asmara",
+      "state": "ዞባ ማእከል Maekel zone المنطقة المركزية",
+      "country": "ኤርትራ Eritrea إرتريا",
+      "lat": 15.3389667,
+      "lon": 38.9326763
+    },
+    {
+      "name": "Keren",
+      "state": "ዞባ ዓንሰባ Anseba عنسبا",
+      "country": "ኤርትራ Eritrea إرتريا",
+      "lat": 15.780477,
+      "lon": 38.453606
+    },
+    {
+      "name": "Massawa",
+      "state": "ዞባ ሰሜናዊ ቀይሕ ባሕሪ Northern Red Sea شمال البحر الأحمر",
+      "country": "ኤርትራ Eritrea إرتريا",
+      "lat": 15.6031828,
+      "lon": 39.4636974
+    },
+    {
+      "name": "Assab",
+      "state": "ደቡባዊ ቀይሕ ባሕሪ Southern Red Sea جنوب البحر الأحمر",
+      "country": "ኤርትራ Eritrea إرتريا",
+      "lat": 13.0091289,
+      "lon": 42.7444596
+    },
+    {
+      "name": "Mendefera",
+      "state": "ዞባ ደቡብ Debub منطقة الجنوب",
+      "country": "ኤርትራ Eritrea إرتريا",
+      "lat": 14.8841153,
+      "lon": 38.8129433
+    }
+  ],
+  "Estonia": [
+    {
+      "name": "Tallinn",
+      "state": "",
+      "country": "Eesti",
+      "lat": 59.4372419,
+      "lon": 24.7572802
+    },
+    {
+      "name": "Tartu",
+      "state": "",
+      "country": "Eesti",
+      "lat": 58.3779528,
+      "lon": 26.7290023
+    },
+    {
+      "name": "Narva",
+      "state": "",
+      "country": "Eesti",
+      "lat": 59.3767458,
+      "lon": 28.1919315
+    },
+    {
+      "name": "Pärnu",
+      "state": "",
+      "country": "Eesti",
+      "lat": 58.3870833,
+      "lon": 24.502831
+    },
+    {
+      "name": "Kohtla-Järve",
+      "state": "",
+      "country": "Eesti",
+      "lat": 59.4025488,
+      "lon": 27.2880288
+    }
+  ],
+  "Eswatini": [
+    {
+      "name": "Mbabane",
+      "state": "Hhohho",
+      "country": "Eswatini",
+      "lat": -26.325745,
+      "lon": 31.144663
+    },
+    {
+      "name": "Manzini",
+      "state": "Manzini",
+      "country": "Eswatini",
+      "lat": -26.4976444,
+      "lon": 31.3750815
+    },
+    {
+      "name": "Lobamba",
+      "state": "Hhohho",
+      "country": "Eswatini",
+      "lat": -26.4462848,
+      "lon": 31.2083781
+    },
+    {
+      "name": "Siteki",
+      "state": "Lubombo",
+      "country": "Eswatini",
+      "lat": -26.4536442,
+      "lon": 31.9463149
+    },
+    {
+      "name": "Malkerns",
+      "state": "Manzini",
+      "country": "Eswatini",
+      "lat": -26.531888,
+      "lon": 31.189006
+    }
+  ],
+  "Fiji": [
+    {
+      "name": "Suva",
+      "state": "Central",
+      "country": "Viti",
+      "lat": -18.1415884,
+      "lon": 178.4421662
+    },
+    {
+      "name": "Nadi",
+      "state": "Western",
+      "country": "Viti",
+      "lat": -17.7992725,
+      "lon": 177.4178549
+    },
+    {
+      "name": "Lautoka",
+      "state": "Western",
+      "country": "Viti",
+      "lat": -17.6046057,
+      "lon": 177.4482766
+    },
+    {
+      "name": "Labasa",
+      "state": "Northern",
+      "country": "Viti",
+      "lat": -16.4332753,
+      "lon": 179.3664854
+    },
+    {
+      "name": "Ba",
+      "state": "Western",
+      "country": "Viti",
+      "lat": -17.1183486,
+      "lon": 177.3917828
+    }
+  ],
+  "Gabon": [
+    {
+      "name": "Libreville",
+      "state": "Estuaire",
+      "country": "Gabon",
+      "lat": 0.4086518,
+      "lon": 9.4418849
+    },
+    {
+      "name": "Port-Gentil",
+      "state": "Ogooué-Maritime",
+      "country": "Gabon",
+      "lat": -0.7151966,
+      "lon": 8.7787919
+    },
+    {
+      "name": "Franceville",
+      "state": "Haut-Ogooué",
+      "country": "Gabon",
+      "lat": -1.6343979,
+      "lon": 13.5894808
+    },
+    {
+      "name": "Oyem",
+      "state": "Woleu-Ntem",
+      "country": "Gabon",
+      "lat": 1.5997904,
+      "lon": 11.5751003
+    },
+    {
+      "name": "Moanda",
+      "state": "Haut-Ogooué",
+      "country": "Gabon",
+      "lat": -1.554764,
+      "lon": 13.2218993
+    }
+  ],
+  "Gambia": [
+    {
+      "name": "Banjul",
+      "state": "",
+      "country": "Gambia",
+      "lat": 13.4410165,
+      "lon": -16.5627509
+    },
+    {
+      "name": "Serekunda",
+      "state": "Kanifing",
+      "country": "Gambia",
+      "lat": 13.4340325,
+      "lon": -16.6855042
+    },
+    {
+      "name": "Brikama",
+      "state": "West Coast",
+      "country": "Gambia",
+      "lat": 13.258513,
+      "lon": -16.4999051
+    },
+    {
+      "name": "Bakau",
+      "state": "Kanifing",
+      "country": "Gambia",
+      "lat": 13.477453,
+      "lon": -16.6779085
+    },
+    {
+      "name": "Farafenni",
+      "state": "North Bank",
+      "country": "Gambia",
+      "lat": 13.5721243,
+      "lon": -15.5979467
+    }
+  ],
+  "Grenada": [
+    {
+      "name": "St. George's",
+      "state": "",
+      "country": "Grenada",
+      "lat": 12.0535331,
+      "lon": -61.751805
+    },
+    {
+      "name": "Gouyave",
+      "state": "",
+      "country": "Grenada",
+      "lat": 12.1665178,
+      "lon": -61.7297144
+    },
+    {
+      "name": "Grenville",
+      "state": "",
+      "country": "Grenada",
+      "lat": 12.1228312,
+      "lon": -61.6225151
+    },
+    {
+      "name": "Victoria",
+      "state": "",
+      "country": "Grenada",
+      "lat": 12.1952359,
+      "lon": -61.7050822
+    },
+    {
+      "name": "Sauteurs",
+      "state": "",
+      "country": "Grenada",
+      "lat": 12.2251172,
+      "lon": -61.6379798
+    }
+  ],
+  "Guinea": [
+    {
+      "name": "Conakry",
+      "state": "",
+      "country": "Guinée",
+      "lat": 9.5170602,
+      "lon": -13.6998434
+    },
+    {
+      "name": "Nzérékoré",
+      "state": "Nzérékoré",
+      "country": "Guinée",
+      "lat": 8.3925728,
+      "lon": -8.8572519
+    },
+    {
+      "name": "Kankan",
+      "state": "Kankan",
+      "country": "Guinée",
+      "lat": 10.6248355,
+      "lon": -9.3175166
+    },
+    {
+      "name": "Kindia",
+      "state": "Kindia",
+      "country": "Guinée",
+      "lat": 10.1154374,
+      "lon": -13.1916883
+    },
+    {
+      "name": "Labé",
+      "state": "Labé",
+      "country": "Guinée",
+      "lat": 11.7614835,
+      "lon": -12.0118889
+    }
+  ],
+  "Guinea-Bissau": [
+    {
+      "name": "Bissau",
+      "state": "Sector autónomo de Bissau",
+      "country": "Guiné-Bissau",
+      "lat": 11.861324,
+      "lon": -15.583055
+    },
+    {
+      "name": "Bafatá",
+      "state": "Região de Bafatá",
+      "country": "Guiné-Bissau",
+      "lat": 12.1723403,
+      "lon": -14.6555027
+    },
+    {
+      "name": "Gabú",
+      "state": "Região de Gabu",
+      "country": "Guiné-Bissau",
+      "lat": 12.1170351,
+      "lon": -14.1762506
+    },
+    {
+      "name": "Bissorã",
+      "state": "Região de Oio",
+      "country": "Guiné-Bissau",
+      "lat": 12.2235221,
+      "lon": -15.4507416
+    },
+    {
+      "name": "Bolama",
+      "state": "Região de Bolama",
+      "country": "Guiné-Bissau",
+      "lat": 11.2795064,
+      "lon": -16.0294425
+    }
+  ],
+  "Guyana": [
+    {
+      "name": "Georgetown",
+      "state": "Demerara-Mahaica",
+      "country": "Guyana",
+      "lat": 6.8032561,
+      "lon": -58.1455403
+    },
+    {
+      "name": "Linden",
+      "state": "Upper Demerara-Berbice",
+      "country": "Guyana",
+      "lat": 6.0100019,
+      "lon": -58.312488
+    },
+    {
+      "name": "New Amsterdam",
+      "state": "East Berbice-Corentyne",
+      "country": "Guyana",
+      "lat": 6.2426407,
+      "lon": -57.5168359
+    },
+    {
+      "name": "Anna Regina",
+      "state": "Pomeroon-Supenaam",
+      "country": "Guyana",
+      "lat": 7.2622058,
+      "lon": -58.4822122
+    },
+    {
+      "name": "Bartica",
+      "state": "Cuyuni-Mazaruni",
+      "country": "Guyana",
+      "lat": 6.4053312,
+      "lon": -58.6214256
+    }
+  ],
+  "Haiti": [
+    {
+      "name": "Port-au-Prince",
+      "state": "Département de l'Ouest",
+      "country": "Ayiti",
+      "lat": 18.547327,
+      "lon": -72.3395928
+    },
+    {
+      "name": "Cap-Haïtien",
+      "state": "Département du Nord",
+      "country": "Ayiti",
+      "lat": 19.7595236,
+      "lon": -72.2008068
+    },
+    {
+      "name": "Gonaïves",
+      "state": "Département de l'Artibonite",
+      "country": "Ayiti",
+      "lat": 19.4460597,
+      "lon": -72.6884336
+    },
+    {
+      "name": "Les Cayes",
+      "state": "Département du Sud",
+      "country": "Ayiti",
+      "lat": 18.1944428,
+      "lon": -73.7511601
+    },
+    {
+      "name": "Port-de-Paix",
+      "state": "Département du Nord-Ouest",
+      "country": "Ayiti",
+      "lat": 19.9389855,
+      "lon": -72.8308129
+    }
+  ],
+  "Iceland": [
+    {
+      "name": "Reykjavik",
+      "state": "",
+      "country": "Ísland",
+      "lat": 64.145981,
+      "lon": -21.9422367
+    },
+    {
+      "name": "Akureyri",
+      "state": "",
+      "country": "Ísland",
+      "lat": 65.6826364,
+      "lon": -18.0912993
+    },
+    {
+      "name": "Keflavik",
+      "state": "",
+      "country": "Ísland",
+      "lat": 63.9997694,
+      "lon": -22.5565373
+    },
+    {
+      "name": "Hafnarfjörður",
+      "state": "",
+      "country": "Ísland",
+      "lat": 64.0695354,
+      "lon": -21.9575664
+    },
+    {
+      "name": "Selfoss",
+      "state": "",
+      "country": "Ísland",
+      "lat": 63.9368093,
+      "lon": -21.0035319
+    }
+  ],
+  "Kosovo": [
+    {
+      "name": "Pristina",
+      "state": "",
+      "country": "Kosova / Kosovo",
+      "lat": 42.6638771,
+      "lon": 21.1640849
+    },
+    {
+      "name": "Prizren",
+      "state": "",
+      "country": "Kosova / Kosovo",
+      "lat": 42.2130151,
+      "lon": 20.7363339
+    },
+    {
+      "name": "Gjakova",
+      "state": "",
+      "country": "Kosova / Kosovo",
+      "lat": 42.3798793,
+      "lon": 20.4316226
+    },
+    {
+      "name": "Peja",
+      "state": "",
+      "country": "Kosova / Kosovo",
+      "lat": 42.6593986,
+      "lon": 20.2885757
+    },
+    {
+      "name": "Mitrovica",
+      "state": "",
+      "country": "Kosova / Kosovo",
+      "lat": 42.8790424,
+      "lon": 20.8657862
+    }
+  ],
+  "Kyrgyzstan": [
+    {
+      "name": "Bishkek",
+      "state": "",
+      "country": "Кыргызстан",
+      "lat": 42.8761424,
+      "lon": 74.6036724
+    },
+    {
+      "name": "Osh",
+      "state": "Ош облусу",
+      "country": "Кыргызстан",
+      "lat": 40.1082848,
+      "lon": 73.1931447
+    },
+    {
+      "name": "Jalal-Abad",
+      "state": "Жалал-Абад облусу",
+      "country": "Кыргызстан",
+      "lat": 41.4804383,
+      "lon": 72.4649525
+    },
+    {
+      "name": "Karakol",
+      "state": "Ысык-Көл облусу",
+      "country": "Кыргызстан",
+      "lat": 42.4917441,
+      "lon": 78.396857
+    },
+    {
+      "name": "Tokmok",
+      "state": "Чүй облусу",
+      "country": "Кыргызстан",
+      "lat": 42.837655,
+      "lon": 75.2951521
+    }
+  ],
+  "Latvia": [
+    {
+      "name": "Riga",
+      "state": "",
+      "country": "Latvija",
+      "lat": 56.9493977,
+      "lon": 24.1051846
+    },
+    {
+      "name": "Daugavpils",
+      "state": "",
+      "country": "Latvija",
+      "lat": 55.8712267,
+      "lon": 26.5159337
+    },
+    {
+      "name": "Liepāja",
+      "state": "",
+      "country": "Latvija",
+      "lat": 56.5048435,
+      "lon": 21.0070903
+    },
+    {
+      "name": "Jelgava",
+      "state": "",
+      "country": "Latvija",
+      "lat": 56.6522063,
+      "lon": 23.7291999
+    },
+    {
+      "name": "Jūrmala",
+      "state": "",
+      "country": "Latvija",
+      "lat": 56.9727164,
+      "lon": 23.7886979
+    }
+  ],
+  "Lesotho": [
+    {
+      "name": "Maseru",
+      "state": "Maseru District",
+      "country": "Lesotho",
+      "lat": -29.310054,
+      "lon": 27.478222
+    },
+    {
+      "name": "Teyateyaneng",
+      "state": "Berea District",
+      "country": "Lesotho",
+      "lat": -29.1519737,
+      "lon": 27.7427554
+    },
+    {
+      "name": "Mafeteng",
+      "state": "Mafeteng District",
+      "country": "Lesotho",
+      "lat": -29.7893049,
+      "lon": 27.4423193
+    },
+    {
+      "name": "Hlotse",
+      "state": "Leribe District",
+      "country": "Lesotho",
+      "lat": -28.8709874,
+      "lon": 28.0432208
+    },
+    {
+      "name": "Mohale's Hoek",
+      "state": "Mohale's Hoek District",
+      "country": "Lesotho",
+      "lat": -30.0696842,
+      "lon": 27.8038609
+    }
+  ],
+  "Liberia": [
+    {
+      "name": "Monrovia",
+      "state": "Montserrado County",
+      "country": "Liberia",
+      "lat": 6.3203562,
+      "lon": -10.8060492
+    },
+    {
+      "name": "Gbarnga",
+      "state": "Bong County",
+      "country": "Liberia",
+      "lat": 6.996269,
+      "lon": -9.470905
+    },
+    {
+      "name": "Buchanan",
+      "state": "Grand Bassa County",
+      "country": "Liberia",
+      "lat": 5.88129,
+      "lon": -10.0494002
+    },
+    {
+      "name": "Ganta",
+      "state": "Nimba County",
+      "country": "Liberia",
+      "lat": 7.2334773,
+      "lon": -8.986099
+    },
+    {
+      "name": "Kakata",
+      "state": "Margibi County",
+      "country": "Liberia",
+      "lat": 6.532326,
+      "lon": -10.3488074
+    }
+  ],
+  "Libya": [
+    {
+      "name": "Tripoli",
+      "state": "طرابلس",
+      "country": "ليبيا",
+      "lat": 32.896672,
+      "lon": 13.1777923
+    },
+    {
+      "name": "Benghazi",
+      "state": "",
+      "country": "ليبيا",
+      "lat": 32.1200168,
+      "lon": 20.0812174
+    },
+    {
+      "name": "Misrata",
+      "state": "محافظة بني وليد",
+      "country": "ليبيا",
+      "lat": 32.3745923,
+      "lon": 15.0905803
+    },
+    {
+      "name": "Bayda",
+      "state": "الجبل الأخضر",
+      "country": "ليبيا",
+      "lat": 32.7609529,
+      "lon": 21.7577175
+    },
+    {
+      "name": "Zawiya",
+      "state": "شعبية الزاوية",
+      "country": "ليبيا",
+      "lat": 32.7596665,
+      "lon": 12.7355967
+    }
+  ],
+  "Liechtenstein": [
+    {
+      "name": "Vaduz",
+      "state": "",
+      "country": "Liechtenstein",
+      "lat": 47.1392862,
+      "lon": 9.5227962
+    },
+    {
+      "name": "Schaan",
+      "state": "",
+      "country": "Liechtenstein",
+      "lat": 47.1663397,
+      "lon": 9.510312
+    },
+    {
+      "name": "Balzers",
+      "state": "",
+      "country": "Liechtenstein",
+      "lat": 47.0688822,
+      "lon": 9.506159
+    },
+    {
+      "name": "Triesen",
+      "state": "",
+      "country": "Liechtenstein",
+      "lat": 47.106994,
+      "lon": 9.5274876
+    },
+    {
+      "name": "Eschen",
+      "state": "",
+      "country": "Liechtenstein",
+      "lat": 47.2126274,
+      "lon": 9.5233202
+    }
+  ],
+  "Lithuania": [
+    {
+      "name": "Vilnius",
+      "state": "Vilniaus apskritis",
+      "country": "Lietuva",
+      "lat": 54.6870458,
+      "lon": 25.2829111
+    },
+    {
+      "name": "Kaunas",
+      "state": "Kauno apskritis",
+      "country": "Lietuva",
+      "lat": 54.8982139,
+      "lon": 23.9044817
+    },
+    {
+      "name": "Klaipėda",
+      "state": "Klaipėdos apskritis",
+      "country": "Lietuva",
+      "lat": 55.7127529,
+      "lon": 21.1350469
+    },
+    {
+      "name": "Šiauliai",
+      "state": "Šiaulių apskritis",
+      "country": "Lietuva",
+      "lat": 55.9340823,
+      "lon": 23.3157775
+    },
+    {
+      "name": "Panevėžys",
+      "state": "Panevėžio apskritis",
+      "country": "Lietuva",
+      "lat": 55.7344985,
+      "lon": 24.3578055
+    }
+  ],
+  "Luxembourg": [
+    {
+      "name": "Luxembourg City",
+      "state": "",
+      "country": "Lëtzebuerg",
+      "lat": 49.5999681,
+      "lon": 6.1342493
+    },
+    {
+      "name": "Esch-sur-Alzette",
+      "state": "",
+      "country": "Lëtzebuerg",
+      "lat": 49.4959628,
+      "lon": 5.9850306
+    },
+    {
+      "name": "Differdange",
+      "state": "",
+      "country": "Lëtzebuerg",
+      "lat": 49.5208469,
+      "lon": 5.889242
+    },
+    {
+      "name": "Dudelange",
+      "state": "",
+      "country": "Lëtzebuerg",
+      "lat": 49.4786477,
+      "lon": 6.0847792
+    },
+    {
+      "name": "Ettelbruck",
+      "state": "",
+      "country": "Lëtzebuerg",
+      "lat": 49.8470016,
+      "lon": 6.0984659
+    }
+  ],
+  "Madagascar": [
+    {
+      "name": "Antananarivo",
+      "state": "Analamanga",
+      "country": "Madagasikara / Madagascar",
+      "lat": -18.9100122,
+      "lon": 47.5255809
+    },
+    {
+      "name": "Toamasina",
+      "state": "Atsinanana",
+      "country": "Madagasikara / Madagascar",
+      "lat": -18.1553985,
+      "lon": 49.4098352
+    },
+    {
+      "name": "Antsirabe",
+      "state": "Vakinankaratra",
+      "country": "Madagasikara / Madagascar",
+      "lat": -19.871403,
+      "lon": 47.034667
+    },
+    {
+      "name": "Fianarantsoa",
+      "state": "Matsiatra Ambony",
+      "country": "Madagasikara / Madagascar",
+      "lat": -21.456444,
+      "lon": 47.085149
+    },
+    {
+      "name": "Mahajanga",
+      "state": "Boeny",
+      "country": "Madagasikara / Madagascar",
+      "lat": -15.7181492,
+      "lon": 46.3172577
+    }
+  ],
+  "Malawi": [
+    {
+      "name": "Lilongwe",
+      "state": "Lilongwe",
+      "country": "Malawi",
+      "lat": -13.9875107,
+      "lon": 33.768144
+    },
+    {
+      "name": "Blantyre",
+      "state": "Blantyre",
+      "country": "Malawi",
+      "lat": -15.7862543,
+      "lon": 35.0035694
+    },
+    {
+      "name": "Mzuzu",
+      "state": "Mzimba",
+      "country": "Malawi",
+      "lat": -11.4607518,
+      "lon": 34.0226422
+    },
+    {
+      "name": "Zomba",
+      "state": "Zomba",
+      "country": "Malawi",
+      "lat": -15.3863208,
+      "lon": 35.3268273
+    },
+    {
+      "name": "Kasungu",
+      "state": "Kasungu",
+      "country": "Malawi",
+      "lat": -12.9921789,
+      "lon": 33.4724535
+    }
+  ],
+  "Maldives": [
+    {
+      "name": "Malé",
+      "state": "",
+      "country": "ދިވެހިރާއްޖެ",
+      "lat": 4.1779879,
+      "lon": 73.5107387
+    },
+    {
+      "name": "Addu City",
+      "state": "އައްޑޫ",
+      "country": "ދިވެހިރާއްޖެ",
+      "lat": -0.6263536,
+      "lon": 73.1791075
+    },
+    {
+      "name": "Fuvahmulah",
+      "state": "ފުވައްމުލައް",
+      "country": "ދިވެހިރާއްޖެ",
+      "lat": -0.2948408,
+      "lon": 73.424065
+    },
+    {
+      "name": "Kulhudhuffushi",
+      "state": "ތިލަދުންމަތީ ދެކުނުބުރި",
+      "country": "ދިވެހިރާއްޖެ",
+      "lat": 6.6229329,
+      "lon": 73.0709428
+    },
+    {
+      "name": "Thinadhoo",
+      "state": "ހުވަދުއަތޮޅު ދެކުނުބުރި",
+      "country": "ދިވެހިރާއްޖެ",
+      "lat": 0.530351,
+      "lon": 72.9965866
+    }
+  ],
+  "Mali": [
+    {
+      "name": "Bamako",
+      "state": "Koulikoro",
+      "country": "Mali",
+      "lat": 12.6132655,
+      "lon": -7.9847391
+    },
+    {
+      "name": "Sikasso",
+      "state": "Région de Sikasso",
+      "country": "Mali",
+      "lat": 11.529684,
+      "lon": -6.8663259
+    },
+    {
+      "name": "Mopti",
+      "state": "Mopti",
+      "country": "Mali",
+      "lat": 14.514489,
+      "lon": -3.6464581
+    },
+    {
+      "name": "Koutiala",
+      "state": "Région de Sikasso",
+      "country": "Mali",
+      "lat": 12.3894818,
+      "lon": -5.4639199
+    },
+    {
+      "name": "Kayes",
+      "state": "Kayes",
+      "country": "Mali",
+      "lat": 13.8001844,
+      "lon": -10.2245548
+    }
+  ],
+  "Malta": [
+    {
+      "name": "Valletta",
+      "state": "",
+      "country": "Malta",
+      "lat": 35.8989979,
+      "lon": 14.5136607
+    },
+    {
+      "name": "Birkirkara",
+      "state": "",
+      "country": "Malta",
+      "lat": 35.8994577,
+      "lon": 14.4649552
+    },
+    {
+      "name": "Mosta",
+      "state": "",
+      "country": "Malta",
+      "lat": 35.9079178,
+      "lon": 14.4241508
+    },
+    {
+      "name": "Qormi",
+      "state": "",
+      "country": "Malta",
+      "lat": 35.877464,
+      "lon": 14.4739598
+    },
+    {
+      "name": "Sliema",
+      "state": "",
+      "country": "Malta",
+      "lat": 35.9127609,
+      "lon": 14.5020708
+    }
+  ],
+  "Mauritania": [
+    {
+      "name": "Nouakchott",
+      "state": "Nouakchott Ouest نواكشوط الغربية",
+      "country": "Mauritanie موريتانيا",
+      "lat": 18.0792379,
+      "lon": -15.9780071
+    },
+    {
+      "name": "Nouadhibou",
+      "state": "Dakhlet Nouadhibou ولاية داخلة نواذيبو",
+      "country": "Mauritanie موريتانيا",
+      "lat": 20.9127045,
+      "lon": -17.0503094
+    },
+    {
+      "name": "Néma",
+      "state": "Hodh Ech Chargui الحوض الشرقي",
+      "country": "Mauritanie موريتانيا",
+      "lat": 16.6173344,
+      "lon": -7.2663798
+    },
+    {
+      "name": "Kaédi",
+      "state": "Gorgol كوركول",
+      "country": "Mauritanie موريتانيا",
+      "lat": 16.1523684,
+      "lon": -13.5039868
+    },
+    {
+      "name": "Rosso",
+      "state": "الترارزة",
+      "country": "Mauritanie موريتانيا",
+      "lat": 16.5132493,
+      "lon": -15.8099665
+    }
+  ],
+  "Mauritius": [
+    {
+      "name": "Port Louis",
+      "state": "Port Louis",
+      "country": "Mauritius / Maurice",
+      "lat": -20.1624522,
+      "lon": 57.5028044
+    },
+    {
+      "name": "Curepipe",
+      "state": "Plaines Wilhems",
+      "country": "Mauritius / Maurice",
+      "lat": -20.3150516,
+      "lon": 57.5211497
+    },
+    {
+      "name": "Vacoas-Phoenix",
+      "state": "Plaines Wilhems",
+      "country": "Mauritius / Maurice",
+      "lat": -20.2933761,
+      "lon": 57.4978036
+    },
+    {
+      "name": "Quatre Bornes",
+      "state": "Plaines Wilhems",
+      "country": "Mauritius / Maurice",
+      "lat": -20.2643015,
+      "lon": 57.4800061
+    },
+    {
+      "name": "Triolet",
+      "state": "Pamplemousses",
+      "country": "Mauritius / Maurice",
+      "lat": -20.0574377,
+      "lon": 57.5521258
+    }
+  ],
+  "Moldova": [
+    {
+      "name": "Chișinău",
+      "state": "",
+      "country": "Moldova",
+      "lat": 47.0245117,
+      "lon": 28.8322923
+    },
+    {
+      "name": "Tiraspol",
+      "state": "Нистрения / Приднестровье / Придністров'я",
+      "country": "Moldova",
+      "lat": 46.8371103,
+      "lon": 29.6109989
+    },
+    {
+      "name": "Bălți",
+      "state": "",
+      "country": "Moldova",
+      "lat": 47.7623952,
+      "lon": 27.9286022
+    },
+    {
+      "name": "Bender",
+      "state": "Нистрения / Приднестровье / Придністров'я",
+      "country": "Moldova",
+      "lat": 46.8218177,
+      "lon": 29.4819196
+    },
+    {
+      "name": "Rîbnița",
+      "state": "Нистрения / Приднестровье / Придністров'я",
+      "country": "Moldova",
+      "lat": 47.7661115,
+      "lon": 29.0073366
+    }
+  ],
+  "Monaco": [
+    {
+      "name": "Monte Carlo",
+      "state": "",
+      "country": "Monaco",
+      "lat": 43.7402961,
+      "lon": 7.426559
+    },
+    {
+      "name": "Monaco-Ville",
+      "state": "",
+      "country": "Monaco",
+      "lat": 43.7309697,
+      "lon": 7.4248152
+    },
+    {
+      "name": "La Condamine",
+      "state": "",
+      "country": "Monaco",
+      "lat": 43.7341489,
+      "lon": 7.4217593
+    },
+    {
+      "name": "Fontvieille",
+      "state": "",
+      "country": "Monaco",
+      "lat": 43.7277586,
+      "lon": 7.418282
+    }
+  ],
+  "Mongolia": [
+    {
+      "name": "Ulaanbaatar",
+      "state": "",
+      "country": "Монгол улс ᠮᠤᠩᠭᠤᠯ ᠤᠯᠤᠰ",
+      "lat": 47.9184676,
+      "lon": 106.9177016
+    },
+    {
+      "name": "Erdenet",
+      "state": "Орхон ᠣᠷᠬᠤᠨ",
+      "country": "Монгол улс ᠮᠤᠩᠭᠤᠯ ᠤᠯᠤᠰ",
+      "lat": 49.0276045,
+      "lon": 104.0443867
+    },
+    {
+      "name": "Darkhan",
+      "state": "Дархан-Уул ᠳᠠᠷᠬᠠᠨ ᠠᠭᠤᠯᠠ",
+      "country": "Монгол улс ᠮᠤᠩᠭᠤᠯ ᠤᠯᠤᠰ",
+      "lat": 49.4922428,
+      "lon": 105.9361613
+    },
+    {
+      "name": "Choibalsan",
+      "state": "Дорнод ᠳᠣᠷᠤᠨᠠᠳᠤ",
+      "country": "Монгол улс ᠮᠤᠩᠭᠤᠯ ᠤᠯᠤᠰ",
+      "lat": 48.0688183,
+      "lon": 114.5241352
+    },
+    {
+      "name": "Khovd",
+      "state": "Ховд ᠬᠣᠪᠳᠤ",
+      "country": "Монгол улс ᠮᠤᠩᠭᠤᠯ ᠤᠯᠤᠰ",
+      "lat": 46.8997977,
+      "lon": 92.2959651
+    }
+  ],
+  "Montenegro": [
+    {
+      "name": "Podgorica",
+      "state": "",
+      "country": "Crna Gora / Црна Гора",
+      "lat": 42.4415238,
+      "lon": 19.2621081
+    },
+    {
+      "name": "Nikšić",
+      "state": "",
+      "country": "Crna Gora / Црна Гора",
+      "lat": 42.7739388,
+      "lon": 18.9488097
+    },
+    {
+      "name": "Pljevlja",
+      "state": "",
+      "country": "Crna Gora / Црна Гора",
+      "lat": 43.3565611,
+      "lon": 19.3584715
+    },
+    {
+      "name": "Bijelo Polje",
+      "state": "",
+      "country": "Crna Gora / Црна Гора",
+      "lat": 43.0341595,
+      "lon": 19.7473559
+    },
+    {
+      "name": "Herceg Novi",
+      "state": "",
+      "country": "Crna Gora / Црна Гора",
+      "lat": 42.4517622,
+      "lon": 18.5367516
+    }
+  ],
+  "Namibia": [
+    {
+      "name": "Windhoek",
+      "state": "Khomas Region",
+      "country": "Namibia",
+      "lat": -22.5335601,
+      "lon": 17.0454775
+    },
+    {
+      "name": "Walvis Bay",
+      "state": "Erongo Region",
+      "country": "Namibia",
+      "lat": -22.9557607,
+      "lon": 14.5071125
+    },
+    {
+      "name": "Swakopmund",
+      "state": "Erongo Region",
+      "country": "Namibia",
+      "lat": -22.6767841,
+      "lon": 14.5313988
+    },
+    {
+      "name": "Rundu",
+      "state": "Kavango-East Region",
+      "country": "Namibia",
+      "lat": -17.913716,
+      "lon": 19.7672535
+    },
+    {
+      "name": "Oshakati",
+      "state": "Oshana Region",
+      "country": "Namibia",
+      "lat": -17.7826518,
+      "lon": 15.6986
+    }
+  ],
+  "Nepal": [
+    {
+      "name": "Kathmandu",
+      "state": "बागमती प्रदेश",
+      "country": "नेपाल",
+      "lat": 27.708317,
+      "lon": 85.3205817
+    },
+    {
+      "name": "Pokhara",
+      "state": "गण्डकी प्रदेश",
+      "country": "नेपाल",
+      "lat": 28.209538,
+      "lon": 83.991402
+    },
+    {
+      "name": "Lalitpur",
+      "state": "बागमती प्रदेश",
+      "country": "नेपाल",
+      "lat": 27.6765635,
+      "lon": 85.3166069
+    },
+    {
+      "name": "Biratnagar",
+      "state": "कोशी प्रदेश",
+      "country": "नेपाल",
+      "lat": 26.4623007,
+      "lon": 87.281617
+    },
+    {
+      "name": "Bharatpur",
+      "state": "बागमती प्रदेश",
+      "country": "नेपाल",
+      "lat": 27.6811896,
+      "lon": 84.4301652
+    }
+  ],
+  "Nicaragua": [
+    {
+      "name": "Managua",
+      "state": "Managua",
+      "country": "Nicaragua",
+      "lat": 12.1547116,
+      "lon": -86.273725
+    },
+    {
+      "name": "León",
+      "state": "León",
+      "country": "Nicaragua",
+      "lat": 12.3021275,
+      "lon": -86.9679698
+    },
+    {
+      "name": "Granada",
+      "state": "Granada",
+      "country": "Nicaragua",
+      "lat": 11.930367,
+      "lon": -85.9535387
+    },
+    {
+      "name": "Masaya",
+      "state": "Masaya",
+      "country": "Nicaragua",
+      "lat": 11.9736474,
+      "lon": -86.0960547
+    },
+    {
+      "name": "Matagalpa",
+      "state": "Matagalpa",
+      "country": "Nicaragua",
+      "lat": 12.940323,
+      "lon": -85.6960942
+    }
+  ],
+  "Niger": [
+    {
+      "name": "Niamey",
+      "state": "",
+      "country": "Niger",
+      "lat": 13.524834,
+      "lon": 2.109823
+    },
+    {
+      "name": "Zinder",
+      "state": "Zinder",
+      "country": "Niger",
+      "lat": 13.8063421,
+      "lon": 8.9891659
+    },
+    {
+      "name": "Maradi",
+      "state": "Maradi",
+      "country": "Niger",
+      "lat": 13.501206,
+      "lon": 7.102534
+    },
+    {
+      "name": "Agadez",
+      "state": "ⴰⴳⴰⴷⴻⵣ",
+      "country": "Niger",
+      "lat": 16.972556,
+      "lon": 7.990739
+    },
+    {
+      "name": "Tahoua",
+      "state": "Tahoua",
+      "country": "Niger",
+      "lat": 14.889922,
+      "lon": 5.262149
+    }
+  ],
+  "North Macedonia": [
+    {
+      "name": "Skopje",
+      "state": "",
+      "country": "Северна Македонија",
+      "lat": 41.9961816,
+      "lon": 21.4319213
+    },
+    {
+      "name": "Bitola",
+      "state": "",
+      "country": "Северна Македонија",
+      "lat": 41.0316005,
+      "lon": 21.3302511
+    },
+    {
+      "name": "Kumanovo",
+      "state": "",
+      "country": "Северна Македонија",
+      "lat": 42.135913,
+      "lon": 21.7185474
+    },
+    {
+      "name": "Prilep",
+      "state": "",
+      "country": "Северна Македонија",
+      "lat": 41.3444984,
+      "lon": 21.5527115
+    },
+    {
+      "name": "Tetovo",
+      "state": "",
+      "country": "Северна Македонија",
+      "lat": 42.0068297,
+      "lon": 20.9728556
+    }
+  ],
+  "Papua New Guinea": [
+    {
+      "name": "Port Moresby",
+      "state": "National Capital District",
+      "country": "Papua Niugini",
+      "lat": -9.4743301,
+      "lon": 147.1599504
+    },
+    {
+      "name": "Lae",
+      "state": "Morobe",
+      "country": "Papua Niugini",
+      "lat": -6.7301976,
+      "lon": 147.0008109
+    },
+    {
+      "name": "Mount Hagen",
+      "state": "Western Highlands",
+      "country": "Papua Niugini",
+      "lat": -5.858784,
+      "lon": 144.2316365
+    },
+    {
+      "name": "Madang",
+      "state": "Madang",
+      "country": "Papua Niugini",
+      "lat": -5.0,
+      "lon": 145.5
+    },
+    {
+      "name": "Wewak",
+      "state": "East Sepik",
+      "country": "Papua Niugini",
+      "lat": -3.5542197,
+      "lon": 143.6270904
+    }
+  ],
+  "Rwanda": [
+    {
+      "name": "Kigali",
+      "state": "",
+      "country": "Rwanda",
+      "lat": -1.9534357,
+      "lon": 30.1140089
+    },
+    {
+      "name": "Butare",
+      "state": "Amajvepfo",
+      "country": "Rwanda",
+      "lat": -2.6053426,
+      "lon": 29.7401547
+    },
+    {
+      "name": "Gitarama",
+      "state": "Amajvepfo",
+      "country": "Rwanda",
+      "lat": -2.0845106,
+      "lon": 29.7528767
+    },
+    {
+      "name": "Ruhengeri",
+      "state": "Majyaruguru",
+      "country": "Rwanda",
+      "lat": -1.4977689,
+      "lon": 29.6322602
+    },
+    {
+      "name": "Gisenyi",
+      "state": "Iburengerazuba",
+      "country": "Rwanda",
+      "lat": -1.693545,
+      "lon": 29.259855
+    }
+  ],
+  "San Marino": [
+    {
+      "name": "San Marino",
+      "state": "",
+      "country": "San Marino",
+      "lat": 43.9458623,
+      "lon": 12.458306
+    },
+    {
+      "name": "Serravalle",
+      "state": "",
+      "country": "San Marino",
+      "lat": 43.9699026,
+      "lon": 12.4802946
+    },
+    {
+      "name": "Borgo Maggiore",
+      "state": "",
+      "country": "San Marino",
+      "lat": 43.9411865,
+      "lon": 12.447422
+    },
+    {
+      "name": "Domagnano",
+      "state": "",
+      "country": "San Marino",
+      "lat": 43.9475027,
+      "lon": 12.4690616
+    },
+    {
+      "name": "Fiorentino",
+      "state": "",
+      "country": "San Marino",
+      "lat": 43.9103157,
+      "lon": 12.4575556
+    }
+  ],
+  "Sierra Leone": [
+    {
+      "name": "Freetown",
+      "state": "Western Area Urban",
+      "country": "Sierra Leone",
+      "lat": 8.479004,
+      "lon": -13.26795
+    },
+    {
+      "name": "Bo",
+      "state": "Bo District",
+      "country": "Sierra Leone",
+      "lat": 7.962065,
+      "lon": -11.73665
+    },
+    {
+      "name": "Kenema",
+      "state": "Kenema District",
+      "country": "Sierra Leone",
+      "lat": 7.8859723,
+      "lon": -11.1863832
+    },
+    {
+      "name": "Makeni",
+      "state": "Bombali District",
+      "country": "Sierra Leone",
+      "lat": 8.8881938,
+      "lon": -12.0441862
+    },
+    {
+      "name": "Koidu",
+      "state": "Kono District",
+      "country": "Sierra Leone",
+      "lat": 8.642281,
+      "lon": -10.971631
+    }
+  ],
+  "Somalia": [
+    {
+      "name": "Mogadishu",
+      "state": "Banaadir بنادر",
+      "country": "Soomaaliya الصومال",
+      "lat": 2.0349312,
+      "lon": 45.3419183
+    },
+    {
+      "name": "Hargeisa",
+      "state": "Woqooyi Galbeed",
+      "country": "Soomaaliland أرض الصومال",
+      "lat": 9.561733,
+      "lon": 44.061803
+    },
+    {
+      "name": "Bosaso",
+      "state": "Bariباري",
+      "country": "Soomaaliya الصومال",
+      "lat": 11.0026149,
+      "lon": 49.4107227
+    },
+    {
+      "name": "Kismayo",
+      "state": "Jubbada Hoose جوبا السفلى",
+      "country": "Soomaaliya الصومال",
+      "lat": -0.3602433,
+      "lon": 42.5409025
+    },
+    {
+      "name": "Merca",
+      "state": "Shabeellaha Hoose شبيلي السفلى",
+      "country": "Soomaaliya الصومال",
+      "lat": 1.7148358,
+      "lon": 44.7699326
+    }
+  ],
+  "South Sudan": [
+    {
+      "name": "Juba",
+      "state": "Central Equatoria الاستوائية المركزية",
+      "country": "South Sudan جنوب السودان",
+      "lat": 4.8459246,
+      "lon": 31.5959173
+    },
+    {
+      "name": "Wau",
+      "state": "Western Bahr El Ghazal بحر الغزال الغربى",
+      "country": "South Sudan جنوب السودان",
+      "lat": 7.7001398,
+      "lon": 27.9909335
+    },
+    {
+      "name": "Malakal",
+      "state": "Upper Nile أعالى النيل",
+      "country": "South Sudan جنوب السودان",
+      "lat": 9.5388487,
+      "lon": 31.6584168
+    },
+    {
+      "name": "Yei",
+      "state": "Central Equatoria الاستوائية المركزية",
+      "country": "South Sudan جنوب السودان",
+      "lat": 4.2432059,
+      "lon": 30.284559
+    },
+    {
+      "name": "Yambio",
+      "state": "Western Equatoria الاستوائية الغربية",
+      "country": "South Sudan جنوب السودان",
+      "lat": 5.1645155,
+      "lon": 28.4530332
+    }
+  ],
+  "Sri Lanka": [
+    {
+      "name": "Colombo",
+      "state": "Western Province",
+      "country": "Sri Lanka",
+      "lat": 6.9388614,
+      "lon": 79.8542005
+    },
+    {
+      "name": "Kandy",
+      "state": "Central Province",
+      "country": "Sri Lanka",
+      "lat": 7.2931208,
+      "lon": 80.6350358
+    },
+    {
+      "name": "Galle",
+      "state": "Southern Province",
+      "country": "Sri Lanka",
+      "lat": 6.0328139,
+      "lon": 80.214955
+    },
+    {
+      "name": "Jaffna",
+      "state": "Northern Province",
+      "country": "Sri Lanka",
+      "lat": 9.665093,
+      "lon": 80.0093029
+    },
+    {
+      "name": "Negombo",
+      "state": "Western Province",
+      "country": "Sri Lanka",
+      "lat": 7.2094282,
+      "lon": 79.833117
+    }
+  ],
+  "Sudan": [
+    {
+      "name": "Khartoum",
+      "state": "الخرطوم",
+      "country": "السودان",
+      "lat": 15.5038301,
+      "lon": 32.5738979
+    },
+    {
+      "name": "Omdurman",
+      "state": "الخرطوم",
+      "country": "السودان",
+      "lat": 15.6445536,
+      "lon": 32.4777311
+    },
+    {
+      "name": "Port Sudan",
+      "state": "البحر الأحمر",
+      "country": "السودان",
+      "lat": 19.619217,
+      "lon": 37.211709
+    },
+    {
+      "name": "Kassala",
+      "state": "كسلا",
+      "country": "السودان",
+      "lat": 15.452011,
+      "lon": 36.3770699
+    },
+    {
+      "name": "Nyala",
+      "state": "جنوب دارفور",
+      "country": "السودان",
+      "lat": 12.2809691,
+      "lon": 24.7741672
+    }
+  ],
+  "Suriname": [
+    {
+      "name": "Paramaribo",
+      "state": "Paramaribo",
+      "country": "Suriname",
+      "lat": 5.8241764,
+      "lon": -55.1662813
+    },
+    {
+      "name": "Lelydorp",
+      "state": "Wanica",
+      "country": "Suriname",
+      "lat": 5.6935158,
+      "lon": -55.2139345
+    },
+    {
+      "name": "Nieuw Nickerie",
+      "state": "Nickerie",
+      "country": "Suriname",
+      "lat": 5.9420605,
+      "lon": -56.9893521
+    },
+    {
+      "name": "Moengo",
+      "state": "Marowijne",
+      "country": "Suriname",
+      "lat": 5.6922779,
+      "lon": -54.5219237
+    },
+    {
+      "name": "Albina",
+      "state": "Marowijne",
+      "country": "Suriname",
+      "lat": 5.498483,
+      "lon": -54.0574537
+    }
+  ],
+  "Syria": [
+    {
+      "name": "Damascus",
+      "state": "محافظة دمشق",
+      "country": "سوريا",
+      "lat": 33.5130695,
+      "lon": 36.3095814
+    },
+    {
+      "name": "Aleppo",
+      "state": "محافظة حلب",
+      "country": "سوريا",
+      "lat": 36.19924,
+      "lon": 37.1637253
+    },
+    {
+      "name": "Homs",
+      "state": "محافظة حمص",
+      "country": "سوريا",
+      "lat": 34.7333334,
+      "lon": 36.7166667
+    },
+    {
+      "name": "Latakia",
+      "state": "محافظة اللاذقية",
+      "country": "سوريا",
+      "lat": 35.5200185,
+      "lon": 35.7781044
+    },
+    {
+      "name": "Hama",
+      "state": "محافظة حماة",
+      "country": "سوريا",
+      "lat": 35.1343368,
+      "lon": 36.7496276
+    }
+  ],
+  "Tajikistan": [
+    {
+      "name": "Dushanbe",
+      "state": "",
+      "country": "Тоҷикистон",
+      "lat": 38.5856814,
+      "lon": 68.760331
+    },
+    {
+      "name": "Khujand",
+      "state": "Вилояти Суғд",
+      "country": "Тоҷикистон",
+      "lat": 40.2844189,
+      "lon": 69.6191669
+    },
+    {
+      "name": "Kulob",
+      "state": "Вилояти Хатлон",
+      "country": "Тоҷикистон",
+      "lat": 37.9081024,
+      "lon": 69.7739482
+    },
+    {
+      "name": "Qurghonteppa",
+      "state": "Вилояти Хатлон",
+      "country": "Тоҷикистон",
+      "lat": 37.8357217,
+      "lon": 68.7820957
+    },
+    {
+      "name": "Istaravshan",
+      "state": "Вилояти Суғд",
+      "country": "Тоҷикистон",
+      "lat": 39.9080152,
+      "lon": 68.9956351
+    }
+  ],
+  "Togo": [
+    {
+      "name": "Lomé",
+      "state": "Région Maritime",
+      "country": "Togo",
+      "lat": 6.130419,
+      "lon": 1.215829
+    },
+    {
+      "name": "Sokodé",
+      "state": "Région Centrale",
+      "country": "Togo",
+      "lat": 8.9874175,
+      "lon": 1.1357852
+    },
+    {
+      "name": "Kara",
+      "state": "Région de la Kara",
+      "country": "Togo",
+      "lat": 9.541111,
+      "lon": 0.7876018
+    },
+    {
+      "name": "Atakpamé",
+      "state": "Région des Plateaux",
+      "country": "Togo",
+      "lat": 7.5320603,
+      "lon": 1.1219479
+    },
+    {
+      "name": "Kpalimé",
+      "state": "Région des Plateaux",
+      "country": "Togo",
+      "lat": 6.9106565,
+      "lon": 0.6323982
+    }
+  ],
+  "Turkmenistan": [
+    {
+      "name": "Ashgabat",
+      "state": "",
+      "country": "Türkmenistan",
+      "lat": 37.9404648,
+      "lon": 58.3823487
+    },
+    {
+      "name": "Türkmenabat",
+      "state": "Lebap welaýaty",
+      "country": "Türkmenistan",
+      "lat": 39.0733839,
+      "lon": 63.5831564
+    },
+    {
+      "name": "Daşoguz",
+      "state": "Daşoguz welaýaty",
+      "country": "Türkmenistan",
+      "lat": 41.83358,
+      "lon": 59.9590079
+    },
+    {
+      "name": "Mary",
+      "state": "Mary welaýaty",
+      "country": "Türkmenistan",
+      "lat": 37.5940358,
+      "lon": 61.8397935
+    },
+    {
+      "name": "Balkanabat",
+      "state": "Balkan welaýaty",
+      "country": "Türkmenistan",
+      "lat": 39.5116273,
+      "lon": 54.3539921
+    }
+  ],
+  "United States": [
+    {
+      "name": "New York",
+      "state": "New York",
+      "country": "United States",
+      "lat": 40.7127281,
+      "lon": -74.0060152
+    },
+    {
+      "name": "Los Angeles",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0536909,
+      "lon": -118.242766
+    },
+    {
+      "name": "Chicago",
+      "state": "Illinois",
+      "country": "United States",
+      "lat": 41.8755616,
+      "lon": -87.6244212
+    },
+    {
+      "name": "Houston",
+      "state": "Texas",
+      "country": "United States",
+      "lat": 29.7589382,
+      "lon": -95.3676974
+    },
+    {
+      "name": "Phoenix",
+      "state": "Arizona",
+      "country": "United States",
+      "lat": 33.4484367,
+      "lon": -112.074141
+    }
+  ],
+  "Vanuatu": [
+    {
+      "name": "Port Vila",
+      "state": "Shefa",
+      "country": "Vanuatu",
+      "lat": -17.7414972,
+      "lon": 168.3150163
+    },
+    {
+      "name": "Luganville",
+      "state": "Sanma",
+      "country": "Vanuatu",
+      "lat": -15.5121107,
+      "lon": 167.1784414
+    },
+    {
+      "name": "Norsup",
+      "state": "Malampa",
+      "country": "Vanuatu",
+      "lat": -16.057446,
+      "lon": 167.410228
+    },
+    {
+      "name": "Isangel",
+      "state": "Tafea",
+      "country": "Vanuatu",
+      "lat": -19.5410863,
+      "lon": 169.2810885
+    },
+    {
+      "name": "Sola",
+      "state": "Torba",
+      "country": "Vanuatu",
+      "lat": -13.8528474,
+      "lon": 167.5373349
+    }
+  ],
+  "Yemen": [
+    {
+      "name": "Sana'a",
+      "state": "أمانة العاصمة",
+      "country": "اليمن",
+      "lat": 15.35,
+      "lon": 44.2
+    },
+    {
+      "name": "Aden",
+      "state": "محافظة عدن",
+      "country": "اليمن",
+      "lat": 12.789585,
+      "lon": 45.028504
+    },
+    {
+      "name": "Taiz",
+      "state": "محافظة تعز",
+      "country": "اليمن",
+      "lat": 13.5752242,
+      "lon": 44.0215268
+    },
+    {
+      "name": "Hodeidah",
+      "state": "محافظة الحديدة",
+      "country": "اليمن",
+      "lat": 14.7978677,
+      "lon": 42.9544872
+    },
+    {
+      "name": "Ibb",
+      "state": "محافظة إب",
+      "country": "اليمن",
+      "lat": 14.1419291,
+      "lon": 44.1389849
+    }
+  ],
+  "Zambia": [
+    {
+      "name": "Lusaka",
+      "state": "Lusaka Province",
+      "country": "Zambia",
+      "lat": -15.4163395,
+      "lon": 28.2818414
+    },
+    {
+      "name": "Kitwe",
+      "state": "Copperbelt Province",
+      "country": "Zambia",
+      "lat": -12.8203689,
+      "lon": 28.2155973
+    },
+    {
+      "name": "Ndola",
+      "state": "Copperbelt Province",
+      "country": "Zambia",
+      "lat": -12.9693056,
+      "lon": 28.6365894
+    },
+    {
+      "name": "Kabwe",
+      "state": "Central Province",
+      "country": "Zambia",
+      "lat": -14.4434056,
+      "lon": 28.4465166
+    },
+    {
+      "name": "Chingola",
+      "state": "Copperbelt Province",
+      "country": "Zambia",
+      "lat": -12.5474926,
+      "lon": 27.8600422
+    }
   ]
 }

@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1000HISTB1 /* HistoricalWeather.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000HIST1 /* HistoricalWeather.swift */; };
+		A1000HISTB2 /* HistoricalWeatherCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000HIST2 /* HistoricalWeatherCache.swift */; };
+		A1000HISTB3 /* HistoricalWeatherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000HIST3 /* HistoricalWeatherView.swift */; };
+
 		A10000001 /* WeatherFastApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000 /* WeatherFastApp.swift */; };
 		A10000003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000002 /* ContentView.swift */; };
 		A10000005 /* City.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000004 /* City.swift */; };
@@ -31,6 +35,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A1000HIST1 /* HistoricalWeather.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistoricalWeather.swift; sourceTree = "<group>"; };
+		A1000HIST2 /* HistoricalWeatherCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistoricalWeatherCache.swift; sourceTree = "<group>"; };
+		A1000HIST3 /* HistoricalWeatherView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistoricalWeatherView.swift; sourceTree = "<group>"; };
+
 		A0FFFFFF0 /* FastWeather.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FastWeather.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A10000000 /* WeatherFastApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherFastApp.swift; sourceTree = "<group>"; };
 		A10000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -102,6 +110,7 @@
 			children = (
 				A10000004 /* City.swift */,
 				A10000006 /* Weather.swift */,
+				A1000HIST1 /* HistoricalWeather.swift */,
 				A10000008 /* Settings.swift */,
 			);
 			path = Models;
@@ -112,6 +121,7 @@
 			children = (
 				A10000002 /* ContentView.swift */,
 				A10000010 /* MyCitiesView.swift */,
+				A1000HIST3 /* HistoricalWeatherView.swift */,
 				A10000012 /* FlatView.swift */,
 				A10000014 /* TableView.swift */,
 				A10000016 /* ListView.swift */,
@@ -128,6 +138,7 @@
 			isa = PBXGroup;
 			children = (
 				A1000000A /* WeatherService.swift */,
+				A1000HIST2 /* HistoricalWeatherCache.swift */,
 				A1000000C /* SettingsManager.swift */,
 				A1000000E /* CityDataService.swift */,
 			);
@@ -233,6 +244,9 @@
 				A1000001D /* CityDetailView.swift in Sources */,
 				A10000025 /* AddCitySearchView.swift in Sources */,
 				A1000001F /* SettingsView.swift in Sources */,
+				A1000HISTB1 /* HistoricalWeather.swift in Sources */,
+				A1000HISTB2 /* HistoricalWeatherCache.swift in Sources */,
+				A1000HISTB3 /* HistoricalWeatherView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -275,7 +289,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 9;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = P887QF74N8;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -358,7 +372,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 9;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = P887QF74N8;
 				ENABLE_NS_ASSERTIONS = NO;
