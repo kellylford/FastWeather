@@ -11,13 +11,17 @@ struct ListView: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
     @Environment(\.editMode) var editMode
+    @State private var selectedCityForHistory: City?
+    @State private var selectedCityForAlert: (City, WeatherAlert)?
     
     var body: some View {
         List {
             ForEach(weatherService.savedCities.indices, id: \.self) { index in
                 let city = weatherService.savedCities[index]
                 NavigationLink(destination: CityDetailView(city: city)) {
-                    ListRowView(city: city)
+                    ListRowView(city: city, onAlertTap: { alert in
+                        selectedCityForAlert = (city, alert)
+                    })
                 }
                 .accessibilityElement(children: .combine)
                 .accessibilityAddTraits(editMode?.wrappedValue.isEditing == true ? [.allowsDirectInteraction] : [])
@@ -36,11 +40,35 @@ struct ListView: View {
                 .accessibilityAction(named: "Move to Bottom") {
                     moveCityToBottom(at: index)
                 }
+                .accessibilityAction(named: "View Historical Weather") {
+                    viewHistoricalWeather(for: city)
+                }
             }
             .onMove(perform: weatherService.moveCity)
-            .onDelete(perform: deleteCities)
         }
         .listStyle(.plain)
+        .background(
+            NavigationLink(
+                destination: selectedCityForHistory.map { city in
+                    HistoricalWeatherView(city: city, autoLoadToday: true)
+                        .navigationTitle("Historical Weather")
+                        .navigationBarTitleDisplayMode(.inline)
+                },
+                isActive: Binding(
+                    get: { selectedCityForHistory != nil },
+                    set: { if !$0 { selectedCityForHistory = nil } }
+                )
+            ) {
+                EmptyView()
+            }
+            .hidden()
+        )
+        .sheet(item: Binding(
+            get: { selectedCityForAlert.map { AlertSheetItem(city: $0.0, alert: $0.1) } },
+            set: { selectedCityForAlert = $0.map { ($0.city, $0.alert) } }
+        )) { item in
+            AlertDetailView(alert: item.alert)
+        }
     }
     
     private func moveCityUp(at index: Int) {
@@ -73,21 +101,34 @@ struct ListView: View {
         UIAccessibility.post(notification: .announcement, argument: "Moved \(cityName) to bottom of list")
     }
     
-    private func deleteCities(at offsets: IndexSet) {
-        offsets.forEach { index in
-            let city = weatherService.savedCities[index]
-            weatherService.removeCity(city)
-        }
+    private func viewHistoricalWeather(for city: City) {
+        selectedCityForHistory = city
+        UIAccessibility.post(notification: .announcement, argument: "Opening historical weather for \(city.displayName)")
     }
+}
+
+// MARK: - Alert Sheet Helper
+struct AlertSheetItem: Identifiable {
+    let id = UUID()
+    let city: City
+    let alert: WeatherAlert
 }
 
 struct ListRowView: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
     let city: City
+    let onAlertTap: (WeatherAlert) -> Void
+    
+    @State private var alerts: [WeatherAlert] = []
+    @State private var hasLoadedAlerts = false
     
     private var weather: WeatherData? {
         weatherService.weatherCache[city.id]
+    }
+    
+    private var highestSeverityAlert: WeatherAlert? {
+        alerts.max(by: { $0.severity.rawValue < $1.severity.rawValue })
     }
     
     var body: some View {
@@ -111,6 +152,20 @@ struct ListRowView: View {
             
             Spacer()
             
+            // Alert badge (if any)
+            if let alert = highestSeverityAlert {
+                Button(action: {
+                    onAlertTap(alert)
+                }) {
+                    Image(systemName: alert.severity.iconName)
+                        .foregroundColor(alert.severity.color)
+                        .font(.title3)
+                }
+                .buttonStyle(.borderless)
+                .accessibilityLabel("Weather alert: \(alert.event)")
+                .accessibilityHint("Double tap to view alert details")
+            }
+            
             // Show temperature on right side if it's enabled
             if let weather = weather,
                settingsManager.settings.weatherFields.first(where: { $0.type == .temperature })?.isEnabled == true {
@@ -120,8 +175,20 @@ struct ListRowView: View {
             }
         }
         .padding(.vertical, 8)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel(buildAccessibilityLabel())
+        .onAppear {
+            if !hasLoadedAlerts {
+                hasLoadedAlerts = true
+                Task {
+                    do {
+                        alerts = try await weatherService.fetchNWSAlerts(for: city)
+                    } catch {
+                        print("Failed to fetch alerts for \(city.name): \(error)")
+                    }
+                }
+            }
+        }
     }
     
     private func buildWeatherSummary(_ weather: WeatherData) -> String {
@@ -193,9 +260,26 @@ struct ListRowView: View {
         // Start with city name, then temperature
         var label = "\(city.displayName), \(formatTemperature(weather.current.temperature2m))"
         
-        // Add all other weather details in order
+        // Add weather conditions first
         let isDetails = settingsManager.settings.displayMode == .details
         
+        // Add conditions if enabled (should be early in announcement)
+        if let conditionsField = settingsManager.settings.weatherFields.first(where: { $0.type == .conditions && $0.isEnabled }),
+           let weatherCode = weather.current.weatherCodeEnum {
+            label += ", "
+            label += isDetails ? "Conditions: \(weatherCode.description)" : weatherCode.description
+        }
+        
+        // Add alert information after conditions
+        if let alert = highestSeverityAlert {
+            if alerts.count == 1 {
+                label += ", Alert: \(alert.event)"
+            } else {
+                label += ", Alerts: \(alert.event) and \(alerts.count - 1) more"
+            }
+        }
+        
+        // Add remaining weather details in order
         for field in settingsManager.settings.weatherFields where field.isEnabled {
             switch field.type {
             case .temperature:
@@ -203,10 +287,8 @@ struct ListRowView: View {
                 break
                 
             case .conditions:
-                if let weatherCode = weather.current.weatherCodeEnum {
-                    label += ", "
-                    label += isDetails ? "Conditions: \(weatherCode.description)" : weatherCode.description
-                }
+                // Already added before alerts
+                break
                 
             case .feelsLike:
                 let value = formatTemperature(weather.current.apparentTemperature)

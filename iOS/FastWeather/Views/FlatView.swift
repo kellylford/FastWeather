@@ -10,6 +10,7 @@ import SwiftUI
 struct FlatView: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
+    @State private var selectedCityForHistory: City?
     
     var body: some View {
         ScrollView {
@@ -36,9 +37,28 @@ struct FlatView: View {
                     .accessibilityAction(named: "Move to Bottom") {
                         moveCityToBottom(at: index)
                     }
+                    .accessibilityAction(named: "View Historical Weather") {
+                        viewHistoricalWeather(for: city)
+                    }
                 }
             }
             .padding()
+            .background(
+                NavigationLink(
+                    destination: selectedCityForHistory.map { city in
+                        HistoricalWeatherView(city: city)
+                            .navigationTitle("Historical Weather")
+                            .navigationBarTitleDisplayMode(.inline)
+                    },
+                    isActive: Binding(
+                        get: { selectedCityForHistory != nil },
+                        set: { if !$0 { selectedCityForHistory = nil } }
+                    )
+                ) {
+                    EmptyView()
+                }
+                .hidden()
+            )
         }
     }
     
@@ -70,6 +90,11 @@ struct FlatView: View {
         let cityName = weatherService.savedCities[index].displayName
         weatherService.moveCity(from: IndexSet(integer: index), to: weatherService.savedCities.count)
         UIAccessibility.post(notification: .announcement, argument: "Moved \(cityName) to bottom of list")
+    }
+    
+    private func viewHistoricalWeather(for city: City) {
+        selectedCityForHistory = city
+        UIAccessibility.post(notification: .announcement, argument: "Opening historical weather for \(city.displayName)")
     }
 }
 

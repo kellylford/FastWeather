@@ -353,6 +353,103 @@ class WeatherService: ObservableObject {
         return historicalDays
     }
     
+    // MARK: - Weather Alerts (NWS)
+    
+    private var alertsCache: [UUID: (alerts: [WeatherAlert], timestamp: Date)] = [:]
+    private let alertsCacheMinutes: TimeInterval = 5
+    
+    /// Fetches severe weather alerts from National Weather Service (US only)
+    /// - Parameters:
+    ///   - latitude: Location latitude
+    ///   - longitude: Location longitude
+    /// - Returns: Array of active weather alerts (empty if non-US or no alerts)
+    func fetchNWSAlerts(for city: City) async throws -> [WeatherAlert] {
+        // Check cache first
+        if let cached = alertsCache[city.id] {
+            let age = Date().timeIntervalSince(cached.timestamp)
+            if age < alertsCacheMinutes * 60 {
+                print("📦 Using cached alerts for \(city.name) (age: \(Int(age))s)")
+                return cached.alerts
+            }
+        }
+        
+        // NWS API only works for US locations
+        guard city.country == "United States" else {
+            print("ℹ️ Skipping alerts for non-US city: \(city.name)")
+            return []
+        }
+        
+        let urlString = "https://api.weather.gov/alerts/active?point=\(city.latitude),\(city.longitude)"
+        guard let url = URL(string: urlString) else {
+            print("⚠️ Invalid NWS alerts URL for \(city.name)")
+            return []
+        }
+        
+        var request = URLRequest(url: url)
+        request.setValue("FastWeather/1.0 iOS", forHTTPHeaderField: "User-Agent")
+        
+        print("🚨 Fetching NWS alerts for \(city.name)...")
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                print("⚠️ NWS alerts API returned non-200 status for \(city.name)")
+                return []
+            }
+            
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            
+            let nwsResponse = try decoder.decode(NWSAlertsResponse.self, from: data)
+            
+            // Convert NWS features to WeatherAlert objects
+            let alerts = nwsResponse.features.compactMap { feature -> WeatherAlert? in
+                let props = feature.properties
+                
+                // Parse severity
+                let severity: AlertSeverity
+                switch props.severity?.lowercased() {
+                case "extreme": severity = .extreme
+                case "severe": severity = .severe
+                case "moderate": severity = .moderate
+                case "minor": severity = .minor
+                default: severity = .unknown
+                }
+                
+                // Parse onset and expires dates (ISO8601 format from NWS)
+                let dateFormatter = ISO8601DateFormatter()
+                let onset = props.onset.flatMap { dateFormatter.date(from: $0) } ?? Date()
+                let expires = props.expires.flatMap { dateFormatter.date(from: $0) } ?? Date().addingTimeInterval(86400)
+                
+                return WeatherAlert(
+                    id: props.id,
+                    event: props.event,
+                    severity: severity,
+                    headline: props.headline,
+                    description: props.description,
+                    instruction: props.instruction,
+                    onset: onset,
+                    expires: expires,
+                    areaDesc: props.areaDesc
+                )
+            }
+            
+            // Filter out expired alerts
+            let activeAlerts = alerts.filter { !$0.isExpired }
+            
+            // Cache the results
+            alertsCache[city.id] = (activeAlerts, Date())
+            
+            print("✅ Fetched \(activeAlerts.count) active alerts for \(city.name)")
+            return activeAlerts
+            
+        } catch {
+            print("⚠️ Error fetching NWS alerts for \(city.name): \(error)")
+            return []
+        }
+    }
+    
     // MARK: - Persistence
     
     private func saveCities() {

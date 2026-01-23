@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HistoricalWeatherView: View {
     let city: City
+    let autoLoadToday: Bool // Auto-load today's date in multi-year mode
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
     
@@ -18,6 +19,12 @@ struct HistoricalWeatherView: View {
     @State private var selectedDate: HistoricalDate = .today
     @State private var showDatePicker: Bool = false
     @State private var viewMode: ViewMode = .singleDay
+    
+    // Default initializer for backward compatibility
+    init(city: City, autoLoadToday: Bool = false) {
+        self.city = city
+        self.autoLoadToday = autoLoadToday
+    }
     
     enum ViewMode {
         case singleDay      // Show weather for specific date only
@@ -65,6 +72,14 @@ struct HistoricalWeatherView: View {
         .padding(.horizontal)
         .sheet(isPresented: $showDatePicker) {
             DatePickerSheet(selectedDate: $selectedDate, onLoad: loadHistoricalData)
+        }
+        .onAppear {
+            // Auto-load today's date in multi-year mode when opened via VoiceOver action
+            if autoLoadToday && historicalData.isEmpty {
+                selectedDate = .today
+                viewMode = .multiYear
+                loadHistoricalData()
+            }
         }
     }
     
@@ -346,9 +361,9 @@ struct HistoricalWeatherView: View {
             // In browse mode, go back 30 days (previous group)
             selectedDate.addDays(-30)
         } else if viewMode == .multiYear {
-            // In multi-year mode, show older years for the same month-day
+            // In multi-year mode, shift the year window back
             let yearsBack = settingsManager.settings.historicalYearsBack
-            selectedDate.addDays(-365 * yearsBack) // Go back by the configured years
+            selectedDate.year -= yearsBack
         } else {
             // In single day mode, go back 1 day
             selectedDate.addDays(-1)
@@ -362,9 +377,9 @@ struct HistoricalWeatherView: View {
             // In browse mode, go forward 30 days (next group)
             selectedDate.addDays(30)
         } else if viewMode == .multiYear {
-            // In multi-year mode, show newer years for the same month-day
+            // In multi-year mode, shift the year window forward
             let yearsBack = settingsManager.settings.historicalYearsBack
-            selectedDate.addDays(365 * yearsBack) // Go forward by the configured years
+            selectedDate.year += yearsBack
         } else {
             // In single day mode, go forward 1 day
             selectedDate.addDays(1)

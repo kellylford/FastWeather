@@ -140,6 +140,18 @@ struct AddCitySearchView: View {
                 if searchText.isEmpty {
                     searchResults = []
                     errorMessage = nil
+                } else {
+                    // Debounce search: wait for user to stop typing
+                    Task {
+                        // Store current text to compare later
+                        let currentText = searchText
+                        // Wait 500ms
+                        try? await Task.sleep(nanoseconds: 500_000_000)
+                        // Only search if text hasn't changed
+                        if currentText == searchText && !searchText.isEmpty {
+                            performSearch()
+                        }
+                    }
                 }
             }
         }

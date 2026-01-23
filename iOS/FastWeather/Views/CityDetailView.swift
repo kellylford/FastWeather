@@ -12,6 +12,7 @@ struct CityDetailView: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
     @State private var showingHistoricalWeather = false
+    @State private var selectedAlert: WeatherAlert?
     
     private var weather: WeatherData? {
         weatherService.weatherCache[city.id]
@@ -140,6 +141,13 @@ struct CityDetailView: View {
         case .historicalWeather:
             EmptyView() // Historical weather moved to separate screen
             
+        case .weatherAlerts:
+            // Weather alerts section (US only)
+            WeatherAlertsSection(city: city, selectedAlert: $selectedAlert)
+                .onAppear {
+                    print("🔶 WeatherAlerts category appeared for \(city.name)")
+                }
+            
         case .location:
             GroupBox(label: Label("Location", systemImage: "mappin.and.ellipse")) {
                 VStack(spacing: 12) {
@@ -161,6 +169,7 @@ struct CityDetailView: View {
     }
     
     var body: some View {
+        let _ = print("🟢 CityDetailView body called for \(city.name), selectedAlert: \(selectedAlert?.event ?? "nil")")
         ScrollView {
             VStack(spacing: 24) {
                 if let weather = weather {
@@ -208,6 +217,7 @@ struct CityDetailView: View {
                     .accessibilityHint("Opens a screen showing historical weather data for \(city.name)")
                     
                     // Dynamically render detail sections based on settings order
+                    let _ = print("📊 Detail categories: \(settingsManager.settings.detailCategories.map { "\($0.category)=\($0.isEnabled)" }.joined(separator: ", "))")
                     ForEach(settingsManager.settings.detailCategories) { categoryField in
                         if categoryField.isEnabled {
                             detailSection(for: categoryField.category, weather: weather)
@@ -248,6 +258,9 @@ struct CityDetailView: View {
                         }
                     }
             }
+        }
+        .sheet(item: $selectedAlert) { alert in
+            AlertDetailView(alert: alert)
         }
     }
     
@@ -514,6 +527,92 @@ struct DailyForecastRow: View {
     private func formatPrecipitation(_ mm: Double) -> String {
         let precip = settingsManager.settings.precipitationUnit.convert(mm)
         return String(format: "%.2f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
+    }
+}
+
+// MARK: - Weather Alerts Section
+struct WeatherAlertsSection: View {
+    let city: City
+    @Binding var selectedAlert: WeatherAlert?
+    @EnvironmentObject var weatherService: WeatherService
+    @State private var alerts: [WeatherAlert] = []
+    @State private var isLoading = true
+    
+    var body: some View {
+        GroupBox(label: Label("Weather Alerts", systemImage: "exclamationmark.triangle.fill")) {
+            VStack(spacing: 12) {
+                if isLoading {
+                    ProgressView("Checking for alerts...")
+                        .padding()
+                } else if alerts.isEmpty {
+                    Text("No active alerts")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .padding()
+                } else {
+                    ForEach(alerts) { alert in
+                        Button(action: {
+                            print("🔔 Alert button tapped: \(alert.event)")
+                            selectedAlert = alert
+                        }) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack {
+                                        Image(systemName: alert.severity.iconName)
+                                            .foregroundColor(alert.severity.color)
+                                        Text(alert.event)
+                                            .font(.headline)
+                                            .foregroundColor(.primary)
+                                    }
+                                    
+                                    Text(alert.headline)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                        .lineLimit(2)
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 4)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("\(alert.severity.rawValue.capitalized) alert: \(alert.event)")
+                        .accessibilityHint("Double tap to view alert details")
+                        
+                        if alert.id != alerts.last?.id {
+                            Divider()
+                        }
+                    }
+                }
+            }
+            .padding(.vertical, 8)
+        }
+        .padding(.horizontal)
+        .accessibilityElement(children: .contain)
+        .onAppear {
+            print("🔵 WeatherAlertsSection appeared for \(city.name)")
+            Task {
+                do {
+                    print("📱 Fetching alerts for \(city.name)...")
+                    let fetchedAlerts = try await weatherService.fetchNWSAlerts(for: city)
+                    print("✅ Fetched \(fetchedAlerts.count) alerts for \(city.name)")
+                    await MainActor.run {
+                        alerts = fetchedAlerts
+                        isLoading = false
+                    }
+                } catch {
+                    print("❌ Failed to fetch alerts for \(city.name): \(error)")
+                    await MainActor.run {
+                        isLoading = false
+                    }
+                }
+            }
+        }
     }
 }
 

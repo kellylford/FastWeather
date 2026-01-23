@@ -1,5 +1,61 @@
 # FastWeather AI Agent Instructions
 
+**⚠️ CRITICAL**: Read this ENTIRE file before making ANY code changes. These are not suggestions - they are mandatory requirements.
+
+## Development Philosophy & Implementation Standards
+
+### Problem-Solving Approach (READ THIS FIRST)
+1. **Understand the full user workflow** before proposing solutions
+   - Don't just fix the immediate bug - understand how users interact with the feature
+   - Ask: "What is the user trying to accomplish?"
+   - Consider the next logical step after the fix
+
+2. **Never disable functionality** to "fix" a bug
+   - If a button/feature exists, there's a reason
+   - Fix the underlying logic, don't hide the problem
+   - Example of BAD fix: Disabling navigation buttons because they have a bug
+   - Example of GOOD fix: Making navigation buttons work correctly in all modes
+
+3. **Question why features exist**
+   - If a UI element is shown, understand its purpose before changing it
+   - Features that seem redundant usually serve different use cases
+   - Navigation that works in one mode should work in ALL modes (with appropriate behavior)
+
+4. **Consider edge cases and future use**
+   - How will users actually interact with this?
+   - What happens when they press buttons in different sequences?
+   - Does this work for ALL view modes, not just the one you're testing?
+
+### Code Quality Requirements (NON-NEGOTIABLE)
+- **No lazy shortcuts**: Disabling features, hiding errors, or partial fixes are UNACCEPTABLE
+- **Think through the logic**: Understand what the code is trying to achieve, not just what it does
+- **Complete solutions only**: If fixing navigation, ensure it works in ALL modes (single-day, multi-year, daily-browse, etc.)
+- **User-first design**: Every decision must be evaluated from the user's perspective
+- **Consistent behavior**: Similar features should work similarly across different contexts
+
+### When You Make a Mistake
+1. Acknowledge the flawed reasoning explicitly and specifically
+2. Explain what you SHOULD have considered
+3. Implement the proper fix immediately (no half-measures)
+4. Learn the pattern to avoid similar mistakes in future interactions
+
+### Red Flags - NEVER Do This
+❌ **Disabling working features** to avoid fixing bugs (e.g., `.disabled(true)` to "fix" navigation)
+❌ **Partial implementations** that break existing workflows (e.g., fixing one mode but breaking another)
+❌ **Surface-level pattern matching** without understanding intent (e.g., "same date = no navigation")
+❌ **Taking the "easy way out"** when a proper fix exists (e.g., hiding a button vs fixing its logic)
+❌ **Breaking existing functionality** to implement new features
+❌ **Assuming edge cases won't happen** - they will, and users will find them
+❌ **Implementing features that only work with specific data** - consider empty states, errors, etc.
+
+### Green Flags - Always Do This
+✅ **Fix root causes**, not symptoms
+✅ **Preserve all existing functionality** while adding new features
+✅ **Test logic across ALL modes/states** before considering it complete
+✅ **Ask "what is the user trying to do?"** before proposing a solution
+✅ **Implement features that work in ALL contexts** where they're shown
+✅ **Question your first solution** - is it the right fix or just the easy fix?
+
 ## Project Overview
 
 FastWeather is a **multi-platform weather application** with implementations for:

@@ -10,6 +10,7 @@ import SwiftUI
 struct TableView: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
+    @State private var selectedCityForHistory: City?
     
     var body: some View {
         List {
@@ -34,11 +35,29 @@ struct TableView: View {
                 .accessibilityAction(named: "Move to Bottom") {
                     moveCityToBottom(at: index)
                 }
+                .accessibilityAction(named: "View Historical Weather") {
+                    viewHistoricalWeather(for: city)
+                }
             }
             .onMove(perform: weatherService.moveCity)
-            .onDelete(perform: deleteCities)
         }
         .listStyle(.insetGrouped)
+        .background(
+            NavigationLink(
+                destination: selectedCityForHistory.map { city in
+                    HistoricalWeatherView(city: city)
+                        .navigationTitle("Historical Weather")
+                        .navigationBarTitleDisplayMode(.inline)
+                },
+                isActive: Binding(
+                    get: { selectedCityForHistory != nil },
+                    set: { if !$0 { selectedCityForHistory = nil } }
+                )
+            ) {
+                EmptyView()
+            }
+            .hidden()
+        )
     }
     
     private func moveCityUp(at index: Int) {
@@ -71,11 +90,9 @@ struct TableView: View {
         UIAccessibility.post(notification: .announcement, argument: "Moved \(cityName) to bottom of list")
     }
     
-    private func deleteCities(at offsets: IndexSet) {
-        offsets.forEach { index in
-            let city = weatherService.savedCities[index]
-            weatherService.removeCity(city)
-        }
+    private func viewHistoricalWeather(for city: City) {
+        selectedCityForHistory = city
+        UIAccessibility.post(notification: .announcement, argument: "Opening historical weather for \(city.displayName)")
     }
 }
 
