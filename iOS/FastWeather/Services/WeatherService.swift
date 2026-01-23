@@ -263,11 +263,15 @@ class WeatherService: ObservableObject {
     }
     
     // Fetch same day across multiple years (e.g., all January 19ths from 1940 to now)
-    func fetchSameDayHistory(for city: City, monthDay: String, yearsBack: Int = 85) async throws -> [HistoricalDay] {
+    func fetchSameDayHistory(for city: City, monthDay: String, yearsBack: Int = 85, endYear: Int? = nil) async throws -> [HistoricalDay] {
+        let calendar = Calendar.current
+        let actualEndYear = endYear ?? calendar.component(.year, from: Date())
+        let cacheKey = "\(monthDay)-\(actualEndYear)"
+        
         // Check cache first - but only use it if it has enough years
-        if let cached = HistoricalWeatherCache.shared.getCached(for: city, monthDay: monthDay) {
+        if let cached = HistoricalWeatherCache.shared.getCached(for: city, monthDay: cacheKey) {
             if cached.count >= yearsBack {
-                print("✅ Using cached historical data for \(city.name) on \(monthDay) (\(cached.count) years cached, \(yearsBack) requested)")
+                print("✅ Using cached historical data for \(city.name) on \(monthDay) ending \(actualEndYear) (\(cached.count) years cached, \(yearsBack) requested)")
                 // Return only the requested number of years (most recent ones)
                 return Array(cached.prefix(yearsBack))
             } else {
@@ -275,9 +279,7 @@ class WeatherService: ObservableObject {
             }
         }
         
-        let calendar = Calendar.current
-        let currentYear = calendar.component(.year, from: Date())
-        let startYear = currentYear - yearsBack
+        let startYear = actualEndYear - yearsBack
         
         // Parse month and day from monthDay string (format: "MM-DD")
         let components = monthDay.split(separator: "-")
@@ -292,8 +294,8 @@ class WeatherService: ObservableObject {
         
         // Fetch in chunks of 10 years to avoid overwhelming the API
         let chunkSize = 10
-        for yearChunkStart in stride(from: startYear, to: currentYear, by: chunkSize) {
-            let yearChunkEnd = min(yearChunkStart + chunkSize - 1, currentYear - 1)
+        for yearChunkStart in stride(from: startYear, to: actualEndYear, by: chunkSize) {
+            let yearChunkEnd = min(yearChunkStart + chunkSize - 1, actualEndYear - 1)
             
             let startDate = String(format: "%04d-%02d-%02d", yearChunkStart, month, day)
             let endDate = String(format: "%04d-%02d-%02d", yearChunkEnd, month, day)
@@ -303,6 +305,8 @@ class WeatherService: ObservableObject {
                 
                 // Parse response into HistoricalDay objects, filtering for only the specific month-day
                 for (index, dateString) in response.daily.time.enumerated() {
+                    guard let dateString = dateString else { continue }
+                    
                     let dateFormatter = DateFormatter()
                     dateFormatter.dateFormat = "yyyy-MM-dd"
                     
@@ -316,21 +320,37 @@ class WeatherService: ObservableObject {
                     
                     let year = calendar.component(.year, from: date)
                     
+                    // Skip this day if any required data is nil
+                    guard let weatherCode = response.daily.weatherCode[index],
+                          let tempMax = response.daily.temperature2mMax[index],
+                          let tempMin = response.daily.temperature2mMin[index],
+                          let apparentTempMax = response.daily.apparentTemperatureMax[index],
+                          let apparentTempMin = response.daily.apparentTemperatureMin[index],
+                          let sunrise = response.daily.sunrise[index],
+                          let sunset = response.daily.sunset[index],
+                          let precipitationSum = response.daily.precipitationSum[index],
+                          let rainSum = response.daily.rainSum[index],
+                          let snowfallSum = response.daily.snowfallSum[index],
+                          let precipitationHours = response.daily.precipitationHours[index],
+                          let windSpeedMax = response.daily.windSpeed10mMax[index] else {
+                        continue
+                    }
+                    
                     let historicalDay = HistoricalDay(
                         date: date,
                         year: year,
-                        weatherCode: response.daily.weatherCode[index],
-                        tempMax: response.daily.temperature2mMax[index],
-                        tempMin: response.daily.temperature2mMin[index],
-                        apparentTempMax: response.daily.apparentTemperatureMax[index],
-                        apparentTempMin: response.daily.apparentTemperatureMin[index],
-                        sunrise: response.daily.sunrise[index],
-                        sunset: response.daily.sunset[index],
-                        precipitationSum: response.daily.precipitationSum[index],
-                        rainSum: response.daily.rainSum[index],
-                        snowfallSum: response.daily.snowfallSum[index],
-                        precipitationHours: response.daily.precipitationHours[index],
-                        windSpeedMax: response.daily.windSpeed10mMax[index]
+                        weatherCode: weatherCode,
+                        tempMax: tempMax,
+                        tempMin: tempMin,
+                        apparentTempMax: apparentTempMax,
+                        apparentTempMin: apparentTempMin,
+                        sunrise: sunrise,
+                        sunset: sunset,
+                        precipitationSum: precipitationSum,
+                        rainSum: rainSum,
+                        snowfallSum: snowfallSum,
+                        precipitationHours: precipitationHours,
+                        windSpeedMax: windSpeedMax
                     )
                     historicalDays.append(historicalDay)
                 }
@@ -346,10 +366,10 @@ class WeatherService: ObservableObject {
         // Sort by year descending (most recent first)
         historicalDays.sort { $0.year > $1.year }
         
-        // Cache the results
-        HistoricalWeatherCache.shared.cache(historicalDays, for: city, monthDay: monthDay)
+        // Cache the results with endYear in key
+        HistoricalWeatherCache.shared.cache(historicalDays, for: city, monthDay: cacheKey)
         
-        print("✅ Fetched \(historicalDays.count) years of historical data for \(city.name) on \(monthDay)")
+        print("✅ Fetched \(historicalDays.count) years of historical data for \(city.name) on \(monthDay) ending \(actualEndYear)")
         return historicalDays
     }
     

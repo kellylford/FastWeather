@@ -246,22 +246,35 @@ struct HistoricalWeatherView: View {
                         let dateFormatter = DateFormatter()
                         dateFormatter.dateFormat = "yyyy-MM-dd"
                         
-                        if let date = dateFormatter.date(from: response.daily.time[0]) {
+                        if let timeString = response.daily.time[0],
+                           let date = dateFormatter.date(from: timeString),
+                           let weatherCode = response.daily.weatherCode[0],
+                           let tempMax = response.daily.temperature2mMax[0],
+                           let tempMin = response.daily.temperature2mMin[0],
+                           let apparentTempMax = response.daily.apparentTemperatureMax[0],
+                           let apparentTempMin = response.daily.apparentTemperatureMin[0],
+                           let sunrise = response.daily.sunrise[0],
+                           let sunset = response.daily.sunset[0],
+                           let precipitationSum = response.daily.precipitationSum[0],
+                           let rainSum = response.daily.rainSum[0],
+                           let snowfallSum = response.daily.snowfallSum[0],
+                           let precipitationHours = response.daily.precipitationHours[0],
+                           let windSpeedMax = response.daily.windSpeed10mMax[0] {
                             let historicalDay = HistoricalDay(
                                 date: date,
                                 year: selectedDate.year,
-                                weatherCode: response.daily.weatherCode[0],
-                                tempMax: response.daily.temperature2mMax[0],
-                                tempMin: response.daily.temperature2mMin[0],
-                                apparentTempMax: response.daily.apparentTemperatureMax[0],
-                                apparentTempMin: response.daily.apparentTemperatureMin[0],
-                                sunrise: response.daily.sunrise[0],
-                                sunset: response.daily.sunset[0],
-                                precipitationSum: response.daily.precipitationSum[0],
-                                rainSum: response.daily.rainSum[0],
-                                snowfallSum: response.daily.snowfallSum[0],
-                                precipitationHours: response.daily.precipitationHours[0],
-                                windSpeedMax: response.daily.windSpeed10mMax[0]
+                                weatherCode: weatherCode,
+                                tempMax: tempMax,
+                                tempMin: tempMin,
+                                apparentTempMax: apparentTempMax,
+                                apparentTempMin: apparentTempMin,
+                                sunrise: sunrise,
+                                sunset: sunset,
+                                precipitationSum: precipitationSum,
+                                rainSum: rainSum,
+                                snowfallSum: snowfallSum,
+                                precipitationHours: precipitationHours,
+                                windSpeedMax: windSpeedMax
                             )
                             data = [historicalDay]
                         } else {
@@ -274,7 +287,7 @@ struct HistoricalWeatherView: View {
                     // Fetch multi-year history
                     let monthDay = selectedDate.monthDayKey
                     let yearsBack = settingsManager.settings.historicalYearsBack
-                    data = try await weatherService.fetchSameDayHistory(for: city, monthDay: monthDay, yearsBack: yearsBack)
+                    data = try await weatherService.fetchSameDayHistory(for: city, monthDay: monthDay, yearsBack: yearsBack, endYear: selectedDate.year)
                 } else {
                     // Fetch consecutive days (dailyBrowse mode)
                     let calendar = Calendar.current
@@ -302,26 +315,41 @@ struct HistoricalWeatherView: View {
                     // Parse all days in the range
                     var parsedDays: [HistoricalDay] = []
                     for (index, timeString) in response.daily.time.enumerated() {
-                        if let date = dateFormatter.date(from: timeString) {
-                            let components = calendar.dateComponents([.year], from: date)
-                            let historicalDay = HistoricalDay(
-                                date: date,
-                                year: components.year ?? 0,
-                                weatherCode: response.daily.weatherCode[index],
-                                tempMax: response.daily.temperature2mMax[index],
-                                tempMin: response.daily.temperature2mMin[index],
-                                apparentTempMax: response.daily.apparentTemperatureMax[index],
-                                apparentTempMin: response.daily.apparentTemperatureMin[index],
-                                sunrise: response.daily.sunrise[index],
-                                sunset: response.daily.sunset[index],
-                                precipitationSum: response.daily.precipitationSum[index],
-                                rainSum: response.daily.rainSum[index],
-                                snowfallSum: response.daily.snowfallSum[index],
-                                precipitationHours: response.daily.precipitationHours[index],
-                                windSpeedMax: response.daily.windSpeed10mMax[index]
-                            )
-                            parsedDays.append(historicalDay)
+                        guard let timeString = timeString,
+                              let date = dateFormatter.date(from: timeString),
+                              let weatherCode = response.daily.weatherCode[index],
+                              let tempMax = response.daily.temperature2mMax[index],
+                              let tempMin = response.daily.temperature2mMin[index],
+                              let apparentTempMax = response.daily.apparentTemperatureMax[index],
+                              let apparentTempMin = response.daily.apparentTemperatureMin[index],
+                              let sunrise = response.daily.sunrise[index],
+                              let sunset = response.daily.sunset[index],
+                              let precipitationSum = response.daily.precipitationSum[index],
+                              let rainSum = response.daily.rainSum[index],
+                              let snowfallSum = response.daily.snowfallSum[index],
+                              let precipitationHours = response.daily.precipitationHours[index],
+                              let windSpeedMax = response.daily.windSpeed10mMax[index] else {
+                            continue
                         }
+                        
+                        let components = calendar.dateComponents([.year], from: date)
+                        let historicalDay = HistoricalDay(
+                            date: date,
+                            year: components.year ?? 0,
+                            weatherCode: weatherCode,
+                            tempMax: tempMax,
+                            tempMin: tempMin,
+                            apparentTempMax: apparentTempMax,
+                            apparentTempMin: apparentTempMin,
+                            sunrise: sunrise,
+                            sunset: sunset,
+                            precipitationSum: precipitationSum,
+                            rainSum: rainSum,
+                            snowfallSum: snowfallSum,
+                            precipitationHours: precipitationHours,
+                            windSpeedMax: windSpeedMax
+                        )
+                        parsedDays.append(historicalDay)
                     }
                     data = parsedDays
                 }

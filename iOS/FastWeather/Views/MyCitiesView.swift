@@ -12,17 +12,32 @@ struct MyCitiesView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @State private var showingSettings = false
     @State private var showingAddCity = false
+    @State private var selectedCityForHistory: City?
+    @State private var selectedCityForDetail: City?
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Group {
                 if weatherService.savedCities.isEmpty {
                     EmptyStateView()
                 } else {
-                    ListView()
+                    switch settingsManager.settings.viewMode {
+                    case .list:
+                        ListView(selectedCityForHistory: $selectedCityForHistory)
+                    case .flat:
+                        FlatView(selectedCityForHistory: $selectedCityForHistory, selectedCityForDetail: $selectedCityForDetail)
+                    }
                 }
             }
             .navigationTitle("Fast Weather")
+            .navigationDestination(item: $selectedCityForHistory) { city in
+                HistoricalWeatherView(city: city, autoLoadToday: settingsManager.settings.viewMode == .list)
+                    .navigationTitle("Historical Weather")
+                    .navigationBarTitleDisplayMode(.inline)
+            }
+            .navigationDestination(item: $selectedCityForDetail) { city in
+                CityDetailView(city: city)
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
@@ -41,7 +56,6 @@ struct MyCitiesView: View {
                 await weatherService.refreshAllWeather()
             }
         }
-        .navigationViewStyle(.stack)
     }
 }
 

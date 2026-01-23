@@ -29,20 +29,20 @@ struct CityDetailView: View {
             if let daily = weather.daily {
                 GroupBox(label: Label("Today's Forecast", systemImage: "calendar")) {
                     VStack(spacing: 12) {
-                        if !daily.temperature2mMax.isEmpty {
-                            DetailRow(label: "High", value: formatTemperature(daily.temperature2mMax[0]))
+                        if !daily.temperature2mMax.isEmpty, let maxTemp = daily.temperature2mMax[0] {
+                            DetailRow(label: "High", value: formatTemperature(maxTemp))
                             Divider()
                         }
-                        if !daily.temperature2mMin.isEmpty {
-                            DetailRow(label: "Low", value: formatTemperature(daily.temperature2mMin[0]))
+                        if !daily.temperature2mMin.isEmpty, let minTemp = daily.temperature2mMin[0] {
+                            DetailRow(label: "Low", value: formatTemperature(minTemp))
                             Divider()
                         }
-                        if !daily.sunrise.isEmpty {
-                            DetailRow(label: "Sunrise", value: formatTime(daily.sunrise[0]))
+                        if let sunriseArray = daily.sunrise, !sunriseArray.isEmpty, let sunrise = sunriseArray[0] {
+                            DetailRow(label: "Sunrise", value: formatTime(sunrise))
                             Divider()
                         }
-                        if !daily.sunset.isEmpty {
-                            DetailRow(label: "Sunset", value: formatTime(daily.sunset[0]))
+                        if let sunsetArray = daily.sunset, !sunsetArray.isEmpty, let sunset = sunsetArray[0] {
+                            DetailRow(label: "Sunset", value: formatTime(sunset))
                         }
                     }
                     .padding(.vertical, 8)
@@ -54,16 +54,26 @@ struct CityDetailView: View {
         case .currentConditions:
             GroupBox(label: Label("Current Conditions", systemImage: "thermometer")) {
                 VStack(spacing: 12) {
-                    DetailRow(label: "Humidity", value: "\(weather.current.relativeHumidity2m)%")
-                    Divider()
-                    DetailRow(label: "Wind Speed", value: formatWindSpeed(weather.current.windSpeed10m))
-                    Divider()
-                    DetailRow(label: "Wind Direction", value: formatWindDirection(weather.current.windDirection10m))
-                    Divider()
-                    DetailRow(label: "Pressure", value: formatPressure(weather.current.pressureMsl))
-                    Divider()
-                    DetailRow(label: "Visibility", value: formatVisibility(weather.current.visibility))
-                    Divider()
+                    if let humidity = weather.current.relativeHumidity2m {
+                        DetailRow(label: "Humidity", value: "\(humidity)%")
+                        Divider()
+                    }
+                    if let windSpeed = weather.current.windSpeed10m {
+                        DetailRow(label: "Wind Speed", value: formatWindSpeed(windSpeed))
+                        Divider()
+                    }
+                    if let windDir = weather.current.windDirection10m {
+                        DetailRow(label: "Wind Direction", value: formatWindDirection(windDir))
+                        Divider()
+                    }
+                    if let pressure = weather.current.pressureMsl {
+                        DetailRow(label: "Pressure", value: formatPressure(pressure))
+                        Divider()
+                    }
+                    if let visibility = weather.current.visibility {
+                        DetailRow(label: "Visibility", value: formatVisibility(visibility))
+                        Divider()
+                    }
                     DetailRow(label: "Cloud Cover", value: "\(weather.current.cloudCover)%")
                 }
                 .padding(.vertical, 8)
@@ -74,13 +84,21 @@ struct CityDetailView: View {
         case .precipitation:
             GroupBox(label: Label("Precipitation", systemImage: "cloud.rain")) {
                 VStack(spacing: 12) {
-                    DetailRow(label: "Total", value: formatPrecipitation(weather.current.precipitation))
-                    Divider()
-                    DetailRow(label: "Rain", value: formatPrecipitation(weather.current.rain))
-                    Divider()
-                    DetailRow(label: "Showers", value: formatPrecipitation(weather.current.showers))
-                    Divider()
-                    DetailRow(label: "Snowfall", value: formatPrecipitation(weather.current.snowfall))
+                    if let precip = weather.current.precipitation {
+                        DetailRow(label: "Total", value: formatPrecipitation(precip))
+                        Divider()
+                    }
+                    if let rain = weather.current.rain {
+                        DetailRow(label: "Rain", value: formatPrecipitation(rain))
+                        Divider()
+                    }
+                    if let showers = weather.current.showers {
+                        DetailRow(label: "Showers", value: formatPrecipitation(showers))
+                        Divider()
+                    }
+                    if let snow = weather.current.snowfall {
+                        DetailRow(label: "Snowfall", value: formatPrecipitation(snow))
+                    }
                 }
                 .padding(.vertical, 8)
             }
@@ -88,22 +106,32 @@ struct CityDetailView: View {
             .accessibilityElement(children: .contain)
             
         case .hourlyForecast:
-            if let hourly = weather.hourly, !hourly.time.isEmpty {
+            if let hourly = weather.hourly,
+               let timeArray = hourly.time,
+               !timeArray.isEmpty,
+               let tempArray = hourly.temperature2m,
+               let weatherCodeArray = hourly.weatherCode,
+               let precipArray = hourly.precipitation {
                 GroupBox(label: Label("24-Hour Forecast", systemImage: "clock")) {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 16) {
-                            let currentHourIndex = findCurrentHourIndex(in: hourly.time)
+                            let currentHourIndex = findCurrentHourIndex(in: timeArray)
                             let startIndex = currentHourIndex >= 0 ? currentHourIndex : 0
-                            let endIndex = min(startIndex + 24, hourly.time.count)
+                            let endIndex = min(startIndex + 24, timeArray.count)
                             
                             ForEach(startIndex..<endIndex, id: \.self) { index in
-                                HourlyForecastCard(
-                                    time: hourly.time[index],
-                                    temperature: hourly.temperature2m[index],
-                                    weatherCode: hourly.weatherCode[index],
-                                    precipitation: hourly.precipitation[index],
-                                    settingsManager: settingsManager
-                                )
+                                if let time = timeArray[index],
+                                   let temperature = tempArray[index],
+                                   let weatherCode = weatherCodeArray[index],
+                                   let precipitation = precipArray[index] {
+                                    HourlyForecastCard(
+                                        time: time,
+                                        temperature: temperature,
+                                        weatherCode: weatherCode,
+                                        precipitation: precipitation,
+                                        settingsManager: settingsManager
+                                    )
+                                }
                             }
                         }
                         .padding(.horizontal)
@@ -118,15 +146,21 @@ struct CityDetailView: View {
                 GroupBox(label: Label("16-Day Forecast", systemImage: "calendar")) {
                     VStack(spacing: 0) {
                         ForEach(0..<min(16, daily.temperature2mMax.count), id: \.self) { index in
-                            DailyForecastRow(
-                                dayIndex: index,
-                                sunrise: daily.sunrise[index],
-                                high: daily.temperature2mMax[index],
-                                low: daily.temperature2mMin[index],
-                                weatherCode: index < daily.weatherCode.count ? daily.weatherCode[index] : nil,
-                                precipitation: index < daily.precipitationSum.count ? daily.precipitationSum[index] : nil,
-                                settingsManager: settingsManager
-                            )
+                            if let high = daily.temperature2mMax[index],
+                               let low = daily.temperature2mMin[index],
+                               let sunriseArray = daily.sunrise,
+                               let sunrise = sunriseArray[index] {
+                                DailyForecastRow(
+                                    dayIndex: index,
+                                    sunrise: sunrise,
+                                    high: high,
+                                    low: low,
+                                    weatherCode: daily.weatherCode?[index],
+                                    precipitation: daily.precipitationSum?[index],
+                                    settingsManager: settingsManager
+                                )
+                            }
+                            
                             if index < min(15, daily.temperature2mMax.count - 1) {
                                 Divider()
                                     .padding(.leading)
@@ -192,9 +226,11 @@ struct CityDetailView: View {
                                 .accessibilityLabel("Conditions: \(weatherCode.description)")
                         }
                         
-                        Text("Feels like \(formatTemperature(weather.current.apparentTemperature))")
-                            .font(.title3)
-                            .foregroundColor(.secondary)
+                        if let apparentTemp = weather.current.apparentTemperature {
+                            Text("Feels like \(formatTemperature(apparentTemp))")
+                                .font(.title3)
+                                .foregroundColor(.secondary)
+                        }
                     }
                     .padding()
                     
@@ -300,13 +336,14 @@ struct CityDetailView: View {
         FormatHelper.formatTime(isoString)
     }
     
-    private func findCurrentHourIndex(in times: [String]) -> Int {
+    private func findCurrentHourIndex(in times: [String?]) -> Int {
         let now = Date()
         let calendar = Calendar.current
         let currentHour = calendar.component(.hour, from: now)
         
         // Parse each time and find the one matching or after current hour
         for (index, timeString) in times.enumerated() {
+            guard let timeString = timeString else { continue }
             if let time = DateParser.parse(timeString) {
                 let hour = calendar.component(.hour, from: time)
                 if hour >= currentHour {

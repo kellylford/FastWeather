@@ -12,6 +12,11 @@ enum DisplayMode: String, CaseIterable, Codable {
     case details = "Details"
 }
 
+enum ViewMode: String, CaseIterable, Codable {
+    case list = "List"
+    case flat = "Flat"
+}
+
 enum WeatherFieldType: String, CaseIterable, Codable {
     case temperature = "Temperature"
     case conditions = "Conditions"
@@ -120,6 +125,7 @@ enum PressureUnit: String, CaseIterable, Codable {
 }
 
 struct AppSettings: Codable {
+    var viewMode: ViewMode = .list
     var displayMode: DisplayMode = .condensed
     var temperatureUnit: TemperatureUnit = .fahrenheit
     var windSpeedUnit: WindSpeedUnit = .mph

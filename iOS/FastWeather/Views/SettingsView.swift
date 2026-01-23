@@ -87,14 +87,32 @@ struct SettingsView: View {
                 }
                 
                 // Display preferences section
-                Section(header: Text("Display Mode")) {
+                Section(header: Text("Display")) {
+                    Picker(selection: $settingsManager.settings.viewMode) {
+                        ForEach(ViewMode.allCases, id: \.self) { mode in
+                            Text(mode.rawValue).tag(mode)
+                        }
+                    } label: {
+                        HStack {
+                            Text("View Mode")
+                            Spacer()
+                            Text(settingsManager.settings.viewMode.rawValue)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .onChange(of: settingsManager.settings.viewMode) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("View mode, currently \(settingsManager.settings.viewMode.rawValue)")
+                    .accessibilityHint("Choose between List or Flat view")
+                    
                     Picker(selection: $settingsManager.settings.displayMode) {
                         ForEach(DisplayMode.allCases, id: \.self) { mode in
                             Text(mode.rawValue).tag(mode)
                         }
                     } label: {
                         HStack {
-                            Text("Display Mode")
+                            Text("List Content Display")
                             Spacer()
                             Text(settingsManager.settings.displayMode.rawValue)
                                 .foregroundColor(.secondary)
@@ -103,8 +121,8 @@ struct SettingsView: View {
                     .onChange(of: settingsManager.settings.displayMode) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Weather display mode, currently \(settingsManager.settings.displayMode.rawValue)")
-                    .accessibilityHint("Condensed shows values only, Details shows labels with values")
+                    .accessibilityLabel("List content display, currently \(settingsManager.settings.displayMode.rawValue)")
+                    .accessibilityHint("Condensed shows values only in List view, Details shows labels with values")
                 }
                 .listRowSeparator(.visible)
                 

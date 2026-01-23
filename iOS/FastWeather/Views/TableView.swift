@@ -10,7 +10,7 @@ import SwiftUI
 struct TableView: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
-    @State private var selectedCityForHistory: City?
+    @Binding var selectedCityForHistory: City?
     
     var body: some View {
         List {
@@ -20,9 +20,6 @@ struct TableView: View {
                     TableRowView(city: city)
                 }
                 .accessibilityElement(children: .combine)
-                .accessibilityAction(named: "Remove") {
-                    weatherService.removeCity(city)
-                }
                 .accessibilityAction(named: "Move Up") {
                     moveCityUp(at: index)
                 }
@@ -38,26 +35,14 @@ struct TableView: View {
                 .accessibilityAction(named: "View Historical Weather") {
                     viewHistoricalWeather(for: city)
                 }
+                .contextMenu {
+                    contextMenuContent(for: city, at: index)
+                }
             }
             .onMove(perform: weatherService.moveCity)
+            .onDelete(perform: deleteCities)
         }
         .listStyle(.insetGrouped)
-        .background(
-            NavigationLink(
-                destination: selectedCityForHistory.map { city in
-                    HistoricalWeatherView(city: city)
-                        .navigationTitle("Historical Weather")
-                        .navigationBarTitleDisplayMode(.inline)
-                },
-                isActive: Binding(
-                    get: { selectedCityForHistory != nil },
-                    set: { if !$0 { selectedCityForHistory = nil } }
-                )
-            ) {
-                EmptyView()
-            }
-            .hidden()
-        )
     }
     
     private func moveCityUp(at index: Int) {
@@ -90,9 +75,48 @@ struct TableView: View {
         UIAccessibility.post(notification: .announcement, argument: "Moved \(cityName) to bottom of list")
     }
     
+    private func deleteCities(at offsets: IndexSet) {
+        for index in offsets {
+            let cityName = weatherService.savedCities[index].displayName
+            weatherService.removeCity(weatherService.savedCities[index])
+            UIAccessibility.post(notification: .announcement, argument: "Removed \(cityName)")
+        }
+    }
+    
     private func viewHistoricalWeather(for city: City) {
         selectedCityForHistory = city
         UIAccessibility.post(notification: .announcement, argument: "Opening historical weather for \(city.displayName)")
+    }
+    
+    @ViewBuilder
+    private func contextMenuContent(for city: City, at index: Int) -> some View {
+        Button(role: .destructive, action: {
+            weatherService.removeCity(city)
+        }) {
+            Label("Remove City", systemImage: "trash")
+        }
+        
+        if index > 0 {
+            Button(action: {
+                moveCityUp(at: index)
+            }) {
+                Label("Move Up", systemImage: "arrow.up")
+            }
+        }
+        
+        if index < weatherService.savedCities.count - 1 {
+            Button(action: {
+                moveCityDown(at: index)
+            }) {
+                Label("Move Down", systemImage: "arrow.down")
+            }
+        }
+        
+        Button(action: {
+            viewHistoricalWeather(for: city)
+        }) {
+            Label("View Historical Weather", systemImage: "calendar")
+        }
     }
 }
 
@@ -144,32 +168,36 @@ struct TableRowView: View {
             return (showLabel ? "Conditions" : "", weatherCode.description)
             
         case .feelsLike:
-            return (showLabel ? "Feels Like" : "", formatTemperature(weather.current.apparentTemperature))
+            guard let apparentTemp = weather.current.apparentTemperature else { return nil }
+            return (showLabel ? "Feels Like" : "", formatTemperature(apparentTemp))
             
         case .humidity:
-            return (showLabel ? "Humidity" : "", "\(weather.current.relativeHumidity2m)%")
+            guard let humidity = weather.current.relativeHumidity2m else { return nil }
+            return (showLabel ? "Humidity" : "", "\(humidity)%")
             
         case .windSpeed:
-            return (showLabel ? "Wind Speed" : "", formatWindSpeed(weather.current.windSpeed10m))
+            guard let windSpeed = weather.current.windSpeed10m else { return nil }
+            return (showLabel ? "Wind Speed" : "", formatWindSpeed(windSpeed))
             
         case .windDirection:
-            return (showLabel ? "Wind Direction" : "", formatWindDirection(weather.current.windDirection10m))
+            guard let windDir = weather.current.windDirection10m else { return nil }
+            return (showLabel ? "Wind Direction" : "", formatWindDirection(windDir))
             
         case .highTemp:
-            guard let daily = weather.daily, !daily.temperature2mMax.isEmpty else { return nil }
-            return (showLabel ? "High" : "", formatTemperature(daily.temperature2mMax[0]))
+            guard let daily = weather.daily, !daily.temperature2mMax.isEmpty, let maxTemp = daily.temperature2mMax[0] else { return nil }
+            return (showLabel ? "High" : "", formatTemperature(maxTemp))
             
         case .lowTemp:
-            guard let daily = weather.daily, !daily.temperature2mMin.isEmpty else { return nil }
-            return (showLabel ? "Low" : "", formatTemperature(daily.temperature2mMin[0]))
+            guard let daily = weather.daily, !daily.temperature2mMin.isEmpty, let minTemp = daily.temperature2mMin[0] else { return nil }
+            return (showLabel ? "Low" : "", formatTemperature(minTemp))
             
         case .sunrise:
-            guard let daily = weather.daily, !daily.sunrise.isEmpty else { return nil }
-            return (showLabel ? "Sunrise" : "", formatTime(daily.sunrise[0]))
+            guard let daily = weather.daily, let sunriseArray = daily.sunrise, !sunriseArray.isEmpty, let sunrise = sunriseArray[0] else { return nil }
+            return (showLabel ? "Sunrise" : "", formatTime(sunrise))
             
         case .sunset:
-            guard let daily = weather.daily, !daily.sunset.isEmpty else { return nil }
-            return (showLabel ? "Sunset" : "", formatTime(daily.sunset[0]))
+            guard let daily = weather.daily, let sunsetArray = daily.sunset, !sunsetArray.isEmpty, let sunset = sunsetArray[0] else { return nil }
+            return (showLabel ? "Sunset" : "", formatTime(sunset))
         }
     }
     
@@ -214,7 +242,7 @@ struct CompactWeatherItem: View {
 }
 
 #Preview {
-    TableView()
+    TableView(selectedCityForHistory: .constant(nil))
         .environmentObject(WeatherService())
         .environmentObject(SettingsManager())
 }

@@ -11,58 +11,19 @@ struct ListView: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
     @Environment(\.editMode) var editMode
-    @State private var selectedCityForHistory: City?
+    @Binding var selectedCityForHistory: City?
     @State private var selectedCityForAlert: (City, WeatherAlert)?
     
     var body: some View {
         List {
             ForEach(weatherService.savedCities.indices, id: \.self) { index in
                 let city = weatherService.savedCities[index]
-                NavigationLink(destination: CityDetailView(city: city)) {
-                    ListRowView(city: city, onAlertTap: { alert in
-                        selectedCityForAlert = (city, alert)
-                    })
-                }
-                .accessibilityElement(children: .combine)
-                .accessibilityAddTraits(editMode?.wrappedValue.isEditing == true ? [.allowsDirectInteraction] : [])
-                .accessibilityAction(named: "Remove") {
-                    weatherService.removeCity(city)
-                }
-                .accessibilityAction(named: "Move Up") {
-                    moveCityUp(at: index)
-                }
-                .accessibilityAction(named: "Move Down") {
-                    moveCityDown(at: index)
-                }
-                .accessibilityAction(named: "Move to Top") {
-                    moveCityToTop(at: index)
-                }
-                .accessibilityAction(named: "Move to Bottom") {
-                    moveCityToBottom(at: index)
-                }
-                .accessibilityAction(named: "View Historical Weather") {
-                    viewHistoricalWeather(for: city)
-                }
+                cityRow(for: city, at: index)
             }
             .onMove(perform: weatherService.moveCity)
+            .onDelete(perform: deleteCities)
         }
         .listStyle(.plain)
-        .background(
-            NavigationLink(
-                destination: selectedCityForHistory.map { city in
-                    HistoricalWeatherView(city: city, autoLoadToday: true)
-                        .navigationTitle("Historical Weather")
-                        .navigationBarTitleDisplayMode(.inline)
-                },
-                isActive: Binding(
-                    get: { selectedCityForHistory != nil },
-                    set: { if !$0 { selectedCityForHistory = nil } }
-                )
-            ) {
-                EmptyView()
-            }
-            .hidden()
-        )
         .sheet(item: Binding(
             get: { selectedCityForAlert.map { AlertSheetItem(city: $0.0, alert: $0.1) } },
             set: { selectedCityForAlert = $0.map { ($0.city, $0.alert) } }
@@ -101,9 +62,80 @@ struct ListView: View {
         UIAccessibility.post(notification: .announcement, argument: "Moved \(cityName) to bottom of list")
     }
     
+    private func deleteCities(at offsets: IndexSet) {
+        for index in offsets {
+            let cityName = weatherService.savedCities[index].displayName
+            weatherService.removeCity(weatherService.savedCities[index])
+            UIAccessibility.post(notification: .announcement, argument: "Removed \(cityName)")
+        }
+    }
+    
     private func viewHistoricalWeather(for city: City) {
         selectedCityForHistory = city
         UIAccessibility.post(notification: .announcement, argument: "Opening historical weather for \(city.displayName)")
+    }
+    
+    @ViewBuilder
+    private func contextMenuContent(for city: City, at index: Int) -> some View {
+        Button(role: .destructive, action: {
+            weatherService.removeCity(city)
+        }) {
+            Label("Remove City", systemImage: "trash")
+        }
+        
+        if index > 0 {
+            Button(action: {
+                moveCityUp(at: index)
+            }) {
+                Label("Move Up", systemImage: "arrow.up")
+            }
+        }
+        
+        if index < weatherService.savedCities.count - 1 {
+            Button(action: {
+                moveCityDown(at: index)
+            }) {
+                Label("Move Down", systemImage: "arrow.down")
+            }
+        }
+        
+        Button(action: {
+            viewHistoricalWeather(for: city)
+        }) {
+            Label("View Historical Weather", systemImage: "calendar")
+        }
+    }
+    
+    @ViewBuilder
+    private func cityRow(for city: City, at index: Int) -> some View {
+        NavigationLink(destination: CityDetailView(city: city)) {
+            ListRowView(city: city, onAlertTap: { alert in
+                selectedCityForAlert = (city, alert)
+            })
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(editMode?.wrappedValue.isEditing == true ? [.allowsDirectInteraction] : [])
+        .accessibilityAction(named: "Remove") {
+            weatherService.removeCity(city)
+        }
+        .accessibilityAction(named: "Move Up") {
+            moveCityUp(at: index)
+        }
+        .accessibilityAction(named: "Move Down") {
+            moveCityDown(at: index)
+        }
+        .accessibilityAction(named: "Move to Top") {
+            moveCityToTop(at: index)
+        }
+        .accessibilityAction(named: "Move to Bottom") {
+            moveCityToBottom(at: index)
+        }
+        .accessibilityAction(named: "View Historical Weather") {
+            viewHistoricalWeather(for: city)
+        }
+        .contextMenu {
+            contextMenuContent(for: city, at: index)
+        }
     }
 }
 
@@ -208,42 +240,50 @@ struct ListRowView: View {
                 }
                 
             case .feelsLike:
-                let value = formatTemperature(weather.current.apparentTemperature)
-                parts.append(isDetails ? "Feels Like: \(value)" : value)
+                if let apparentTemp = weather.current.apparentTemperature {
+                    let value = formatTemperature(apparentTemp)
+                    parts.append(isDetails ? "Feels Like: \(value)" : value)
+                }
                 
             case .humidity:
-                let value = "\(weather.current.relativeHumidity2m)%"
-                parts.append(isDetails ? "Humidity: \(value)" : value)
+                if let humidity = weather.current.relativeHumidity2m {
+                    let value = "\(humidity)%"
+                    parts.append(isDetails ? "Humidity: \(value)" : value)
+                }
                 
             case .windSpeed:
-                let value = formatWindSpeed(weather.current.windSpeed10m)
-                parts.append(isDetails ? "Wind Speed: \(value)" : value)
+                if let windSpeed = weather.current.windSpeed10m {
+                    let value = formatWindSpeed(windSpeed)
+                    parts.append(isDetails ? "Wind Speed: \(value)" : value)
+                }
                 
             case .windDirection:
-                let value = formatWindDirection(weather.current.windDirection10m)
-                parts.append(isDetails ? "Wind Direction: \(value)" : value)
+                if let windDir = weather.current.windDirection10m {
+                    let value = formatWindDirection(windDir)
+                    parts.append(isDetails ? "Wind Direction: \(value)" : value)
+                }
                 
             case .highTemp:
-                if let daily = weather.daily, !daily.temperature2mMax.isEmpty {
-                    let value = formatTemperature(daily.temperature2mMax[0])
+                if let daily = weather.daily, !daily.temperature2mMax.isEmpty, let maxTemp = daily.temperature2mMax[0] {
+                    let value = formatTemperature(maxTemp)
                     parts.append(isDetails ? "High: \(value)" : value)
                 }
                 
             case .lowTemp:
-                if let daily = weather.daily, !daily.temperature2mMin.isEmpty {
-                    let value = formatTemperature(daily.temperature2mMin[0])
+                if let daily = weather.daily, !daily.temperature2mMin.isEmpty, let minTemp = daily.temperature2mMin[0] {
+                    let value = formatTemperature(minTemp)
                     parts.append(isDetails ? "Low: \(value)" : value)
                 }
                 
             case .sunrise:
-                if let daily = weather.daily, !daily.sunrise.isEmpty {
-                    let value = formatTime(daily.sunrise[0])
+                if let daily = weather.daily, let sunriseArray = daily.sunrise, !sunriseArray.isEmpty, let sunrise = sunriseArray[0] {
+                    let value = formatTime(sunrise)
                     parts.append(isDetails ? "Sunrise: \(value)" : value)
                 }
                 
             case .sunset:
-                if let daily = weather.daily, !daily.sunset.isEmpty {
-                    let value = formatTime(daily.sunset[0])
+                if let daily = weather.daily, let sunsetArray = daily.sunset, !sunsetArray.isEmpty, let sunset = sunsetArray[0] {
+                    let value = formatTime(sunset)
                     parts.append(isDetails ? "Sunset: \(value)" : value)
                 }
             }
@@ -291,49 +331,57 @@ struct ListRowView: View {
                 break
                 
             case .feelsLike:
-                let value = formatTemperature(weather.current.apparentTemperature)
-                label += ", "
-                label += isDetails ? "Feels Like: \(value)" : value
+                if let apparentTemp = weather.current.apparentTemperature {
+                    let value = formatTemperature(apparentTemp)
+                    label += ", "
+                    label += isDetails ? "Feels Like: \(value)" : value
+                }
                 
             case .humidity:
-                let value = "\(weather.current.relativeHumidity2m)%"
-                label += ", "
-                label += isDetails ? "Humidity: \(value)" : value
+                if let humidity = weather.current.relativeHumidity2m {
+                    let value = "\(humidity)%"
+                    label += ", "
+                    label += isDetails ? "Humidity: \(value)" : value
+                }
                 
             case .windSpeed:
-                let value = formatWindSpeed(weather.current.windSpeed10m)
-                label += ", "
-                label += isDetails ? "Wind Speed: \(value)" : value
+                if let windSpeed = weather.current.windSpeed10m {
+                    let value = formatWindSpeed(windSpeed)
+                    label += ", "
+                    label += isDetails ? "Wind Speed: \(value)" : value
+                }
                 
             case .windDirection:
-                let value = formatWindDirection(weather.current.windDirection10m)
-                label += ", "
-                label += isDetails ? "Wind Direction: \(value)" : value
+                if let windDir = weather.current.windDirection10m {
+                    let value = formatWindDirection(windDir)
+                    label += ", "
+                    label += isDetails ? "Wind Direction: \(value)" : value
+                }
                 
             case .highTemp:
-                if let daily = weather.daily, !daily.temperature2mMax.isEmpty {
-                    let value = formatTemperature(daily.temperature2mMax[0])
+                if let daily = weather.daily, !daily.temperature2mMax.isEmpty, let maxTemp = daily.temperature2mMax[0] {
+                    let value = formatTemperature(maxTemp)
                     label += ", "
                     label += isDetails ? "High: \(value)" : value
                 }
                 
             case .lowTemp:
-                if let daily = weather.daily, !daily.temperature2mMin.isEmpty {
-                    let value = formatTemperature(daily.temperature2mMin[0])
+                if let daily = weather.daily, !daily.temperature2mMin.isEmpty, let minTemp = daily.temperature2mMin[0] {
+                    let value = formatTemperature(minTemp)
                     label += ", "
                     label += isDetails ? "Low: \(value)" : value
                 }
                 
             case .sunrise:
-                if let daily = weather.daily, !daily.sunrise.isEmpty {
-                    let value = formatTime(daily.sunrise[0])
+                if let daily = weather.daily, let sunriseArray = daily.sunrise, !sunriseArray.isEmpty, let sunrise = sunriseArray[0] {
+                    let value = formatTime(sunrise)
                     label += ", "
                     label += isDetails ? "Sunrise: \(value)" : value
                 }
                 
             case .sunset:
-                if let daily = weather.daily, !daily.sunset.isEmpty {
-                    let value = formatTime(daily.sunset[0])
+                if let daily = weather.daily, let sunsetArray = daily.sunset, !sunsetArray.isEmpty, let sunset = sunsetArray[0] {
+                    let value = formatTime(sunset)
                     label += ", "
                     label += isDetails ? "Sunset: \(value)" : value
                 }
@@ -365,7 +413,7 @@ struct ListRowView: View {
 }
 
 #Preview {
-    ListView()
+    ListView(selectedCityForHistory: .constant(nil))
         .environmentObject(WeatherService())
         .environmentObject(SettingsManager())
 }

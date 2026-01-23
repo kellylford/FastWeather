@@ -12,19 +12,19 @@ struct HistoricalWeatherResponse: Codable {
     let daily: HistoricalDailyWeather
     
     struct HistoricalDailyWeather: Codable {
-        let time: [String]
-        let weatherCode: [Int]
-        let temperature2mMax: [Double]
-        let temperature2mMin: [Double]
-        let apparentTemperatureMax: [Double]
-        let apparentTemperatureMin: [Double]
-        let sunrise: [String]
-        let sunset: [String]
-        let precipitationSum: [Double]
-        let rainSum: [Double]
-        let snowfallSum: [Double]
-        let precipitationHours: [Double]
-        let windSpeed10mMax: [Double]
+        let time: [String?]
+        let weatherCode: [Int?]
+        let temperature2mMax: [Double?]
+        let temperature2mMin: [Double?]
+        let apparentTemperatureMax: [Double?]
+        let apparentTemperatureMin: [Double?]
+        let sunrise: [String?]
+        let sunset: [String?]
+        let precipitationSum: [Double?]
+        let rainSum: [Double?]
+        let snowfallSum: [Double?]
+        let precipitationHours: [Double?]
+        let windSpeed10mMax: [Double?]
         
         enum CodingKeys: String, CodingKey {
             case time

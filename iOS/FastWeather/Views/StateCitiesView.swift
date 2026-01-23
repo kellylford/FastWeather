@@ -14,6 +14,7 @@ struct StateCitiesView: View {
     @State private var searchText = ""
     @State private var weatherData: [String: WeatherData] = [:]
     @State private var isLoadingWeather = false
+    @State private var hasCompletedInitialLoad = false
     
     private var cities: [CityLocation] {
         cityDataService.cities(forState: state)
@@ -32,7 +33,8 @@ struct StateCitiesView: View {
                 NavigationLink(destination: CityLocationDetailView(cityLocation: cityLocation)) {
                     CityLocationRowOptimized(
                         cityLocation: cityLocation,
-                        weatherData: weatherData[cityLocation.cacheKey]
+                        weatherData: weatherData[cityLocation.cacheKey],
+                        isLoading: !hasCompletedInitialLoad
                     )
                 }
             }
@@ -66,6 +68,7 @@ struct CountryCitiesView: View {
     @State private var searchText = ""
     @State private var weatherData: [String: WeatherData] = [:]
     @State private var isLoadingWeather = false
+    @State private var hasCompletedInitialLoad = false
     
     private var cities: [CityLocation] {
         cityDataService.cities(forCountry: country)
@@ -84,7 +87,8 @@ struct CountryCitiesView: View {
                 NavigationLink(destination: CityLocationDetailView(cityLocation: cityLocation)) {
                     CityLocationRowOptimized(
                         cityLocation: cityLocation,
-                        weatherData: weatherData[cityLocation.cacheKey]
+                        weatherData: weatherData[cityLocation.cacheKey],
+                        isLoading: !hasCompletedInitialLoad
                     )
                 }
             }
@@ -107,6 +111,7 @@ struct CountryCitiesView: View {
         await MainActor.run {
             weatherData = results
             isLoadingWeather = false
+            hasCompletedInitialLoad = true
         }
     }
 }
@@ -115,6 +120,7 @@ struct CountryCitiesView: View {
 struct CityLocationRowOptimized: View {
     let cityLocation: CityLocation
     let weatherData: WeatherData?
+    let isLoading: Bool
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
     
@@ -139,11 +145,20 @@ struct CityLocationRowOptimized: View {
                                 .foregroundColor(.secondary)
                         }
                     }
-                } else {
+                } else if isLoading {
                     HStack(spacing: 4) {
                         ProgressView()
                             .scaleEffect(0.7)
                         Text("Loading...")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                } else {
+                    HStack(spacing: 4) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .foregroundColor(.orange)
+                            .font(.caption)
+                        Text("Unable to load")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -167,9 +182,11 @@ struct CityLocationRowOptimized: View {
         if let weatherData = weatherData {
             let temp = formatTemperature(weatherData.current.temperature2m)
             let desc = weatherData.current.weatherCodeEnum?.description ?? "unknown conditions"
-            return "\(temp), \(desc), \(cityLocation.displayName)"
-        } else {
+            return "\(cityLocation.displayName), \(temp), \(desc)"
+        } else if isLoading {
             return "\(cityLocation.displayName), loading weather"
+        } else {
+            return "\(cityLocation.displayName), unable to load weather"
         }
     }
     
@@ -253,7 +270,7 @@ struct CityLocationRow: View {
         if let weatherData = weatherData {
             let temp = formatTemperature(weatherData.current.temperature2m)
             let desc = weatherData.current.weatherCodeEnum?.description ?? "unknown conditions"
-            return "\(temp), \(desc), \(cityLocation.displayName)"
+            return "\(cityLocation.displayName), \(temp), \(desc)"
         } else if isLoadingWeather {
             return "\(cityLocation.displayName), loading weather"
         }
@@ -336,9 +353,11 @@ struct CityLocationDetailView: View {
                             .font(.system(size: 72, weight: .bold))
                             .accessibilityLabel("Temperature \(formatTemperature(weather.current.temperature2m))")
                         
-                        Text("Feels like \(formatTemperature(weather.current.apparentTemperature))")
-                            .font(.title3)
-                            .foregroundColor(.secondary)
+                        if let apparentTemp = weather.current.apparentTemperature {
+                            Text("Feels like \(formatTemperature(apparentTemp))")
+                                .font(.title3)
+                                .foregroundColor(.secondary)
+                        }
                     }
                     .padding()
                     
@@ -359,16 +378,26 @@ struct CityLocationDetailView: View {
                     // Current conditions
                     GroupBox(label: Label("Current Conditions", systemImage: "thermometer")) {
                         VStack(spacing: 12) {
-                            DetailRow(label: "Humidity", value: "\(weather.current.relativeHumidity2m)%")
-                            Divider()
-                            DetailRow(label: "Wind Speed", value: formatWindSpeed(weather.current.windSpeed10m))
-                            Divider()
-                            DetailRow(label: "Wind Direction", value: formatWindDirection(weather.current.windDirection10m))
-                            Divider()
-                            DetailRow(label: "Pressure", value: String(format: "%.1f hPa", weather.current.pressureMsl))
-                            Divider()
-                            DetailRow(label: "Visibility", value: formatVisibility(weather.current.visibility))
-                            Divider()
+                            if let humidity = weather.current.relativeHumidity2m {
+                                DetailRow(label: "Humidity", value: "\(humidity)%")
+                                Divider()
+                            }
+                            if let windSpeed = weather.current.windSpeed10m {
+                                DetailRow(label: "Wind Speed", value: formatWindSpeed(windSpeed))
+                                Divider()
+                            }
+                            if let windDir = weather.current.windDirection10m {
+                                DetailRow(label: "Wind Direction", value: formatWindDirection(windDir))
+                                Divider()
+                            }
+                            if let pressure = weather.current.pressureMsl {
+                                DetailRow(label: "Pressure", value: String(format: "%.1f hPa", pressure))
+                                Divider()
+                            }
+                            if let visibility = weather.current.visibility {
+                                DetailRow(label: "Visibility", value: formatVisibility(visibility))
+                                Divider()
+                            }
                             DetailRow(label: "Cloud Cover", value: "\(weather.current.cloudCover)%")
                         }
                         .padding(.vertical, 8)
@@ -379,13 +408,21 @@ struct CityLocationDetailView: View {
                     // Precipitation
                     GroupBox(label: Label("Precipitation", systemImage: "cloud.rain")) {
                         VStack(spacing: 12) {
-                            DetailRow(label: "Total", value: formatPrecipitation(weather.current.precipitation))
-                            Divider()
-                            DetailRow(label: "Rain", value: formatPrecipitation(weather.current.rain))
-                            Divider()
-                            DetailRow(label: "Showers", value: formatPrecipitation(weather.current.showers))
-                            Divider()
-                            DetailRow(label: "Snowfall", value: formatPrecipitation(weather.current.snowfall))
+                            if let precip = weather.current.precipitation {
+                                DetailRow(label: "Total", value: formatPrecipitation(precip))
+                                Divider()
+                            }
+                            if let rain = weather.current.rain {
+                                DetailRow(label: "Rain", value: formatPrecipitation(rain))
+                                Divider()
+                            }
+                            if let showers = weather.current.showers {
+                                DetailRow(label: "Showers", value: formatPrecipitation(showers))
+                                Divider()
+                            }
+                            if let snow = weather.current.snowfall {
+                                DetailRow(label: "Snowfall", value: formatPrecipitation(snow))
+                            }
                         }
                         .padding(.vertical, 8)
                     }
@@ -396,13 +433,21 @@ struct CityLocationDetailView: View {
                     if let daily = weather.daily {
                         GroupBox(label: Label("Today", systemImage: "calendar")) {
                             VStack(spacing: 12) {
-                                DetailRow(label: "High", value: formatTemperature(daily.temperature2mMax[0]))
+                                if let maxTemp = daily.temperature2mMax[0] {
+                                    DetailRow(label: "High", value: formatTemperature(maxTemp))
+                                }
                                 Divider()
-                                DetailRow(label: "Low", value: formatTemperature(daily.temperature2mMin[0]))
+                                if let minTemp = daily.temperature2mMin[0] {
+                                    DetailRow(label: "Low", value: formatTemperature(minTemp))
+                                }
                                 Divider()
-                                DetailRow(label: "Sunrise", value: formatTime(daily.sunrise[0]))
+                                if let sunriseArray = daily.sunrise, let sunrise = sunriseArray[0] {
+                                    DetailRow(label: "Sunrise", value: formatTime(sunrise))
+                                }
                                 Divider()
-                                DetailRow(label: "Sunset", value: formatTime(daily.sunset[0]))
+                                if let sunsetArray = daily.sunset, let sunset = sunsetArray[0] {
+                                    DetailRow(label: "Sunset", value: formatTime(sunset))
+                                }
                             }
                             .padding(.vertical, 8)
                         }
