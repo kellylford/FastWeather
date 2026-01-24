@@ -14,6 +14,7 @@ struct CityDetailView: View {
     @StateObject private var featureFlags = FeatureFlags.shared
     @State private var showingHistoricalWeather = false
     @State private var showingRadar = false
+    @State private var showingWeatherAroundMe = false
     @State private var selectedAlert: WeatherAlert?
     
     private var weather: WeatherData? {
@@ -273,6 +274,25 @@ struct CityDetailView: View {
                             .accessibilityLabel("Expected Precipitation")
                             .accessibilityHint("Opens precipitation forecast showing expected rain and snow for \(city.name)")
                         }
+                        
+                        // Weather Around Me Button (feature-flagged)
+                        if featureFlags.weatherAroundMeEnabled {
+                            Button(action: { showingWeatherAroundMe = true }) {
+                                HStack {
+                                    Image(systemName: "location.circle")
+                                        .font(.title2)
+                                    Text("Weather Around Me")
+                                        .font(.headline)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.purple)
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
+                            }
+                            .accessibilityLabel("Weather Around Me")
+                            .accessibilityHint("Shows weather conditions in all directions around \(city.name)")
+                        }
                     }
                     .padding(.horizontal)
                     
@@ -327,6 +347,19 @@ struct CityDetailView: View {
                         ToolbarItem(placement: .navigationBarTrailing) {
                             Button("Done") {
                                 showingRadar = false
+                            }
+                        }
+                    }
+            }
+        }
+        .sheet(isPresented: $showingWeatherAroundMe) {
+            NavigationView {
+                WeatherAroundMeView(city: city)
+                    .environmentObject(settingsManager)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button("Done") {
+                                showingWeatherAroundMe = false
                             }
                         }
                     }
@@ -611,17 +644,20 @@ struct WeatherAlertsSection: View {
     @EnvironmentObject var weatherService: WeatherService
     @State private var alerts: [WeatherAlert] = []
     @State private var isLoading = true
+    @State private var hasLoaded = false  // Prevent re-fetching on every appear
     
     var body: some View {
         GroupBox(label: Label("Weather Alerts", systemImage: "exclamationmark.triangle.fill")) {
             VStack(spacing: 12) {
                 if isLoading {
                     ProgressView("Checking for alerts...")
+                        .frame(minHeight: 60)  // Consistent height to prevent layout shift
                         .padding()
                 } else if alerts.isEmpty {
                     Text("No active alerts")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
+                        .frame(minHeight: 60)  // Match loading height
                         .padding()
                 } else {
                     ForEach(alerts) { alert in
@@ -665,26 +701,26 @@ struct WeatherAlertsSection: View {
                 }
             }
             .padding(.vertical, 8)
+            .animation(.easeInOut(duration: 0.2), value: isLoading)  // Smooth transition
         }
         .padding(.horizontal)
         .accessibilityElement(children: .contain)
-        .onAppear {
-            print("🔵 WeatherAlertsSection appeared for \(city.name)")
-            Task {
-                do {
-                    print("📱 Fetching alerts for \(city.name)...")
-                    let fetchedAlerts = try await weatherService.fetchNWSAlerts(for: city)
-                    print("✅ Fetched \(fetchedAlerts.count) alerts for \(city.name)")
-                    await MainActor.run {
-                        alerts = fetchedAlerts
-                        isLoading = false
-                    }
-                } catch {
-                    print("❌ Failed to fetch alerts for \(city.name): \(error)")
-                    await MainActor.run {
-                        isLoading = false
-                    }
-                }
+        .task(id: city.id) {  // Use .task instead of .onAppear, re-run only if city changes
+            guard !hasLoaded else { return }
+            
+            print("🔵 WeatherAlertsSection loading for \(city.name)")
+            do {
+                print("📱 Fetching alerts for \(city.name)...")
+                let fetchedAlerts = try await weatherService.fetchNWSAlerts(for: city)
+                print("✅ Fetched \(fetchedAlerts.count) alerts for \(city.name)")
+                
+                alerts = fetchedAlerts
+                isLoading = false
+                hasLoaded = true
+            } catch {
+                print("❌ Failed to fetch alerts for \(city.name): \(error)")
+                isLoading = false
+                hasLoaded = true
             }
         }
     }

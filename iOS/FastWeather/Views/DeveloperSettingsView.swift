@@ -18,6 +18,10 @@ struct DeveloperSettingsView: View {
                     Toggle("Expected Precipitation", isOn: $featureFlags.radarEnabled)
                         .accessibilityLabel("Expected Precipitation feature toggle")
                         .accessibilityHint(featureFlags.radarEnabled ? "Expected Precipitation is currently enabled" : "Expected Precipitation is currently disabled")
+                    
+                    Toggle("Weather Around Me", isOn: $featureFlags.weatherAroundMeEnabled)
+                        .accessibilityLabel("Weather Around Me feature toggle")
+                        .accessibilityHint(featureFlags.weatherAroundMeEnabled ? "Weather Around Me is currently enabled" : "Weather Around Me is currently disabled")
                 }
                 
                 Section(header: Text("Quick Actions")) {

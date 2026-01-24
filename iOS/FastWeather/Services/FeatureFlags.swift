@@ -22,16 +22,28 @@ class FeatureFlags: ObservableObject {
         }
     }
     
+    /// Enable/disable weather around me feature (in development)
+    /// Set to true to show regional weather comparison button and functionality
+    @Published var weatherAroundMeEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(weatherAroundMeEnabled, forKey: "feature_weather_around_me_enabled")
+        }
+    }
+    
     // MARK: - Initialization
     
     private init() {
         // Load saved feature flag states
         self.radarEnabled = UserDefaults.standard.bool(forKey: "feature_radar_enabled")
+        self.weatherAroundMeEnabled = UserDefaults.standard.bool(forKey: "feature_weather_around_me_enabled")
         
         // Default values (if first launch or not set)
         // Change these to true/false to enable/disable features during development
         if !UserDefaults.standard.contains(key: "feature_radar_enabled") {
             self.radarEnabled = false  // Disabled by default - set to true to test
+        }
+        if !UserDefaults.standard.contains(key: "feature_weather_around_me_enabled") {
+            self.weatherAroundMeEnabled = false  // Disabled by default - set to true to test
         }
     }
     
@@ -40,18 +52,21 @@ class FeatureFlags: ObservableObject {
     /// Reset all feature flags to defaults
     func resetToDefaults() {
         radarEnabled = false
+        weatherAroundMeEnabled = false
         print("🔧 Feature flags reset to defaults")
     }
     
     /// Enable all features (for testing)
     func enableAll() {
         radarEnabled = true
+        weatherAroundMeEnabled = true
         print("🔧 All features enabled")
     }
     
     /// Disable all features (for release)
     func disableAll() {
         radarEnabled = false
+        weatherAroundMeEnabled = false
         print("🔧 All features disabled")
     }
 }

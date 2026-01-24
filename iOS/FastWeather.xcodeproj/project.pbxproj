@@ -37,6 +37,8 @@
 		A9C7A9359CF740975C1AA31E /* HistoricalWeather.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000HIST1 /* HistoricalWeather.swift */; };
 		C1D4318204CE67D03430BC6F /* HistoricalWeatherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000HIST3 /* HistoricalWeatherView.swift */; };
 		E41FA69A048BFD0F634DB005 /* RadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8C597ECDBB8F82B9D13 /* RadarView.swift */; };
+		A1000WARMB1 /* WeatherAroundMeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000WARM1 /* WeatherAroundMeView.swift */; };
+		A1000WARMB2 /* RegionalWeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000WARM2 /* RegionalWeatherService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -76,6 +78,8 @@
 		A1000HIST3 /* HistoricalWeatherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoricalWeatherView.swift; sourceTree = "<group>"; };
 		A5F0E524751DEEAE77391AD2 /* DeveloperSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeveloperSettingsView.swift; sourceTree = "<group>"; };
 		B505151E924798A11141FE82 /* FeatureFlags.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeatureFlags.swift; sourceTree = "<group>"; };
+		A1000WARM1 /* WeatherAroundMeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherAroundMeView.swift; sourceTree = "<group>"; };
+		A1000WARM2 /* RegionalWeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionalWeatherService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -151,6 +155,7 @@
 				A5F0E524751DEEAE77391AD2 /* DeveloperSettingsView.swift */,
 				95C9B6C3071CC6357870F7A8 /* RadarView.swift */,
 				5C214A72B9AB146E98AAFD1B /* DeveloperSettingsView.swift */,
+				A1000WARM1 /* WeatherAroundMeView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -166,6 +171,7 @@
 				0EED081CD8BA9AD9146E4318 /* RadarService.swift */,
 				B505151E924798A11141FE82 /* FeatureFlags.swift */,
 				9DCDC584E3856802D5BBA5B7 /* RadarService.swift */,
+				A1000WARM2 /* RegionalWeatherService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -255,6 +261,8 @@
 				A10000001 /* WeatherFastApp.swift in Sources */,
 				A10000003 /* ContentView.swift in Sources */,
 				A10000005 /* City.swift in Sources */,
+				A1000WARMB1 /* WeatherAroundMeView.swift in Sources */,
+				A1000WARMB2 /* RegionalWeatherService.swift in Sources */,
 				A10000007 /* Weather.swift in Sources */,
 				A10000009 /* Settings.swift in Sources */,
 				A1000000B /* WeatherService.swift in Sources */,

@@ -15,6 +15,7 @@ struct RadarView: View {
     @State private var radarData: RadarData?
     @State private var isLoading = true
     @State private var errorMessage: String?
+    @State private var lastUpdated: Date?
     
     var body: some View {
         ScrollView {
@@ -31,7 +32,20 @@ struct RadarView: View {
         }
         .navigationTitle("Expected Precipitation")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    Task { await loadRadarData() }
+                }) {
+                    Label("Refresh", systemImage: "arrow.clockwise")
+                }
+                .accessibilityLabel("Refresh precipitation data")
+            }
+        }
         .task {
+            await loadRadarData()
+        }
+        .refreshable {
             await loadRadarData()
         }
     }
@@ -86,6 +100,20 @@ struct RadarView: View {
     // MARK: - Radar Content
     private func radarContent(_ radar: RadarData) -> some View {
         VStack(spacing: 24) {
+            // Last updated timestamp
+            if let lastUpdated = lastUpdated {
+                HStack {
+                    Image(systemName: "clock")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text("Updated \(formatLastUpdated(lastUpdated))")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Data last updated \(formatLastUpdated(lastUpdated))")
+            }
+            
             // Summary Card - Most important info first for accessibility
             radarSummaryCard(radar)
             
@@ -189,12 +217,14 @@ struct RadarView: View {
             .padding(.vertical, 8)
         }
         .accessibilityRepresentation {
-            // Audio Graph representation
+            // Audio Graph representation with descriptive labels instead of numbers
             Chart(radar.timeline, id: \.time) { point in
                 BarMark(
                     x: .value("Time", point.time),
                     y: .value("Intensity", precipitationValue(for: point.condition))
                 )
+                .accessibilityLabel("\(point.time): \(point.condition)")
+                .accessibilityValue(point.condition)
             }
             .accessibilityLabel("Precipitation intensity over next 2 hours")
             .accessibilityValue(timelineAccessibilityLabel(radar.timeline))
@@ -239,6 +269,7 @@ struct RadarView: View {
             
             await MainActor.run {
                 self.radarData = data
+                self.lastUpdated = Date()
                 self.isLoading = false
             }
         } catch {
@@ -246,6 +277,23 @@ struct RadarView: View {
                 self.errorMessage = error.localizedDescription
                 self.isLoading = false
             }
+        }
+    }
+    
+    // MARK: - Helper for formatting last updated time
+    private func formatLastUpdated(_ date: Date) -> String {
+        let now = Date()
+        let interval = now.timeIntervalSince(date)
+        
+        if interval < 60 {
+            return "just now"
+        } else if interval < 3600 {
+            let minutes = Int(interval / 60)
+            return "\(minutes) minute\(minutes == 1 ? "" : "s") ago"
+        } else {
+            let formatter = DateFormatter()
+            formatter.timeStyle = .short
+            return "at \(formatter.string(from: date))"
         }
     }
     

@@ -88,11 +88,24 @@ class RadarService {
             return [TimelinePoint(time: "Now", condition: "No data available")]
         }
         
+        // Find the current time index to start from NOW, not from midnight
+        let now = Date()
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        
+        var currentIndex = 0
+        for (index, timeString) in times.enumerated() {
+            if let timeDate = dateFormatter.date(from: timeString), timeDate > now {
+                currentIndex = index
+                break
+            }
+        }
+        
         var timeline: [TimelinePoint] = []
         let intervals = [0, 15, 30, 45, 60, 90, 120] // Minutes from now
         
         for interval in intervals {
-            let index = min(interval / 15, times.count - 1)
+            let index = currentIndex + (interval / 15)
             
             guard index >= 0 && index < times.count else { continue }
             
@@ -152,10 +165,23 @@ class RadarService {
             return nil
         }
         
-        // Find when precipitation starts
-        for (index, precip) in precipitation.enumerated() {
-            if let precip = precip, precip > 0.01 {
-                let minutesAway = index * 15
+        // Find the current time index to only look at FUTURE precipitation
+        let now = Date()
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        
+        var currentIndex = 0
+        for (index, timeString) in times.enumerated() {
+            if let timeDate = dateFormatter.date(from: timeString), timeDate > now {
+                currentIndex = index
+                break
+            }
+        }
+        
+        // Search for precipitation starting from current time forward
+        for index in currentIndex..<precipitation.count {
+            if let precip = precipitation[index], precip > 0.01 {
+                let minutesAway = (index - currentIndex) * 15
                 
                 if minutesAway == 0 {
                     return nil // Already precipitating
@@ -166,8 +192,9 @@ class RadarService {
                     ? "\(minutesAway) minutes"
                     : "Approximately \(minutesAway / 60) hour\(minutesAway / 60 == 1 ? "" : "s")"
                 
-                // Get wind direction to determine where precipitation is coming from
-                let windDir = (hourly?.windDirection10m?.first ?? nil) ?? 0
+                // Get current wind direction to determine where precipitation is coming from
+                let currentHourIndex = min(index / 4, (hourly?.windDirection10m?.count ?? 1) - 1)
+                let windDir = (hourly?.windDirection10m?[currentHourIndex] ?? nil) ?? 0
                 let fromDirection = getOppositeDirection(windDir)
                 
                 return NearestPrecipitation(
@@ -190,13 +217,13 @@ class RadarService {
         case 0..<0.1:
             return "Clear"
         case 0.1..<2.5:
-            return "Light rain"
+            return "Light precipitation"
         case 2.5..<10:
-            return "Moderate rain"
+            return "Moderate precipitation"
         case 10..<50:
-            return "Heavy rain"
+            return "Heavy precipitation"
         default:
-            return "Very heavy rain"
+            return "Very heavy precipitation"
         }
     }
     

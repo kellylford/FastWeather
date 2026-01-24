@@ -184,41 +184,43 @@ struct ListRowView: View {
             
             Spacer()
             
-            // Alert badge (if any)
-            if let alert = highestSeverityAlert {
-                Button(action: {
-                    onAlertTap(alert)
-                }) {
-                    Image(systemName: alert.severity.iconName)
-                        .foregroundColor(alert.severity.color)
-                        .font(.title3)
+            // Alert badge (if any) - reserve space to prevent layout shift
+            HStack(spacing: 8) {
+                if let alert = highestSeverityAlert {
+                    Button(action: {
+                        onAlertTap(alert)
+                    }) {
+                        Image(systemName: alert.severity.iconName)
+                            .foregroundColor(alert.severity.color)
+                            .font(.title3)
+                    }
+                    .buttonStyle(.borderless)
+                    .accessibilityLabel("Weather alert: \(alert.event)")
+                    .accessibilityHint("Double tap to view alert details")
+                    .transition(.scale.combined(with: .opacity))
                 }
-                .buttonStyle(.borderless)
-                .accessibilityLabel("Weather alert: \(alert.event)")
-                .accessibilityHint("Double tap to view alert details")
-            }
-            
-            // Show temperature on right side if it's enabled
-            if let weather = weather,
-               settingsManager.settings.weatherFields.first(where: { $0.type == .temperature })?.isEnabled == true {
-                Text(formatTemperature(weather.current.temperature2m))
-                    .font(.title3)
-                    .fontWeight(.semibold)
+                
+                // Show temperature on right side if it's enabled
+                if let weather = weather,
+                   settingsManager.settings.weatherFields.first(where: { $0.type == .temperature })?.isEnabled == true {
+                    Text(formatTemperature(weather.current.temperature2m))
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                }
             }
         }
         .padding(.vertical, 8)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(buildAccessibilityLabel())
-        .onAppear {
-            if !hasLoadedAlerts {
-                hasLoadedAlerts = true
-                Task {
-                    do {
-                        alerts = try await weatherService.fetchNWSAlerts(for: city)
-                    } catch {
-                        print("Failed to fetch alerts for \(city.name): \(error)")
-                    }
-                }
+        .animation(.easeInOut(duration: 0.2), value: highestSeverityAlert?.id)
+        .task(id: city.id) {
+            guard !hasLoadedAlerts else { return }
+            hasLoadedAlerts = true
+            
+            do {
+                alerts = try await weatherService.fetchNWSAlerts(for: city)
+            } catch {
+                print("Failed to fetch alerts for \(city.name): \(error)")
             }
         }
     }
