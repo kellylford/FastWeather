@@ -11,6 +11,7 @@ struct SettingsView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @EnvironmentObject var weatherService: WeatherService
     @State private var showingResetAlert = false
+    @State private var showingDeveloperSettings = false
     
     var body: some View {
         NavigationView {
@@ -255,6 +256,23 @@ struct SettingsView: View {
                     Link("Weather Data by Open-Meteo", destination: URL(string: "https://open-meteo.com")!)
                         .accessibilityLabel("Weather data provided by Open-Meteo")
                 }
+                
+                // Developer Settings section (hidden by default)
+                Section {
+                    Button(action: { showingDeveloperSettings = true }) {
+                        HStack {
+                            Image(systemName: "hammer.fill")
+                                .foregroundColor(.orange)
+                            Text("Developer Settings")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .accessibilityLabel("Developer Settings")
+                    .accessibilityHint("Configure feature flags and experimental features")
+                }
             }
             .navigationTitle("Settings")
             .toolbar {
@@ -270,6 +288,9 @@ struct SettingsView: View {
                 }
             } message: {
                 Text("Are you sure you want to remove all saved cities? This action cannot be undone.")
+            }
+            .sheet(isPresented: $showingDeveloperSettings) {
+                DeveloperSettingsView()
             }
         }
         .navigationViewStyle(.stack)

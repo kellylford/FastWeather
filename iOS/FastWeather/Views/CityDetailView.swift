@@ -11,7 +11,9 @@ struct CityDetailView: View {
     let city: City
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
+    @StateObject private var featureFlags = FeatureFlags.shared
     @State private var showingHistoricalWeather = false
+    @State private var showingRadar = false
     @State private var selectedAlert: WeatherAlert?
     
     private var weather: WeatherData? {
@@ -234,23 +236,45 @@ struct CityDetailView: View {
                     }
                     .padding()
                     
-                    // Historical Weather Button
-                    Button(action: { showingHistoricalWeather = true }) {
-                        HStack {
-                            Image(systemName: "clock.arrow.circlepath")
-                                .font(.title2)
-                            Text("View Historical Weather")
-                                .font(.headline)
+                    // Action Buttons
+                    VStack(spacing: 12) {
+                        // Historical Weather Button
+                        Button(action: { showingHistoricalWeather = true }) {
+                            HStack {
+                                Image(systemName: "clock.arrow.circlepath")
+                                    .font(.title2)
+                                Text("View Historical Weather")
+                                    .font(.headline)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.accentColor)
+                            .foregroundColor(.white)
+                            .cornerRadius(12)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.accentColor)
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
+                        .accessibilityLabel("View Historical Weather")
+                        .accessibilityHint("Opens a screen showing historical weather data for \(city.name)")
+                        
+                        // Expected Precipitation Button (feature-flagged)
+                        if featureFlags.radarEnabled {
+                            Button(action: { showingRadar = true }) {
+                                HStack {
+                                    Image(systemName: "cloud.rain")
+                                        .font(.title2)
+                                    Text("Expected Precipitation")
+                                        .font(.headline)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
+                            }
+                            .accessibilityLabel("Expected Precipitation")
+                            .accessibilityHint("Opens precipitation forecast showing expected rain and snow for \(city.name)")
+                        }
                     }
                     .padding(.horizontal)
-                    .accessibilityLabel("View Historical Weather")
-                    .accessibilityHint("Opens a screen showing historical weather data for \(city.name)")
                     
                     // Dynamically render detail sections based on settings order
                     let _ = print("📊 Detail categories: \(settingsManager.settings.detailCategories.map { "\($0.category)=\($0.isEnabled)" }.joined(separator: ", "))")
@@ -290,6 +314,19 @@ struct CityDetailView: View {
                         ToolbarItem(placement: .navigationBarTrailing) {
                             Button("Done") {
                                 showingHistoricalWeather = false
+                            }
+                        }
+                    }
+            }
+        }
+        .sheet(isPresented: $showingRadar) {
+            NavigationView {
+                RadarView(city: city)
+                    .environmentObject(settingsManager)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button("Done") {
+                                showingRadar = false
                             }
                         }
                     }

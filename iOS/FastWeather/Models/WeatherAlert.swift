@@ -69,5 +69,46 @@ struct NWSAlertProperties: Codable {
     let instruction: String?
     let onset: String?
     let expires: String?
-    let areaDesc: String?
+    private let areaDescRaw: FlexibleStringOrArray?
+    
+    var areaDesc: String? {
+        switch areaDescRaw {
+        case .string(let str): return str
+        case .array(let arr): return arr.joined(separator: ", ")
+        case .none: return nil
+        }
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case id, event, severity, headline, description, instruction, onset, expires
+        case areaDescRaw = "areaDesc"
+    }
+}
+
+// Helper enum to handle NWS API's inconsistent areaDesc field
+enum FlexibleStringOrArray: Codable {
+    case string(String)
+    case array([String])
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let str = try? container.decode(String.self) {
+            self = .string(str)
+        } else if let arr = try? container.decode([String].self) {
+            self = .array(arr)
+        } else {
+            throw DecodingError.typeMismatch(
+                FlexibleStringOrArray.self,
+                DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Expected String or [String]")
+            )
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .string(let str): try container.encode(str)
+        case .array(let arr): try container.encode(arr)
+        }
+    }
 }

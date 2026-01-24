@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A1000HISTB1 /* HistoricalWeather.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000HIST1 /* HistoricalWeather.swift */; };
-		A1000HISTB2 /* HistoricalWeatherCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000HIST2 /* HistoricalWeatherCache.swift */; };
-		A1000HISTB3 /* HistoricalWeatherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000HIST3 /* HistoricalWeatherView.swift */; };
-
+		17EDB0C714A497F1BFFBD972 /* HistoricalWeatherCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000HIST2 /* HistoricalWeatherCache.swift */; };
+		4A6D0D115A976039A83A189E /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486EDF8DF974A3A8043714DD /* FeatureFlags.swift */; };
+		62CB858A1D1017158A62BC44 /* RadarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EED081CD8BA9AD9146E4318 /* RadarService.swift */; };
+		6CA5EB93D785DE05210F375A /* DeveloperSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F0E524751DEEAE77391AD2 /* DeveloperSettingsView.swift */; };
 		A10000001 /* WeatherFastApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000 /* WeatherFastApp.swift */; };
 		A10000003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000002 /* ContentView.swift */; };
 		A10000005 /* City.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000004 /* City.swift */; };
@@ -34,13 +34,18 @@
 		A10000029 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1000002A /* PrivacyInfo.xcprivacy */; };
 		A1000ALERTB1 /* WeatherAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000ALERT1 /* WeatherAlert.swift */; };
 		A1000ALERTB2 /* AlertDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000ALERT2 /* AlertDetailView.swift */; };
+		A9C7A9359CF740975C1AA31E /* HistoricalWeather.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000HIST1 /* HistoricalWeather.swift */; };
+		C1D4318204CE67D03430BC6F /* HistoricalWeatherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000HIST3 /* HistoricalWeatherView.swift */; };
+		E41FA69A048BFD0F634DB005 /* RadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8C597ECDBB8F82B9D13 /* RadarView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A1000HIST1 /* HistoricalWeather.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistoricalWeather.swift; sourceTree = "<group>"; };
-		A1000HIST2 /* HistoricalWeatherCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistoricalWeatherCache.swift; sourceTree = "<group>"; };
-		A1000HIST3 /* HistoricalWeatherView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistoricalWeatherView.swift; sourceTree = "<group>"; };
-
+		0EED081CD8BA9AD9146E4318 /* RadarService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RadarService.swift; sourceTree = "<group>"; };
+		343FB8C597ECDBB8F82B9D13 /* RadarView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RadarView.swift; sourceTree = "<group>"; };
+		486EDF8DF974A3A8043714DD /* FeatureFlags.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeatureFlags.swift; sourceTree = "<group>"; };
+		5C214A72B9AB146E98AAFD1B /* DeveloperSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeveloperSettingsView.swift; sourceTree = "<group>"; };
+		95C9B6C3071CC6357870F7A8 /* RadarView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RadarView.swift; sourceTree = "<group>"; };
+		9DCDC584E3856802D5BBA5B7 /* RadarService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RadarService.swift; sourceTree = "<group>"; };
 		A0FFFFFF0 /* FastWeather.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FastWeather.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A10000000 /* WeatherFastApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherFastApp.swift; sourceTree = "<group>"; };
 		A10000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -66,6 +71,11 @@
 		A1000002A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A1000ALERT1 /* WeatherAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherAlert.swift; sourceTree = "<group>"; };
 		A1000ALERT2 /* AlertDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertDetailView.swift; sourceTree = "<group>"; };
+		A1000HIST1 /* HistoricalWeather.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoricalWeather.swift; sourceTree = "<group>"; };
+		A1000HIST2 /* HistoricalWeatherCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoricalWeatherCache.swift; sourceTree = "<group>"; };
+		A1000HIST3 /* HistoricalWeatherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoricalWeatherView.swift; sourceTree = "<group>"; };
+		A5F0E524751DEEAE77391AD2 /* DeveloperSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeveloperSettingsView.swift; sourceTree = "<group>"; };
+		B505151E924798A11141FE82 /* FeatureFlags.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeatureFlags.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +124,7 @@
 			children = (
 				A10000004 /* City.swift */,
 				A10000006 /* Weather.swift */,
+				A1000HIST1 /* HistoricalWeather.swift */,
 				A1000ALERT1 /* WeatherAlert.swift */,
 				A1000HIST1 /* HistoricalWeather.swift */,
 				A10000008 /* Settings.swift */,
@@ -136,6 +147,10 @@
 				A1000001C /* CityDetailView.swift */,
 				A10000026 /* AddCitySearchView.swift */,
 				A1000001E /* SettingsView.swift */,
+				343FB8C597ECDBB8F82B9D13 /* RadarView.swift */,
+				A5F0E524751DEEAE77391AD2 /* DeveloperSettingsView.swift */,
+				95C9B6C3071CC6357870F7A8 /* RadarView.swift */,
+				5C214A72B9AB146E98AAFD1B /* DeveloperSettingsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -147,6 +162,10 @@
 				A1000HIST2 /* HistoricalWeatherCache.swift */,
 				A1000000C /* SettingsManager.swift */,
 				A1000000E /* CityDataService.swift */,
+				486EDF8DF974A3A8043714DD /* FeatureFlags.swift */,
+				0EED081CD8BA9AD9146E4318 /* RadarService.swift */,
+				B505151E924798A11141FE82 /* FeatureFlags.swift */,
+				9DCDC584E3856802D5BBA5B7 /* RadarService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -252,9 +271,13 @@
 				A1000001F /* SettingsView.swift in Sources */,
 				A1000ALERTB1 /* WeatherAlert.swift in Sources */,
 				A1000ALERTB2 /* AlertDetailView.swift in Sources */,
-				A1000HISTB1 /* HistoricalWeather.swift in Sources */,
-				A1000HISTB2 /* HistoricalWeatherCache.swift in Sources */,
-				A1000HISTB3 /* HistoricalWeatherView.swift in Sources */,
+				4A6D0D115A976039A83A189E /* FeatureFlags.swift in Sources */,
+				62CB858A1D1017158A62BC44 /* RadarService.swift in Sources */,
+				E41FA69A048BFD0F634DB005 /* RadarView.swift in Sources */,
+				6CA5EB93D785DE05210F375A /* DeveloperSettingsView.swift in Sources */,
+				A9C7A9359CF740975C1AA31E /* HistoricalWeather.swift in Sources */,
+				17EDB0C714A497F1BFFBD972 /* HistoricalWeatherCache.swift in Sources */,
+				C1D4318204CE67D03430BC6F /* HistoricalWeatherView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -295,6 +318,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = FastWeather/FastWeather.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 9;
@@ -315,9 +339,10 @@
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;			CODE_SIGN_ENTITLEMENTS = FastWeather/FastWeather.entitlements;				GENERATE_INFOPLIST_FILE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FastWeather/Info.plist;
-			INFOPLIST_KEY_CFBundleDisplayName = "Fast Weather";
+				INFOPLIST_KEY_CFBundleDisplayName = "Fast Weather";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -378,6 +403,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = FastWeather/FastWeather.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 9;
@@ -392,9 +418,10 @@
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;			CODE_SIGN_ENTITLEMENTS = FastWeather/FastWeather.entitlements;				GENERATE_INFOPLIST_FILE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FastWeather/Info.plist;
-			INFOPLIST_KEY_CFBundleDisplayName = "Fast Weather";
+				INFOPLIST_KEY_CFBundleDisplayName = "Fast Weather";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
