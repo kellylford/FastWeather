@@ -246,11 +246,11 @@ struct SettingsView: View {
                     HStack {
                         Text("Version")
                         Spacer()
-                        Text("1.0 (build 9)")
+                        Text("1.0 (build 11)")
                             .foregroundColor(.secondary)
                     }
                     .accessibilityElement(children: .combine)
-                    .accessibilityLabel("Version 1.0 build 9")
+                    .accessibilityLabel("Version 1.0 build 11")
                     
                     Link("Weather Data by Open-Meteo", destination: URL(string: "https://open-meteo.com")!)
                         .accessibilityLabel("Weather data provided by Open-Meteo")
