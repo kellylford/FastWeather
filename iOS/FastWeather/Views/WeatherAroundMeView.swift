@@ -339,6 +339,8 @@ struct WeatherAroundMeView: View {
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("\(currentCity.displayName), approximately \(Int(currentCity.distanceMiles)) miles. City \(currentCityIndex + 1) of \(citiesInDirection.count)")
                 .accessibilityHint("Swipe up for farther cities, swipe down for closer cities")
+                .accessibilityAddTraits([.isButton])
+                .accessibilityValue("\(currentCityIndex + 1) of \(citiesInDirection.count)")
                 .accessibilityAdjustableAction { direction in
                     switch direction {
                     case .increment:
