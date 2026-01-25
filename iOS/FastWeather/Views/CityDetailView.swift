@@ -365,8 +365,11 @@ struct CityDetailView: View {
             titleVisibility: .visible
         ) {
             Button("Remove", role: .destructive) {
-                weatherService.removeCity(city)
                 dismiss()
+                // Defer removal until after dismiss animation completes to avoid UICollectionView crash
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    weatherService.removeCity(city)
+                }
             }
             Button("Cancel", role: .cancel) { }
         } message: {

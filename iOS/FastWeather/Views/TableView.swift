@@ -76,10 +76,12 @@ struct TableView: View {
     }
     
     private func deleteCities(at offsets: IndexSet) {
-        for index in offsets {
-            let cityName = weatherService.savedCities[index].displayName
-            weatherService.removeCity(weatherService.savedCities[index])
-            UIAccessibility.post(notification: .announcement, argument: "Removed \(cityName)")
+        withAnimation {
+            for index in offsets {
+                let cityName = weatherService.savedCities[index].displayName
+                weatherService.removeCity(weatherService.savedCities[index])
+                UIAccessibility.post(notification: .announcement, argument: "Removed \(cityName)")
+            }
         }
     }
     
@@ -91,7 +93,9 @@ struct TableView: View {
     @ViewBuilder
     private func contextMenuContent(for city: City, at index: Int) -> some View {
         Button(role: .destructive, action: {
-            weatherService.removeCity(city)
+            withAnimation {
+                weatherService.removeCity(city)
+            }
         }) {
             Label("Remove City", systemImage: "trash")
         }

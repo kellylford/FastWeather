@@ -495,7 +495,9 @@ struct CityLocationDetailView: View {
             if let existingCity = weatherService.savedCities.first(where: { city in
                 city.latitude == cityLocation.latitude && city.longitude == cityLocation.longitude
             }) {
-                weatherService.removeCity(existingCity)
+                withAnimation {
+                    weatherService.removeCity(existingCity)
+                }
                 UIAccessibility.post(notification: .announcement, argument: "\(cityLocation.displayName) removed from My Cities")
             }
         } else {

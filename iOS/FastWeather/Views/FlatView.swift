@@ -139,7 +139,9 @@ struct FlatView: View {
             Divider()
             
             Button(role: .destructive, action: {
-                weatherService.removeCity(city)
+                withAnimation {
+                    weatherService.removeCity(city)
+                }
             }) {
                 Label("Remove City", systemImage: "trash")
             }

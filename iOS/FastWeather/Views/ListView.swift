@@ -63,10 +63,12 @@ struct ListView: View {
     }
     
     private func deleteCities(at offsets: IndexSet) {
-        for index in offsets {
-            let cityName = weatherService.savedCities[index].displayName
-            weatherService.removeCity(weatherService.savedCities[index])
-            UIAccessibility.post(notification: .announcement, argument: "Removed \(cityName)")
+        withAnimation {
+            for index in offsets {
+                let cityName = weatherService.savedCities[index].displayName
+                weatherService.removeCity(weatherService.savedCities[index])
+                UIAccessibility.post(notification: .announcement, argument: "Removed \(cityName)")
+            }
         }
     }
     
@@ -78,7 +80,9 @@ struct ListView: View {
     @ViewBuilder
     private func contextMenuContent(for city: City, at index: Int) -> some View {
         Button(role: .destructive, action: {
-            weatherService.removeCity(city)
+            withAnimation {
+                weatherService.removeCity(city)
+            }
         }) {
             Label("Remove City", systemImage: "trash")
         }
@@ -116,7 +120,9 @@ struct ListView: View {
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(editMode?.wrappedValue.isEditing == true ? [.allowsDirectInteraction] : [])
         .accessibilityAction(named: "Remove") {
-            weatherService.removeCity(city)
+            withAnimation {
+                weatherService.removeCity(city)
+            }
         }
         .accessibilityAction(named: "Move Up") {
             moveCityUp(at: index)
