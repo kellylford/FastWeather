@@ -80,7 +80,8 @@ const DEFAULT_CONFIG = {
         pressure: 'inHg',
         distance: 'mi'
     },
-    defaultView: 'flat'
+    defaultView: 'flat',
+    listViewStyle: 'detailed' // 'detailed' shows labels, 'condensed' shows data only
 };
 
 // Application state
@@ -2321,6 +2322,19 @@ function renderTableView(container) {
         });
         
         cityCell.appendChild(cityLink);
+        
+        // Add alert badge to city cell
+        const alertSpan = document.createElement('span');
+        alertSpan.id = `alert-badge-table-${index}`;
+        alertSpan.style.marginLeft = '8px';
+        fetchWeatherAlerts(cityName, lat, lon).then(alerts => {
+            const badgeHTML = renderAlertBadge(alerts);
+            if (badgeHTML) {
+                alertSpan.innerHTML = badgeHTML;
+            }
+        });
+        cityCell.appendChild(alertSpan);
+        
         row.appendChild(cityCell);
         
         if (weather && weather.current) {
@@ -2421,14 +2435,6 @@ function renderTableView(container) {
         aroundBtn.title = 'Weather Around Me';
         actionsDiv.appendChild(aroundBtn);
         
-        // Alert badge
-        const alertSpan = document.createElement('span');
-        alertSpan.id = `alert-badge-table-${index}`;
-        fetchWeatherAlerts(cityName, lat, lon).then(alerts => {
-            alertSpan.innerHTML = renderAlertBadge(alerts);
-        });
-        actionsDiv.appendChild(alertSpan);
-        
         // Movement buttons
         if (index > 0) {
             const upBtn = createButton('↑', `Move ${cityName} up`, () => moveCityUp(cityName));
@@ -2469,9 +2475,10 @@ function renderListView(container) {
     
     let activeIndex = 0;
     const cityNames = Object.keys(cities);
+    const isCondensed = currentConfig.listViewStyle === 'condensed';
     
     // Create list items
-    cityNames.forEach((cityName, index) => {
+    cityNames.forEach(async (cityName, index) => {
         const [lat, lon] = cities[cityName];
         const weather = weatherData[cityName];
         
@@ -2481,8 +2488,29 @@ function renderListView(container) {
         item.id = `list-item-${index}`;
         item.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
         
-        // City name and weather summary in one line
+        // City name - we'll add alert button separately
         let weatherText = cityName;
+        let alertInfo = null;
+        
+        // Check for alerts
+        try {
+            const alerts = await fetchWeatherAlerts(cityName, lat, lon);
+            if (alerts && alerts.length > 0) {
+                const severityOrder = { extreme: 0, severe: 1, moderate: 2, minor: 3, unknown: 4 };
+                const highestAlert = alerts.sort((a, b) => 
+                    (severityOrder[a.severity] || 4) - (severityOrder[b.severity] || 4)
+                )[0];
+                
+                if (alerts.length === 1) {
+                    alertInfo = { text: `Alert: ${highestAlert.event}`, alert: highestAlert };
+                } else {
+                    alertInfo = { text: `Alerts: ${highestAlert.event} and ${alerts.length - 1} more`, alert: highestAlert };
+                }
+            }
+        } catch (error) {
+            // Silently continue without alerts if fetch fails
+        }
+        
         if (weather && weather.current) {
             const current = weather.current;
             const parts = [];
@@ -2494,60 +2522,92 @@ function renderListView(container) {
                 switch(key) {
                     case 'temperature':
                         const temp = convertTemperature(current.temperature_2m);
-                        parts.push(`${temp}°${currentConfig.units.temperature}`);
+                        parts.push(isCondensed ? 
+                            `${temp}°${currentConfig.units.temperature}` : 
+                            `Temperature: ${temp}°${currentConfig.units.temperature}`);
                         break;
                     case 'conditions':
                         const weatherDesc = WEATHER_CODES[current.weather_code] || 'Unknown';
-                        parts.push(weatherDesc);
+                        parts.push(isCondensed ? weatherDesc : `Conditions: ${weatherDesc}`);
                         break;
                     case 'feels_like':
                         const feels = convertTemperature(current.apparent_temperature);
-                        parts.push(`Feels: ${feels}°${currentConfig.units.temperature}`);
+                        parts.push(isCondensed ? 
+                            `${feels}°${currentConfig.units.temperature}` : 
+                            `Feels Like: ${feels}°${currentConfig.units.temperature}`);
                         break;
                     case 'humidity':
-                        parts.push(`Humidity: ${current.relative_humidity_2m}%`);
+                        parts.push(isCondensed ? 
+                            `${current.relative_humidity_2m}%` : 
+                            `Humidity: ${current.relative_humidity_2m}%`);
                         break;
                     case 'wind_speed':
                         const windSpeed = convertWindSpeed(current.wind_speed_10m);
-                        parts.push(`Wind: ${windSpeed} ${currentConfig.units.wind_speed}`);
+                        parts.push(isCondensed ? 
+                            `${windSpeed} ${currentConfig.units.wind_speed}` : 
+                            `Wind: ${windSpeed} ${currentConfig.units.wind_speed}`);
                         break;
                     case 'wind_direction':
                         const windDir = degreesToCardinal(current.wind_direction_10m);
-                        parts.push(`Wind Dir: ${windDir}`);
+                        parts.push(isCondensed ? windDir : `Wind Direction: ${windDir}`);
                         break;
                     case 'high_temp':
                         if (weather.daily) {
                             const high = convertTemperature(weather.daily.temperature_2m_max[0]);
-                            parts.push(`High: ${high}°${currentConfig.units.temperature}`);
+                            parts.push(isCondensed ? 
+                                `${high}°${currentConfig.units.temperature}` : 
+                                `High: ${high}°${currentConfig.units.temperature}`);
                         }
                         break;
                     case 'low_temp':
                         if (weather.daily) {
                             const low = convertTemperature(weather.daily.temperature_2m_min[0]);
-                            parts.push(`Low: ${low}°${currentConfig.units.temperature}`);
+                            parts.push(isCondensed ? 
+                                `${low}°${currentConfig.units.temperature}` : 
+                                `Low: ${low}°${currentConfig.units.temperature}`);
                         }
                         break;
                     case 'sunrise':
                         if (weather.daily && weather.daily.sunrise && weather.daily.sunrise[0]) {
                             const sunriseTime = new Date(weather.daily.sunrise[0]);
-                            parts.push(`Sunrise: ${sunriseTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`);
+                            const timeStr = sunriseTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                            parts.push(isCondensed ? timeStr : `Sunrise: ${timeStr}`);
                         }
                         break;
                     case 'sunset':
                         if (weather.daily && weather.daily.sunset && weather.daily.sunset[0]) {
                             const sunsetTime = new Date(weather.daily.sunset[0]);
-                            parts.push(`Sunset: ${sunsetTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`);
+                            const timeStr = sunsetTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                            parts.push(isCondensed ? timeStr : `Sunset: ${timeStr}`);
                         }
                         break;
                 }
             });
             
-            weatherText = `${cityName} - ${parts.join(', ')}`;
+            // Add alert info right after city name if present
+            if (alertInfo) {
+                weatherText = `${weatherText} (${alertInfo.text})`;
+            }
+            
+            weatherText = `${weatherText} - ${parts.join(', ')}`;
         } else {
-            weatherText = `${cityName} - Loading...`;
+            // Add alert info right after city name if present
+            if (alertInfo) {
+                weatherText = `${weatherText} (${alertInfo.text})`;
+            }
+            weatherText = `${weatherText} - Loading...`;
         }
         
-        item.textContent = weatherText;
+        // Create text node for main content
+        const textNode = document.createTextNode(weatherText);
+        item.appendChild(textNode);
+        
+        // Set aria-label for screen reader announcement
+        item.setAttribute('aria-label', weatherText);
+        
+        // Set aria-label for screen reader announcement
+        item.setAttribute('aria-label', ariaLabel);
+        
         item.dataset.cityName = cityName;
         item.dataset.lat = lat;
         item.dataset.lon = lon;
@@ -2630,6 +2690,7 @@ function renderListView(container) {
             historyBtn.textContent = `📊 ${cityName} History`;
             precipBtn.textContent = `💧 ${cityName} Precipitation`;
             aroundBtn.textContent = `🧭 Around ${cityName}`;
+            alertBtn.textContent = `⚠️ ${cityName} Alerts`;
             downBtn.textContent = `↓ Move ${cityName} Down`;
             removeBtn.textContent = `🗑️ Remove ${cityName}`;
             detailsBtn.textContent = `📋 ${cityName} Details`;
@@ -2708,7 +2769,28 @@ function renderListView(container) {
     });
     aroundBtn.className = 'list-control-btn feature-btn';
     
-    // Alert badge for selected city
+    const alertBtn = createButton('⚠️ Alerts', 'View weather alerts for selected city', async () => {
+        const items = container.querySelectorAll('.list-view-item');
+        const currentActive = container.getAttribute('aria-activedescendant');
+        const activeIndex = parseInt(currentActive.split('-')[2]);
+        const cityName = items[activeIndex].dataset.cityName;
+        const lat = parseFloat(items[activeIndex].dataset.lat);
+        const lon = parseFloat(items[activeIndex].dataset.lon);
+        
+        try {
+            const alerts = await fetchWeatherAlerts(cityName, lat, lon);
+            if (alerts && alerts.length > 0) {
+                showAlertDetails(alerts[0]);
+            }
+            // If no alerts, do nothing - absence doesn't need announcement
+        } catch (error) {
+            announceToScreenReader(`Error loading alerts for ${cityName}`);
+        }
+    });
+    alertBtn.className = 'list-control-btn feature-btn';
+    alertBtn.id = 'list-alert-btn';
+    
+    // Alert badge for selected city (visual indicator)
     const alertSpan = document.createElement('span');
     alertSpan.id = 'list-view-alert-badge';
     alertSpan.className = 'alert-container';
@@ -2756,6 +2838,7 @@ function renderListView(container) {
     controlsDiv.appendChild(historyBtn);
     controlsDiv.appendChild(precipBtn);
     controlsDiv.appendChild(aroundBtn);
+    controlsDiv.appendChild(alertBtn);
     controlsDiv.appendChild(alertSpan);
     controlsDiv.appendChild(upBtn);
     controlsDiv.appendChild(downBtn);
@@ -3049,6 +3132,11 @@ function openConfigDialog() {
     document.querySelector(`input[name="distance-unit"][value="${currentConfig.units.distance}"]`).checked = true;
     document.querySelector(`input[name="default-view"][value="${currentConfig.defaultView}"]`).checked = true;
     
+    // List view style (may not exist in older configs)
+    const listViewStyle = currentConfig.listViewStyle || 'detailed';
+    const listViewStyleInput = document.querySelector(`input[name="list-view-style"][value="${listViewStyle}"]`);
+    if (listViewStyleInput) listViewStyleInput.checked = true;
+    
     closeAllModals();
     focusReturnElement = document.activeElement;
     dialog.hidden = false;
@@ -3104,6 +3192,12 @@ function updateConfigFromForm() {
     
     // Default view
     currentConfig.defaultView = document.querySelector('input[name="default-view"]:checked').value;
+    
+    // List view style
+    const listViewStyleChecked = document.querySelector('input[name="list-view-style"]:checked');
+    if (listViewStyleChecked) {
+        currentConfig.listViewStyle = listViewStyleChecked.value;
+    }
 }
 
 function renderCityListOrderControls() {
@@ -3352,6 +3446,10 @@ function loadConfigFromStorage() {
             if (!currentConfig.defaultView) {
                 currentConfig.defaultView = DEFAULT_CONFIG.defaultView;
             }
+            // Ensure listViewStyle exists for backward compatibility
+            if (!currentConfig.listViewStyle) {
+                currentConfig.listViewStyle = DEFAULT_CONFIG.listViewStyle;
+            }
         } catch (e) {
             console.error('Failed to load config:', e);
         }
@@ -3549,12 +3647,16 @@ function renderAlertBadge(alerts) {
     
     const icon = severityIcons[highestSeverityAlert.severity] || 'ℹ️';
     
+    // Build screen reader label
+    const srLabel = alerts.length === 1 
+        ? `Weather alert: ${escapeHtml(highestSeverityAlert.event)}`
+        : `${alerts.length} weather alerts: ${escapeHtml(highestSeverityAlert.event)} and ${alerts.length - 1} more`;
+    
     return `<button class="alert-badge ${highestSeverityAlert.severity}" 
                     onclick="showAlertDetails(\`${JSON.stringify(highestSeverityAlert).replace(/`/g, '\\`')}\`)"
-                    aria-label="Weather alert: ${escapeHtml(highestSeverityAlert.event)}"
+                    aria-label="${srLabel}"
                     title="${escapeHtml(highestSeverityAlert.event)}">
                 <span aria-hidden="true">${icon}</span>
-                <span class="sr-only">${alerts.length} alert${alerts.length > 1 ? 's' : ''}</span>
             </button>`;
 }
 

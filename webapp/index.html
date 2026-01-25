@@ -294,6 +294,14 @@
                         <label><input type="radio" name="default-view" value="table"> Table View</label>
                         <label><input type="radio" name="default-view" value="list"> List View</label>
                     </fieldset>
+                    <fieldset>
+                        <legend>List View Style (Accessibility)</legend>
+                        <label><input type="radio" name="list-view-style" value="detailed" checked> Detailed (Field names + data)</label>
+                        <label><input type="radio" name="list-view-style" value="condensed"> Condensed (Data only)</label>
+                        <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">
+                            Detailed mode shows labels like "Temperature: 72°F". Condensed mode shows just "72°F" for more concise screen reader output.
+                        </p>
+                    </fieldset>
                 </div>
 
                 <div id="units-panel" role="tabpanel" aria-labelledby="units-tab" class="tab-panel" hidden>

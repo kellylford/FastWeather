@@ -396,6 +396,31 @@ section {
     border-bottom: none;
 }
 
+.list-alert-btn {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    margin-left: 0.5rem;
+    border-radius: var(--border-radius);
+    transition: background-color 0.2s;
+    font-size: inherit;
+}
+
+.list-alert-btn:hover {
+    background-color: rgba(255, 193, 7, 0.2);
+}
+
+.list-alert-btn:focus {
+    outline: 2px solid var(--focus-outline);
+    outline-offset: 2px;
+}
+
+.list-view-item[aria-selected="true"] .list-alert-btn {
+    color: white;
+}
+
 #city-list[role="listbox"] {
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius);
