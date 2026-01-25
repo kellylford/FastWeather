@@ -363,7 +363,8 @@ struct WeatherAroundMeView: View {
                 .background(Color.accentColor.opacity(0.1))
                 .cornerRadius(10)
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel(cityExplorerAccessibilityLabel(currentCity))
+                .accessibilityLabel("City explorer")
+                .accessibilityValue(cityExplorerAccessibilityLabel(currentCity))
                 .accessibilityHint("Swipe up for farther cities, swipe down for closer cities")
                 .accessibilityAdjustableAction { direction in
                     switch direction {
