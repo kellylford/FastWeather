@@ -24,6 +24,7 @@ struct WeatherAroundMeView: View {
     @State private var citiesInDirection: [DirectionalCityInfo] = []
     @State private var currentCityIndex: Int = 0
     @State private var showingAllCities = false
+    @State private var directionalWeatherData: [UUID: (temp: Double, condition: String)] = [:]
     
     let distanceOptions: [Double] = [50, 100, 150, 200, 250, 300, 350]
     
@@ -280,6 +281,7 @@ struct WeatherAroundMeView: View {
                     ForEach(CardinalDirection.allCases, id: \.self) { direction in
                         HStack {
                             Image(systemName: direction.icon)
+                                .accessibilityHidden(true)
                             Text(direction.rawValue)
                         }
                         .tag(direction)
@@ -324,6 +326,20 @@ struct WeatherAroundMeView: View {
                         .font(.headline)
                         .multilineTextAlignment(.center)
                     
+                    // Weather info if available
+                    if let weather = directionalWeatherData[currentCity.id] {
+                        HStack(spacing: 8) {
+                            Text(formatTemperature(weather.temp))
+                                .font(.title2.weight(.semibold))
+                            Text(weather.condition)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                    } else {
+                        ProgressView()
+                            .accessibilityLabel("Loading weather")
+                    }
+                    
                     Text("~\(Int(currentCity.distanceMiles)) mi")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
@@ -337,10 +353,16 @@ struct WeatherAroundMeView: View {
                 .background(Color.accentColor.opacity(0.1))
                 .cornerRadius(10)
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("\(currentCity.displayName), approximately \(Int(currentCity.distanceMiles)) miles. City \(currentCityIndex + 1) of \(citiesInDirection.count)")
+                .accessibilityLabel({
+                    var label = "\(currentCity.displayName), "
+                    if let weather = directionalWeatherData[currentCity.id] {
+                        label += "\(formatTemperature(weather.temp)), \(weather.condition), "
+                    }
+                    label += "approximately \(Int(currentCity.distanceMiles)) miles, \(currentCityIndex + 1) of \(citiesInDirection.count)"
+                    return label
+                }())
                 .accessibilityHint("Swipe up for farther cities, swipe down for closer cities")
                 .accessibilityAddTraits([.isButton])
-                .accessibilityValue("\(currentCityIndex + 1) of \(citiesInDirection.count)")
                 .accessibilityAdjustableAction { direction in
                     switch direction {
                     case .increment:
@@ -356,6 +378,9 @@ struct WeatherAroundMeView: View {
                     @unknown default:
                         break
                     }
+                }
+                .task(id: currentCity.id) {
+                    await loadWeatherForCity(currentCity)
                 }
             }
             
@@ -476,6 +501,31 @@ struct WeatherAroundMeView: View {
             maxDistance: distanceMiles
         )
         currentCityIndex = 0
+        // Clear old weather data
+        directionalWeatherData.removeAll()
+    }
+    
+    private func loadWeatherForCity(_ cityInfo: DirectionalCityInfo) async {
+        // Don't reload if we already have data
+        guard directionalWeatherData[cityInfo.id] == nil else { return }
+        
+        do {
+            let weatherService = WeatherService()
+            let weather = try await weatherService.fetchWeatherBasic(
+                latitude: cityInfo.latitude,
+                longitude: cityInfo.longitude
+            )
+            
+            let temp = weather.current.temperature2m
+            let condition = weather.current.weatherCodeEnum?.description ?? "Unknown"
+            
+            await MainActor.run {
+                directionalWeatherData[cityInfo.id] = (temp: temp, condition: condition)
+            }
+        } catch {
+            // Silently fail for individual cities
+            print("Failed to load weather for \(cityInfo.name): \(error)")
+        }
     }
     
     private func showAllCities() {
