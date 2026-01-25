@@ -68,7 +68,27 @@ struct SettingsView: View {
                         settingsManager.saveSettings()
                     }
                     .accessibilityLabel("Precipitation unit, currently \(settingsManager.settings.precipitationUnit.rawValue)")
-                    
+                }
+                
+                // Weather Around Me section
+                Section(header: Text("Weather Around Me")) {
+                    Picker("Default Distance", selection: $settingsManager.settings.weatherAroundMeDistance) {
+                        Text("50 miles").tag(50.0)
+                        Text("100 miles").tag(100.0)
+                        Text("150 miles").tag(150.0)
+                        Text("200 miles").tag(200.0)
+                        Text("250 miles").tag(250.0)
+                        Text("300 miles").tag(300.0)
+                        Text("350 miles").tag(350.0)
+                    }
+                    .onChange(of: settingsManager.settings.weatherAroundMeDistance) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Default distance for Weather Around Me, currently \(Int(settingsManager.settings.weatherAroundMeDistance)) miles")
+                    .accessibilityHint("Sets the default radius when viewing weather conditions around a city")
+                }
+                
+                Section(header: Text("Units")) {
                     Picker(selection: $settingsManager.settings.pressureUnit) {
                         ForEach(PressureUnit.allCases, id: \.self) { unit in
                             Text(unit.rawValue).tag(unit)
@@ -240,6 +260,21 @@ struct SettingsView: View {
                     }
                     .accessibilityLabel("Clear all cached historical weather data")
                     .accessibilityHint("Tap to delete cached historical data for all cities")
+                }
+                
+                // User Guide section (feature-flagged)
+                if FeatureFlags.shared.userGuideEnabled {
+                    Section {
+                        NavigationLink(destination: UserGuideView()) {
+                            HStack {
+                                Image(systemName: "book.fill")
+                                    .foregroundColor(.blue)
+                                Text("User Guide")
+                            }
+                        }
+                        .accessibilityLabel("User Guide")
+                        .accessibilityHint("Learn how to use FastWeather features")
+                    }
                 }
                 
                 // About section

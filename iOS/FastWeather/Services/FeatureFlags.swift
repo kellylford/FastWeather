@@ -30,12 +30,21 @@ class FeatureFlags: ObservableObject {
         }
     }
     
+    /// Enable/disable user guide link in settings
+    /// Set to true to show user guide link in settings
+    @Published var userGuideEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(userGuideEnabled, forKey: "feature_user_guide_enabled")
+        }
+    }
+    
     // MARK: - Initialization
     
     private init() {
         // Load saved feature flag states
         self.radarEnabled = UserDefaults.standard.bool(forKey: "feature_radar_enabled")
         self.weatherAroundMeEnabled = UserDefaults.standard.bool(forKey: "feature_weather_around_me_enabled")
+        self.userGuideEnabled = UserDefaults.standard.bool(forKey: "feature_user_guide_enabled")
         
         // Default values (if first launch or not set)
         // Change these to true/false to enable/disable features during development
@@ -45,6 +54,9 @@ class FeatureFlags: ObservableObject {
         if !UserDefaults.standard.contains(key: "feature_weather_around_me_enabled") {
             self.weatherAroundMeEnabled = false  // Disabled by default - set to true to test
         }
+        if !UserDefaults.standard.contains(key: "feature_user_guide_enabled") {
+            self.userGuideEnabled = false  // Disabled by default
+        }
     }
     
     // MARK: - Helper Methods
@@ -53,6 +65,7 @@ class FeatureFlags: ObservableObject {
     func resetToDefaults() {
         radarEnabled = false
         weatherAroundMeEnabled = false
+        userGuideEnabled = false
         print("🔧 Feature flags reset to defaults")
     }
     
@@ -60,6 +73,7 @@ class FeatureFlags: ObservableObject {
     func enableAll() {
         radarEnabled = true
         weatherAroundMeEnabled = true
+        userGuideEnabled = true
         print("🔧 All features enabled")
     }
     
@@ -67,6 +81,7 @@ class FeatureFlags: ObservableObject {
     func disableAll() {
         radarEnabled = false
         weatherAroundMeEnabled = false
+        userGuideEnabled = false
         print("🔧 All features disabled")
     }
 }

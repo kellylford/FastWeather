@@ -10,14 +10,21 @@ import SwiftUI
 
 struct WeatherAroundMeView: View {
     let city: City
+    let defaultDistance: Double
     @EnvironmentObject var settingsManager: SettingsManager
     @State private var regionalWeather: RegionalWeatherData?
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var lastUpdated: Date?
-    @State private var distanceMiles: Double = 50
+    @State private var distanceMiles: Double
     
     let distanceOptions: [Double] = [50, 100, 150, 200, 250, 300, 350]
+    
+    init(city: City, defaultDistance: Double = 150) {
+        self.city = city
+        self.defaultDistance = defaultDistance
+        _distanceMiles = State(initialValue: defaultDistance)
+    }
     
     var body: some View {
         ScrollView {

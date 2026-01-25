@@ -132,6 +132,7 @@ struct AppSettings: Codable {
     var precipitationUnit: PrecipitationUnit = .inches
     var pressureUnit: PressureUnit = .inHg
     var historicalYearsBack: Int = 20
+    var weatherAroundMeDistance: Double = 150  // Default distance in miles
     
     // Ordered weather fields with enable/disable state
     var weatherFields: [WeatherField] = [

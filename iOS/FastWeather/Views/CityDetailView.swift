@@ -12,10 +12,12 @@ struct CityDetailView: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
     @StateObject private var featureFlags = FeatureFlags.shared
+    @Environment(\.dismiss) private var dismiss
     @State private var showingHistoricalWeather = false
     @State private var showingRadar = false
     @State private var showingWeatherAroundMe = false
     @State private var selectedAlert: WeatherAlert?
+    @State private var showingRemoveConfirmation = false
     
     private var weather: WeatherData? {
         weatherService.weatherCache[city.id]
@@ -237,64 +239,45 @@ struct CityDetailView: View {
                     }
                     .padding()
                     
-                    // Action Buttons
-                    VStack(spacing: 12) {
-                        // Historical Weather Button
+                    // Actions Menu
+                    Menu {
                         Button(action: { showingHistoricalWeather = true }) {
-                            HStack {
-                                Image(systemName: "clock.arrow.circlepath")
-                                    .font(.title2)
-                                Text("View Historical Weather")
-                                    .font(.headline)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.accentColor)
-                            .foregroundColor(.white)
-                            .cornerRadius(12)
+                            Label("View Historical Weather", systemImage: "clock.arrow.circlepath")
                         }
-                        .accessibilityLabel("View Historical Weather")
-                        .accessibilityHint("Opens a screen showing historical weather data for \(city.name)")
                         
-                        // Expected Precipitation Button (feature-flagged)
                         if featureFlags.radarEnabled {
                             Button(action: { showingRadar = true }) {
-                                HStack {
-                                    Image(systemName: "cloud.rain")
-                                        .font(.title2)
-                                    Text("Expected Precipitation")
-                                        .font(.headline)
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(12)
+                                Label("Expected Precipitation", systemImage: "cloud.rain")
                             }
-                            .accessibilityLabel("Expected Precipitation")
-                            .accessibilityHint("Opens precipitation forecast showing expected rain and snow for \(city.name)")
                         }
                         
-                        // Weather Around Me Button (feature-flagged)
                         if featureFlags.weatherAroundMeEnabled {
                             Button(action: { showingWeatherAroundMe = true }) {
-                                HStack {
-                                    Image(systemName: "location.circle")
-                                        .font(.title2)
-                                    Text("Weather Around Me")
-                                        .font(.headline)
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.purple)
-                                .foregroundColor(.white)
-                                .cornerRadius(12)
+                                Label("Weather Around Me", systemImage: "location.circle")
                             }
-                            .accessibilityLabel("Weather Around Me")
-                            .accessibilityHint("Shows weather conditions in all directions around \(city.name)")
                         }
+                        
+                        Divider()
+                        
+                        Button(role: .destructive, action: { showingRemoveConfirmation = true }) {
+                            Label("Remove City", systemImage: "trash")
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "ellipsis.circle")
+                                .font(.title2)
+                            Text("Actions")
+                                .font(.headline)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.accentColor)
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
                     }
                     .padding(.horizontal)
+                    .accessibilityLabel("Actions menu")
+                    .accessibilityHint("Opens menu with options for historical weather, precipitation forecast, weather around me, and remove city")
                     
                     // Dynamically render detail sections based on settings order
                     let _ = print("📊 Detail categories: \(settingsManager.settings.detailCategories.map { "\($0.category)=\($0.isEnabled)" }.joined(separator: ", "))")
@@ -354,7 +337,7 @@ struct CityDetailView: View {
         }
         .sheet(isPresented: $showingWeatherAroundMe) {
             NavigationView {
-                WeatherAroundMeView(city: city)
+                WeatherAroundMeView(city: city, defaultDistance: settingsManager.settings.weatherAroundMeDistance)
                     .environmentObject(settingsManager)
                     .toolbar {
                         ToolbarItem(placement: .navigationBarTrailing) {
@@ -367,6 +350,19 @@ struct CityDetailView: View {
         }
         .sheet(item: $selectedAlert) { alert in
             AlertDetailView(alert: alert)
+        }
+        .confirmationDialog(
+            "Remove \(city.name)?",
+            isPresented: $showingRemoveConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Remove", role: .destructive) {
+                weatherService.removeCity(city)
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This city will be removed from your list.")
         }
     }
     
@@ -723,15 +719,5 @@ struct WeatherAlertsSection: View {
                 hasLoaded = true
             }
         }
-    }
-}
-
-#Preview {
-    NavigationView {
-        CityDetailView(
-            city: City(name: "Madison", state: "Wisconsin", country: "United States", latitude: 43.074761, longitude: -89.3837613)
-        )
-        .environmentObject(WeatherService())
-        .environmentObject(SettingsManager())
     }
 }
