@@ -426,6 +426,12 @@ struct WeatherAroundMeView: View {
         } message: {
             Text(alertMessage)
         }
+        .onChange(of: showingAllCities) { oldValue, newValue in
+            // Flash detection: Alert should never go from true to true
+            if oldValue == true && newValue == true {
+                print("⚠️ ALERT FLASH DETECTED in WeatherAroundMeView cities alert!")
+            }
+        }
     }
     
     // MARK: - Regional Summary Card

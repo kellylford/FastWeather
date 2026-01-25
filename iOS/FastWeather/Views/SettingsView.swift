@@ -323,6 +323,12 @@ struct SettingsView: View {
             } message: {
                 Text("Are you sure you want to remove all saved cities? This action cannot be undone.")
             }
+            .onChange(of: showingResetAlert) { oldValue, newValue in
+                // Flash detection: Alert should never go from true to true
+                if oldValue == true && newValue == true {
+                    print("⚠️ ALERT FLASH DETECTED in SettingsView reset alert!")
+                }
+            }
             .sheet(isPresented: $showingDeveloperSettings) {
                 DeveloperSettingsView()
             }

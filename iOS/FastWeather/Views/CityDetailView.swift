@@ -18,6 +18,7 @@ struct CityDetailView: View {
     @State private var showingWeatherAroundMe = false
     @State private var selectedAlert: WeatherAlert?
     @State private var showingRemoveConfirmation = false
+    @State private var removalCityName = "" // Captured at trigger time to prevent dialog flashing
     @State private var isRefreshing = false
     
     private var weather: WeatherData? {
@@ -276,7 +277,10 @@ struct CityDetailView: View {
                         
                         Divider()
                         
-                        Button(role: .destructive, action: { showingRemoveConfirmation = true }) {
+                        Button(role: .destructive, action: { 
+                            removalCityName = city.name
+                            showingRemoveConfirmation = true 
+                        }) {
                             Label("Remove City", systemImage: "trash")
                         }
                     } label: {
@@ -360,7 +364,7 @@ struct CityDetailView: View {
             AlertDetailView(alert: alert)
         }
         .confirmationDialog(
-            "Remove \(city.name)?",
+            "Remove \(removalCityName)?",
             isPresented: $showingRemoveConfirmation,
             titleVisibility: .visible
         ) {
@@ -374,6 +378,12 @@ struct CityDetailView: View {
             Button("Cancel", role: .cancel) { }
         } message: {
             Text("This city will be removed from your list.")
+        }
+        .onChange(of: showingRemoveConfirmation) { oldValue, newValue in
+            // Flash detection: Alert should never go from true to true
+            if oldValue == true && newValue == true {
+                print("⚠️ ALERT FLASH DETECTED in CityDetailView confirmation dialog!")
+            }
         }
     }
     
