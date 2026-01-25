@@ -18,9 +18,16 @@ struct CityDetailView: View {
     @State private var showingWeatherAroundMe = false
     @State private var selectedAlert: WeatherAlert?
     @State private var showingRemoveConfirmation = false
+    @State private var isRefreshing = false
     
     private var weather: WeatherData? {
         weatherService.weatherCache[city.id]
+    }
+    
+    private func refreshWeather() async {
+        isRefreshing = true
+        await weatherService.fetchWeather(for: city)
+        isRefreshing = false
     }
     
     private func isCategoryEnabled(_ category: DetailCategory) -> Bool {
@@ -241,6 +248,16 @@ struct CityDetailView: View {
                     
                     // Actions Menu
                     Menu {
+                        Button(action: {
+                            Task {
+                                await refreshWeather()
+                            }
+                        }) {
+                            Label("Refresh Weather", systemImage: "arrow.clockwise")
+                        }
+                        
+                        Divider()
+                        
                         Button(action: { showingHistoricalWeather = true }) {
                             Label("View Historical Weather", systemImage: "clock.arrow.circlepath")
                         }
@@ -277,7 +294,7 @@ struct CityDetailView: View {
                     }
                     .padding(.horizontal)
                     .accessibilityLabel("Actions menu")
-                    .accessibilityHint("Opens menu with options for historical weather, precipitation forecast, weather around me, and remove city")
+                    .accessibilityHint("Opens menu with options to refresh weather, view historical weather, precipitation forecast, weather around me, and remove city")
                     
                     // Dynamically render detail sections based on settings order
                     let _ = print("📊 Detail categories: \(settingsManager.settings.detailCategories.map { "\($0.category)=\($0.isEnabled)" }.joined(separator: ", "))")
@@ -296,17 +313,8 @@ struct CityDetailView: View {
         }
         .navigationTitle(city.displayName)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
-                    Task {
-                        await weatherService.fetchWeather(for: city)
-                    }
-                }) {
-                    Image(systemName: "arrow.clockwise")
-                        .accessibilityLabel("Refresh weather")
-                }
-            }
+        .refreshable {
+            await refreshWeather()
         }
         .sheet(isPresented: $showingHistoricalWeather) {
             NavigationView {

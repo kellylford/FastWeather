@@ -32,7 +32,7 @@ struct UserGuideView: View {
                     color: .green
                 ) {
                     Text("Add cities to track their weather:")
-                    BulletPoint("Tap the **+** button on the My Cities tab")
+                    BulletPoint("Activate the **+** (Add City) button on the My Cities tab")
                     BulletPoint("Enter a city name or ZIP code")
                     BulletPoint("Select from search results")
                     BulletPoint("Or browse cities by state/country")
@@ -45,10 +45,10 @@ struct UserGuideView: View {
                     color: .blue
                 ) {
                     Text("View and manage your saved cities:")
-                    BulletPoint("**Swipe left** on a city to remove it")
-                    BulletPoint("**Tap** a city to see detailed weather")
+                    BulletPoint("**Swipe left** on a city to remove it, or use the **VoiceOver actions menu**")
+                    BulletPoint("**Activate** a city to see detailed weather")
                     BulletPoint("**Pull down** to refresh all cities")
-                    BulletPoint("Change view: **List**, **Table**, or **Flat** cards")
+                    BulletPoint("Change view: **List** or **Flat** cards")
                 }
                 
                 // Browse Cities Tab
@@ -61,7 +61,7 @@ struct UserGuideView: View {
                     BulletPoint("Browse by **U.S. States** or **International** countries")
                     BulletPoint("Navigate through states/countries → cities")
                     BulletPoint("View weather without adding to your list")
-                    BulletPoint("Tap **+** to add interesting cities")
+                    BulletPoint("Activate the **+** (Add City) button to add interesting cities")
                 }
                 
                 // City Detail View
@@ -73,7 +73,7 @@ struct UserGuideView: View {
                     Text("Explore comprehensive weather information:")
                     BulletPoint("**Current conditions** with temperature, humidity, wind")
                     BulletPoint("**Hourly forecast** for next 24 hours")
-                    BulletPoint("**Daily forecast** for 7 days")
+                    BulletPoint("**Daily forecast** for 16 days")
                     BulletPoint("**Actions menu** for historical data and more")
                     BulletPoint("**Weather alerts** when active (U.S. only)")
                 }
@@ -112,10 +112,90 @@ struct UserGuideView: View {
                 ) {
                     Text("Customize your experience:")
                     BulletPoint("**Units** - °F/°C, mph/km/h, inches/mm")
-                    BulletPoint("**View Mode** - List, Table, or Flat cards")
+                    BulletPoint("**View Mode** - List or Flat cards")
                     BulletPoint("**Display Mode** - Condensed or Expanded")
                     BulletPoint("**Weather Fields** - Show/hide and reorder")
                     BulletPoint("**Detail Categories** - Customize detail view")
+                }
+                
+                // Icons & Graphics
+                GuideSection(
+                    icon: "photo.fill",
+                    title: "Icons & Graphics",
+                    color: .pink
+                ) {
+                    Text("Visual icons used throughout the app with VoiceOver equivalents:")
+                    
+                    Text("**Tab Bar Icons:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("**List icon** - My Cities tab (VoiceOver: \"My Cities\")")
+                    BulletPoint("**Magnifying glass** - Browse tab (VoiceOver: \"Browse Cities\")")
+                    BulletPoint("**Gear** - Settings tab (VoiceOver: \"Settings\")")
+                    
+                    Text("**Weather Condition Icons:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("**Sun** - Clear sky (VoiceOver: condition name)")
+                    BulletPoint("**Cloud with sun** - Partly cloudy")
+                    BulletPoint("**Cloud** - Overcast")
+                    BulletPoint("**Cloud with rain** - Rain")
+                    BulletPoint("**Cloud with snow** - Snow")
+                    BulletPoint("**Cloud with lightning** - Thunderstorm")
+                    BulletPoint("**Fog cloud** - Fog or mist")
+                    Text("VoiceOver announces: \"Weather condition: [description]\"")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                    
+                    Text("**Weather Alert Icons:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("**Filled warning triangle** - Extreme/Severe/Moderate alerts (red/orange/yellow)")
+                    BulletPoint("**Filled circle with exclamation** - Minor alerts (blue)")
+                    BulletPoint("**Circle with exclamation** - Unknown severity (gray)")
+                    Text("VoiceOver announces: \"Weather alert: [event name]\" with severity level")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                    
+                    Text("**Action & Navigation Icons:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("**Plus circle** - Add city (VoiceOver: \"Add City\")")
+                    BulletPoint("**Circular arrows** - Refresh (VoiceOver: \"Refresh\" or \"Refresh weather\")")
+                    BulletPoint("**Three dots circle** - Actions menu (VoiceOver: \"Actions\")")
+                    BulletPoint("**Chevron right** - Navigate forward (VoiceOver: included in item name)")
+                    BulletPoint("**Chevron down** - Expand menu (VoiceOver: \"[State/Country name]\")")
+                    BulletPoint("**Map pin** - Location/browse (VoiceOver: \"Browse by state or country\")")
+                    BulletPoint("**Book** - User guide (VoiceOver: \"User Guide\")")
+                    BulletPoint("**Hammer** - Developer settings (VoiceOver: \"Developer Settings\")")
+                    
+                    Text("**Data Visualization Icons:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("**Droplet** - Precipitation amount (VoiceOver: \"Precipitation: [amount]\")")
+                    BulletPoint("**Up arrow** - High temperature (VoiceOver: \"High: [temperature]\")")
+                    BulletPoint("**Down arrow** - Low temperature (VoiceOver: \"Low: [temperature]\")")
+                    BulletPoint("**Compass arrows** - Wind direction (VoiceOver: \"Wind from [direction]\")")
+                    BulletPoint("**Clock** - Time/timestamp (VoiceOver: formatted time)")
+                    BulletPoint("**Calendar with clock** - Historical weather (VoiceOver: \"View historical weather\")")
+                    
+                    Text("**Status Icons:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("**Warning triangle** - Error or unavailable (VoiceOver: describes issue)")
+                    BulletPoint("**Checkmark** - Selected item (VoiceOver: \"Selected\")")
+                    BulletPoint("**Sort arrows** - Reorder indicator (VoiceOver: \"Reorder\" or drag hint)")
+                    
+                    Text("**Important:** All icons are decorative only. VoiceOver users receive full information through text labels and announcements. You never need to see icons to use the app.")
+                        .font(.callout)
+                        .foregroundColor(.orange)
+                        .padding(.top, 8)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 12)
+                        .background(Color.orange.opacity(0.1))
+                        .cornerRadius(8)
                 }
                 
                 // Accessibility
@@ -140,9 +220,9 @@ struct UserGuideView: View {
                 ) {
                     BulletPoint("**Reorder weather fields** in Settings → Weather Fields")
                     BulletPoint("**Drag to reorder** detail categories in Settings")
-                    BulletPoint("**Double-tap** city in browse to view without adding")
+                    BulletPoint("**Activate** a city in browse to view without adding")
                     BulletPoint("**Pull to refresh** works on all city lists")
-                    BulletPoint("**Swipe actions** available in List and Table views")
+                    BulletPoint("**Swipe actions** or **VoiceOver actions menu** available in List view")
                     BulletPoint("**Historical years** can be configured in Settings")
                 }
                 

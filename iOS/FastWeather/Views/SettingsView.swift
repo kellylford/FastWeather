@@ -10,6 +10,7 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @EnvironmentObject var weatherService: WeatherService
+    @StateObject private var featureFlags = FeatureFlags.shared
     @State private var showingResetAlert = false
     @State private var showingDeveloperSettings = false
     
@@ -263,7 +264,7 @@ struct SettingsView: View {
                 }
                 
                 // User Guide section (feature-flagged)
-                if FeatureFlags.shared.userGuideEnabled {
+                if featureFlags.userGuideEnabled {
                     Section {
                         NavigationLink(destination: UserGuideView()) {
                             HStack {
