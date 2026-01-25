@@ -24,6 +24,8 @@ struct WeatherAroundMeView: View {
     @State private var citiesInDirection: [DirectionalCityInfo] = []
     @State private var currentCityIndex: Int = 0
     @State private var showingAllCities = false
+    @State private var alertTitle = ""
+    @State private var alertMessage = ""
     @State private var directionalWeatherData: [UUID: (temp: Double, condition: String)] = [:]
     @State private var isLoadingCities = false
     
@@ -419,10 +421,10 @@ struct WeatherAroundMeView: View {
             }
             .buttonStyle(.bordered)
         }
-        .alert("Cities to the \(selectedDirection.rawValue)", isPresented: $showingAllCities) {
+        .alert(alertTitle, isPresented: $showingAllCities) {
             Button("OK", role: .cancel) { }
         } message: {
-            Text(allCitiesList())
+            Text(alertMessage)
         }
     }
     
@@ -562,13 +564,12 @@ struct WeatherAroundMeView: View {
     }
     
     private func showAllCities() {
-        showingAllCities = true
-    }
-    
-    private func allCitiesList() -> String {
-        citiesInDirection.map { city in
+        // Capture values at the moment the alert is triggered to prevent flashing
+        alertTitle = "Cities to the \(selectedDirection.rawValue)"
+        alertMessage = citiesInDirection.map { city in
             "\(city.displayName) (~\(Int(city.distanceMiles)) mi)"
         }.joined(separator: "\n")
+        showingAllCities = true
     }
     
     private func formatLastUpdated(_ date: Date) -> String {
