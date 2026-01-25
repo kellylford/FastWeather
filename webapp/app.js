@@ -553,6 +553,7 @@ function showCitySelectionDialog(originalInput, matches) {
     // Set aria-activedescendant to the first option
     listBox.setAttribute('aria-activedescendant', 'city-option-0');
     
+    closeAllModals();
     focusReturnElement = document.activeElement;
     dialog.hidden = false;
     
@@ -721,14 +722,14 @@ async function handleStateSelection(e) {
         clearError(errorDiv);
         
         // Check if cached coordinates are loaded
-        if (!cachedUSCoordinates) {
+        if (!cachedCityCoordinates) {
             console.error('Cached US city coordinates not loaded');
             showError(errorDiv, 'City data not loaded. Please refresh the page.');
             return;
         }
         
         // Get cities for the selected state from cached data
-        const stateCities = cachedUSCoordinates[stateName];
+        const stateCities = cachedCityCoordinates[stateName];
         
         if (!stateCities || stateCities.length === 0) {
             showError(errorDiv, 'No cities found for this state');
@@ -2136,6 +2137,51 @@ function createCityCard(cityName, lat, lon, weather, index) {
     
     card.appendChild(content);
     
+    // Feature action buttons
+    const featureActions = document.createElement('div');
+    featureActions.className = 'feature-actions';
+    
+    // Historical Weather button
+    const historyBtn = createButton(
+        '<span class="icon">📊</span> History',
+        () => showHistoricalWeather(cityName, lat, lon)
+    );
+    historyBtn.className = 'feature-btn';
+    historyBtn.setAttribute('aria-label', `View historical weather for ${cityName}`);
+    featureActions.appendChild(historyBtn);
+    
+    // Expected Precipitation button
+    const precipBtn = createButton(
+        '<span class="icon">💧</span> Precipitation',
+        () => showPrecipitationNowcast(cityName, lat, lon)
+    );
+    precipBtn.className = 'feature-btn';
+    precipBtn.setAttribute('aria-label', `View precipitation forecast for ${cityName}`);
+    featureActions.appendChild(precipBtn);
+    
+    // Weather Around Me button
+    const aroundBtn = createButton(
+        '<span class="icon">🧭</span> Around Me',
+        () => showWeatherAroundMe(cityName, lat, lon)
+    );
+    aroundBtn.className = 'feature-btn';
+    aroundBtn.setAttribute('aria-label', `View weather around ${cityName}`);
+    featureActions.appendChild(aroundBtn);
+    
+    // Weather Alert badge (will be populated asynchronously)
+    const alertContainer = document.createElement('span');
+    alertContainer.id = `alert-badge-${index}`;
+    alertContainer.className = 'alert-container';
+    featureActions.appendChild(alertContainer);
+    
+    // Fetch and display alerts asynchronously
+    fetchWeatherAlerts(cityName, lat, lon).then(alerts => {
+        const alertHTML = renderAlertBadge(alerts);
+        alertContainer.innerHTML = alertHTML;
+    });
+    
+    card.appendChild(featureActions);
+    
     // Controls at the bottom for better screen reader experience
     const controls = document.createElement('div');
     controls.className = 'city-card-controls';
@@ -2356,6 +2402,34 @@ function renderTableView(container) {
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'table-actions';
         
+        // Feature buttons with icons
+        const historyBtn = createButton('📊', () => showHistoricalWeather(cityName, lat, lon));
+        historyBtn.className = 'icon-btn-small feature-btn-small';
+        historyBtn.setAttribute('aria-label', `View historical weather for ${cityName}`);
+        historyBtn.title = 'Historical Weather';
+        actionsDiv.appendChild(historyBtn);
+        
+        const precipBtn = createButton('💧', () => showPrecipitationNowcast(cityName, lat, lon));
+        precipBtn.className = 'icon-btn-small feature-btn-small';
+        precipBtn.setAttribute('aria-label', `View precipitation forecast for ${cityName}`);
+        precipBtn.title = 'Expected Precipitation';
+        actionsDiv.appendChild(precipBtn);
+        
+        const aroundBtn = createButton('🧭', () => showWeatherAroundMe(cityName, lat, lon));
+        aroundBtn.className = 'icon-btn-small feature-btn-small';
+        aroundBtn.setAttribute('aria-label', `View weather around ${cityName}`);
+        aroundBtn.title = 'Weather Around Me';
+        actionsDiv.appendChild(aroundBtn);
+        
+        // Alert badge
+        const alertSpan = document.createElement('span');
+        alertSpan.id = `alert-badge-table-${index}`;
+        fetchWeatherAlerts(cityName, lat, lon).then(alerts => {
+            alertSpan.innerHTML = renderAlertBadge(alerts);
+        });
+        actionsDiv.appendChild(alertSpan);
+        
+        // Movement buttons
         if (index > 0) {
             const upBtn = createButton('↑', `Move ${cityName} up`, () => moveCityUp(cityName));
             upBtn.className = 'icon-btn-small';
@@ -2544,19 +2618,34 @@ function renderListView(container) {
         }
     };
     
-    // Function to update button labels based on current selection
-    const updateButtonLabels = (index) => {
+    // Function to update button labels and alert badge based on current selection
+    const updateButtonLabels = async (index) => {
         const items = container.querySelectorAll('.list-view-item');
         if (items[index]) {
             const cityName = items[index].dataset.cityName;
+            const lat = parseFloat(items[index].dataset.lat);
+            const lon = parseFloat(items[index].dataset.lon);
             
             upBtn.textContent = `↑ Move ${cityName} Up`;
-            
+            historyBtn.textContent = `📊 ${cityName} History`;
+            precipBtn.textContent = `💧 ${cityName} Precipitation`;
+            aroundBtn.textContent = `🧭 Around ${cityName}`;
             downBtn.textContent = `↓ Move ${cityName} Down`;
-            
             removeBtn.textContent = `🗑️ Remove ${cityName}`;
-            
             detailsBtn.textContent = `📋 ${cityName} Details`;
+            
+            // Update alert badge for selected city
+            try {
+                const alerts = await fetchWeatherAlerts(cityName, lat, lon);
+                const alertBadge = renderAlertBadge(alerts, cityName, lat, lon);
+                alertSpan.innerHTML = '';
+                if (alertBadge) {
+                    alertSpan.appendChild(alertBadge);
+                }
+            } catch (error) {
+                console.error('Error loading alerts for list view:', error);
+                alertSpan.innerHTML = '';
+            }
         }
     };
     
@@ -2585,6 +2674,46 @@ function renderListView(container) {
     const controlsDiv = document.createElement('div');
     controlsDiv.className = 'list-view-controls';
     
+    // Feature buttons
+    const historyBtn = createButton('📊 History', 'View historical weather for selected city', () => {
+        const items = container.querySelectorAll('.list-view-item');
+        const currentActive = container.getAttribute('aria-activedescendant');
+        const activeIndex = parseInt(currentActive.split('-')[2]);
+        const cityName = items[activeIndex].dataset.cityName;
+        const lat = parseFloat(items[activeIndex].dataset.lat);
+        const lon = parseFloat(items[activeIndex].dataset.lon);
+        showHistoricalWeather(cityName, lat, lon);
+    });
+    historyBtn.className = 'list-control-btn feature-btn';
+    
+    const precipBtn = createButton('💧 Precipitation', 'View precipitation forecast for selected city', () => {
+        const items = container.querySelectorAll('.list-view-item');
+        const currentActive = container.getAttribute('aria-activedescendant');
+        const activeIndex = parseInt(currentActive.split('-')[2]);
+        const cityName = items[activeIndex].dataset.cityName;
+        const lat = parseFloat(items[activeIndex].dataset.lat);
+        const lon = parseFloat(items[activeIndex].dataset.lon);
+        showPrecipitationNowcast(cityName, lat, lon);
+    });
+    precipBtn.className = 'list-control-btn feature-btn';
+    
+    const aroundBtn = createButton('🧭 Around Me', 'View weather around selected city', () => {
+        const items = container.querySelectorAll('.list-view-item');
+        const currentActive = container.getAttribute('aria-activedescendant');
+        const activeIndex = parseInt(currentActive.split('-')[2]);
+        const cityName = items[activeIndex].dataset.cityName;
+        const lat = parseFloat(items[activeIndex].dataset.lat);
+        const lon = parseFloat(items[activeIndex].dataset.lon);
+        showWeatherAroundMe(cityName, lat, lon);
+    });
+    aroundBtn.className = 'list-control-btn feature-btn';
+    
+    // Alert badge for selected city
+    const alertSpan = document.createElement('span');
+    alertSpan.id = 'list-view-alert-badge';
+    alertSpan.className = 'alert-container';
+    
+    // Movement and action buttons
     const upBtn = createButton('↑ Move Up', 'Move selected city up in list', () => {
         const items = container.querySelectorAll('.list-view-item');
         const currentActive = container.getAttribute('aria-activedescendant');
@@ -2624,6 +2753,10 @@ function renderListView(container) {
     detailsBtn.className = 'list-control-btn';
     
     controlsDiv.appendChild(detailsBtn);
+    controlsDiv.appendChild(historyBtn);
+    controlsDiv.appendChild(precipBtn);
+    controlsDiv.appendChild(aroundBtn);
+    controlsDiv.appendChild(alertSpan);
     controlsDiv.appendChild(upBtn);
     controlsDiv.appendChild(downBtn);
     controlsDiv.appendChild(removeBtn);
@@ -2733,6 +2866,7 @@ async function showFullWeather(cityName, lat, lon) {
     title.textContent = `Full Weather Details - ${cityName}`;
     content.innerHTML = '<p class="loading-text">Loading detailed forecast...</p>';
     
+    closeAllModals();
     focusReturnElement = document.activeElement;
     dialog.hidden = false;
     trapFocus(dialog);
@@ -2915,6 +3049,7 @@ function openConfigDialog() {
     document.querySelector(`input[name="distance-unit"][value="${currentConfig.units.distance}"]`).checked = true;
     document.querySelector(`input[name="default-view"][value="${currentConfig.defaultView}"]`).checked = true;
     
+    closeAllModals();
     focusReturnElement = document.activeElement;
     dialog.hidden = false;
     trapFocus(dialog);
@@ -3293,4 +3428,615 @@ function trapFocus(element) {
             }
         }
     });
+}
+// ==================== NEW FEATURES ====================
+
+// ===== WEATHER ALERTS (NWS API for US locations) =====
+const alertsCache = {}; // Cache alerts by city key
+
+async function fetchWeatherAlerts(cityKey, lat, lon) {
+    console.log(`Fetching weather alerts for ${cityKey}...`);
+    
+    // Check cache first (10 minute cache)
+    if (alertsCache[cityKey]) {
+        const age = Date.now() - alertsCache[cityKey].timestamp;
+        if (age < 600000) { // 10 minutes
+            console.log(`Using cached alerts for ${cityKey}`);
+            return alertsCache[cityKey].alerts;
+        }
+    }
+    
+    // NWS API only works for US locations
+    // Simple heuristic: if the city key doesn't contain "United States", skip
+    if (!cityKey.includes('United States')) {
+        console.log(`Skipping alerts for non-US city: ${cityKey}`);
+        return [];
+    }
+    
+    try {
+        const url = `https://api.weather.gov/alerts/active?point=${lat},${lon}`;
+        const response = await fetch(url, {
+            headers: {
+                'User-Agent': 'FastWeather/1.1 Web'
+            }
+        });
+        
+        if (!response.ok) {
+            console.log(`NWS alerts API returned ${response.status} for ${cityKey}`);
+            return [];
+        }
+        
+        const data = await response.json();
+        const alerts = parseNWSAlerts(data);
+        
+        // Cache the results
+        alertsCache[cityKey] = {
+            alerts: alerts,
+            timestamp: Date.now()
+        };
+        
+        console.log(`Fetched ${alerts.length} alerts for ${cityKey}`);
+        return alerts;
+        
+    } catch (error) {
+        console.error(`Error fetching alerts for ${cityKey}:`, error);
+        return [];
+    }
+}
+
+function parseNWSAlerts(nwsResponse) {
+    if (!nwsResponse || !nwsResponse.features) return [];
+    
+    const now = new Date();
+    
+    return nwsResponse.features.map(feature => {
+        const props = feature.properties;
+        
+        // Parse severity
+        const severityMap = {
+            'Extreme': 'extreme',
+            'Severe': 'severe',
+            'Moderate': 'moderate',
+            'Minor': 'minor'
+        };
+        const severity = severityMap[props.severity] || 'unknown';
+        
+        // Parse dates
+        const onset = props.onset ? new Date(props.onset) : now;
+        const expires = props.expires ? new Date(props.expires) : new Date(now.getTime() + 86400000);
+        
+        // Handle flexible string/array fields
+        const getFlexibleField = (field) => {
+            if (!field) return '';
+            if (typeof field === 'string') return field;
+            if (Array.isArray(field)) return field.join(' ');
+            return '';
+        };
+        
+        return {
+            id: props.id,
+            event: props.event || 'Weather Alert',
+            severity: severity,
+            headline: getFlexibleField(props.headline),
+            description: getFlexibleField(props.description),
+            instruction: getFlexibleField(props.instruction),
+            onset: onset,
+            expires: expires,
+            areaDesc: getFlexibleField(props.areaDesc),
+            isExpired: now > expires
+        };
+    }).filter(alert => !alert.isExpired); // Filter out expired alerts
+}
+
+function renderAlertBadge(alerts) {
+    if (!alerts || alerts.length === 0) return '';
+    
+    // Find highest severity alert
+    const severityOrder = ['extreme', 'severe', 'moderate', 'minor', 'unknown'];
+    const highestSeverityAlert = alerts.reduce((highest, alert) => {
+        const currentIndex = severityOrder.indexOf(alert.severity);
+        const highestIndex = severityOrder.indexOf(highest.severity);
+        return currentIndex < highestIndex ? alert : highest;
+    }, alerts[0]);
+    
+    const severityIcons = {
+        'extreme': '⚠️',
+        'severe': '⚠️',
+        'moderate': '⚠️',
+        'minor': 'ℹ️',
+        'unknown': 'ℹ️'
+    };
+    
+    const icon = severityIcons[highestSeverityAlert.severity] || 'ℹ️';
+    
+    return `<button class="alert-badge ${highestSeverityAlert.severity}" 
+                    onclick="showAlertDetails(\`${JSON.stringify(highestSeverityAlert).replace(/`/g, '\\`')}\`)"
+                    aria-label="Weather alert: ${escapeHtml(highestSeverityAlert.event)}"
+                    title="${escapeHtml(highestSeverityAlert.event)}">
+                <span aria-hidden="true">${icon}</span>
+                <span class="sr-only">${alerts.length} alert${alerts.length > 1 ? 's' : ''}</span>
+            </button>`;
+}
+
+function showAlertDetails(alertDataStr) {
+    const alert = JSON.parse(alertDataStr);
+    const dialog = document.getElementById('alert-details-dialog');
+    const content = document.getElementById('alert-details-content');
+    
+    const severityIcons = {
+        'extreme': '⚠️',
+        'severe': '⚠️',
+        'moderate': '⚠️',
+        'minor': 'ℹ️',
+        'unknown': 'ℹ️'
+    };
+    
+    const icon = severityIcons[alert.severity] || 'ℹ️';
+    
+    content.innerHTML = `
+        <div class="alert-details">
+            <div class="alert-severity-header ${alert.severity}">
+                <div class="alert-severity-icon" aria-hidden="true">${icon}</div>
+                <div>
+                    <div class="alert-event">${escapeHtml(alert.event)}</div>
+                    <div class="alert-headline">${escapeHtml(alert.headline)}</div>
+                </div>
+            </div>
+            
+            <div class="alert-section">
+                <h4>Details</h4>
+                <p>${escapeHtml(alert.description)}</p>
+            </div>
+            
+            ${alert.instruction ? `
+                <div class="alert-section">
+                    <h4>Instructions</h4>
+                    <p>${escapeHtml(alert.instruction)}</p>
+                </div>
+            ` : ''}
+            
+            <div class="alert-meta">
+                <div class="alert-meta-item">
+                    <span class="alert-meta-label">Severity</span>
+                    <span class="alert-meta-value">${alert.severity.charAt(0).toUpperCase() + alert.severity.slice(1)}</span>
+                </div>
+                <div class="alert-meta-item">
+                    <span class="alert-meta-label">Onset</span>
+                    <span class="alert-meta-value">${formatDateTime(alert.onset)}</span>
+                </div>
+                <div class="alert-meta-item">
+                    <span class="alert-meta-label">Expires</span>
+                    <span class="alert-meta-value">${formatDateTime(alert.expires)}</span>
+                </div>
+                ${alert.areaDesc ? `
+                    <div class="alert-meta-item">
+                        <span class="alert-meta-label">Areas Affected</span>
+                        <span class="alert-meta-value">${escapeHtml(alert.areaDesc)}</span>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    
+    closeAllModals();
+    dialog.hidden = false;
+    announceToScreenReader(`Weather alert: ${alert.event}. ${alert.severity} severity.`);
+}
+
+document.getElementById('close-alert-details-btn')?.addEventListener('click', () => {
+    document.getElementById('alert-details-dialog').hidden = true;
+});
+
+// ===== HISTORICAL WEATHER =====
+async function showHistoricalWeather(cityKey, lat, lon) {
+    const dialog = document.getElementById('historical-weather-dialog');
+    const content = document.getElementById('historical-weather-content');
+    const title = document.getElementById('historical-weather-title');
+    
+    title.textContent = `Historical Weather - ${cityKey.split(',')[0]}`;
+    
+    content.innerHTML = `
+        <div class="historical-controls">
+            <div class="historical-view-modes">
+                <button onclick="loadHistoricalView('${cityKey}', ${lat}, ${lon}, 'single')">Single Day</button>
+                <button onclick="loadHistoricalView('${cityKey}', ${lat}, ${lon}, 'multi')">Multi-Year</button>
+                <button onclick="loadHistoricalView('${cityKey}', ${lat}, ${lon}, 'browse')">Daily Browse</button>
+            </div>
+            <div class="historical-date-nav">
+                <button onclick="adjustHistoricalDate(-1)">← Previous</button>
+                <div class="historical-date-display" id="historical-current-date">Today</div>
+                <button onclick="adjustHistoricalDate(1)">Next →</button>
+            </div>
+        </div>
+        <div id="historical-data-container">
+            <p>Select a view mode to load historical weather data.</p>
+        </div>
+    `;
+    
+    closeAllModals();
+    dialog.hidden = false;
+    announceToScreenReader(`Historical weather for ${cityKey.split(',')[0]}`);
+}
+
+let currentHistoricalMode = 'single';
+let currentHistoricalDate = new Date();
+let currentHistoricalCity = null;
+
+async function loadHistoricalView(cityKey, lat, lon, mode) {
+    currentHistoricalMode = mode;
+    currentHistoricalCity = { key: cityKey, lat: lat, lon: lon };
+    
+    const container = document.getElementById('historical-data-container');
+    container.innerHTML = '<p>Loading historical data...</p>';
+    
+    try {
+        let data;
+        const dateStr = currentHistoricalDate.toISOString().split('T')[0];
+        
+        if (mode === 'single') {
+            // Single day historical data
+            data = await fetchHistoricalWeatherSingleDay(lat, lon, dateStr);
+        } else if (mode === 'multi') {
+            // Same day across multiple years
+            data = await fetchHistoricalWeatherMultiYear(lat, lon, currentHistoricalDate);
+        } else {
+            // Daily browse mode (next 7 days from selected date)
+            data = await fetchHistoricalWeatherBrowse(lat, lon, currentHistoricalDate);
+        }
+        
+        renderHistoricalData(data, mode);
+        
+    } catch (error) {
+        container.innerHTML = `<p class="error-message">Error loading historical data: ${escapeHtml(error.message)}</p>`;
+    }
+}
+
+async function fetchHistoricalWeatherSingleDay(lat, lon, date) {
+    const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${date}&end_date=${date}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode&timezone=auto`;
+    
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Failed to fetch historical data');
+    
+    return await response.json();
+}
+
+async function fetchHistoricalWeatherMultiYear(lat, lon, date) {
+    // Fetch the same month/day for the past 5 years
+    const results = [];
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    for (let i = 0; i < 5; i++) {
+        const year = date.getFullYear() - i;
+        const dateStr = `${year}-${month}-${day}`;
+        
+        try {
+            const data = await fetchHistoricalWeatherSingleDay(lat, lon, dateStr);
+            if (data.daily) {
+                results.push({
+                    date: dateStr,
+                    ...data.daily
+                });
+            }
+        } catch (e) {
+            console.error(`Failed to fetch data for ${dateStr}:`, e);
+        }
+    }
+    
+    return { years: results };
+}
+
+async function fetchHistoricalWeatherBrowse(lat, lon, startDate) {
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 6);
+    
+    const startStr = startDate.toISOString().split('T')[0];
+    const endStr = endDate.toISOString().split('T')[0];
+    
+    return await fetchHistoricalWeatherSingleDay(lat, lon, startStr, endStr);
+}
+
+function renderHistoricalData(data, mode) {
+    const container = document.getElementById('historical-data-container');
+    
+    if (mode === 'single' && data.daily) {
+        const day = data.daily;
+        container.innerHTML = `
+            <div class="historical-data-list">
+                <div class="historical-day">
+                    <div class="historical-day-header">${currentHistoricalDate.toLocaleDateString()}</div>
+                    <div class="historical-day-data">
+                        <div>High: ${convertTemperature(day.temperature_2m_max[0])}°${currentConfig.units.temperature}</div>
+                        <div>Low: ${convertTemperature(day.temperature_2m_min[0])}°${currentConfig.units.temperature}</div>
+                        <div>Precipitation: ${convertPrecipitation(day.precipitation_sum[0])} ${currentConfig.units.precipitation}</div>
+                        <div>Conditions: ${WEATHER_CODES[day.weathercode[0]] || 'Unknown'}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else if (mode === 'multi' && data.years) {
+        let html = '<div class="historical-data-list">';
+        data.years.forEach(yearData => {
+            html += `
+                <div class="historical-day">
+                    <div class="historical-day-header">${yearData.date}</div>
+                    <div class="historical-day-data">
+                        <div>High: ${convertTemperature(yearData.temperature_2m_max[0])}°${currentConfig.units.temperature}</div>
+                        <div>Low: ${convertTemperature(yearData.temperature_2m_min[0])}°${currentConfig.units.temperature}</div>
+                        <div>Precipitation: ${convertPrecipitation(yearData.precipitation_sum[0])} ${currentConfig.units.precipitation}</div>
+                        <div>Conditions: ${WEATHER_CODES[yearData.weathercode[0]] || 'Unknown'}</div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    } else {
+        container.innerHTML = '<p>No data available</p>';
+    }
+}
+
+function adjustHistoricalDate(days) {
+    currentHistoricalDate.setDate(currentHistoricalDate.getDate() + days);
+    document.getElementById('historical-current-date').textContent = currentHistoricalDate.toLocaleDateString();
+    
+    if (currentHistoricalCity) {
+        loadHistoricalView(currentHistoricalCity.key, currentHistoricalCity.lat, currentHistoricalCity.lon, currentHistoricalMode);
+    }
+}
+
+document.getElementById('close-historical-weather-btn')?.addEventListener('click', () => {
+    document.getElementById('historical-weather-dialog').hidden = true;
+});
+
+// ===== PRECIPITATION NOWCAST =====
+async function showPrecipitationNowcast(cityKey, lat, lon) {
+    const dialog = document.getElementById('precipitation-nowcast-dialog');
+    const content = document.getElementById('precipitation-nowcast-content');
+    const title = document.getElementById('precipitation-nowcast-title');
+    
+    title.textContent = `Expected Precipitation - ${cityKey.split(',')[0]}`;
+    content.innerHTML = '<p>Loading precipitation forecast...</p>';
+    
+    closeAllModals();
+    dialog.hidden = false;
+    
+    try {
+        const data = await fetchPrecipitationNowcast(lat, lon);
+        renderPrecipitationNowcast(data);
+        announceToScreenReader(`Precipitation forecast loaded for ${cityKey.split(',')[0]}`);
+    } catch (error) {
+        content.innerHTML = `<p class="error-message">Error loading precipitation data: ${escapeHtml(error.message)}</p>`;
+    }
+}
+
+async function fetchPrecipitationNowcast(lat, lon) {
+    const url = `${OPEN_METEO_API_URL}?latitude=${lat}&longitude=${lon}&minutely_15=precipitation&hourly=precipitation,weather_code&current=precipitation,weather_code&timezone=auto&forecast_days=1`;
+    
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Failed to fetch precipitation data');
+    
+    return await response.json();
+}
+
+function renderPrecipitationNowcast(data) {
+    const content = document.getElementById('precipitation-nowcast-content');
+    
+    if (!data.minutely_15 || !data.minutely_15.precipitation) {
+        content.innerHTML = '<p>No precipitation forecast available</p>';
+        return;
+    }
+    
+    const now = new Date();
+    const times = data.minutely_15.time;
+    const precip = data.minutely_15.precipitation;
+    
+    // Find current time index
+    let currentIndex = 0;
+    for (let i = 0; i < times.length; i++) {
+        const timeDate = new Date(times[i]);
+        if (timeDate > now) {
+            currentIndex = i;
+            break;
+        }
+    }
+    
+    // Create visual timeline
+    const intervals = [0, 15, 30, 45, 60, 90, 120]; // minutes from now
+    let timelineHTML = '<div class="precipitation-timeline"><div class="precipitation-points">';
+    
+    intervals.forEach(interval => {
+        const index = currentIndex + Math.floor(interval / 15);
+        if (index >= 0 && index < precip.length) {
+            const precipValue = precip[index] || 0;
+            const height = Math.min(100, precipValue * 20); // Scale precipitation to pixels
+            const label = interval === 0 ? 'Now' : `+${interval}m`;
+            
+            timelineHTML += `
+                <div class="precip-point">
+                    <div class="precip-bar" style="height: ${height}px"></div>
+                    <div class="precip-label">${label}</div>
+                </div>
+            `;
+        }
+    });
+    
+    timelineHTML += '</div></div>';
+    
+    // Create data list for accessibility
+    let dataListHTML = '<ul class="precipitation-data-list" aria-label="Precipitation forecast by time">';
+    intervals.forEach(interval => {
+        const index = currentIndex + Math.floor(interval / 15);
+        if (index >= 0 && index < precip.length) {
+            const precipValue = precip[index] || 0;
+            const timeLabel = interval === 0 ? 'Now' : `In ${interval} minutes`;
+            const precipStr = precipValue > 0.01 ? 
+                `${convertPrecipitation(precipValue)} ${currentConfig.units.precipitation}` : 
+                'None';
+            
+            dataListHTML += `<li>${timeLabel}: ${precipStr}</li>`;
+        }
+    });
+    dataListHTML += '</ul>';
+    
+    content.innerHTML = `
+        <div aria-hidden="true">${timelineHTML}</div>
+        ${dataListHTML}
+        <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+            Data shows 15-minute interval precipitation forecasts for the next 2 hours.
+        </p>
+    `;
+}
+
+document.getElementById('close-precipitation-nowcast-btn')?.addEventListener('click', () => {
+    document.getElementById('precipitation-nowcast-dialog').hidden = true;
+});
+
+// ===== WEATHER AROUND ME =====
+async function showWeatherAroundMe(cityKey, lat, lon) {
+    const dialog = document.getElementById('weather-around-me-dialog');
+    const content = document.getElementById('weather-around-me-content');
+    const title = document.getElementById('weather-around-me-title');
+    
+    title.textContent = `Weather Around ${cityKey.split(',')[0]}`;
+    content.innerHTML = `
+        <div class="distance-selector">
+            <label for="around-me-distance">Distance Radius:</label>
+            <select id="around-me-distance" onchange="loadWeatherAroundMe('${cityKey}', ${lat}, ${lon}, this.value)">
+                <option value="50">50 miles</option>
+                <option value="100">100 miles</option>
+                <option value="150" selected>150 miles</option>
+                <option value="200">200 miles</option>
+                <option value="250">250 miles</option>
+            </select>
+        </div>
+        <div id="weather-around-me-data">
+            <p>Loading regional weather data...</p>
+        </div>
+    `;
+    
+    closeAllModals();
+    dialog.hidden = false;
+    
+    loadWeatherAroundMe(cityKey, lat, lon, 150);
+}
+
+async function loadWeatherAroundMe(cityKey, lat, lon, distanceMiles) {
+    const container = document.getElementById('weather-around-me-data');
+    container.innerHTML = '<p>Loading...</p>';
+    
+    try {
+        // Calculate approximate degree offset for the distance
+        const degreeOffset = distanceMiles / 69; // Rough approximation: 1 degree ≈ 69 miles
+        
+        // Create 8 directional points
+        const directions = [
+            { name: 'North', lat: lat + degreeOffset, lon: lon },
+            { name: 'Northeast', lat: lat + degreeOffset * 0.7, lon: lon + degreeOffset * 0.7 },
+            { name: 'East', lat: lat, lon: lon + degreeOffset },
+            { name: 'Southeast', lat: lat - degreeOffset * 0.7, lon: lon + degreeOffset * 0.7 },
+            { name: 'South', lat: lat - degreeOffset, lon: lon },
+            { name: 'Southwest', lat: lat - degreeOffset * 0.7, lon: lon - degreeOffset * 0.7 },
+            { name: 'West', lat: lat, lon: lon - degreeOffset },
+            { name: 'Northwest', lat: lat + degreeOffset * 0.7, lon: lon - degreeOffset * 0.7 }
+        ];
+        
+        // Fetch weather for each direction
+        const promises = directions.map(dir => fetchSimpleWeather(dir.lat, dir.lon));
+        const results = await Promise.all(promises);
+        
+        // Render directional grid
+        let html = '<div class="directional-grid">';
+        directions.forEach((dir, i) => {
+            const weather = results[i];
+            if (weather && weather.current) {
+                const temp = convertTemperature(weather.current.temperature_2m);
+                const condition = WEATHER_CODES[weather.current.weather_code] || 'Unknown';
+                
+                html += `
+                    <div class="directional-sector">
+                        <h4>${dir.name}</h4>
+                        <p>${temp}°${currentConfig.units.temperature}</p>
+                        <p>${condition}</p>
+                    </div>
+                `;
+            }
+        });
+        html += '</div>';
+        
+        // Add summary
+        html += generateWeatherSummary(results, cityKey);
+        
+        container.innerHTML = html;
+        announceToScreenReader(`Regional weather loaded for ${distanceMiles} mile radius`);
+        
+    } catch (error) {
+        container.innerHTML = `<p class="error-message">Error loading regional weather: ${escapeHtml(error.message)}</p>`;
+    }
+}
+
+async function fetchSimpleWeather(lat, lon) {
+    const url = `${OPEN_METEO_API_URL}?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,precipitation&timezone=auto`;
+    
+    try {
+        const response = await fetch(url);
+        if (!response.ok) return null;
+        return await response.json();
+    } catch (e) {
+        return null;
+    }
+}
+
+function generateWeatherSummary(weatherResults, cityKey) {
+    // Analyze temperature and precipitation patterns
+    const temps = weatherResults.filter(w => w && w.current).map(w => w.current.temperature_2m);
+    const precips = weatherResults.filter(w => w && w.current).map(w => w.current.precipitation || 0);
+    
+    if (temps.length === 0) return '<p>Unable to generate summary</p>';
+    
+    const avgTemp = temps.reduce((a, b) => a + b, 0) / temps.length;
+    const maxTemp = Math.max(...temps);
+    const minTemp = Math.min(...temps);
+    const hasPrecip = precips.some(p => p > 0.1);
+    
+    const avgTempConverted = convertTemperature(avgTemp);
+    const maxTempConverted = convertTemperature(maxTemp);
+    const minTempConverted = convertTemperature(minTemp);
+    
+    return `
+        <div class="weather-summary-box">
+            <h4>Regional Summary</h4>
+            <p>Average temperature in surrounding area: ${avgTempConverted}°${currentConfig.units.temperature}</p>
+            <p>Temperature range: ${minTempConverted}° to ${maxTempConverted}°${currentConfig.units.temperature}</p>
+            ${hasPrecip ? '<p>Precipitation detected in one or more directions</p>' : '<p>No significant precipitation in the area</p>'}
+        </div>
+    `;
+}
+
+document.getElementById('close-weather-around-me-btn')?.addEventListener('click', () => {
+    document.getElementById('weather-around-me-dialog').hidden = true;
+});
+
+// Helper function for date/time formatting
+function formatDateTime(date) {
+    if (!(date instanceof Date)) date = new Date(date);
+    return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+}
+
+// HTML escaping for security
+function escapeHtml(unsafe) {
+    if (typeof unsafe !== 'string') unsafe = String(unsafe);
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
