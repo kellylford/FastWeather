@@ -90,8 +90,10 @@ class RadarService {
         
         // Find the current time index to start from NOW, not from midnight
         let now = Date()
-        let dateFormatter = ISO8601DateFormatter()
-        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        
+        // Use proper date parsing for Open-Meteo format
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm"
         
         var currentIndex = 0
         for (index, timeString) in times.enumerated() {
@@ -167,8 +169,10 @@ class RadarService {
         
         // Find the current time index to only look at FUTURE precipitation
         let now = Date()
-        let dateFormatter = ISO8601DateFormatter()
-        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        
+        // Use proper date parsing for Open-Meteo format
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm"
         
         var currentIndex = 0
         for (index, timeString) in times.enumerated() {
@@ -178,10 +182,17 @@ class RadarService {
             }
         }
         
+        print("🔍 findNearestPrecipitation: now=\(now), currentIndex=\(currentIndex), totalTimes=\(times.count)")
+        if currentIndex < times.count {
+            print("🔍 Starting search from time: \(times[currentIndex])")
+        }
+        
         // Search for precipitation starting from current time forward
         for index in currentIndex..<precipitation.count {
             if let precip = precipitation[index], precip > 0.01 {
                 let minutesAway = (index - currentIndex) * 15
+                
+                print("🔍 Found precipitation at index \(index): \(precip)mm, minutesAway=\(minutesAway)")
                 
                 if minutesAway == 0 {
                     return nil // Already precipitating
@@ -197,18 +208,24 @@ class RadarService {
                 let windDir = (hourly?.windDirection10m?[currentHourIndex] ?? nil) ?? 0
                 let fromDirection = getOppositeDirection(windDir)
                 
+                let distanceMiles = estimateDistance(fromMinutes: minutesAway)
+                let speedMph = estimateSpeed(fromMinutes: minutesAway)
+                
+                print("🔍 Calculated: distance=\(distanceMiles) miles, direction=\(fromDirection), speed=\(speedMph) mph")
+                
                 return NearestPrecipitation(
-                    distanceMiles: estimateDistance(fromMinutes: minutesAway),
+                    distanceMiles: distanceMiles,
                     direction: fromDirection,
                     type: intensity,
                     intensity: intensity,
                     movementDirection: getCardinalDirection(windDir),
-                    speedMph: estimateSpeed(fromMinutes: minutesAway),
+                    speedMph: speedMph,
                     arrivalEstimate: arrival
                 )
             }
         }
         
+        print("🔍 No precipitation found in forecast")
         return nil
     }
     

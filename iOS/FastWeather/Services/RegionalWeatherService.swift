@@ -7,15 +7,72 @@
 //
 
 import Foundation
+import CoreLocation
 
 class RegionalWeatherService {
     static let shared = RegionalWeatherService()
     
-    private init() {}
+    // Cache for reverse geocoded location names (key: "lat,lon", value: city name)
+    private var locationNameCache: [String: String] = [:]
+    private let cacheQueue = DispatchQueue(label: "com.fastweather.locationcache")
+    
+    // Actor to serialize geocoding requests to respect rate limits
+    private actor GeocodingCoordinator {
+        func geocode(latitude: Double, longitude: Double, reverseGeocodeFn: (Double, Double) async throws -> String) async throws -> String {
+            // Add delay to respect Nominatim's 1 request/second limit
+            try await Task.sleep(nanoseconds: 1_100_000_000)
+            return try await reverseGeocodeFn(latitude, longitude)
+        }
+    }
+    
+    private let geocodingCoordinator = GeocodingCoordinator()
+    
+    private init() {
+        loadCache()
+    }
     
     /// Convert miles to degrees (approximately 69 miles per degree of latitude)
     private func milesToDegrees(_ miles: Double) -> Double {
         return miles / 69.0
+    }
+    
+    // MARK: - Cache Management
+    
+    private func cacheKey(latitude: Double, longitude: Double) -> String {
+        // Round to 2 decimal places for cache key (sufficient precision for city names)
+        return String(format: "%.2f,%.2f", latitude, longitude)
+    }
+    
+    private func getCachedLocationName(latitude: Double, longitude: Double) -> String? {
+        let key = cacheKey(latitude: latitude, longitude: longitude)
+        return cacheQueue.sync {
+            return locationNameCache[key]
+        }
+    }
+    
+    private func setCachedLocationName(_ name: String, latitude: Double, longitude: Double) {
+        let key = cacheKey(latitude: latitude, longitude: longitude)
+        cacheQueue.sync {
+            locationNameCache[key] = name
+            saveCache()
+        }
+    }
+    
+    private func loadCache() {
+        let defaults = UserDefaults.standard
+        if let data = defaults.data(forKey: "RegionalWeatherLocationCache"),
+           let cache = try? JSONDecoder().decode([String: String].self, from: data) {
+            cacheQueue.sync {
+                locationNameCache = cache
+            }
+            print("📍 Loaded \(cache.count) cached location names")
+        }
+    }
+    
+    private func saveCache() {
+        if let data = try? JSONEncoder().encode(locationNameCache) {
+            UserDefaults.standard.set(data, forKey: "RegionalWeatherLocationCache")
+        }
     }
     
     /// Fetch weather for all 8 cardinal directions plus center location
@@ -116,10 +173,30 @@ class RegionalWeatherService {
         // Convert weather code to description
         let weatherCode = WeatherCode(rawValue: weatherResponse.current.weatherCode)
         
-        // Fetch location name via reverse geocoding (with error handling)
-        let locationName = try? await reverseGeocode(latitude: location.lat, longitude: location.lon)
+        // Check cache first, then fetch location name via reverse geocoding if needed
+        var locationName: String?
         
-        return DirectionalLocation(
+        if let cached = getCachedLocationName(latitude: location.lat, longitude: location.lon) {
+            locationName = cached
+            print("💾 Using cached location for \(location.direction): \(cached)")
+        } else {
+            // Not in cache - fetch via reverse geocoding using serialized coordinator
+            do {
+                let name = try await geocodingCoordinator.geocode(
+                    latitude: location.lat,
+                    longitude: location.lon,
+                    reverseGeocodeFn: reverseGeocode
+                )
+                locationName = name
+                setCachedLocationName(name, latitude: location.lat, longitude: location.lon)
+                print("✅ Reverse geocoded \(location.direction): \(name)")
+            } catch {
+                print("⚠️ Failed to reverse geocode \(location.direction): \(error.localizedDescription)")
+                locationName = nil
+            }
+        }
+        
+        let result = DirectionalLocation(
             direction: location.direction,
             latitude: location.lat,
             longitude: location.lon,
@@ -127,36 +204,42 @@ class RegionalWeatherService {
             condition: weatherCode?.description ?? "Unknown",
             locationName: locationName
         )
+        
+        print("🏁 Returning DirectionalLocation for \(location.direction): locationName = '\(result.locationName ?? "nil")'")
+        return result
     }
     
-    /// Reverse geocode coordinates to get location name
+    /// Reverse geocode coordinates to get location name using Apple's CLGeocoder
     private func reverseGeocode(latitude: Double, longitude: Double) async throws -> String {
-        let urlString = "https://nominatim.openstreetmap.org/reverse?lat=\(latitude)&lon=\(longitude)&format=json"
-        guard let url = URL(string: urlString) else {
-            throw URLError(.badURL)
+        print("🌍 Geocoding with CLGeocoder: \(latitude), \(longitude)")
+        
+        let geocoder = CLGeocoder()
+        let location = CLLocation(latitude: latitude, longitude: longitude)
+        
+        let placemarks = try await geocoder.reverseGeocodeLocation(location)
+        
+        guard let placemark = placemarks.first else {
+            print("⚠️ No placemarks found")
+            throw URLError(.cannotFindHost)
         }
-        
-        var request = URLRequest(url: url)
-        request.setValue("FastWeather/1.0 iOS", forHTTPHeaderField: "User-Agent")
-        
-        let (data, _) = try await URLSession.shared.data(for: request)
-        
-        let response = try JSONDecoder().decode(NominatimReverseResponse.self, from: data)
         
         // Build a concise location name
         var parts: [String] = []
         
-        if let city = response.address.city ?? response.address.town ?? response.address.village {
-            parts.append(city)
+        if let locality = placemark.locality {
+            parts.append(locality)
         }
         
-        if let state = response.address.state {
-            parts.append(state)
-        } else if let country = response.address.country {
+        if let administrativeArea = placemark.administrativeArea {
+            parts.append(administrativeArea)
+        } else if let country = placemark.country {
             parts.append(country)
         }
         
-        return parts.isEmpty ? "Unknown location" : parts.joined(separator: ", ")
+        let locationName = parts.isEmpty ? "Unknown location" : parts.joined(separator: ", ")
+        print("✅ CLGeocoder result: \(locationName)")
+        
+        return locationName
     }
 }
 
@@ -186,18 +269,4 @@ private struct BasicCurrentWeather: Codable {
         case temperature2m = "temperature_2m"
         case weatherCode = "weather_code"
     }
-}
-
-// MARK: - Nominatim Response Models
-
-private struct NominatimReverseResponse: Codable {
-    let address: NominatimAddress
-}
-
-private struct NominatimAddress: Codable {
-    let city: String?
-    let town: String?
-    let village: String?
-    let state: String?
-    let country: String?
 }

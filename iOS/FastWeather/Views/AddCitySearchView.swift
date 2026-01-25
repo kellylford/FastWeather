@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CoreLocation
 
 struct AddCitySearchView: View {
     @Environment(\.dismiss) var dismiss
@@ -184,26 +185,36 @@ struct AddCitySearchView: View {
     }
     
     private func searchCity(query: String) async throws -> [GeocodingResult] {
-        let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query
-        let urlString = "https://nominatim.openstreetmap.org/search?q=\(encodedQuery)&format=json&limit=10"
+        let geocoder = CLGeocoder()
         
-        guard let url = URL(string: urlString) else {
-            throw URLError(.badURL)
-        }
+        // Use CLGeocoder to search for locations
+        let placemarks = try await geocoder.geocodeAddressString(query)
         
-        var request = URLRequest(url: url)
-        request.setValue("Fast Weather iOS App", forHTTPHeaderField: "User-Agent")
-        
-        let (data, _) = try await URLSession.shared.data(for: request)
-        let results = try JSONDecoder().decode([NominatimResult].self, from: data)
-        
-        return results.map { result in
-            GeocodingResult(
+        return placemarks.compactMap { placemark -> GeocodingResult? in
+            guard let location = placemark.location else { return nil }
+            
+            // Build display name from placemark components
+            var displayParts: [String] = []
+            
+            if let locality = placemark.locality {
+                displayParts.append(locality)
+            }
+            if let administrativeArea = placemark.administrativeArea {
+                displayParts.append(administrativeArea)
+            }
+            if let country = placemark.country {
+                displayParts.append(country)
+            }
+            
+            let displayName = displayParts.isEmpty ? "Unknown Location" : displayParts.joined(separator: ", ")
+            let cityName = placemark.locality ?? placemark.name ?? displayName.components(separatedBy: ", ").first ?? "Unknown"
+            
+            return GeocodingResult(
                 id: UUID(),
-                displayName: result.display_name,
-                latitude: Double(result.lat) ?? 0.0,
-                longitude: Double(result.lon) ?? 0.0,
-                name: result.name ?? result.display_name
+                displayName: displayName,
+                latitude: location.coordinate.latitude,
+                longitude: location.coordinate.longitude,
+                name: cityName
             )
         }
     }
@@ -303,13 +314,6 @@ struct GeocodingResult: Identifiable {
     let latitude: Double
     let longitude: Double
     let name: String
-}
-
-struct NominatimResult: Codable {
-    let lat: String
-    let lon: String
-    let display_name: String
-    let name: String?
 }
 
 #Preview {

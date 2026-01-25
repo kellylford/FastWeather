@@ -17,30 +17,30 @@ struct WeatherAroundMeView: View {
     @State private var lastUpdated: Date?
     @State private var distanceMiles: Double = 50
     
+    let distanceOptions: [Double] = [50, 100, 150, 200, 250, 300, 350]
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                // Distance Slider
+                // Distance Picker
                 VStack(spacing: 8) {
                     HStack {
-                        Text("Radius: \(Int(distanceMiles)) miles")
+                        Text("Distance")
                             .font(.headline)
                         Spacer()
                     }
                     
-                    Slider(value: $distanceMiles, in: 50...350, step: 100) {
-                        Text("Distance")
-                    } minimumValueLabel: {
-                        Text("50")
-                            .font(.caption)
-                    } maximumValueLabel: {
-                        Text("350")
-                            .font(.caption)
+                    Picker("Distance Radius", selection: $distanceMiles) {
+                        ForEach(distanceOptions, id: \.self) { distance in
+                            Text("\(Int(distance)) miles").tag(distance)
+                        }
                     }
+                    .pickerStyle(.wheel)
+                    .frame(height: 100)
                     .accessibilityLabel("Distance radius")
                     .accessibilityValue("\(Int(distanceMiles)) miles")
-                    .accessibilityHint("Adjust the radius for surrounding weather data. Ranges from 50 to 350 miles.")
-                    .onChange(of: distanceMiles) { _ in
+                    .accessibilityHint("Select the radius for surrounding weather data. Options range from 50 to 350 miles.")
+                    .onChange(of: distanceMiles) {
                         Task { await loadRegionalWeather() }
                     }
                 }
@@ -273,7 +273,14 @@ struct WeatherAroundMeView: View {
         errorMessage = nil
         
         do {
+            print("🔄 Loading regional weather for \(city.name) at \(distanceMiles) miles...")
             let data = try await RegionalWeatherService.shared.fetchRegionalWeather(for: city, distanceMiles: distanceMiles)
+            
+            print("✅ Received regional weather data:")
+            print("   Center: \(data.center.direction) - locationName: \(data.center.locationName ?? "nil")")
+            for direction in data.directions {
+                print("   \(direction.direction): locationName = \(direction.locationName ?? "nil")")
+            }
             
             await MainActor.run {
                 self.regionalWeather = data
