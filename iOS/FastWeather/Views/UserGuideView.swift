@@ -98,23 +98,45 @@ struct UserGuideView: View {
                     title: "Weather Around Me",
                     color: .purple
                 ) {
-                    Text("Compare weather across nearby cities:")
-                    BulletPoint("**Regional Overview** - Weather in all 8 directions (N, NE, E, etc.)")
-                    BulletPoint("**Distance Display** - Shows both search radius and actual distance to each city")
-                    BulletPoint("**Directional Explorer** - Select a direction to explore cities along that bearing")
+                    Text("See weather in cities around you in all directions. This feature helps you understand regional weather patterns and plan trips.")
+                        .padding(.bottom, 4)
                     
-                    Text("**Using Directional Explorer:**")
+                    Text("**What You'll See:**")
                         .fontWeight(.semibold)
                         .padding(.top, 8)
-                    BulletPoint("**Pick Direction** - Use picker to select N, NE, E, SE, S, SW, W, or NW")
-                    BulletPoint("**VoiceOver Swipe** - Swipe up for farther cities, swipe down for closer")
-                    BulletPoint("**Visual Navigation** - Use Closer/Farther buttons to navigate")
-                    BulletPoint("**List All** - See all cities in the selected direction at once")
-                    Text("The explorer finds cities within a ±22.5° cone in your chosen direction, up to your configured maximum distance. Perfect for VoiceOver users who want to explore regional weather one direction at a time.")
+                    BulletPoint("**Regional Overview** - Weather in 8 directions (N, NE, E, SE, S, SW, W, NW)")
+                    BulletPoint("**Distance** - How far each city is from your selected city")
+                    BulletPoint("**Current Weather** - Temperature and conditions for each city")
+                    
+                    Text("**Exploring Along a Direction:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("Tap any direction to explore cities along that path. For example, tap \"North\" to see all cities north of your location.")
                         .font(.callout)
                         .foregroundColor(.secondary)
-                        .padding(.top, 4)
                         .padding(.leading, 16)
+                        .padding(.bottom, 4)
+                    
+                    BulletPoint("**Pick a Direction** - Choose N, NE, E, SE, S, SW, W, or NW from the picker")
+                    BulletPoint("**Navigate Cities** - Swipe up for cities farther away, swipe down for closer cities")
+                    BulletPoint("**Visual Buttons** - Use \"Closer\" and \"Farther\" buttons to move between cities")
+                    BulletPoint("**View All** - Tap \"List All\" to see all cities in that direction at once")
+                    
+                    Text("**First Time Loading:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("Finding cities along a direction may take 10-20 seconds the first time, but results are cached for instant access next time. The app searches every 10 miles along your chosen direction to find nearby cities.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 4)
+                    
+                    Text("**Tips:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("Increase \"Max Distance\" in settings to see cities farther away")
+                    BulletPoint("Use VoiceOver swipe gestures to quickly explore city by city")
+                    BulletPoint("Weather data is prefetched as you navigate for smooth scrolling")
                 }
                 
                 // Historical Weather

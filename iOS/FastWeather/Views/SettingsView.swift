@@ -263,19 +263,17 @@ struct SettingsView: View {
                     .accessibilityHint("Tap to delete cached historical data for all cities")
                 }
                 
-                // User Guide section (feature-flagged)
-                if featureFlags.userGuideEnabled {
-                    Section {
-                        NavigationLink(destination: UserGuideView()) {
-                            HStack {
-                                Image(systemName: "book.fill")
-                                    .foregroundColor(.blue)
-                                Text("User Guide")
-                            }
+                // User Guide section
+                Section {
+                    NavigationLink(destination: UserGuideView()) {
+                        HStack {
+                            Image(systemName: "book.fill")
+                                .foregroundColor(.blue)
+                            Text("User Guide")
                         }
-                        .accessibilityLabel("User Guide")
-                        .accessibilityHint("Learn how to use FastWeather features")
                     }
+                    .accessibilityLabel("User Guide")
+                    .accessibilityHint("Learn how to use FastWeather features")
                 }
                 
                 // About section

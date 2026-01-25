@@ -22,10 +22,6 @@ struct DeveloperSettingsView: View {
                     Toggle("Weather Around Me", isOn: $featureFlags.weatherAroundMeEnabled)
                         .accessibilityLabel("Weather Around Me feature toggle")
                         .accessibilityHint(featureFlags.weatherAroundMeEnabled ? "Weather Around Me is currently enabled" : "Weather Around Me is currently disabled")
-                    
-                    Toggle("Show User Guide", isOn: $featureFlags.userGuideEnabled)
-                        .accessibilityLabel("User Guide link toggle")
-                        .accessibilityHint(featureFlags.userGuideEnabled ? "User Guide link is currently shown in settings" : "User Guide link is currently hidden")
                 }
                 
                 Section(header: Text("Quick Actions")) {
