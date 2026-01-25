@@ -279,12 +279,8 @@ struct WeatherAroundMeView: View {
                 // Direction Picker
                 Picker("Direction", selection: $selectedDirection) {
                     ForEach(CardinalDirection.allCases, id: \.self) { direction in
-                        HStack {
-                            Image(systemName: direction.icon)
-                                .accessibilityHidden(true)
-                            Text(direction.rawValue)
-                        }
-                        .tag(direction)
+                        Text(direction.rawValue)
+                            .tag(direction)
                     }
                 }
                 .pickerStyle(.wheel)
