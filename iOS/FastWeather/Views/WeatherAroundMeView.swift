@@ -279,8 +279,11 @@ struct WeatherAroundMeView: View {
                 // Direction Picker
                 Picker("Direction", selection: $selectedDirection) {
                     ForEach(CardinalDirection.allCases, id: \.self) { direction in
-                        Text(direction.rawValue)
-                            .tag(direction)
+                        HStack {
+                            Image(systemName: direction.icon)
+                            Text(direction.rawValue)
+                        }
+                        .tag(direction)
                     }
                 }
                 .pickerStyle(.wheel)
@@ -349,14 +352,7 @@ struct WeatherAroundMeView: View {
                 .background(Color.accentColor.opacity(0.1))
                 .cornerRadius(10)
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel({
-                    var label = "\(currentCity.displayName), "
-                    if let weather = directionalWeatherData[currentCity.id] {
-                        label += "\(formatTemperature(weather.temp)), \(weather.condition), "
-                    }
-                    label += "approximately \(Int(currentCity.distanceMiles)) miles, \(currentCityIndex + 1) of \(citiesInDirection.count)"
-                    return label
-                }())
+                .accessibilityLabel(cityExplorerAccessibilityLabel(currentCity))
                 .accessibilityHint("Swipe up for farther cities, swipe down for closer cities")
                 .accessibilityAddTraits([.isButton])
                 .accessibilityAdjustableAction { direction in
@@ -606,6 +602,15 @@ struct WeatherAroundMeView: View {
         if let condition = location.condition {
             label += ", \(condition)"
         }
+        return label
+    }
+    
+    private func cityExplorerAccessibilityLabel(_ cityInfo: DirectionalCityInfo) -> String {
+        var label = "\(cityInfo.displayName), "
+        if let weather = directionalWeatherData[cityInfo.id] {
+            label += "\(formatTemperature(weather.temp)), \(weather.condition), "
+        }
+        label += "approximately \(Int(cityInfo.distanceMiles)) miles, \(currentCityIndex + 1) of \(citiesInDirection.count)"
         return label
     }
 }
