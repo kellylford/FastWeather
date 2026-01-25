@@ -374,6 +374,12 @@ struct WeatherAroundMeView: View {
                 .task(id: currentCity.id) {
                     await loadWeatherForCity(currentCity)
                 }
+                .onChange(of: currentCityIndex) {
+                    // Prefetch next batch when user navigates
+                    Task {
+                        await prefetchWeatherData()
+                    }
+                }
             }
             
             // Navigation buttons (visual alternative)
@@ -495,6 +501,11 @@ struct WeatherAroundMeView: View {
         currentCityIndex = 0
         // Clear old weather data
         directionalWeatherData.removeAll()
+        
+        // Prefetch weather for first batch of cities
+        Task {
+            await prefetchWeatherData()
+        }
     }
     
     private func loadWeatherForCity(_ cityInfo: DirectionalCityInfo) async {
@@ -517,6 +528,23 @@ struct WeatherAroundMeView: View {
         } catch {
             // Silently fail for individual cities
             print("Failed to load weather for \(cityInfo.name): \(error)")
+        }
+    }
+    
+    /// Prefetch weather data for current city and next few cities
+    private func prefetchWeatherData() async {
+        // Prefetch current + next 4 cities (total of 5)
+        let endIndex = min(currentCityIndex + 5, citiesInDirection.count)
+        
+        for index in currentCityIndex..<endIndex {
+            guard citiesInDirection.indices.contains(index) else { continue }
+            let cityInfo = citiesInDirection[index]
+            
+            // Skip if already loaded
+            guard directionalWeatherData[cityInfo.id] == nil else { continue }
+            
+            // Load in background
+            await loadWeatherForCity(cityInfo)
         }
     }
     
