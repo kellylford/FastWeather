@@ -12,7 +12,7 @@ struct ListView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @Environment(\.editMode) var editMode
     @Binding var selectedCityForHistory: City?
-    @State private var selectedCityForAlert: (City, WeatherAlert)?
+    @State private var alertSheetItem: AlertSheetItem?  // Stable sheet item to prevent re-presentation loop
     
     var body: some View {
         List {
@@ -24,10 +24,7 @@ struct ListView: View {
             .onDelete(perform: deleteCities)
         }
         .listStyle(.plain)
-        .sheet(item: Binding(
-            get: { selectedCityForAlert.map { AlertSheetItem(city: $0.0, alert: $0.1) } },
-            set: { selectedCityForAlert = $0.map { ($0.city, $0.alert) } }
-        )) { item in
+        .sheet(item: $alertSheetItem) { item in
             AlertDetailView(alert: item.alert)
         }
     }
@@ -114,7 +111,8 @@ struct ListView: View {
     private func cityRow(for city: City, at index: Int) -> some View {
         NavigationLink(destination: CityDetailView(city: city)) {
             ListRowView(city: city, onAlertTap: { alert in
-                selectedCityForAlert = (city, alert)
+                // Create stable AlertSheetItem to prevent re-presentation loop
+                alertSheetItem = AlertSheetItem(city: city, alert: alert)
             })
         }
         .accessibilityElement(children: .combine)
@@ -146,10 +144,15 @@ struct ListView: View {
 }
 
 // MARK: - Alert Sheet Helper
-struct AlertSheetItem: Identifiable {
+struct AlertSheetItem: Identifiable, Equatable {
     let id = UUID()
     let city: City
     let alert: WeatherAlert
+    
+    static func == (lhs: AlertSheetItem, rhs: AlertSheetItem) -> Bool {
+        // Two alert sheet items are equal if they show the same alert for the same city
+        lhs.city.id == rhs.city.id && lhs.alert.id == rhs.alert.id
+    }
 }
 
 struct ListRowView: View {
