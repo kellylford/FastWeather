@@ -25,6 +25,7 @@ struct WeatherAroundMeView: View {
     @State private var currentCityIndex: Int = 0
     @State private var showingAllCities = false
     @State private var directionalWeatherData: [UUID: (temp: Double, condition: String)] = [:]
+    @State private var isLoadingCities = false
     
     let distanceOptions: [Double] = [50, 100, 150, 200, 250, 300, 350]
     
@@ -297,7 +298,16 @@ struct WeatherAroundMeView: View {
                 Divider()
                 
                 // City Explorer
-                if citiesInDirection.isEmpty {
+                if isLoadingCities {
+                    VStack(spacing: 12) {
+                        ProgressView()
+                        Text("Finding cities along bearing...")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding()
+                    .accessibilityLabel("Loading cities in \(selectedDirection.rawValue) direction")
+                } else if citiesInDirection.isEmpty {
                     Text("No cities found in this direction")
                         .font(.body)
                         .foregroundColor(.secondary)
@@ -493,17 +503,19 @@ struct WeatherAroundMeView: View {
     }
     
     private func loadCitiesInDirection() {
-        citiesInDirection = DirectionalCityService.shared.findCities(
-            from: city,
-            direction: selectedDirection,
-            maxDistance: distanceMiles
-        )
-        currentCityIndex = 0
-        // Clear old weather data
-        directionalWeatherData.removeAll()
-        
-        // Prefetch weather for first batch of cities
+        isLoadingCities = true
         Task {
+            citiesInDirection = await DirectionalCityService.shared.findCities(
+                from: city,
+                direction: selectedDirection,
+                maxDistance: distanceMiles
+            )
+            currentCityIndex = 0
+            isLoadingCities = false
+            // Clear old weather data
+            directionalWeatherData.removeAll()
+            
+            // Prefetch weather for first batch of cities
             await prefetchWeatherData()
         }
     }
