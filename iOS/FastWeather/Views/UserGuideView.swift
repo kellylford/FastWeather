@@ -85,10 +85,36 @@ struct UserGuideView: View {
                     color: .indigo
                 ) {
                     Text("Access additional features from city detail:")
+                    BulletPoint("**Refresh** - Update weather data")
                     BulletPoint("**View Historical Weather** - See past weather data")
                     BulletPoint("**Expected Precipitation** - Rainfall forecast (if enabled)")
                     BulletPoint("**Weather Around Me** - Regional weather comparison (if enabled)")
                     BulletPoint("**Remove City** - Delete from your list")
+                }
+                
+                // Weather Around Me & Directional Explorer
+                GuideSection(
+                    icon: "location.circle.fill",
+                    title: "Weather Around Me",
+                    color: .purple
+                ) {
+                    Text("Compare weather across nearby cities:")
+                    BulletPoint("**Regional Overview** - Weather in all 8 directions (N, NE, E, etc.)")
+                    BulletPoint("**Distance Display** - Shows both search radius and actual distance to each city")
+                    BulletPoint("**Directional Explorer** - Select a direction to explore cities along that bearing")
+                    
+                    Text("**Using Directional Explorer:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("**Pick Direction** - Use picker to select N, NE, E, SE, S, SW, W, or NW")
+                    BulletPoint("**VoiceOver Swipe** - Swipe up for farther cities, swipe down for closer")
+                    BulletPoint("**Visual Navigation** - Use Closer/Farther buttons to navigate")
+                    BulletPoint("**List All** - See all cities in the selected direction at once")
+                    Text("The explorer finds cities within a ±22.5° cone in your chosen direction, up to your configured maximum distance. Perfect for VoiceOver users who want to explore regional weather one direction at a time.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 4)
+                        .padding(.leading, 16)
                 }
                 
                 // Historical Weather
@@ -196,6 +222,14 @@ struct UserGuideView: View {
                         .padding(.vertical, 12)
                         .background(Color.orange.opacity(0.1))
                         .cornerRadius(8)
+                    
+                    Text("**Expected Precipitation Timeline:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("The Expected Precipitation feature displays a visual timeline showing precipitation forecasts for each time interval. This timeline is visible on screen for sighted users but is hidden from VoiceOver. The same data is available through the audio graph below the timeline, which provides both audio tones (representing precipitation intensity) and individual data points you can explore by swiping. The audio graph format is more efficient for non-visual exploration than reading through a long list of time entries.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
                 }
                 
                 // Accessibility

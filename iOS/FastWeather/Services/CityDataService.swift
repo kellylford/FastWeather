@@ -67,4 +67,16 @@ class CityDataService: ObservableObject {
     func cities(forCountry country: String) -> [CityLocation] {
         internationalCitiesByCountry[country] ?? []
     }
+    
+    /// Get all cities from all states and countries combined
+    func allCities() -> [CityLocation] {
+        var all: [CityLocation] = []
+        for cities in usCitiesByState.values {
+            all.append(contentsOf: cities)
+        }
+        for cities in internationalCitiesByCountry.values {
+            all.append(contentsOf: cities)
+        }
+        return all
+    }
 }

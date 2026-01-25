@@ -184,8 +184,7 @@ struct RadarView: View {
             }
             .padding(.vertical, 8)
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(timelineAccessibilityLabel(radar.timeline))
+        .accessibilityHidden(true)
     }
     
     // MARK: - Radar Map View (Visual)
@@ -223,11 +222,10 @@ struct RadarView: View {
                     x: .value("Time", point.time),
                     y: .value("Intensity", precipitationValue(for: point.condition))
                 )
-                .accessibilityLabel("\(point.time): \(point.condition)")
+                .accessibilityLabel(point.time)
                 .accessibilityValue(point.condition)
             }
-            .accessibilityLabel("Precipitation intensity over next 2 hours")
-            .accessibilityValue(timelineAccessibilityLabel(radar.timeline))
+            .accessibilityLabel("Precipitation intensity over next 2 hours. Swipe to explore individual time points.")
         }
     }
     
