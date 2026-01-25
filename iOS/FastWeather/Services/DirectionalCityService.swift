@@ -45,9 +45,10 @@ class DirectionalCityService {
             
             // Reverse geocode to find city at this point
             do {
-                // Rate limit: 1 request per second
+                // Rate limit: 2 seconds per request to respect Apple's CLGeocoder limits
+                // (Apple recommends 1 request/minute, but allows burst capacity with delays)
                 if distance > interval {
-                    try await Task.sleep(nanoseconds: 1_000_000_000)
+                    try await Task.sleep(nanoseconds: 2_000_000_000)
                 }
                 
                 let placemarks = try await geocoder.reverseGeocodeLocation(location)
@@ -80,7 +81,14 @@ class DirectionalCityService {
                     }
                 }
             } catch {
-                print("Geocoding failed at \(distance) miles: \(error)")
+                print("⚠️ Geocoding failed at \(distance) miles (\(direction.rawValue)): \(error.localizedDescription)")
+                
+                // If we hit rate limit, wait longer before continuing
+                if (error as NSError).domain == kCLErrorDomain,
+                   (error as NSError).code == CLError.network.rawValue {
+                    print("🚫 Rate limit detected, waiting 5 seconds...")
+                    try? await Task.sleep(nanoseconds: 5_000_000_000)
+                }
                 // Continue to next point even if this one fails
             }
             
