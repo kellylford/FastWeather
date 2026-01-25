@@ -282,6 +282,7 @@ struct WeatherAroundMeView: View {
                     ForEach(CardinalDirection.allCases, id: \.self) { direction in
                         HStack {
                             Image(systemName: direction.icon)
+                                .accessibilityHidden(true)
                             Text(direction.rawValue)
                         }
                         .tag(direction)
@@ -364,7 +365,6 @@ struct WeatherAroundMeView: View {
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(cityExplorerAccessibilityLabel(currentCity))
                 .accessibilityHint("Swipe up for farther cities, swipe down for closer cities")
-                .accessibilityAddTraits([.isButton])
                 .accessibilityAdjustableAction { direction in
                     switch direction {
                     case .increment:
