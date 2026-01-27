@@ -124,6 +124,65 @@ enum PressureUnit: String, CaseIterable, Codable {
     }
 }
 
+enum DistanceUnit: String, CaseIterable, Codable {
+    case miles = "mi"
+    case kilometers = "km"
+    
+    /// Convert a distance value from kilometers to the target unit
+    func convert(_ kilometers: Double) -> Double {
+        switch self {
+        case .miles:
+            return kilometers * 0.621371
+        case .kilometers:
+            return kilometers
+        }
+    }
+    
+    /// Convert a distance value to kilometers from this unit
+    func toKilometers(_ value: Double) -> Double {
+        switch self {
+        case .miles:
+            return value / 0.621371
+        case .kilometers:
+            return value
+        }
+    }
+    
+    /// Get appropriate distance options for Weather Around Me picker
+    var weatherAroundMeOptions: [Double] {
+        switch self {
+        case .miles:
+            return [50, 100, 150, 200, 250, 300, 350]
+        case .kilometers:
+            return [80, 160, 240, 320, 400, 480, 560]
+        }
+    }
+    
+    /// Format a distance value with unit
+    func format(_ value: Double, decimals: Int = 0) -> String {
+        let formatString = decimals > 0 ? "%.\(decimals)f" : "%.0f"
+        return String(format: "\(formatString) %@", value, self.rawValue)
+    }
+    
+    /// Snap a distance value to the nearest "nice" value in this unit
+    func snapToNearest(_ value: Double) -> Double {
+        let options = weatherAroundMeOptions
+        guard !options.isEmpty else { return value }
+        
+        // Find closest option
+        return options.min(by: { abs($0 - value) < abs($1 - value) }) ?? options.first!
+    }
+    
+    /// Get default distance unit based on user's locale (no permissions needed)
+    static var defaultUnit: DistanceUnit {
+        if Locale.current.measurementSystem == .us {
+            return .miles
+        } else {
+            return .kilometers
+        }
+    }
+}
+
 struct AppSettings: Codable {
     var viewMode: ViewMode = .list
     var displayMode: DisplayMode = .condensed
@@ -131,8 +190,26 @@ struct AppSettings: Codable {
     var windSpeedUnit: WindSpeedUnit = .mph
     var precipitationUnit: PrecipitationUnit = .inches
     var pressureUnit: PressureUnit = .inHg
+    var distanceUnit: DistanceUnit = DistanceUnit.defaultUnit
     var historicalYearsBack: Int = 20
-    var weatherAroundMeDistance: Double = 150  // Default distance in miles
+    
+    // Private storage for weatherAroundMeDistance with validation
+    private var _weatherAroundMeDistance: Double = DistanceUnit.defaultUnit == .miles ? 150 : 240
+    
+    // Public accessor that ensures value is valid for current unit
+    var weatherAroundMeDistance: Double {
+        get {
+            let options = distanceUnit.weatherAroundMeOptions
+            // If current value is not in options, snap to nearest
+            if !options.contains(_weatherAroundMeDistance) {
+                return distanceUnit.snapToNearest(_weatherAroundMeDistance)
+            }
+            return _weatherAroundMeDistance
+        }
+        set {
+            _weatherAroundMeDistance = newValue
+        }
+    }
     
     // Ordered weather fields with enable/disable state
     var weatherFields: [WeatherField] = [
@@ -170,4 +247,15 @@ struct AppSettings: Codable {
     var showLowTemp: Bool = true
     var showSunrise: Bool = true
     var showSunset: Bool = true
+    
+    // Custom CodingKeys to handle private _weatherAroundMeDistance property
+    enum CodingKeys: String, CodingKey {
+        case viewMode, displayMode, temperatureUnit, windSpeedUnit
+        case precipitationUnit, pressureUnit, distanceUnit, historicalYearsBack
+        case _weatherAroundMeDistance = "weatherAroundMeDistance"
+        case weatherFields, detailCategories
+        case showTemperature, showConditions, showFeelsLike, showHumidity
+        case showWindSpeed, showWindDirection, showHighTemp, showLowTemp
+        case showSunrise, showSunset
+    }
 }

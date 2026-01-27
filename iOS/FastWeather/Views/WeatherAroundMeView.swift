@@ -29,8 +29,6 @@ struct WeatherAroundMeView: View {
     @State private var directionalWeatherData: [UUID: (temp: Double, condition: String)] = [:]
     @State private var isLoadingCities = false
     
-    let distanceOptions: [Double] = [50, 100, 150, 200, 250, 300, 350]
-    
     init(city: City, defaultDistance: Double = 150) {
         self.city = city
         self.defaultDistance = defaultDistance
@@ -49,15 +47,15 @@ struct WeatherAroundMeView: View {
                     }
                     
                     Picker("Distance Radius", selection: $distanceMiles) {
-                        ForEach(distanceOptions, id: \.self) { distance in
-                            Text("\(Int(distance)) miles").tag(distance)
+                        ForEach(settingsManager.settings.distanceUnit.weatherAroundMeOptions, id: \.self) { distance in
+                            Text(settingsManager.settings.distanceUnit.format(distance)).tag(distance)
                         }
                     }
                     .pickerStyle(.wheel)
                     .frame(height: 100)
                     .accessibilityLabel("Distance radius")
-                    .accessibilityValue("\(Int(distanceMiles)) miles")
-                    .accessibilityHint("Select the radius for surrounding weather data. Options range from 50 to 350 miles.")
+                    .accessibilityValue(settingsManager.settings.distanceUnit.format(distanceMiles))
+                    .accessibilityHint("Select the radius for surrounding weather data. Options range from \(Int(settingsManager.settings.distanceUnit.weatherAroundMeOptions.first ?? 0)) to \(Int(settingsManager.settings.distanceUnit.weatherAroundMeOptions.last ?? 0)) \(settingsManager.settings.distanceUnit.rawValue).")
                     .onChange(of: distanceMiles) {
                         Task { await loadRegionalWeather() }
                     }
@@ -244,11 +242,11 @@ struct WeatherAroundMeView: View {
                             .font(.headline)
                         
                         if let locationName = location.locationName {
-                            Text("\(locationName) (~\(actualDistance) mi)")
+                            Text("\(locationName) (\(settingsManager.settings.distanceUnit.format(Double(actualDistance))))")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         } else {
-                            Text("~\(actualDistance) mi")
+                            Text(settingsManager.settings.distanceUnit.format(Double(actualDistance)))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -352,7 +350,7 @@ struct WeatherAroundMeView: View {
                             .accessibilityLabel("Loading weather")
                     }
                     
-                    Text("~\(Int(currentCity.distanceMiles)) mi")
+                    Text(settingsManager.settings.distanceUnit.format(currentCity.distanceMiles))
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
@@ -459,7 +457,7 @@ struct WeatherAroundMeView: View {
         errorMessage = nil
         
         do {
-            print("🔄 Loading regional weather for \(city.name) at \(distanceMiles) miles...")
+            print("🔄 Loading regional weather for \(city.name) at \(settingsManager.settings.distanceUnit.format(distanceMiles))...")
             let data = try await RegionalWeatherService.shared.fetchRegionalWeather(for: city, distanceMiles: distanceMiles)
             
             print("✅ Received regional weather data:")
@@ -502,13 +500,14 @@ struct WeatherAroundMeView: View {
         return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
     }
     
-    /// Calculate actual distance between center city and directional location in miles
+    /// Calculate actual distance between center city and directional location in user's preferred unit
     private func calculateDistance(from center: City, to location: DirectionalLocation) -> Int {
         let centerLocation = CLLocation(latitude: center.latitude, longitude: center.longitude)
         let targetLocation = CLLocation(latitude: location.latitude, longitude: location.longitude)
         let distanceMeters = centerLocation.distance(from: targetLocation)
-        let distanceMiles = distanceMeters * 0.000621371
-        return Int(distanceMiles.rounded())
+        let distanceKm = distanceMeters / 1000.0
+        let distanceInUnit = settingsManager.settings.distanceUnit.convert(distanceKm)
+        return Int(distanceInUnit.rounded())
     }
     
     private func loadCitiesInDirection() {
@@ -640,9 +639,9 @@ struct WeatherAroundMeView: View {
         let actualDistance = calculateDistance(from: city, to: location)
         var label = "\(location.direction)"
         if let locationName = location.locationName {
-            label += ", near \(locationName), approximately \(actualDistance) miles"
+            label += ", near \(locationName), approximately \(actualDistance) \(settingsManager.settings.distanceUnit.rawValue)"
         } else {
-            label += ", approximately \(actualDistance) miles"
+            label += ", approximately \(actualDistance) \(settingsManager.settings.distanceUnit.rawValue)"
         }
         if let temp = location.temperature {
             label += ", \(formatTemperature(temp))"
@@ -658,7 +657,7 @@ struct WeatherAroundMeView: View {
         if let weather = directionalWeatherData[cityInfo.id] {
             label += "\(formatTemperature(weather.temp)), \(weather.condition), "
         }
-        label += "approximately \(Int(cityInfo.distanceMiles)) miles, \(currentCityIndex + 1) of \(citiesInDirection.count)"
+        label += "approximately \(Int(cityInfo.distanceMiles)) \(settingsManager.settings.distanceUnit.rawValue), \(currentCityIndex + 1) of \(citiesInDirection.count)"
         return label
     }
 }

@@ -74,22 +74,43 @@ struct SettingsView: View {
                 // Weather Around Me section
                 Section(header: Text("Weather Around Me")) {
                     Picker("Default Distance", selection: $settingsManager.settings.weatherAroundMeDistance) {
-                        Text("50 miles").tag(50.0)
-                        Text("100 miles").tag(100.0)
-                        Text("150 miles").tag(150.0)
-                        Text("200 miles").tag(200.0)
-                        Text("250 miles").tag(250.0)
-                        Text("300 miles").tag(300.0)
-                        Text("350 miles").tag(350.0)
+                        ForEach(settingsManager.settings.distanceUnit.weatherAroundMeOptions, id: \.self) { distance in
+                            Text(settingsManager.settings.distanceUnit.format(distance)).tag(distance)
+                        }
                     }
                     .onChange(of: settingsManager.settings.weatherAroundMeDistance) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Default distance for Weather Around Me, currently \(Int(settingsManager.settings.weatherAroundMeDistance)) miles")
+                    .accessibilityLabel("Default distance for Weather Around Me, currently \(settingsManager.settings.distanceUnit.format(settingsManager.settings.weatherAroundMeDistance))")
                     .accessibilityHint("Sets the default radius when viewing weather conditions around a city")
                 }
                 
                 Section(header: Text("Units")) {
+                    Picker(selection: $settingsManager.settings.distanceUnit) {
+                        ForEach(DistanceUnit.allCases, id: \.self) { unit in
+                            Text(unit.rawValue).tag(unit)
+                        }
+                    } label: {
+                        HStack {
+                            Text("Distance")
+                            Spacer()
+                            Text(settingsManager.settings.distanceUnit.rawValue)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .onChange(of: settingsManager.settings.distanceUnit) { oldValue, newValue in
+                        // Convert and snap weatherAroundMeDistance to nearest nice value in new unit
+                        // Must update both values atomically to prevent picker confusion
+                        DispatchQueue.main.async {
+                            let kilometers = oldValue.toKilometers(settingsManager.settings.weatherAroundMeDistance)
+                            let convertedValue = newValue.convert(kilometers)
+                            let snappedValue = newValue.snapToNearest(convertedValue)
+                            settingsManager.settings.weatherAroundMeDistance = snappedValue
+                            settingsManager.saveSettings()
+                        }
+                    }
+                    .accessibilityLabel("Distance unit, currently \(settingsManager.settings.distanceUnit.rawValue)")
+                    
                     Picker(selection: $settingsManager.settings.pressureUnit) {
                         ForEach(PressureUnit.allCases, id: \.self) { unit in
                             Text(unit.rawValue).tag(unit)

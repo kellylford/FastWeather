@@ -7,6 +7,10 @@
 
 import Foundation
 import Combine
+import CoreLocation
+#if canImport(WeatherKit)
+import WeatherKit
+#endif
 
 class WeatherService: ObservableObject {
     @Published var savedCities: [City] = []
@@ -373,16 +377,15 @@ class WeatherService: ObservableObject {
         return historicalDays
     }
     
-    // MARK: - Weather Alerts (NWS)
+    // MARK: - Weather Alerts (NWS & WeatherKit)
     
     private var alertsCache: [UUID: (alerts: [WeatherAlert], timestamp: Date)] = [:]
     private let alertsCacheMinutes: TimeInterval = 5
     
-    /// Fetches severe weather alerts from National Weather Service (US only)
-    /// - Parameters:
-    ///   - latitude: Location latitude
-    ///   - longitude: Location longitude
-    /// - Returns: Array of active weather alerts (empty if non-US or no alerts)
+    /// Fetches severe weather alerts using appropriate source based on location
+    /// - US cities: National Weather Service (detailed alerts with full text)
+    /// - International: Apple WeatherKit (when feature flag enabled)
+    /// - Returns: Array of active weather alerts (empty if no alerts or service unavailable)
     func fetchNWSAlerts(for city: City) async throws -> [WeatherAlert] {
         // Check cache first
         if let cached = alertsCache[city.id] {
@@ -393,11 +396,23 @@ class WeatherService: ObservableObject {
             }
         }
         
-        // NWS API only works for US locations
-        guard city.country == "United States" else {
-            print("ℹ️ Skipping alerts for non-US city: \(city.name)")
+        // US cities: Use NWS for detailed alerts
+        if city.country == "United States" {
+            return try await fetchNWSAlertsDirectly(for: city)
+        }
+        
+        // International cities: Use WeatherKit if enabled
+        if FeatureFlags.shared.weatherKitAlertsEnabled {
+            print("🌍 Using WeatherKit for international city: \(city.name)")
+            return try await fetchWeatherKitAlerts(for: city)
+        } else {
+            print("ℹ️ WeatherKit disabled, no alerts for international city: \(city.name)")
             return []
         }
+    }
+    
+    /// Fetches alerts directly from National Weather Service API (US only)
+    private func fetchNWSAlertsDirectly(for city: City) async throws -> [WeatherAlert] {
         
         let urlString = "https://api.weather.gov/alerts/active?point=\(city.latitude),\(city.longitude)"
         guard let url = URL(string: urlString) else {
@@ -468,6 +483,80 @@ class WeatherService: ObservableObject {
             print("⚠️ Error fetching NWS alerts for \(city.name): \(error)")
             return []
         }
+    }
+    
+    /// Fetches weather alerts from Apple WeatherKit (international cities)
+    private func fetchWeatherKitAlerts(for city: City) async throws -> [WeatherAlert] {
+        #if canImport(WeatherKit)
+        let location = CLLocation(latitude: city.latitude, longitude: city.longitude)
+        let appleWeatherService = WeatherKit.WeatherService.shared
+        
+        do {
+            let weatherAlerts = try await appleWeatherService.weather(
+                for: location,
+                including: .alerts
+            )
+            
+            // Convert WeatherKit alerts to our WeatherAlert model
+            let alerts = weatherAlerts?.compactMap { wkAlert -> WeatherAlert? in
+                // Map WeatherKit severity to our AlertSeverity
+                let severity: AlertSeverity
+                switch wkAlert.severity {
+                case .extreme: severity = .extreme
+                case .severe: severity = .severe
+                case .moderate: severity = .moderate
+                case .minor: severity = .minor
+                case .unknown: severity = .unknown
+                @unknown default: severity = .unknown
+                }
+                
+                // WeatherKit doesn't provide full description or instructions
+                // Only summary and a link to details
+                let description = wkAlert.detailsURL.absoluteString
+                
+                return WeatherAlert(
+                    id: UUID().uuidString,
+                    event: wkAlert.summary,
+                    severity: severity,
+                    headline: wkAlert.summary,
+                    description: description,
+                    instruction: nil, // WeatherKit doesn't provide instructions
+                    onset: Date(), // WeatherKit doesn't expose onset/expires directly, use current date
+                    expires: Date().addingTimeInterval(86400), // Default to 24 hours
+                    areaDesc: wkAlert.region
+                )
+            } ?? []
+            
+            // Filter expired alerts
+            let activeAlerts = alerts.filter { !$0.isExpired }
+            
+            // Cache results
+            alertsCache[city.id] = (activeAlerts, Date())
+            
+            print("✅ Fetched \(activeAlerts.count) WeatherKit alerts for \(city.name)")
+            return activeAlerts
+            
+        } catch {
+            // Check for authentication errors
+            let nsError = error as NSError
+            if nsError.domain.contains("WDSJWTAuthenticatorServiceListener") || 
+               nsError.domain.contains("WeatherDaemon") {
+                print("⚠️ WeatherKit authentication failed for \(city.name)")
+                print("   → WeatherKit may not be enabled for your App ID in Apple Developer Portal")
+                print("   → Visit https://developer.apple.com/account/resources/identifiers/list")
+                print("   → Edit your App ID and enable the WeatherKit capability")
+            } else {
+                print("⚠️ Error fetching WeatherKit alerts for \(city.name): \(error)")
+            }
+            
+            // Cache empty result to avoid repeated failed requests
+            alertsCache[city.id] = ([], Date())
+            return []
+        }
+        #else
+        print("⚠️ WeatherKit not available on this platform")
+        return []
+        #endif
     }
     
     // MARK: - Persistence

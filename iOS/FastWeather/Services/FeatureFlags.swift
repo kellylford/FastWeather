@@ -38,6 +38,15 @@ class FeatureFlags: ObservableObject {
         }
     }
     
+    /// Enable/disable WeatherKit alerts for international cities
+    /// When enabled, uses Apple WeatherKit for alerts in non-US cities
+    /// US cities continue to use NWS for more detailed alerts
+    @Published var weatherKitAlertsEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(weatherKitAlertsEnabled, forKey: "feature_weatherkit_alerts_enabled")
+        }
+    }
+    
     // MARK: - Initialization
     
     private init() {
@@ -45,6 +54,7 @@ class FeatureFlags: ObservableObject {
         self.radarEnabled = UserDefaults.standard.bool(forKey: "feature_radar_enabled")
         self.weatherAroundMeEnabled = UserDefaults.standard.bool(forKey: "feature_weather_around_me_enabled")
         self.userGuideEnabled = UserDefaults.standard.bool(forKey: "feature_user_guide_enabled")
+        self.weatherKitAlertsEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_alerts_enabled")
         
         // Default values (if first launch or not set)
         // Change these to true/false to enable/disable features during development
@@ -57,6 +67,9 @@ class FeatureFlags: ObservableObject {
         if !UserDefaults.standard.contains(key: "feature_user_guide_enabled") {
             self.userGuideEnabled = false  // Disabled by default
         }
+        if !UserDefaults.standard.contains(key: "feature_weatherkit_alerts_enabled") {
+            self.weatherKitAlertsEnabled = true  // Enabled by default for international alerts
+        }
     }
     
     // MARK: - Helper Methods
@@ -66,6 +79,7 @@ class FeatureFlags: ObservableObject {
         radarEnabled = false
         weatherAroundMeEnabled = false
         userGuideEnabled = false
+        weatherKitAlertsEnabled = true  // Default: enabled
         print("🔧 Feature flags reset to defaults")
     }
     
@@ -74,6 +88,7 @@ class FeatureFlags: ObservableObject {
         radarEnabled = true
         weatherAroundMeEnabled = true
         userGuideEnabled = true
+        weatherKitAlertsEnabled = true
         print("🔧 All features enabled")
     }
     
@@ -82,6 +97,7 @@ class FeatureFlags: ObservableObject {
         radarEnabled = false
         weatherAroundMeEnabled = false
         userGuideEnabled = false
+        weatherKitAlertsEnabled = false
         print("🔧 All features disabled")
     }
 }

@@ -415,8 +415,9 @@ struct CityDetailView: View {
     }
     
     private func formatVisibility(_ meters: Double) -> String {
-        let miles = meters * 0.000621371
-        return String(format: "%.1f mi", miles)
+        let km = meters / 1000.0
+        let distance = settingsManager.settings.distanceUnit.convert(km)
+        return settingsManager.settings.distanceUnit.format(distance, decimals: 1)
     }
     
     private func formatTime(_ isoString: String) -> String {

@@ -32,6 +32,11 @@
 - **Complete solutions only**: If fixing navigation, ensure it works in ALL modes (single-day, multi-year, daily-browse, etc.)
 - **User-first design**: Every decision must be evaluated from the user's perspective
 - **Consistent behavior**: Similar features should work similarly across different contexts
+- **Build verification (iOS)**: ALL iOS code changes MUST build successfully using `xcodebuild` before considering work complete
+  - Command: `cd iOS && xcodebuild -project FastWeather.xcodeproj -scheme FastWeather -configuration Debug build`
+  - Must see `** BUILD SUCCEEDED **` in output
+  - Fix ALL compilation errors before marking work as done
+  - Warnings are acceptable but should be noted
 
 ### When You Make a Mistake
 1. Acknowledge the flawed reasoning explicitly and specifically

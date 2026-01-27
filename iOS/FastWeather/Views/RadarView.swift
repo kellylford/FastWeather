@@ -145,7 +145,7 @@ struct RadarView: View {
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                         
-                        DetailRow(label: "Distance", value: "\(nearest.distanceMiles) miles to the \(nearest.direction)")
+                        DetailRow(label: "Distance", value: "\(formatDistance(nearest.distanceMiles)) to the \(nearest.direction)")
                         DetailRow(label: "Type", value: nearest.type)
                         DetailRow(label: "Intensity", value: nearest.intensity)
                         DetailRow(label: "Movement", value: "\(nearest.movementDirection) at \(nearest.speedMph) mph")
@@ -315,8 +315,8 @@ struct RadarView: View {
         var label = "Precipitation Summary. \(radar.currentStatus)."
         
         if let nearest = radar.nearestPrecipitation {
-            label += " Nearest precipitation: \(nearest.type), \(nearest.distanceMiles) miles to the \(nearest.direction), "
-            label += "moving \(nearest.movementDirection) at \(nearest.speedMph) miles per hour."
+            label += " Nearest precipitation: \(nearest.type), \(formatDistance(nearest.distanceMiles)) to the \(nearest.direction), "
+            label += "moving \(nearest.movementDirection) at \(formatSpeed(nearest.speedMph))."
             if let arrival = nearest.arrivalEstimate {
                 label += " Expected arrival: \(arrival)."
             }
@@ -331,6 +331,19 @@ struct RadarView: View {
             label += "\(point.time): \(point.condition). "
         }
         return label
+    }
+    
+    // MARK: - Formatting Helpers
+    private func formatDistance(_ miles: Int) -> String {
+        let km = Double(miles) / 0.621371
+        let distance = settingsManager.settings.distanceUnit == .miles ? Double(miles) : km
+        return settingsManager.settings.distanceUnit.format(distance)
+    }
+    
+    private func formatSpeed(_ mph: Int) -> String {
+        let kmh = Double(mph) / 0.621371
+        let speed = settingsManager.settings.windSpeedUnit.convert(kmh)
+        return "\(Int(speed)) \(settingsManager.settings.windSpeedUnit.rawValue)"
     }
 }
 
