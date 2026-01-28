@@ -44,6 +44,33 @@ struct DeveloperSettingsView: View {
                     }
                 }
                 
+                #if targetEnvironment(simulator)
+                Section(header: Text("⚠️ Simulator Detected")) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("WeatherKit may not work properly on iOS Simulator")
+                            .font(.subheadline)
+                            .foregroundColor(.orange)
+                        
+                        Text("To test international alerts:")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Text("1. Build to a real iPhone device")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Text("2. Ensure device is signed in to iCloud")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Text("3. Check console for authentication errors")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, 4)
+                }
+                #endif
+                
                 Section(header: Text("Quick Actions")) {
                     Button(action: {
                         featureFlags.enableAll()
