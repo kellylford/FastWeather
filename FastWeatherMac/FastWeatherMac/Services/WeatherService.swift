@@ -111,7 +111,9 @@ enum WeatherError: LocalizedError {
             return "Network error: \(error.localizedDescription)"
         }
     }
-    
+}
+
+extension WeatherService {
     // MARK: - Historical Weather
     func fetchHistoricalWeather(for city: City, startDate: String, endDate: String) async throws -> HistoricalWeatherResponse {
         let params = [

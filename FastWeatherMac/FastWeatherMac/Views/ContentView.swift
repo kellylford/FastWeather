@@ -18,23 +18,8 @@ struct ContentView: View {
     @State private var showingLocationBrowser = false
     @State private var showingError = false
     @State private var errorMessage = ""
-    @State private var viewMode: CityListViewMode = .list
     @EnvironmentObject var featureFlags: FeatureFlags
     @EnvironmentObject var settingsManager: SettingsManager
-    
-    enum CityListViewMode: String, CaseIterable {
-        case table = "Table"
-        case list = "List"
-        case flat = "Flat"
-        
-        var icon: String {
-            switch self {
-            case .table: return "tablecells"
-            case .list: return "list.bullet"
-            case .flat: return "square.grid.2x2"
-            }
-        }
-    }
     
     private var addCityHint: String {
         searchText.isEmpty ? "Enter a city name first" : "Add \(searchText) to your city list"
@@ -78,15 +63,35 @@ struct ContentView: View {
         .frame(minWidth: 280)
         .toolbar {
             ToolbarItemGroup {
-                Picker("View Mode", selection: $viewMode) {
-                    ForEach(CityListViewMode.allCases, id: \.self) { mode in
-                        Label(mode.rawValue, systemImage: mode.icon)
-                            .tag(mode)
-                    }
+                // View Mode picker (List or Flat only)
+                Picker("View Mode", selection: $settingsManager.settings.viewMode) {
+                    Label("List", systemImage: "list.bullet")
+                        .tag(ViewMode.list)
+                    Label("Flat", systemImage: "square.grid.2x2")
+                        .tag(ViewMode.flat)
                 }
                 .pickerStyle(.segmented)
-                .help("Switch between Table, List, and Flat view modes")
+                .help("Switch between List and Flat view modes")
                 .accessibilityLabel("View mode selector")
+                .onChange(of: settingsManager.settings.viewMode) { _ in
+                    settingsManager.saveSettings()
+                }
+                
+                // Display Mode toggle (only for List view)
+                if settingsManager.settings.viewMode == .list {
+                    Picker("Display Mode", selection: $settingsManager.settings.displayMode) {
+                        Label("Condensed", systemImage: "text.alignleft")
+                            .tag(DisplayMode.condensed)
+                        Label("Details", systemImage: "text.alignjustify")
+                            .tag(DisplayMode.details)
+                    }
+                    .pickerStyle(.segmented)
+                    .help("Toggle between condensed and detailed view")
+                    .accessibilityLabel("Display mode selector")
+                    .onChange(of: settingsManager.settings.displayMode) { _ in
+                        settingsManager.saveSettings()
+                    }
+                }
                 
                 Button(action: { showingAddCitySheet = true }) {
                     Label("Search City", systemImage: "magnifyingglass")
@@ -188,51 +193,12 @@ struct ContentView: View {
     // MARK: - City List
     private var cityList: some View {
         Group {
-            switch viewMode {
-            case .table:
-                TableView(cities: cityManager.cities, selectedCity: $selectedCity)
+            switch settingsManager.settings.viewMode {
             case .list:
-                List(selection: $selectedCity) {
-                    cityListContent
-                }
-                .accessibilityLabel("Cities list")
-                .accessibilityHint("\(cityManager.cities.count) cities. Select a city to view weather details.")
+                ListView(cities: cityManager.cities, selectedCity: $selectedCity)
             case .flat:
                 FlatView(cities: cityManager.cities, selectedCity: $selectedCity)
             }
-        }
-    }
-    
-    private var cityListContent: some View {
-        ForEach(cityManager.cities) { city in
-            CityRowView(city: city)
-                .tag(city)
-                .contextMenu {
-                    removeCityButton(for: city)
-                }
-        }
-        .onMove(perform: cityManager.moveCity)
-        .onDelete(perform: deleteCity)
-    }
-    
-    private func removeCityButton(for city: City) -> some View {
-        Button(role: .destructive) {
-            withAnimation {
-                cityManager.removeCity(city)
-                if selectedCity?.id == city.id {
-                    selectedCity = cityManager.cities.first
-                }
-            }
-        } label: {
-            Label("Remove City", systemImage: "trash")
-        }
-        .accessibilityLabel("Remove \(city.displayName)")
-    }
-    
-    private func deleteCity(at indexSet: IndexSet) {
-        indexSet.forEach { index in
-            let city = cityManager.cities[index]
-            cityManager.removeCity(city)
         }
     }
     

@@ -1,0 +1,162 @@
+//
+//  TableView.swift
+//  FastWeatherMac
+//
+//  Tabular view for displaying weather data in rows/columns
+//  macOS exclusive - not available on iOS
+//
+
+import SwiftUI
+
+struct TableView: View {
+    let cities: [City]
+    @Binding var selectedCity: City?
+    @EnvironmentObject var settingsManager: SettingsManager
+    @State private var weatherCache: [UUID: WeatherResponse] = [:]
+    
+    var body: some View {
+        Table(cities, selection: $selectedCity) {
+            TableColumn("City") { (city: City) in
+                Text(city.displayName)
+            }
+            
+            TableColumn("Temperature") { city in
+                weatherText(for: .temperature, city: city)
+            }
+            
+            TableColumn("Conditions") { city in
+                weatherText(for: .conditions, city: city)
+            }
+            
+            TableColumn("Feels Like") { city in
+                weatherText(for: .feelsLike, city: city)
+            }
+            
+            TableColumn("Humidity") { city in
+                weatherText(for: .humidity, city: city)
+            }
+            
+            TableColumn("Wind Speed") { city in
+                weatherText(for: .windSpeed, city: city)
+            }
+            
+            TableColumn("High") { city in
+                weatherText(for: .highTemp, city: city)
+            }
+            
+            TableColumn("Low") { city in
+                weatherText(for: .lowTemp, city: city)
+            }
+        }
+        .task {
+            await loadAllWeather()
+        }
+    }
+    
+    @ViewBuilder
+    private func weatherText(for fieldType: WeatherFieldType, city: City) -> some View {
+        if let weather = weatherCache[city.id] {
+            Text(getFieldValue(for: fieldType, weather: weather))
+        } else {
+            Text("...")
+                .foregroundColor(.secondary)
+        }
+    }
+    
+    private func getFieldValue(for fieldType: WeatherFieldType, weather: WeatherResponse) -> String {
+        switch fieldType {
+        case .temperature:
+            return formatTemperature(weather.current.temperature2m)
+            
+        case .conditions:
+            return weather.current.weatherCodeEnum?.description ?? "Unknown"
+            
+        case .feelsLike:
+            let apparentTemp = weather.current.apparentTemperature
+            return formatTemperature(apparentTemp)
+            
+        case .humidity:
+            let humidity = weather.current.relativeHumidity2m
+            return "\(humidity)%"
+            
+        case .windSpeed:
+            let windSpeed = weather.current.windSpeed10m
+            return formatWindSpeed(windSpeed)
+            
+        case .windDirection:
+            let windDir = weather.current.windDirection10m
+            return formatWindDirection(windDir)
+            
+        case .highTemp:
+            if let daily = weather.daily, !daily.temperature2mMax.isEmpty {
+                let maxTemp = daily.temperature2mMax[0]
+                return formatTemperature(maxTemp)
+            }
+            return "-"
+            
+        case .lowTemp:
+            if let daily = weather.daily, !daily.temperature2mMin.isEmpty {
+                let minTemp = daily.temperature2mMin[0]
+                return formatTemperature(minTemp)
+            }
+            return "-"
+            
+        case .sunrise:
+            if let daily = weather.daily, !daily.sunrise.isEmpty {
+                let sunrise = daily.sunrise[0]
+                return FormatHelper.formatTime(sunrise)
+            }
+            return "-"
+            
+        case .sunset:
+            if let daily = weather.daily, !daily.sunset.isEmpty {
+                let sunset = daily.sunset[0]
+                return FormatHelper.formatTime(sunset)
+            }
+            return "-"
+        }
+    }
+    
+    private func loadAllWeather() async {
+        await withTaskGroup(of: Void.self) { group in
+            for city in cities {
+                group.addTask {
+                    await loadWeather(for: city)
+                }
+            }
+        }
+    }
+    
+    private func loadWeather(for city: City) async {
+        guard weatherCache[city.id] == nil else { return }
+        
+        do {
+            let weather = try await WeatherService.shared.fetchWeather(
+                for: city,
+                includeHourly: false,
+                includeDaily: true
+            )
+            await MainActor.run {
+                weatherCache[city.id] = weather
+            }
+        } catch {
+            print("Failed to load weather for \(city.name): \(error)")
+        }
+    }
+    
+    private func formatTemperature(_ celsius: Double) -> String {
+        let temp = settingsManager.settings.temperatureUnit.convert(celsius)
+        return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
+    }
+    
+    private func formatWindSpeed(_ kmh: Double) -> String {
+        let speed = settingsManager.settings.windSpeedUnit.convert(kmh)
+        return String(format: "%.0f %@", speed, settingsManager.settings.windSpeedUnit.rawValue)
+    }
+    
+    private func formatWindDirection(_ degrees: Int) -> String {
+        let directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+        let index = Int((Double(degrees) + 22.5) / 45.0) % 8
+        return directions[index]
+    }
+}

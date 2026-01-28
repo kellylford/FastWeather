@@ -51,17 +51,17 @@ struct WeatherAroundMeView: View {
                             Text(settingsManager.settings.distanceUnit.format(distance)).tag(distance)
                         }
                     }
-                    .pickerStyle(.wheel)
+                    .pickerStyle(.menu)
                     .frame(height: 100)
                     .accessibilityLabel("Distance radius")
                     .accessibilityValue(settingsManager.settings.distanceUnit.format(distanceMiles))
                     .accessibilityHint("Select the radius for surrounding weather data. Options range from \(Int(settingsManager.settings.distanceUnit.weatherAroundMeOptions.first ?? 0)) to \(Int(settingsManager.settings.distanceUnit.weatherAroundMeOptions.last ?? 0)) \(settingsManager.settings.distanceUnit.rawValue).")
-                    .onChange(of: distanceMiles) {
+                    .onChange(of: distanceMiles) { _ in
                         Task { await loadRegionalWeather() }
                     }
                 }
                 .padding()
-                .background(Color(nsColor: .secondarySystemGroupedBackground))
+                .background(Color(nsColor: .windowBackgroundColor))
                 .cornerRadius(12)
                 
                 if isLoading {
@@ -75,9 +75,8 @@ struct WeatherAroundMeView: View {
             .padding()
         }
         .navigationTitle("Weather Around Me")
-        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItem(placement: .automatic) {
                 Button(action: {
                     Task { await loadRegionalWeather() }
                 }) {
@@ -288,11 +287,11 @@ struct WeatherAroundMeView: View {
                         .tag(direction)
                     }
                 }
-                .pickerStyle(.wheel)
+                .pickerStyle(.menu)
                 .frame(height: 120)
                 .accessibilityLabel("Select direction to explore")
                 .accessibilityValue(selectedDirection.rawValue)
-                .onChange(of: selectedDirection) {
+                .onChange(of: selectedDirection) { _ in
                     loadCitiesInDirection()
                 }
                 
@@ -385,7 +384,7 @@ struct WeatherAroundMeView: View {
                 .task(id: currentCity.id) {
                     await loadWeatherForCity(currentCity)
                 }
-                .onChange(of: currentCityIndex) {
+                .onChange(of: currentCityIndex) { _ in
                     // Prefetch next batch when user navigates
                     Task {
                         await prefetchWeatherData()
@@ -424,11 +423,9 @@ struct WeatherAroundMeView: View {
         } message: {
             Text(alertMessage)
         }
-        .onChange(of: showingAllCities) { oldValue, newValue in
-            // Flash detection: Alert should never go from true to true
-            if oldValue == true && newValue == true {
-                print("⚠️ ALERT FLASH DETECTED in WeatherAroundMeView cities alert!")
-            }
+        .onChange(of: showingAllCities) { _ in
+            // Note: oldValue/newValue checking removed for macOS 13 compatibility
+            // Flash detection still handled by the alert presentation logic
         }
     }
     
@@ -533,10 +530,16 @@ struct WeatherAroundMeView: View {
         guard directionalWeatherData[cityInfo.id] == nil else { return }
         
         do {
-            let weatherService = WeatherService()
-            let weather = try await weatherService.fetchWeatherBasic(
-                latitude: cityInfo.latitude,
-                longitude: cityInfo.longitude
+            let weather = try await WeatherService.shared.fetchWeather(
+                for: City(
+                    id: cityInfo.id,
+                    name: cityInfo.name,
+                    displayName: cityInfo.name,
+                    latitude: cityInfo.latitude,
+                    longitude: cityInfo.longitude
+                ),
+                includeHourly: false,
+                includeDaily: false
             )
             
             let temp = weather.current.temperature2m

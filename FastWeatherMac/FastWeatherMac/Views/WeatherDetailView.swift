@@ -128,8 +128,7 @@ struct WeatherDetailView: View {
                         }
                         
                         // Historical Weather
-                        HistoricalWeatherView(city: city)
-                            .environmentObject(WeatherService.shared)
+                        HistoricalWeatherView(city: city, autoLoadToday: true)
                             .environmentObject(settingsManager)
                         
                         Divider()

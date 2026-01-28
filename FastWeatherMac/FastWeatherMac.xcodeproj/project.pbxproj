@@ -11,7 +11,6 @@
 		1243914061D4F53B2382EA02 /* HistoricalWeatherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83D35F17C035E12D12ADA2D0 /* HistoricalWeatherView.swift */; };
 		16E9064C4FAF2F501286C9A2 /* FlatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CD2E5A4CB2E2EBE1E620DD9 /* FlatView.swift */; };
 		281CEF21FCC976439FC4B0C7 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A84252B7CC73F8CCDA1A0C /* FeatureFlags.swift */; };
-		2D54A3C44E3A3C6C8A1957D0 /* TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12D8BE8AF9C10CAA7C4DCF53 /* TableView.swift */; };
 		2D605F7A04DDBC32503E1AE7 /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A64D381DB2659A5C3542CD48 /* ListView.swift */; };
 		3D6ACE42E0EDA6A36D804E7F /* RegionalWeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE717AB82BAF93C3A93CC20D /* RegionalWeatherService.swift */; };
 		6EE72D327043B652E1ADACA0 /* DeveloperSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8D3143D4597091091743FA /* DeveloperSettingsView.swift */; };
@@ -39,7 +38,6 @@
 
 /* Begin PBXFileReference section */
 		108C271366D17425A07AE5F5 /* Settings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Settings.swift; path = Settings.swift; sourceTree = "<group>"; };
-		12D8BE8AF9C10CAA7C4DCF53 /* TableView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TableView.swift; sourceTree = "<group>"; };
 		3753E7F0FEA58AA9B5EFF3EC /* RadarView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RadarView.swift; path = RadarView.swift; sourceTree = "<group>"; };
 		3CD2E5A4CB2E2EBE1E620DD9 /* FlatView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FlatView.swift; sourceTree = "<group>"; };
 		50F223B5F201ACF5C3408242 /* RadarService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RadarService.swift; path = RadarService.swift; sourceTree = "<group>"; };
@@ -166,7 +164,6 @@
 				E0C2BD56451D2C260CEBD40A /* WeatherAroundMeView.swift */,
 				83D35F17C035E12D12ADA2D0 /* HistoricalWeatherView.swift */,
 				AD8D3143D4597091091743FA /* DeveloperSettingsView.swift */,
-				12D8BE8AF9C10CAA7C4DCF53 /* TableView.swift */,
 				A64D381DB2659A5C3542CD48 /* ListView.swift */,
 				3CD2E5A4CB2E2EBE1E620DD9 /* FlatView.swift */,
 			);
@@ -261,7 +258,6 @@
 				281CEF21FCC976439FC4B0C7 /* FeatureFlags.swift in Sources */,
 				A27556D19E9FEF1D05987EA8 /* SettingsManager.swift in Sources */,
 				D44BDAD087C710A20D29C2E7 /* HistoricalWeather.swift in Sources */,
-				2D54A3C44E3A3C6C8A1957D0 /* TableView.swift in Sources */,
 				2D605F7A04DDBC32503E1AE7 /* ListView.swift in Sources */,
 				16E9064C4FAF2F501286C9A2 /* FlatView.swift in Sources */,
 			);
