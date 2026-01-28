@@ -2471,7 +2471,6 @@ function renderTableView(container) {
 function renderListView(container) {
     container.setAttribute('role', 'listbox');
     container.setAttribute('tabindex', '0');
-    container.setAttribute('aria-label', 'Cities list - use arrow keys to navigate, Enter to view details');
     
     let activeIndex = 0;
     const cityNames = Object.keys(cities);
@@ -3839,7 +3838,12 @@ function renderHistoricalData(data) {
         return;
     }
     
-    container.innerHTML = '';
+    // Show loading for list view
+    if (currentView === 'list') {
+        container.innerHTML = '<p>Rendering historical data...</p>';
+    } else {
+        container.innerHTML = '';
+    }
     
     // Render based on main page's current view mode
     if (currentView === 'table') {
@@ -3912,7 +3916,6 @@ function renderHistoricalFlatView(container, data) {
     data.forEach(yearData => {
         const card = document.createElement('div');
         card.className = 'city-card historical-card';
-        card.setAttribute('role', 'article');
         
         const high = convertTemperature(yearData.temperature_2m_max);
         const low = convertTemperature(yearData.temperature_2m_min);
@@ -3948,6 +3951,9 @@ function renderHistoricalFlatView(container, data) {
 }
 
 function renderHistoricalListView(container, data) {
+    // Clear container first
+    container.innerHTML = '';
+    
     container.setAttribute('role', 'listbox');
     container.setAttribute('tabindex', '0');
     container.setAttribute('aria-label', 'Historical weather data - use arrow keys to navigate');
@@ -4055,6 +4061,12 @@ function renderHistoricalListView(container, data) {
     };
     
     container.addEventListener('keydown', navHandler);
+    
+    // Set focus to the container now that it's fully rendered
+    setTimeout(() => {
+        container.focus();
+        announceToScreenReader(`Historical data loaded, ${data.length} years`);
+    }, 50);
 }
 
 function adjustHistoricalYear(yearShift) {
@@ -4198,15 +4210,34 @@ async function showWeatherAroundMe(cityKey, lat, lon) {
     const title = document.getElementById('weather-around-me-title');
     
     title.textContent = `Weather Around ${cityKey.split(',')[0]}`;
+    
+    const distanceUnit = currentConfig.units.distance;
+    const isKm = distanceUnit === 'km';
+    
+    // Define radius options for each unit
+    const radiusOptions = isKm ? [
+        { value: 80, label: '80 km' },
+        { value: 160, label: '160 km' },
+        { value: 240, label: '240 km', default: true },
+        { value: 320, label: '320 km' },
+        { value: 400, label: '400 km' }
+    ] : [
+        { value: 50, label: '50 miles' },
+        { value: 100, label: '100 miles' },
+        { value: 150, label: '150 miles', default: true },
+        { value: 200, label: '200 miles' },
+        { value: 250, label: '250 miles' }
+    ];
+    
+    const optionsHtml = radiusOptions.map(opt => 
+        `<option value="${opt.value}"${opt.default ? ' selected' : ''}>${opt.label}</option>`
+    ).join('');
+    
     content.innerHTML = `
         <div class="distance-selector">
             <label for="around-me-distance">Distance Radius:</label>
             <select id="around-me-distance" onchange="loadWeatherAroundMe('${cityKey}', ${lat}, ${lon}, this.value)">
-                <option value="50">50 miles</option>
-                <option value="100">100 miles</option>
-                <option value="150" selected>150 miles</option>
-                <option value="200">200 miles</option>
-                <option value="250">250 miles</option>
+                ${optionsHtml}
             </select>
         </div>
         <div id="weather-around-me-data">
@@ -4217,16 +4248,22 @@ async function showWeatherAroundMe(cityKey, lat, lon) {
     closeAllModals();
     dialog.hidden = false;
     
-    loadWeatherAroundMe(cityKey, lat, lon, 150);
+    // Default distance based on unit
+    const defaultDistance = isKm ? 240 : 150;
+    loadWeatherAroundMe(cityKey, lat, lon, defaultDistance);
 }
 
-async function loadWeatherAroundMe(cityKey, lat, lon, distanceMiles) {
+async function loadWeatherAroundMe(cityKey, lat, lon, distance) {
     const container = document.getElementById('weather-around-me-data');
     container.innerHTML = '<p>Loading weather and location data...</p>';
     
     try {
-        // Calculate approximate degree offset for the distance
-        const degreeOffset = distanceMiles / 69; // Rough approximation: 1 degree ≈ 69 miles
+        const distanceUnit = currentConfig.units.distance;
+        const isKm = distanceUnit === 'km';
+        
+        // Convert to miles for calculation if needed (1 degree ≈ 69 miles)
+        const distanceInMiles = isKm ? distance * 0.621371 : distance;
+        const degreeOffset = distanceInMiles / 69;
         
         // Create 8 directional points
         const directions = [
@@ -4290,9 +4327,14 @@ async function loadWeatherAroundMe(cityKey, lat, lon, distanceMiles) {
                     locationText += `</p>`;
                 }
                 
-                const distanceText = result.actualDistance ? 
-                    `<p class="distance">${Math.round(result.actualDistance)} miles ${dir.name.toLowerCase()}</p>` : 
-                    `<p class="distance">${Math.round(distanceMiles)} miles ${dir.name.toLowerCase()}</p>`;
+                const distanceUnit = currentConfig.units.distance;
+                const isKm = distanceUnit === 'km';
+                const displayDistance = result.actualDistance ? 
+                    (isKm ? Math.round(result.actualDistance * 1.60934) : Math.round(result.actualDistance)) :
+                    (isKm ? Math.round(distance * 1.60934) : Math.round(distance));
+                const unitLabel = isKm ? 'km' : 'miles';
+                
+                const distanceText = `<p class="distance">${displayDistance} ${unitLabel} ${dir.name.toLowerCase()}</p>`;
                 
                 html += `
                     <div class="directional-sector">
@@ -4311,7 +4353,11 @@ async function loadWeatherAroundMe(cityKey, lat, lon, distanceMiles) {
         html += generateWeatherSummary(results.map(r => r.weather), cityKey);
         
         container.innerHTML = html;
-        announceToScreenReader(`Regional weather loaded for ${distanceMiles} mile radius with location details`);
+        const distanceUnit = currentConfig.units.distance;
+        const isKm = distanceUnit === 'km';
+        const displayDistance = isKm ? Math.round(distance * 1.60934) : Math.round(distance);
+        const unitLabel = isKm ? 'kilometer' : 'mile';
+        announceToScreenReader(`Regional weather loaded for ${displayDistance} ${unitLabel} radius with location details`);
         
     } catch (error) {
         container.innerHTML = `<p class="error-message">Error loading regional weather: ${escapeHtml(error.message)}</p>`;
