@@ -4025,7 +4025,7 @@ async function showWeatherAroundMe(cityKey, lat, lon) {
 
 async function loadWeatherAroundMe(cityKey, lat, lon, distanceMiles) {
     const container = document.getElementById('weather-around-me-data');
-    container.innerHTML = '<p>Loading...</p>';
+    container.innerHTML = '<p>Loading weather and location data...</p>';
     
     try {
         // Calculate approximate degree offset for the distance
@@ -4033,33 +4033,77 @@ async function loadWeatherAroundMe(cityKey, lat, lon, distanceMiles) {
         
         // Create 8 directional points
         const directions = [
-            { name: 'North', lat: lat + degreeOffset, lon: lon },
-            { name: 'Northeast', lat: lat + degreeOffset * 0.7, lon: lon + degreeOffset * 0.7 },
-            { name: 'East', lat: lat, lon: lon + degreeOffset },
-            { name: 'Southeast', lat: lat - degreeOffset * 0.7, lon: lon + degreeOffset * 0.7 },
-            { name: 'South', lat: lat - degreeOffset, lon: lon },
-            { name: 'Southwest', lat: lat - degreeOffset * 0.7, lon: lon - degreeOffset * 0.7 },
-            { name: 'West', lat: lat, lon: lon - degreeOffset },
-            { name: 'Northwest', lat: lat + degreeOffset * 0.7, lon: lon - degreeOffset * 0.7 }
+            { name: 'North', lat: lat + degreeOffset, lon: lon, bearing: 0 },
+            { name: 'Northeast', lat: lat + degreeOffset * 0.7, lon: lon + degreeOffset * 0.7, bearing: 45 },
+            { name: 'East', lat: lat, lon: lon + degreeOffset, bearing: 90 },
+            { name: 'Southeast', lat: lat - degreeOffset * 0.7, lon: lon + degreeOffset * 0.7, bearing: 135 },
+            { name: 'South', lat: lat - degreeOffset, lon: lon, bearing: 180 },
+            { name: 'Southwest', lat: lat - degreeOffset * 0.7, lon: lon - degreeOffset * 0.7, bearing: 225 },
+            { name: 'West', lat: lat, lon: lon - degreeOffset, bearing: 270 },
+            { name: 'Northwest', lat: lat + degreeOffset * 0.7, lon: lon - degreeOffset * 0.7, bearing: 315 }
         ];
         
-        // Fetch weather for each direction
-        const promises = directions.map(dir => fetchSimpleWeather(dir.lat, dir.lon));
-        const results = await Promise.all(promises);
+        // Fetch weather for all directions in parallel (fast)
+        const weatherPromises = directions.map(dir => fetchSimpleWeather(dir.lat, dir.lon));
+        const weatherResults = await Promise.all(weatherPromises);
         
-        // Render directional grid
+        // Reverse geocode sequentially to respect rate limits (1 req/sec for Nominatim)
+        const results = [];
+        for (let i = 0; i < directions.length; i++) {
+            const dir = directions[i];
+            const weather = weatherResults[i];
+            
+            // Add delay before each geocode request (except first)
+            if (i > 0) {
+                await new Promise(resolve => setTimeout(resolve, 1100)); // 1.1 second delay
+            }
+            
+            const locationInfo = await reverseGeocode(dir.lat, dir.lon);
+            const actualDistance = calculateDistanceMiles(lat, lon, dir.lat, dir.lon);
+            
+            results.push({
+                direction: dir,
+                weather: weather,
+                locationInfo: locationInfo,
+                actualDistance: actualDistance
+            });
+            
+            // Update progress in UI
+            container.innerHTML = `<p>Loading location data... (${i + 1}/${directions.length})</p>`;
+        }
+        
+        // Render directional grid with city names and distances
         let html = '<div class="directional-grid">';
-        directions.forEach((dir, i) => {
-            const weather = results[i];
+        results.forEach(result => {
+            const dir = result.direction;
+            const weather = result.weather;
+            const locationInfo = result.locationInfo;
+            
             if (weather && weather.current) {
                 const temp = convertTemperature(weather.current.temperature_2m);
                 const condition = WEATHER_CODES[weather.current.weather_code] || 'Unknown';
                 
+                // Build location display text
+                let locationText = '';
+                if (locationInfo && locationInfo.cityName) {
+                    locationText = `<p class="location-name">${escapeHtml(locationInfo.cityName)}`;
+                    if (locationInfo.state) {
+                        locationText += `, ${escapeHtml(locationInfo.state)}`;
+                    }
+                    locationText += `</p>`;
+                }
+                
+                const distanceText = result.actualDistance ? 
+                    `<p class="distance">${Math.round(result.actualDistance)} miles ${dir.name.toLowerCase()}</p>` : 
+                    `<p class="distance">${Math.round(distanceMiles)} miles ${dir.name.toLowerCase()}</p>`;
+                
                 html += `
                     <div class="directional-sector">
                         <h4>${dir.name}</h4>
-                        <p>${temp}°${currentConfig.units.temperature}</p>
-                        <p>${condition}</p>
+                        ${locationText}
+                        ${distanceText}
+                        <p class="temp">${temp}°${currentConfig.units.temperature}</p>
+                        <p class="condition">${condition}</p>
                     </div>
                 `;
             }
@@ -4067,10 +4111,10 @@ async function loadWeatherAroundMe(cityKey, lat, lon, distanceMiles) {
         html += '</div>';
         
         // Add summary
-        html += generateWeatherSummary(results, cityKey);
+        html += generateWeatherSummary(results.map(r => r.weather), cityKey);
         
         container.innerHTML = html;
-        announceToScreenReader(`Regional weather loaded for ${distanceMiles} mile radius`);
+        announceToScreenReader(`Regional weather loaded for ${distanceMiles} mile radius with location details`);
         
     } catch (error) {
         container.innerHTML = `<p class="error-message">Error loading regional weather: ${escapeHtml(error.message)}</p>`;
@@ -4087,6 +4131,67 @@ async function fetchSimpleWeather(lat, lon) {
     } catch (e) {
         return null;
     }
+}
+
+/**
+ * Reverse geocode coordinates to find city name
+ * Uses OpenStreetMap Nominatim API with rate limiting
+ */
+async function reverseGeocode(lat, lon) {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`;
+    
+    try {
+        const response = await fetch(url, {
+            headers: {
+                'User-Agent': 'FastWeather/1.1 (https://github.com/kellylford/FastWeather)'
+            }
+        });
+        
+        if (!response.ok) return null;
+        
+        const data = await response.json();
+        const address = data.address || {};
+        
+        // Extract city name (try different fields)
+        const cityName = address.city || 
+                        address.town || 
+                        address.village || 
+                        address.municipality || 
+                        address.county ||
+                        null;
+        
+        const state = address.state || null;
+        const country = address.country || null;
+        
+        return {
+            cityName: cityName,
+            state: state,
+            country: country,
+            displayName: data.display_name
+        };
+    } catch (e) {
+        console.warn('Reverse geocoding failed:', e);
+        return null;
+    }
+}
+
+/**
+ * Calculate distance between two coordinates using Haversine formula
+ * Returns distance in miles
+ */
+function calculateDistanceMiles(lat1, lon1, lat2, lon2) {
+    const R = 3959; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    
+    return distance;
 }
 
 function generateWeatherSummary(weatherResults, cityKey) {

@@ -1649,6 +1649,34 @@ a:hover {
     font-size: 1rem;
     margin-bottom: var(--spacing-sm);
     color: var(--text-primary);
+    font-weight: 600;
+}
+
+.directional-sector .location-name {
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    font-weight: 500;
+    margin: 0.25rem 0;
+}
+
+.directional-sector .distance {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin: 0.25rem 0;
+    font-style: italic;
+}
+
+.directional-sector .temp {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0.5rem 0;
+}
+
+.directional-sector .condition {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 0.25rem 0;
 }
 
 .directional-sector p {
