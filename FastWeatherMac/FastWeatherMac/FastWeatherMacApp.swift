@@ -11,11 +11,15 @@ import SwiftUI
 @main
 struct FastWeatherMacApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @StateObject private var featureFlags = FeatureFlags.shared
+    @StateObject private var settingsManager = SettingsManager()
     
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .frame(minWidth: 800, minHeight: 600)
+                .environmentObject(featureFlags)
+                .environmentObject(settingsManager)
+                .frame(minWidth: 900, minHeight: 600)
         }
         .commands {
             // Add custom menu commands for accessibility

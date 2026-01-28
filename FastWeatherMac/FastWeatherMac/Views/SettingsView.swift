@@ -12,6 +12,8 @@ struct SettingsView: View {
     @AppStorage("useMetricDefault") private var useMetric = true
     @AppStorage("enableVoiceOverDescriptions") private var enableVoiceOverDescriptions = true
     @AppStorage("showWeatherAlerts") private var showWeatherAlerts = true
+    @StateObject private var featureFlags = FeatureFlags.shared
+    @State private var showingDeveloperSettings = false
     
     var body: some View {
         TabView {
@@ -40,9 +42,32 @@ struct SettingsView: View {
                         .accessibilityLabel("Show weather alerts")
                         .accessibilityHint("Enable to receive weather alerts and warnings")
                 }
+                
+                Section {
+                    Text("Developer")
+                        .font(.headline)
+                        .accessibilityAddTraits(.isHeader)
+                    
+                    Button(action: {
+                        showingDeveloperSettings = true
+                    }) {
+                        HStack {
+                            Label("Developer Settings", systemImage: "wrench.and.screwdriver.fill")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Developer Settings")
+                    .accessibilityHint("Configure feature flags and experimental features")
+                }
             }
             .padding(20)
-            .frame(width: 450, height: 300)
+            .frame(width: 450, height: 400)
+            .sheet(isPresented: $showingDeveloperSettings) {
+                DeveloperSettingsView()
+            }
             .tabItem {
                 Text("General")
             }

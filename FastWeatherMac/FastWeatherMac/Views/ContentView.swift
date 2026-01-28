@@ -18,6 +18,23 @@ struct ContentView: View {
     @State private var showingLocationBrowser = false
     @State private var showingError = false
     @State private var errorMessage = ""
+    @State private var viewMode: CityListViewMode = .list
+    @EnvironmentObject var featureFlags: FeatureFlags
+    @EnvironmentObject var settingsManager: SettingsManager
+    
+    enum CityListViewMode: String, CaseIterable {
+        case table = "Table"
+        case list = "List"
+        case flat = "Flat"
+        
+        var icon: String {
+            switch self {
+            case .table: return "tablecells"
+            case .list: return "list.bullet"
+            case .flat: return "square.grid.2x2"
+            }
+        }
+    }
     
     private var addCityHint: String {
         searchText.isEmpty ? "Enter a city name first" : "Add \(searchText) to your city list"
@@ -61,6 +78,16 @@ struct ContentView: View {
         .frame(minWidth: 280)
         .toolbar {
             ToolbarItemGroup {
+                Picker("View Mode", selection: $viewMode) {
+                    ForEach(CityListViewMode.allCases, id: \.self) { mode in
+                        Label(mode.rawValue, systemImage: mode.icon)
+                            .tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .help("Switch between Table, List, and Flat view modes")
+                .accessibilityLabel("View mode selector")
+                
                 Button(action: { showingAddCitySheet = true }) {
                     Label("Search City", systemImage: "magnifyingglass")
                 }
@@ -160,11 +187,20 @@ struct ContentView: View {
     
     // MARK: - City List
     private var cityList: some View {
-        List(selection: $selectedCity) {
-            cityListContent
+        Group {
+            switch viewMode {
+            case .table:
+                TableView(cities: cityManager.cities, selectedCity: $selectedCity)
+            case .list:
+                List(selection: $selectedCity) {
+                    cityListContent
+                }
+                .accessibilityLabel("Cities list")
+                .accessibilityHint("\(cityManager.cities.count) cities. Select a city to view weather details.")
+            case .flat:
+                FlatView(cities: cityManager.cities, selectedCity: $selectedCity)
+            }
         }
-        .accessibilityLabel("Cities list")
-        .accessibilityHint("\(cityManager.cities.count) cities. Select a city to view weather details.")
     }
     
     private var cityListContent: some View {

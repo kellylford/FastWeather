@@ -14,6 +14,8 @@ struct WeatherDetailView: View {
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var useMetric = true
+    @EnvironmentObject var featureFlags: FeatureFlags
+    @EnvironmentObject var settingsManager: SettingsManager
     
     var body: some View {
         ScrollView {
@@ -66,6 +68,69 @@ struct WeatherDetailView: View {
                         .frame(maxWidth: .infinity)
                         .accessibilityElement(children: .combine)
                         .accessibilityLabel("\(city.displayName), Last updated: \(formatTime(weather.current.time))")
+                        
+                        Divider()
+                        
+                        // MARK: - Feature-Flagged Sections
+                        
+                        // Expected Precipitation (Radar)
+                        if featureFlags.radarEnabled {
+                            NavigationLink(destination: RadarView(city: city).environmentObject(settingsManager)) {
+                                HStack {
+                                    Image(systemName: "cloud.rain.fill")
+                                        .font(.title3)
+                                        .foregroundColor(.blue)
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Expected Precipitation")
+                                            .font(.headline)
+                                        Text("Minute-by-minute forecast")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.secondary)
+                                }
+                                .padding()
+                                .background(Color(nsColor: .controlBackgroundColor))
+                                .cornerRadius(10)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Expected Precipitation")
+                            .accessibilityHint("View minute-by-minute precipitation forecast")
+                        }
+                        
+                        // Weather Around Me
+                        if featureFlags.weatherAroundMeEnabled {
+                            NavigationLink(destination: WeatherAroundMeView(city: city, defaultDistance: settingsManager.settings.weatherAroundMeDistance).environmentObject(settingsManager)) {
+                                HStack {
+                                    Image(systemName: "location.circle.fill")
+                                        .font(.title3)
+                                        .foregroundColor(.green)
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Weather Around Me")
+                                            .font(.headline)
+                                        Text("Regional weather comparison")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.secondary)
+                                }
+                                .padding()
+                                .background(Color(nsColor: .controlBackgroundColor))
+                                .cornerRadius(10)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Weather Around Me")
+                            .accessibilityHint("View weather in surrounding areas")
+                        }
+                        
+                        // Historical Weather
+                        HistoricalWeatherView(city: city)
+                            .environmentObject(WeatherService.shared)
+                            .environmentObject(settingsManager)
                         
                         Divider()
                         
