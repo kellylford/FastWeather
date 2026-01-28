@@ -110,7 +110,7 @@
         </header>
         
         <!-- Getting Started -->
-        <section class="guide-section" aria-labelledby="getting-started">
+        <div class="guide-section">
             <h2 id="getting-started">Getting Started</h2>
             <p>FastWeather makes it easy to track weather in multiple cities:</p>
             <ul>
@@ -119,10 +119,10 @@
                 <li><strong>View weather:</strong> Your cities will display current conditions automatically</li>
                 <li><strong>Refresh data:</strong> Activate the refresh button (🔄) next to any city, or press <kbd>F5</kbd></li>
             </ul>
-        </section>
+        </div>
         
         <!-- View Modes -->
-        <section class="guide-section" aria-labelledby="view-modes">
+        <div class="guide-section">
             <h2 id="view-modes">View Modes</h2>
             <p>FastWeather offers three ways to view your cities, each optimized for different use cases:</p>
             
@@ -130,7 +130,7 @@
             <p>A traditional table with rows and columns, ideal for comparing data across cities at a glance.</p>
             <ul>
                 <li>All weather data in organized columns</li>
-                <li>Works well with screen readers in virtual cursor mode</li>
+                <li>Works well with screen readers in default reading modes such as virtual cursor (JAWS), Browse (NVDA) and Scan (Narrator) mode</li>
                 <li>Select column headers to understand data organization</li>
             </ul>
             
@@ -155,10 +155,10 @@
                 <li><strong>Detailed mode:</strong> Shows labels with data (Temperature: 72°F, Conditions: Clear, Humidity: 45%)</li>
             </ul>
             <p>Screen readers announce each city as a single concatenated string, making navigation extremely fast and efficient.</p>
-        </section>
+        </div>
         
         <!-- City Management -->
-        <section class="guide-section" aria-labelledby="city-management">
+        <div class="guide-section">
             <h2 id="city-management">Managing Your Cities</h2>
             
             <h3>Adding Cities</h3>
@@ -170,8 +170,8 @@
             
             <h3>Removing Cities</h3>
             <ul>
-                <li>Activate the 🗑️ (trash) button next to the city in Table or Flat view</li>
-                <li>In List view, select the city and use the control buttons below the list</li>
+                <li>Activate the "Remove" button (🗑️ icon) next to the city in Table or Flat view</li>
+                <li>In List view, select the city and activate the "Remove" button below the list</li>
                 <li>Keyboard shortcut: Select a city and press <kbd>Delete</kbd></li>
             </ul>
             
@@ -180,17 +180,17 @@
                 <li>Use ↑ (up) and ↓ (down) buttons to move cities in your preferred order</li>
                 <li>Your order is saved automatically</li>
             </ul>
-        </section>
+        </div>
         
         <!-- Features -->
-        <section class="guide-section" aria-labelledby="features">
+        <div class="guide-section">
             <h2 id="features">Weather Features</h2>
             
             <h3>Full Weather Details</h3>
             <p>Select any city name to see comprehensive weather information:</p>
             <ul>
                 <li><strong>Current conditions:</strong> Temperature, feels-like, humidity, wind, pressure, visibility</li>
-                <li><strong>Hourly forecast:</strong> Next 48 hours with temperature and precipitation</li>
+                <li><strong>Hourly forecast:</strong> Next 24 hours with temperature and precipitation</li>
                 <li><strong>Daily forecast:</strong> 16-day outlook with high/low temperatures</li>
                 <li><strong>Sun times:</strong> Sunrise and sunset for each day</li>
             </ul>
@@ -201,15 +201,14 @@
                 <li><strong>20-year view:</strong> See the same date (e.g., January 28) going back 20 years</li>
                 <li><strong>Navigate years:</strong> Select "Previous 20 Years" or "Next 20 Years" to shift the time window</li>
                 <li><strong>View modes:</strong> Historical data uses the same view mode as your main page (Table/Flat/List)</li>
-                <li><strong>Data available:</strong> Most locations have records back to 1940</li>
             </ul>
             
             <h3>Expected Precipitation</h3>
-            <p>See rainfall and snowfall forecasts for the next 7 days:</p>
+            <p>See rainfall and snowfall forecasts for the next 2 hours:</p>
             <ul>
-                <li>Hourly precipitation amounts</li>
+                <li>15-minute interval precipitation amounts</li>
                 <li>Visual timeline showing when to expect rain or snow</li>
-                <li>Probabilities and accumulation totals</li>
+                <li>Data at intervals: Now, +15m, +30m, +45m, +60m, +90m, +120m</li>
             </ul>
             
             <h3>Weather Around Me</h3>
@@ -223,12 +222,12 @@
             <div class="note-box">
                 <p><strong>Note:</strong> The first time you open Weather Around Me for a city, it may take 8-10 seconds to load as it looks up city names for each direction. This data is cached for faster access next time.</p>
             </div>
-        </section>
+        </div>
         
         <!-- Configuration -->
-        <section class="guide-section" aria-labelledby="configuration">
+        <div class="guide-section">
             <h2 id="configuration">Configuration Options</h2>
-            <p>Customize FastWeather to match your preferences using the ⚙️ (Settings) button:</p>
+            <p>Customize FastWeather to match your preferences using the "Configure" button (⚙️ icon):</p>
             
             <h3>Units</h3>
             <ul>
@@ -250,10 +249,10 @@
                 <li><strong>Import/Export:</strong> Save your city list and settings as a file, or load from a backup</li>
                 <li><strong>Reset:</strong> Return to default settings if needed</li>
             </ul>
-        </section>
+        </div>
         
         <!-- Keyboard Navigation -->
-        <section class="guide-section" aria-labelledby="keyboard">
+        <div class="guide-section">
             <h2 id="keyboard">Keyboard Navigation</h2>
             <p>FastWeather is fully keyboard accessible:</p>
             
@@ -262,7 +261,8 @@
                 <li><kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> - Move between controls</li>
                 <li><kbd>Enter</kbd> / <kbd>Space</kbd> - Activate buttons and links</li>
                 <li><kbd>Esc</kbd> - Close dialogs and return to main view</li>
-                <li><kbd>F5</kbd> - Refresh weather data</li>
+                <li><kbd>Ctrl+R</kbd> - Refresh all cities (alternative to "Refresh All" button)</li>
+                <li><kbd>Alt+V</kbd> - Open view mode menu</li>
             </ul>
             
             <h3>List View (Virtual Cursor OFF)</h3>
@@ -270,8 +270,7 @@
                 <li><kbd>↑</kbd> / <kbd>↓</kbd> - Navigate through cities</li>
                 <li><kbd>Home</kbd> - Jump to first city</li>
                 <li><kbd>End</kbd> - Jump to last city</li>
-                <li><kbd>Enter</kbd> - View detailed weather</li>
-                <li><kbd>Delete</kbd> - Remove selected city</li>
+                <li><kbd>Enter</kbd> or <kbd>Space</kbd> - View full weather details for selected city</li>
             </ul>
             
             <h3>Dialogs and Modals</h3>
@@ -280,17 +279,17 @@
                 <li><kbd>Tab</kbd> - Move between controls within dialog</li>
                 <li>Focus automatically moves to the first interactive element when opening</li>
             </ul>
-        </section>
+        </div>
         
         <!-- Screen Reader Usage -->
-        <section class="guide-section" aria-labelledby="screen-readers">
+        <div class="guide-section">
             <h2 id="screen-readers">Screen Reader Support</h2>
             <p>FastWeather is designed with screen reader users in mind:</p>
             
             <h3>JAWS</h3>
             <ul>
                 <li><strong>Table/Flat View:</strong> Use standard virtual cursor navigation</li>
-                <li><strong>List View:</strong> Turn OFF Forms Mode (Num Pad Plus) for best experience</li>
+                <li><strong>List View:</strong> Turn ON Forms Mode (press NumPad Plus to toggle) for arrow key navigation</li>
                 <li>ARIA live regions announce weather updates automatically</li>
             </ul>
             
@@ -311,22 +310,22 @@
             <div class="note-box">
                 <p><strong>Why List View is Different:</strong> When your screen reader's virtual cursor/browse mode is OFF, you can use arrow keys to quickly move through cities and hear just the essential weather data. This is much faster than tabbing through buttons and links in Table or Flat view. Each city is announced as a single string, perfect for scanning your list.</p>
             </div>
-        </section>
+        </div>
         
         <!-- Weather Data -->
-        <section class="guide-section" aria-labelledby="data-sources">
+        <div class="guide-section">
             <h2 id="data-sources">Weather Data Sources</h2>
             <p>FastWeather uses reliable, free, and open data sources:</p>
             <ul>
                 <li><strong>Open-Meteo:</strong> Current conditions and forecasts (no API key required)</li>
-                <li><strong>Open-Meteo Historical Archive:</strong> Weather data back to 1940</li>
+                <li><strong>Open-Meteo Historical Archive:</strong> Historical weather data for pattern analysis</li>
                 <li><strong>OpenStreetMap Nominatim:</strong> City geocoding and reverse geocoding</li>
             </ul>
             <p>No personal data is collected. No tracking. No API keys needed. Your city list is stored locally in your browser.</p>
-        </section>
+        </div>
         
         <!-- Tips -->
-        <section class="guide-section" aria-labelledby="tips">
+        <div class="guide-section">
             <h2 id="tips">Tips & Tricks</h2>
             <ul>
                 <li><strong>Fast city switching:</strong> In List View, use arrow keys to quickly hear weather for each city</li>
@@ -338,7 +337,7 @@
                 <li><strong>Historical patterns:</strong> Use Historical Weather to see if current conditions are unusual</li>
                 <li><strong>Trip planning:</strong> Use Weather Around Me to check conditions along your route</li>
             </ul>
-        </section>
+        </div>
         
         <!-- Footer -->
         <footer class="guide-section" style="border-left: none; text-align: center;">
