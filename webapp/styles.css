@@ -1528,6 +1528,29 @@ a:hover {
     display: flex;
     gap: var(--spacing-sm);
     flex-wrap: wrap;
+    justify-content: center;
+}
+
+.historical-view-modes button {
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--border-color);
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.historical-view-modes button:hover {
+    background-color: var(--secondary-bg);
+    border-color: var(--primary-color, #0066cc);
+}
+
+.historical-view-modes button.active {
+    background-color: var(--primary-color, #0066cc);
+    color: white;
+    border-color: var(--primary-color, #0066cc);
 }
 
 .historical-data-list {
@@ -1555,6 +1578,22 @@ a:hover {
     gap: var(--spacing-sm);
     font-size: 0.9rem;
     color: var(--text-secondary);
+}
+
+.historical-table {
+    width: 100%;
+    margin-top: var(--spacing-md);
+}
+
+.historical-card {
+    min-width: 180px;
+}
+
+.historical-list-item {
+    padding: var(--spacing-md);
+    background-color: var(--secondary-bg);
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--primary-color, #0066cc);
 }
 
 /* === Precipitation Nowcast === */

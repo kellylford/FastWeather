@@ -2605,9 +2605,6 @@ function renderListView(container) {
         // Set aria-label for screen reader announcement
         item.setAttribute('aria-label', weatherText);
         
-        // Set aria-label for screen reader announcement
-        item.setAttribute('aria-label', ariaLabel);
-        
         item.dataset.cityName = cityName;
         item.dataset.lat = lat;
         item.dataset.lon = lon;
@@ -3735,58 +3732,60 @@ async function showHistoricalWeather(cityKey, lat, lon) {
     const content = document.getElementById('historical-weather-content');
     const title = document.getElementById('historical-weather-title');
     
+    // Reset to current date when opening
+    currentHistoricalDate = new Date();
+    currentHistoricalCity = { key: cityKey, lat: lat, lon: lon };
+    historicalYearOffset = 0; // Reset offset
+    
     title.textContent = `Historical Weather - ${cityKey.split(',')[0]}`;
+    
+    const dateStr = currentHistoricalDate.toLocaleDateString('en-US', { 
+        month: 'long', 
+        day: 'numeric' 
+    });
     
     content.innerHTML = `
         <div class="historical-controls">
-            <div class="historical-view-modes">
-                <button onclick="loadHistoricalView('${cityKey}', ${lat}, ${lon}, 'single')">Single Day</button>
-                <button onclick="loadHistoricalView('${cityKey}', ${lat}, ${lon}, 'multi')">Multi-Year</button>
-                <button onclick="loadHistoricalView('${cityKey}', ${lat}, ${lon}, 'browse')">Daily Browse</button>
-            </div>
             <div class="historical-date-nav">
-                <button onclick="adjustHistoricalDate(-1)">← Previous</button>
-                <div class="historical-date-display" id="historical-current-date">Today</div>
-                <button onclick="adjustHistoricalDate(1)">Next →</button>
+                <button id="hist-prev-btn" onclick="adjustHistoricalYear(20)">← Previous 20 Years</button>
+                <div class="historical-date-display" id="historical-current-date">${dateStr}</div>
+                <button id="hist-next-btn" onclick="adjustHistoricalYear(-20)">Next 20 Years →</button>
             </div>
         </div>
         <div id="historical-data-container">
-            <p>Select a view mode to load historical weather data.</p>
+            <p>Loading historical weather data...</p>
         </div>
     `;
     
     closeAllModals();
     dialog.hidden = false;
-    announceToScreenReader(`Historical weather for ${cityKey.split(',')[0]}`);
+    announceToScreenReader(`Historical weather for ${cityKey.split(',')[0]} - showing this day over the past 20 years`);
+    
+    // Automatically load data
+    loadHistoricalData();
 }
 
-let currentHistoricalMode = 'single';
 let currentHistoricalDate = new Date();
 let currentHistoricalCity = null;
+let historicalYearOffset = 0; // Tracks how many years to shift the 20-year window
 
-async function loadHistoricalView(cityKey, lat, lon, mode) {
-    currentHistoricalMode = mode;
-    currentHistoricalCity = { key: cityKey, lat: lat, lon: lon };
+async function loadHistoricalData() {
+    if (!currentHistoricalCity) return;
     
     const container = document.getElementById('historical-data-container');
     container.innerHTML = '<p>Loading historical data...</p>';
     
     try {
-        let data;
-        const dateStr = currentHistoricalDate.toISOString().split('T')[0];
+        // Fetch the same month/day for 20 years, starting from offset
+        const data = await fetchHistoricalWeatherMultiYear(
+            currentHistoricalCity.lat, 
+            currentHistoricalCity.lon, 
+            currentHistoricalDate,
+            20, // 20 years
+            historicalYearOffset // Year offset for the window
+        );
         
-        if (mode === 'single') {
-            // Single day historical data
-            data = await fetchHistoricalWeatherSingleDay(lat, lon, dateStr);
-        } else if (mode === 'multi') {
-            // Same day across multiple years
-            data = await fetchHistoricalWeatherMultiYear(lat, lon, currentHistoricalDate);
-        } else {
-            // Daily browse mode (next 7 days from selected date)
-            data = await fetchHistoricalWeatherBrowse(lat, lon, currentHistoricalDate);
-        }
-        
-        renderHistoricalData(data, mode);
+        renderHistoricalData(data);
         
     } catch (error) {
         container.innerHTML = `<p class="error-message">Error loading historical data: ${escapeHtml(error.message)}</p>`;
@@ -3802,22 +3801,26 @@ async function fetchHistoricalWeatherSingleDay(lat, lon, date) {
     return await response.json();
 }
 
-async function fetchHistoricalWeatherMultiYear(lat, lon, date) {
-    // Fetch the same month/day for the past 5 years
+async function fetchHistoricalWeatherMultiYear(lat, lon, date, yearCount = 20, yearOffset = 0) {
+    // Fetch the same month/day for N years, starting from offset
     const results = [];
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     
-    for (let i = 0; i < 5; i++) {
-        const year = date.getFullYear() - i;
+    for (let i = 0; i < yearCount; i++) {
+        const year = date.getFullYear() - i - yearOffset;
         const dateStr = `${year}-${month}-${day}`;
         
         try {
             const data = await fetchHistoricalWeatherSingleDay(lat, lon, dateStr);
             if (data.daily) {
                 results.push({
+                    year: year,
                     date: dateStr,
-                    ...data.daily
+                    temperature_2m_max: data.daily.temperature_2m_max[0],
+                    temperature_2m_min: data.daily.temperature_2m_min[0],
+                    precipitation_sum: data.daily.precipitation_sum[0],
+                    weathercode: data.daily.weathercode[0]
                 });
             }
         } catch (e) {
@@ -3825,65 +3828,259 @@ async function fetchHistoricalWeatherMultiYear(lat, lon, date) {
         }
     }
     
-    return { years: results };
+    return results;
 }
 
-async function fetchHistoricalWeatherBrowse(lat, lon, startDate) {
-    const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + 6);
-    
-    const startStr = startDate.toISOString().split('T')[0];
-    const endStr = endDate.toISOString().split('T')[0];
-    
-    return await fetchHistoricalWeatherSingleDay(lat, lon, startStr, endStr);
-}
-
-function renderHistoricalData(data, mode) {
+function renderHistoricalData(data) {
     const container = document.getElementById('historical-data-container');
     
-    if (mode === 'single' && data.daily) {
-        const day = data.daily;
-        container.innerHTML = `
-            <div class="historical-data-list">
-                <div class="historical-day">
-                    <div class="historical-day-header">${currentHistoricalDate.toLocaleDateString()}</div>
-                    <div class="historical-day-data">
-                        <div>High: ${convertTemperature(day.temperature_2m_max[0])}°${currentConfig.units.temperature}</div>
-                        <div>Low: ${convertTemperature(day.temperature_2m_min[0])}°${currentConfig.units.temperature}</div>
-                        <div>Precipitation: ${convertPrecipitation(day.precipitation_sum[0])} ${currentConfig.units.precipitation}</div>
-                        <div>Conditions: ${WEATHER_CODES[day.weathercode[0]] || 'Unknown'}</div>
+    if (!data || data.length === 0) {
+        container.innerHTML = '<p>No historical data available for this date.</p>';
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    // Render based on main page's current view mode
+    if (currentView === 'table') {
+        renderHistoricalTableView(container, data);
+    } else if (currentView === 'flat') {
+        renderHistoricalFlatView(container, data);
+    } else if (currentView === 'list') {
+        renderHistoricalListView(container, data);
+    }
+}
+
+function renderHistoricalTableView(container, data) {
+    const table = document.createElement('table');
+    table.className = 'weather-table historical-table';
+    
+    // Table header
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    ['Year', 'High', 'Low', 'Precipitation', 'Conditions'].forEach(text => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        th.scope = 'col';
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    
+    // Table body
+    const tbody = document.createElement('tbody');
+    data.forEach(yearData => {
+        const row = document.createElement('tr');
+        
+        // Year
+        const yearCell = document.createElement('th');
+        yearCell.scope = 'row';
+        yearCell.textContent = yearData.year;
+        row.appendChild(yearCell);
+        
+        // High
+        const highCell = document.createElement('td');
+        highCell.textContent = `${convertTemperature(yearData.temperature_2m_max)}°${currentConfig.units.temperature}`;
+        row.appendChild(highCell);
+        
+        // Low
+        const lowCell = document.createElement('td');
+        lowCell.textContent = `${convertTemperature(yearData.temperature_2m_min)}°${currentConfig.units.temperature}`;
+        row.appendChild(lowCell);
+        
+        // Precipitation
+        const precipCell = document.createElement('td');
+        precipCell.textContent = `${convertPrecipitation(yearData.precipitation_sum)} ${currentConfig.units.precipitation}`;
+        row.appendChild(precipCell);
+        
+        // Conditions
+        const condCell = document.createElement('td');
+        condCell.textContent = WEATHER_CODES[yearData.weathercode] || 'Unknown';
+        row.appendChild(condCell);
+        
+        tbody.appendChild(row);
+    });
+    table.appendChild(tbody);
+    
+    container.appendChild(table);
+}
+
+function renderHistoricalFlatView(container, data) {
+    const grid = document.createElement('div');
+    grid.className = 'city-grid';
+    
+    data.forEach(yearData => {
+        const card = document.createElement('div');
+        card.className = 'city-card historical-card';
+        card.setAttribute('role', 'article');
+        
+        const high = convertTemperature(yearData.temperature_2m_max);
+        const low = convertTemperature(yearData.temperature_2m_min);
+        const precip = convertPrecipitation(yearData.precipitation_sum);
+        const condition = WEATHER_CODES[yearData.weathercode] || 'Unknown';
+        
+        card.innerHTML = `
+            <div class="city-card-header">
+                <h3>${yearData.year}</h3>
+            </div>
+            <div class="city-card-body">
+                <div class="weather-main">
+                    <div class="temperature-display">
+                        <span class="temp-large">H: ${high}°</span>
+                        <span class="temp-large">L: ${low}°</span>
+                    </div>
+                    <div class="conditions">${condition}</div>
+                </div>
+                <div class="weather-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Precipitation:</span>
+                        <span class="detail-value">${precip} ${currentConfig.units.precipitation}</span>
                     </div>
                 </div>
             </div>
         `;
-    } else if (mode === 'multi' && data.years) {
-        let html = '<div class="historical-data-list">';
-        data.years.forEach(yearData => {
-            html += `
-                <div class="historical-day">
-                    <div class="historical-day-header">${yearData.date}</div>
-                    <div class="historical-day-data">
-                        <div>High: ${convertTemperature(yearData.temperature_2m_max[0])}°${currentConfig.units.temperature}</div>
-                        <div>Low: ${convertTemperature(yearData.temperature_2m_min[0])}°${currentConfig.units.temperature}</div>
-                        <div>Precipitation: ${convertPrecipitation(yearData.precipitation_sum[0])} ${currentConfig.units.precipitation}</div>
-                        <div>Conditions: ${WEATHER_CODES[yearData.weathercode[0]] || 'Unknown'}</div>
-                    </div>
-                </div>
-            `;
-        });
-        html += '</div>';
-        container.innerHTML = html;
-    } else {
-        container.innerHTML = '<p>No data available</p>';
-    }
+        
+        card.setAttribute('aria-label', `${yearData.year}: High ${high}, Low ${low}, ${condition}`);
+        grid.appendChild(card);
+    });
+    
+    container.appendChild(grid);
 }
 
-function adjustHistoricalDate(days) {
-    currentHistoricalDate.setDate(currentHistoricalDate.getDate() + days);
-    document.getElementById('historical-current-date').textContent = currentHistoricalDate.toLocaleDateString();
+function renderHistoricalListView(container, data) {
+    container.setAttribute('role', 'listbox');
+    container.setAttribute('tabindex', '0');
+    container.setAttribute('aria-label', 'Historical weather data - use arrow keys to navigate');
+    
+    const isCondensed = currentConfig.listViewStyle === 'condensed';
+    
+    data.forEach((yearData, index) => {
+        const item = document.createElement('div');
+        item.className = 'list-view-item historical-list-item';
+        item.setAttribute('role', 'option');
+        item.id = `hist-list-item-${index}`;
+        item.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
+        
+        const high = convertTemperature(yearData.temperature_2m_max);
+        const low = convertTemperature(yearData.temperature_2m_min);
+        const precip = convertPrecipitation(yearData.precipitation_sum);
+        const condition = WEATHER_CODES[yearData.weathercode] || 'Unknown';
+        
+        // Build parts array based on condensed/detailed style
+        const parts = [];
+        parts.push(isCondensed ? 
+            `${high}°${currentConfig.units.temperature}` : 
+            `High: ${high}°${currentConfig.units.temperature}`);
+        parts.push(isCondensed ? 
+            `${low}°${currentConfig.units.temperature}` : 
+            `Low: ${low}°${currentConfig.units.temperature}`);
+        parts.push(isCondensed ? condition : `Conditions: ${condition}`);
+        parts.push(isCondensed ? 
+            `${precip} ${currentConfig.units.precipitation}` : 
+            `Precipitation: ${precip} ${currentConfig.units.precipitation}`);
+        
+        // Create concatenated string for screen reader
+        const weatherText = `${yearData.year} - ${parts.join(', ')}`;
+        
+        // Create text node for main content
+        const textNode = document.createTextNode(weatherText);
+        item.appendChild(textNode);
+        
+        // Set aria-label for screen reader announcement
+        item.setAttribute('aria-label', weatherText);
+        
+        container.appendChild(item);
+    });
+    
+    // Set initial active descendant
+    container.setAttribute('aria-activedescendant', 'hist-list-item-0');
+    
+    // Simple keyboard navigation for historical list
+    const navHandler = (e) => {
+        const items = container.querySelectorAll('.list-view-item');
+        const currentActive = container.getAttribute('aria-activedescendant');
+        let activeIndex = parseInt(currentActive.split('-').pop());
+        
+        let handled = false;
+        
+        switch(e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                if (activeIndex < items.length - 1) {
+                    activeIndex++;
+                    items.forEach((item, i) => {
+                        item.setAttribute('aria-selected', i === activeIndex ? 'true' : 'false');
+                    });
+                    container.setAttribute('aria-activedescendant', `hist-list-item-${activeIndex}`);
+                    announceToScreenReader(items[activeIndex].textContent);
+                }
+                handled = true;
+                break;
+                
+            case 'ArrowUp':
+                e.preventDefault();
+                if (activeIndex > 0) {
+                    activeIndex--;
+                    items.forEach((item, i) => {
+                        item.setAttribute('aria-selected', i === activeIndex ? 'true' : 'false');
+                    });
+                    container.setAttribute('aria-activedescendant', `hist-list-item-${activeIndex}`);
+                    announceToScreenReader(items[activeIndex].textContent);
+                }
+                handled = true;
+                break;
+                
+            case 'Home':
+                e.preventDefault();
+                activeIndex = 0;
+                items.forEach((item, i) => {
+                    item.setAttribute('aria-selected', i === activeIndex ? 'true' : 'false');
+                });
+                container.setAttribute('aria-activedescendant', `hist-list-item-${activeIndex}`);
+                announceToScreenReader(items[activeIndex].textContent);
+                handled = true;
+                break;
+                
+            case 'End':
+                e.preventDefault();
+                activeIndex = items.length - 1;
+                items.forEach((item, i) => {
+                    item.setAttribute('aria-selected', i === activeIndex ? 'true' : 'false');
+                });
+                container.setAttribute('aria-activedescendant', `hist-list-item-${activeIndex}`);
+                announceToScreenReader(items[activeIndex].textContent);
+                handled = true;
+                break;
+        }
+    };
+    
+    container.addEventListener('keydown', navHandler);
+}
+
+function adjustHistoricalYear(yearShift) {
+    historicalYearOffset += yearShift;
+    
+    // Prevent going into the future
+    if (historicalYearOffset < 0) {
+        historicalYearOffset = 0;
+    }
+    
+    // Update button states
+    const nextBtn = document.getElementById('hist-next-btn');
+    const prevBtn = document.getElementById('hist-prev-btn');
+    
+    if (nextBtn) {
+        // Disable next button if we're at the current period (offset = 0)
+        nextBtn.disabled = historicalYearOffset === 0;
+    }
+    
+    if (prevBtn) {
+        // Always enable previous button (can go back indefinitely)
+        prevBtn.disabled = false;
+    }
     
     if (currentHistoricalCity) {
-        loadHistoricalView(currentHistoricalCity.key, currentHistoricalCity.lat, currentHistoricalCity.lon, currentHistoricalMode);
+        loadHistoricalData();
     }
 }
 
