@@ -80,7 +80,7 @@ const DEFAULT_CONFIG = {
         pressure: 'inHg',
         distance: 'mi'
     },
-    defaultView: 'flat',
+    defaultView: 'list',
     listViewStyle: 'detailed' // 'detailed' shows labels, 'condensed' shows data only
 };
 
@@ -90,7 +90,7 @@ let weatherData = {};
 let currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 let currentCityMatches = [];
 let focusReturnElement = null;
-let currentView = 'flat'; // 'flat', 'table', or 'list'
+let currentView = 'list'; // 'flat', 'table', or 'list'
 let listNavigationHandler = null;
 let cachedCityCoordinates = null; // Cache for pre-geocoded US city coordinates
 let cachedInternationalCoordinates = null; // Cache for pre-geocoded international city coordinates

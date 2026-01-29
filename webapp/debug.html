@@ -143,12 +143,9 @@
                     const keys = await cache.keys();
                     html += `${cacheName}: ${keys.length} items\n`;
                     
-                    // Show first few URLs
-                    const urls = keys.slice(0, 5).map(req => '  - ' + req.url.split('/').pop()).join('\n');
+                    // Show all URLs
+                    const urls = keys.map(req => '  - ' + req.url.split('/').pop()).join('\n');
                     html += urls + '\n';
-                    if (keys.length > 5) {
-                        html += `  ... and ${keys.length - 5} more\n`;
-                    }
                     html += '\n';
                 }
                 
