@@ -1,18 +1,19 @@
 // FastWeather Service Worker
 // Enables offline functionality and faster loading
+// UPDATED: January 28, 2026 - Fixed paths for subdirectory deployment
 
-const CACHE_NAME = 'fastweather-v3-101countries';
-const RUNTIME_CACHE = 'fastweather-runtime-v3';
+const CACHE_NAME = 'fastweather-v4-icons-fixed';
+const RUNTIME_CACHE = 'fastweather-runtime-v4';
 
 // Files to cache for offline use
 const STATIC_CACHE_URLS = [
-    '/',
-    '/index.html',
-    '/styles.css',
-    '/app.js',
-    '/us-cities-cached.json',
-    '/international-cities-cached.json',
-    '/manifest.json'
+    './',
+    './index.html',
+    './styles.css',
+    './app.js',
+    './us-cities-cached.json',
+    './international-cities-cached.json',
+    './manifest.json'
 ];
 
 // Install event - cache static assets

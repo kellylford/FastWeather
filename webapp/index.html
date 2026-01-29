@@ -8,7 +8,7 @@
     <title>FastWeather - Accessible Weather App</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="WeatherIcon-192.png">
 </head>
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -469,7 +469,7 @@
         // Register service worker for PWA functionality
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
+                navigator.serviceWorker.register('./service-worker.js')
                     .then(registration => {
                         console.log('Service Worker registered successfully:', registration.scope);
                         
