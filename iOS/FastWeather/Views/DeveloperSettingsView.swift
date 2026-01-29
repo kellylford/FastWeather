@@ -28,7 +28,7 @@ struct DeveloperSettingsView: View {
                         .accessibilityHint(featureFlags.weatherKitAlertsEnabled ? "WeatherKit alerts for international cities are currently enabled. US cities use NWS." : "WeatherKit alerts are currently disabled. Only US cities will show alerts via NWS.")
                 }
                 
-                Section(header: Text("Alert Sources"), footer: Text("US cities always use National Weather Service for detailed alerts. When enabled, international cities use Apple WeatherKit for government weather warnings.")) {
+                Section(header: Text("Alert Sources"), footer: Text("US cities always use National Weather Service for detailed alerts. When enabled, international cities use Apple WeatherKit for government weather warnings. Note: WeatherKit alert coverage is limited to select countries (Canada, parts of Europe, Japan, Australia, etc.). Not all countries are supported.")) {
                     HStack {
                         Text("US Cities")
                         Spacer()
@@ -39,8 +39,20 @@ struct DeveloperSettingsView: View {
                     HStack {
                         Text("International")
                         Spacer()
-                        Text(featureFlags.weatherKitAlertsEnabled ? "WeatherKit" : "None")
+                        Text(featureFlags.weatherKitAlertsEnabled ? "WeatherKit*" : "None")
                             .foregroundColor(featureFlags.weatherKitAlertsEnabled ? .green : .secondary)
+                    }
+                    
+                    if featureFlags.weatherKitAlertsEnabled {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("* Limited Coverage")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                            Text("WeatherKit alerts work in: Canada, UK, Germany, France, Spain, Italy, Japan, Australia, and other select countries. Russia, many Asian countries, and Africa have limited/no coverage.")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.vertical, 4)
                     }
                 }
                 

@@ -18,10 +18,17 @@ struct WeatherAlert: Codable, Identifiable {
     let onset: Date
     let expires: Date
     let areaDesc: String?
+    let source: AlertSource      // NWS or WeatherKit
+    let detailsURL: String?      // Optional URL for more info
     
     var isExpired: Bool {
         Date() > expires
     }
+}
+
+enum AlertSource: String, Codable {
+    case nws = "NWS"              // US National Weather Service
+    case weatherKit = "WeatherKit" // Apple WeatherKit (international)
 }
 
 enum AlertSeverity: String, Codable, CaseIterable {

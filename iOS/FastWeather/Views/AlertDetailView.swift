@@ -84,16 +84,38 @@ struct AlertDetailView: View {
                         Text("Until: \(formatFullDate(alert.expires))")
                     }
                     
-                    // Link to official source
-                    Link(destination: URL(string: "https://www.weather.gov")!) {
-                        Label("View on Weather.gov", systemImage: "safari")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(12)
+                    // Link to official source (source-specific)
+                    if alert.source == .nws {
+                        Link(destination: URL(string: "https://www.weather.gov")!) {
+                            Label("View on Weather.gov", systemImage: "safari")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
+                        }
+                        .accessibilityHint("Opens Safari to view official National Weather Service alert information")
+                    } else if alert.source == .weatherKit, let urlString = alert.detailsURL, let url = URL(string: urlString) {
+                        Link(destination: url) {
+                            Label("View Alert Details", systemImage: "safari")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
+                        }
+                        .accessibilityHint("Opens Safari to view official weather alert from local authorities")
                     }
-                    .accessibilityHint("Opens Safari to view official National Weather Service alert information")
+                    
+                    // Source attribution
+                    HStack {
+                        Spacer()
+                        Text("Source: \(alert.source.rawValue)")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    }
+                    .padding(.top, 8)
                 }
             .padding()
         }

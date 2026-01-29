@@ -100,7 +100,7 @@ class WeatherService: ObservableObject {
             let decoder = JSONDecoder()
             let response = try decoder.decode(WeatherResponse.self, from: data)
             
-            await MainActor.run {
+                    await MainActor.run {
                 self.weatherCache[city.id] = WeatherData(current: response.current, daily: response.daily, hourly: response.hourly)
                 self.cacheTimestamps[city.id] = Date()
             }
@@ -466,7 +466,9 @@ class WeatherService: ObservableObject {
                     instruction: props.instruction,
                     onset: onset,
                     expires: expires,
-                    areaDesc: props.areaDesc
+                    areaDesc: props.areaDesc,
+                    source: .nws,
+                    detailsURL: nil  // NWS alerts use weather.gov link in UI
                 )
             }
             
@@ -510,9 +512,10 @@ class WeatherService: ObservableObject {
                 @unknown default: severity = .unknown
                 }
                 
-                // WeatherKit doesn't provide full description or instructions
-                // Only summary and a link to details
-                let description = wkAlert.detailsURL.absoluteString
+                // WeatherKit provides limited info - just summary and region
+                // Build a user-friendly description
+                let regionText = wkAlert.region ?? "your area"
+                let description = "Government weather alert issued for \(regionText). Tap 'View Alert Details' below for complete information from local authorities."
                 
                 return WeatherAlert(
                     id: UUID().uuidString,
@@ -520,10 +523,12 @@ class WeatherService: ObservableObject {
                     severity: severity,
                     headline: wkAlert.summary,
                     description: description,
-                    instruction: nil, // WeatherKit doesn't provide instructions
-                    onset: Date(), // WeatherKit doesn't expose onset/expires directly, use current date
+                    instruction: nil, // WeatherKit doesn't provide safety instructions
+                    onset: Date(), // WeatherKit doesn't expose onset directly
                     expires: Date().addingTimeInterval(86400), // Default to 24 hours
-                    areaDesc: wkAlert.region
+                    areaDesc: wkAlert.region,
+                    source: .weatherKit,
+                    detailsURL: wkAlert.detailsURL.absoluteString
                 )
             } ?? []
             
@@ -537,15 +542,29 @@ class WeatherService: ObservableObject {
             return activeAlerts
             
         } catch {
-            // Check for authentication errors
+            // Parse error to provide helpful messaging
             let nsError = error as NSError
-            if nsError.domain.contains("WDSJWTAuthenticatorServiceListener") || 
-               nsError.domain.contains("WeatherDaemon") {
+            let errorDescription = nsError.localizedDescription
+            
+            // HTTP 400 errors typically mean the country/region doesn't support weather alerts
+            if errorDescription.contains("400") || errorDescription.contains("responseFailed: 400") {
+                print("⚠️ WeatherKit alerts not available for \(city.name)")
+                print("   → WeatherKit doesn't support weather alerts in \(city.country)")
+                print("   → Coverage is limited to select countries (US, Canada, parts of Europe, etc.)")
+            }
+            // JWT/Authentication errors
+            else if nsError.domain.contains("WDSJWTAuthenticatorServiceListener") {
                 print("⚠️ WeatherKit authentication failed for \(city.name)")
                 print("   → WeatherKit may not be enabled for your App ID in Apple Developer Portal")
                 print("   → Visit https://developer.apple.com/account/resources/identifiers/list")
-                print("   → Edit your App ID and enable the WeatherKit capability")
-            } else {
+                print("   → Edit your App ID and enable the WeatherKit capability under App Services")
+            }
+            // Other WeatherDaemon errors
+            else if nsError.domain.contains("WeatherDaemon") {
+                print("⚠️ WeatherKit service error for \(city.name): \(errorDescription)")
+            }
+            // Unknown errors
+            else {
                 print("⚠️ Error fetching WeatherKit alerts for \(city.name): \(error)")
             }
             
