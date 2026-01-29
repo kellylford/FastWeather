@@ -2,8 +2,8 @@
 // Enables offline functionality and faster loading
 // UPDATED: January 28, 2026 - Fixed paths for subdirectory deployment
 
-const CACHE_NAME = 'fastweather-v4-icons-fixed';
-const RUNTIME_CACHE = 'fastweather-runtime-v4';
+const CACHE_NAME = 'fastweather-v5-user-guide';
+const RUNTIME_CACHE = 'fastweather-runtime-v5';
 
 // Files to cache for offline use
 const STATIC_CACHE_URLS = [
