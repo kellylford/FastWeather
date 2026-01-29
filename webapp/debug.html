@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastWeather Debug</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #0f0;
+        }
+        h1 { color: #0ff; }
+        h2 { color: #ff0; margin-top: 20px; }
+        pre {
+            background: #000;
+            padding: 10px;
+            border: 1px solid #0f0;
+            overflow-x: auto;
+        }
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-family: monospace;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #0ff;
+        }
+        .error { color: #f00; }
+        .success { color: #0f0; }
+        .warning { color: #ff0; }
+    </style>
+</head>
+<body>
+    <h1>FastWeather Debug Console</h1>
+    
+    <h2>Quick Actions</h2>
+    <button onclick="clearAllData()">Clear All Data & Reload</button>
+    <button onclick="unregisterServiceWorker()">Unregister Service Worker</button>
+    <button onclick="checkStatus()">Re-check Status</button>
+    
+    <h2>LocalStorage Status</h2>
+    <pre id="storage-status">Loading...</pre>
+    
+    <h2>Service Worker Status</h2>
+    <pre id="sw-status">Loading...</pre>
+    
+    <h2>Cache Status</h2>
+    <pre id="cache-status">Loading...</pre>
+    
+    <h2>Network Test</h2>
+    <pre id="network-status">Loading...</pre>
+    
+    <script>
+        async function checkStatus() {
+            checkLocalStorage();
+            await checkServiceWorker();
+            await checkCaches();
+            await testNetwork();
+        }
+        
+        function checkLocalStorage() {
+            const output = document.getElementById('storage-status');
+            let html = '';
+            
+            // Check cities
+            const cities = localStorage.getItem('fastweather-cities');
+            html += '<strong>Cities:</strong>\n';
+            if (cities) {
+                try {
+                    const parsed = JSON.parse(cities);
+                    html += `<span class="success">✓ Found ${Object.keys(parsed).length} cities</span>\n`;
+                    html += JSON.stringify(parsed, null, 2) + '\n';
+                } catch (e) {
+                    html += `<span class="error">✗ Parse error: ${e.message}</span>\n`;
+                }
+            } else {
+                html += '<span class="warning">⚠ No cities in localStorage (will use defaults)</span>\n';
+            }
+            
+            // Check config
+            html += '\n<strong>Config:</strong>\n';
+            const config = localStorage.getItem('fastweather-config');
+            if (config) {
+                try {
+                    const parsed = JSON.parse(config);
+                    html += '<span class="success">✓ Config found</span>\n';
+                    html += JSON.stringify(parsed, null, 2) + '\n';
+                } catch (e) {
+                    html += `<span class="error">✗ Parse error: ${e.message}</span>\n`;
+                }
+            } else {
+                html += '<span class="warning">⚠ No config (will use defaults)</span>\n';
+            }
+            
+            output.innerHTML = html;
+        }
+        
+        async function checkServiceWorker() {
+            const output = document.getElementById('sw-status');
+            let html = '';
+            
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                html += `<strong>Registered Service Workers:</strong> ${registrations.length}\n\n`;
+                
+                for (const reg of registrations) {
+                    html += `Scope: ${reg.scope}\n`;
+                    html += `State: ${reg.active ? 'active' : 'not active'}\n`;
+                    if (reg.active) {
+                        html += `Script: ${reg.active.scriptURL}\n`;
+                        html += `State: ${reg.active.state}\n`;
+                    }
+                    html += '\n';
+                }
+                
+                if (registrations.length === 0) {
+                    html += '<span class="warning">⚠ No service workers registered</span>\n';
+                }
+            } else {
+                html += '<span class="error">✗ Service Workers not supported</span>\n';
+            }
+            
+            output.innerHTML = html;
+        }
+        
+        async function checkCaches() {
+            const output = document.getElementById('cache-status');
+            let html = '';
+            
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                html += `<strong>Active Caches:</strong> ${cacheNames.length}\n\n`;
+                
+                for (const cacheName of cacheNames) {
+                    const cache = await caches.open(cacheName);
+                    const keys = await cache.keys();
+                    html += `${cacheName}: ${keys.length} items\n`;
+                    
+                    // Show first few URLs
+                    const urls = keys.slice(0, 5).map(req => '  - ' + req.url.split('/').pop()).join('\n');
+                    html += urls + '\n';
+                    if (keys.length > 5) {
+                        html += `  ... and ${keys.length - 5} more\n`;
+                    }
+                    html += '\n';
+                }
+                
+                if (cacheNames.length === 0) {
+                    html += '<span class="warning">⚠ No caches found</span>\n';
+                }
+            } else {
+                html += '<span class="error">✗ Cache API not supported</span>\n';
+            }
+            
+            output.innerHTML = html;
+        }
+        
+        async function testNetwork() {
+            const output = document.getElementById('network-status');
+            let html = '';
+            
+            // Test JSON file loads
+            html += '<strong>Testing JSON file loads:</strong>\n\n';
+            
+            const files = [
+                'us-cities-cached.json',
+                'international-cities-cached.json',
+                'manifest.json'
+            ];
+            
+            for (const file of files) {
+                try {
+                    const response = await fetch(file);
+                    if (response.ok) {
+                        const size = response.headers.get('content-length');
+                        html += `<span class="success">✓ ${file}: ${response.status} ${response.statusText} (${size} bytes)</span>\n`;
+                    } else {
+                        html += `<span class="error">✗ ${file}: ${response.status} ${response.statusText}</span>\n`;
+                    }
+                } catch (e) {
+                    html += `<span class="error">✗ ${file}: ${e.message}</span>\n`;
+                }
+            }
+            
+            // Test weather API
+            html += '\n<strong>Testing Weather API:</strong>\n';
+            try {
+                const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=43.074761&longitude=-89.3837613&current=temperature_2m&timezone=auto');
+                if (response.ok) {
+                    const data = await response.json();
+                    html += `<span class="success">✓ Weather API: ${data.current.temperature_2m}°C</span>\n`;
+                } else {
+                    html += `<span class="error">✗ Weather API: ${response.status} ${response.statusText}</span>\n`;
+                }
+            } catch (e) {
+                html += `<span class="error">✗ Weather API: ${e.message}</span>\n`;
+            }
+            
+            output.innerHTML = html;
+        }
+        
+        async function clearAllData() {
+            if (!confirm('This will clear all localStorage data, caches, and service workers. Continue?')) {
+                return;
+            }
+            
+            // Clear localStorage
+            localStorage.clear();
+            
+            // Unregister service workers
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (const reg of registrations) {
+                    await reg.unregister();
+                }
+            }
+            
+            // Clear caches
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                for (const cacheName of cacheNames) {
+                    await caches.delete(cacheName);
+                }
+            }
+            
+            alert('All data cleared! Reloading...');
+            window.location.reload();
+        }
+        
+        async function unregisterServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (const reg of registrations) {
+                    await reg.unregister();
+                }
+                alert('Service workers unregistered! Reload the page to continue.');
+            } else {
+                alert('Service Workers not supported');
+            }
+        }
+        
+        // Run checks on load
+        checkStatus();
+    </script>
+</body>
+</html>

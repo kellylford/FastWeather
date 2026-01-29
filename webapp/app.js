@@ -102,6 +102,7 @@ let currentLocationType = 'us'; // 'us' or 'international'
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('=== FastWeather Initializing ===');
     loadCitiesFromStorage();
+    console.log('After loadCitiesFromStorage, cities:', Object.keys(cities));
     loadConfigFromStorage();
     
     // Set initial view from config
@@ -118,6 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     
     initializeEventListeners();
+    console.log('About to renderCityList, cities count:', Object.keys(cities).length);
     renderCityList();
     
     // Load cached city coordinates
@@ -1126,7 +1128,7 @@ function renderStateCitiesTable(container, citiesData) {
 function renderStateCitiesList(container, citiesData) {
     container.setAttribute('role', 'listbox');
     container.setAttribute('tabindex', '0');
-    container.setAttribute('aria-label', 'State cities - use arrow keys to navigate');
+    container.removeAttribute('aria-label');
     
     citiesData.forEach((cityData, index) => {
         const item = document.createElement('div');
@@ -1135,9 +1137,14 @@ function renderStateCitiesList(container, citiesData) {
         item.id = `state-city-item-${index}`;
         item.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
         
+        const displayText = `${cityData.display} (${cityData.lat.toFixed(4)}, ${cityData.lon.toFixed(4)})`;
+        
         const textSpan = document.createElement('span');
-        textSpan.textContent = `${cityData.display} (${cityData.lat.toFixed(4)}, ${cityData.lon.toFixed(4)})`;
+        textSpan.textContent = displayText;
         item.appendChild(textSpan);
+        
+        // Set aria-label for screen reader
+        item.setAttribute('aria-label', displayText);
         
         const addBtn = createButton('➕ Add', `Add ${cityData.display} to your cities list`, async (e) => {
             e.stopPropagation();
@@ -1570,7 +1577,7 @@ function renderStateCitiesTableWithWeather(container, citiesData) {
 function renderStateCitiesListWithWeather(container, citiesData) {
     container.setAttribute('role', 'listbox');
     container.setAttribute('tabindex', '0');
-    container.setAttribute('aria-label', 'State cities with weather - use arrow keys to navigate');
+    container.removeAttribute('aria-label');
     
     citiesData.forEach((cityData, index) => {
         const item = document.createElement('div');
@@ -1645,6 +1652,9 @@ function renderStateCitiesListWithWeather(container, citiesData) {
         
         // Just show the text - buttons will be displayed after the list
         item.textContent = weatherText;
+        
+        // Set aria-label for screen reader
+        item.setAttribute('aria-label', weatherText);
         
         container.appendChild(item);
     });
@@ -1776,7 +1786,10 @@ function renderStateCitiesListWithWeather(container, citiesData) {
             // Update the action button text based on new selection
             updateActionButton(newIndex);
             
-            // Don't announce - screen reader will read it automatically
+            // Announce the new item to screen readers
+            if (items[newIndex]) {
+                announceToScreenReader(items[newIndex].textContent);
+            }
         }
     });
 }
@@ -2467,10 +2480,109 @@ function renderTableView(container) {
     container.appendChild(wrapper);
 }
 
-// List view (compact, keyboard navigable)
-function renderListView(container) {
+// Shared ARIA listbox setup helper
+function setupListboxARIA(container, idPrefix) {
     container.setAttribute('role', 'listbox');
     container.setAttribute('tabindex', '0');
+    container.removeAttribute('aria-label');
+}
+
+// Shared listbox item creator
+function createListboxItem(index, idPrefix, text, ariaLabel) {
+    const item = document.createElement('div');
+    item.className = 'list-view-item';
+    item.setAttribute('role', 'option');
+    item.id = `${idPrefix}-${index}`;
+    item.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
+    item.setAttribute('aria-label', ariaLabel || text);
+    return item;
+}
+
+// Shared listbox keyboard navigation
+function addListboxNavigation(container, idPrefix, onNavigate) {
+    const navHandler = (e) => {
+        const listItems = container.querySelectorAll(`[id^="${idPrefix}-"]`);
+        const currentActive = container.getAttribute('aria-activedescendant');
+        let activeIndex = 0;
+        
+        if (currentActive) {
+            const parts = currentActive.split('-');
+            activeIndex = parseInt(parts[parts.length - 1]);
+        }
+        
+        let handled = false;
+        let newIndex = activeIndex;
+        
+        switch(e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                if (activeIndex < listItems.length - 1) {
+                    newIndex = activeIndex + 1;
+                }
+                handled = true;
+                break;
+                
+            case 'ArrowUp':
+                e.preventDefault();
+                if (activeIndex > 0) {
+                    newIndex = activeIndex - 1;
+                }
+                handled = true;
+                break;
+                
+            case 'Home':
+                e.preventDefault();
+                newIndex = 0;
+                handled = true;
+                break;
+                
+            case 'End':
+                e.preventDefault();
+                newIndex = listItems.length - 1;
+                handled = true;
+                break;
+                
+            case 'Enter':
+            case ' ':
+                e.preventDefault();
+                if (onNavigate && onNavigate.onActivate) {
+                    onNavigate.onActivate(activeIndex, listItems[activeIndex]);
+                }
+                handled = true;
+                break;
+        }
+        
+        if (handled && newIndex !== activeIndex) {
+            // Update aria-selected
+            listItems.forEach((item, i) => {
+                item.setAttribute('aria-selected', i === newIndex ? 'true' : 'false');
+            });
+            
+            // Update aria-activedescendant
+            container.setAttribute('aria-activedescendant', `${idPrefix}-${newIndex}`);
+            
+            // Scroll into view
+            listItems[newIndex].scrollIntoView({ block: 'nearest' });
+            
+            // Call navigation callback
+            if (onNavigate && onNavigate.onChange) {
+                onNavigate.onChange(newIndex, listItems[newIndex]);
+            }
+            
+            // Announce to screen reader
+            if (listItems[newIndex]) {
+                announceToScreenReader(listItems[newIndex].textContent);
+            }
+        }
+    };
+    
+    container.addEventListener('keydown', navHandler);
+    return navHandler;
+}
+
+// List view (compact, keyboard navigable)
+function renderListView(container) {
+    setupListboxARIA(container, 'list-item');
     
     let activeIndex = 0;
     const cityNames = Object.keys(cities);
@@ -2667,11 +2779,6 @@ function renderListView(container) {
                 handled = true;
                 break;
         }
-        
-        if (handled) {
-            const item = items[activeIndex];
-            announceToScreenReader(item.textContent);
-        }
     };
     
     // Function to update button labels and alert badge based on current selection
@@ -2722,6 +2829,10 @@ function renderListView(container) {
         
         if (newIndex !== oldIndex) {
             updateButtonLabels(newIndex);
+            // Announce after button labels update to avoid conflicts
+            if (items[newIndex]) {
+                announceToScreenReader(items[newIndex].textContent);
+            }
         }
     };
     
@@ -4353,11 +4464,13 @@ async function loadWeatherAroundMe(cityKey, lat, lon, distance) {
         html += generateWeatherSummary(results.map(r => r.weather), cityKey);
         
         container.innerHTML = html;
-        const distanceUnit = currentConfig.units.distance;
-        const isKm = distanceUnit === 'km';
-        const displayDistance = isKm ? Math.round(distance * 1.60934) : Math.round(distance);
-        const unitLabel = isKm ? 'kilometer' : 'mile';
-        announceToScreenReader(`Regional weather loaded for ${displayDistance} ${unitLabel} radius with location details`);
+        
+        // Use distance unit for screen reader announcement
+        const announceDistanceUnit = currentConfig.units.distance;
+        const announceIsKm = announceDistanceUnit === 'km';
+        const announceDisplayDistance = announceIsKm ? Math.round(distance * 1.60934) : Math.round(distance);
+        const announceUnitLabel = announceIsKm ? 'kilometer' : 'mile';
+        announceToScreenReader(`Regional weather loaded for ${announceDisplayDistance} ${announceUnitLabel} radius with location details`);
         
     } catch (error) {
         container.innerHTML = `<p class="error-message">Error loading regional weather: ${escapeHtml(error.message)}</p>`;
