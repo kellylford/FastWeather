@@ -5,14 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="FastWeather - A fast, accessible weather application providing current conditions and detailed forecasts">
     <meta name="theme-color" content="#2563eb">
+    
+    <!-- Open Graph / Facebook / LinkedIn -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://fastweather.online/">
+    <meta property="og:title" content="FastWeather - Accessible Weather App">
+    <meta property="og:description" content="Fast, accessible weather information with detailed forecasts">
+    <meta property="og:image" content="https://fastweather.online/WeatherIcon-512.png">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:url" content="https://fastweather.online/">
+    <meta name="twitter:title" content="FastWeather - Accessible Weather App">
+    <meta name="twitter:description" content="Fast, accessible weather information with detailed forecasts">
+    <meta name="twitter:image" content="https://fastweather.online/WeatherIcon-192.png">
+    
     <title>FastWeather - Accessible Weather App</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="WeatherIcon-192.png">
 </head>
 <body>
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-    
     <header role="banner">
         <h1>FastWeather</h1>
         <p class="tagline">Fast, accessible weather information</p>
@@ -42,6 +55,9 @@
                     </select>
                     <button type="submit" id="add-city-btn">
                         Add City
+                    </button>
+                    <button type="button" id="location-btn" class="location-btn">
+                        Use My Current Location
                     </button>
                 </div>
                 <div id="city-search-error" role="alert" aria-live="polite" class="error-message"></div>
@@ -462,7 +478,7 @@
         <p>FastWeather v1.1 &copy; 2025 Kelly Ford | <a href="user-guide.html">User Guide</a> | <a href="https://testflight.apple.com/join/QwMz3Hep" target="_blank" rel="noopener noreferrer">Try the iOS Version</a> | <a href="https://github.com/kellylford/FastWeather">GitHub</a> | <a href="https://github.com/kellylford/FastWeather/issues/new" target="_blank" rel="noopener noreferrer">Report an Issue</a></p>
     </footer>
 
-    <script src="app.js"></script>
+    <script src="app.js?v=2.1.1"></script>
     
     <!-- PWA Service Worker Registration -->
     <script>
