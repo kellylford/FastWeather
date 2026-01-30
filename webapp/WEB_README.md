@@ -72,7 +72,11 @@ This application implements the following accessibility features:
 ### Using the Application
 
 1. **Add Cities**:
-   - Enter a city name, state, and country (e.g., "San Diego, California")
+   - **Search by Name**: Enter a city name, state, and country (e.g., "San Diego, California")
+   - **Use Current Location**: Click "Use My Current Location" to automatically add your current location
+     - Your browser will ask for permission the first time
+     - Location data never leaves your browser - it's only used to find the nearest city
+     - If you've already added your current location, you'll see a message indicating it's already in your list
    - Press Enter or click "Add City"
    - If multiple matches are found, select from the list
 

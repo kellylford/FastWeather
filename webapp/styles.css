@@ -86,23 +86,6 @@ p {
     margin-bottom: var(--spacing-md);
 }
 
-/* === Skip Link (WCAG requirement) === */
-.skip-link {
-    position: absolute;
-    top: -40px;
-    left: 0;
-    background: var(--button-primary);
-    color: white;
-    padding: var(--spacing-sm) var(--spacing-md);
-    text-decoration: none;
-    border-radius: 0 0 var(--border-radius) 0;
-    z-index: 100;
-}
-
-.skip-link:focus {
-    top: 0;
-}
-
 /* === Visually Hidden (for screen readers) === */
 .visually-hidden {
     position: absolute;
@@ -546,6 +529,21 @@ button:disabled {
     min-height: 44px;
     background-color: var(--button-secondary);
     font-size: var(--font-size-lg);
+}
+
+.location-btn {
+    background-color: var(--button-secondary);
+    border: 2px solid var(--border-color);
+}
+
+.location-btn:hover:not(:disabled) {
+    background-color: var(--button-secondary-hover);
+    border-color: var(--focus-outline);
+}
+
+.location-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
 }
 
 .icon-btn:hover {
