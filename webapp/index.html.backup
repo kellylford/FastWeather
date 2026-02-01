@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FastWeather - A fast, accessible weather application providing current conditions and detailed forecasts">
+    <meta name="theme-color" content="#2563eb">
+    
+    <!-- Open Graph / Facebook / LinkedIn -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://fastweather.online/">
+    <meta property="og:title" content="FastWeather - Accessible Weather App">
+    <meta property="og:description" content="Fast, accessible weather information with detailed forecasts">
+    <meta property="og:image" content="https://fastweather.online/WeatherIcon-512.png">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:url" content="https://fastweather.online/">
+    <meta name="twitter:title" content="FastWeather - Accessible Weather App">
+    <meta name="twitter:description" content="Fast, accessible weather information with detailed forecasts">
+    <meta name="twitter:image" content="https://fastweather.online/WeatherIcon-192.png">
+    
+    <title>FastWeather - Accessible Weather App</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="WeatherIcon-192.png">
+</head>
+<body>
+    <header role="banner">
+        <h1>FastWeather</h1>
+        <p class="tagline">Fast, accessible weather information</p>
+    </header>
+
+    <main id="main-content" role="main">
+        <section class="city-management">
+            <h2 id="manage-cities-heading">Add New City</h2>
+            <form id="add-city-form">
+                <div class="input-group">
+                    <label for="city-input">Enter city name or zip code:</label>
+                    <input 
+                        type="text" 
+                        id="city-input" 
+                        name="city" 
+                        autocomplete="off"
+                        placeholder="e.g., San Diego, California"
+                        aria-describedby="city-input-help"
+                        required>
+                    <span id="city-input-help" class="visually-hidden">
+                        Enter a city name, state, and country, or a zip code to add weather information
+                    </span>
+                    <label for="country-select">Country (optional):</label>
+                    <select id="country-select" name="country" aria-label="Filter search by country">
+                        <option value="">Any Country</option>
+                        <!-- Populated dynamically from international-cities-cached.json -->
+                    </select>
+                    <button type="submit" id="add-city-btn">
+                        Add City
+                    </button>
+                    <button type="button" id="location-btn" class="location-btn">
+                        Use My Current Location
+                    </button>
+                </div>
+                <div id="city-search-error" role="alert" aria-live="polite" class="error-message"></div>
+            </form>
+
+            <!-- City selection dialog for multiple matches -->
+            <div id="city-selection-dialog" 
+                 class="modal" 
+                 role="dialog" 
+                 aria-labelledby="city-selection-title" 
+                 aria-describedby="city-selection-desc"
+                 aria-modal="true"
+                 hidden>
+                <div class="modal-content">
+                    <h3 id="city-selection-title">Select City</h3>
+                    <p id="city-selection-desc">Multiple cities were found. Please select one:</p>
+                    <div id="city-matches-list" role="listbox" tabindex="0" aria-label="City matches">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                    <div class="modal-buttons">
+                        <button id="select-city-btn" type="button">Select</button>
+                        <button id="cancel-selection-btn" type="button">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="state-selector-section">
+            <h2 id="state-selector-heading">Browse Cities</h2>
+            
+            <div class="location-tabs" role="tablist">
+                <button role="tab" aria-selected="true" aria-controls="us-states-panel" id="us-states-tab" tabindex="0">
+                    U.S. States
+                </button>
+                <button role="tab" aria-selected="false" aria-controls="international-panel" id="international-tab" tabindex="-1">
+                    International
+                </button>
+            </div>
+            
+            <form id="state-selector-form">
+                <div class="input-group" id="us-states-panel" role="tabpanel" aria-labelledby="us-states-tab">
+                    <label for="state-select">Select a U.S. State:</label>
+                    <select id="state-select" name="state">
+                        <option value="">-- Select a State --</option>
+                        <option value="Alabama">Alabama</option>
+                        <option value="Alaska">Alaska</option>
+                        <option value="Arizona">Arizona</option>
+                        <option value="Arkansas">Arkansas</option>
+                        <option value="California">California</option>
+                        <option value="Colorado">Colorado</option>
+                        <option value="Connecticut">Connecticut</option>
+                        <option value="Delaware">Delaware</option>
+                        <option value="Florida">Florida</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Hawaii">Hawaii</option>
+                        <option value="Idaho">Idaho</option>
+                        <option value="Illinois">Illinois</option>
+                        <option value="Indiana">Indiana</option>
+                        <option value="Iowa">Iowa</option>
+                        <option value="Kansas">Kansas</option>
+                        <option value="Kentucky">Kentucky</option>
+                        <option value="Louisiana">Louisiana</option>
+                        <option value="Maine">Maine</option>
+                        <option value="Maryland">Maryland</option>
+                        <option value="Massachusetts">Massachusetts</option>
+                        <option value="Michigan">Michigan</option>
+                        <option value="Minnesota">Minnesota</option>
+                        <option value="Mississippi">Mississippi</option>
+                        <option value="Missouri">Missouri</option>
+                        <option value="Montana">Montana</option>
+                        <option value="Nebraska">Nebraska</option>
+                        <option value="Nevada">Nevada</option>
+                        <option value="New Hampshire">New Hampshire</option>
+                        <option value="New Jersey">New Jersey</option>
+                        <option value="New Mexico">New Mexico</option>
+                        <option value="New York">New York</option>
+                        <option value="North Carolina">North Carolina</option>
+                        <option value="North Dakota">North Dakota</option>
+                        <option value="Ohio">Ohio</option>
+                        <option value="Oklahoma">Oklahoma</option>
+                        <option value="Oregon">Oregon</option>
+                        <option value="Pennsylvania">Pennsylvania</option>
+                        <option value="Rhode Island">Rhode Island</option>
+                        <option value="South Carolina">South Carolina</option>
+                        <option value="South Dakota">South Dakota</option>
+                        <option value="Tennessee">Tennessee</option>
+                        <option value="Texas">Texas</option>
+                        <option value="Utah">Utah</option>
+                        <option value="Vermont">Vermont</option>
+                        <option value="Virginia">Virginia</option>
+                        <option value="Washington">Washington</option>
+                        <option value="West Virginia">West Virginia</option>
+                        <option value="Wisconsin">Wisconsin</option>
+                        <option value="Wyoming">Wyoming</option>
+                    </select>
+                    <button type="submit" id="choose-state-btn">
+                        Load Cities
+                    </button>
+                </div>
+                
+                <div class="input-group" id="international-panel" role="tabpanel" aria-labelledby="international-tab" hidden>
+                    <label for="country-select-browse">Select a Country:</label>
+                    <select id="country-select-browse" name="country">
+                        <option value="">-- Select a Country --</option>
+                        <!-- Populated dynamically from international-cities-cached.json -->
+                    </select>
+                    <button type="submit" id="choose-country-btn">
+                        Load Cities
+                    </button>
+                </div>
+                
+                <div id="state-selector-error" role="alert" aria-live="polite" class="error-message"></div>
+            </form>
+
+            <div id="state-cities-section" hidden>
+                <h3 id="state-cities-heading">Cities in <span id="selected-state-name"></span></h3>
+                <div id="state-cities-list" role="list" aria-label="List of cities in selected state">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <section class="city-list-section">
+            <div class="section-header">
+                <h2 id="your-cities-heading">Your Cities</h2>
+                <div class="controls">
+                    <div class="view-menu-container">
+                        <button id="view-menu-btn" aria-haspopup="menu" aria-expanded="false">
+                            <span id="current-view-label">View: Flat</span> <span aria-hidden="true">▼</span>
+                        </button>
+                        <ul id="view-menu" role="menu" aria-labelledby="view-menu-btn" hidden>
+                            <li role="none">
+                                <button role="menuitem" data-view="flat" aria-checked="true">Flat</button>
+                            </li>
+                            <li role="none">
+                                <button role="menuitem" data-view="table" aria-checked="false">Table</button>
+                            </li>
+                            <li role="none">
+                                <button role="menuitem" data-view="list" aria-checked="false">List</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <button id="configure-btn">
+                        <span aria-hidden="true">⚙️</span> Configure
+                    </button>
+                    <button id="refresh-all-btn">
+                        <span aria-hidden="true">🔄</span> Refresh All
+                    </button>
+                </div>
+            </div>
+
+            <div id="city-list" role="list" aria-label="List of your saved cities">
+                <!-- Populated by JavaScript -->
+            </div>
+
+            <div id="empty-state" class="empty-state" hidden>
+                <p>No cities added yet. Add a city above to get started!</p>
+            </div>
+        </section>
+
+        <!-- Configuration dialog -->
+        <div id="config-dialog" 
+             class="modal" 
+             role="dialog" 
+             aria-labelledby="config-title" 
+             aria-modal="true"
+             hidden>
+            <div class="modal-content large">
+                <h3 id="config-title">Configure Weather Display</h3>
+                
+                <div class="tabs" role="tablist" aria-label="Weather configuration options">
+                    <button role="tab" aria-selected="true" aria-controls="current-panel" id="current-tab" tabindex="0">
+                        Current Weather
+                    </button>
+                    <button role="tab" aria-selected="false" aria-controls="hourly-panel" id="hourly-tab" tabindex="-1">
+                        Hourly Forecast
+                    </button>
+                    <button role="tab" aria-selected="false" aria-controls="daily-panel" id="daily-tab" tabindex="-1">
+                        Daily Forecast
+                    </button>
+                    <button role="tab" aria-selected="false" aria-controls="citylist-panel" id="citylist-tab" tabindex="-1">
+                        City List
+                    </button>
+                    <button role="tab" aria-selected="false" aria-controls="units-panel" id="units-tab" tabindex="-1">
+                        Units
+                    </button>
+                    <button role="tab" aria-selected="false" aria-controls="reset-panel" id="reset-tab" tabindex="-1">
+                        Reset
+                    </button>
+                </div>
+
+                <div id="current-panel" role="tabpanel" aria-labelledby="current-tab" class="tab-panel">
+                    <fieldset>
+                        <legend>Select current weather details to display:</legend>
+                        <div class="checkbox-grid">
+                            <label><input type="checkbox" name="current-temperature" checked> Temperature</label>
+                            <label><input type="checkbox" name="current-feels_like" checked> Feels Like</label>
+                            <label><input type="checkbox" name="current-humidity" checked> Humidity</label>
+                            <label><input type="checkbox" name="current-wind_speed" checked> Wind Speed</label>
+                            <label><input type="checkbox" name="current-wind_direction" checked> Wind Direction</label>
+                            <label><input type="checkbox" name="current-pressure"> Pressure</label>
+                            <label><input type="checkbox" name="current-visibility"> Visibility</label>
+                            <label><input type="checkbox" name="current-precipitation" checked> Precipitation</label>
+                            <label><input type="checkbox" name="current-cloud_cover"> Cloud Cover</label>
+                            <label><input type="checkbox" name="current-rain"> Rain</label>
+                            <label><input type="checkbox" name="current-showers"> Showers</label>
+                            <label><input type="checkbox" name="current-snowfall"> Snowfall</label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div id="hourly-panel" role="tabpanel" aria-labelledby="hourly-tab" class="tab-panel" hidden>
+                    <fieldset>
+                        <legend>Select hourly forecast details to display:</legend>
+                        <div class="checkbox-grid">
+                            <label><input type="checkbox" name="hourly-temperature" checked> Temperature</label>
+                            <label><input type="checkbox" name="hourly-feels_like"> Feels Like</label>
+                            <label><input type="checkbox" name="hourly-humidity"> Humidity</label>
+                            <label><input type="checkbox" name="hourly-precipitation" checked> Precipitation</label>
+                            <label><input type="checkbox" name="hourly-wind_speed"> Wind Speed</label>
+                            <label><input type="checkbox" name="hourly-cloud_cover"> Cloud Cover</label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div id="daily-panel" role="tabpanel" aria-labelledby="daily-tab" class="tab-panel" hidden>
+                    <fieldset>
+                        <legend>Select daily forecast details to display:</legend>
+                        <div class="checkbox-grid">
+                            <label><input type="checkbox" name="daily-temperature_max" checked> High Temperature</label>
+                            <label><input type="checkbox" name="daily-temperature_min" checked> Low Temperature</label>
+                            <label><input type="checkbox" name="daily-sunrise" checked> Sunrise</label>
+                            <label><input type="checkbox" name="daily-sunset" checked> Sunset</label>
+                            <label><input type="checkbox" name="daily-precipitation_sum" checked> Total Precipitation</label>
+                            <label><input type="checkbox" name="daily-wind_speed_max"> Max Wind Speed</label>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div id="citylist-panel" role="tabpanel" aria-labelledby="citylist-tab" class="tab-panel" hidden>
+                    <fieldset>
+                        <legend>Select city list details to display:</legend>
+                        <div id="citylist-order-container" class="order-list">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Default View</legend>
+                        <label><input type="radio" name="default-view" value="flat" checked> Flat (Card View)</label>
+                        <label><input type="radio" name="default-view" value="table"> Table View</label>
+                        <label><input type="radio" name="default-view" value="list"> List View</label>
+                    </fieldset>
+                    <fieldset>
+                        <legend>List View Style (Accessibility)</legend>
+                        <label><input type="radio" name="list-view-style" value="detailed" checked> Detailed (Field names + data)</label>
+                        <label><input type="radio" name="list-view-style" value="condensed"> Condensed (Data only)</label>
+                        <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">
+                            Detailed mode shows labels like "Temperature: 72°F". Condensed mode shows just "72°F" for more concise screen reader output.
+                        </p>
+                    </fieldset>
+                </div>
+
+                <div id="units-panel" role="tabpanel" aria-labelledby="units-tab" class="tab-panel" hidden>
+                    <fieldset>
+                        <legend>Temperature</legend>
+                        <label><input type="radio" name="temp-unit" value="F" checked> Fahrenheit (°F)</label>
+                        <label><input type="radio" name="temp-unit" value="C"> Celsius (°C)</label>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Wind Speed</legend>
+                        <label><input type="radio" name="wind-unit" value="mph" checked> Miles per hour (mph)</label>
+                        <label><input type="radio" name="wind-unit" value="kmh"> Kilometers per hour (km/h)</label>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Precipitation</legend>
+                        <label><input type="radio" name="precip-unit" value="in" checked> Inches (in)</label>
+                        <label><input type="radio" name="precip-unit" value="mm"> Millimeters (mm)</label>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Pressure</legend>
+                        <label><input type="radio" name="pressure-unit" value="inHg" checked> Inches of mercury (inHg)</label>
+                        <label><input type="radio" name="pressure-unit" value="hPa"> Hectopascals (hPa/mb)</label>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Distance/Visibility</legend>
+                        <label><input type="radio" name="distance-unit" value="mi" checked> Miles (mi)</label>
+                        <label><input type="radio" name="distance-unit" value="km"> Kilometers (km)</label>
+                    </fieldset>
+                </div>
+
+                <div id="reset-panel" role="tabpanel" aria-labelledby="reset-tab" class="tab-panel" hidden>
+                    <fieldset>
+                        <legend>Reset Options</legend>
+                        <p style="margin-bottom: 1rem;">Use these options to clear your saved data and start fresh.</p>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <div>
+                                <button type="button" id="reset-cities-btn" class="reset-btn" style="width: 100%; min-height: 44px;">
+                                    Clear All Cities
+                                </button>
+                                <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">Remove all cities from your saved list. Your configuration settings will be preserved.</p>
+                            </div>
+                            <div>
+                                <button type="button" id="reset-settings-btn" class="reset-btn" style="width: 100%; min-height: 44px;">
+                                    Reset All Settings to Default
+                                </button>
+                                <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">Reset all configuration options to their default values. Your saved cities will be preserved.</p>
+                            </div>
+                            <div>
+                                <button type="button" id="reset-all-btn" class="reset-btn" style="width: 100%; min-height: 44px;">
+                                    Reset Everything
+                                </button>
+                                <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">Clear all cities and reset all settings to default. This is like clearing your browser cache.</p>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="modal-buttons">
+                    <button id="apply-config-btn" type="button">Apply</button>
+                    <button id="save-config-btn" type="button">Save & Close</button>
+                    <button id="cancel-config-btn" type="button">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Full Weather Details Dialog -->
+        <div id="weather-details-dialog" 
+             class="modal" 
+             role="dialog" 
+             aria-labelledby="weather-details-title" 
+             aria-modal="true"
+             hidden>
+            <div class="modal-content large">
+                <h3 id="weather-details-title">Full Weather Details</h3>
+                <div id="weather-details-content">
+                    <!-- Populated by JavaScript -->
+                </div>
+                <div class="modal-buttons">
+                    <button id="close-weather-details-btn" type="button">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weather Alert Detail Dialog -->
+        <div id="alert-details-dialog" 
+             class="modal" 
+             role="alertdialog" 
+             aria-labelledby="alert-details-title" 
+             aria-modal="true"
+             hidden>
+            <div class="modal-content large">
+                <div id="alert-details-content">
+                    <!-- Populated by JavaScript -->
+                </div>
+                <div class="modal-buttons">
+                    <button id="close-alert-details-btn" type="button">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historical Weather Dialog -->
+        <div id="historical-weather-dialog" 
+             class="modal" 
+             role="dialog" 
+             aria-labelledby="historical-weather-title" 
+             aria-modal="true"
+             hidden>
+            <div class="modal-content large">
+                <h3 id="historical-weather-title">Historical Weather</h3>
+                <div id="historical-weather-content">
+                    <!-- Populated by JavaScript -->
+                </div>
+                <div class="modal-buttons">
+                    <button id="close-historical-weather-btn" type="button">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expected Precipitation/Nowcast Dialog -->
+        <div id="precipitation-nowcast-dialog" 
+             class="modal" 
+             role="dialog" 
+             aria-labelledby="precipitation-nowcast-title" 
+             aria-modal="true"
+             hidden>
+            <div class="modal-content large">
+                <h3 id="precipitation-nowcast-title">Expected Precipitation</h3>
+                <div id="precipitation-nowcast-content">
+                    <!-- Populated by JavaScript -->
+                </div>
+                <div class="modal-buttons">
+                    <button id="close-precipitation-nowcast-btn" type="button">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weather Around Me Dialog -->
+        <div id="weather-around-me-dialog" 
+             class="modal" 
+             role="dialog" 
+             aria-labelledby="weather-around-me-title" 
+             aria-modal="true"
+             hidden>
+            <div class="modal-content large">
+                <h3 id="weather-around-me-title">Weather Around Me</h3>
+                <div id="weather-around-me-content">
+                    <!-- Populated by JavaScript -->
+                </div>
+                <div class="modal-buttons">
+                    <button id="close-weather-around-me-btn" type="button">Close</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer role="contentinfo">
+        <p>Data provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo.com</a> (CC BY 4.0)</p>
+        <p>FastWeather v1.1 &copy; 2025 Kelly Ford | <a href="user-guide.html">User Guide</a> | <a href="https://testflight.apple.com/join/QwMz3Hep" target="_blank" rel="noopener noreferrer">Try the iOS Version</a> | <a href="https://github.com/kellylford/FastWeather">GitHub</a> | <a href="https://github.com/kellylford/FastWeather/issues/new" target="_blank" rel="noopener noreferrer">Report an Issue</a></p>
+    </footer>
+
+    <script src="app.js?v=2.1.1"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        // Register service worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration.scope);
+                        
+                        // Check for updates periodically
+                        setInterval(() => {
+                            registration.update();
+                        }, 60000); // Check every minute
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+            
+            // Handle service worker updates
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    console.log('New service worker activated, reloading page...');
+                    window.location.reload();
+                }
+            });
+        }
+        
+        // Detect if running as installed PWA
+        window.addEventListener('DOMContentLoaded', () => {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
+                || window.navigator.standalone 
+                || document.referrer.includes('android-app://');
+            
+            if (isStandalone) {
+                console.log('Running as installed PWA');
+                document.body.classList.add('pwa-mode');
+            }
+        });
+    </script>
+
+</body>
+</html>
