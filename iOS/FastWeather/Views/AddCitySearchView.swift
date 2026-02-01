@@ -11,11 +11,14 @@ import CoreLocation
 struct AddCitySearchView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var weatherService: WeatherService
+    @StateObject private var locationService = LocationService.shared
     var initialSearchText: String = ""
     @State private var searchText = ""
     @State private var searchResults: [GeocodingResult] = []
     @State private var isSearching = false
     @State private var errorMessage: String?
+    @State private var showingLocationPermissionAlert = false
+    @State private var isGettingLocation = false
     
     var body: some View {
         NavigationView {
@@ -26,6 +29,45 @@ struct AddCitySearchView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    // Current Location Button
+                    Button(action: {
+                        getCurrentLocation()
+                    }) {
+                        HStack(spacing: 8) {
+                            if isGettingLocation {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                            } else {
+                                Image(systemName: "location.fill")
+                            }
+                            Text("Use My Current Location")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(isGettingLocation || isSearching)
+                    .accessibilityLabel("Use my current location")
+                    .accessibilityHint("Automatically detects your city using GPS. Requires location permission.")
+                    
+                    // Divider with "OR"
+                    HStack {
+                        Rectangle()
+                            .fill(Color.secondary.opacity(0.3))
+                            .frame(height: 1)
+                        
+                        Text("OR")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 8)
+                        
+                        Rectangle()
+                            .fill(Color.secondary.opacity(0.3))
+                            .frame(height: 1)
+                    }
+                    .padding(.vertical, 4)
+                    .accessibilityHidden(true)
                     
                     HStack(spacing: 12) {
                         TextField("City name or zip code", text: $searchText)
@@ -130,6 +172,16 @@ struct AddCitySearchView: View {
                         dismiss()
                     }
                 }
+            }
+            .alert("Location Permission Required", isPresented: $showingLocationPermissionAlert) {
+                Button("Open Settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("To use your current location, please enable location access in Settings > Privacy > Location Services.")
             }
             .onAppear {
                 if !initialSearchText.isEmpty {
@@ -303,6 +355,57 @@ struct AddCitySearchView: View {
         UIAccessibility.post(notification: .announcement, argument: "\(city.displayName) added to My Cities")
         
         dismiss()
+    }
+    
+    // MARK: - Current Location
+    
+    private func getCurrentLocation() {
+        // Check authorization status first
+        if locationService.authorizationStatus == .denied || locationService.authorizationStatus == .restricted {
+            showingLocationPermissionAlert = true
+            return
+        }
+        
+        isGettingLocation = true
+        errorMessage = nil
+        searchResults = [] // Clear any previous search results
+        
+        Task {
+            do {
+                let city = try await locationService.getCurrentLocationAsCity()
+                
+                await MainActor.run {
+                    isGettingLocation = false
+                    
+                    // Add the city to saved cities
+                    weatherService.addCity(city)
+                    
+                    // Announce to VoiceOver
+                    UIAccessibility.post(
+                        notification: .announcement,
+                        argument: "Current location detected: \(city.displayName). City added to My Cities."
+                    )
+                    
+                    dismiss()
+                }
+            } catch LocationError.permissionDenied {
+                await MainActor.run {
+                    isGettingLocation = false
+                    showingLocationPermissionAlert = true
+                }
+            } catch {
+                await MainActor.run {
+                    isGettingLocation = false
+                    errorMessage = "Unable to get current location: \(error.localizedDescription)"
+                    
+                    // Announce error to VoiceOver
+                    UIAccessibility.post(
+                        notification: .announcement,
+                        argument: errorMessage ?? "Location error"
+                    )
+                }
+            }
+        }
     }
 }
 

@@ -41,6 +41,7 @@
 		A9C7A9359CF740975C1AA31E /* HistoricalWeather.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000HIST1 /* HistoricalWeather.swift */; };
 		C1D4318204CE67D03430BC6F /* HistoricalWeatherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000HIST3 /* HistoricalWeatherView.swift */; };
 		E41FA69A048BFD0F634DB005 /* RadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8C597ECDBB8F82B9D13 /* RadarView.swift */; };
+		FCF060427E69A6D68459749C /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F83A2A75D10D105C7225AE79 /* LocationService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -84,6 +85,7 @@
 		A1000WARM2 /* RegionalWeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionalWeatherService.swift; sourceTree = "<group>"; };
 		A5F0E524751DEEAE77391AD2 /* DeveloperSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeveloperSettingsView.swift; sourceTree = "<group>"; };
 		B505151E924798A11141FE82 /* FeatureFlags.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeatureFlags.swift; sourceTree = "<group>"; };
+		F83A2A75D10D105C7225AE79 /* LocationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -177,6 +179,7 @@
 				9DCDC584E3856802D5BBA5B7 /* RadarService.swift */,
 				A1000WARM2 /* RegionalWeatherService.swift */,
 				1311D88F8BCB7E6528F708FD /* DirectionalCityService.swift */,
+				F83A2A75D10D105C7225AE79 /* LocationService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -298,6 +301,7 @@
 				C1D4318204CE67D03430BC6F /* HistoricalWeatherView.swift in Sources */,
 				1EA38206A8F8117706BC1BE1 /* UserGuideView.swift in Sources */,
 				0B20A334AA1FE3314940526C /* DirectionalCityService.swift in Sources */,
+				FCF060427E69A6D68459749C /* LocationService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

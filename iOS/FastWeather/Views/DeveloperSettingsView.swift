@@ -28,6 +28,19 @@ struct DeveloperSettingsView: View {
                         .accessibilityHint(featureFlags.weatherKitAlertsEnabled ? "WeatherKit alerts for international cities are currently enabled. US cities use NWS." : "WeatherKit alerts are currently disabled. Only US cities will show alerts via NWS.")
                 }
                 
+                Section(header: Text("Location Features"), footer: Text("Current location uses GPS to automatically detect your city. This requires location permission.")) {
+                    HStack {
+                        Text("Find My Location")
+                        Spacer()
+                        Image(systemName: "location.fill")
+                            .foregroundColor(.green)
+                    }
+                    
+                    Text("Available in Add City screen. Press \"Use My Current Location\" button to automatically add your current city.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
                 Section(header: Text("Alert Sources"), footer: Text("US cities always use National Weather Service for detailed alerts. When enabled, international cities use Apple WeatherKit for government weather warnings. Note: WeatherKit alert coverage is limited to select countries (Canada, parts of Europe, Japan, Australia, etc.). Not all countries are supported.")) {
                     HStack {
                         Text("US Cities")
