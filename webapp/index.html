@@ -5,14 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="FastWeather - A fast, accessible weather application providing current conditions and detailed forecasts">
     <meta name="theme-color" content="#2563eb">
+    
+    <!-- Open Graph / Facebook / LinkedIn -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://fastweather.online/">
+    <meta property="og:title" content="FastWeather - Accessible Weather App">
+    <meta property="og:description" content="Fast, accessible weather information with detailed forecasts">
+    <meta property="og:image" content="https://fastweather.online/WeatherIcon-512.png">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:url" content="https://fastweather.online/">
+    <meta name="twitter:title" content="FastWeather - Accessible Weather App">
+    <meta name="twitter:description" content="Fast, accessible weather information with detailed forecasts">
+    <meta name="twitter:image" content="https://fastweather.online/WeatherIcon-192.png">
+    
     <title>FastWeather - Accessible Weather App</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="WeatherIcon-192.png">
 </head>
 <body>
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-    
     <header role="banner">
         <h1>FastWeather</h1>
         <p class="tagline">Fast, accessible weather information</p>
@@ -38,61 +51,13 @@
                     <label for="country-select">Country (optional):</label>
                     <select id="country-select" name="country" aria-label="Filter search by country">
                         <option value="">Any Country</option>
-                        <option value="ar">Argentina</option>
-                        <option value="au">Australia</option>
-                        <option value="at">Austria</option>
-                        <option value="bd">Bangladesh</option>
-                        <option value="be">Belgium</option>
-                        <option value="br">Brazil</option>
-                        <option value="ca">Canada</option>
-                        <option value="cn">China</option>
-                        <option value="dk">Denmark</option>
-                        <option value="eg">Egypt</option>
-                        <option value="et">Ethiopia</option>
-                        <option value="fi">Finland</option>
-                        <option value="fr">France</option>
-                        <option value="de">Germany</option>
-                        <option value="in">India</option>
-                        <option value="id">Indonesia</option>
-                        <option value="ir">Iran</option>
-                        <option value="iq">Iraq</option>
-                        <option value="ie">Ireland</option>
-                        <option value="il">Israel</option>
-                        <option value="it">Italy</option>
-                        <option value="jp">Japan</option>
-                        <option value="jo">Jordan</option>
-                        <option value="ke">Kenya</option>
-                        <option value="kw">Kuwait</option>
-                        <option value="my">Malaysia</option>
-                        <option value="mx">Mexico</option>
-                        <option value="ma">Morocco</option>
-                        <option value="nl">Netherlands</option>
-                        <option value="nz">New Zealand</option>
-                        <option value="ng">Nigeria</option>
-                        <option value="no">Norway</option>
-                        <option value="pk">Pakistan</option>
-                        <option value="ph">Philippines</option>
-                        <option value="pl">Poland</option>
-                        <option value="qa">Qatar</option>
-                        <option value="ru">Russia</option>
-                        <option value="sa">Saudi Arabia</option>
-                        <option value="sg">Singapore</option>
-                        <option value="za">South Africa</option>
-                        <option value="kr">South Korea</option>
-                        <option value="es">Spain</option>
-                        <option value="se">Sweden</option>
-                        <option value="ch">Switzerland</option>
-                        <option value="tw">Taiwan</option>
-                        <option value="th">Thailand</option>
-                        <option value="tr">Turkey</option>
-                        <option value="ua">Ukraine</option>
-                        <option value="ae">United Arab Emirates</option>
-                        <option value="gb">United Kingdom</option>
-                        <option value="us">United States</option>
-                        <option value="vn">Vietnam</option>
+                        <!-- Populated dynamically from international-cities-cached.json -->
                     </select>
                     <button type="submit" id="add-city-btn">
                         Add City
+                    </button>
+                    <button type="button" id="location-btn" class="location-btn">
+                        Use My Current Location
                     </button>
                 </div>
                 <div id="city-search-error" role="alert" aria-live="polite" class="error-message"></div>
@@ -197,57 +162,7 @@
                     <label for="country-select-browse">Select a Country:</label>
                     <select id="country-select-browse" name="country">
                         <option value="">-- Select a Country --</option>
-                        <option value="Argentina">Argentina</option>
-                        <option value="Australia">Australia</option>
-                        <option value="Austria">Austria</option>
-                        <option value="Bangladesh">Bangladesh</option>
-                        <option value="Belgium">Belgium</option>
-                        <option value="Brazil">Brazil</option>
-                        <option value="Canada">Canada</option>
-                        <option value="China">China</option>
-                        <option value="Denmark">Denmark</option>
-                        <option value="Egypt">Egypt</option>
-                        <option value="Ethiopia">Ethiopia</option>
-                        <option value="Finland">Finland</option>
-                        <option value="France">France</option>
-                        <option value="Germany">Germany</option>
-                        <option value="India">India</option>
-                        <option value="Indonesia">Indonesia</option>
-                        <option value="Iran">Iran</option>
-                        <option value="Iraq">Iraq</option>
-                        <option value="Ireland">Ireland</option>
-                        <option value="Israel">Israel</option>
-                        <option value="Italy">Italy</option>
-                        <option value="Japan">Japan</option>
-                        <option value="Jordan">Jordan</option>
-                        <option value="Kenya">Kenya</option>
-                        <option value="Kuwait">Kuwait</option>
-                        <option value="Malaysia">Malaysia</option>
-                        <option value="Mexico">Mexico</option>
-                        <option value="Morocco">Morocco</option>
-                        <option value="Netherlands">Netherlands</option>
-                        <option value="New Zealand">New Zealand</option>
-                        <option value="Nigeria">Nigeria</option>
-                        <option value="Norway">Norway</option>
-                        <option value="Pakistan">Pakistan</option>
-                        <option value="Philippines">Philippines</option>
-                        <option value="Poland">Poland</option>
-                        <option value="Qatar">Qatar</option>
-                        <option value="Russia">Russia</option>
-                        <option value="Saudi Arabia">Saudi Arabia</option>
-                        <option value="Singapore">Singapore</option>
-                        <option value="South Africa">South Africa</option>
-                        <option value="South Korea">South Korea</option>
-                        <option value="Spain">Spain</option>
-                        <option value="Sweden">Sweden</option>
-                        <option value="Switzerland">Switzerland</option>
-                        <option value="Taiwan">Taiwan</option>
-                        <option value="Thailand">Thailand</option>
-                        <option value="Turkey">Turkey</option>
-                        <option value="Ukraine">Ukraine</option>
-                        <option value="United Arab Emirates">United Arab Emirates</option>
-                        <option value="United Kingdom">United Kingdom</option>
-                        <option value="Vietnam">Vietnam</option>
+                        <!-- Populated dynamically from international-cities-cached.json -->
                     </select>
                     <button type="submit" id="choose-country-btn">
                         Load Cities
@@ -395,6 +310,14 @@
                         <label><input type="radio" name="default-view" value="table"> Table View</label>
                         <label><input type="radio" name="default-view" value="list"> List View</label>
                     </fieldset>
+                    <fieldset>
+                        <legend>List View Style (Accessibility)</legend>
+                        <label><input type="radio" name="list-view-style" value="detailed" checked> Detailed (Field names + data)</label>
+                        <label><input type="radio" name="list-view-style" value="condensed"> Condensed (Data only)</label>
+                        <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">
+                            Detailed mode shows labels like "Temperature: 72°F". Condensed mode shows just "72°F" for more concise screen reader output.
+                        </p>
+                    </fieldset>
                 </div>
 
                 <div id="units-panel" role="tabpanel" aria-labelledby="units-tab" class="tab-panel" hidden>
@@ -477,23 +400,92 @@
                 </div>
             </div>
         </div>
+
+        <!-- Weather Alert Detail Dialog -->
+        <div id="alert-details-dialog" 
+             class="modal" 
+             role="alertdialog" 
+             aria-labelledby="alert-details-title" 
+             aria-modal="true"
+             hidden>
+            <div class="modal-content large">
+                <div id="alert-details-content">
+                    <!-- Populated by JavaScript -->
+                </div>
+                <div class="modal-buttons">
+                    <button id="close-alert-details-btn" type="button">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historical Weather Dialog -->
+        <div id="historical-weather-dialog" 
+             class="modal" 
+             role="dialog" 
+             aria-labelledby="historical-weather-title" 
+             aria-modal="true"
+             hidden>
+            <div class="modal-content large">
+                <h3 id="historical-weather-title">Historical Weather</h3>
+                <div id="historical-weather-content">
+                    <!-- Populated by JavaScript -->
+                </div>
+                <div class="modal-buttons">
+                    <button id="close-historical-weather-btn" type="button">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expected Precipitation/Nowcast Dialog -->
+        <div id="precipitation-nowcast-dialog" 
+             class="modal" 
+             role="dialog" 
+             aria-labelledby="precipitation-nowcast-title" 
+             aria-modal="true"
+             hidden>
+            <div class="modal-content large">
+                <h3 id="precipitation-nowcast-title">Expected Precipitation</h3>
+                <div id="precipitation-nowcast-content">
+                    <!-- Populated by JavaScript -->
+                </div>
+                <div class="modal-buttons">
+                    <button id="close-precipitation-nowcast-btn" type="button">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weather Around Me Dialog -->
+        <div id="weather-around-me-dialog" 
+             class="modal" 
+             role="dialog" 
+             aria-labelledby="weather-around-me-title" 
+             aria-modal="true"
+             hidden>
+            <div class="modal-content large">
+                <h3 id="weather-around-me-title">Weather Around Me</h3>
+                <div id="weather-around-me-content">
+                    <!-- Populated by JavaScript -->
+                </div>
+                <div class="modal-buttons">
+                    <button id="close-weather-around-me-btn" type="button">Close</button>
+                </div>
+            </div>
+        </div>
     </main>
 
     <footer role="contentinfo">
         <p>Data provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo.com</a> (CC BY 4.0)</p>
-        <p>FastWeather v1.1 &copy; 2025 Kelly Ford | <a href="https://github.com/kellylford/FastWeather">GitHub</a> | <a href="https://github.com/kellylford/FastWeather/issues/new" target="_blank" rel="noopener noreferrer">Report an Issue</a></p>
+        <p>FastWeather v1.1 &copy; 2025 Kelly Ford | <a href="user-guide.html">User Guide</a> | <a href="https://testflight.apple.com/join/QwMz3Hep" target="_blank" rel="noopener noreferrer">Try the iOS Version</a> | <a href="https://github.com/kellylford/FastWeather">GitHub</a> | <a href="https://github.com/kellylford/FastWeather/issues/new" target="_blank" rel="noopener noreferrer">Report an Issue</a></p>
     </footer>
 
-    <script src="us-cities-data.js"></script>
-    <script src="international-cities-data.js"></script>
-    <script src="app.js"></script>
+    <script src="app.js?v=2.1.1"></script>
     
     <!-- PWA Service Worker Registration -->
     <script>
         // Register service worker for PWA functionality
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
+                navigator.serviceWorker.register('./service-worker.js')
                     .then(registration => {
                         console.log('Service Worker registered successfully:', registration.scope);
                         

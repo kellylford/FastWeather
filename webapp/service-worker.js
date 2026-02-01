@@ -1,20 +1,19 @@
 // FastWeather Service Worker
 // Enables offline functionality and faster loading
+// UPDATED: January 28, 2026 - Debug default cities issue
 
-const CACHE_NAME = 'fastweather-v1';
-const RUNTIME_CACHE = 'fastweather-runtime-v1';
+const CACHE_NAME = 'fastweather-v6-debug';
+const RUNTIME_CACHE = 'fastweather-runtime-v6';
 
 // Files to cache for offline use
 const STATIC_CACHE_URLS = [
-    '/',
-    '/index.html',
-    '/styles.css',
-    '/app.js',
-    '/us-cities-data.js',
-    '/international-cities-data.js',
-    '/us-cities-cached.json',
-    '/international-cities-cached.json',
-    '/manifest.json'
+    './',
+    './index.html',
+    './styles.css',
+    './app.js',
+    './us-cities-cached.json',
+    './international-cities-cached.json',
+    './manifest.json'
 ];
 
 // Install event - cache static assets
@@ -74,6 +73,28 @@ self.addEventListener('fetch', event => {
                 })
                 .catch(() => {
                     // If offline, try to serve cached API response
+                    return caches.match(request);
+                })
+        );
+        return;
+    }
+
+    // Network-first strategy for JSON city data files (always check for updates)
+    if (url.pathname.endsWith('.json') && 
+        (url.pathname.includes('cities-cached') || url.pathname.includes('manifest'))) {
+        event.respondWith(
+            fetch(request)
+                .then(response => {
+                    if (response.ok) {
+                        const responseClone = response.clone();
+                        caches.open(CACHE_NAME).then(cache => {
+                            cache.put(request, responseClone);
+                        });
+                    }
+                    return response;
+                })
+                .catch(() => {
+                    // If offline, serve from cache as fallback
                     return caches.match(request);
                 })
         );
