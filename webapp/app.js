@@ -3538,7 +3538,7 @@ function renderCurrentConditions(weather) {
         fields.forEach((field, i) => {
             const visualText = isCondensed ? `<strong>${field.label}:</strong> ${field.value}` : `<strong>${field.label}</strong> • ${field.value}`;
             const ariaLabel = `${field.label}, ${field.value}`;
-            html += `<div role="option" id="current-item-${i}" aria-selected="${i === 0 ? 'true' : 'false'}" style="padding: 0.75rem; border-bottom: 1px solid var(--border-color);">${visualText}</div>`;
+            html += `<div role="option" id="current-item-${i}" aria-selected="${i === 0 ? 'true' : 'false'}" aria-label="${ariaLabel}" style="padding: 0.75rem; border-bottom: 1px solid var(--border-color);">${visualText}</div>`;
         });
         
         html += '</div>';
@@ -3720,7 +3720,7 @@ function renderHourlyForecast(weather) {
                 ariaLabel += `, ${details.join(', ')}`;
             }
             
-            html += `<div role="option" id="hourly-item-${i}" aria-selected="${i === 0 ? 'true' : 'false'}" style="padding: 0.75rem; border-bottom: 1px solid var(--border-color);">${visualText}</div>`;
+            html += `<div role="option" id="hourly-item-${i}" aria-selected="${i === 0 ? 'true' : 'false'}" aria-label="${ariaLabel}" style="padding: 0.75rem; border-bottom: 1px solid var(--border-color);">${visualText}</div>`;
         }
         
         html += '</div>';
@@ -3912,7 +3912,7 @@ function renderDailyForecast(weather) {
                 ariaLabel += `, ${details.join(', ')}`;
             }
             
-            html += `<div role="option" id="daily-item-${i}" aria-selected="${i === 0 ? 'true' : 'false'}" style="padding: 0.75rem; border-bottom: 1px solid var(--border-color);">${visualText}</div>`;
+            html += `<div role="option" id="daily-item-${i}" aria-selected="${i === 0 ? 'true' : 'false'}" aria-label="${ariaLabel}" style="padding: 0.75rem; border-bottom: 1px solid var(--border-color);">${visualText}</div>`;
         }
         
         html += '</div>';
