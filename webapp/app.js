@@ -3066,9 +3066,6 @@ function renderListView(container) {
         const textNode = document.createTextNode(weatherText);
         item.appendChild(textNode);
         
-        // Set aria-label for screen reader announcement
-        item.setAttribute('aria-label', weatherText);
-        
         item.dataset.cityName = cityName;
         item.dataset.lat = lat;
         item.dataset.lon = lon;
