@@ -968,8 +968,13 @@ async function addCity(cityData, skipRender = false) {
     
     // Fetch weather for new city
     console.log('Fetching weather for', key);
-    await fetchWeatherForCity(key, cityData.lat, cityData.lon, false, true); // silent since we announce "added to list"
-    console.log('Weather fetched for', key);
+    try {
+        await fetchWeatherForCity(key, cityData.lat, cityData.lon, false, true); // silent since we announce "added to list"
+        console.log('Weather fetched for', key);
+    } catch (error) {
+        console.error('Failed to fetch weather for', key, error);
+        announceToScreenReader(`Added ${key} but weather data unavailable`);
+    }
     
     return true;
 }
@@ -1468,7 +1473,7 @@ async function addCityFromState(cityData) {
             
             // Update the action button to reflect the new state
             const actionBtn = document.getElementById('state-city-action-btn');
-            if (actionBtn && citiesData[activeIndex]) {
+            if (actionBtn && currentStateCities && currentStateCities[activeIndex]) {
                 const cityData = currentStateCities[activeIndex];
                 const isInList = cities[cityData.display];
                 
@@ -3365,7 +3370,12 @@ function moveCityDown(cityName) {
 
 async function refreshCity(cityName, lat, lon) {
     announceToScreenReader(`Refreshing weather for ${cityName}`);
-    await fetchWeatherForCity(cityName, lat, lon);
+    try {
+        await fetchWeatherForCity(cityName, lat, lon);
+    } catch (error) {
+        console.error('Failed to refresh city:', error);
+        announceToScreenReader(`Failed to refresh ${cityName}`);
+    }
 }
 
 async function refreshAllCities() {
@@ -4588,7 +4598,12 @@ function loadCitiesFromStorage() {
 }
 
 function saveCitiesToStorage() {
-    localStorage.setItem('fastweather-cities', JSON.stringify(cities));
+    try {
+        localStorage.setItem('fastweather-cities', JSON.stringify(cities));
+    } catch (e) {
+        console.error('Failed to save cities to localStorage:', e);
+        announceToScreenReader('Warning: Unable to save city list');
+    }
 }
 
 function loadConfigFromStorage() {
@@ -4635,7 +4650,12 @@ function loadConfigFromStorage() {
 }
 
 function saveConfigToStorage() {
-    localStorage.setItem('fastweather-config', JSON.stringify(currentConfig));
+    try {
+        localStorage.setItem('fastweather-config', JSON.stringify(currentConfig));
+    } catch (e) {
+        console.error('Failed to save config to localStorage:', e);
+        announceToScreenReader('Warning: Unable to save settings');
+    }
 }
 
 // Utility functions
