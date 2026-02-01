@@ -1,6 +1,7 @@
 /**
  * FastWeather Web Application
  * Accessible weather application with WCAG 2.2 AA compliance
+ * Version: 2.1.1 - Location detection fixed
  */
 
 // Constants
@@ -309,6 +310,9 @@ function initializeEventListeners() {
     // Add city form
     document.getElementById('add-city-form').addEventListener('submit', handleAddCity);
     
+    // Location detection button
+    document.getElementById('location-btn').addEventListener('click', detectLocation);
+    
     // Location tabs (U.S. States / International)
     document.getElementById('us-states-tab').addEventListener('click', () => switchLocationTab('us'));
     document.getElementById('international-tab').addEventListener('click', () => switchLocationTab('international'));
@@ -488,6 +492,212 @@ async function handleAddCity(e) {
     } catch (error) {
         showError(errorDiv, `Error searching for city: ${error.message}`);
     }
+}
+
+// Detect user's current location
+async function detectLocation() {
+    const locationBtn = document.getElementById('location-btn');
+    const errorDiv = document.getElementById('city-search-error');
+    
+    // Check if geolocation is supported
+    if (!navigator.geolocation) {
+        showError(errorDiv, 'Geolocation is not supported by your browser');
+        return;
+    }
+    
+    clearError(errorDiv);
+    
+    // Show loading state
+    const originalText = locationBtn.textContent;
+    locationBtn.disabled = true;
+    locationBtn.textContent = 'Detecting location...';
+    announceToScreenReader('Detecting your location');
+    
+    try {
+        // Get user's coordinates
+        const position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(
+                resolve,
+                reject,
+                {
+                    enableHighAccuracy: false,
+                    timeout: 10000,
+                    maximumAge: 300000 // 5 minutes
+                }
+            );
+        });
+        
+        const { latitude, longitude } = position.coords;
+        announceToScreenReader('Location detected, finding city name');
+        
+        console.log('User coordinates:', latitude, longitude);
+        
+        // Reverse geocode to get city name
+        const cityData = await reverseGeocode(latitude, longitude);
+        
+        console.log('City data from reverse geocode:', cityData);
+        
+        if (!cityData) {
+            showError(errorDiv, 'Could not determine city name from your location');
+            return;
+        }
+        
+        // Validate cityData has required properties
+        if (!cityData.display || cityData.display === 'undefined' || 
+            typeof cityData.lat !== 'number' || typeof cityData.lon !== 'number' ||
+            isNaN(cityData.lat) || isNaN(cityData.lon)) {
+            console.error('Invalid city data received:', cityData);
+            showError(errorDiv, 'Could not determine valid city from your location');
+            return;
+        }
+        
+        // Check if city already exists
+        if (cities[cityData.display]) {
+            announceToScreenReader(`${cityData.display} is already in your list`);
+            showError(errorDiv, `${cityData.display} is already in your list`);
+            return;
+        }
+        
+        // Add the city
+        await addCity(cityData);
+        announceToScreenReader(`Added ${cityData.display} to your cities`);
+        
+    } catch (error) {
+        console.error('Location detection error:', error);
+        
+        let errorMessage = 'Unable to detect location';
+        
+        if (error.code === 1) {
+            errorMessage = 'Location access denied. Please enable location permissions in your browser.';
+        } else if (error.code === 2) {
+            errorMessage = 'Location unavailable. Please check your device settings.';
+        } else if (error.code === 3) {
+            errorMessage = 'Location request timed out. Please try again.';
+        } else if (error.message) {
+            errorMessage = `Error: ${error.message}`;
+        }
+        
+        showError(errorDiv, errorMessage);
+        announceToScreenReader(errorMessage);
+        
+    } finally {
+        // Restore button state
+        locationBtn.disabled = false;
+        locationBtn.textContent = originalText;
+    }
+}
+
+// Reverse geocode coordinates to city name
+async function reverseGeocode(lat, lon) {
+    const params = new URLSearchParams({
+        lat: lat.toString(),
+        lon: lon.toString(),
+        format: 'json',
+        addressdetails: '1'
+    });
+    
+    // Rate limit: wait 1 second before request (Nominatim requirement)
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?${params}`, {
+        headers: { 'User-Agent': 'FastWeather Web/1.0' }
+    });
+    
+    if (!response.ok) {
+        throw new Error('Failed to reverse geocode location');
+    }
+    
+    const result = await response.json();
+    
+    console.log('Reverse geocode result:', result);
+    
+    if (!result || result.error) {
+        console.error('Reverse geocode error:', result?.error);
+        return null;
+    }
+    
+    const address = result.address || {};
+    
+    // Helper function to safely get string value
+    const getString = (value) => {
+        if (value && typeof value === 'string' && value.trim() !== '') {
+            return value.trim();
+        }
+        return null;
+    };
+    
+    // Try different address fields for city name
+    const city = getString(address.city) || 
+                 getString(address.town) || 
+                 getString(address.village) || 
+                 getString(address.municipality) || 
+                 getString(address.county);
+    
+    const state = getString(address.state);
+    const country = getString(address.country);
+    
+    console.log('Extracted location:', { city, state, country });
+    
+    // Must have at least one valid component
+    if (!city && !state && !country) {
+        console.error('No valid location components found');
+        return null;
+    }
+    
+    // Build display name with only valid parts
+    const displayParts = [];
+    if (city) {
+        displayParts.push(city);
+    } else if (state) {
+        displayParts.push(state); // Use state as primary if no city
+    } else {
+        displayParts.push(country); // Use country as fallback
+    }
+    
+    if (city && state) {
+        displayParts.push(state);
+    }
+    if (country) {
+        displayParts.push(country);
+    }
+    
+    const displayName = displayParts.join(', ');
+    
+    console.log('Final display name:', displayName);
+    
+    // Validate display name is not empty
+    if (!displayName || displayName.trim() === '') {
+        console.error('Empty display name generated');
+        return null;
+    }
+    
+    // Validate coordinates
+    const latitude = parseFloat(result.lat);
+    const longitude = parseFloat(result.lon);
+    
+    if (isNaN(latitude) || isNaN(longitude) || !isFinite(latitude) || !isFinite(longitude)) {
+        console.error('Invalid coordinates:', result.lat, result.lon);
+        return null;
+    }
+    
+    // Validate coordinate ranges
+    if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+        console.error('Coordinates out of valid range:', latitude, longitude);
+        return null;
+    }
+    
+    const cityDataObject = {
+        display: displayName,
+        city: city || state || country || 'Unknown',
+        state: state || '',
+        country: country || '',
+        lat: latitude,
+        lon: longitude
+    };
+    
+    console.log('Returning city data:', cityDataObject);
+    
+    return cityDataObject;
 }
 
 // Geocode city
@@ -4485,48 +4695,6 @@ async function fetchSimpleWeather(lat, lon) {
         if (!response.ok) return null;
         return await response.json();
     } catch (e) {
-        return null;
-    }
-}
-
-/**
- * Reverse geocode coordinates to find city name
- * Uses OpenStreetMap Nominatim API with rate limiting
- */
-async function reverseGeocode(lat, lon) {
-    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`;
-    
-    try {
-        const response = await fetch(url, {
-            headers: {
-                'User-Agent': 'FastWeather/1.1 (https://github.com/kellylford/FastWeather)'
-            }
-        });
-        
-        if (!response.ok) return null;
-        
-        const data = await response.json();
-        const address = data.address || {};
-        
-        // Extract city name (try different fields)
-        const cityName = address.city || 
-                        address.town || 
-                        address.village || 
-                        address.municipality || 
-                        address.county ||
-                        null;
-        
-        const state = address.state || null;
-        const country = address.country || null;
-        
-        return {
-            cityName: cityName,
-            state: state,
-            country: country,
-            displayName: data.display_name
-        };
-    } catch (e) {
-        console.warn('Reverse geocoding failed:', e);
         return null;
     }
 }
