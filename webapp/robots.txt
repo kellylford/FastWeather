@@ -1,0 +1,11 @@
+# FastWeather robots.txt
+# Allow search engines to index the main app
+
+User-agent: *
+Allow: /
+Disallow: /clear-cache.html
+Disallow: /debug.html
+Disallow: /table-test.html
+
+# Sitemap (create one if you want better SEO)
+# Sitemap: https://fastweather.online/sitemap.xml

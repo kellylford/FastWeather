@@ -1,0 +1,161 @@
+# =================================================================
+# SECURITY HEADERS & BEST PRACTICES
+# FastWeather Web App - Updated January 30, 2026
+# =================================================================
+
+# -----------------------------------------------------------------
+# 1. FORCE HTTPS (CRITICAL for geolocation, service workers, PWA)
+# -----------------------------------------------------------------
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Redirect www to non-www (optional - choose one)
+# RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+# RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+# -----------------------------------------------------------------
+# 2. SECURITY HEADERS
+# -----------------------------------------------------------------
+<IfModule mod_headers.c>
+    # HSTS - Force HTTPS for 1 year (includeSubDomains if you control all subdomains)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" env=HTTPS
+    
+    # Content Security Policy - Prevent XSS attacks
+    # Allows same-origin content, external APIs (Open-Meteo, Nominatim), and inline styles/scripts
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.open-meteo.com https://nominatim.openstreetmap.org; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    
+    # Prevent clickjacking attacks
+    Header always set X-Frame-Options "DENY"
+    
+    # Prevent MIME type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # Enable XSS protection (legacy browsers)
+    Header always set X-XSS-Protection "1; mode=block"
+    
+    # Referrer Policy - Don't leak full URLs to external sites
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Permissions Policy - Restrict browser features
+    Header always set Permissions-Policy "geolocation=(self), camera=(), microphone=(), payment=(), usb=(), magnetometer=(), accelerometer=(), gyroscope=()"
+    
+    # Remove server signature
+    Header always unset X-Powered-By
+    Header always unset Server
+</IfModule>
+
+# -----------------------------------------------------------------
+# 3. FILE ACCESS RESTRICTIONS
+# -----------------------------------------------------------------
+
+# Prevent access to hidden files (.htaccess, .git, etc.)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# Prevent access to backup/sensitive files
+<FilesMatch "\.(bak|config|sql|log|ini|sh|md|txt)$">
+    Require all denied
+</FilesMatch>
+
+# Allow specific documentation files
+<FilesMatch "^(README|LICENSE|PRIVACY)\.md$">
+    Require all granted
+</FilesMatch>
+
+# Prevent directory listing
+Options -Indexes
+
+# -----------------------------------------------------------------
+# 4. PERFORMANCE OPTIMIZATION
+# -----------------------------------------------------------------
+
+# Enable compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json application/manifest+json
+    AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# Browser caching
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # Images - cache for 1 year
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    
+    # Fonts - cache for 1 year
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/ttf "access plus 1 year"
+    
+    # CSS/JS - cache for 1 month (change when you update)
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    
+    # Data files - cache for 1 day
+    ExpiresByType application/json "access plus 1 day"
+    ExpiresByType application/manifest+json "access plus 1 week"
+    
+    # HTML - cache for 1 hour
+    ExpiresByType text/html "access plus 1 hour"
+</IfModule>
+
+# Cache-Control headers
+<IfModule mod_headers.c>
+    # Cache static assets
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico|woff2|woff|ttf)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+    
+    # Cache CSS/JS with validation
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "public, max-age=2592000, must-revalidate"
+    </FilesMatch>
+    
+    # Don't cache HTML (always fresh)
+    <FilesMatch "\.(html|htm)$">
+        Header set Cache-Control "public, max-age=3600, must-revalidate"
+    </FilesMatch>
+    
+    # Cache service worker but validate often
+    <FilesMatch "service-worker\.js$">
+        Header set Cache-Control "public, max-age=0, must-revalidate"
+    </FilesMatch>
+</IfModule>
+
+# -----------------------------------------------------------------
+# 5. MIME TYPE CONFIGURATION
+# -----------------------------------------------------------------
+<IfModule mod_mime.c>
+    # JavaScript
+    AddType application/javascript js
+    
+    # JSON
+    AddType application/json json
+    AddType application/manifest+json webmanifest
+    
+    # Fonts
+    AddType font/woff2 woff2
+    AddType font/woff woff
+    AddType font/ttf ttf
+    
+    # Images
+    AddType image/webp webp
+    AddType image/svg+xml svg
+    
+    # Default charset
+    AddDefaultCharset UTF-8
+</IfModule>
+
+# -----------------------------------------------------------------
+# 6. ERROR PAGES
+# -----------------------------------------------------------------
+ErrorDocument 404 /404.html
+# ErrorDocument 500 /500.html
