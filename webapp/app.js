@@ -1288,154 +1288,6 @@ function renderStateCitiesWithWeather(container, citiesData) {
     }
 }
 
-// Render state cities in the current view (legacy function - keeping for compatibility)
-function renderStateCities(container, citiesData) {
-    container.innerHTML = '';
-    
-    if (currentView === 'table') {
-        renderStateCitiesTable(container, citiesData);
-    } else if (currentView === 'list') {
-        renderStateCitiesList(container, citiesData);
-    } else {
-        renderStateCitiesFlat(container, citiesData);
-    }
-}
-
-// Render state cities in flat view
-function renderStateCitiesFlat(container, citiesData) {
-    container.setAttribute('role', 'list');
-    
-    citiesData.forEach((cityData) => {
-        const card = document.createElement('article');
-        card.className = 'city-card state-city-card';
-        card.setAttribute('role', 'listitem');
-        
-        const header = document.createElement('div');
-        header.className = 'city-card-header';
-        
-        const title = document.createElement('h4');
-        title.textContent = cityData.display;
-        header.appendChild(title);
-        card.appendChild(header);
-        
-        const content = document.createElement('div');
-        content.className = 'city-card-content';
-        
-        const coords = document.createElement('p');
-        coords.className = 'coordinates';
-        coords.textContent = `Coordinates: ${cityData.lat.toFixed(4)}, ${cityData.lon.toFixed(4)}`;
-        content.appendChild(coords);
-        
-        card.appendChild(content);
-        
-        const controls = document.createElement('div');
-        controls.className = 'city-card-controls';
-        
-        const addBtn = createButton('➕ Add to My Cities', `Add ${cityData.display} to your cities list`, async () => {
-            await addCityFromState(cityData);
-        });
-        addBtn.className = 'add-city-btn';
-        controls.appendChild(addBtn);
-        
-        card.appendChild(controls);
-        container.appendChild(card);
-    });
-}
-
-// Render state cities in table view
-function renderStateCitiesTable(container, citiesData) {
-    container.setAttribute('role', 'region');
-    
-    const table = document.createElement('table');
-    table.className = 'weather-table';
-    
-    const thead = document.createElement('thead');
-    const headerRow = document.createElement('tr');
-    
-    const cityHeader = document.createElement('th');
-    cityHeader.textContent = 'City';
-    cityHeader.scope = 'col';
-    headerRow.appendChild(cityHeader);
-    
-    const coordsHeader = document.createElement('th');
-    coordsHeader.textContent = 'Coordinates';
-    coordsHeader.scope = 'col';
-    headerRow.appendChild(coordsHeader);
-    
-    const actionsHeader = document.createElement('th');
-    actionsHeader.textContent = 'Actions';
-    actionsHeader.scope = 'col';
-    headerRow.appendChild(actionsHeader);
-    
-    thead.appendChild(headerRow);
-    table.appendChild(thead);
-    
-    const tbody = document.createElement('tbody');
-    
-    citiesData.forEach((cityData) => {
-        const row = document.createElement('tr');
-        
-        const cityCell = document.createElement('th');
-        cityCell.scope = 'row';
-        cityCell.textContent = cityData.display;
-        row.appendChild(cityCell);
-        
-        const coordsCell = document.createElement('td');
-        coordsCell.textContent = `${cityData.lat.toFixed(4)}, ${cityData.lon.toFixed(4)}`;
-        row.appendChild(coordsCell);
-        
-        const actionsCell = document.createElement('td');
-        const addBtn = createButton('➕ Add', `Add ${cityData.display} to your cities list`, async () => {
-            await addCityFromState(cityData);
-        });
-        addBtn.className = 'add-city-btn-small';
-        actionsCell.appendChild(addBtn);
-        row.appendChild(actionsCell);
-        
-        tbody.appendChild(row);
-    });
-    
-    table.appendChild(tbody);
-    container.appendChild(table);
-}
-
-// Render state cities in list view
-function renderStateCitiesList(container, citiesData) {
-    container.setAttribute('role', 'listbox');
-    container.setAttribute('tabindex', '0');
-    container.removeAttribute('aria-label');
-    
-    citiesData.forEach((cityData, index) => {
-        const item = document.createElement('div');
-        item.className = 'list-view-item state-city-item';
-        item.setAttribute('role', 'option');
-        item.id = `state-city-item-${index}`;
-        item.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
-        
-        const displayText = `${cityData.display} (${cityData.lat.toFixed(4)}, ${cityData.lon.toFixed(4)})`;
-        
-        const textSpan = document.createElement('span');
-        textSpan.textContent = displayText;
-        item.appendChild(textSpan);
-        
-        // Set aria-label for screen reader
-        item.setAttribute('aria-label', displayText);
-        
-        const addBtn = createButton('➕ Add', `Add ${cityData.display} to your cities list`, async (e) => {
-            e.stopPropagation();
-            await addCityFromState(cityData);
-        });
-        addBtn.className = 'add-city-btn-small inline';
-        item.appendChild(addBtn);
-        
-        item.dataset.cityData = JSON.stringify(cityData);
-        
-        container.appendChild(item);
-    });
-    
-    container.setAttribute('aria-activedescendant', 'state-city-item-0');
-}
-
 // Add city from state selection
 async function addCityFromState(cityData) {
     const added = await addCity({
@@ -2003,8 +1855,13 @@ function renderStateCitiesListWithWeather(container, citiesData) {
     // Set initial button state
     updateActionButton(0);
     
+    // Remove old keyboard navigation handler if exists
+    if (container._stateCityNavHandler) {
+        container.removeEventListener('keydown', container._stateCityNavHandler);
+    }
+    
     // Add keyboard navigation for state cities list
-    container.addEventListener('keydown', (e) => {
+    const stateCityNavHandler = (e) => {
         const items = container.querySelectorAll('.state-city-item');
         const currentActive = container.getAttribute('aria-activedescendant');
         let activeIndex = 0;
@@ -2084,7 +1941,10 @@ function renderStateCitiesListWithWeather(container, citiesData) {
                 announceToScreenReader(items[newIndex].textContent);
             }
         }
-    });
+    };
+    
+    container._stateCityNavHandler = stateCityNavHandler;
+    container.addEventListener('keydown', stateCityNavHandler);
 }
 
 // Fetch weather data
@@ -2913,6 +2773,12 @@ function addListboxNavigation(container, idPrefix, onNavigate) {
         }
     };
     
+    // Remove old handler if exists
+    if (container._listboxNavHandler) {
+        container.removeEventListener('keydown', container._listboxNavHandler);
+    }
+    
+    container._listboxNavHandler = navHandler;
     container.addEventListener('keydown', navHandler);
     return navHandler;
 }
@@ -3152,10 +3018,7 @@ function renderListView(container) {
             try {
                 const alerts = await fetchWeatherAlerts(cityName, lat, lon);
                 const alertBadge = renderAlertBadge(alerts, cityName, lat, lon);
-                alertSpan.innerHTML = '';
-                if (alertBadge) {
-                    alertSpan.appendChild(alertBadge);
-                }
+                alertSpan.innerHTML = alertBadge; // renderAlertBadge returns HTML string, not DOM element
             } catch (error) {
                 console.error('Error loading alerts for list view:', error);
                 alertSpan.innerHTML = '';
@@ -3186,6 +3049,12 @@ function renderListView(container) {
         }
     };
     
+    // Remove old handler if exists (prevent memory leak)
+    if (container._cityListNavHandler) {
+        container.removeEventListener('keydown', container._cityListNavHandler);
+    }
+    
+    container._cityListNavHandler = listNavigationHandler;
     container.addEventListener('keydown', listNavigationHandler);
     
     // Add control buttons for list view (single set that acts on focused city)
