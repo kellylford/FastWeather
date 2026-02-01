@@ -56,8 +56,8 @@
                     <button type="submit" id="add-city-btn">
                         Add City
                     </button>
-                    <button type="button" id="location-btn" class="location-btn">
-                        Use My Current Location
+                    <button type="button" id="location-btn" class="location-btn" aria-keyshortcuts="Alt+L">
+                        Use My Current Location <span class="shortcut-hint" aria-hidden="true">(Alt+L)</span>
                     </button>
                 </div>
                 <div id="city-search-error" role="alert" aria-live="polite" class="error-message"></div>
@@ -185,7 +185,7 @@
                 <h2 id="your-cities-heading">Your Cities</h2>
                 <div class="controls">
                     <div class="view-menu-container">
-                        <button id="view-menu-btn" aria-haspopup="menu" aria-expanded="false">
+                        <button id="view-menu-btn" aria-haspopup="menu" aria-expanded="false" aria-keyshortcuts="Alt+V" title="Change view mode (Alt+V)">
                             <span id="current-view-label">View: Flat</span> <span aria-hidden="true">▼</span>
                         </button>
                         <ul id="view-menu" role="menu" aria-labelledby="view-menu-btn" hidden>
@@ -200,11 +200,11 @@
                             </li>
                         </ul>
                     </div>
-                    <button id="configure-btn">
-                        <span aria-hidden="true">⚙️</span> Configure
+                    <button id="configure-btn" aria-keyshortcuts="Alt+G" title="Open configuration (Alt+G)">
+                        <span aria-hidden="true">⚙️</span> Configure <span class="shortcut-hint" aria-hidden="true">(Alt+G)</span>
                     </button>
-                    <button id="refresh-all-btn">
-                        <span aria-hidden="true">🔄</span> Refresh All
+                    <button id="refresh-all-btn" aria-keyshortcuts="Control+R" title="Refresh all cities (Ctrl+R)">
+                        <span aria-hidden="true">🔄</span> Refresh All <span class="shortcut-hint" aria-hidden="true">(Ctrl+R)</span>
                     </button>
                 </div>
             </div>
@@ -237,12 +237,16 @@
                     </button>
                     <button role="tab" aria-selected="false" aria-controls="daily-panel" id="daily-tab" tabindex="-1">
                         Daily Forecast
-                    </button>
-                    <button role="tab" aria-selected="false" aria-controls="citylist-panel" id="citylist-tab" tabindex="-1">
+                    </button>                    <button role="tab" aria-selected="false" aria-controls="views-panel" id="views-tab" tabindex="-1">
+                        Views
+                    </button>                    <button role="tab" aria-selected="false" aria-controls="citylist-panel" id="citylist-tab" tabindex="-1">
                         City List
                     </button>
                     <button role="tab" aria-selected="false" aria-controls="units-panel" id="units-tab" tabindex="-1">
                         Units
+                    </button>
+                    <button role="tab" aria-selected="false" aria-controls="debug-panel" id="debug-tab" tabindex="-1">
+                        Debug
                     </button>
                     <button role="tab" aria-selected="false" aria-controls="reset-panel" id="reset-tab" tabindex="-1">
                         Reset
@@ -252,12 +256,19 @@
                 <div id="current-panel" role="tabpanel" aria-labelledby="current-tab" class="tab-panel">
                     <fieldset>
                         <legend>Select current weather details to display:</legend>
+                        <div style="margin-bottom: 1rem;">
+                            <button type="button" class="check-all-btn" data-target="current">Check All</button>
+                            <button type="button" class="uncheck-all-btn" data-target="current">Uncheck All</button>
+                        </div>
                         <div class="checkbox-grid">
                             <label><input type="checkbox" name="current-temperature" checked> Temperature</label>
                             <label><input type="checkbox" name="current-feels_like" checked> Feels Like</label>
                             <label><input type="checkbox" name="current-humidity" checked> Humidity</label>
                             <label><input type="checkbox" name="current-wind_speed" checked> Wind Speed</label>
                             <label><input type="checkbox" name="current-wind_direction" checked> Wind Direction</label>
+                            <label><input type="checkbox" name="current-wind_gusts" checked> Wind Gusts</label>
+                            <label><input type="checkbox" name="current-uv_index" checked> UV Index</label>
+                            <label><input type="checkbox" name="current-dew_point"> Dew Point</label>
                             <label><input type="checkbox" name="current-pressure"> Pressure</label>
                             <label><input type="checkbox" name="current-visibility"> Visibility</label>
                             <label><input type="checkbox" name="current-precipitation" checked> Precipitation</label>
@@ -272,12 +283,20 @@
                 <div id="hourly-panel" role="tabpanel" aria-labelledby="hourly-tab" class="tab-panel" hidden>
                     <fieldset>
                         <legend>Select hourly forecast details to display:</legend>
+                        <div style="margin-bottom: 1rem;">
+                            <button type="button" class="check-all-btn" data-target="hourly">Check All</button>
+                            <button type="button" class="uncheck-all-btn" data-target="hourly">Uncheck All</button>
+                        </div>
                         <div class="checkbox-grid">
                             <label><input type="checkbox" name="hourly-temperature" checked> Temperature</label>
                             <label><input type="checkbox" name="hourly-feels_like"> Feels Like</label>
                             <label><input type="checkbox" name="hourly-humidity"> Humidity</label>
                             <label><input type="checkbox" name="hourly-precipitation" checked> Precipitation</label>
+                            <label><input type="checkbox" name="hourly-precipitation_probability" checked> Rain Chance (%)</label>
+                            <label><input type="checkbox" name="hourly-uv_index" checked> UV Index</label>
                             <label><input type="checkbox" name="hourly-wind_speed"> Wind Speed</label>
+                            <label><input type="checkbox" name="hourly-wind_gusts"> Wind Gusts</label>
+                            <label><input type="checkbox" name="hourly-dew_point"> Dew Point</label>
                             <label><input type="checkbox" name="hourly-cloud_cover"> Cloud Cover</label>
                         </div>
                     </fieldset>
@@ -286,12 +305,20 @@
                 <div id="daily-panel" role="tabpanel" aria-labelledby="daily-tab" class="tab-panel" hidden>
                     <fieldset>
                         <legend>Select daily forecast details to display:</legend>
+                        <div style="margin-bottom: 1rem;">
+                            <button type="button" class="check-all-btn" data-target="daily">Check All</button>
+                            <button type="button" class="uncheck-all-btn" data-target="daily">Uncheck All</button>
+                        </div>
                         <div class="checkbox-grid">
                             <label><input type="checkbox" name="daily-temperature_max" checked> High Temperature</label>
                             <label><input type="checkbox" name="daily-temperature_min" checked> Low Temperature</label>
                             <label><input type="checkbox" name="daily-sunrise" checked> Sunrise</label>
                             <label><input type="checkbox" name="daily-sunset" checked> Sunset</label>
                             <label><input type="checkbox" name="daily-precipitation_sum" checked> Total Precipitation</label>
+                            <label><input type="checkbox" name="daily-precipitation_probability" checked> Rain Chance (%)</label>
+                            <label><input type="checkbox" name="daily-uv_index_max" checked> UV Index (Max)</label>
+                            <label><input type="checkbox" name="daily-daylight_duration" checked> Daylight Duration</label>
+                            <label><input type="checkbox" name="daily-sunshine_duration"> Sunshine Duration</label>
                             <label><input type="checkbox" name="daily-wind_speed_max"> Max Wind Speed</label>
                         </div>
                     </fieldset>
@@ -300,22 +327,50 @@
                 <div id="citylist-panel" role="tabpanel" aria-labelledby="citylist-tab" class="tab-panel" hidden>
                     <fieldset>
                         <legend>Select city list details to display:</legend>
+                        <div style="margin-bottom: 1rem;">
+                            <button type="button" class="check-all-btn" data-target="citylist">Check All</button>
+                            <button type="button" class="uncheck-all-btn" data-target="citylist">Uncheck All</button>
+                        </div>
                         <div id="citylist-order-container" class="order-list">
                             <!-- Populated by JavaScript -->
                         </div>
                     </fieldset>
+                </div>
+
+                <div id="views-panel" role="tabpanel" aria-labelledby="views-tab" class="tab-panel" hidden>
                     <fieldset>
-                        <legend>Default View</legend>
+                        <legend>Default View (City List)</legend>
                         <label><input type="radio" name="default-view" value="flat" checked> Flat (Card View)</label>
                         <label><input type="radio" name="default-view" value="table"> Table View</label>
                         <label><input type="radio" name="default-view" value="list"> List View</label>
+                        <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">
+                            Choose how to display your city list on the main page.
+                        </p>
                     </fieldset>
                     <fieldset>
                         <legend>List View Style (Accessibility)</legend>
                         <label><input type="radio" name="list-view-style" value="detailed" checked> Detailed (Field names + data)</label>
                         <label><input type="radio" name="list-view-style" value="condensed"> Condensed (Data only)</label>
                         <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">
-                            Detailed mode shows labels like "Temperature: 72°F". Condensed mode shows just "72°F" for more concise screen reader output.
+                            Detailed mode shows labels like "Temperature: 72°F". Condensed mode shows just "72°F" for more concise screen reader output. This applies to all list views.
+                        </p>
+                    </fieldset>
+                    <fieldset>
+                        <legend>24-Hour Forecast Detail View</legend>
+                        <label><input type="radio" name="hourly-detail-view" value="flat" checked> Flat (Card View)</label>
+                        <label><input type="radio" name="hourly-detail-view" value="table"> Table View</label>
+                        <label><input type="radio" name="hourly-detail-view" value="list"> List View</label>
+                        <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">
+                            Choose how to display the 24-hour forecast when viewing city details.
+                        </p>
+                    </fieldset>
+                    <fieldset>
+                        <legend>16-Day Forecast Detail View</legend>
+                        <label><input type="radio" name="daily-detail-view" value="flat" checked> Flat (Card View)</label>
+                        <label><input type="radio" name="daily-detail-view" value="table"> Table View</label>
+                        <label><input type="radio" name="daily-detail-view" value="list"> List View</label>
+                        <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">
+                            Choose how to display the 16-day forecast when viewing city details.
                         </p>
                     </fieldset>
                 </div>
@@ -345,6 +400,39 @@
                         <legend>Distance/Visibility</legend>
                         <label><input type="radio" name="distance-unit" value="mi" checked> Miles (mi)</label>
                         <label><input type="radio" name="distance-unit" value="km"> Kilometers (km)</label>
+                    </fieldset>
+                </div>
+
+                <div id="debug-panel" role="tabpanel" aria-labelledby="debug-tab" class="tab-panel" hidden>
+                    <fieldset>
+                        <legend>Debug Console</legend>
+                        <p style="margin-bottom: 1rem; color: var(--text-secondary);">Use these tools to diagnose issues with the app.</p>
+                        
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem;">
+                            <button type="button" id="debug-check-status-btn" class="secondary-btn">Check Status</button>
+                            <button type="button" id="debug-clear-cache-btn" class="secondary-btn">Clear Caches</button>
+                            <button type="button" id="debug-unregister-sw-btn" class="secondary-btn">Unregister Service Worker</button>
+                        </div>
+                    </fieldset>
+                    
+                    <fieldset>
+                        <legend>LocalStorage Status</legend>
+                        <pre id="debug-storage-status" style="background: var(--bg-secondary); padding: 1rem; border-radius: 4px; overflow-x: auto; font-size: 0.75rem; line-height: 1.4; max-height: 200px; overflow-y: auto;">Click "Check Status" to view...</pre>
+                    </fieldset>
+                    
+                    <fieldset>
+                        <legend>Service Worker Status</legend>
+                        <pre id="debug-sw-status" style="background: var(--bg-secondary); padding: 1rem; border-radius: 4px; overflow-x: auto; font-size: 0.75rem; line-height: 1.4; max-height: 150px; overflow-y: auto;">Click "Check Status" to view...</pre>
+                    </fieldset>
+                    
+                    <fieldset>
+                        <legend>Cache Status</legend>
+                        <pre id="debug-cache-status" style="background: var(--bg-secondary); padding: 1rem; border-radius: 4px; overflow-x: auto; font-size: 0.75rem; line-height: 1.4; max-height: 150px; overflow-y: auto;">Click "Check Status" to view...</pre>
+                    </fieldset>
+                    
+                    <fieldset>
+                        <legend>Network Status</legend>
+                        <pre id="debug-network-status" style="background: var(--bg-secondary); padding: 1rem; border-radius: 4px; overflow-x: auto; font-size: 0.75rem; line-height: 1.4; max-height: 150px; overflow-y: auto;">Click "Check Status" to view...</pre>
                     </fieldset>
                 </div>
 

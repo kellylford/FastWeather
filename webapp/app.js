@@ -37,8 +37,11 @@ const DEFAULT_CONFIG = {
         humidity: true,
         wind_speed: true,
         wind_direction: true,
+        wind_gusts: true,
         pressure: false,
         visibility: false,
+        uv_index: true,
+        dew_point: false,
         precipitation: true,
         cloud_cover: false,
         rain: false,
@@ -50,7 +53,11 @@ const DEFAULT_CONFIG = {
         feels_like: false,
         humidity: false,
         precipitation: true,
+        precipitation_probability: true,
+        uv_index: true,
         wind_speed: false,
+        wind_gusts: false,
+        dew_point: false,
         cloud_cover: false
     },
     daily: {
@@ -59,6 +66,10 @@ const DEFAULT_CONFIG = {
         sunrise: true,
         sunset: true,
         precipitation_sum: true,
+        precipitation_probability: true,
+        uv_index_max: true,
+        daylight_duration: true,
+        sunshine_duration: false,
         wind_speed_max: false
     },
     cityList: {
@@ -68,12 +79,14 @@ const DEFAULT_CONFIG = {
         humidity: true,
         wind_speed: true,
         wind_direction: true,
+        wind_gusts: true,
+        uv_index: true,
         high_temp: true,
         low_temp: true,
         sunrise: true,
         sunset: true
     },
-    cityListOrder: ['temperature', 'conditions', 'feels_like', 'humidity', 'wind_speed', 'wind_direction', 'high_temp', 'low_temp', 'sunrise', 'sunset'],
+    cityListOrder: ['temperature', 'conditions', 'uv_index', 'feels_like', 'humidity', 'wind_speed', 'wind_gusts', 'wind_direction', 'high_temp', 'low_temp', 'sunrise', 'sunset'],
     units: {
         temperature: 'F',
         wind_speed: 'mph',
@@ -82,7 +95,9 @@ const DEFAULT_CONFIG = {
         distance: 'mi'
     },
     defaultView: 'flat',
-    listViewStyle: 'detailed' // 'detailed' shows labels, 'condensed' shows data only
+    listViewStyle: 'detailed', // 'detailed' shows labels, 'condensed' shows data only
+    hourlyDetailView: 'flat', // View mode for 24-hour forecast detail: 'flat', 'table', or 'list'
+    dailyDetailView: 'flat' // View mode for 16-day forecast detail: 'flat', 'table', or 'list'
 };
 
 // Application state
@@ -331,6 +346,30 @@ function initializeEventListeners() {
     document.getElementById('reset-settings-btn').addEventListener('click', resetSettings);
     document.getElementById('reset-all-btn').addEventListener('click', resetAll);
     
+    // Check All / Uncheck All buttons
+    document.querySelectorAll('.check-all-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const target = e.target.dataset.target;
+            document.querySelectorAll(`input[name^="${target}-"]`).forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        });
+    });
+    
+    document.querySelectorAll('.uncheck-all-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const target = e.target.dataset.target;
+            document.querySelectorAll(`input[name^="${target}-"]`).forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        });
+    });
+    
+    // Debug panel buttons
+    document.getElementById('debug-check-status-btn').addEventListener('click', checkDebugStatus);
+    document.getElementById('debug-clear-cache-btn').addEventListener('click', clearDebugCaches);
+    document.getElementById('debug-unregister-sw-btn').addEventListener('click', unregisterServiceWorker);
+    
     // City selection dialog
     document.getElementById('select-city-btn').addEventListener('click', handleCitySelection);
     document.getElementById('cancel-selection-btn').addEventListener('click', closeCitySelectionDialog);
@@ -402,6 +441,26 @@ function handleKeyboardShortcuts(e) {
         if (viewMenuBtn && !document.getElementById('config-dialog').hidden === false) {
             toggleViewMenu();
             announceToScreenReader('View menu opened');
+        }
+    }
+    
+    // Alt+G: Open configuration dialog
+    if (e.altKey && e.key === 'g') {
+        e.preventDefault();
+        const configDialog = document.getElementById('config-dialog');
+        if (configDialog && configDialog.hidden) {
+            openConfigDialog();
+            announceToScreenReader('Configuration dialog opened');
+        }
+    }
+    
+    // Alt+L: Use current location
+    if (e.altKey && e.key === 'l') {
+        e.preventDefault();
+        const locationBtn = document.getElementById('location-btn');
+        if (locationBtn && !locationBtn.disabled) {
+            locationBtn.click();
+            announceToScreenReader('Getting current location');
         }
     }
 }
@@ -1645,9 +1704,11 @@ function renderStateCitiesTableWithWeather(container, citiesData) {
     const columnConfig = [
         { key: 'temperature', label: 'Temperature' },
         { key: 'conditions', label: 'Conditions' },
+        { key: 'uv_index', label: 'UV Index' },
         { key: 'feels_like', label: 'Feels Like' },
         { key: 'humidity', label: 'Humidity' },
         { key: 'wind_speed', label: 'Wind Speed' },
+        { key: 'wind_gusts', label: 'Wind Gusts' },
         { key: 'wind_direction', label: 'Wind Direction' },
         { key: 'high_temp', label: 'High' },
         { key: 'low_temp', label: 'Low' },
@@ -1709,9 +1770,25 @@ function renderStateCitiesTableWithWeather(container, citiesData) {
                         const windSpeed = convertWindSpeed(current.wind_speed_10m);
                         cell.textContent = `${windSpeed} ${currentConfig.units.wind_speed}`;
                         break;
+                    case 'wind_gusts':
+                        if (current.wind_gusts_10m) {
+                            const gusts = convertWindSpeed(current.wind_gusts_10m);
+                            cell.textContent = `${gusts} ${currentConfig.units.wind_speed}`;
+                        } else {
+                            cell.textContent = '-';
+                        }
+                        break;
                     case 'wind_direction':
                         const windDir = degreesToCardinal(current.wind_direction_10m);
                         cell.textContent = `${windDir} (${current.wind_direction_10m}°)`;
+                        break;
+                    case 'uv_index':
+                        if (current.uv_index !== null && current.uv_index !== undefined) {
+                            const { category } = getUVIndexCategory(current.uv_index);
+                            cell.textContent = `${Math.round(current.uv_index)} (${category})`;
+                        } else {
+                            cell.textContent = '-';
+                        }
                         break;
                     case 'high_temp':
                         if (weather.daily && weather.daily.temperature_2m_max) {
@@ -2010,17 +2087,17 @@ async function fetchWeatherForCity(cityName, lat, lon, detailed = false, silent 
         const params = new URLSearchParams({
             latitude: lat,
             longitude: lon,
-            current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility',
+            current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m,visibility,uv_index,dewpoint_2m',
             timezone: 'auto'
         });
         
         if (detailed) {
-            params.append('hourly', 'temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weathercode,cloudcover,windspeed_10m');
-            params.append('daily', 'weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,windspeed_10m_max');
+            params.append('hourly', 'temperature_2m,apparent_temperature,relative_humidity_2m,dewpoint_2m,precipitation,precipitation_probability,weathercode,cloudcover,windspeed_10m,windgusts_10m,uv_index');
+            params.append('daily', 'weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,precipitation_probability_max,windspeed_10m_max,uv_index_max,daylight_duration,sunshine_duration');
             params.append('forecast_days', '16');
         } else {
-            params.append('hourly', 'cloudcover');
-            params.append('daily', 'temperature_2m_max,temperature_2m_min,sunrise,sunset');
+            params.append('hourly', 'cloudcover,uv_index,precipitation_probability');
+            params.append('daily', 'temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max');
             params.append('forecast_days', '1');
         }
         
@@ -2297,12 +2374,38 @@ function createCityCard(cityName, lat, lon, weather, index) {
                     
                 case 'wind_speed':
                     const windSpeed = convertWindSpeed(current.wind_speed_10m);
-                    addDetail(details, 'Wind Speed', `${windSpeed} ${currentConfig.units.wind_speed}`);
+                    let windText = `${windSpeed} ${currentConfig.units.wind_speed}`;
+                    if (currentConfig.cityList.wind_gusts && current.wind_gusts_10m) {
+                        const gusts = convertWindSpeed(current.wind_gusts_10m);
+                        windText += `, gusts ${gusts} ${currentConfig.units.wind_speed}`;
+                    }
+                    addDetail(details, 'Wind', windText);
                     break;
                     
                 case 'wind_direction':
                     const cardinal = degreesToCardinal(current.wind_direction_10m);
                     addDetail(details, 'Wind Direction', `${cardinal} (${current.wind_direction_10m}°)`);
+                    break;
+                    
+                case 'wind_gusts':
+                    // Only show if not already shown with wind_speed
+                    if (!currentConfig.cityList.wind_speed && current.wind_gusts_10m) {
+                        const gusts = convertWindSpeed(current.wind_gusts_10m);
+                        addDetail(details, 'Wind Gusts', `${gusts} ${currentConfig.units.wind_speed}`);
+                    }
+                    break;
+                    
+                case 'uv_index':
+                    if (current.uv_index !== null && current.uv_index !== undefined) {
+                        const { category, color } = getUVIndexCategory(current.uv_index);
+                        const uvBadge = document.createElement('span');
+                        uvBadge.className = 'uv-badge';
+                        uvBadge.style.backgroundColor = color;
+                        uvBadge.style.color = current.uv_index <= 5 ? '#000' : '#fff';
+                        uvBadge.textContent = `UV: ${Math.round(current.uv_index)} (${category})`;
+                        uvBadge.setAttribute('aria-label', getUVIndexDescription(current.uv_index));
+                        summary.appendChild(uvBadge);
+                    }
                     break;
                     
                 case 'high_temp':
@@ -2493,9 +2596,11 @@ function renderTableView(container) {
     const columnLabels = {
         'temperature': 'Temperature',
         'conditions': 'Conditions',
+        'uv_index': 'UV Index',
         'feels_like': 'Feels Like',
         'humidity': 'Humidity',
         'wind_speed': 'Wind Speed',
+        'wind_gusts': 'Wind Gusts',
         'wind_direction': 'Wind Direction',
         'high_temp': 'High',
         'low_temp': 'Low',
@@ -2586,9 +2691,25 @@ function renderTableView(container) {
                         const windSpeed = convertWindSpeed(current.wind_speed_10m);
                         cell.textContent = `${windSpeed} ${currentConfig.units.wind_speed}`;
                         break;
+                    case 'wind_gusts':
+                        if (current.wind_gusts_10m) {
+                            const gusts = convertWindSpeed(current.wind_gusts_10m);
+                            cell.textContent = `${gusts} ${currentConfig.units.wind_speed}`;
+                        } else {
+                            cell.textContent = '-';
+                        }
+                        break;
                     case 'wind_direction':
                         const windDir = degreesToCardinal(current.wind_direction_10m);
                         cell.textContent = `${windDir} (${current.wind_direction_10m}°)`;
+                        break;
+                    case 'uv_index':
+                        if (current.uv_index !== null && current.uv_index !== undefined) {
+                            const { category } = getUVIndexCategory(current.uv_index);
+                            cell.textContent = `${Math.round(current.uv_index)} (${category})`;
+                        } else {
+                            cell.textContent = '-';
+                        }
                         break;
                     case 'high_temp':
                         if (weather.daily && weather.daily.temperature_2m_max) {
@@ -2871,6 +2992,22 @@ function renderListView(container) {
                     case 'wind_direction':
                         const windDir = degreesToCardinal(current.wind_direction_10m);
                         parts.push(isCondensed ? windDir : `Wind Direction: ${windDir}`);
+                        break;
+                    case 'wind_gusts':
+                        if (current.wind_gusts_10m) {
+                            const gusts = convertWindSpeed(current.wind_gusts_10m);
+                            parts.push(isCondensed ? 
+                                `gusts ${gusts} ${currentConfig.units.wind_speed}` : 
+                                `Wind Gusts: ${gusts} ${currentConfig.units.wind_speed}`);
+                        }
+                        break;
+                    case 'uv_index':
+                        if (current.uv_index !== null && current.uv_index !== undefined) {
+                            const { category } = getUVIndexCategory(current.uv_index);
+                            parts.push(isCondensed ? 
+                                `UV${Math.round(current.uv_index)}` : 
+                                `UV: ${Math.round(current.uv_index)} (${category})`);
+                        }
                         break;
                     case 'high_temp':
                         if (weather.daily) {
@@ -3274,6 +3411,33 @@ async function showFullWeather(cityName, lat, lon) {
     try {
         const weather = await fetchWeatherForCity(cityName, lat, lon, true);
         content.innerHTML = renderFullWeatherDetails(weather);
+        
+        // Setup keyboard navigation for list views if they exist
+        const hourlyList = document.getElementById('hourly-forecast-list');
+        if (hourlyList) {
+            addListboxNavigation(hourlyList, 'hourly-item', {});
+            hourlyList.setAttribute('aria-activedescendant', 'hourly-item-0');
+            hourlyList.style.outline = '2px solid var(--focus-outline)';
+            hourlyList.addEventListener('focus', () => {
+                hourlyList.style.outline = '2px solid var(--focus-outline)';
+            });
+            hourlyList.addEventListener('blur', () => {
+                hourlyList.style.outline = '2px solid transparent';
+            });
+        }
+        
+        const dailyList = document.getElementById('daily-forecast-list');
+        if (dailyList) {
+            addListboxNavigation(dailyList, 'daily-item', {});
+            dailyList.setAttribute('aria-activedescendant', 'daily-item-0');
+            dailyList.style.outline = '2px solid var(--focus-outline)';
+            dailyList.addEventListener('focus', () => {
+                dailyList.style.outline = '2px solid var(--focus-outline)';
+            });
+            dailyList.addEventListener('blur', () => {
+                dailyList.style.outline = '2px solid transparent';
+            });
+        }
     } catch (error) {
         content.innerHTML = `<p class="error-message">Failed to load detailed forecast: ${error.message}</p>`;
     }
@@ -3290,8 +3454,25 @@ function renderFullWeatherDetails(weather) {
     html += `<dt>Feels Like:</dt><dd>${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}</dd>`;
     html += `<dt>Weather:</dt><dd>${WEATHER_CODES[current.weather_code] || 'Unknown'}</dd>`;
     html += `<dt>Humidity:</dt><dd>${current.relative_humidity_2m}%</dd>`;
+    
+    // Wind with gusts
     const windCardinal = degreesToCardinal(current.wind_direction_10m);
-    html += `<dt>Wind:</dt><dd>${convertWindSpeed(current.wind_speed_10m)} ${currentConfig.units.wind_speed} ${windCardinal} (${current.wind_direction_10m}°)</dd>`;
+    let windText = `${convertWindSpeed(current.wind_speed_10m)} ${currentConfig.units.wind_speed} ${windCardinal} (${current.wind_direction_10m}°)`;
+    if (currentConfig.current.wind_gusts && current.wind_gusts_10m) {
+        windText += `, gusts to ${convertWindSpeed(current.wind_gusts_10m)} ${currentConfig.units.wind_speed}`;
+    }
+    html += `<dt>Wind:</dt><dd>${windText}</dd>`;
+    
+    // UV Index
+    if (currentConfig.current.uv_index && current.uv_index !== null && current.uv_index !== undefined) {
+        html += `<dt>UV Index:</dt><dd>${getUVIndexDescription(current.uv_index)}</dd>`;
+    }
+    
+    // Dew Point
+    if (currentConfig.current.dew_point && current.dewpoint_2m !== null && current.dewpoint_2m !== undefined) {
+        html += `<dt>Dew Point:</dt><dd>${formatDewPoint(current.dewpoint_2m)}</dd>`;
+    }
+    
     html += `<dt>Pressure:</dt><dd>${convertPressure(current.pressure_msl)} ${currentConfig.units.pressure}</dd>`;
     html += `<dt>Cloud Cover:</dt><dd>${current.cloud_cover}%</dd>`;
     html += `<dt>Visibility:</dt><dd>${convertDistance(current.visibility)} ${currentConfig.units.distance}</dd>`;
@@ -3301,37 +3482,158 @@ function renderFullWeatherDetails(weather) {
     // Next 24 hours hourly forecast
     if (weather.hourly) {
         html += '<section><h4>Next 24 Hours</h4>';
-        html += '<ul class="hourly-forecast">';
-        
-        // Get current time and find the starting hour index
-        const now = new Date();
-        const currentHour = now.getHours();
-        
-        // Open-Meteo hourly data is in local timezone
-        // Find the closest hour index that matches or is after current time
-        let startIndex = 0;
-        for (let i = 0; i < weather.hourly.time.length; i++) {
-            const hourTime = new Date(weather.hourly.time[i]);
-            if (hourTime >= now) {
-                startIndex = i;
-                break;
-            }
+        html += renderHourlyForecast(weather);
+        html += '</section>';
+    }
+    
+    // 16-day forecast
+    if (weather.daily) {
+        html += '<section><h4>16-Day Forecast</h4>';
+        html += renderDailyForecast(weather);
+        html += '</section>';
+    }
+    
+    html += '</div>';
+    return html;
+}
+
+function renderHourlyForecast(weather) {
+    const viewMode = currentConfig.hourlyDetailView || 'flat';
+    let html = '';
+    
+    // Get current time and find the starting hour index
+    const now = new Date();
+    let startIndex = 0;
+    for (let i = 0; i < weather.hourly.time.length; i++) {
+        const hourTime = new Date(weather.hourly.time[i]);
+        if (hourTime >= now) {
+            startIndex = i;
+            break;
         }
-        
-        // Display next 24 hours (or up to end of available data)
-        const endIndex = Math.min(startIndex + 24, weather.hourly.time.length);
+    }
+    
+    const endIndex = Math.min(startIndex + 24, weather.hourly.time.length);
+    
+    if (viewMode === 'table') {
+        html += '<div style="overflow-x: auto;"><table class="weather-table">';
+        html += '<thead><tr>';
+        html += '<th scope="col">Time</th>';
+        html += '<th scope="col">Conditions</th>';
+        if (currentConfig.hourly.temperature) html += '<th scope="col">Temp</th>';
+        if (currentConfig.hourly.feels_like) html += '<th scope="col">Feels Like</th>';
+        if (currentConfig.hourly.humidity) html += '<th scope="col">Humidity</th>';
+        if (currentConfig.hourly.precipitation) html += '<th scope="col">Precip</th>';
+        if (currentConfig.hourly.precipitation_probability) html += '<th scope="col">Precip %</th>';
+        if (currentConfig.hourly.uv_index) html += '<th scope="col">UV</th>';
+        if (currentConfig.hourly.wind_speed) html += '<th scope="col">Wind</th>';
+        if (currentConfig.hourly.dew_point) html += '<th scope="col">Dew Point</th>';
+        if (currentConfig.hourly.cloud_cover) html += '<th scope="col">Clouds</th>';
+        html += '</tr></thead><tbody>';
         
         for (let i = startIndex; i < endIndex; i++) {
             const hourTime = new Date(weather.hourly.time[i]);
-            const timeStr = hourTime.toLocaleTimeString(undefined, { 
-                hour: 'numeric', 
-                hour12: true 
-            });
+            const timeStr = hourTime.toLocaleTimeString(undefined, { hour: 'numeric', hour12: true });
+            
+            html += '<tr>';
+            html += `<th scope="row">${timeStr}</th>`;
+            html += `<td>${WEATHER_CODES[weather.hourly.weathercode[i]] || 'Unknown'}</td>`;
+            if (currentConfig.hourly.temperature) html += `<td>${convertTemperature(weather.hourly.temperature_2m[i])}°${currentConfig.units.temperature}</td>`;
+            if (currentConfig.hourly.feels_like) html += `<td>${convertTemperature(weather.hourly.apparent_temperature[i])}°${currentConfig.units.temperature}</td>`;
+            if (currentConfig.hourly.humidity) html += `<td>${weather.hourly.relative_humidity_2m[i]}%</td>`;
+            if (currentConfig.hourly.precipitation) html += `<td>${convertPrecipitation(weather.hourly.precipitation[i])} ${currentConfig.units.precipitation}</td>`;
+            if (currentConfig.hourly.precipitation_probability && weather.hourly.precipitation_probability) html += `<td>${weather.hourly.precipitation_probability[i]}%</td>`;
+            if (currentConfig.hourly.uv_index && weather.hourly.uv_index && weather.hourly.uv_index[i] !== null) {
+                const { category } = getUVIndexCategory(weather.hourly.uv_index[i]);
+                html += `<td>${Math.round(weather.hourly.uv_index[i])} (${category})</td>`;
+            } else if (currentConfig.hourly.uv_index) {
+                html += '<td>-</td>';
+            }
+            if (currentConfig.hourly.wind_speed) {
+                let windText = `${convertWindSpeed(weather.hourly.windspeed_10m[i])} ${currentConfig.units.wind_speed}`;
+                if (currentConfig.hourly.wind_gusts && weather.hourly.windgusts_10m) {
+                    windText += `, gusts ${convertWindSpeed(weather.hourly.windgusts_10m[i])}`;
+                }
+                html += `<td>${windText}</td>`;
+            }
+            if (currentConfig.hourly.dew_point && weather.hourly.dewpoint_2m) html += `<td>${formatDewPoint(weather.hourly.dewpoint_2m[i])}</td>`;
+            if (currentConfig.hourly.cloud_cover) html += `<td>${weather.hourly.cloudcover[i]}%</td>`;
+            html += '</tr>';
+        }
+        
+        html += '</tbody></table></div>';
+    } else if (viewMode === 'list') {
+        // Listbox pattern for keyboard navigation
+        html += '<div role="listbox" tabindex="0" class="weather-list" id="hourly-forecast-list" style="list-style: none; padding: 0; outline: 2px solid transparent; transition: outline 0.2s;">';
+        
+        const isCondensed = currentConfig.listViewStyle === 'condensed';
+        
+        for (let i = startIndex; i < endIndex; i++) {
+            const hourTime = new Date(weather.hourly.time[i]);
+            const timeStr = hourTime.toLocaleTimeString(undefined, { hour: 'numeric', hour12: true });
+            
+            // Build aria-label and visual text
+            let ariaLabel = `${timeStr}, ${WEATHER_CODES[weather.hourly.weathercode[i]] || 'Unknown'}`;
+            let visualText = `<strong>${timeStr}</strong> - ${WEATHER_CODES[weather.hourly.weathercode[i]] || 'Unknown'}`;
+            
+            let details = [];
+            if (currentConfig.hourly.temperature) {
+                const temp = `${convertTemperature(weather.hourly.temperature_2m[i])}°${currentConfig.units.temperature}`;
+                details.push(isCondensed ? temp : `Temperature: ${temp}`);
+            }
+            if (currentConfig.hourly.feels_like) {
+                const feels = `${convertTemperature(weather.hourly.apparent_temperature[i])}°${currentConfig.units.temperature}`;
+                details.push(isCondensed ? `Feels ${feels}` : `Feels Like: ${feels}`);
+            }
+            if (currentConfig.hourly.humidity) {
+                details.push(isCondensed ? `${weather.hourly.relative_humidity_2m[i]}%` : `Humidity: ${weather.hourly.relative_humidity_2m[i]}%`);
+            }
+            if (currentConfig.hourly.precipitation) {
+                const precip = `${convertPrecipitation(weather.hourly.precipitation[i])} ${currentConfig.units.precipitation}`;
+                details.push(isCondensed ? precip : `Precip: ${precip}`);
+            }
+            if (currentConfig.hourly.precipitation_probability && weather.hourly.precipitation_probability) {
+                details.push(isCondensed ? `${weather.hourly.precipitation_probability[i]}%` : `Precip Chance: ${weather.hourly.precipitation_probability[i]}%`);
+            }
+            if (currentConfig.hourly.uv_index && weather.hourly.uv_index && weather.hourly.uv_index[i] !== null) {
+                const { category } = getUVIndexCategory(weather.hourly.uv_index[i]);
+                details.push(isCondensed ? `UV${Math.round(weather.hourly.uv_index[i])}` : `UV: ${Math.round(weather.hourly.uv_index[i])} (${category})`);
+            }
+            if (currentConfig.hourly.wind_speed) {
+                let windText = `${convertWindSpeed(weather.hourly.windspeed_10m[i])} ${currentConfig.units.wind_speed}`;
+                if (currentConfig.hourly.wind_gusts && weather.hourly.windgusts_10m) {
+                    windText += `, gusts ${convertWindSpeed(weather.hourly.windgusts_10m[i])}`;
+                }
+                details.push(isCondensed ? windText : `Wind: ${windText}`);
+            }
+            if (currentConfig.hourly.dew_point && weather.hourly.dewpoint_2m) {
+                const dp = formatDewPoint(weather.hourly.dewpoint_2m[i]);
+                details.push(isCondensed ? dp : `Dew Point: ${dp}`);
+            }
+            if (currentConfig.hourly.cloud_cover) {
+                details.push(isCondensed ? `${weather.hourly.cloudcover[i]}%` : `Cloud Cover: ${weather.hourly.cloudcover[i]}%`);
+            }
+            
+            if (details.length > 0) {
+                visualText += ` • ${details.join(' • ')}`;
+                ariaLabel += `, ${details.join(', ')}`;
+            }
+            
+            html += `<div role="option" id="hourly-item-${i}" aria-selected="${i === 0 ? 'true' : 'false'}" style="padding: 0.75rem; border-bottom: 1px solid var(--border-color);">${visualText}</div>`;
+        }
+        
+        html += '</div>';
+    } else {
+        // Flat/Card view (default)
+        html += '<ul class="hourly-forecast">';
+        
+        for (let i = startIndex; i < endIndex; i++) {
+            const hourTime = new Date(weather.hourly.time[i]);
+            const timeStr = hourTime.toLocaleTimeString(undefined, { hour: 'numeric', hour12: true });
             
             html += '<li class="hourly-item">';
             html += `<strong>${timeStr}</strong>`;
             html += `<p class="hourly-weather">${WEATHER_CODES[weather.hourly.weathercode[i]] || 'Unknown'}</p>`;
-            html += `<p class="hourly-temp">${convertTemperature(weather.hourly.temperature_2m[i])}°${currentConfig.units.temperature}</p>`;
+            if (currentConfig.hourly.temperature) html += `<p class="hourly-temp">${convertTemperature(weather.hourly.temperature_2m[i])}°${currentConfig.units.temperature}</p>`;
             
             if (currentConfig.hourly.feels_like) {
                 html += `<p>Feels: ${convertTemperature(weather.hourly.apparent_temperature[i])}°${currentConfig.units.temperature}</p>`;
@@ -3345,8 +3647,25 @@ function renderFullWeatherDetails(weather) {
                 html += `<p>Precip: ${convertPrecipitation(weather.hourly.precipitation[i])} ${currentConfig.units.precipitation}</p>`;
             }
             
+            if (currentConfig.hourly.precipitation_probability && weather.hourly.precipitation_probability) {
+                html += `<p>Precip Chance: ${weather.hourly.precipitation_probability[i]}%</p>`;
+            }
+            
+            if (currentConfig.hourly.uv_index && weather.hourly.uv_index && weather.hourly.uv_index[i] !== null) {
+                const { category } = getUVIndexCategory(weather.hourly.uv_index[i]);
+                html += `<p>UV: ${Math.round(weather.hourly.uv_index[i])} (${category})</p>`;
+            }
+            
             if (currentConfig.hourly.wind_speed) {
-                html += `<p>Wind: ${convertWindSpeed(weather.hourly.windspeed_10m[i])} ${currentConfig.units.wind_speed}</p>`;
+                let windText = `${convertWindSpeed(weather.hourly.windspeed_10m[i])} ${currentConfig.units.wind_speed}`;
+                if (currentConfig.hourly.wind_gusts && weather.hourly.windgusts_10m) {
+                    windText += `, gusts ${convertWindSpeed(weather.hourly.windgusts_10m[i])} ${currentConfig.units.wind_speed}`;
+                }
+                html += `<p>Wind: ${windText}</p>`;
+            }
+            
+            if (currentConfig.hourly.dew_point && weather.hourly.dewpoint_2m) {
+                html += `<p>Dew Point: ${formatDewPoint(weather.hourly.dewpoint_2m[i])}</p>`;
             }
             
             if (currentConfig.hourly.cloud_cover) {
@@ -3356,12 +3675,164 @@ function renderFullWeatherDetails(weather) {
             html += '</li>';
         }
         
-        html += '</ul></section>';
+        html += '</ul>';
     }
     
-    // 16-day forecast
-    if (weather.daily) {
-        html += '<section><h4>16-Day Forecast</h4>';
+    return html;
+}
+
+function renderDailyForecast(weather) {
+    const viewMode = currentConfig.dailyDetailView || 'flat';
+    let html = '';
+    
+    if (viewMode === 'table') {
+        html += '<div style="overflow-x: auto;"><table class="weather-table">';
+        html += '<thead><tr>';
+        html += '<th scope="col">Day</th>';
+        html += '<th scope="col">Conditions</th>';
+        if (currentConfig.daily.temperature_max) html += '<th scope="col">High</th>';
+        if (currentConfig.daily.temperature_min) html += '<th scope="col">Low</th>';
+        if (currentConfig.daily.precipitation_sum) html += '<th scope="col">Precip</th>';
+        if (currentConfig.daily.precipitation_probability) html += '<th scope="col">Precip %</th>';
+        if (currentConfig.daily.uv_index_max) html += '<th scope="col">UV</th>';
+        if (currentConfig.daily.sunrise) html += '<th scope="col">Sunrise</th>';
+        if (currentConfig.daily.sunset) html += '<th scope="col">Sunset</th>';
+        if (currentConfig.daily.daylight_duration) html += '<th scope="col">Daylight</th>';
+        if (currentConfig.daily.sunshine_duration) html += '<th scope="col">Sunshine</th>';
+        if (currentConfig.daily.wind_speed_max) html += '<th scope="col">Max Wind</th>';
+        html += '</tr></thead><tbody>';
+        
+        for (let i = 0; i < 16 && i < weather.daily.time.length; i++) {
+            const date = new Date(weather.daily.time[i]);
+            let dayLabel;
+            if (i === 0) {
+                dayLabel = 'Today';
+            } else {
+                const weekday = date.toLocaleDateString(undefined, { weekday: 'short' });
+                const monthDay = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                dayLabel = `${weekday}, ${monthDay}`;
+            }
+            
+            html += '<tr>';
+            html += `<th scope="row">${dayLabel}</th>`;
+            html += `<td>${WEATHER_CODES[weather.daily.weathercode[i]] || 'Unknown'}</td>`;
+            if (currentConfig.daily.temperature_max) html += `<td>${convertTemperature(weather.daily.temperature_2m_max[i])}°${currentConfig.units.temperature}</td>`;
+            if (currentConfig.daily.temperature_min) html += `<td>${convertTemperature(weather.daily.temperature_2m_min[i])}°${currentConfig.units.temperature}</td>`;
+            if (currentConfig.daily.precipitation_sum) html += `<td>${convertPrecipitation(weather.daily.precipitation_sum[i])} ${currentConfig.units.precipitation}</td>`;
+            if (currentConfig.daily.precipitation_probability && weather.daily.precipitation_probability_max) html += `<td>${weather.daily.precipitation_probability_max[i]}%</td>`;
+            if (currentConfig.daily.uv_index_max && weather.daily.uv_index_max && weather.daily.uv_index_max[i] !== null) {
+                const { category } = getUVIndexCategory(weather.daily.uv_index_max[i]);
+                html += `<td>${Math.round(weather.daily.uv_index_max[i])} (${category})</td>`;
+            } else if (currentConfig.daily.uv_index_max) {
+                html += '<td>-</td>';
+            }
+            if (currentConfig.daily.sunrise && weather.daily.sunrise) {
+                const sunrise = new Date(weather.daily.sunrise[i]).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                html += `<td>${sunrise}</td>`;
+            }
+            if (currentConfig.daily.sunset && weather.daily.sunset) {
+                const sunset = new Date(weather.daily.sunset[i]).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                html += `<td>${sunset}</td>`;
+            }
+            if (currentConfig.daily.daylight_duration && weather.daily.daylight_duration) html += `<td>${formatDuration(weather.daily.daylight_duration[i])}</td>`;
+            if (currentConfig.daily.sunshine_duration && weather.daily.sunshine_duration) html += `<td>${formatDuration(weather.daily.sunshine_duration[i])}</td>`;
+            if (currentConfig.daily.wind_speed_max && weather.daily.windspeed_10m_max) html += `<td>${convertWindSpeed(weather.daily.windspeed_10m_max[i])} ${currentConfig.units.wind_speed}</td>`;
+            html += '</tr>';
+        }
+        
+        html += '</tbody></table></div>';
+    } else if (viewMode === 'list') {
+        // Listbox pattern for keyboard navigation
+        html += '<div role="listbox" tabindex="0" class="weather-list" id="daily-forecast-list" style="list-style: none; padding: 0; outline: 2px solid transparent; transition: outline 0.2s;">';
+        
+        const isCondensed = currentConfig.listViewStyle === 'condensed';
+        
+        for (let i = 0; i < 16 && i < weather.daily.time.length; i++) {
+            const date = new Date(weather.daily.time[i]);
+            let dayLabel;
+            if (i === 0) {
+                dayLabel = 'Today';
+            } else {
+                const weekday = date.toLocaleDateString(undefined, { weekday: 'short' });
+                const monthDay = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                dayLabel = `${weekday}, ${monthDay}`;
+            }
+            
+            // Build aria-label and visual text
+            let ariaLabel = `${dayLabel}, ${WEATHER_CODES[weather.daily.weathercode[i]] || 'Unknown'}`;
+            let visualText = `<strong>${dayLabel}</strong> - ${WEATHER_CODES[weather.daily.weathercode[i]] || 'Unknown'}`;
+            
+            let details = [];
+            if (currentConfig.daily.temperature_max && currentConfig.daily.temperature_min) {
+                const temps = `${convertTemperature(weather.daily.temperature_2m_max[i])}°/${convertTemperature(weather.daily.temperature_2m_min[i])}°${currentConfig.units.temperature}`;
+                details.push(isCondensed ? temps : `High/Low: ${temps}`);
+            } else if (currentConfig.daily.temperature_max) {
+                const high = `${convertTemperature(weather.daily.temperature_2m_max[i])}°${currentConfig.units.temperature}`;
+                details.push(isCondensed ? high : `High: ${high}`);
+            } else if (currentConfig.daily.temperature_min) {
+                const low = `${convertTemperature(weather.daily.temperature_2m_min[i])}°${currentConfig.units.temperature}`;
+                details.push(isCondensed ? low : `Low: ${low}`);
+            }
+            if (currentConfig.daily.precipitation_sum) {
+                const precip = `${convertPrecipitation(weather.daily.precipitation_sum[i])} ${currentConfig.units.precipitation}`;
+                details.push(isCondensed ? precip : `Precip: ${precip}`);
+            }
+            if (currentConfig.daily.precipitation_probability && weather.daily.precipitation_probability_max) {
+                details.push(isCondensed ? `${weather.daily.precipitation_probability_max[i]}%` : `Precip Chance: ${weather.daily.precipitation_probability_max[i]}%`);
+            }
+            if (currentConfig.daily.uv_index_max && weather.daily.uv_index_max && weather.daily.uv_index_max[i] !== null) {
+                const { category } = getUVIndexCategory(weather.daily.uv_index_max[i]);
+                details.push(isCondensed ? `UV${Math.round(weather.daily.uv_index_max[i])}` : `UV: ${Math.round(weather.daily.uv_index_max[i])} (${category})`);
+            }
+            if (currentConfig.daily.sunrise && weather.daily.sunrise) {
+                const sunrise = new Date(weather.daily.sunrise[i]).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                details.push(isCondensed ? sunrise : `Sunrise: ${sunrise}`);
+            }
+            if (currentConfig.daily.sunset && weather.daily.sunset) {
+                const sunset = new Date(weather.daily.sunset[i]).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                details.push(isCondensed ? sunset : `Sunset: ${sunset}`);
+            }
+            if (currentConfig.daily.daylight_duration && weather.daily.daylight_duration) {
+                const daylight = formatDuration(weather.daily.daylight_duration[i]);
+                details.push(isCondensed ? daylight : `Daylight: ${daylight}`);
+            }
+            if (currentConfig.daily.sunshine_duration && weather.daily.sunshine_duration) {
+                const sunshine = formatDuration(weather.daily.sunshine_duration[i]);
+                details.push(isCondensed ? sunshine : `Sunshine: ${sunshine}`);
+            }
+            if (currentConfig.daily.wind_speed_max && weather.daily.windspeed_10m_max) {
+                const wind = `${convertWindSpeed(weather.daily.windspeed_10m_max[i])} ${currentConfig.units.wind_speed}`;
+                details.push(isCondensed ? wind : `Wind: ${wind}`);
+            }
+            
+            if (details.length > 0) {
+                visualText += ` • ${details.join(' • ')}`;
+                ariaLabel += `, ${details.join(', ')}`;
+            }
+            
+            html += `<div role="option" id="daily-item-${i}" aria-selected="${i === 0 ? 'true' : 'false'}" style="padding: 0.75rem; border-bottom: 1px solid var(--border-color);">${visualText}</div>`;
+        }
+        
+        html += '</div>';
+            }
+            if (currentConfig.daily.sunset && weather.daily.sunset) {
+                const sunset = new Date(weather.daily.sunset[i]).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                details.push(`Sunset ${sunset}`);
+            }
+            if (currentConfig.daily.daylight_duration && weather.daily.daylight_duration) details.push(`${formatDuration(weather.daily.daylight_duration[i])} daylight`);
+            if (currentConfig.daily.sunshine_duration && weather.daily.sunshine_duration) details.push(`${formatDuration(weather.daily.sunshine_duration[i])} sunshine`);
+            if (currentConfig.daily.wind_speed_max && weather.daily.windspeed_10m_max) details.push(`${convertWindSpeed(weather.daily.windspeed_10m_max[i])} ${currentConfig.units.wind_speed} wind`);
+            
+            if (details.length > 0) {
+                html += ` • ${details.join(' • ')}`;
+            }
+            
+            html += '</li>';
+        }
+        
+        html += '</ul>';
+    } else {
+        // Flat/Card view (default)
         html += '<ul class="forecast-grid">';
         
         for (let i = 0; i < 16 && i < weather.daily.time.length; i++) {
@@ -3370,7 +3841,6 @@ function renderFullWeatherDetails(weather) {
             if (i === 0) {
                 dayLabel = 'Today';
             } else {
-                // Use browser's locale for date formatting
                 const weekday = date.toLocaleDateString(undefined, { weekday: 'short' });
                 const monthDay = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
                 dayLabel = `${weekday}, ${monthDay}`;
@@ -3379,34 +3849,54 @@ function renderFullWeatherDetails(weather) {
             html += '<li class="forecast-day">';
             html += `<strong>${dayLabel}</strong>`;
             html += `<p class="forecast-weather">${WEATHER_CODES[weather.daily.weathercode[i]] || 'Unknown'}</p>`;
-            html += `<p class="forecast-temp">High: ${convertTemperature(weather.daily.temperature_2m_max[i])}°${currentConfig.units.temperature}</p>`;
-            html += `<p class="forecast-temp">Low: ${convertTemperature(weather.daily.temperature_2m_min[i])}°${currentConfig.units.temperature}</p>`;
+            if (currentConfig.daily.temperature_max) html += `<p class="forecast-temp">High: ${convertTemperature(weather.daily.temperature_2m_max[i])}°${currentConfig.units.temperature}</p>`;
+            if (currentConfig.daily.temperature_min) html += `<p class="forecast-temp">Low: ${convertTemperature(weather.daily.temperature_2m_min[i])}°${currentConfig.units.temperature}</p>`;
             
             if (currentConfig.daily.precipitation_sum) {
                 html += `<p>Precip: ${convertPrecipitation(weather.daily.precipitation_sum[i])} ${currentConfig.units.precipitation}</p>`;
+            }
+            
+            if (currentConfig.daily.precipitation_probability && weather.daily.precipitation_probability_max) {
+                html += `<p>Precip Chance: ${weather.daily.precipitation_probability_max[i]}%</p>`;
+            }
+            
+            if (currentConfig.daily.uv_index_max && weather.daily.uv_index_max && weather.daily.uv_index_max[i] !== null) {
+                const { category } = getUVIndexCategory(weather.daily.uv_index_max[i]);
+                html += `<p>UV: ${Math.round(weather.daily.uv_index_max[i])} (${category})</p>`;
             }
             
             if (currentConfig.daily.sunrise && weather.daily.sunrise) {
                 const sunrise = new Date(weather.daily.sunrise[i]).toLocaleTimeString('en-US', { 
                     hour: 'numeric', minute: '2-digit', hour12: true 
                 });
-                html += `<p>☀️ ${sunrise}</p>`;
+                html += `<p>Sunrise: ${sunrise}</p>`;
             }
             
             if (currentConfig.daily.sunset && weather.daily.sunset) {
                 const sunset = new Date(weather.daily.sunset[i]).toLocaleTimeString('en-US', { 
                     hour: 'numeric', minute: '2-digit', hour12: true 
                 });
-                html += `<p>🌙 ${sunset}</p>`;
+                html += `<p>Sunset: ${sunset}</p>`;
+            }
+            
+            if (currentConfig.daily.daylight_duration && weather.daily.daylight_duration) {
+                html += `<p>Daylight: ${formatDuration(weather.daily.daylight_duration[i])}</p>`;
+            }
+            
+            if (currentConfig.daily.sunshine_duration && weather.daily.sunshine_duration) {
+                html += `<p>Sunshine: ${formatDuration(weather.daily.sunshine_duration[i])}</p>`;
+            }
+            
+            if (currentConfig.daily.wind_speed_max && weather.daily.windspeed_10m_max) {
+                html += `<p>Max Wind: ${convertWindSpeed(weather.daily.windspeed_10m_max[i])} ${currentConfig.units.wind_speed}</p>`;
             }
             
             html += '</li>';
         }
         
-        html += '</ul></section>';
+        html += '</ul>';
     }
     
-    html += '</div>';
     return html;
 }
 
@@ -3421,44 +3911,75 @@ function closeWeatherDetailsDialog() {
 
 // Configuration dialog
 function openConfigDialog() {
-    const dialog = document.getElementById('config-dialog');
+    console.log('openConfigDialog called');
+    try {
+        const dialog = document.getElementById('config-dialog');
+        console.log('Dialog element:', dialog);
+        
+        // Load current config into form
+        Object.keys(currentConfig.current).forEach(key => {
+            const checkbox = document.querySelector(`input[name="current-${key}"]`);
+            if (checkbox) checkbox.checked = currentConfig.current[key];
+        });
+        
+        Object.keys(currentConfig.hourly).forEach(key => {
+            const checkbox = document.querySelector(`input[name="hourly-${key}"]`);
+            if (checkbox) checkbox.checked = currentConfig.hourly[key];
+        });
+        
+        Object.keys(currentConfig.daily).forEach(key => {
+            const checkbox = document.querySelector(`input[name="daily-${key}"]`);
+            if (checkbox) checkbox.checked = currentConfig.daily[key];
+        });
+        
+        // Render city list order controls
+        console.log('About to call renderCityListOrderControls');
+        renderCityListOrderControls();
+        console.log('renderCityListOrderControls completed');
     
-    // Load current config into form
-    Object.keys(currentConfig.current).forEach(key => {
-        const checkbox = document.querySelector(`input[name="current-${key}"]`);
-        if (checkbox) checkbox.checked = currentConfig.current[key];
-    });
+    const tempUnit = document.querySelector(`input[name="temp-unit"][value="${currentConfig.units.temperature}"]`);
+    if (tempUnit) tempUnit.checked = true;
     
-    Object.keys(currentConfig.hourly).forEach(key => {
-        const checkbox = document.querySelector(`input[name="hourly-${key}"]`);
-        if (checkbox) checkbox.checked = currentConfig.hourly[key];
-    });
+    const windUnit = document.querySelector(`input[name="wind-unit"][value="${currentConfig.units.wind_speed}"]`);
+    if (windUnit) windUnit.checked = true;
     
-    Object.keys(currentConfig.daily).forEach(key => {
-        const checkbox = document.querySelector(`input[name="daily-${key}"]`);
-        if (checkbox) checkbox.checked = currentConfig.daily[key];
-    });
+    const precipUnit = document.querySelector(`input[name="precip-unit"][value="${currentConfig.units.precipitation}"]`);
+    if (precipUnit) precipUnit.checked = true;
     
-    // Render city list order controls
-    renderCityListOrderControls();
+    const pressureUnit = document.querySelector(`input[name="pressure-unit"][value="${currentConfig.units.pressure}"]`);
+    if (pressureUnit) pressureUnit.checked = true;
     
-    document.querySelector(`input[name="temp-unit"][value="${currentConfig.units.temperature}"]`).checked = true;
-    document.querySelector(`input[name="wind-unit"][value="${currentConfig.units.wind_speed}"]`).checked = true;
-    document.querySelector(`input[name="precip-unit"][value="${currentConfig.units.precipitation}"]`).checked = true;
-    document.querySelector(`input[name="pressure-unit"][value="${currentConfig.units.pressure}"]`).checked = true;
-    document.querySelector(`input[name="distance-unit"][value="${currentConfig.units.distance}"]`).checked = true;
-    document.querySelector(`input[name="default-view"][value="${currentConfig.defaultView}"]`).checked = true;
+    const distanceUnit = document.querySelector(`input[name="distance-unit"][value="${currentConfig.units.distance}"]`);
+    if (distanceUnit) distanceUnit.checked = true;
+    
+    const defaultView = document.querySelector(`input[name="default-view"][value="${currentConfig.defaultView}"]`);
+    if (defaultView) defaultView.checked = true;
     
     // List view style (may not exist in older configs)
     const listViewStyle = currentConfig.listViewStyle || 'detailed';
     const listViewStyleInput = document.querySelector(`input[name="list-view-style"][value="${listViewStyle}"]`);
     if (listViewStyleInput) listViewStyleInput.checked = true;
     
+    // Detail view settings (may not exist in older configs)
+    const hourlyDetailView = currentConfig.hourlyDetailView || 'flat';
+    const hourlyDetailViewInput = document.querySelector(`input[name="hourly-detail-view"][value="${hourlyDetailView}"]`);
+    if (hourlyDetailViewInput) hourlyDetailViewInput.checked = true;
+    
+    const dailyDetailView = currentConfig.dailyDetailView || 'flat';
+    const dailyDetailViewInput = document.querySelector(`input[name="daily-detail-view"][value="${dailyDetailView}"]`);
+    if (dailyDetailViewInput) dailyDetailViewInput.checked = true;
+    
+    console.log('About to close modals and show dialog');
     closeAllModals();
     focusReturnElement = document.activeElement;
     dialog.hidden = false;
     trapFocus(dialog);
     document.getElementById('current-tab').focus();
+    console.log('Dialog should now be visible');
+    } catch (error) {
+        console.error('Error in openConfigDialog:', error);
+        alert('Error opening configuration dialog. Check console for details.');
+    }
 }
 
 function applyConfiguration() {
@@ -3515,6 +4036,17 @@ function updateConfigFromForm() {
     if (listViewStyleChecked) {
         currentConfig.listViewStyle = listViewStyleChecked.value;
     }
+    
+    // Detail view settings
+    const hourlyDetailViewChecked = document.querySelector('input[name="hourly-detail-view"]:checked');
+    if (hourlyDetailViewChecked) {
+        currentConfig.hourlyDetailView = hourlyDetailViewChecked.value;
+    }
+    
+    const dailyDetailViewChecked = document.querySelector('input[name="daily-detail-view"]:checked');
+    if (dailyDetailViewChecked) {
+        currentConfig.dailyDetailView = dailyDetailViewChecked.value;
+    }
 }
 
 function renderCityListOrderControls() {
@@ -3526,9 +4058,11 @@ function renderCityListOrderControls() {
     const fieldLabels = {
         'temperature': 'Temperature',
         'conditions': 'Weather Conditions',
+        'uv_index': 'UV Index',
         'feels_like': 'Feels Like',
         'humidity': 'Humidity',
         'wind_speed': 'Wind Speed',
+        'wind_gusts': 'Wind Gusts',
         'wind_direction': 'Wind Direction',
         'high_temp': "Today's High",
         'low_temp': "Today's Low",
@@ -3660,6 +4194,194 @@ function resetAll() {
     announceToScreenReader('Everything has been reset');
 }
 
+// Debug functions
+async function checkDebugStatus() {
+    checkDebugLocalStorage();
+    await checkDebugServiceWorker();
+    await checkDebugCaches();
+    await testDebugNetwork();
+}
+
+function checkDebugLocalStorage() {
+    const output = document.getElementById('debug-storage-status');
+    let html = '';
+    
+    // Check cities
+    const citiesData = localStorage.getItem('fastweather-cities');
+    html += '<strong>Cities:</strong>\n';
+    if (citiesData) {
+        try {
+            const parsed = JSON.parse(citiesData);
+            html += `✓ Found ${Object.keys(parsed).length} cities\n`;
+            html += JSON.stringify(parsed, null, 2) + '\n';
+        } catch (e) {
+            html += `✗ Parse error: ${e.message}\n`;
+        }
+    } else {
+        html += '⚠ No cities in localStorage (will use defaults)\n';
+    }
+    
+    // Check config
+    html += '\n<strong>Config:</strong>\n';
+    const configData = localStorage.getItem('fastweather-config');
+    if (configData) {
+        try {
+            const parsed = JSON.parse(configData);
+            html += '✓ Config found\n';
+            html += JSON.stringify(parsed, null, 2) + '\n';
+        } catch (e) {
+            html += `✗ Parse error: ${e.message}\n`;
+        }
+    } else {
+        html += '⚠ No config (will use defaults)\n';
+    }
+    
+    output.innerHTML = html;
+}
+
+async function checkDebugServiceWorker() {
+    const output = document.getElementById('debug-sw-status');
+    let html = '';
+    
+    if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        html += `<strong>Registered Service Workers:</strong> ${registrations.length}\n\n`;
+        
+        for (const reg of registrations) {
+            html += `Scope: ${reg.scope}\n`;
+            html += `State: ${reg.active ? 'active' : 'not active'}\n`;
+            if (reg.active) {
+                html += `Script: ${reg.active.scriptURL}\n`;
+                html += `State: ${reg.active.state}\n`;
+            }
+            html += '\n';
+        }
+        
+        if (registrations.length === 0) {
+            html += '⚠ No service workers registered\n';
+        }
+    } else {
+        html += '✗ Service Workers not supported\n';
+    }
+    
+    output.innerHTML = html;
+}
+
+async function checkDebugCaches() {
+    const output = document.getElementById('debug-cache-status');
+    let html = '';
+    
+    if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        html += `<strong>Active Caches:</strong> ${cacheNames.length}\n\n`;
+        
+        for (const cacheName of cacheNames) {
+            const cache = await caches.open(cacheName);
+            const keys = await cache.keys();
+            html += `${cacheName}: ${keys.length} items\n`;
+            
+            // Show all URLs (limit to filename only for readability)
+            const urls = keys.map(req => '  - ' + req.url.split('/').pop()).join('\n');
+            html += urls + '\n';
+            html += '\n';
+        }
+        
+        if (cacheNames.length === 0) {
+            html += '⚠ No caches found\n';
+        }
+    } else {
+        html += '✗ Cache API not supported\n';
+    }
+    
+    output.innerHTML = html;
+}
+
+async function testDebugNetwork() {
+    const output = document.getElementById('debug-network-status');
+    let html = '';
+    
+    // Test JSON file loads
+    html += '<strong>Testing JSON file loads:</strong>\n\n';
+    
+    const files = [
+        'us-cities-cached.json',
+        'international-cities-cached.json',
+        'manifest.json'
+    ];
+    
+    for (const file of files) {
+        try {
+            const response = await fetch(file);
+            if (response.ok) {
+                const size = response.headers.get('content-length');
+                html += `✓ ${file}: ${response.status} ${response.statusText}${size ? ' (' + size + ' bytes)' : ''}\n`;
+            } else {
+                html += `✗ ${file}: ${response.status} ${response.statusText}\n`;
+            }
+        } catch (e) {
+            html += `✗ ${file}: ${e.message}\n`;
+        }
+    }
+    
+    // Test weather API
+    html += '\n<strong>Testing Weather API:</strong>\n';
+    try {
+        const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=43.074761&longitude=-89.3837613&current=temperature_2m&timezone=auto');
+        if (response.ok) {
+            const data = await response.json();
+            html += `✓ Weather API: ${data.current.temperature_2m}°C\n`;
+        } else {
+            html += `✗ Weather API: ${response.status} ${response.statusText}\n`;
+        }
+    } catch (e) {
+        html += `✗ Weather API: ${e.message}\n`;
+    }
+    
+    output.innerHTML = html;
+}
+
+async function clearDebugCaches() {
+    if (!confirm('This will clear all caches. Continue?')) {
+        return;
+    }
+    
+    try {
+        if ('caches' in window) {
+            const cacheNames = await caches.keys();
+            for (const cacheName of cacheNames) {
+                await caches.delete(cacheName);
+            }
+            alert('All caches cleared!');
+            await checkDebugCaches();
+        } else {
+            alert('Cache API not supported');
+        }
+    } catch (e) {
+        alert(`Error clearing caches: ${e.message}`);
+    }
+}
+
+async function unregisterServiceWorker() {
+    if (!confirm('This will unregister all service workers. Continue?')) {
+        return;
+    }
+    
+    try {
+        if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const reg of registrations) {
+                await reg.unregister();
+            }
+            alert('Service workers unregistered! Reload the page to continue.');
+            await checkDebugServiceWorker();
+        } else {
+            alert('Service Workers not supported');
+        }
+    } catch (e) {
+        alert(`Error unregistering service workers: ${e.message}`);
+    }
+}
+
 // Unit conversion
 function degreesToCardinal(degrees) {
     const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
@@ -3700,6 +4422,61 @@ function convertDistance(meters) {
         return (meters * M_TO_MILES).toFixed(1);
     }
     return (meters * M_TO_KM).toFixed(1);
+}
+
+// UV Index helpers
+function getUVIndexCategory(uvIndex) {
+    if (uvIndex === null || uvIndex === undefined) return { category: 'Unknown', color: '#888' };
+    if (uvIndex <= 2) return { category: 'Low', color: '#289500' };
+    if (uvIndex <= 5) return { category: 'Moderate', color: '#f7e400' };
+    if (uvIndex <= 7) return { category: 'High', color: '#f85900' };
+    if (uvIndex <= 10) return { category: 'Very High', color: '#d8001d' };
+    return { category: 'Extreme', color: '#6b49c8' };
+}
+
+function getUVIndexDescription(uvIndex) {
+    if (uvIndex === null || uvIndex === undefined) return 'UV data unavailable';
+    const { category } = getUVIndexCategory(uvIndex);
+    let description = `UV Index: ${Math.round(uvIndex)} (${category})`;
+    
+    if (uvIndex <= 2) {
+        description += ' - Minimal protection needed';
+    } else if (uvIndex <= 5) {
+        description += ' - Use SPF 30+ sunscreen';
+    } else if (uvIndex <= 7) {
+        description += ' - Use SPF 30+ sunscreen, seek shade';
+    } else if (uvIndex <= 10) {
+        description += ' - Use SPF 50+ sunscreen, avoid midday sun';
+    } else {
+        description += ' - Take all precautions, stay indoors if possible';
+    }
+    
+    return description;
+}
+
+// Dew point helpers
+function getDewPointComfort(dewPointF) {
+    if (dewPointF === null || dewPointF === undefined) return 'Unknown';
+    if (dewPointF < 50) return 'Dry';
+    if (dewPointF < 60) return 'Comfortable';
+    if (dewPointF < 65) return 'Slightly humid';
+    if (dewPointF < 70) return 'Muggy/Uncomfortable';
+    return 'Oppressive';
+}
+
+function formatDewPoint(dewPointC) {
+    if (dewPointC === null || dewPointC === undefined) return 'N/A';
+    const temp = convertTemperature(dewPointC);
+    const comfort = getDewPointComfort(currentConfig.units.temperature === 'F' ? temp : (dewPointC * 9/5 + 32));
+    return `${temp}°${currentConfig.units.temperature} (${comfort})`;
+}
+
+// Format duration (seconds to hours/minutes)
+function formatDuration(seconds) {
+    if (seconds === null || seconds === undefined) return 'N/A';
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return `${hours}h ${minutes}m`;
 }
 
 // Storage

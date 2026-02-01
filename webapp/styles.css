@@ -673,6 +673,36 @@ legend {
     cursor: not-allowed;
 }
 
+/* === Check All / Uncheck All Buttons === */
+.check-all-btn,
+.uncheck-all-btn,
+.secondary-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    min-height: 36px;
+}
+
+.check-all-btn:hover,
+.uncheck-all-btn:hover,
+.secondary-btn:hover {
+    background-color: var(--button-primary);
+    color: white;
+    border-color: var(--button-primary);
+}
+
+.check-all-btn:focus,
+.uncheck-all-btn:focus,
+.secondary-btn:focus {
+    outline: 2px solid var(--focus-outline);
+    outline-offset: 2px;
+}
+
 /* === City Cards === */
 #city-list {
     display: grid;
@@ -759,6 +789,17 @@ legend {
 .weather-desc {
     font-size: var(--font-size-lg);
     color: var(--text-secondary);
+}
+
+.uv-badge {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: calc(var(--border-radius) * 2);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    line-height: 1.4;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .weather-details {
@@ -1735,6 +1776,15 @@ a:hover {
 
 .weather-summary-box p {
     line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+/* === Keyboard Shortcut Hints === */
+.shortcut-hint {
+    opacity: 0.7;
+    font-size: 0.85em;
+    margin-left: 0.25rem;
+    font-weight: normal;
     color: var(--text-secondary);
 }
 
