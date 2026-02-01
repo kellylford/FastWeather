@@ -42,9 +42,16 @@ The main screen is divided into two sections: **Add New City** and **Your Cities
 
 ### Full Weather View
 This view provides a comprehensive weather report, including:
-*   **Current Conditions**: Temperature, wind, humidity, etc.
-*   **Hourly Forecast**: A 12-hour outlook.
-*   **Daily Forecast**: A 7-day outlook with highs, lows, and precipitation chances.
+*   **Current Conditions**: Temperature, Feels Like, Conditions, Humidity, Wind (with gusts), UV Index, Dew Point (comfort level), Pressure, Cloud Cover, Visibility
+*   **Hourly Forecast**: 24-hour outlook with temperature, conditions, rain chance, UV Index, wind, humidity, and more
+*   **Daily Forecast**: 16-day outlook with highs, lows, rain chance, UV Index, sunrise/sunset, and daylight duration
+
+**Understanding the UV Index:**
+*   **0-2 (Low)**: Minimal sun protection needed
+*   **3-5 (Moderate)**: Use SPF 30+ sunscreen
+*   **6-7 (High)**: Use SPF 30+ sunscreen and seek shade
+*   **8-10 (Very High)**: Use SPF 50+ sunscreen, avoid midday sun
+*   **11+ (Extreme)**: Take all precautions, stay indoors if possible
 
 Press **Esc** or activate **<- Back** to return to the city list.
 
@@ -52,13 +59,31 @@ Press **Esc** or activate **<- Back** to return to the city list.
 
 ## Customization
 
-You can customize exactly what data is displayed in the Full Weather report.
+You can customize exactly what data is displayed throughout the application.
 
-1.  From the **Full Weather** view, activate the **Configure** button.
-2.  A dialog will appear with three tabs: **Current**, **Hourly**, and **Daily**.
+1.  From the **Full Weather** view (or main screen in web version), activate the **Configure** button.
+2.  A dialog will appear with multiple tabs:
+    *   **Current Weather**: Temperature, Feels Like, Humidity, Wind Speed/Direction, Wind Gusts, UV Index, Dew Point, Pressure, Visibility, Precipitation, Cloud Cover
+    *   **Hourly Forecast**: Temperature, Feels Like, Humidity, Precipitation, Rain Chance (%), UV Index, Wind Speed, Wind Gusts, Dew Point, Cloud Cover
+    *   **Daily Forecast**: High/Low Temps, Sunrise/Sunset, Total Precipitation, Rain Chance (%), UV Index (Max), Daylight Duration, Sunshine Duration, Max Wind Speed
+    *   **City List**: Choose which fields appear in your city list view and their display order
+    *   **Units**: Select Fahrenheit/Celsius, mph/km/h, inches/mm, inHg/hPa, miles/km
 3.  Check or uncheck the boxes to show or hide specific details.
-    *   *Examples: Cloud Cover, UV Index, Humidity, Feels Like Temperature.*
-4.  Activate **OK** to save. Your preferences are saved automatically for future sessions.
+4.  Activate **Apply** to preview changes or **Save & Close** to save. Your preferences are saved automatically for future sessions.
+
+### New Features Explained
+
+**UV Index**: Color-coded indicator showing sun exposure risk. Low (green), Moderate (yellow), High (orange), Very High (red), Extreme (purple). Higher numbers mean stronger sun protection needed.
+
+**Wind Gusts**: Shows peak wind speeds in addition to sustained wind speed. Important for outdoor activities and driving safety.
+
+**Rain Chance (%)**: Probability of precipitation occurring. Higher percentages mean rain is more likely. Helps you decide whether to bring an umbrella.
+
+**Dew Point**: Indicates how humid/muggy it feels. Shows comfort level: Dry, Comfortable, Slightly humid, Muggy/Uncomfortable, or Oppressive.
+
+**Daylight Duration**: Total hours of daylight from sunrise to sunset. Useful for planning outdoor activities and understanding seasonal changes.
+
+**Sunshine Duration**: Expected hours of actual sunshine (vs. cloudy periods). Lower than daylight duration indicates cloudy conditions.
 
 ---
 
@@ -90,6 +115,15 @@ FastWeather is designed to be fully accessible with screen readers and keyboard 
 **The hourly forecast seems to start at the wrong time.**
 The app calculates the hourly forecast based on your computer's current time. Ensure your system clock is set correctly.
 
+
+**What's the difference between Daylight and Sunshine Duration?**
+Daylight Duration is the total time from sunrise to sunset. Sunshine Duration is the expected hours of actual direct sunshine. If sunshine duration is much lower than daylight, expect cloudy conditions.
+
+**Why doesn't the UV Index show at night?**
+UV Index measures ultraviolet radiation from the sun, so it's only displayed during daylight hours. At night, the UV Index is zero.
+
+**What does "Muggy/Uncomfortable" dew point mean?**
+Dew point measures moisture in the air. When the dew point is above 65°F (18°C), the air feels sticky and uncomfortable. Above 70°F (21°C) is oppressive. Below 60°F (15°C) feels comfortable.
 **I want to reset everything to default.**
 If you need to clear all your data and settings, you can run the application from a command prompt with the reset flag:
 `FastWeather.exe --reset`

@@ -3536,9 +3536,8 @@ function renderCurrentConditions(weather) {
         fields.push({ label: 'Visibility', value: `${convertDistance(current.visibility)} ${currentConfig.units.distance}` });
         
         fields.forEach((field, i) => {
-            const visualText = isCondensed ? `<strong>${field.label}:</strong> ${field.value}` : `<strong>${field.label}</strong> • ${field.value}`;
-            const ariaLabel = `${field.label}, ${field.value}`;
-            html += `<div role="option" id="current-item-${i}" aria-selected="${i === 0 ? 'true' : 'false'}" aria-label="${ariaLabel}" style="padding: 0.75rem; border-bottom: 1px solid var(--border-color);">${visualText}</div>`;
+            const visualText = isCondensed ? `${field.label}: ${field.value}` : `${field.label} • ${field.value}`;
+            html += `<div role="option" id="current-item-${i}" aria-selected="${i === 0 ? 'true' : 'false'}" style="padding: 0.75rem; border-bottom: 1px solid var(--border-color);">${visualText}</div>`;
         });
         
         html += '</div>';
@@ -3860,9 +3859,8 @@ function renderDailyForecast(weather) {
                 dayLabel = `${weekday}, ${monthDay}`;
             }
             
-            // Build aria-label and visual text
-            let ariaLabel = `${dayLabel}, ${WEATHER_CODES[weather.daily.weathercode[i]] || 'Unknown'}`;
-            let visualText = `<strong>${dayLabel}</strong> - ${WEATHER_CODES[weather.daily.weathercode[i]] || 'Unknown'}`;
+            // Build visual text (no aria-label, no <strong> tags - following hourly pattern)
+            let visualText = `${dayLabel} - ${WEATHER_CODES[weather.daily.weathercode[i]] || 'Unknown'}`;
             
             let details = [];
             if (currentConfig.daily.temperature_max && currentConfig.daily.temperature_min) {
@@ -3909,7 +3907,6 @@ function renderDailyForecast(weather) {
             
             if (details.length > 0) {
                 visualText += ` • ${details.join(' • ')}`;
-                ariaLabel += `, ${details.join(', ')}`;
             }
             
             html += `<div role="option" id="daily-item-${i}" aria-selected="${i === 0 ? 'true' : 'false'}" style="padding: 0.75rem; border-bottom: 1px solid var(--border-color);">${visualText}</div>`;
