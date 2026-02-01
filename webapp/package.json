@@ -1,0 +1,53 @@
+{
+  "name": "fastweather-webapp",
+  "version": "2.0.0",
+  "description": "Accessible weather application - PWA",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:a11y": "jest --testMatch='**/*.a11y.test.js'",
+    "test:unit": "jest --testMatch='**/*.unit.test.js'",
+    "test:integration": "jest --testMatch='**/*.integration.test.js'",
+    "lint": "eslint .",
+    "serve": "python -m http.server 8000"
+  },
+  "keywords": ["weather", "pwa", "accessibility", "wcag"],
+  "author": "Kelly Ford",
+  "license": "MIT",
+  "devDependencies": {
+    "@axe-core/cli": "^4.9.0",
+    "@testing-library/dom": "^9.3.4",
+    "@testing-library/jest-dom": "^6.1.6",
+    "@testing-library/user-event": "^14.5.2",
+    "axe-core": "^4.8.4",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "jest-axe": "^8.0.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "whatwg-fetch": "^3.6.20"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"],
+    "collectCoverageFrom": [
+      "app.js",
+      "!node_modules/**",
+      "!tests/**"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 70,
+        "functions": 70,
+        "lines": 70,
+        "statements": 70
+      }
+    },
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ],
+    "moduleNameMapper": {
+      "\\.(css|less|scss|sass)$": "<rootDir>/tests/__mocks__/styleMock.js"
+    }
+  }
+}

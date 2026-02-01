@@ -29,18 +29,18 @@ const WEATHER_CODES = {
     96: 'Thunderstorm with slight hail', 99: 'Thunderstorm with heavy hail'
 };
 
-// Default configuration
+// Default configuration - intelligent defaults for best user experience
 const DEFAULT_CONFIG = {
     current: {
         temperature: true,
         feels_like: true,
         humidity: true,
         wind_speed: true,
-        wind_direction: true,
-        wind_gusts: true,
+        wind_direction: false,
+        wind_gusts: false,
         pressure: false,
         visibility: false,
-        uv_index: true,
+        uv_index: false,
         dew_point: false,
         precipitation: true,
         cloud_cover: false,
@@ -54,7 +54,7 @@ const DEFAULT_CONFIG = {
         humidity: false,
         precipitation: true,
         precipitation_probability: true,
-        uv_index: true,
+        uv_index: false,
         wind_speed: false,
         wind_gusts: false,
         dew_point: false,
@@ -67,26 +67,26 @@ const DEFAULT_CONFIG = {
         sunset: true,
         precipitation_sum: true,
         precipitation_probability: true,
-        uv_index_max: true,
-        daylight_duration: true,
+        uv_index_max: false,
+        daylight_duration: false,
         sunshine_duration: false,
         wind_speed_max: false
     },
     cityList: {
         temperature: true,
         conditions: true,
-        feels_like: true,
-        humidity: true,
-        wind_speed: true,
-        wind_direction: true,
-        wind_gusts: true,
-        uv_index: true,
+        feels_like: false,
+        humidity: false,
+        wind_speed: false,
+        wind_direction: false,
+        wind_gusts: false,
+        uv_index: false,
         high_temp: true,
         low_temp: true,
-        sunrise: true,
-        sunset: true
+        sunrise: false,
+        sunset: false
     },
-    cityListOrder: ['temperature', 'conditions', 'uv_index', 'feels_like', 'humidity', 'wind_speed', 'wind_gusts', 'wind_direction', 'high_temp', 'low_temp', 'sunrise', 'sunset'],
+    cityListOrder: ['temperature', 'conditions', 'high_temp', 'low_temp', 'feels_like', 'humidity', 'wind_speed', 'wind_gusts', 'wind_direction', 'uv_index', 'sunrise', 'sunset'],
     units: {
         temperature: 'F',
         wind_speed: 'mph',
@@ -95,9 +95,10 @@ const DEFAULT_CONFIG = {
         distance: 'mi'
     },
     defaultView: 'flat',
-    listViewStyle: 'detailed', // 'detailed' shows labels, 'condensed' shows data only
-    hourlyDetailView: 'flat', // View mode for 24-hour forecast detail: 'flat', 'table', or 'list'
-    dailyDetailView: 'flat' // View mode for 16-day forecast detail: 'flat', 'table', or 'list'
+    listViewStyle: 'detailed',
+    currentConditionsView: 'flat',
+    hourlyDetailView: 'flat',
+    dailyDetailView: 'flat'
 };
 
 // Application state
@@ -3413,6 +3414,22 @@ async function showFullWeather(cityName, lat, lon) {
         content.innerHTML = renderFullWeatherDetails(weather);
         
         // Setup keyboard navigation for list views if they exist
+        // Setup keyboard navigation for list views if they exist
+        const currentList = document.getElementById('current-conditions-list');
+        if (currentList) {
+            addListboxNavigation(currentList, 'current-item', {});
+            currentList.setAttribute('aria-activedescendant', 'current-item-0');
+            currentList.style.outline = '2px solid var(--focus-outline)';
+            currentList.addEventListener('focus', () => {
+                currentList.style.outline = '2px solid var(--focus-outline)';
+            });
+            currentList.addEventListener('blur', () => {
+                currentList.style.outline = '2px solid transparent';
+            });
+            // Set focus to current conditions list if it exists
+            currentList.focus();
+        }
+        
         const hourlyList = document.getElementById('hourly-forecast-list');
         if (hourlyList) {
             addListboxNavigation(hourlyList, 'hourly-item', {});
@@ -3443,41 +3460,116 @@ async function showFullWeather(cityName, lat, lon) {
     }
 }
 
+function renderCurrentConditions(weather) {
+    const current = weather.current;
+    const viewMode = currentConfig.currentConditionsView || 'flat';
+    let html = '<section><h4>Current Conditions</h4>';
+    
+    if (viewMode === 'table') {
+        html += '<div class="table-container"><table class="weather-table"><thead><tr>';
+        html += '<th scope="col">Field</th><th scope="col">Value</th>';
+        html += '</tr></thead><tbody>';
+        
+        html += `<tr><th scope="row">Temperature</th><td>${convertTemperature(current.temperature_2m)}°${currentConfig.units.temperature}</td></tr>`;
+        html += `<tr><th scope="row">Feels Like</th><td>${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}</td></tr>`;
+        html += `<tr><th scope="row">Weather</th><td>${WEATHER_CODES[current.weather_code] || 'Unknown'}</td></tr>`;
+        html += `<tr><th scope="row">Humidity</th><td>${current.relative_humidity_2m}%</td></tr>`;
+        
+        const windCardinal = degreesToCardinal(current.wind_direction_10m);
+        let windText = `${convertWindSpeed(current.wind_speed_10m)} ${currentConfig.units.wind_speed} ${windCardinal} (${current.wind_direction_10m}°)`;
+        if (currentConfig.current.wind_gusts && current.wind_gusts_10m) {
+            windText += `, gusts to ${convertWindSpeed(current.wind_gusts_10m)} ${currentConfig.units.wind_speed}`;
+        }
+        html += `<tr><th scope="row">Wind</th><td>${windText}</td></tr>`;
+        
+        if (currentConfig.current.uv_index && current.uv_index !== null && current.uv_index !== undefined) {
+            html += `<tr><th scope="row">UV Index</th><td>${getUVIndexDescription(current.uv_index)}</td></tr>`;
+        }
+        
+        if (currentConfig.current.dew_point && current.dewpoint_2m !== null && current.dewpoint_2m !== undefined) {
+            html += `<tr><th scope="row">Dew Point</th><td>${formatDewPoint(current.dewpoint_2m)}</td></tr>`;
+        }
+        
+        html += `<tr><th scope="row">Pressure</th><td>${convertPressure(current.pressure_msl)} ${currentConfig.units.pressure}</td></tr>`;
+        html += `<tr><th scope="row">Cloud Cover</th><td>${current.cloud_cover}%</td></tr>`;
+        html += `<tr><th scope="row">Visibility</th><td>${convertDistance(current.visibility)} ${currentConfig.units.distance}</td></tr>`;
+        
+        html += '</tbody></table></div>';
+    } else if (viewMode === 'list') {
+        const isCondensed = currentConfig.listViewStyle === 'condensed';
+        html += '<div role="listbox" tabindex="0" class="weather-list" id="current-conditions-list" style="list-style: none; padding: 0; outline: 2px solid transparent; transition: outline 0.2s;">';
+        
+        const fields = [
+            { label: 'Temperature', value: `${convertTemperature(current.temperature_2m)}°${currentConfig.units.temperature}` },
+            { label: 'Feels Like', value: `${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}` },
+            { label: 'Weather', value: WEATHER_CODES[current.weather_code] || 'Unknown' },
+            { label: 'Humidity', value: `${current.relative_humidity_2m}%` }
+        ];
+        
+        const windCardinal = degreesToCardinal(current.wind_direction_10m);
+        let windValue = `${convertWindSpeed(current.wind_speed_10m)} ${currentConfig.units.wind_speed} ${windCardinal}`;
+        if (currentConfig.current.wind_gusts && current.wind_gusts_10m) {
+            windValue += `, gusts ${convertWindSpeed(current.wind_gusts_10m)} ${currentConfig.units.wind_speed}`;
+        }
+        fields.push({ label: 'Wind', value: windValue });
+        
+        if (currentConfig.current.uv_index && current.uv_index !== null && current.uv_index !== undefined) {
+            fields.push({ label: 'UV Index', value: getUVIndexDescription(current.uv_index) });
+        }
+        
+        if (currentConfig.current.dew_point && current.dewpoint_2m !== null && current.dewpoint_2m !== undefined) {
+            fields.push({ label: 'Dew Point', value: formatDewPoint(current.dewpoint_2m) });
+        }
+        
+        fields.push({ label: 'Pressure', value: `${convertPressure(current.pressure_msl)} ${currentConfig.units.pressure}` });
+        fields.push({ label: 'Cloud Cover', value: `${current.cloud_cover}%` });
+        fields.push({ label: 'Visibility', value: `${convertDistance(current.visibility)} ${currentConfig.units.distance}` });
+        
+        fields.forEach((field, i) => {
+            const visualText = isCondensed ? `<strong>${field.label}:</strong> ${field.value}` : `<strong>${field.label}</strong> • ${field.value}`;
+            const ariaLabel = `${field.label}, ${field.value}`;
+            html += `<div role="option" id="current-item-${i}" aria-selected="${i === 0 ? 'true' : 'false'}" style="padding: 0.75rem; border-bottom: 1px solid var(--border-color);">${visualText}</div>`;
+        });
+        
+        html += '</div>';
+    } else {
+        // Flat/Card view (default)
+        html += '<dl>';
+        html += `<dt>Temperature:</dt><dd>${convertTemperature(current.temperature_2m)}°${currentConfig.units.temperature}</dd>`;
+        html += `<dt>Feels Like:</dt><dd>${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}</dd>`;
+        html += `<dt>Weather:</dt><dd>${WEATHER_CODES[current.weather_code] || 'Unknown'}</dd>`;
+        html += `<dt>Humidity:</dt><dd>${current.relative_humidity_2m}%</dd>`;
+        
+        const windCardinal = degreesToCardinal(current.wind_direction_10m);
+        let windText = `${convertWindSpeed(current.wind_speed_10m)} ${currentConfig.units.wind_speed} ${windCardinal} (${current.wind_direction_10m}°)`;
+        if (currentConfig.current.wind_gusts && current.wind_gusts_10m) {
+            windText += `, gusts to ${convertWindSpeed(current.wind_gusts_10m)} ${currentConfig.units.wind_speed}`;
+        }
+        html += `<dt>Wind:</dt><dd>${windText}</dd>`;
+        
+        if (currentConfig.current.uv_index && current.uv_index !== null && current.uv_index !== undefined) {
+            html += `<dt>UV Index:</dt><dd>${getUVIndexDescription(current.uv_index)}</dd>`;
+        }
+        
+        if (currentConfig.current.dew_point && current.dewpoint_2m !== null && current.dewpoint_2m !== undefined) {
+            html += `<dt>Dew Point:</dt><dd>${formatDewPoint(current.dewpoint_2m)}</dd>`;
+        }
+        
+        html += `<dt>Pressure:</dt><dd>${convertPressure(current.pressure_msl)} ${currentConfig.units.pressure}</dd>`;
+        html += `<dt>Cloud Cover:</dt><dd>${current.cloud_cover}%</dd>`;
+        html += `<dt>Visibility:</dt><dd>${convertDistance(current.visibility)} ${currentConfig.units.distance}</dd>`;
+        html += '</dl>';
+    }
+    
+    html += '</section>';
+    return html;
+}
+
 function renderFullWeatherDetails(weather) {
     let html = '<div class="full-weather-details">';
     
-    // Current conditions (expanded)
-    html += '<section><h4>Current Conditions</h4><dl>';
-    const current = weather.current;
-    
-    html += `<dt>Temperature:</dt><dd>${convertTemperature(current.temperature_2m)}°${currentConfig.units.temperature}</dd>`;
-    html += `<dt>Feels Like:</dt><dd>${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}</dd>`;
-    html += `<dt>Weather:</dt><dd>${WEATHER_CODES[current.weather_code] || 'Unknown'}</dd>`;
-    html += `<dt>Humidity:</dt><dd>${current.relative_humidity_2m}%</dd>`;
-    
-    // Wind with gusts
-    const windCardinal = degreesToCardinal(current.wind_direction_10m);
-    let windText = `${convertWindSpeed(current.wind_speed_10m)} ${currentConfig.units.wind_speed} ${windCardinal} (${current.wind_direction_10m}°)`;
-    if (currentConfig.current.wind_gusts && current.wind_gusts_10m) {
-        windText += `, gusts to ${convertWindSpeed(current.wind_gusts_10m)} ${currentConfig.units.wind_speed}`;
-    }
-    html += `<dt>Wind:</dt><dd>${windText}</dd>`;
-    
-    // UV Index
-    if (currentConfig.current.uv_index && current.uv_index !== null && current.uv_index !== undefined) {
-        html += `<dt>UV Index:</dt><dd>${getUVIndexDescription(current.uv_index)}</dd>`;
-    }
-    
-    // Dew Point
-    if (currentConfig.current.dew_point && current.dewpoint_2m !== null && current.dewpoint_2m !== undefined) {
-        html += `<dt>Dew Point:</dt><dd>${formatDewPoint(current.dewpoint_2m)}</dd>`;
-    }
-    
-    html += `<dt>Pressure:</dt><dd>${convertPressure(current.pressure_msl)} ${currentConfig.units.pressure}</dd>`;
-    html += `<dt>Cloud Cover:</dt><dd>${current.cloud_cover}%</dd>`;
-    html += `<dt>Visibility:</dt><dd>${convertDistance(current.visibility)} ${currentConfig.units.distance}</dd>`;
-    
-    html += '</dl></section>';
+    // Current conditions with view mode support
+    html += renderCurrentConditions(weather);
     
     // Next 24 hours hourly forecast
     if (weather.hourly) {
@@ -3814,23 +3906,6 @@ function renderDailyForecast(weather) {
         }
         
         html += '</div>';
-            }
-            if (currentConfig.daily.sunset && weather.daily.sunset) {
-                const sunset = new Date(weather.daily.sunset[i]).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-                details.push(`Sunset ${sunset}`);
-            }
-            if (currentConfig.daily.daylight_duration && weather.daily.daylight_duration) details.push(`${formatDuration(weather.daily.daylight_duration[i])} daylight`);
-            if (currentConfig.daily.sunshine_duration && weather.daily.sunshine_duration) details.push(`${formatDuration(weather.daily.sunshine_duration[i])} sunshine`);
-            if (currentConfig.daily.wind_speed_max && weather.daily.windspeed_10m_max) details.push(`${convertWindSpeed(weather.daily.windspeed_10m_max[i])} ${currentConfig.units.wind_speed} wind`);
-            
-            if (details.length > 0) {
-                html += ` • ${details.join(' • ')}`;
-            }
-            
-            html += '</li>';
-        }
-        
-        html += '</ul>';
     } else {
         // Flat/Card view (default)
         html += '<ul class="forecast-grid">';
@@ -3936,46 +4011,54 @@ function openConfigDialog() {
         console.log('About to call renderCityListOrderControls');
         renderCityListOrderControls();
         console.log('renderCityListOrderControls completed');
-    
-    const tempUnit = document.querySelector(`input[name="temp-unit"][value="${currentConfig.units.temperature}"]`);
-    if (tempUnit) tempUnit.checked = true;
-    
-    const windUnit = document.querySelector(`input[name="wind-unit"][value="${currentConfig.units.wind_speed}"]`);
-    if (windUnit) windUnit.checked = true;
-    
-    const precipUnit = document.querySelector(`input[name="precip-unit"][value="${currentConfig.units.precipitation}"]`);
-    if (precipUnit) precipUnit.checked = true;
-    
-    const pressureUnit = document.querySelector(`input[name="pressure-unit"][value="${currentConfig.units.pressure}"]`);
-    if (pressureUnit) pressureUnit.checked = true;
-    
-    const distanceUnit = document.querySelector(`input[name="distance-unit"][value="${currentConfig.units.distance}"]`);
-    if (distanceUnit) distanceUnit.checked = true;
-    
-    const defaultView = document.querySelector(`input[name="default-view"][value="${currentConfig.defaultView}"]`);
-    if (defaultView) defaultView.checked = true;
-    
-    // List view style (may not exist in older configs)
-    const listViewStyle = currentConfig.listViewStyle || 'detailed';
-    const listViewStyleInput = document.querySelector(`input[name="list-view-style"][value="${listViewStyle}"]`);
-    if (listViewStyleInput) listViewStyleInput.checked = true;
-    
-    // Detail view settings (may not exist in older configs)
-    const hourlyDetailView = currentConfig.hourlyDetailView || 'flat';
-    const hourlyDetailViewInput = document.querySelector(`input[name="hourly-detail-view"][value="${hourlyDetailView}"]`);
-    if (hourlyDetailViewInput) hourlyDetailViewInput.checked = true;
-    
-    const dailyDetailView = currentConfig.dailyDetailView || 'flat';
-    const dailyDetailViewInput = document.querySelector(`input[name="daily-detail-view"][value="${dailyDetailView}"]`);
-    if (dailyDetailViewInput) dailyDetailViewInput.checked = true;
-    
-    console.log('About to close modals and show dialog');
-    closeAllModals();
-    focusReturnElement = document.activeElement;
-    dialog.hidden = false;
-    trapFocus(dialog);
-    document.getElementById('current-tab').focus();
-    console.log('Dialog should now be visible');
+        
+        const tempUnit = document.querySelector(`input[name="temp-unit"][value="${currentConfig.units.temperature}"]`);
+        if (tempUnit) tempUnit.checked = true;
+        
+        const windUnit = document.querySelector(`input[name="wind-unit"][value="${currentConfig.units.wind_speed}"]`);
+        if (windUnit) windUnit.checked = true;
+        
+        const precipUnit = document.querySelector(`input[name="precip-unit"][value="${currentConfig.units.precipitation}"]`);
+        if (precipUnit) precipUnit.checked = true;
+        
+        const pressureUnit = document.querySelector(`input[name="pressure-unit"][value="${currentConfig.units.pressure}"]`);
+        if (pressureUnit) pressureUnit.checked = true;
+        
+        const distanceUnit = document.querySelector(`input[name="distance-unit"][value="${currentConfig.units.distance}"]`);
+        if (distanceUnit) distanceUnit.checked = true;
+        
+        const defaultView = document.querySelector(`input[name="default-view"][value="${currentConfig.defaultView}"]`);
+        if (defaultView) defaultView.checked = true;
+        
+        // List view style (may not exist in older configs)
+        const listViewStyle = currentConfig.listViewStyle || 'detailed';
+        const listViewStyleInput = document.querySelector(`input[name="list-view-style"][value="${listViewStyle}"]`);
+        if (listViewStyleInput) listViewStyleInput.checked = true;
+        
+        // Detail view settings (may not exist in older configs)
+        const currentConditionsView = currentConfig.currentConditionsView || 'flat';
+        const currentConditionsViewInput = document.querySelector(`input[name="current-conditions-view"][value="${currentConditionsView}"]`);
+        if (currentConditionsViewInput) currentConditionsViewInput.checked = true;
+        
+        const currentConditionsView = currentConfig.currentConditionsView || 'flat';
+        const currentConditionsViewInput = document.querySelector(`input[name="current-conditions-view"][value="${currentConditionsView}"]`);
+        if (currentConditionsViewInput) currentConditionsViewInput.checked = true;
+        
+        const hourlyDetailView = currentConfig.hourlyDetailView || 'flat';
+        const hourlyDetailViewInput = document.querySelector(`input[name="hourly-detail-view"][value="${hourlyDetailView}"]`);
+        if (hourlyDetailViewInput) hourlyDetailViewInput.checked = true;
+        
+        const dailyDetailView = currentConfig.dailyDetailView || 'flat';
+        const dailyDetailViewInput = document.querySelector(`input[name="daily-detail-view"][value="${dailyDetailView}"]`);
+        if (dailyDetailViewInput) dailyDetailViewInput.checked = true;
+        
+        console.log('About to close modals and show dialog');
+        closeAllModals();
+        focusReturnElement = document.activeElement;
+        dialog.hidden = false;
+        trapFocus(dialog);
+        document.getElementById('current-tab').focus();
+        console.log('Dialog should now be visible');
     } catch (error) {
         console.error('Error in openConfigDialog:', error);
         alert('Error opening configuration dialog. Check console for details.');
@@ -4038,6 +4121,11 @@ function updateConfigFromForm() {
     }
     
     // Detail view settings
+    const currentConditionsViewChecked = document.querySelector('input[name="current-conditions-view"]:checked');
+    if (currentConditionsViewChecked) {
+        currentConfig.currentConditionsView = currentConditionsViewChecked.value;
+    }
+    
     const hourlyDetailViewChecked = document.querySelector('input[name="hourly-detail-view"]:checked');
     if (hourlyDetailViewChecked) {
         currentConfig.hourlyDetailView = hourlyDetailViewChecked.value;
@@ -4600,7 +4688,7 @@ function closeAllModals() {
 // Focus trap for modal dialogs
 function trapFocus(element) {
     const focusableElements = element.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"]), [role="listbox"]'
     );
     const firstFocusable = focusableElements[0];
     const lastFocusable = focusableElements[focusableElements.length - 1];
