@@ -4040,10 +4040,6 @@ function openConfigDialog() {
         const currentConditionsViewInput = document.querySelector(`input[name="current-conditions-view"][value="${currentConditionsView}"]`);
         if (currentConditionsViewInput) currentConditionsViewInput.checked = true;
         
-        const currentConditionsView = currentConfig.currentConditionsView || 'flat';
-        const currentConditionsViewInput = document.querySelector(`input[name="current-conditions-view"][value="${currentConditionsView}"]`);
-        if (currentConditionsViewInput) currentConditionsViewInput.checked = true;
-        
         const hourlyDetailView = currentConfig.hourlyDetailView || 'flat';
         const hourlyDetailViewInput = document.querySelector(`input[name="hourly-detail-view"][value="${hourlyDetailView}"]`);
         if (hourlyDetailViewInput) hourlyDetailViewInput.checked = true;
