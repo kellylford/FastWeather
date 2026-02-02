@@ -46,8 +46,17 @@ struct FlatView: View {
     private func cityHeader(for city: City) -> some View {
         if let weather = weatherService.weatherCache[city.id] {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(city.displayName)
-                    .font(.headline)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(city.displayName)
+                        .font(.headline)
+                    
+                    // UV Index badge (only during daytime)
+                    if settingsManager.settings.showUVIndex,
+                       let isDay = weather.current.isDay, isDay == 1,
+                       let uvIndex = weather.current.uvIndex {
+                        UVBadge(uvIndex: uvIndex)
+                    }
+                }
                 
                 Spacer()
                 

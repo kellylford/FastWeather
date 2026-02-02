@@ -209,12 +209,22 @@ struct ListRowView: View {
                     .transition(.scale.combined(with: .opacity))
                 }
                 
-                // Show temperature on right side if it's enabled
-                if let weather = weather,
-                   settingsManager.settings.weatherFields.first(where: { $0.type == .temperature })?.isEnabled == true {
-                    Text(formatTemperature(weather.current.temperature2m))
-                        .font(.title3)
-                        .fontWeight(.semibold)
+                VStack(alignment: .trailing, spacing: 4) {
+                    // Show temperature on right side if it's enabled
+                    if let weather = weather,
+                       settingsManager.settings.weatherFields.first(where: { $0.type == .temperature })?.isEnabled == true {
+                        Text(formatTemperature(weather.current.temperature2m))
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                    }
+                    
+                    // UV Index badge (only during daytime)
+                    if settingsManager.settings.showUVIndex,
+                       let weather = weather,
+                       let isDay = weather.current.isDay, isDay == 1,
+                       let uvIndex = weather.current.uvIndex {
+                        UVBadge(uvIndex: uvIndex)
+                    }
                 }
             }
         }
@@ -397,6 +407,14 @@ struct ListRowView: View {
                     label += isDetails ? "Sunset: \(value)" : value
                 }
             }
+        }
+        
+        // Add UV Index if enabled and during daytime
+        if settingsManager.settings.showUVIndex,
+           let isDay = weather.current.isDay, isDay == 1,
+           let uvIndex = weather.current.uvIndex {
+            let category = getUVIndexDescription(uvIndex)
+            label += ", UV Index: \(Int(uvIndex)) \(category)"
         }
         
         return label

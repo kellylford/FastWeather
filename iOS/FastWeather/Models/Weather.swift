@@ -121,6 +121,9 @@ struct WeatherData: Codable {
         let windSpeed10m: Double?
         let windDirection10m: Int?
         let visibility: Double?
+        let windGusts10m: Double?
+        let uvIndex: Double?
+        let dewpoint2m: Double?
         
         enum CodingKeys: String, CodingKey {
             case temperature2m = "temperature_2m"
@@ -137,6 +140,9 @@ struct WeatherData: Codable {
             case windSpeed10m = "wind_speed_10m"
             case windDirection10m = "wind_direction_10m"
             case visibility
+            case windGusts10m = "wind_gusts_10m"
+            case uvIndex = "uv_index"
+            case dewpoint2m = "dewpoint_2m"
         }
         
         var weatherCodeEnum: WeatherCode? {
@@ -151,6 +157,10 @@ struct WeatherData: Codable {
         let sunset: [String?]?   // Optional for basic mode (not requested)
         let weatherCode: [Int?]? // Optional for basic mode (not requested)
         let precipitationSum: [Double?]? // Optional for basic mode (not requested)
+        let precipitationProbabilityMax: [Int?]?
+        let uvIndexMax: [Double?]?
+        let daylightDuration: [Double?]?
+        let sunshineDuration: [Double?]?
         
         enum CodingKeys: String, CodingKey {
             case temperature2mMax = "temperature_2m_max"
@@ -159,6 +169,10 @@ struct WeatherData: Codable {
             case sunset
             case weatherCode = "weather_code"
             case precipitationSum = "precipitation_sum"
+            case precipitationProbabilityMax = "precipitation_probability_max"
+            case uvIndexMax = "uv_index_max"
+            case daylightDuration = "daylight_duration"
+            case sunshineDuration = "sunshine_duration"
         }
     }
     
@@ -170,6 +184,10 @@ struct WeatherData: Codable {
         let relativeHumidity2m: [Int?]?  // Optional for basic mode (not requested)
         let windSpeed10m: [Double?]?  // Optional for basic mode (not requested)
         let cloudcover: [Int?]?  // Used in basic mode
+        let precipitationProbability: [Int?]?
+        let uvIndex: [Double?]?
+        let windgusts10m: [Double?]?
+        let dewpoint2m: [Double?]?
         
         enum CodingKeys: String, CodingKey {
             case time
@@ -179,6 +197,10 @@ struct WeatherData: Codable {
             case relativeHumidity2m = "relative_humidity_2m"
             case windSpeed10m = "wind_speed_10m"
             case cloudcover
+            case precipitationProbability = "precipitation_probability"
+            case uvIndex = "uv_index"
+            case windgusts10m = "windgusts_10m"
+            case dewpoint2m = "dewpoint_2m"
         }
     }
 }

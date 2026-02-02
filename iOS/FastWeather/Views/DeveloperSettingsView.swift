@@ -9,6 +9,7 @@ import SwiftUI
 
 struct DeveloperSettingsView: View {
     @StateObject private var featureFlags = FeatureFlags.shared
+    @EnvironmentObject var settingsManager: SettingsManager
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -116,6 +117,13 @@ struct DeveloperSettingsView: View {
                     }) {
                         Label("Reset to Defaults", systemImage: "arrow.counterclockwise")
                     }
+                    
+                    Button(action: {
+                        enableAllEnhancedData()
+                    }) {
+                        Label("Enable All Enhanced Weather Data", systemImage: "sun.max.fill")
+                            .foregroundColor(.blue)
+                    }
                 }
                 
                 Section(footer: Text("These settings control experimental features that are in development. Changes take effect immediately.")) {
@@ -133,8 +141,31 @@ struct DeveloperSettingsView: View {
             }
         }
     }
+    
+    private func enableAllEnhancedData() {
+        // Enable all enhanced weather data
+        settingsManager.settings.showUVIndex = true
+        settingsManager.settings.showWindGusts = true
+        settingsManager.settings.showPrecipitationProbability = true
+        settingsManager.settings.showDewPoint = true
+        settingsManager.settings.showDaylightDuration = true
+        settingsManager.settings.showSunshineDuration = true
+        
+        // Enable all weather fields
+        for index in settingsManager.settings.weatherFields.indices {
+            settingsManager.settings.weatherFields[index].isEnabled = true
+        }
+        
+        // Enable all detail categories
+        for index in settingsManager.settings.detailCategories.indices {
+            settingsManager.settings.detailCategories[index].isEnabled = true
+        }
+        
+        settingsManager.saveSettings()
+    }
 }
 
 #Preview {
     DeveloperSettingsView()
+        .environmentObject(SettingsManager())
 }

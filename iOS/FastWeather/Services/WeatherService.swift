@@ -78,9 +78,9 @@ class WeatherService: ObservableObject {
         let params = [
             "latitude": String(city.latitude),
             "longitude": String(city.longitude),
-            "current": "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility",
-            "hourly": "temperature_2m,weather_code,precipitation,relative_humidity_2m,wind_speed_10m",
-            "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum",
+            "current": "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility,wind_gusts_10m,uv_index,dewpoint_2m",
+            "hourly": "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,windgusts_10m,uv_index,dewpoint_2m",
+            "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration",
             "forecast_days": "16",
             "timezone": "auto"
         ]
@@ -100,7 +100,7 @@ class WeatherService: ObservableObject {
             let decoder = JSONDecoder()
             let response = try decoder.decode(WeatherResponse.self, from: data)
             
-                    await MainActor.run {
+            await MainActor.run {
                 self.weatherCache[city.id] = WeatherData(current: response.current, daily: response.daily, hourly: response.hourly)
                 self.cacheTimestamps[city.id] = Date()
             }
@@ -126,7 +126,7 @@ class WeatherService: ObservableObject {
         let params = [
             "latitude": String(latitude),
             "longitude": String(longitude),
-            "current": "temperature_2m,weather_code,cloud_cover",
+            "current": "temperature_2m,weather_code,cloud_cover,is_day,uv_index",
             "hourly": "cloudcover",
             "daily": "temperature_2m_max,temperature_2m_min",
             "forecast_days": "1",
@@ -158,9 +158,9 @@ class WeatherService: ObservableObject {
         let params = [
             "latitude": String(latitude),
             "longitude": String(longitude),
-            "current": "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility",
-            "hourly": "temperature_2m,weather_code,precipitation,relative_humidity_2m,wind_speed_10m",
-            "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum",
+            "current": "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility,wind_gusts_10m,uv_index,dewpoint_2m",
+            "hourly": "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,windgusts_10m,uv_index,dewpoint_2m",
+            "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration",
             "forecast_days": "16",
             "timezone": "auto"
         ]

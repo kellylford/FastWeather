@@ -193,6 +193,14 @@ struct AppSettings: Codable {
     var distanceUnit: DistanceUnit = DistanceUnit.defaultUnit
     var historicalYearsBack: Int = 20
     
+    // Enhanced weather data display options
+    var showUVIndex: Bool = true
+    var showWindGusts: Bool = true
+    var showPrecipitationProbability: Bool = true
+    var showDewPoint: Bool = false  // Off by default (advanced)
+    var showDaylightDuration: Bool = true
+    var showSunshineDuration: Bool = false  // Off by default
+    
     // Private storage for weatherAroundMeDistance with validation
     private var _weatherAroundMeDistance: Double = DistanceUnit.defaultUnit == .miles ? 150 : 240
     
@@ -252,6 +260,8 @@ struct AppSettings: Codable {
     enum CodingKeys: String, CodingKey {
         case viewMode, displayMode, temperatureUnit, windSpeedUnit
         case precipitationUnit, pressureUnit, distanceUnit, historicalYearsBack
+        case showUVIndex, showWindGusts, showPrecipitationProbability
+        case showDewPoint, showDaylightDuration, showSunshineDuration
         case _weatherAroundMeDistance = "weatherAroundMeDistance"
         case weatherFields, detailCategories
         case showTemperature, showConditions, showFeelsLike, showHumidity

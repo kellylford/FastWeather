@@ -129,6 +129,12 @@ struct SettingsView: View {
                     .accessibilityLabel("Pressure unit, currently \(settingsManager.settings.pressureUnit.rawValue)")
                 }
                 
+                // Enhanced Weather Data section
+                Section(header: Text("Enhanced Weather Data"),
+                       footer: Text("Additional weather information available from Open-Meteo API.")) {
+                    enhancedDataToggles
+                }
+                
                 // Display preferences section
                 Section(header: Text("Display")) {
                     Picker(selection: $settingsManager.settings.viewMode) {
@@ -391,6 +397,47 @@ struct SettingsView: View {
         settingsManager.settings.detailCategories.move(fromOffsets: IndexSet(integer: index), toOffset: 0)
         settingsManager.saveSettings()
         UIAccessibility.post(notification: .announcement, argument: "Moved \(categoryName) to top")
+    }
+    
+    // MARK: - Enhanced Weather Data Toggles
+    private var enhancedDataToggles: some View {
+        Group {
+            Toggle("UV Index", isOn: $settingsManager.settings.showUVIndex)
+                .onChange(of: settingsManager.settings.showUVIndex) { _ in
+                    settingsManager.saveSettings()
+                }
+                .accessibilityLabel("Show UV Index")
+            
+            Toggle("Wind Gusts", isOn: $settingsManager.settings.showWindGusts)
+                .onChange(of: settingsManager.settings.showWindGusts) { _ in
+                    settingsManager.saveSettings()
+                }
+                .accessibilityLabel("Show Wind Gusts")
+            
+            Toggle("Precipitation Probability", isOn: $settingsManager.settings.showPrecipitationProbability)
+                .onChange(of: settingsManager.settings.showPrecipitationProbability) { _ in
+                    settingsManager.saveSettings()
+                }
+                .accessibilityLabel("Show Precipitation Probability")
+            
+            Toggle("Dew Point", isOn: $settingsManager.settings.showDewPoint)
+                .onChange(of: settingsManager.settings.showDewPoint) { _ in
+                    settingsManager.saveSettings()
+                }
+                .accessibilityLabel("Show Dew Point")
+            
+            Toggle("Daylight Duration", isOn: $settingsManager.settings.showDaylightDuration)
+                .onChange(of: settingsManager.settings.showDaylightDuration) { _ in
+                    settingsManager.saveSettings()
+                }
+                .accessibilityLabel("Show Daylight Duration")
+            
+            Toggle("Sunshine Duration", isOn: $settingsManager.settings.showSunshineDuration)
+                .onChange(of: settingsManager.settings.showSunshineDuration) { _ in
+                    settingsManager.saveSettings()
+                }
+                .accessibilityLabel("Show Sunshine Duration")
+        }
     }
     
     private func moveCategoryToBottom(at index: Int) {

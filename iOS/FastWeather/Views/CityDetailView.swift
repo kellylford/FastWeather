@@ -71,14 +71,39 @@ struct CityDetailView: View {
                         DetailRow(label: "Humidity", value: "\(humidity)%")
                         Divider()
                     }
+                    
+                    // Wind Speed with Gusts (if enabled and available)
                     if let windSpeed = weather.current.windSpeed10m {
-                        DetailRow(label: "Wind Speed", value: formatWindSpeed(windSpeed))
+                        if settingsManager.settings.showWindGusts,
+                           let windGusts = weather.current.windGusts10m,
+                           let windDir = weather.current.windDirection10m {
+                            DetailRow(label: "Wind", value: formatWind(speed: windSpeed, direction: windDir, gusts: windGusts, unit: settingsManager.settings.windSpeedUnit.rawValue, degreesToCardinal: degreesToCardinal))
+                        } else {
+                            DetailRow(label: "Wind Speed", value: formatWindSpeed(windSpeed))
+                        }
                         Divider()
                     }
-                    if let windDir = weather.current.windDirection10m {
+                    
+                    if let windDir = weather.current.windDirection10m, weather.current.windSpeed10m == nil {
                         DetailRow(label: "Wind Direction", value: formatWindDirection(windDir))
                         Divider()
                     }
+                    
+                    // UV Index (if enabled and daytime)
+                    if settingsManager.settings.showUVIndex,
+                       let isDay = weather.current.isDay, isDay == 1,
+                       let uvIndex = weather.current.uvIndex {
+                        DetailRow(label: "UV Index", value: "\(Int(uvIndex.rounded())) (\(UVIndexCategory(uvIndex: uvIndex).category))")
+                        Divider()
+                    }
+                    
+                    // Dew Point (if enabled)
+                    if settingsManager.settings.showDewPoint,
+                       let dewPoint = weather.current.dewpoint2m {
+                        DetailRow(label: "Dew Point", value: formatDewPoint(dewPoint, isFahrenheit: settingsManager.settings.temperatureUnit == .fahrenheit))
+                        Divider()
+                    }
+                    
                     if let pressure = weather.current.pressureMsl {
                         DetailRow(label: "Pressure", value: formatPressure(pressure))
                         Divider()
@@ -142,6 +167,8 @@ struct CityDetailView: View {
                                         temperature: temperature,
                                         weatherCode: weatherCode,
                                         precipitation: precipitation,
+                                        precipitationProbability: hourly.precipitationProbability?[index],
+                                        uvIndex: hourly.uvIndex?[index],
                                         settingsManager: settingsManager
                                     )
                                 }
@@ -170,6 +197,10 @@ struct CityDetailView: View {
                                     low: low,
                                     weatherCode: daily.weatherCode?[index],
                                     precipitation: daily.precipitationSum?[index],
+                                    precipitationProbability: daily.precipitationProbabilityMax?[index],
+                                    uvIndexMax: daily.uvIndexMax?[index],
+                                    daylightDuration: daily.daylightDuration?[index],
+                                    sunshineDuration: daily.sunshineDuration?[index],
                                     settingsManager: settingsManager
                                 )
                             }
@@ -466,6 +497,8 @@ struct HourlyForecastCard: View {
     let temperature: Double
     let weatherCode: Int
     let precipitation: Double
+    let precipitationProbability: Int?
+    let uvIndex: Double?
     let settingsManager: SettingsManager
     
     private var formattedTime: String {
@@ -493,15 +526,36 @@ struct HourlyForecastCard: View {
                 .font(.body)
                 .fontWeight(.semibold)
             
-            if precipitation > 0 {
+            // Precipitation with probability
+            if precipitation > 0 || (settingsManager.settings.showPrecipitationProbability && precipitationProbability ?? 0 > 0) {
                 HStack(spacing: 2) {
                     Image(systemName: "drop.fill")
                         .font(.caption2)
                         .foregroundColor(.blue)
-                    Text(formatPrecipitation(precipitation))
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
+                    
+                    if settingsManager.settings.showPrecipitationProbability, let prob = precipitationProbability, prob > 0 {
+                        Text("\(prob)%")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    } else if precipitation > 0 {
+                        Text(formatPrecipitation(precipitation))
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
                 }
+            }
+            
+            // UV Index badge (if enabled and UV > 0)
+            if settingsManager.settings.showUVIndex, let uv = uvIndex, uv > 0 {
+                let category = UVIndexCategory(uvIndex: uv)
+                Text("\(Int(uv.rounded()))")
+                    .font(.caption2)
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 2)
+                    .background(category.color.opacity(0.2))
+                    .foregroundColor(category.color)
+                    .cornerRadius(4)
             }
         }
         .frame(width: 70)
@@ -532,9 +586,17 @@ struct HourlyForecastCard: View {
         if let weatherCode = weatherCodeEnum {
             label += ", \(weatherCode.description)"
         }
-        if precipitation > 0 {
+        
+        if settingsManager.settings.showPrecipitationProbability, let prob = precipitationProbability, prob > 0 {
+            label += ", \(prob) percent chance of rain"
+        } else if precipitation > 0 {
             label += ", precipitation \(formatPrecipitation(precipitation))"
         }
+        
+        if settingsManager.settings.showUVIndex, let uv = uvIndex, uv > 0 {
+            label += ", \(getUVIndexDescription(uv))"
+        }
+        
         return label
     }
     
@@ -556,6 +618,10 @@ struct DailyForecastRow: View {
     let low: Double
     let weatherCode: Int?
     let precipitation: Double?
+    let precipitationProbability: Int?
+    let uvIndexMax: Double?
+    let daylightDuration: Double?
+    let sunshineDuration: Double?
     let settingsManager: SettingsManager
     
     private var dayName: String {
@@ -590,54 +656,132 @@ struct DailyForecastRow: View {
             text += ", \(weatherCode.description)"
         }
         text += ", High \(formatTemperature(high)), Low \(formatTemperature(low))"
-        if let precip = precipitation, precip > 0 {
+        
+        if settingsManager.settings.showPrecipitationProbability, let prob = precipitationProbability, prob > 0 {
+            text += ", \(prob) percent chance of rain"
+        } else if let precip = precipitation, precip > 0 {
             text += ", precipitation \(formatPrecipitation(precip))"
         }
+        
+        if settingsManager.settings.showUVIndex, let uvMax = uvIndexMax {
+            text += ", \(getUVIndexDescription(uvMax))"
+        }
+        
+        if settingsManager.settings.showDaylightDuration, let daylight = daylightDuration {
+            text += ", \(formatDuration(daylight)) of daylight"
+        }
+        
+        if settingsManager.settings.showSunshineDuration, let sunshine = sunshineDuration {
+            text += ", \(formatDuration(sunshine)) of sunshine"
+        }
+        
         return text
     }
     
     var body: some View {
-        HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(dayName)
-                    .font(.body)
-            }
-            .frame(width: 140, alignment: .leading)
-            .accessibilityHidden(true)
-            
-            if let weatherCode = weatherCodeEnum {
-                Image(systemName: weatherCode.systemImageName)
-                    .font(.title3)
-                    .foregroundColor(.blue)
-                    .frame(width: 30)
-                    .accessibilityHidden(true)
-            }
-            
-            Spacer()
-            
-            if let precip = precipitation, precip > 0 {
-                HStack(spacing: 4) {
-                    Image(systemName: "drop.fill")
-                        .font(.caption)
-                        .foregroundColor(.blue)
-                    Text(formatPrecipitation(precip))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(dayName)
+                        .font(.body)
                 }
-                .frame(width: 60)
+                .frame(width: 140, alignment: .leading)
+                .accessibilityHidden(true)
+                
+                if let weatherCode = weatherCodeEnum {
+                    Image(systemName: weatherCode.systemImageName)
+                        .font(.title3)
+                        .foregroundColor(.blue)
+                        .frame(width: 30)
+                        .accessibilityHidden(true)
+                }
+                
+                Spacer()
+                
+                // Precipitation or Probability
+                if settingsManager.settings.showPrecipitationProbability, let prob = precipitationProbability, prob > 0 {
+                    HStack(spacing: 4) {
+                        Image(systemName: "drop.fill")
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                        Text("\(prob)%")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(width: 60)
+                    .accessibilityHidden(true)
+                } else if let precip = precipitation, precip > 0 {
+                    HStack(spacing: 4) {
+                        Image(systemName: "drop.fill")
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                        Text(formatPrecipitation(precip))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(width: 60)
+                    .accessibilityHidden(true)
+                }
+                
+                HStack(spacing: 8) {
+                    Text(formatTemperature(low))
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                    
+                    Text(formatTemperature(high))
+                        .font(.body)
+                        .fontWeight(.semibold)
+                }
                 .accessibilityHidden(true)
             }
             
-            HStack(spacing: 8) {
-                Text(formatTemperature(low))
-                    .font(.body)
-                    .foregroundColor(.secondary)
-                
-                Text(formatTemperature(high))
-                    .font(.body)
-                    .fontWeight(.semibold)
+            // Additional details (UV, Daylight, Sunshine)
+            if settingsManager.settings.showUVIndex || settingsManager.settings.showDaylightDuration || settingsManager.settings.showSunshineDuration {
+                HStack(spacing: 12) {
+                    if settingsManager.settings.showUVIndex, let uvMax = uvIndexMax {
+                        let category = UVIndexCategory(uvIndex: uvMax)
+                        HStack(spacing: 4) {
+                            Text("UV:")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text("\(Int(uvMax.rounded()))")
+                                .font(.caption2)
+                                .fontWeight(.semibold)
+                                .padding(.horizontal, 4)
+                                .padding(.vertical, 2)
+                                .background(category.color.opacity(0.2))
+                                .foregroundColor(category.color)
+                                .cornerRadius(4)
+                        }
+                        .accessibilityHidden(true)
+                    }
+                    
+                    if settingsManager.settings.showDaylightDuration, let daylight = daylightDuration {
+                        HStack(spacing: 4) {
+                            Image(systemName: "sun.max")
+                                .font(.caption2)
+                            Text(formatDuration(daylight))
+                                .font(.caption2)
+                        }
+                        .foregroundColor(.secondary)
+                        .accessibilityHidden(true)
+                    }
+                    
+                    if settingsManager.settings.showSunshineDuration, let sunshine = sunshineDuration {
+                        HStack(spacing: 4) {
+                            Image(systemName: "sun.and.horizon")
+                                .font(.caption2)
+                            Text(formatDuration(sunshine))
+                                .font(.caption2)
+                        }
+                        .foregroundColor(.secondary)
+                        .accessibilityHidden(true)
+                    }
+                    
+                    Spacer()
+                }
+                .padding(.leading, 8)
             }
-            .accessibilityHidden(true)
         }
         .padding(.vertical, 8)
         .accessibilityElement(children: .ignore)
