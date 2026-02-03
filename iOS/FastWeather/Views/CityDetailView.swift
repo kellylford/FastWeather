@@ -865,6 +865,8 @@ struct DailyForecastRow: View {
                     text += ", \(formatPrecipitation(rainfall)) of rain"
                 } else if let precip = precipitation, precip > 0 {
                     text += ", \(formatPrecipitation(precip)) expected"
+                } else {
+                    text += ", trace amounts expected"
                 }
             }
         } else if settingsManager.settings.dailyShowPrecipitationAmount {
@@ -959,6 +961,20 @@ struct DailyForecastRow: View {
                             Text(formatPrecipitation(precip))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
+                        }
+                        .frame(width: 60)
+                        .accessibilityHidden(true)
+                    } else if settingsManager.settings.dailyShowPrecipitationProbability,
+                              let prob = precipitationProbability, prob > 0 {
+                        // Show "trace" when there's probability but no measurable amount
+                        HStack(spacing: 4) {
+                            Image(systemName: "drop.fill")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                            Text("trace")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .italic()
                         }
                         .frame(width: 60)
                         .accessibilityHidden(true)
