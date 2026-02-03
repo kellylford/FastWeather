@@ -1425,6 +1425,7 @@ function renderStateCitiesFlatWithWeather(container, citiesData) {
             details.className = 'weather-details';
             
             const forecastDetails = document.createElement('dl');
+            forecastDetails.className = 'weather-details';
             let hasForecastData = false;
             
             // Render fields in custom order
@@ -2208,6 +2209,7 @@ function createCityCard(cityName, lat, lon, weather, index) {
         details.className = 'weather-details';
         
         const forecastDetails = document.createElement('dl');
+        forecastDetails.className = 'weather-details';
         let hasForecastData = false;
         
         // Render fields in custom order
