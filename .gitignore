@@ -42,3 +42,10 @@ README.old.md
 # Test files
 test_*.py
 iOS/FastWeather.xcodeproj/xcshareddata/xcschemes/FastWeather.xcscheme
+
+# Node modules
+node_modules/
+package-lock.json
+
+# Web test files
+webapp/test-role-fix.html

@@ -1399,7 +1399,7 @@ function renderStateCitiesFlatWithWeather(container, citiesData) {
     container.setAttribute('role', 'list');
     
     citiesData.forEach((cityData) => {
-        const card = document.createElement('article');
+        const card = document.createElement('div');
         card.className = 'city-card state-city-card';
         card.setAttribute('role', 'listitem');
         
@@ -2175,7 +2175,7 @@ function renderFlatView(container) {
 
 // Create city card
 function createCityCard(cityName, lat, lon, weather, index) {
-    const card = document.createElement('article');
+    const card = document.createElement('div');
     card.className = 'city-card';
     card.setAttribute('role', 'listitem');
     
