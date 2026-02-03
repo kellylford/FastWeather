@@ -2340,7 +2340,7 @@ function createCityCard(cityName, lat, lon, weather, index) {
         () => showHistoricalWeather(cityName, lat, lon)
     );
     historyBtn.className = 'feature-btn';
-    historyBtn.setAttribute('aria-label', `View historical weather for ${cityName}`);
+    historyBtn.setAttribute('aria-label', `History - View historical weather for ${cityName}`);
     featureActions.appendChild(historyBtn);
     
     // Expected Precipitation button
@@ -2358,7 +2358,7 @@ function createCityCard(cityName, lat, lon, weather, index) {
         () => showWeatherAroundMe(cityName, lat, lon)
     );
     aroundBtn.className = 'feature-btn';
-    aroundBtn.setAttribute('aria-label', `View weather around ${cityName}`);
+    aroundBtn.setAttribute('aria-label', `Around Me - View weather around ${cityName}`);
     featureActions.appendChild(aroundBtn);
     
     // Weather Alert badge (will be populated asynchronously)
@@ -2629,7 +2629,7 @@ function renderTableView(container) {
         // Feature buttons with icons
         const historyBtn = createButton('📊', () => showHistoricalWeather(cityName, lat, lon));
         historyBtn.className = 'icon-btn-small feature-btn-small';
-        historyBtn.setAttribute('aria-label', `View historical weather for ${cityName}`);
+        historyBtn.setAttribute('aria-label', `History - View historical weather for ${cityName}`);
         historyBtn.title = 'Historical Weather';
         actionsDiv.appendChild(historyBtn);
         
@@ -2641,7 +2641,7 @@ function renderTableView(container) {
         
         const aroundBtn = createButton('🧭', () => showWeatherAroundMe(cityName, lat, lon));
         aroundBtn.className = 'icon-btn-small feature-btn-small';
-        aroundBtn.setAttribute('aria-label', `View weather around ${cityName}`);
+        aroundBtn.setAttribute('aria-label', `Around Me - View weather around ${cityName}`);
         aroundBtn.title = 'Weather Around Me';
         actionsDiv.appendChild(aroundBtn);
         
