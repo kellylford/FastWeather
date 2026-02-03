@@ -1,4 +1,76 @@
 {
+  "Antarctica": [
+    {
+      "name": "McMurdo Station",
+      "state": "Ross Island",
+      "country": "Antarctica",
+      "lat": -77.85,
+      "lon": 166.67
+    },
+    {
+      "name": "Amundsen-Scott South Pole Station",
+      "state": "South Pole",
+      "country": "Antarctica",
+      "lat": -90.0,
+      "lon": 0.0
+    },
+    {
+      "name": "Palmer Station",
+      "state": "Anvers Island",
+      "country": "Antarctica",
+      "lat": -64.77,
+      "lon": -64.05
+    },
+    {
+      "name": "Rothera Research Station",
+      "state": "Adelaide Island",
+      "country": "Antarctica",
+      "lat": -67.57,
+      "lon": -68.13
+    },
+    {
+      "name": "Casey Station",
+      "state": "Wilkes Land",
+      "country": "Antarctica",
+      "lat": -66.28,
+      "lon": 110.53
+    },
+    {
+      "name": "Davis Station",
+      "state": "Vestfold Hills",
+      "country": "Antarctica",
+      "lat": -68.58,
+      "lon": 77.97
+    },
+    {
+      "name": "Mawson Station",
+      "state": "Mac. Robertson Land",
+      "country": "Antarctica",
+      "lat": -67.60,
+      "lon": 62.87
+    },
+    {
+      "name": "Vostok Station",
+      "state": "Princess Elizabeth Land",
+      "country": "Antarctica",
+      "lat": -78.47,
+      "lon": 106.83
+    },
+    {
+      "name": "Halley Research Station",
+      "state": "Brunt Ice Shelf",
+      "country": "Antarctica",
+      "lat": -75.58,
+      "lon": -26.65
+    },
+    {
+      "name": "Concordia Station",
+      "state": "Dome C",
+      "country": "Antarctica",
+      "lat": -75.10,
+      "lon": 123.38
+    }
+  ],
   "Argentina": [
     {
       "name": "Buenos Aires",
