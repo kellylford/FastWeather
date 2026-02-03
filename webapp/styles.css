@@ -552,10 +552,12 @@ button:disabled {
 
 .remove-btn, .remove-btn-small {
     background-color: var(--button-danger);
+    color: white;
 }
 
 .remove-btn:hover, .remove-btn-small:hover {
     background-color: var(--button-danger-hover);
+    color: white;
 }
 
 .back-btn {
