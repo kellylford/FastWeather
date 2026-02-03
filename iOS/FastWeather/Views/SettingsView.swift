@@ -223,44 +223,8 @@ struct SettingsView: View {
                         .onChange(of: settingsManager.settings.showUVIndex) {
                             settingsManager.saveSettings()
                         }
-                        .accessibilityLabel("Show UV Index in city list")
-                }
-                
-                // Today's Forecast section
-                Section(header: Text("Today's Forecast"),
-                       footer: Text("Configure alerts and warnings shown in the Today's Forecast summary.")) {
-                    Toggle("Precipitation Alerts", isOn: $settingsManager.settings.showPrecipitationProbability)
-                        .onChange(of: settingsManager.settings.showPrecipitationProbability) {
-                            settingsManager.saveSettings()
-                        }
-                        .accessibilityLabel("Show precipitation probability alerts")
-                        .accessibilityHint("Shows alert when precipitation probability exceeds 20 percent")
-                    
-                    Toggle("UV Warnings", isOn: $settingsManager.settings.showUVIndex)
-                        .onChange(of: settingsManager.settings.showUVIndex) {
-                            settingsManager.saveSettings()
-                        }
-                        .accessibilityLabel("Show UV index warnings")
-                        .accessibilityHint("Shows warning when UV index is 6 or higher")
-                    
-                    Toggle("Wind Alerts", isOn: $settingsManager.settings.showWindGusts)
-                        .onChange(of: settingsManager.settings.showWindGusts) {
-                            settingsManager.saveSettings()
-                        }
-                        .accessibilityLabel("Show wind speed alerts")
-                        .accessibilityHint("Shows alert when wind speed exceeds 25 kilometers per hour")
-                    
-                    Toggle("Daylight Duration", isOn: $settingsManager.settings.showDaylightDuration)
-                        .onChange(of: settingsManager.settings.showDaylightDuration) {
-                            settingsManager.saveSettings()
-                        }
-                        .accessibilityLabel("Show daylight duration")
-                    
-                    Toggle("Sunshine Duration", isOn: $settingsManager.settings.showSunshineDuration)
-                        .onChange(of: settingsManager.settings.showSunshineDuration) {
-                            settingsManager.saveSettings()
-                        }
-                        .accessibilityLabel("Show sunshine duration")
+                        .accessibilityLabel("UV Index")
+                        .accessibilityHint(settingsManager.settings.showUVIndex ? "Enabled, double tap to disable" : "Disabled, double tap to enable")
                 }
                 
                 // Current Weather Detail Sections
@@ -514,12 +478,38 @@ struct SettingsView: View {
                 Text("• Sunrise, Sunset times")
                     .font(.caption)
                     .foregroundColor(.secondary)
+                
+                Toggle("Precipitation Alerts", isOn: $settingsManager.settings.showPrecipitationProbability)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.showPrecipitationProbability) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Show precipitation alerts")
+                    .accessibilityHint("Shows alert when precipitation exceeds 20 percent")
+                
+                Toggle("UV Warnings", isOn: $settingsManager.settings.showUVIndex)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.showUVIndex) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Show UV warnings")
+                    .accessibilityHint("Shows warning when UV index is 6 or higher")
+                
+                Toggle("Wind Alerts", isOn: $settingsManager.settings.showWindGusts)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.showWindGusts) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Show wind alerts")
+                    .accessibilityHint("Shows alert when wind exceeds 25 kilometers per hour")
+                
                 Toggle("Daylight Duration", isOn: $settingsManager.settings.showDaylightDuration)
                     .font(.caption)
                     .onChange(of: settingsManager.settings.showDaylightDuration) {
                         settingsManager.saveSettings()
                     }
                     .accessibilityLabel("Show daylight duration")
+                
                 Toggle("Sunshine Duration", isOn: $settingsManager.settings.showSunshineDuration)
                     .font(.caption)
                     .onChange(of: settingsManager.settings.showSunshineDuration) {
