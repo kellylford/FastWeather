@@ -129,6 +129,22 @@ struct SettingsView: View {
                     .accessibilityLabel("Pressure unit, currently \(settingsManager.settings.pressureUnit.rawValue)")
                 }
                 
+                // Features section
+                Section(header: Text("Features"),
+                       footer: Text("Enable or disable app features.")) {
+                    Toggle("Expected Precipitation", isOn: $featureFlags.radarEnabled)
+                        .accessibilityLabel("Expected Precipitation feature")
+                        .accessibilityHint("Shows precipitation forecast visualization")
+                    
+                    Toggle("Weather Around Me", isOn: $featureFlags.weatherAroundMeEnabled)
+                        .accessibilityLabel("Weather Around Me feature")
+                        .accessibilityHint("Compare weather conditions in nearby cities")
+                    
+                    Toggle("International Weather Alerts", isOn: $featureFlags.weatherKitAlertsEnabled)
+                        .accessibilityLabel("International Weather Alerts")
+                        .accessibilityHint("Enable weather alerts for international cities using Apple WeatherKit. US cities always use National Weather Service.")
+                }
+                
                 // Enhanced Weather Data section
                 Section(header: Text("Enhanced Weather Data"),
                        footer: Text("Additional weather information available from Open-Meteo API.")) {

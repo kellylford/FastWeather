@@ -49,22 +49,7 @@ struct UVIndexCategory {
 func getUVIndexDescription(_ uvIndex: Double?) -> String {
     guard let uv = uvIndex else { return "UV data unavailable" }
     let category = UVIndexCategory(uvIndex: uv)
-    var description = "UV Index: \(Int(uv.rounded())) (\(category.category))"
-    
-    switch uv {
-    case 0...2:
-        description += " - Minimal protection needed"
-    case 2...5:
-        description += " - Use SPF 30+ sunscreen"
-    case 5...7:
-        description += " - Use SPF 30+ sunscreen, seek shade"
-    case 7...10:
-        description += " - Use SPF 50+ sunscreen, avoid midday sun"
-    default:
-        description += " - Take all precautions, stay indoors if possible"
-    }
-    
-    return description
+    return "UV Index: \(Int(uv.rounded())) (\(category.category))"
 }
 
 // MARK: - UV Index Badge View Component

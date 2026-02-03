@@ -41,21 +41,188 @@ struct CityDetailView: View {
         case .todaysForecast:
             if let daily = weather.daily {
                 GroupBox(label: Label("Today's Forecast", systemImage: "calendar")) {
-                    VStack(spacing: 12) {
-                        if !daily.temperature2mMax.isEmpty, let maxTemp = daily.temperature2mMax[0] {
-                            DetailRow(label: "High", value: formatTemperature(maxTemp))
-                            Divider()
+                    VStack(alignment: .leading, spacing: 16) {
+                        // Weather summary with condition
+                        if let weatherCode = daily.weatherCode?[0], let code = WeatherCode(rawValue: weatherCode) {
+                            HStack(spacing: 8) {
+                                Image(systemName: code.systemImageName)
+                                    .font(.title2)
+                                    .foregroundColor(.blue)
+                                    .accessibilityHidden(true)
+                                Text(code.description)
+                                    .font(.headline)
+                            }
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel("Conditions: \(code.description)")
                         }
-                        if !daily.temperature2mMin.isEmpty, let minTemp = daily.temperature2mMin[0] {
-                            DetailRow(label: "Low", value: formatTemperature(minTemp))
-                            Divider()
+                        
+                        // Temperature range
+                        if !daily.temperature2mMax.isEmpty, let maxTemp = daily.temperature2mMax[0],
+                           !daily.temperature2mMin.isEmpty, let minTemp = daily.temperature2mMin[0] {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Temperature Range")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .accessibilityHidden(true)
+                                HStack {
+                                    Text(formatTemperature(minTemp))
+                                        .font(.title3)
+                                    Text("to")
+                                        .foregroundColor(.secondary)
+                                        .accessibilityHidden(true)
+                                    Text(formatTemperature(maxTemp))
+                                        .font(.title3)
+                                        .fontWeight(.semibold)
+                                }
+                            }
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel("Temperature: Low \(formatTemperature(minTemp)), High \(formatTemperature(maxTemp))")
                         }
-                        if let sunriseArray = daily.sunrise, !sunriseArray.isEmpty, let sunrise = sunriseArray[0] {
-                            DetailRow(label: "Sunrise", value: formatTime(sunrise))
-                            Divider()
+                        
+                        // Precipitation alert (only if significant)
+                        if settingsManager.settings.showPrecipitationProbability,
+                           let precipProb = daily.precipitationProbabilityMax?[0], precipProb > 20 {
+                            HStack(spacing: 8) {
+                                Image(systemName: "drop.fill")
+                                    .foregroundColor(.blue)
+                                    .accessibilityHidden(true)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("\(precipProb)% chance of precipitation")
+                                        .font(.subheadline)
+                                    if let precipSum = daily.precipitationSum?[0], precipSum > 0 {
+                                        Text("\(formatPrecipitation(precipSum)) expected")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                            }
+                            .padding(8)
+                            .background(Color.blue.opacity(0.1))
+                            .cornerRadius(8)
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel({
+                                var label = "\(precipProb) percent chance of precipitation"
+                                if let precipSum = daily.precipitationSum?[0], precipSum > 0 {
+                                    label += ", \(formatPrecipitation(precipSum)) expected"
+                                }
+                                return label
+                            }())
                         }
-                        if let sunsetArray = daily.sunset, !sunsetArray.isEmpty, let sunset = sunsetArray[0] {
-                            DetailRow(label: "Sunset", value: formatTime(sunset))
+                        
+                        // UV warning (only if significant)
+                        if settingsManager.settings.showUVIndex,
+                           let uvMax = daily.uvIndexMax?[0], uvMax >= 6 {
+                            let category = UVIndexCategory(uvIndex: uvMax)
+                            HStack(spacing: 8) {
+                                Image(systemName: "sun.max.fill")
+                                    .foregroundColor(category.color)
+                                    .accessibilityHidden(true)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("UV Index: \(Int(uvMax.rounded())) (\(category.category))")
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                                    Text("Sun protection recommended")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            .padding(8)
+                            .background(category.color.opacity(0.1))
+                            .cornerRadius(8)
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel("UV Index: \(Int(uvMax.rounded())) (\(category.category)), Sun protection recommended")
+                        }
+                        
+                        // Wind alert (only if significant)
+                        if settingsManager.settings.showWindGusts,
+                           let windMax = daily.windSpeed10mMax?[0], windMax > 25 {
+                            HStack(spacing: 8) {
+                                Image(systemName: "wind")
+                                    .foregroundColor(.orange)
+                                    .accessibilityHidden(true)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Winds up to \(formatWindSpeed(windMax))")
+                                        .font(.subheadline)
+                                    if let windDir = daily.winddirection10mDominant?[0] {
+                                        Text("From \(degreesToCardinalLong(windDir))")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                            }
+                            .padding(8)
+                            .background(Color.orange.opacity(0.1))
+                            .cornerRadius(8)
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel({
+                                var label = "Winds up to \(formatWindSpeed(windMax))"
+                                if let windDir = daily.winddirection10mDominant?[0] {
+                                    label += ", From \(degreesToCardinalLong(windDir))"
+                                }
+                                return label
+                            }())
+                        }
+                        
+                        Divider()
+                        
+                        // Sun times and daylight
+                        VStack(spacing: 8) {
+                            if let sunriseArray = daily.sunrise, !sunriseArray.isEmpty, let sunrise = sunriseArray[0],
+                               let sunsetArray = daily.sunset, !sunsetArray.isEmpty, let sunset = sunsetArray[0] {
+                                HStack {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "sunrise.fill")
+                                            .foregroundColor(.orange)
+                                            .accessibilityHidden(true)
+                                        Text(formatTime(sunrise))
+                                            .font(.subheadline)
+                                    }
+                                    .accessibilityElement(children: .ignore)
+                                    .accessibilityLabel("Sunrise: \(formatTime(sunrise))")
+                                    
+                                    Spacer()
+                                    
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "sunset.fill")
+                                            .foregroundColor(.orange)
+                                            .accessibilityHidden(true)
+                                        Text(formatTime(sunset))
+                                            .font(.subheadline)
+                                    }
+                                    .accessibilityElement(children: .ignore)
+                                    .accessibilityLabel("Sunset: \(formatTime(sunset))")
+                                }
+                            }
+                            
+                            if settingsManager.settings.showDaylightDuration,
+                               let daylight = daily.daylightDuration?[0] {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "sun.max")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                        .accessibilityHidden(true)
+                                    Text("\(formatDuration(daylight)) of daylight")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                .accessibilityElement(children: .ignore)
+                                .accessibilityLabel("\(formatDuration(daylight)) of daylight")
+                            }
+                            
+                            if settingsManager.settings.showSunshineDuration,
+                               let sunshine = daily.sunshineDuration?[0], sunshine > 0 {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "sun.and.horizon")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                        .accessibilityHidden(true)
+                                    Text("\(formatDuration(sunshine)) of sunshine")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                .accessibilityElement(children: .ignore)
+                                .accessibilityLabel("\(formatDuration(sunshine)) of sunshine")
+                            }
                         }
                     }
                     .padding(.vertical, 8)
@@ -588,7 +755,7 @@ struct HourlyForecastCard: View {
         }
         
         if settingsManager.settings.showPrecipitationProbability, let prob = precipitationProbability, prob > 0 {
-            label += ", \(prob) percent chance of rain"
+            label += ", \(prob) percent chance of precipitation"
         } else if precipitation > 0 {
             label += ", precipitation \(formatPrecipitation(precipitation))"
         }
@@ -658,7 +825,7 @@ struct DailyForecastRow: View {
         text += ", High \(formatTemperature(high)), Low \(formatTemperature(low))"
         
         if settingsManager.settings.showPrecipitationProbability, let prob = precipitationProbability, prob > 0 {
-            text += ", \(prob) percent chance of rain"
+            text += ", \(prob) percent chance of precipitation"
         } else if let precip = precipitation, precip > 0 {
             text += ", precipitation \(formatPrecipitation(precip))"
         }

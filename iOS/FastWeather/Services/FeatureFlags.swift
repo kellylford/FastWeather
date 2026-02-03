@@ -57,15 +57,15 @@ class FeatureFlags: ObservableObject {
         self.weatherKitAlertsEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_alerts_enabled")
         
         // Default values (if first launch or not set)
-        // Change these to true/false to enable/disable features during development
+        // All features enabled by default for production
         if !UserDefaults.standard.contains(key: "feature_radar_enabled") {
-            self.radarEnabled = false  // Disabled by default - set to true to test
+            self.radarEnabled = true  // Enabled by default
         }
         if !UserDefaults.standard.contains(key: "feature_weather_around_me_enabled") {
-            self.weatherAroundMeEnabled = false  // Disabled by default - set to true to test
+            self.weatherAroundMeEnabled = true  // Enabled by default
         }
         if !UserDefaults.standard.contains(key: "feature_user_guide_enabled") {
-            self.userGuideEnabled = false  // Disabled by default
+            self.userGuideEnabled = true  // Enabled by default
         }
         if !UserDefaults.standard.contains(key: "feature_weatherkit_alerts_enabled") {
             self.weatherKitAlertsEnabled = true  // Enabled by default for international alerts
@@ -76,9 +76,9 @@ class FeatureFlags: ObservableObject {
     
     /// Reset all feature flags to defaults
     func resetToDefaults() {
-        radarEnabled = false
-        weatherAroundMeEnabled = false
-        userGuideEnabled = false
+        radarEnabled = true
+        weatherAroundMeEnabled = true
+        userGuideEnabled = true
         weatherKitAlertsEnabled = true  // Default: enabled
         print("🔧 Feature flags reset to defaults")
     }

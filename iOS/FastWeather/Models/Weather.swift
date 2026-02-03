@@ -161,6 +161,8 @@ struct WeatherData: Codable {
         let uvIndexMax: [Double?]?
         let daylightDuration: [Double?]?
         let sunshineDuration: [Double?]?
+        let windSpeed10mMax: [Double?]?
+        let winddirection10mDominant: [Int?]?
         
         enum CodingKeys: String, CodingKey {
             case temperature2mMax = "temperature_2m_max"
@@ -173,6 +175,8 @@ struct WeatherData: Codable {
             case uvIndexMax = "uv_index_max"
             case daylightDuration = "daylight_duration"
             case sunshineDuration = "sunshine_duration"
+            case windSpeed10mMax = "windspeed_10m_max"
+            case winddirection10mDominant = "winddirection_10m_dominant"
         }
     }
     
