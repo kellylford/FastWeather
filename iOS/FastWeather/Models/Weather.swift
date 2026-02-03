@@ -157,6 +157,8 @@ struct WeatherData: Codable {
         let sunset: [String?]?   // Optional for basic mode (not requested)
         let weatherCode: [Int?]? // Optional for basic mode (not requested)
         let precipitationSum: [Double?]? // Optional for basic mode (not requested)
+        let rainSum: [Double?]? // Amount that fell as rain (mm)
+        let snowfallSum: [Double?]? // Amount that fell as snow (cm)
         let precipitationProbabilityMax: [Int?]?
         let uvIndexMax: [Double?]?
         let daylightDuration: [Double?]?
@@ -171,6 +173,8 @@ struct WeatherData: Codable {
             case sunset
             case weatherCode = "weather_code"
             case precipitationSum = "precipitation_sum"
+            case rainSum = "rain_sum"
+            case snowfallSum = "snowfall_sum"
             case precipitationProbabilityMax = "precipitation_probability_max"
             case uvIndexMax = "uv_index_max"
             case daylightDuration = "daylight_duration"

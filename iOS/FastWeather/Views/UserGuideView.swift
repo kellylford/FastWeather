@@ -10,6 +10,15 @@ import SwiftUI
 struct UserGuideView: View {
     @Environment(\.dismiss) private var dismiss
     
+    // Get app version and build number from Info.plist
+    private var appVersion: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
+    }
+    
+    private var buildNumber: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
+    }
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
@@ -311,9 +320,10 @@ struct UserGuideView: View {
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
                     
-                    Text("Version 1.0")
+                    Text("Version \(appVersion) (build \(buildNumber))")
                         .font(.caption)
                         .foregroundColor(.secondary)
+                        .accessibilityLabel("Version \(appVersion) build \(buildNumber)")
                 }
                 .padding(.top, 24)
                 .padding(.bottom, 40)

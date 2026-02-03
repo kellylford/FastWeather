@@ -193,13 +193,38 @@ struct AppSettings: Codable {
     var distanceUnit: DistanceUnit = DistanceUnit.defaultUnit
     var historicalYearsBack: Int = 20
     
-    // Enhanced weather data display options
-    var showUVIndex: Bool = true
-    var showWindGusts: Bool = true
-    var showPrecipitationProbability: Bool = true
+    // Granular UV Index display options (by section)
+    var showUVIndexInCurrentConditions: Bool = true
+    var showUVIndexInTodaysForecast: Bool = true  // Shows as warnings when high
+    var showUVIndexInDailyForecast: Bool = false  // Off by default for 16-day
+    var showUVIndexInCityList: Bool = false  // Off by default (reduces clutter)
+    
+    // Granular Wind Gusts display options (by section)
+    var showWindGustsInCurrentConditions: Bool = true
+    var showWindGustsInTodaysForecast: Bool = true  // Shows as alerts when high
+    
+    // Granular Precipitation Probability options (by section)
+    var showPrecipitationProbabilityInPrecipitation: Bool = true
+    var showPrecipitationProbabilityInTodaysForecast: Bool = true  // Shows as alerts
+    
+    // Other enhanced weather data display options
+    var showPrecipitationAmount: Bool = true  // Show rain/snow amounts
     var showDewPoint: Bool = false  // Off by default (advanced)
     var showDaylightDuration: Bool = true
     var showSunshineDuration: Bool = false  // Off by default
+    
+    // Hourly forecast data items
+    var hourlyShowTemperature: Bool = true
+    var hourlyShowConditions: Bool = true
+    var hourlyShowPrecipitationProbability: Bool = true
+    var hourlyShowWind: Bool = true
+    
+    // Daily forecast data items
+    var dailyShowHighLow: Bool = true
+    var dailyShowConditions: Bool = true
+    var dailyShowPrecipitationProbability: Bool = true
+    var dailyShowPrecipitationAmount: Bool = true
+    var dailyShowWind: Bool = false  // Off by default (reduces clutter)
     
     // Private storage for weatherAroundMeDistance with validation
     private var _weatherAroundMeDistance: Double = DistanceUnit.defaultUnit == .miles ? 150 : 240
@@ -260,12 +285,25 @@ struct AppSettings: Codable {
     enum CodingKeys: String, CodingKey {
         case viewMode, displayMode, temperatureUnit, windSpeedUnit
         case precipitationUnit, pressureUnit, distanceUnit, historicalYearsBack
-        case showUVIndex, showWindGusts, showPrecipitationProbability
+        // Granular UV Index settings
+        case showUVIndexInCurrentConditions, showUVIndexInTodaysForecast
+        case showUVIndexInDailyForecast, showUVIndexInCityList
+        // Granular Wind Gusts settings
+        case showWindGustsInCurrentConditions, showWindGustsInTodaysForecast
+        // Granular Precipitation Probability settings
+        case showPrecipitationProbabilityInPrecipitation, showPrecipitationProbabilityInTodaysForecast
+        // Other enhanced data
+        case showPrecipitationAmount
         case showDewPoint, showDaylightDuration, showSunshineDuration
+        case hourlyShowTemperature, hourlyShowConditions, hourlyShowPrecipitationProbability, hourlyShowWind
+        case dailyShowHighLow, dailyShowConditions, dailyShowPrecipitationProbability, dailyShowPrecipitationAmount, dailyShowWind
         case _weatherAroundMeDistance = "weatherAroundMeDistance"
         case weatherFields, detailCategories
+        // Legacy properties
         case showTemperature, showConditions, showFeelsLike, showHumidity
         case showWindSpeed, showWindDirection, showHighTemp, showLowTemp
         case showSunrise, showSunset
+        // Deprecated (for migration)
+        case showUVIndex, showWindGusts, showPrecipitationProbability
     }
 }

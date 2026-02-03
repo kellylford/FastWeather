@@ -80,7 +80,7 @@ class WeatherService: ObservableObject {
             "longitude": String(city.longitude),
             "current": "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility,wind_gusts_10m,uv_index,dewpoint_2m",
             "hourly": "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,windgusts_10m,uv_index,dewpoint_2m",
-            "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration,windspeed_10m_max,winddirection_10m_dominant",
+            "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,rain_sum,snowfall_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration,windspeed_10m_max,winddirection_10m_dominant",
             "forecast_days": "16",
             "timezone": "auto"
         ]
@@ -160,7 +160,7 @@ class WeatherService: ObservableObject {
             "longitude": String(longitude),
             "current": "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility,wind_gusts_10m,uv_index,dewpoint_2m",
             "hourly": "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,windgusts_10m,uv_index,dewpoint_2m",
-            "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration,windspeed_10m_max,winddirection_10m_dominant",
+            "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,rain_sum,snowfall_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration,windspeed_10m_max,winddirection_10m_dominant",
             "forecast_days": "16",
             "timezone": "auto"
         ]
@@ -382,9 +382,39 @@ class WeatherService: ObservableObject {
     private var alertsCache: [UUID: (alerts: [WeatherAlert], timestamp: Date)] = [:]
     private let alertsCacheMinutes: TimeInterval = 5
     
+    /// Countries where WeatherKit alerts are known to work
+    /// Source: Apple WeatherKit documentation and real-world testing
+    private let weatherKitSupportedCountries = Set([
+        "United States",
+        "Canada",
+        "United Kingdom",
+        "Germany",
+        "France",
+        "Spain",
+        "Italy",
+        "Netherlands",
+        "Belgium",
+        "Austria",
+        "Switzerland",
+        "Denmark",
+        "Sweden",
+        "Norway",
+        "Finland",
+        "Ireland",
+        "Portugal",
+        "Japan",
+        "Australia",
+        "New Zealand"
+    ])
+    
+    /// Checks if WeatherKit alerts are likely supported for this country
+    private func isWeatherKitSupported(for city: City) -> Bool {
+        return weatherKitSupportedCountries.contains(city.country)
+    }
+    
     /// Fetches severe weather alerts using appropriate source based on location
     /// - US cities: National Weather Service (detailed alerts with full text)
-    /// - International: Apple WeatherKit (when feature flag enabled)
+    /// - International: Apple WeatherKit (when feature flag enabled AND country supported)
     /// - Returns: Array of active weather alerts (empty if no alerts or service unavailable)
     func fetchNWSAlerts(for city: City) async throws -> [WeatherAlert] {
         // Check cache first
@@ -401,10 +431,15 @@ class WeatherService: ObservableObject {
             return try await fetchNWSAlertsDirectly(for: city)
         }
         
-        // International cities: Use WeatherKit if enabled
+        // International cities: Use WeatherKit if enabled AND country supported
         if FeatureFlags.shared.weatherKitAlertsEnabled {
-            print("🌍 Using WeatherKit for international city: \(city.name)")
-            return try await fetchWeatherKitAlerts(for: city)
+            if isWeatherKitSupported(for: city) {
+                print("🌍 Using WeatherKit for international city: \(city.name) (\(city.country))")
+                return try await fetchWeatherKitAlerts(for: city)
+            } else {
+                print("🚫 WeatherKit not supported for \(city.country), skipping alert request for \(city.name)")
+                return []
+            }
         } else {
             print("ℹ️ WeatherKit disabled, no alerts for international city: \(city.name)")
             return []

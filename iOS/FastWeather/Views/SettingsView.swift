@@ -14,6 +14,15 @@ struct SettingsView: View {
     @State private var showingResetAlert = false
     @State private var showingDeveloperSettings = false
     
+    // Get app version and build number from Info.plist
+    private var appVersion: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
+    }
+    
+    private var buildNumber: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
+    }
+    
     var body: some View {
         NavigationView {
             Form {
@@ -219,12 +228,12 @@ struct SettingsView: View {
                     }
                     
                     // UV Index for list view
-                    Toggle("UV Index", isOn: $settingsManager.settings.showUVIndex)
-                        .onChange(of: settingsManager.settings.showUVIndex) {
+                    Toggle("UV Index", isOn: $settingsManager.settings.showUVIndexInCityList)
+                        .onChange(of: settingsManager.settings.showUVIndexInCityList) {
                             settingsManager.saveSettings()
                         }
                         .accessibilityLabel("UV Index")
-                        .accessibilityHint(settingsManager.settings.showUVIndex ? "Enabled, double tap to disable" : "Disabled, double tap to enable")
+                        .accessibilityHint(settingsManager.settings.showUVIndexInCityList ? "Enabled, double tap to disable" : "Disabled, double tap to enable")
                 }
                 
                 // Current Weather Detail Sections
@@ -330,11 +339,11 @@ struct SettingsView: View {
                     HStack {
                         Text("Version")
                         Spacer()
-                        Text("1.0 (build 16)")
+                        Text("\(appVersion) (build \(buildNumber))")
                             .foregroundColor(.secondary)
                     }
                     .accessibilityElement(children: .combine)
-                    .accessibilityLabel("Version 1.0 build 16")
+                    .accessibilityLabel("Version \(appVersion) build \(buildNumber)")
                     
                     Link("Weather Data by Open-Meteo", destination: URL(string: "https://open-meteo.com")!)
                         .accessibilityLabel("Weather data provided by Open-Meteo")
@@ -441,35 +450,35 @@ struct SettingsView: View {
                 Text("• Humidity, Pressure")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                Toggle("Wind Gusts", isOn: $settingsManager.settings.showWindGusts)
+                Toggle("Wind Gusts", isOn: $settingsManager.settings.showWindGustsInCurrentConditions)
                     .font(.caption)
-                    .onChange(of: settingsManager.settings.showWindGusts) {
+                    .onChange(of: settingsManager.settings.showWindGustsInCurrentConditions) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Show wind gusts in current conditions")
-                Toggle("UV Index", isOn: $settingsManager.settings.showUVIndex)
+                    .accessibilityLabel("Wind gusts in current conditions")
+                Toggle("UV Index", isOn: $settingsManager.settings.showUVIndexInCurrentConditions)
                     .font(.caption)
-                    .onChange(of: settingsManager.settings.showUVIndex) {
+                    .onChange(of: settingsManager.settings.showUVIndexInCurrentConditions) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Show UV index in current conditions")
+                    .accessibilityLabel("UV index in current conditions")
                 Toggle("Dew Point", isOn: $settingsManager.settings.showDewPoint)
                     .font(.caption)
                     .onChange(of: settingsManager.settings.showDewPoint) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Show dew point in current conditions")
+                    .accessibilityLabel("Dew point in current conditions")
                 
             case .precipitation:
                 Text("• Current precipitation")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                Toggle("Precipitation Probability", isOn: $settingsManager.settings.showPrecipitationProbability)
+                Toggle("Precipitation Probability", isOn: $settingsManager.settings.showPrecipitationProbabilityInPrecipitation)
                     .font(.caption)
-                    .onChange(of: settingsManager.settings.showPrecipitationProbability) {
+                    .onChange(of: settingsManager.settings.showPrecipitationProbabilityInPrecipitation) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Show precipitation probability")
+                    .accessibilityLabel("Precipitation probability")
                 
             case .todaysForecast:
                 Text("• Automatic daily summary")
@@ -479,28 +488,36 @@ struct SettingsView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
                 
-                Toggle("Precipitation Alerts", isOn: $settingsManager.settings.showPrecipitationProbability)
+                Toggle("Precipitation Alerts", isOn: $settingsManager.settings.showPrecipitationProbabilityInTodaysForecast)
                     .font(.caption)
-                    .onChange(of: settingsManager.settings.showPrecipitationProbability) {
+                    .onChange(of: settingsManager.settings.showPrecipitationProbabilityInTodaysForecast) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Show precipitation alerts")
-                    .accessibilityHint("Shows alert when precipitation exceeds 20 percent")
+                    .accessibilityLabel("Precipitation probability alerts")
+                    .accessibilityHint("Shows alert when precipitation probability exceeds 20 percent")
                 
-                Toggle("UV Warnings", isOn: $settingsManager.settings.showUVIndex)
+                Toggle("Precipitation Amount", isOn: $settingsManager.settings.showPrecipitationAmount)
                     .font(.caption)
-                    .onChange(of: settingsManager.settings.showUVIndex) {
+                    .onChange(of: settingsManager.settings.showPrecipitationAmount) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Show UV warnings")
+                    .accessibilityLabel("Precipitation amount")
+                    .accessibilityHint("Shows rain or snow amounts when available")
+                
+                Toggle("UV Warnings", isOn: $settingsManager.settings.showUVIndexInTodaysForecast)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.showUVIndexInTodaysForecast) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("UV warnings")
                     .accessibilityHint("Shows warning when UV index is 6 or higher")
                 
-                Toggle("Wind Alerts", isOn: $settingsManager.settings.showWindGusts)
+                Toggle("Wind Alerts", isOn: $settingsManager.settings.showWindGustsInTodaysForecast)
                     .font(.caption)
-                    .onChange(of: settingsManager.settings.showWindGusts) {
+                    .onChange(of: settingsManager.settings.showWindGustsInTodaysForecast) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Show wind alerts")
+                    .accessibilityLabel("Wind alerts")
                     .accessibilityHint("Shows alert when wind exceeds 25 kilometers per hour")
                 
                 Toggle("Daylight Duration", isOn: $settingsManager.settings.showDaylightDuration)
@@ -508,30 +525,86 @@ struct SettingsView: View {
                     .onChange(of: settingsManager.settings.showDaylightDuration) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Show daylight duration")
+                    .accessibilityLabel("Daylight duration")
                 
                 Toggle("Sunshine Duration", isOn: $settingsManager.settings.showSunshineDuration)
                     .font(.caption)
                     .onChange(of: settingsManager.settings.showSunshineDuration) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Show sunshine duration")
+                    .accessibilityLabel("Sunshine duration")
                 
             case .hourlyForecast:
-                Text("• Temperature, conditions")
+                Toggle("Temperature", isOn: $settingsManager.settings.hourlyShowTemperature)
                     .font(.caption)
-                    .foregroundColor(.secondary)
-                Text("• Precipitation, wind")
+                    .onChange(of: settingsManager.settings.hourlyShowTemperature) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Temperature in hourly forecast")
+                
+                Toggle("Conditions", isOn: $settingsManager.settings.hourlyShowConditions)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .onChange(of: settingsManager.settings.hourlyShowConditions) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Weather conditions in hourly forecast")
+                
+                Toggle("Precipitation Probability", isOn: $settingsManager.settings.hourlyShowPrecipitationProbability)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.hourlyShowPrecipitationProbability) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Precipitation probability in hourly forecast")
+                
+                Toggle("Wind", isOn: $settingsManager.settings.hourlyShowWind)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.hourlyShowWind) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Wind speed and direction in hourly forecast")
                 
             case .dailyForecast:
-                Text("• High/Low temperatures")
+                Toggle("High/Low Temperatures", isOn: $settingsManager.settings.dailyShowHighLow)
                     .font(.caption)
-                    .foregroundColor(.secondary)
-                Text("• Precipitation, wind")
+                    .onChange(of: settingsManager.settings.dailyShowHighLow) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("High and low temperatures in daily forecast")
+                
+                Toggle("Conditions", isOn: $settingsManager.settings.dailyShowConditions)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .onChange(of: settingsManager.settings.dailyShowConditions) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Weather conditions in daily forecast")
+                
+                Toggle("Precipitation Probability", isOn: $settingsManager.settings.dailyShowPrecipitationProbability)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.dailyShowPrecipitationProbability) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Precipitation probability in daily forecast")
+                
+                Toggle("Precipitation Amount", isOn: $settingsManager.settings.dailyShowPrecipitationAmount)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.dailyShowPrecipitationAmount) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Rain or snow amounts in daily forecast")
+                
+                Toggle("Wind", isOn: $settingsManager.settings.dailyShowWind)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.dailyShowWind) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Wind speed and direction in daily forecast")
+                
+                Toggle("UV Index", isOn: $settingsManager.settings.showUVIndexInDailyForecast)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.showUVIndexInDailyForecast) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("UV index in daily forecast")
                 
             case .historicalWeather:
                 Text("• Past year comparisons")

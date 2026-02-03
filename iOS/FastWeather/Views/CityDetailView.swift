@@ -80,7 +80,7 @@ struct CityDetailView: View {
                         }
                         
                         // Precipitation alert (only if significant)
-                        if settingsManager.settings.showPrecipitationProbability,
+                        if settingsManager.settings.showPrecipitationProbabilityInTodaysForecast,
                            let precipProb = daily.precipitationProbabilityMax?[0], precipProb > 20 {
                             HStack(spacing: 8) {
                                 Image(systemName: "drop.fill")
@@ -89,10 +89,21 @@ struct CityDetailView: View {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("\(precipProb)% chance of precipitation")
                                         .font(.subheadline)
-                                    if let precipSum = daily.precipitationSum?[0], precipSum > 0 {
-                                        Text("\(formatPrecipitation(precipSum)) expected")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
+                                    // Show snow or rain amount based on which is present (if setting enabled)
+                                    if settingsManager.settings.showPrecipitationAmount {
+                                        if let snowfall = daily.snowfallSum?[0], snowfall > 0 {
+                                            Text("\(formatSnowfall(snowfall)) of snow expected")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        } else if let rain = daily.rainSum?[0], rain > 0 {
+                                            Text("\(formatPrecipitation(rain)) of rain expected")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        } else if let precipSum = daily.precipitationSum?[0], precipSum > 0 {
+                                            Text("\(formatPrecipitation(precipSum)) expected")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
                                     }
                                 }
                             }
@@ -102,15 +113,21 @@ struct CityDetailView: View {
                             .accessibilityElement(children: .ignore)
                             .accessibilityLabel({
                                 var label = "\(precipProb) percent chance of precipitation"
-                                if let precipSum = daily.precipitationSum?[0], precipSum > 0 {
-                                    label += ", \(formatPrecipitation(precipSum)) expected"
+                                if settingsManager.settings.showPrecipitationAmount {
+                                    if let snowfall = daily.snowfallSum?[0], snowfall > 0 {
+                                        label += ", \(formatSnowfall(snowfall)) of snow expected"
+                                    } else if let rain = daily.rainSum?[0], rain > 0 {
+                                        label += ", \(formatPrecipitation(rain)) of rain expected"
+                                    } else if let precipSum = daily.precipitationSum?[0], precipSum > 0 {
+                                        label += ", \(formatPrecipitation(precipSum)) expected"
+                                    }
                                 }
                                 return label
                             }())
                         }
                         
                         // UV warning (only if significant)
-                        if settingsManager.settings.showUVIndex,
+                        if settingsManager.settings.showUVIndexInTodaysForecast,
                            let uvMax = daily.uvIndexMax?[0], uvMax >= 6 {
                             let category = UVIndexCategory(uvIndex: uvMax)
                             HStack(spacing: 8) {
@@ -134,7 +151,7 @@ struct CityDetailView: View {
                         }
                         
                         // Wind alert (only if significant)
-                        if settingsManager.settings.showWindGusts,
+                        if settingsManager.settings.showWindGustsInTodaysForecast,
                            let windMax = daily.windSpeed10mMax?[0], windMax > 25 {
                             HStack(spacing: 8) {
                                 Image(systemName: "wind")
@@ -241,7 +258,7 @@ struct CityDetailView: View {
                     
                     // Wind Speed with Gusts (if enabled and available)
                     if let windSpeed = weather.current.windSpeed10m {
-                        if settingsManager.settings.showWindGusts,
+                        if settingsManager.settings.showWindGustsInCurrentConditions,
                            let windGusts = weather.current.windGusts10m,
                            let windDir = weather.current.windDirection10m {
                             DetailRow(label: "Wind", value: formatWind(speed: windSpeed, direction: windDir, gusts: windGusts, unit: settingsManager.settings.windSpeedUnit.rawValue, degreesToCardinal: degreesToCardinal))
@@ -257,7 +274,7 @@ struct CityDetailView: View {
                     }
                     
                     // UV Index (if enabled and daytime)
-                    if settingsManager.settings.showUVIndex,
+                    if settingsManager.settings.showUVIndexInCurrentConditions,
                        let isDay = weather.current.isDay, isDay == 1,
                        let uvIndex = weather.current.uvIndex {
                         DetailRow(label: "UV Index", value: "\(Int(uvIndex.rounded())) (\(UVIndexCategory(uvIndex: uvIndex).category))")
@@ -364,6 +381,8 @@ struct CityDetailView: View {
                                     low: low,
                                     weatherCode: daily.weatherCode?[index],
                                     precipitation: daily.precipitationSum?[index],
+                                    rain: daily.rainSum?[index],
+                                    snow: daily.snowfallSum?[index],
                                     precipitationProbability: daily.precipitationProbabilityMax?[index],
                                     uvIndexMax: daily.uvIndexMax?[index],
                                     daylightDuration: daily.daylightDuration?[index],
@@ -606,6 +625,17 @@ struct CityDetailView: View {
         return String(format: "%.2f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
     }
     
+    private func formatSnowfall(_ cm: Double) -> String {
+        // Snow is measured in cm (API) → convert to inches for US, keep cm elsewhere
+        switch settingsManager.settings.precipitationUnit {
+        case .inches:
+            let inches = cm * 0.393701
+            return String(format: "%.1f in", inches)
+        case .millimeters:
+            return String(format: "%.1f cm", cm)
+        }
+    }
+    
     private func formatPressure(_ hPa: Double) -> String {
         let pressure = settingsManager.settings.pressureUnit.convert(hPa)
         let formatString = settingsManager.settings.pressureUnit == .hPa ? "%.0f %@" : "%.2f %@"
@@ -694,13 +724,13 @@ struct HourlyForecastCard: View {
                 .fontWeight(.semibold)
             
             // Precipitation with probability
-            if precipitation > 0 || (settingsManager.settings.showPrecipitationProbability && precipitationProbability ?? 0 > 0) {
+            if precipitation > 0 || (settingsManager.settings.showPrecipitationProbabilityInTodaysForecast && precipitationProbability ?? 0 > 0) {
                 HStack(spacing: 2) {
                     Image(systemName: "drop.fill")
                         .font(.caption2)
                         .foregroundColor(.blue)
                     
-                    if settingsManager.settings.showPrecipitationProbability, let prob = precipitationProbability, prob > 0 {
+                    if settingsManager.settings.showPrecipitationProbabilityInTodaysForecast, let prob = precipitationProbability, prob > 0 {
                         Text("\(prob)%")
                             .font(.caption2)
                             .foregroundColor(.secondary)
@@ -713,7 +743,7 @@ struct HourlyForecastCard: View {
             }
             
             // UV Index badge (if enabled and UV > 0)
-            if settingsManager.settings.showUVIndex, let uv = uvIndex, uv > 0 {
+            if settingsManager.settings.showUVIndexInTodaysForecast, let uv = uvIndex, uv > 0 {
                 let category = UVIndexCategory(uvIndex: uv)
                 Text("\(Int(uv.rounded()))")
                     .font(.caption2)
@@ -754,13 +784,13 @@ struct HourlyForecastCard: View {
             label += ", \(weatherCode.description)"
         }
         
-        if settingsManager.settings.showPrecipitationProbability, let prob = precipitationProbability, prob > 0 {
+        if settingsManager.settings.showPrecipitationProbabilityInTodaysForecast, let prob = precipitationProbability, prob > 0 {
             label += ", \(prob) percent chance of precipitation"
         } else if precipitation > 0 {
             label += ", precipitation \(formatPrecipitation(precipitation))"
         }
         
-        if settingsManager.settings.showUVIndex, let uv = uvIndex, uv > 0 {
+        if settingsManager.settings.showUVIndexInTodaysForecast, let uv = uvIndex, uv > 0 {
             label += ", \(getUVIndexDescription(uv))"
         }
         
@@ -785,6 +815,8 @@ struct DailyForecastRow: View {
     let low: Double
     let weatherCode: Int?
     let precipitation: Double?
+    let rain: Double?
+    let snow: Double?
     let precipitationProbability: Int?
     let uvIndexMax: Double?
     let daylightDuration: Double?
@@ -824,13 +856,28 @@ struct DailyForecastRow: View {
         }
         text += ", High \(formatTemperature(high)), Low \(formatTemperature(low))"
         
-        if settingsManager.settings.showPrecipitationProbability, let prob = precipitationProbability, prob > 0 {
+        if settingsManager.settings.dailyShowPrecipitationProbability, let prob = precipitationProbability, prob > 0 {
             text += ", \(prob) percent chance of precipitation"
-        } else if let precip = precipitation, precip > 0 {
-            text += ", precipitation \(formatPrecipitation(precip))"
+            if settingsManager.settings.dailyShowPrecipitationAmount {
+                if let snowfall = snow, snowfall > 0 {
+                    text += ", \(formatSnowfall(snowfall)) of snow"
+                } else if let rainfall = rain, rainfall > 0 {
+                    text += ", \(formatPrecipitation(rainfall)) of rain"
+                } else if let precip = precipitation, precip > 0 {
+                    text += ", \(formatPrecipitation(precip)) expected"
+                }
+            }
+        } else if settingsManager.settings.dailyShowPrecipitationAmount {
+            if let snowfall = snow, snowfall > 0 {
+                text += ", \(formatSnowfall(snowfall)) of snow"
+            } else if let rainfall = rain, rainfall > 0 {
+                text += ", \(formatPrecipitation(rainfall)) of rain"
+            } else if let precip = precipitation, precip > 0 {
+                text += ", precipitation \(formatPrecipitation(precip))"
+            }
         }
         
-        if settingsManager.settings.showUVIndex, let uvMax = uvIndexMax {
+        if settingsManager.settings.showUVIndexInDailyForecast, let uvMax = uvIndexMax {
             text += ", \(getUVIndexDescription(uvMax))"
         }
         
@@ -865,8 +912,8 @@ struct DailyForecastRow: View {
                 
                 Spacer()
                 
-                // Precipitation or Probability
-                if settingsManager.settings.showPrecipitationProbability, let prob = precipitationProbability, prob > 0 {
+                // Precipitation Probability
+                if settingsManager.settings.dailyShowPrecipitationProbability, let prob = precipitationProbability, prob > 0 {
                     HStack(spacing: 4) {
                         Image(systemName: "drop.fill")
                             .font(.caption)
@@ -877,17 +924,45 @@ struct DailyForecastRow: View {
                     }
                     .frame(width: 60)
                     .accessibilityHidden(true)
-                } else if let precip = precipitation, precip > 0 {
-                    HStack(spacing: 4) {
-                        Image(systemName: "drop.fill")
-                            .font(.caption)
-                            .foregroundColor(.blue)
-                        Text(formatPrecipitation(precip))
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                }
+                
+                // Precipitation Amount (can show alongside probability)
+                if settingsManager.settings.dailyShowPrecipitationAmount {
+                    // Show snow or rain amount
+                    if let snowfall = snow, snowfall > 0 {
+                        HStack(spacing: 4) {
+                            Image(systemName: "snowflake")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                            Text(formatSnowfall(snowfall))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(width: 60)
+                        .accessibilityHidden(true)
+                    } else if let rainfall = rain, rainfall > 0 {
+                        HStack(spacing: 4) {
+                            Image(systemName: "drop.fill")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                            Text(formatPrecipitation(rainfall))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(width: 60)
+                        .accessibilityHidden(true)
+                    } else if let precip = precipitation, precip > 0 {
+                        HStack(spacing: 4) {
+                            Image(systemName: "drop.fill")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                            Text(formatPrecipitation(precip))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(width: 60)
+                        .accessibilityHidden(true)
                     }
-                    .frame(width: 60)
-                    .accessibilityHidden(true)
                 }
                 
                 HStack(spacing: 8) {
@@ -903,9 +978,9 @@ struct DailyForecastRow: View {
             }
             
             // Additional details (UV, Daylight, Sunshine)
-            if settingsManager.settings.showUVIndex || settingsManager.settings.showDaylightDuration || settingsManager.settings.showSunshineDuration {
+            if settingsManager.settings.showUVIndexInDailyForecast || settingsManager.settings.showDaylightDuration || settingsManager.settings.showSunshineDuration {
                 HStack(spacing: 12) {
-                    if settingsManager.settings.showUVIndex, let uvMax = uvIndexMax {
+                    if settingsManager.settings.showUVIndexInDailyForecast, let uvMax = uvIndexMax {
                         let category = UVIndexCategory(uvIndex: uvMax)
                         HStack(spacing: 4) {
                             Text("UV:")
@@ -963,6 +1038,17 @@ struct DailyForecastRow: View {
     private func formatPrecipitation(_ mm: Double) -> String {
         let precip = settingsManager.settings.precipitationUnit.convert(mm)
         return String(format: "%.2f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
+    }
+    
+    private func formatSnowfall(_ cm: Double) -> String {
+        // Snow is measured in cm (API) → convert to inches for US, keep cm elsewhere
+        switch settingsManager.settings.precipitationUnit {
+        case .inches:
+            let inches = cm * 0.393701
+            return String(format: "%.1f in", inches)
+        case .millimeters:
+            return String(format: "%.1f cm", cm)
+        }
     }
 }
 
