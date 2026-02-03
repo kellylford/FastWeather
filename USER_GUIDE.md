@@ -34,6 +34,27 @@ The main screen is divided into two sections: **Add New City** and **Your Cities
 3.  If multiple locations match your search, a dialog will appear asking you to select the correct one.
 4.  The city will be added to your list.
 
+#### Interesting Cities to Try
+
+FastWeather works with weather data from anywhere on Earth! Here are some fascinating locations you can add to explore extreme weather conditions:
+
+**Extreme Cold:**
+- **McMurdo Station, Antarctica** - Largest Antarctic research station (currently -4.8°C with regular snowfall)
+- **Amundsen-Scott South Pole Station, Antarctica** - Geographic South Pole (extreme cold year-round)
+- **Mount Everest Base Camp, Nepal** - Highest weather station area on Earth (currently -33°C!)
+
+**Extreme Heat:**
+- **Death Valley, California** - Hottest place on Earth (record: 56.7°C / 134°F in 1913)
+- **Mecca, Saudi Arabia** - One of the hottest pilgrimage sites (summer highs often exceed 45°C)
+
+**Unique Climates:**
+- **Atacama Desert, Chile** - Driest non-polar place on Earth (some areas have never recorded rain)
+- **Bikini Atoll, Marshall Islands** - Remote tropical island and historic nuclear test site
+- **Pitcairn Island** - Most remote inhabited island in the world (Pacific Ocean)
+- **Vostok Station, Antarctica** - Russian station, coldest temperature ever recorded (-89.2°C in 1983)
+
+These locations are excellent for testing the app's display of extreme temperatures, low precipitation, or heavy snowfall. Simply type the location name (e.g., "Death Valley, California" or "McMurdo Station, Antarctica") and add it to your list!
+
 #### Managing Your Cities
 *   **View Weather**: Select a city and press **Enter** (or activate **Full Weather**) to view the detailed report.
 *   **Reorder**: Use the **Move Up** (Alt+U) and **Move Down** (Alt+D) buttons to change the order of your cities.
