@@ -69,23 +69,7 @@ struct SettingsView: View {
                         settingsManager.saveSettings()
                     }
                     .accessibilityLabel("Precipitation unit, currently \(settingsManager.settings.precipitationUnit.rawValue)")
-                }
-                
-                // Weather Around Me section
-                Section(header: Text("Weather Around Me")) {
-                    Picker("Default Distance", selection: $settingsManager.settings.weatherAroundMeDistance) {
-                        ForEach(settingsManager.settings.distanceUnit.weatherAroundMeOptions, id: \.self) { distance in
-                            Text(settingsManager.settings.distanceUnit.format(distance)).tag(distance)
-                        }
-                    }
-                    .onChange(of: settingsManager.settings.weatherAroundMeDistance) {
-                        settingsManager.saveSettings()
-                    }
-                    .accessibilityLabel("Default distance for Weather Around Me, currently \(settingsManager.settings.distanceUnit.format(settingsManager.settings.weatherAroundMeDistance))")
-                    .accessibilityHint("Sets the default radius when viewing weather conditions around a city")
-                }
-                
-                Section(header: Text("Units")) {
+                    
                     Picker(selection: $settingsManager.settings.distanceUnit) {
                         ForEach(DistanceUnit.allCases, id: \.self) { unit in
                             Text(unit.rawValue).tag(unit)
@@ -129,6 +113,20 @@ struct SettingsView: View {
                     .accessibilityLabel("Pressure unit, currently \(settingsManager.settings.pressureUnit.rawValue)")
                 }
                 
+                // Weather Around Me section
+                Section(header: Text("Weather Around Me")) {
+                    Picker("Default Distance", selection: $settingsManager.settings.weatherAroundMeDistance) {
+                        ForEach(settingsManager.settings.distanceUnit.weatherAroundMeOptions, id: \.self) { distance in
+                            Text(settingsManager.settings.distanceUnit.format(distance)).tag(distance)
+                        }
+                    }
+                    .onChange(of: settingsManager.settings.weatherAroundMeDistance) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Default distance for Weather Around Me, currently \(settingsManager.settings.distanceUnit.format(settingsManager.settings.weatherAroundMeDistance))")
+                    .accessibilityHint("Sets the default radius when viewing weather conditions around a city")
+                }
+                
                 // Features section
                 Section(header: Text("Features"),
                        footer: Text("Enable or disable app features.")) {
@@ -145,14 +143,8 @@ struct SettingsView: View {
                         .accessibilityHint("Enable weather alerts for international cities using Apple WeatherKit. US cities always use National Weather Service.")
                 }
                 
-                // Enhanced Weather Data section
-                Section(header: Text("Enhanced Weather Data"),
-                       footer: Text("Additional weather information available from Open-Meteo API.")) {
-                    enhancedDataToggles
-                }
-                
                 // Display preferences section
-                Section(header: Text("Display")) {
+                Section(header: Text("Display Options")) {
                     Picker(selection: $settingsManager.settings.viewMode) {
                         ForEach(ViewMode.allCases, id: \.self) { mode in
                             Text(mode.rawValue).tag(mode)
@@ -189,11 +181,10 @@ struct SettingsView: View {
                     .accessibilityLabel("List content display, currently \(settingsManager.settings.displayMode.rawValue)")
                     .accessibilityHint("Condensed shows values only in List view, Details shows labels with values")
                 }
-                .listRowSeparator(.visible)
                 
-                // Weather fields section with reordering
-                Section(header: Text("Weather Fields"),
-                       footer: Text("Toggle to show/hide fields. Use VoiceOver actions to reorder.")) {
+                // City List View Data
+                Section(header: Text("City List View"),
+                       footer: Text("Choose which data appears in your city list. Toggle to show/hide, use VoiceOver actions to reorder.")) {
                     ForEach(Array(settingsManager.settings.weatherFields.enumerated()), id: \.element.id) { index, field in
                         HStack {
                             Image(systemName: "line.3.horizontal")
@@ -226,32 +217,83 @@ struct SettingsView: View {
                         settingsManager.settings.weatherFields.move(fromOffsets: from, toOffset: to)
                         settingsManager.saveSettings()
                     }
+                    
+                    // UV Index for list view
+                    Toggle("UV Index", isOn: $settingsManager.settings.showUVIndex)
+                        .onChange(of: settingsManager.settings.showUVIndex) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Show UV Index in city list")
                 }
                 
-                // Detail Categories section with reordering
-                Section(header: Text("Detail Categories"),
-                       footer: Text("Toggle to show/hide detail sections. Use VoiceOver actions to reorder.")) {
-                    ForEach(Array(settingsManager.settings.detailCategories.enumerated()), id: \.element.id) { index, category in
-                        HStack {
-                            Image(systemName: "line.3.horizontal")
-                                .foregroundColor(.secondary)
-                                .accessibilityHidden(true)
-                            
-                            Toggle(isOn: Binding(
-                                get: { category.isEnabled },
-                                set: { newValue in
-                                    settingsManager.settings.detailCategories[index].isEnabled = newValue
-                                    settingsManager.saveSettings()
-                                }
-                            )) {
-                                Text(category.category.rawValue)
-                                    .font(.body)
-                            }
-                            .accessibilityLabel("\(category.category.rawValue)")
-                            .accessibilityHint(category.isEnabled ? "Enabled, double tap to disable" : "Disabled, double tap to enable")
+                // Today's Forecast section
+                Section(header: Text("Today's Forecast"),
+                       footer: Text("Configure alerts and warnings shown in the Today's Forecast summary.")) {
+                    Toggle("Precipitation Alerts", isOn: $settingsManager.settings.showPrecipitationProbability)
+                        .onChange(of: settingsManager.settings.showPrecipitationProbability) {
+                            settingsManager.saveSettings()
                         }
-                        .accessibilityElement(children: .combine)
-                        .accessibilityAddTraits(.isButton)
+                        .accessibilityLabel("Show precipitation probability alerts")
+                        .accessibilityHint("Shows alert when precipitation probability exceeds 20 percent")
+                    
+                    Toggle("UV Warnings", isOn: $settingsManager.settings.showUVIndex)
+                        .onChange(of: settingsManager.settings.showUVIndex) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Show UV index warnings")
+                        .accessibilityHint("Shows warning when UV index is 6 or higher")
+                    
+                    Toggle("Wind Alerts", isOn: $settingsManager.settings.showWindGusts)
+                        .onChange(of: settingsManager.settings.showWindGusts) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Show wind speed alerts")
+                        .accessibilityHint("Shows alert when wind speed exceeds 25 kilometers per hour")
+                    
+                    Toggle("Daylight Duration", isOn: $settingsManager.settings.showDaylightDuration)
+                        .onChange(of: settingsManager.settings.showDaylightDuration) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Show daylight duration")
+                    
+                    Toggle("Sunshine Duration", isOn: $settingsManager.settings.showSunshineDuration)
+                        .onChange(of: settingsManager.settings.showSunshineDuration) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Show sunshine duration")
+                }
+                
+                // Current Weather Detail Sections
+                Section(header: Text("Current Weather Detail View"),
+                       footer: Text("Toggle which sections appear in the current weather detail view. Use VoiceOver actions to reorder sections.")) {
+                    ForEach(Array(settingsManager.settings.detailCategories.enumerated()), id: \.element.id) { index, category in
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Image(systemName: "line.3.horizontal")
+                                    .foregroundColor(.secondary)
+                                    .accessibilityHidden(true)
+                                
+                                Toggle(isOn: Binding(
+                                    get: { category.isEnabled },
+                                    set: { newValue in
+                                        settingsManager.settings.detailCategories[index].isEnabled = newValue
+                                        settingsManager.saveSettings()
+                                    }
+                                )) {
+                                    Text(category.category.rawValue)
+                                        .font(.body.weight(.semibold))
+                                }
+                                .accessibilityLabel("\(category.category.rawValue) section")
+                                .accessibilityHint(category.isEnabled ? "Enabled, double tap to disable" : "Disabled, double tap to enable")
+                            }
+                            
+                            // Show data items for this category
+                            if category.isEnabled {
+                                categoryDataItems(for: category.category)
+                                    .padding(.leading, 32)
+                            }
+                        }
+                        .accessibilityElement(children: .contain)
                         .accessibilityAction(named: "Move Up") {
                             moveCategoryUp(at: index)
                         }
@@ -415,44 +457,102 @@ struct SettingsView: View {
         UIAccessibility.post(notification: .announcement, argument: "Moved \(categoryName) to top")
     }
     
-    // MARK: - Enhanced Weather Data Toggles
-    private var enhancedDataToggles: some View {
-        Group {
-            Toggle("UV Index", isOn: $settingsManager.settings.showUVIndex)
-                .onChange(of: settingsManager.settings.showUVIndex) { _ in
-                    settingsManager.saveSettings()
-                }
-                .accessibilityLabel("Show UV Index")
-            
-            Toggle("Wind Gusts", isOn: $settingsManager.settings.showWindGusts)
-                .onChange(of: settingsManager.settings.showWindGusts) { _ in
-                    settingsManager.saveSettings()
-                }
-                .accessibilityLabel("Show Wind Gusts")
-            
-            Toggle("Precipitation Probability", isOn: $settingsManager.settings.showPrecipitationProbability)
-                .onChange(of: settingsManager.settings.showPrecipitationProbability) { _ in
-                    settingsManager.saveSettings()
-                }
-                .accessibilityLabel("Show Precipitation Probability")
-            
-            Toggle("Dew Point", isOn: $settingsManager.settings.showDewPoint)
-                .onChange(of: settingsManager.settings.showDewPoint) { _ in
-                    settingsManager.saveSettings()
-                }
-                .accessibilityLabel("Show Dew Point")
-            
-            Toggle("Daylight Duration", isOn: $settingsManager.settings.showDaylightDuration)
-                .onChange(of: settingsManager.settings.showDaylightDuration) { _ in
-                    settingsManager.saveSettings()
-                }
-                .accessibilityLabel("Show Daylight Duration")
-            
-            Toggle("Sunshine Duration", isOn: $settingsManager.settings.showSunshineDuration)
-                .onChange(of: settingsManager.settings.showSunshineDuration) { _ in
-                    settingsManager.saveSettings()
-                }
-                .accessibilityLabel("Show Sunshine Duration")
+    // MARK: - Category Data Items
+    @ViewBuilder
+    private func categoryDataItems(for category: DetailCategory) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            switch category {
+            case .weatherAlerts:
+                Text("• Active weather warnings")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+            case .currentConditions:
+                Text("• Temperature, Feels Like")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text("• Wind Speed, Direction")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text("• Humidity, Pressure")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Toggle("Wind Gusts", isOn: $settingsManager.settings.showWindGusts)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.showWindGusts) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Show wind gusts in current conditions")
+                Toggle("UV Index", isOn: $settingsManager.settings.showUVIndex)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.showUVIndex) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Show UV index in current conditions")
+                Toggle("Dew Point", isOn: $settingsManager.settings.showDewPoint)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.showDewPoint) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Show dew point in current conditions")
+                
+            case .precipitation:
+                Text("• Current precipitation")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Toggle("Precipitation Probability", isOn: $settingsManager.settings.showPrecipitationProbability)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.showPrecipitationProbability) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Show precipitation probability")
+                
+            case .todaysForecast:
+                Text("• Automatic daily summary")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text("• Sunrise, Sunset times")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Toggle("Daylight Duration", isOn: $settingsManager.settings.showDaylightDuration)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.showDaylightDuration) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Show daylight duration")
+                Toggle("Sunshine Duration", isOn: $settingsManager.settings.showSunshineDuration)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.showSunshineDuration) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Show sunshine duration")
+                
+            case .hourlyForecast:
+                Text("• Temperature, conditions")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text("• Precipitation, wind")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+            case .dailyForecast:
+                Text("• High/Low temperatures")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text("• Precipitation, wind")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+            case .historicalWeather:
+                Text("• Past year comparisons")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+            case .location:
+                Text("• Coordinates, elevation")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
         }
     }
     

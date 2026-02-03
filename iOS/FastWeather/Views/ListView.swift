@@ -325,7 +325,7 @@ struct ListRowView: View {
         let isDetails = settingsManager.settings.displayMode == .details
         
         // Add conditions if enabled (should be early in announcement)
-        if let conditionsField = settingsManager.settings.weatherFields.first(where: { $0.type == .conditions && $0.isEnabled }),
+        if settingsManager.settings.weatherFields.first(where: { $0.type == .conditions && $0.isEnabled }) != nil,
            let weatherCode = weather.current.weatherCodeEnum {
             label += ", "
             label += isDetails ? "Conditions: \(weatherCode.description)" : weatherCode.description
@@ -413,8 +413,7 @@ struct ListRowView: View {
         if settingsManager.settings.showUVIndex,
            let isDay = weather.current.isDay, isDay == 1,
            let uvIndex = weather.current.uvIndex {
-            let category = getUVIndexDescription(uvIndex)
-            label += ", UV Index: \(Int(uvIndex)) \(category)"
+            label += ", \(getUVIndexDescription(uvIndex))"
         }
         
         return label
