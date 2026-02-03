@@ -19,6 +19,9 @@ class WeatherService: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     
+    // Persistent cache via WeatherCache service
+    private let persistentCache = WeatherCache.shared
+    
     private let baseURL = "https://api.open-meteo.com/v1/forecast"
     private let historicalURL = "https://archive-api.open-meteo.com/v1/archive"
     private let userDefaultsKey = "SavedCities"
@@ -69,9 +72,25 @@ class WeatherService: ObservableObject {
     
     // Fetch full weather data (16 days) for detail views
     func fetchWeather(for city: City) async {
-        // Check cache first
+        // Check persistent cache first (survives app restarts)
+        if let cached = await persistentCache.get(for: city.id) {
+            await MainActor.run {
+                self.weatherCache[city.id] = cached.weather
+                self.cacheTimestamps[city.id] = cached.timestamp
+            }
+            print("✅ Using persistent cached weather for \(city.name) (age: \(cached.ageDescription))")
+            
+            // Still fetch fresh data in background if stale
+            if cached.isStale {
+                print("🔄 Refreshing stale cache for \(city.name) in background...")
+            } else {
+                return
+            }
+        }
+        
+        // Check in-memory cache
         if isCacheValid(timestamp: cacheTimestamps[city.id]) {
-            print("✅ Using cached weather for \(city.name)")
+            print("✅ Using in-memory cached weather for \(city.name)")
             return
         }
         
@@ -100,10 +119,15 @@ class WeatherService: ObservableObject {
             let decoder = JSONDecoder()
             let response = try decoder.decode(WeatherResponse.self, from: data)
             
+            let weatherData = WeatherData(current: response.current, daily: response.daily, hourly: response.hourly)
+            
             await MainActor.run {
-                self.weatherCache[city.id] = WeatherData(current: response.current, daily: response.daily, hourly: response.hourly)
+                self.weatherCache[city.id] = weatherData
                 self.cacheTimestamps[city.id] = Date()
             }
+            
+            // Save to persistent cache
+            await persistentCache.set(weatherData, for: city.id)
         } catch {
             await MainActor.run {
                 self.errorMessage = "Failed to fetch weather: \(error.localizedDescription)"
@@ -611,6 +635,20 @@ class WeatherService: ObservableObject {
         print("⚠️ WeatherKit not available on this platform")
         return []
         #endif
+    }
+    
+    // MARK: - Cache Management
+    
+    /// Get cache metadata for a city (for displaying "Using cached data from...")
+    func getCacheMetadata(for cityId: UUID) async -> CachedWeather? {
+        return await persistentCache.get(for: cityId)
+    }
+    
+    /// Clear all persistent cached weather data
+    func clearPersistentCache() {
+        Task {
+            await persistentCache.clearAll()
+        }
     }
     
     // MARK: - Persistence

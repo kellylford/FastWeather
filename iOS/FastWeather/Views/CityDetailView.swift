@@ -20,6 +20,7 @@ struct CityDetailView: View {
     @State private var showingRemoveConfirmation = false
     @State private var removalCityName = "" // Captured at trigger time to prevent dialog flashing
     @State private var isRefreshing = false
+    @State private var cacheMetadata: CachedWeather?
     
     private var weather: WeatherData? {
         weatherService.weatherCache[city.id]
@@ -29,6 +30,12 @@ struct CityDetailView: View {
         isRefreshing = true
         await weatherService.fetchWeather(for: city)
         isRefreshing = false
+        // Refresh cache metadata
+        cacheMetadata = await weatherService.getCacheMetadata(for: city.id)
+    }
+    
+    private func loadCacheMetadata() async {
+        cacheMetadata = await weatherService.getCacheMetadata(for: city.id)
     }
     
     private func isCategoryEnabled(_ category: DetailCategory) -> Bool {
@@ -437,6 +444,22 @@ struct CityDetailView: View {
         ScrollView {
             VStack(spacing: 24) {
                 if let weather = weather {
+                    // Cache status indicator (if data is stale)
+                    if let metadata = cacheMetadata, metadata.isStale {
+                        HStack(spacing: 8) {
+                            Image(systemName: "clock.arrow.circlepath")
+                                .foregroundColor(.orange)
+                                .accessibilityHidden(true)
+                            Text("Using cached data from \(metadata.ageDescription)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel("Weather data is \(metadata.ageDescription), tap refresh to update")
+                    }
+                    
                     // Main weather display
                     VStack(spacing: 16) {
                         // Current temperature - read first after city name
@@ -534,6 +557,9 @@ struct CityDetailView: View {
         }
         .navigationTitle(city.displayName)
         .navigationBarTitleDisplayMode(.inline)
+        .task {
+            await loadCacheMetadata()
+        }
         .refreshable {
             await refreshWeather()
         }
