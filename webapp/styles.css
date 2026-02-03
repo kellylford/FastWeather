@@ -177,7 +177,7 @@ section {
 }
 
 #view-menu-btn {
-    background: var(--bg-secondary);
+    background: var(--secondary-bg);
     border: 1px solid var(--border-color);
     padding: 8px 16px;
     border-radius: var(--border-radius);
@@ -192,7 +192,7 @@ section {
 }
 
 #view-menu-btn:hover {
-    background: var(--bg-primary);
+    background: var(--primary-bg);
 }
 
 #view-menu-btn:focus {
@@ -205,7 +205,7 @@ section {
     top: 100%;
     left: 0;
     margin-top: 4px;
-    background: var(--bg-secondary);
+    background: var(--secondary-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -248,7 +248,7 @@ section {
 }
 
 #view-menu [role="menuitem"]:hover {
-    background: var(--bg-primary);
+    background: var(--primary-bg);
 }
 
 #view-menu [role="menuitem"]:focus {
@@ -262,13 +262,13 @@ section {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     border-radius: var(--border-radius);
-    background: var(--bg-secondary);
+    background: var(--secondary-bg);
 }
 
 .weather-table {
     width: 100%;
     border-collapse: collapse;
-    background: var(--bg-secondary);
+    background: var(--secondary-bg);
 }
 
 .weather-table th,
@@ -280,7 +280,7 @@ section {
 }
 
 .weather-table thead th {
-    background: var(--bg-primary);
+    background: var(--primary-bg);
     font-weight: 600;
     color: var(--text-primary);
 }
@@ -291,7 +291,7 @@ section {
 }
 
 .weather-table tbody tr:hover {
-    background: var(--bg-primary);
+    background: var(--primary-bg);
 }
 
 .weather-table tbody tr:last-child td,
@@ -337,7 +337,7 @@ section {
     min-height: 32px;
     min-width: 32px;
     border-radius: var(--border-radius);
-    background: var(--bg-primary);
+    background: var(--primary-bg);
     border: 1px solid var(--border-color);
     cursor: pointer;
     transition: background-color 0.2s;
@@ -362,7 +362,7 @@ section {
 .list-view-item {
     padding: var(--spacing-md);
     border-bottom: 1px solid var(--border-color);
-    background: var(--bg-secondary);
+    background: var(--secondary-bg);
     transition: background-color 0.2s;
     min-height: 44px;
     display: flex;
@@ -427,7 +427,7 @@ section {
 .list-control-btn {
     padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--border-radius);
-    background: var(--bg-secondary);
+    background: var(--secondary-bg);
     border: 1px solid var(--border-color);
     cursor: pointer;
     font-size: var(--font-size-base);
@@ -679,7 +679,7 @@ legend {
 .secondary-btn {
     padding: 0.5rem 1rem;
     border: 1px solid var(--border-color);
-    background-color: var(--bg-card);
+    background-color: var(--card-bg);
     color: var(--text-primary);
     border-radius: var(--border-radius);
     cursor: pointer;
