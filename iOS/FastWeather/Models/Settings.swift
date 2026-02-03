@@ -306,4 +306,186 @@ struct AppSettings: Codable {
         // Deprecated (for migration)
         case showUVIndex, showWindGusts, showPrecipitationProbability
     }
+    
+    // Default initializer (uses default values from property declarations)
+    init() {
+        // All properties have default values, so we just need to set weatherFields and detailCategories
+        self.weatherFields = [
+            WeatherField(type: .temperature, isEnabled: true),
+            WeatherField(type: .conditions, isEnabled: true),
+            WeatherField(type: .feelsLike, isEnabled: true),
+            WeatherField(type: .humidity, isEnabled: true),
+            WeatherField(type: .windSpeed, isEnabled: true),
+            WeatherField(type: .windDirection, isEnabled: true),
+        ]
+        
+        self.detailCategories = [
+            DetailCategoryField(category: .weatherAlerts, isEnabled: true),
+            DetailCategoryField(category: .todaysForecast, isEnabled: true),
+            DetailCategoryField(category: .currentConditions, isEnabled: true),
+            DetailCategoryField(category: .precipitation, isEnabled: true),
+            DetailCategoryField(category: .hourlyForecast, isEnabled: true),
+            DetailCategoryField(category: .dailyForecast, isEnabled: true),
+            DetailCategoryField(category: .historicalWeather, isEnabled: true),
+            DetailCategoryField(category: .location, isEnabled: true),
+        ]
+    }
+    
+    // Custom Decodable implementation
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        viewMode = try container.decodeIfPresent(ViewMode.self, forKey: .viewMode) ?? .list
+        displayMode = try container.decodeIfPresent(DisplayMode.self, forKey: .displayMode) ?? .condensed
+        temperatureUnit = try container.decodeIfPresent(TemperatureUnit.self, forKey: .temperatureUnit) ?? .fahrenheit
+        windSpeedUnit = try container.decodeIfPresent(WindSpeedUnit.self, forKey: .windSpeedUnit) ?? .mph
+        precipitationUnit = try container.decodeIfPresent(PrecipitationUnit.self, forKey: .precipitationUnit) ?? .inches
+        pressureUnit = try container.decodeIfPresent(PressureUnit.self, forKey: .pressureUnit) ?? .inHg
+        distanceUnit = try container.decodeIfPresent(DistanceUnit.self, forKey: .distanceUnit) ?? DistanceUnit.defaultUnit
+        historicalYearsBack = try container.decodeIfPresent(Int.self, forKey: .historicalYearsBack) ?? 20
+        
+        // Granular UV Index settings (with migration from deprecated showUVIndex)
+        if let deprecated = try? container.decode(Bool.self, forKey: .showUVIndex) {
+            // Migrate from old shared setting to new granular settings
+            showUVIndexInCurrentConditions = deprecated
+            showUVIndexInTodaysForecast = deprecated
+            showUVIndexInDailyForecast = false  // Keep default off
+            showUVIndexInCityList = false
+        } else {
+            showUVIndexInCurrentConditions = try container.decodeIfPresent(Bool.self, forKey: .showUVIndexInCurrentConditions) ?? true
+            showUVIndexInTodaysForecast = try container.decodeIfPresent(Bool.self, forKey: .showUVIndexInTodaysForecast) ?? true
+            showUVIndexInDailyForecast = try container.decodeIfPresent(Bool.self, forKey: .showUVIndexInDailyForecast) ?? false
+            showUVIndexInCityList = try container.decodeIfPresent(Bool.self, forKey: .showUVIndexInCityList) ?? false
+        }
+        
+        // Granular Wind Gusts settings (with migration)
+        if let deprecated = try? container.decode(Bool.self, forKey: .showWindGusts) {
+            showWindGustsInCurrentConditions = deprecated
+            showWindGustsInTodaysForecast = deprecated
+        } else {
+            showWindGustsInCurrentConditions = try container.decodeIfPresent(Bool.self, forKey: .showWindGustsInCurrentConditions) ?? true
+            showWindGustsInTodaysForecast = try container.decodeIfPresent(Bool.self, forKey: .showWindGustsInTodaysForecast) ?? true
+        }
+        
+        // Granular Precipitation Probability settings (with migration)
+        if let deprecated = try? container.decode(Bool.self, forKey: .showPrecipitationProbability) {
+            showPrecipitationProbabilityInPrecipitation = deprecated
+            showPrecipitationProbabilityInTodaysForecast = deprecated
+        } else {
+            showPrecipitationProbabilityInPrecipitation = try container.decodeIfPresent(Bool.self, forKey: .showPrecipitationProbabilityInPrecipitation) ?? true
+            showPrecipitationProbabilityInTodaysForecast = try container.decodeIfPresent(Bool.self, forKey: .showPrecipitationProbabilityInTodaysForecast) ?? true
+        }
+        
+        // Other enhanced data
+        showPrecipitationAmount = try container.decodeIfPresent(Bool.self, forKey: .showPrecipitationAmount) ?? true
+        showDewPoint = try container.decodeIfPresent(Bool.self, forKey: .showDewPoint) ?? false
+        showDaylightDuration = try container.decodeIfPresent(Bool.self, forKey: .showDaylightDuration) ?? true
+        showSunshineDuration = try container.decodeIfPresent(Bool.self, forKey: .showSunshineDuration) ?? false
+        
+        // Hourly forecast items
+        hourlyShowTemperature = try container.decodeIfPresent(Bool.self, forKey: .hourlyShowTemperature) ?? true
+        hourlyShowConditions = try container.decodeIfPresent(Bool.self, forKey: .hourlyShowConditions) ?? true
+        hourlyShowPrecipitationProbability = try container.decodeIfPresent(Bool.self, forKey: .hourlyShowPrecipitationProbability) ?? true
+        hourlyShowWind = try container.decodeIfPresent(Bool.self, forKey: .hourlyShowWind) ?? true
+        
+        // Daily forecast items
+        dailyShowHighLow = try container.decodeIfPresent(Bool.self, forKey: .dailyShowHighLow) ?? true
+        dailyShowConditions = try container.decodeIfPresent(Bool.self, forKey: .dailyShowConditions) ?? true
+        dailyShowPrecipitationProbability = try container.decodeIfPresent(Bool.self, forKey: .dailyShowPrecipitationProbability) ?? true
+        dailyShowPrecipitationAmount = try container.decodeIfPresent(Bool.self, forKey: .dailyShowPrecipitationAmount) ?? true
+        dailyShowWind = try container.decodeIfPresent(Bool.self, forKey: .dailyShowWind) ?? false
+        
+        _weatherAroundMeDistance = try container.decodeIfPresent(Double.self, forKey: ._weatherAroundMeDistance) ?? (DistanceUnit.defaultUnit == .miles ? 150 : 240)
+        
+        weatherFields = try container.decodeIfPresent([WeatherField].self, forKey: .weatherFields) ?? [
+            WeatherField(type: .temperature, isEnabled: true),
+            WeatherField(type: .conditions, isEnabled: true),
+            WeatherField(type: .feelsLike, isEnabled: true),
+            WeatherField(type: .humidity, isEnabled: true),
+            WeatherField(type: .windSpeed, isEnabled: true),
+            WeatherField(type: .windDirection, isEnabled: true),
+        ]
+        
+        detailCategories = try container.decodeIfPresent([DetailCategoryField].self, forKey: .detailCategories) ?? [
+            DetailCategoryField(category: .weatherAlerts, isEnabled: true),
+            DetailCategoryField(category: .todaysForecast, isEnabled: true),
+            DetailCategoryField(category: .currentConditions, isEnabled: true),
+            DetailCategoryField(category: .precipitation, isEnabled: true),
+            DetailCategoryField(category: .hourlyForecast, isEnabled: true),
+            DetailCategoryField(category: .dailyForecast, isEnabled: true),
+            DetailCategoryField(category: .historicalWeather, isEnabled: true),
+            DetailCategoryField(category: .location, isEnabled: true),
+        ]
+        
+        // Legacy properties
+        showTemperature = try container.decodeIfPresent(Bool.self, forKey: .showTemperature) ?? true
+        showConditions = try container.decodeIfPresent(Bool.self, forKey: .showConditions) ?? true
+        showFeelsLike = try container.decodeIfPresent(Bool.self, forKey: .showFeelsLike) ?? true
+        showHumidity = try container.decodeIfPresent(Bool.self, forKey: .showHumidity) ?? true
+        showWindSpeed = try container.decodeIfPresent(Bool.self, forKey: .showWindSpeed) ?? true
+        showWindDirection = try container.decodeIfPresent(Bool.self, forKey: .showWindDirection) ?? true
+        showHighTemp = try container.decodeIfPresent(Bool.self, forKey: .showHighTemp) ?? true
+        showLowTemp = try container.decodeIfPresent(Bool.self, forKey: .showLowTemp) ?? true
+        showSunrise = try container.decodeIfPresent(Bool.self, forKey: .showSunrise) ?? true
+        showSunset = try container.decodeIfPresent(Bool.self, forKey: .showSunset) ?? true
+    }
+    
+    // Custom Encodable implementation
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(viewMode, forKey: .viewMode)
+        try container.encode(displayMode, forKey: .displayMode)
+        try container.encode(temperatureUnit, forKey: .temperatureUnit)
+        try container.encode(windSpeedUnit, forKey: .windSpeedUnit)
+        try container.encode(precipitationUnit, forKey: .precipitationUnit)
+        try container.encode(pressureUnit, forKey: .pressureUnit)
+        try container.encode(distanceUnit, forKey: .distanceUnit)
+        try container.encode(historicalYearsBack, forKey: .historicalYearsBack)
+        
+        // Granular settings
+        try container.encode(showUVIndexInCurrentConditions, forKey: .showUVIndexInCurrentConditions)
+        try container.encode(showUVIndexInTodaysForecast, forKey: .showUVIndexInTodaysForecast)
+        try container.encode(showUVIndexInDailyForecast, forKey: .showUVIndexInDailyForecast)
+        try container.encode(showUVIndexInCityList, forKey: .showUVIndexInCityList)
+        
+        try container.encode(showWindGustsInCurrentConditions, forKey: .showWindGustsInCurrentConditions)
+        try container.encode(showWindGustsInTodaysForecast, forKey: .showWindGustsInTodaysForecast)
+        
+        try container.encode(showPrecipitationProbabilityInPrecipitation, forKey: .showPrecipitationProbabilityInPrecipitation)
+        try container.encode(showPrecipitationProbabilityInTodaysForecast, forKey: .showPrecipitationProbabilityInTodaysForecast)
+        
+        // Other enhanced data
+        try container.encode(showPrecipitationAmount, forKey: .showPrecipitationAmount)
+        try container.encode(showDewPoint, forKey: .showDewPoint)
+        try container.encode(showDaylightDuration, forKey: .showDaylightDuration)
+        try container.encode(showSunshineDuration, forKey: .showSunshineDuration)
+        
+        try container.encode(hourlyShowTemperature, forKey: .hourlyShowTemperature)
+        try container.encode(hourlyShowConditions, forKey: .hourlyShowConditions)
+        try container.encode(hourlyShowPrecipitationProbability, forKey: .hourlyShowPrecipitationProbability)
+        try container.encode(hourlyShowWind, forKey: .hourlyShowWind)
+        
+        try container.encode(dailyShowHighLow, forKey: .dailyShowHighLow)
+        try container.encode(dailyShowConditions, forKey: .dailyShowConditions)
+        try container.encode(dailyShowPrecipitationProbability, forKey: .dailyShowPrecipitationProbability)
+        try container.encode(dailyShowPrecipitationAmount, forKey: .dailyShowPrecipitationAmount)
+        try container.encode(dailyShowWind, forKey: .dailyShowWind)
+        
+        try container.encode(_weatherAroundMeDistance, forKey: ._weatherAroundMeDistance)
+        try container.encode(weatherFields, forKey: .weatherFields)
+        try container.encode(detailCategories, forKey: .detailCategories)
+        
+        // Legacy properties
+        try container.encode(showTemperature, forKey: .showTemperature)
+        try container.encode(showConditions, forKey: .showConditions)
+        try container.encode(showFeelsLike, forKey: .showFeelsLike)
+        try container.encode(showHumidity, forKey: .showHumidity)
+        try container.encode(showWindSpeed, forKey: .showWindSpeed)
+        try container.encode(showWindDirection, forKey: .showWindDirection)
+        try container.encode(showHighTemp, forKey: .showHighTemp)
+        try container.encode(showLowTemp, forKey: .showLowTemp)
+        try container.encode(showSunrise, forKey: .showSunrise)
+        try container.encode(showSunset, forKey: .showSunset)
+    }
 }

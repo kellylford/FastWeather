@@ -219,7 +219,7 @@ struct ListRowView: View {
                     }
                     
                     // UV Index badge (only during daytime)
-                    if settingsManager.settings.showUVIndex,
+                    if settingsManager.settings.showUVIndexInCityList,
                        let weather = weather,
                        let isDay = weather.current.isDay, isDay == 1,
                        let uvIndex = weather.current.uvIndex {
@@ -410,7 +410,7 @@ struct ListRowView: View {
         }
         
         // Add UV Index if enabled and during daytime
-        if settingsManager.settings.showUVIndex,
+        if settingsManager.settings.showUVIndexInCityList,
            let isDay = weather.current.isDay, isDay == 1,
            let uvIndex = weather.current.uvIndex {
             label += ", \(getUVIndexDescription(uvIndex))"
