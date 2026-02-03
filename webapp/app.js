@@ -2381,20 +2381,20 @@ function createCityCard(cityName, lat, lon, weather, index) {
     
     // Move up button
     if (index > 0) {
-        const upBtn = createButton('↑', `Move ${cityName} up in list`, () => moveCityUp(cityName));
+        const upBtn = createButton('↑ Move Up', `Move ${cityName} up in list`, () => moveCityUp(cityName));
         upBtn.className = 'icon-btn';
         controls.appendChild(upBtn);
     }
     
     // Move down button
     if (index < Object.keys(cities).length - 1) {
-        const downBtn = createButton('↓', `Move ${cityName} down in list`, () => moveCityDown(cityName));
+        const downBtn = createButton('↓ Move Down', `Move ${cityName} down in list`, () => moveCityDown(cityName));
         downBtn.className = 'icon-btn';
         controls.appendChild(downBtn);
     }
     
     // Remove button
-    const removeBtn = createButton('🗑️', `Remove ${cityName} from list`, () => removeCity(cityName));
+    const removeBtn = createButton('🗑️ Remove', `Remove ${cityName} from list`, () => removeCity(cityName));
     removeBtn.className = 'icon-btn remove-btn';
     controls.appendChild(removeBtn);
     
@@ -2647,18 +2647,18 @@ function renderTableView(container) {
         
         // Movement buttons
         if (index > 0) {
-            const upBtn = createButton('↑', `Move ${cityName} up`, () => moveCityUp(cityName));
+            const upBtn = createButton('↑ Move Up', `Move ${cityName} up in list`, () => moveCityUp(cityName));
             upBtn.className = 'icon-btn-small';
             actionsDiv.appendChild(upBtn);
         }
         
         if (index < Object.keys(cities).length - 1) {
-            const downBtn = createButton('↓', `Move ${cityName} down`, () => moveCityDown(cityName));
+            const downBtn = createButton('↓ Move Down', `Move ${cityName} down in list`, () => moveCityDown(cityName));
             downBtn.className = 'icon-btn-small';
             actionsDiv.appendChild(downBtn);
         }
         
-        const removeBtn = createButton('🗑️', `Remove ${cityName}`, () => removeCity(cityName));
+        const removeBtn = createButton('🗑️ Remove', `Remove ${cityName} from list`, () => removeCity(cityName));
         removeBtn.className = 'icon-btn-small remove-btn';
         actionsDiv.appendChild(removeBtn);
         
