@@ -16,7 +16,13 @@ struct DeveloperSettingsView: View {
         NavigationView {
             Form {
                 Section(header: Text("Feature Flags")) {
+                    Toggle("Expected Precipitation", isOn: $featureFlags.radarEnabled)
+                        .accessibilityLabel("Expected Precipitation feature toggle")
+                        .accessibilityHint(featureFlags.radarEnabled ? "Expected Precipitation is currently enabled" : "Expected Precipitation is currently disabled")
                     
+                    Toggle("Weather Around Me", isOn: $featureFlags.weatherAroundMeEnabled)
+                        .accessibilityLabel("Weather Around Me feature toggle")
+                        .accessibilityHint(featureFlags.weatherAroundMeEnabled ? "Weather Around Me is currently enabled" : "Weather Around Me is currently disabled")
                     
                     Toggle("WeatherKit International Alerts", isOn: $featureFlags.weatherKitAlertsEnabled)
                         .accessibilityLabel("WeatherKit International Alerts feature toggle")
@@ -113,7 +119,7 @@ struct DeveloperSettingsView: View {
                     }
                 }
                 
-                Section(footer: Text("These settings control experimental features that are in development. Changes take effect immediately. Note: Expected Precipitation, Weather Around Me, and Historical Weather settings are now in the main Settings screen.")) {
+                Section(footer: Text("These settings control experimental features that are in development. Changes take effect immediately.")) {
                     EmptyView()
                 }
             }

@@ -24,6 +24,17 @@ enum WeatherFieldType: String, CaseIterable, Codable {
     case humidity = "Humidity"
     case windSpeed = "Wind Speed"
     case windDirection = "Wind Direction"
+    case windGusts = "Wind Gusts"
+    case precipitation = "Precipitation"
+    case precipitationProbability = "Precipitation Probability"
+    case rain = "Rain"
+    case showers = "Showers"
+    case snowfall = "Snowfall"
+    case cloudCover = "Cloud Cover"
+    case pressure = "Pressure"
+    case visibility = "Visibility"
+    case uvIndex = "UV Index"
+    case dewPoint = "Dew Point"
     case highTemp = "High Temperature"
     case lowTemp = "Low Temperature"
     case sunrise = "Sunrise"
@@ -199,6 +210,9 @@ struct AppSettings: Codable {
     var showUVIndexInDailyForecast: Bool = false  // Off by default for 16-day
     var showUVIndexInCityList: Bool = false  // Off by default (reduces clutter)
     
+    // City List display options
+    var showDailyHighLowInCityList: Bool = true  // Show today's high/low in city list
+    
     // Granular Wind Gusts display options (by section)
     var showWindGustsInCurrentConditions: Bool = true
     var showWindGustsInTodaysForecast: Bool = true  // Shows as alerts when high
@@ -252,6 +266,17 @@ struct AppSettings: Codable {
         WeatherField(type: .humidity, isEnabled: true),
         WeatherField(type: .windSpeed, isEnabled: true),
         WeatherField(type: .windDirection, isEnabled: true),
+        WeatherField(type: .windGusts, isEnabled: true),
+        WeatherField(type: .precipitation, isEnabled: true),
+        WeatherField(type: .precipitationProbability, isEnabled: true),
+        WeatherField(type: .rain, isEnabled: true),
+        WeatherField(type: .showers, isEnabled: true),
+        WeatherField(type: .snowfall, isEnabled: true),
+        WeatherField(type: .cloudCover, isEnabled: true),
+        WeatherField(type: .pressure, isEnabled: true),
+        WeatherField(type: .visibility, isEnabled: true),
+        WeatherField(type: .uvIndex, isEnabled: true),
+        WeatherField(type: .dewPoint, isEnabled: true),
         WeatherField(type: .highTemp, isEnabled: true),
         WeatherField(type: .lowTemp, isEnabled: true),
         WeatherField(type: .sunrise, isEnabled: true),
@@ -288,6 +313,7 @@ struct AppSettings: Codable {
         // Granular UV Index settings
         case showUVIndexInCurrentConditions, showUVIndexInTodaysForecast
         case showUVIndexInDailyForecast, showUVIndexInCityList
+        case showDailyHighLowInCityList
         // Granular Wind Gusts settings
         case showWindGustsInCurrentConditions, showWindGustsInTodaysForecast
         // Granular Precipitation Probability settings
@@ -351,11 +377,13 @@ struct AppSettings: Codable {
             showUVIndexInTodaysForecast = deprecated
             showUVIndexInDailyForecast = false  // Keep default off
             showUVIndexInCityList = false
+            showDailyHighLowInCityList = true
         } else {
             showUVIndexInCurrentConditions = try container.decodeIfPresent(Bool.self, forKey: .showUVIndexInCurrentConditions) ?? true
             showUVIndexInTodaysForecast = try container.decodeIfPresent(Bool.self, forKey: .showUVIndexInTodaysForecast) ?? true
             showUVIndexInDailyForecast = try container.decodeIfPresent(Bool.self, forKey: .showUVIndexInDailyForecast) ?? false
             showUVIndexInCityList = try container.decodeIfPresent(Bool.self, forKey: .showUVIndexInCityList) ?? false
+            showDailyHighLowInCityList = try container.decodeIfPresent(Bool.self, forKey: .showDailyHighLowInCityList) ?? true
         }
         
         // Granular Wind Gusts settings (with migration)
@@ -448,6 +476,7 @@ struct AppSettings: Codable {
         try container.encode(showUVIndexInTodaysForecast, forKey: .showUVIndexInTodaysForecast)
         try container.encode(showUVIndexInDailyForecast, forKey: .showUVIndexInDailyForecast)
         try container.encode(showUVIndexInCityList, forKey: .showUVIndexInCityList)
+        try container.encode(showDailyHighLowInCityList, forKey: .showDailyHighLowInCityList)
         
         try container.encode(showWindGustsInCurrentConditions, forKey: .showWindGustsInCurrentConditions)
         try container.encode(showWindGustsInTodaysForecast, forKey: .showWindGustsInTodaysForecast)

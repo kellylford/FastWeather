@@ -157,11 +157,6 @@ struct TableRowView: View {
         .padding(.vertical, 4)
     }
     
-    private func formatTemperature(_ celsius: Double) -> String {
-        let temp = settingsManager.settings.temperatureUnit.convert(celsius)
-        return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
-    }
-    
     private func getFieldLabelAndValue(for fieldType: WeatherFieldType, weather: WeatherData, showLabel: Bool) -> (String, String)? {
         switch fieldType {
         case .temperature:
@@ -187,6 +182,54 @@ struct TableRowView: View {
             guard let windDir = weather.current.windDirection10m else { return nil }
             return (showLabel ? "Wind Direction" : "", formatWindDirection(windDir))
             
+        case .windGusts:
+            guard let windGusts = weather.current.windGusts10m else { return nil }
+            return (showLabel ? "Wind Gusts" : "", formatWindSpeed(windGusts))
+            
+        case .precipitation:
+            guard let precip = weather.current.precipitation, precip > 0 else { return nil }
+            return (showLabel ? "Precipitation" : "", formatPrecipitation(precip))
+            
+        case .precipitationProbability:
+            guard let hourly = weather.hourly,
+                  let probArray = hourly.precipitationProbability,
+                  !probArray.isEmpty,
+                  let prob = probArray[0], prob > 0 else { return nil }
+            return (showLabel ? "Precip Probability" : "", "\(prob)%")
+            
+        case .rain:
+            guard let rain = weather.current.rain, rain > 0 else { return nil }
+            return (showLabel ? "Rain" : "", formatPrecipitation(rain))
+            
+        case .showers:
+            guard let showers = weather.current.showers, showers > 0 else { return nil }
+            return (showLabel ? "Showers" : "", formatPrecipitation(showers))
+            
+        case .snowfall:
+            guard let snow = weather.current.snowfall, snow > 0 else { return nil }
+            return (showLabel ? "Snowfall" : "", formatPrecipitation(snow))
+            
+        case .cloudCover:
+            let cc = weather.current.cloudCover
+            return (showLabel ? "Cloud Cover" : "", "\(cc)%")
+            
+        case .pressure:
+            guard let pressure = weather.current.pressureMsl else { return nil }
+            return (showLabel ? "Pressure" : "", formatPressure(pressure))
+            
+        case .visibility:
+            guard let vis = weather.current.visibility else { return nil }
+            return (showLabel ? "Visibility" : "", formatVisibility(vis))
+            
+        case .uvIndex:
+            guard let isDay = weather.current.isDay, isDay == 1,
+                  let uvIndex = weather.current.uvIndex else { return nil }
+            return (showLabel ? "UV Index" : "", String(format: "%.1f", uvIndex))
+            
+        case .dewPoint:
+            guard let dewPoint = weather.current.dewpoint2m else { return nil }
+            return (showLabel ? "Dew Point" : "", formatTemperature(dewPoint))
+            
         case .highTemp:
             guard let daily = weather.daily, !daily.temperature2mMax.isEmpty, let maxTemp = daily.temperature2mMax[0] else { return nil }
             return (showLabel ? "High" : "", formatTemperature(maxTemp))
@@ -210,10 +253,30 @@ struct TableRowView: View {
         return String(format: "%.0f %@", speed, settingsManager.settings.windSpeedUnit.rawValue)
     }
     
+    private func formatTemperature(_ celsius: Double) -> String {
+        let temp = settingsManager.settings.temperatureUnit.convert(celsius)
+        return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
+    }
+    
     private func formatWindDirection(_ degrees: Int) -> String {
         let directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
         let index = Int((Double(degrees) / 45.0).rounded()) % 8
         return directions[index]
+    }
+    
+    private func formatPrecipitation(_ mm: Double) -> String {
+        let precip = settingsManager.settings.precipitationUnit.convert(mm)
+        return String(format: "%.1f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
+    }
+    
+    private func formatPressure(_ hPa: Double) -> String {
+        let pressure = settingsManager.settings.pressureUnit.convert(hPa)
+        return String(format: "%.1f %@", pressure, settingsManager.settings.pressureUnit.rawValue)
+    }
+    
+    private func formatVisibility(_ meters: Double) -> String {
+        let distance = settingsManager.settings.distanceUnit.convert(meters / 1000.0)
+        return String(format: "%.1f %@", distance, settingsManager.settings.distanceUnit.rawValue)
     }
     
     private func formatTime(_ isoString: String) -> String {

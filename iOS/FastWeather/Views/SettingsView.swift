@@ -227,6 +227,14 @@ struct SettingsView: View {
                         settingsManager.saveSettings()
                     }
                     
+                    // Daily High/Low for list view
+                    Toggle("Daily High/Low", isOn: $settingsManager.settings.showDailyHighLowInCityList)
+                        .onChange(of: settingsManager.settings.showDailyHighLowInCityList) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Daily High and Low temperatures")
+                        .accessibilityHint(settingsManager.settings.showDailyHighLowInCityList ? "Enabled, double tap to disable" : "Disabled, double tap to enable")
+                    
                     // UV Index for list view
                     Toggle("UV Index", isOn: $settingsManager.settings.showUVIndexInCityList)
                         .onChange(of: settingsManager.settings.showUVIndexInCityList) {

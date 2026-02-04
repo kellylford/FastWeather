@@ -119,23 +119,61 @@ struct NWSAlertProperties: Codable {
     }
 }
 
-// Helper enum to handle NWS API's inconsistent areaDesc field
+// Helper enum to handle NWS API's inconsistent field types
 enum FlexibleStringOrArray: Codable {
     case string(String)
     case array([String])
     
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
+        
+        // Try standard types first
         if let str = try? container.decode(String.self) {
             self = .string(str)
-        } else if let arr = try? container.decode([String].self) {
-            self = .array(arr)
-        } else {
-            throw DecodingError.typeMismatch(
-                FlexibleStringOrArray.self,
-                DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Expected String or [String]")
-            )
+            return
         }
+        
+        if let arr = try? container.decode([String].self) {
+            self = .array(arr)
+            return
+        }
+        
+        // Handle numeric types (NWS API bug - sometimes returns numbers for text fields)
+        if let int = try? container.decode(Int.self) {
+            print("⚠️ NWS API returned Int (\(int)) for string field - converting to string")
+            self = .string(String(int))
+            return
+        }
+        
+        if let double = try? container.decode(Double.self) {
+            print("⚠️ NWS API returned Double (\(double)) for string field - converting to string")
+            self = .string(String(double))
+            return
+        }
+        
+        if let bool = try? container.decode(Bool.self) {
+            print("⚠️ NWS API returned Bool (\(bool)) for string field - converting to string")
+            self = .string(String(bool))
+            return
+        }
+        
+        // Handle Date objects (another NWS API bug)
+        if let date = try? container.decode(Date.self) {
+            print("⚠️ NWS API returned Date object for string field - using empty string")
+            self = .string("")
+            return
+        }
+        
+        // Handle null values
+        if container.decodeNil() {
+            self = .string("")
+            return
+        }
+        
+        // Last resort - log the failure and use empty string
+        print("⚠️ NWS API returned unknown type for string field - using empty string")
+        print("   CodingPath: \(decoder.codingPath.map { $0.stringValue }.joined(separator: "."))")
+        self = .string("")
     }
     
     func encode(to encoder: Encoder) throws {
@@ -146,3 +184,4 @@ enum FlexibleStringOrArray: Codable {
         }
     }
 }
+

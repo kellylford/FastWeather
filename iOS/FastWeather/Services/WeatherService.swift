@@ -492,8 +492,9 @@ class WeatherService: ObservableObject {
                 return []
             }
             
+            // Don't use .iso8601 date decoding strategy - it interferes with FlexibleStringOrArray
+            // and causes crashes when NWS API puts ISO date strings in text fields
             let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
             
             let nwsResponse = try decoder.decode(NWSAlertsResponse.self, from: data)
             
