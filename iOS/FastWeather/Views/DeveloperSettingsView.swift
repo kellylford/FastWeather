@@ -117,13 +117,6 @@ struct DeveloperSettingsView: View {
                     }) {
                         Label("Reset to Defaults", systemImage: "arrow.counterclockwise")
                     }
-                    
-                    Button(action: {
-                        enableAllEnhancedData()
-                    }) {
-                        Label("Enable All Enhanced Weather Data", systemImage: "sun.max.fill")
-                            .foregroundColor(.blue)
-                    }
                 }
                 
                 Section(footer: Text("These settings control experimental features that are in development. Changes take effect immediately.")) {
@@ -140,53 +133,6 @@ struct DeveloperSettingsView: View {
                 }
             }
         }
-    }
-    
-    private func enableAllEnhancedData() {
-        // Enable all UV Index options
-        settingsManager.settings.showUVIndexInCurrentConditions = true
-        settingsManager.settings.showUVIndexInTodaysForecast = true
-        settingsManager.settings.showUVIndexInDailyForecast = true
-        settingsManager.settings.showUVIndexInCityList = true
-        
-        // Enable all Wind Gusts options
-        settingsManager.settings.showWindGustsInCurrentConditions = true
-        settingsManager.settings.showWindGustsInTodaysForecast = true
-        
-        // Enable all Precipitation Probability options
-        settingsManager.settings.showPrecipitationProbabilityInPrecipitation = true
-        settingsManager.settings.showPrecipitationProbabilityInTodaysForecast = true
-        
-        // Enable other enhanced weather data
-        settingsManager.settings.showPrecipitationAmount = true
-        settingsManager.settings.showDewPoint = true
-        settingsManager.settings.showDaylightDuration = true
-        settingsManager.settings.showSunshineDuration = true
-        
-        // Enable all hourly forecast items
-        settingsManager.settings.hourlyShowTemperature = true
-        settingsManager.settings.hourlyShowConditions = true
-        settingsManager.settings.hourlyShowPrecipitationProbability = true
-        settingsManager.settings.hourlyShowWind = true
-        
-        // Enable all daily forecast items
-        settingsManager.settings.dailyShowHighLow = true
-        settingsManager.settings.dailyShowConditions = true
-        settingsManager.settings.dailyShowPrecipitationProbability = true
-        settingsManager.settings.dailyShowPrecipitationAmount = true
-        settingsManager.settings.dailyShowWind = true
-        
-        // Enable all weather fields
-        for index in settingsManager.settings.weatherFields.indices {
-            settingsManager.settings.weatherFields[index].isEnabled = true
-        }
-        
-        // Enable all detail categories
-        for index in settingsManager.settings.detailCategories.indices {
-            settingsManager.settings.detailCategories[index].isEnabled = true
-        }
-        
-        settingsManager.saveSettings()
     }
 }
 
