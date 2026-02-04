@@ -14,12 +14,19 @@ class SettingsManager: ObservableObject {
     private let userDefaultsKey = "AppSettings"
     
     init() {
+        let startTime = Date()
+        print("⚙️ [LAUNCH] SettingsManager init started at \(startTime)")
+        
         if let data = UserDefaults.standard.data(forKey: userDefaultsKey),
            let settings = try? JSONDecoder().decode(AppSettings.self, from: data) {
             self.settings = settings
+            print("⚙️ [LAUNCH] SettingsManager loaded from UserDefaults (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s)")
         } else {
             self.settings = AppSettings()
+            print("⚙️ [LAUNCH] SettingsManager using defaults (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s)")
         }
+        
+        print("✅ [LAUNCH] SettingsManager init complete (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s)")
     }
     
     func saveSettings() {

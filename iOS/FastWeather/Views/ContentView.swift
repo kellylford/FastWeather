@@ -11,6 +11,11 @@ struct ContentView: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
     @State private var selectedTab = 0
+    @State private var hasStartedWeatherFetch = false
+    
+    init() {
+        print("📱 [LAUNCH] ContentView init at \(Date())")
+    }
     
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -42,6 +47,13 @@ struct ContentView: View {
                 .accessibilityAddTraits(.isButton)
         }
         .accessibilityElement(children: .contain)
+        .task {
+            // Start weather fetch as early as possible - don't wait for MyCitiesView
+            guard !hasStartedWeatherFetch else { return }
+            hasStartedWeatherFetch = true
+            print("📱 [LAUNCH] ContentView starting weather fetch immediately")
+            await weatherService.refreshAllWeather()
+        }
     }
 }
 

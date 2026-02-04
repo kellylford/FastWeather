@@ -19,8 +19,9 @@ class WeatherService: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     
-    // Persistent cache via WeatherCache service
-    private let persistentCache = WeatherCache.shared
+    // DISABLED: Persistent cache is too slow (8.9s to load from UserDefaults)
+    // Only using in-memory cache for now
+    // private let persistentCache = WeatherCache.shared
     
     private let baseURL = "https://api.open-meteo.com/v1/forecast"
     private let historicalURL = "https://archive-api.open-meteo.com/v1/archive"
@@ -35,7 +36,10 @@ class WeatherService: ObservableObject {
     private var browseCacheTimestamps: [String: Date] = [:]
     
     init() {
+        let startTime = Date()
+        print("🌤️ [LAUNCH] WeatherService init started at \(startTime)")
         loadSavedCities()
+        print("✅ [LAUNCH] WeatherService init complete (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s)")
     }
     
     // MARK: - City Management
@@ -72,25 +76,16 @@ class WeatherService: ObservableObject {
     
     // Fetch full weather data (16 days) for detail views
     func fetchWeather(for city: City) async {
-        // Check persistent cache first (survives app restarts)
-        if let cached = await persistentCache.get(for: city.id) {
-            await MainActor.run {
-                self.weatherCache[city.id] = cached.weather
-                self.cacheTimestamps[city.id] = cached.timestamp
-            }
-            print("✅ Using persistent cached weather for \(city.name) (age: \(cached.ageDescription))")
-            
-            // Still fetch fresh data in background if stale
-            if cached.isStale {
-                print("🔄 Refreshing stale cache for \(city.name) in background...")
-            } else {
-                return
-            }
-        }
+        print("⏰ [DEBUG] fetchWeather called for \(city.name) at \(Date()) - entering function")
+        let startTime = Date()
+        print("🌐 [API] fetchWeather started for \(city.name) at \(startTime)")
+        
+        // DISABLED: Persistent cache is too slow (8.9s to load from UserDefaults)
+        // Only use in-memory cache for performance
         
         // Check in-memory cache
         if isCacheValid(timestamp: cacheTimestamps[city.id]) {
-            print("✅ Using in-memory cached weather for \(city.name)")
+            print("✅ [CACHE] Using in-memory cached weather for \(city.name) (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s)")
             return
         }
         
@@ -115,7 +110,11 @@ class WeatherService: ObservableObject {
         }
         
         do {
+            let apiStartTime = Date()
+            print("🌐 [API] Making HTTP request for \(city.name)...")
             let (data, _) = try await URLSession.shared.data(from: url)
+            print("✅ [API] HTTP request complete for \(city.name) (\(String(format: "%.3f", Date().timeIntervalSince(apiStartTime)))s)")
+            
             let decoder = JSONDecoder()
             let response = try decoder.decode(WeatherResponse.self, from: data)
             
@@ -126,12 +125,14 @@ class WeatherService: ObservableObject {
                 self.cacheTimestamps[city.id] = Date()
             }
             
-            // Save to persistent cache
-            await persistentCache.set(weatherData, for: city.id)
+            // DISABLED: Persistent cache save is too slow
+            // await persistentCache.set(weatherData, for: city.id)
+            
+            print("✅ [API] fetchWeather complete for \(city.name) (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s total)")
         } catch {
             await MainActor.run {
                 self.errorMessage = "Failed to fetch weather: \(error.localizedDescription)"
-                print("Weather fetch error for \(city.name): \(error)")
+                print("❌ [API] Weather fetch error for \(city.name): \(error)")
             }
         }
     }
@@ -246,14 +247,20 @@ class WeatherService: ObservableObject {
     }
     
     func refreshAllWeather() async {
+        let startTime = Date()
+        print("🔄 [REFRESH] refreshAllWeather started for \(savedCities.count) cities at \(startTime)")
+        
         await MainActor.run {
             isLoading = true
         }
         
         await withTaskGroup(of: Void.self) { group in
-            for city in savedCities {
+            for (index, city) in savedCities.enumerated() {
                 group.addTask {
+                    let cityStartTime = Date()
+                    print("📍 [REFRESH] Starting city \(index + 1)/\(self.savedCities.count): \(city.name)")
                     await self.fetchWeather(for: city)
+                    print("✅ [REFRESH] Completed city \(index + 1)/\(self.savedCities.count): \(city.name) (\(String(format: "%.3f", Date().timeIntervalSince(cityStartTime)))s)")
                 }
             }
         }
@@ -261,6 +268,8 @@ class WeatherService: ObservableObject {
         await MainActor.run {
             isLoading = false
         }
+        
+        print("✅ [REFRESH] refreshAllWeather complete (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s total for \(savedCities.count) cities)")
     }
     
     // MARK: - Historical Weather
@@ -441,6 +450,12 @@ class WeatherService: ObservableObject {
     /// - International: Apple WeatherKit (when feature flag enabled AND country supported)
     /// - Returns: Array of active weather alerts (empty if no alerts or service unavailable)
     func fetchNWSAlerts(for city: City) async throws -> [WeatherAlert] {
+        // TEMPORARILY DISABLED: NWS alerts causing crashes and 11-second delays during launch
+        // The FlexibleStringOrArray decoder is not handling all NWS API edge cases
+        print("ℹ️ NWS alerts temporarily disabled for performance and stability")
+        return []
+        
+        /* ORIGINAL CODE - RE-ENABLE AFTER FIXING CRASHES
         // Check cache first
         if let cached = alertsCache[city.id] {
             let age = Date().timeIntervalSince(cached.timestamp)
@@ -468,6 +483,7 @@ class WeatherService: ObservableObject {
             print("ℹ️ WeatherKit disabled, no alerts for international city: \(city.name)")
             return []
         }
+        */
     }
     
     /// Fetches alerts directly from National Weather Service API (US only)
@@ -642,14 +658,14 @@ class WeatherService: ObservableObject {
     
     /// Get cache metadata for a city (for displaying "Using cached data from...")
     func getCacheMetadata(for cityId: UUID) async -> CachedWeather? {
-        return await persistentCache.get(for: cityId)
+        // DISABLED: Persistent cache too slow
+        return nil
     }
     
     /// Clear all persistent cached weather data
     func clearPersistentCache() {
-        Task {
-            await persistentCache.clearAll()
-        }
+        // DISABLED: Persistent cache too slow
+        print("ℹ️ Persistent cache disabled for performance")
     }
     
     // MARK: - Persistence
@@ -661,24 +677,28 @@ class WeatherService: ObservableObject {
     }
     
     private func loadSavedCities() {
+        let startTime = Date()
+        print("📍 [LAUNCH] loadSavedCities started at \(startTime)")
+        
         if let data = UserDefaults.standard.data(forKey: userDefaultsKey),
            let cities = try? JSONDecoder().decode([City].self, from: data) {
             savedCities = cities
+            print("📍 [LAUNCH] Loaded \(cities.count) cities from UserDefaults (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s)")
             
-            // Fetch weather for all cities
-            Task {
-                await refreshAllWeather()
-            }
+            // DON'T fetch weather during init - let the view trigger it after appearing
+            // This allows the UI to show immediately
+            print("⏭️ [LAUNCH] Deferring weather fetch until after UI loads")
         } else {
+            print("📍 [LAUNCH] No saved cities, using defaults")
             // Default cities
             savedCities = [
                 City(name: "Madison", state: "Wisconsin", country: "United States", latitude: 43.074761, longitude: -89.3837613),
                 City(name: "San Diego", state: "California", country: "United States", latitude: 32.7174202, longitude: -117.162772)
             ]
             saveCities()
-            Task {
-                await refreshAllWeather()
-            }
+            print("⏭️ [LAUNCH] Deferring weather fetch until after UI loads")
         }
+        
+        print("✅ [LAUNCH] loadSavedCities complete (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s)")
     }
 }

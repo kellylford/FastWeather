@@ -41,10 +41,75 @@ enum WeatherFieldType: String, CaseIterable, Codable {
     case sunset = "Sunset"
 }
 
+enum HourlyFieldType: String, CaseIterable, Codable {
+    case temperature = "Temperature"
+    case conditions = "Conditions"
+    case feelsLike = "Feels Like"
+    case humidity = "Humidity"
+    case precipitation = "Precipitation"
+    case precipitationProbability = "Precipitation Probability"
+    case rain = "Rain"
+    case showers = "Showers"
+    case snowfall = "Snowfall"
+    case windSpeed = "Wind Speed"
+    case windDirection = "Wind Direction"
+    case windGusts = "Wind Gusts"
+    case cloudCover = "Cloud Cover"
+    case pressure = "Pressure"
+    case visibility = "Visibility"
+    case uvIndex = "UV Index"
+    case dewPoint = "Dew Point"
+}
+
+enum DailyFieldType: String, CaseIterable, Codable {
+    case temperatureMax = "High Temperature"
+    case temperatureMin = "Low Temperature"
+    case conditions = "Conditions"
+    case feelsLikeMax = "Feels Like High"
+    case feelsLikeMin = "Feels Like Low"
+    case sunrise = "Sunrise"
+    case sunset = "Sunset"
+    case precipitationSum = "Precipitation Total"
+    case precipitationProbability = "Precipitation Probability"
+    case precipitationHours = "Precipitation Hours"
+    case rainSum = "Rain Total"
+    case showersSum = "Showers Total"
+    case snowfallSum = "Snowfall Total"
+    case windSpeedMax = "Max Wind Speed"
+    case windGustsMax = "Max Wind Gusts"
+    case windDirectionDominant = "Wind Direction"
+    case uvIndexMax = "UV Index Max"
+    case daylightDuration = "Daylight Duration"
+    case sunshineDuration = "Sunshine Duration"
+}
+
+struct HourlyField: Codable, Identifiable, Equatable {
+    let id: String
+    let type: HourlyFieldType
+    var isEnabled: Bool
+    
+    init(type: HourlyFieldType, isEnabled: Bool = true) {
+        self.id = type.rawValue
+        self.type = type
+        self.isEnabled = isEnabled
+    }
+}
+
+struct DailyField: Codable, Identifiable, Equatable {
+    let id: String
+    let type: DailyFieldType
+    var isEnabled: Bool
+    
+    init(type: DailyFieldType, isEnabled: Bool = true) {
+        self.id = type.rawValue
+        self.type = type
+        self.isEnabled = isEnabled
+    }
+}
+
 enum DetailCategory: String, CaseIterable, Codable {
     case weatherAlerts = "Weather Alerts"
     case currentConditions = "Current Conditions"
-    case precipitation = "Precipitation"
     case todaysForecast = "Today's Forecast"
     case hourlyForecast = "24-Hour Forecast"
     case dailyForecast = "16-Day Forecast"
@@ -258,29 +323,73 @@ struct AppSettings: Codable {
         }
     }
     
-    // Ordered weather fields with enable/disable state
+    // Ordered weather fields with enable/disable state (City List)
     var weatherFields: [WeatherField] = [
         WeatherField(type: .temperature, isEnabled: true),
         WeatherField(type: .conditions, isEnabled: true),
         WeatherField(type: .feelsLike, isEnabled: true),
-        WeatherField(type: .humidity, isEnabled: true),
+        WeatherField(type: .humidity, isEnabled: false),
         WeatherField(type: .windSpeed, isEnabled: true),
-        WeatherField(type: .windDirection, isEnabled: true),
-        WeatherField(type: .windGusts, isEnabled: true),
+        WeatherField(type: .windDirection, isEnabled: false),
+        WeatherField(type: .windGusts, isEnabled: false),
         WeatherField(type: .precipitation, isEnabled: true),
-        WeatherField(type: .precipitationProbability, isEnabled: true),
-        WeatherField(type: .rain, isEnabled: true),
-        WeatherField(type: .showers, isEnabled: true),
-        WeatherField(type: .snowfall, isEnabled: true),
-        WeatherField(type: .cloudCover, isEnabled: true),
-        WeatherField(type: .pressure, isEnabled: true),
-        WeatherField(type: .visibility, isEnabled: true),
-        WeatherField(type: .uvIndex, isEnabled: true),
-        WeatherField(type: .dewPoint, isEnabled: true),
-        WeatherField(type: .highTemp, isEnabled: true),
-        WeatherField(type: .lowTemp, isEnabled: true),
-        WeatherField(type: .sunrise, isEnabled: true),
-        WeatherField(type: .sunset, isEnabled: true)
+        WeatherField(type: .precipitationProbability, isEnabled: false),
+        WeatherField(type: .rain, isEnabled: false),
+        WeatherField(type: .showers, isEnabled: false),
+        WeatherField(type: .snowfall, isEnabled: false),
+        WeatherField(type: .cloudCover, isEnabled: false),
+        WeatherField(type: .pressure, isEnabled: false),
+        WeatherField(type: .visibility, isEnabled: false),
+        WeatherField(type: .uvIndex, isEnabled: false),
+        WeatherField(type: .dewPoint, isEnabled: false),
+        WeatherField(type: .highTemp, isEnabled: false),
+        WeatherField(type: .lowTemp, isEnabled: false),
+        WeatherField(type: .sunrise, isEnabled: false),
+        WeatherField(type: .sunset, isEnabled: false)
+    ]
+    
+    // Ordered hourly forecast fields with enable/disable state (24-Hour Forecast)
+    var hourlyFields: [HourlyField] = [
+        HourlyField(type: .temperature, isEnabled: true),
+        HourlyField(type: .conditions, isEnabled: true),
+        HourlyField(type: .feelsLike, isEnabled: true),
+        HourlyField(type: .humidity, isEnabled: true),
+        HourlyField(type: .precipitation, isEnabled: true),
+        HourlyField(type: .precipitationProbability, isEnabled: true),
+        HourlyField(type: .rain, isEnabled: true),
+        HourlyField(type: .showers, isEnabled: true),
+        HourlyField(type: .snowfall, isEnabled: true),
+        HourlyField(type: .windSpeed, isEnabled: true),
+        HourlyField(type: .windDirection, isEnabled: true),
+        HourlyField(type: .windGusts, isEnabled: true),
+        HourlyField(type: .cloudCover, isEnabled: true),
+        HourlyField(type: .pressure, isEnabled: true),
+        HourlyField(type: .visibility, isEnabled: true),
+        HourlyField(type: .uvIndex, isEnabled: true),
+        HourlyField(type: .dewPoint, isEnabled: true)
+    ]
+    
+    // Ordered daily forecast fields with enable/disable state (16-Day Forecast)
+    var dailyFields: [DailyField] = [
+        DailyField(type: .temperatureMax, isEnabled: true),
+        DailyField(type: .temperatureMin, isEnabled: true),
+        DailyField(type: .conditions, isEnabled: true),
+        DailyField(type: .feelsLikeMax, isEnabled: true),
+        DailyField(type: .feelsLikeMin, isEnabled: true),
+        DailyField(type: .sunrise, isEnabled: true),
+        DailyField(type: .sunset, isEnabled: true),
+        DailyField(type: .precipitationSum, isEnabled: true),
+        DailyField(type: .precipitationProbability, isEnabled: true),
+        DailyField(type: .precipitationHours, isEnabled: true),
+        DailyField(type: .rainSum, isEnabled: true),
+        DailyField(type: .showersSum, isEnabled: true),
+        DailyField(type: .snowfallSum, isEnabled: true),
+        DailyField(type: .windSpeedMax, isEnabled: true),
+        DailyField(type: .windGustsMax, isEnabled: true),
+        DailyField(type: .windDirectionDominant, isEnabled: true),
+        DailyField(type: .uvIndexMax, isEnabled: true),
+        DailyField(type: .daylightDuration, isEnabled: true),
+        DailyField(type: .sunshineDuration, isEnabled: true)
     ]
     
     // Detail categories with enable/disable and order control
@@ -288,7 +397,6 @@ struct AppSettings: Codable {
         DetailCategoryField(category: .weatherAlerts, isEnabled: true),
         DetailCategoryField(category: .todaysForecast, isEnabled: true),
         DetailCategoryField(category: .currentConditions, isEnabled: true),
-        DetailCategoryField(category: .precipitation, isEnabled: true),
         DetailCategoryField(category: .hourlyForecast, isEnabled: true),
         DetailCategoryField(category: .dailyForecast, isEnabled: true),
         DetailCategoryField(category: .location, isEnabled: true)
@@ -324,7 +432,7 @@ struct AppSettings: Codable {
         case hourlyShowTemperature, hourlyShowConditions, hourlyShowPrecipitationProbability, hourlyShowWind
         case dailyShowHighLow, dailyShowConditions, dailyShowPrecipitationProbability, dailyShowPrecipitationAmount, dailyShowWind
         case _weatherAroundMeDistance = "weatherAroundMeDistance"
-        case weatherFields, detailCategories
+        case weatherFields, hourlyFields, dailyFields, detailCategories
         // Legacy properties
         case showTemperature, showConditions, showFeelsLike, showHumidity
         case showWindSpeed, showWindDirection, showHighTemp, showLowTemp
@@ -335,21 +443,77 @@ struct AppSettings: Codable {
     
     // Default initializer (uses default values from property declarations)
     init() {
-        // All properties have default values, so we just need to set weatherFields and detailCategories
+        // All properties have default values, so we just need to set weatherFields, hourlyFields, dailyFields, and detailCategories
         self.weatherFields = [
             WeatherField(type: .temperature, isEnabled: true),
             WeatherField(type: .conditions, isEnabled: true),
             WeatherField(type: .feelsLike, isEnabled: true),
-            WeatherField(type: .humidity, isEnabled: true),
+            WeatherField(type: .humidity, isEnabled: false),
             WeatherField(type: .windSpeed, isEnabled: true),
-            WeatherField(type: .windDirection, isEnabled: true),
+            WeatherField(type: .windDirection, isEnabled: false),
+            WeatherField(type: .windGusts, isEnabled: false),
+            WeatherField(type: .precipitation, isEnabled: true),
+            WeatherField(type: .precipitationProbability, isEnabled: false),
+            WeatherField(type: .rain, isEnabled: false),
+            WeatherField(type: .showers, isEnabled: false),
+            WeatherField(type: .snowfall, isEnabled: false),
+            WeatherField(type: .cloudCover, isEnabled: false),
+            WeatherField(type: .pressure, isEnabled: false),
+            WeatherField(type: .visibility, isEnabled: false),
+            WeatherField(type: .uvIndex, isEnabled: false),
+            WeatherField(type: .dewPoint, isEnabled: false),
+            WeatherField(type: .highTemp, isEnabled: false),
+            WeatherField(type: .lowTemp, isEnabled: false),
+            WeatherField(type: .sunrise, isEnabled: false),
+            WeatherField(type: .sunset, isEnabled: false)
+        ]
+        
+        self.hourlyFields = [
+            HourlyField(type: .temperature, isEnabled: true),
+            HourlyField(type: .conditions, isEnabled: true),
+            HourlyField(type: .feelsLike, isEnabled: true),
+            HourlyField(type: .humidity, isEnabled: true),
+            HourlyField(type: .precipitation, isEnabled: true),
+            HourlyField(type: .precipitationProbability, isEnabled: true),
+            HourlyField(type: .rain, isEnabled: true),
+            HourlyField(type: .showers, isEnabled: true),
+            HourlyField(type: .snowfall, isEnabled: true),
+            HourlyField(type: .windSpeed, isEnabled: true),
+            HourlyField(type: .windDirection, isEnabled: true),
+            HourlyField(type: .windGusts, isEnabled: true),
+            HourlyField(type: .cloudCover, isEnabled: true),
+            HourlyField(type: .pressure, isEnabled: true),
+            HourlyField(type: .visibility, isEnabled: true),
+            HourlyField(type: .uvIndex, isEnabled: true),
+            HourlyField(type: .dewPoint, isEnabled: true)
+        ]
+        
+        self.dailyFields = [
+            DailyField(type: .temperatureMax, isEnabled: true),
+            DailyField(type: .temperatureMin, isEnabled: true),
+            DailyField(type: .conditions, isEnabled: true),
+            DailyField(type: .feelsLikeMax, isEnabled: true),
+            DailyField(type: .feelsLikeMin, isEnabled: true),
+            DailyField(type: .sunrise, isEnabled: true),
+            DailyField(type: .sunset, isEnabled: true),
+            DailyField(type: .precipitationSum, isEnabled: true),
+            DailyField(type: .precipitationProbability, isEnabled: true),
+            DailyField(type: .precipitationHours, isEnabled: true),
+            DailyField(type: .rainSum, isEnabled: true),
+            DailyField(type: .showersSum, isEnabled: true),
+            DailyField(type: .snowfallSum, isEnabled: true),
+            DailyField(type: .windSpeedMax, isEnabled: true),
+            DailyField(type: .windGustsMax, isEnabled: true),
+            DailyField(type: .windDirectionDominant, isEnabled: true),
+            DailyField(type: .uvIndexMax, isEnabled: true),
+            DailyField(type: .daylightDuration, isEnabled: true),
+            DailyField(type: .sunshineDuration, isEnabled: true)
         ]
         
         self.detailCategories = [
             DetailCategoryField(category: .weatherAlerts, isEnabled: true),
             DetailCategoryField(category: .todaysForecast, isEnabled: true),
             DetailCategoryField(category: .currentConditions, isEnabled: true),
-            DetailCategoryField(category: .precipitation, isEnabled: true),
             DetailCategoryField(category: .hourlyForecast, isEnabled: true),
             DetailCategoryField(category: .dailyForecast, isEnabled: true),
             DetailCategoryField(category: .historicalWeather, isEnabled: true),
@@ -425,20 +589,133 @@ struct AppSettings: Codable {
         
         _weatherAroundMeDistance = try container.decodeIfPresent(Double.self, forKey: ._weatherAroundMeDistance) ?? (DistanceUnit.defaultUnit == .miles ? 150 : 240)
         
-        weatherFields = try container.decodeIfPresent([WeatherField].self, forKey: .weatherFields) ?? [
+        // Weather fields with migration: merge saved fields with new defaults
+        let defaultFields: [WeatherField] = [
             WeatherField(type: .temperature, isEnabled: true),
             WeatherField(type: .conditions, isEnabled: true),
             WeatherField(type: .feelsLike, isEnabled: true),
             WeatherField(type: .humidity, isEnabled: true),
             WeatherField(type: .windSpeed, isEnabled: true),
             WeatherField(type: .windDirection, isEnabled: true),
+            WeatherField(type: .windGusts, isEnabled: true),
+            WeatherField(type: .precipitation, isEnabled: true),
+            WeatherField(type: .precipitationProbability, isEnabled: true),
+            WeatherField(type: .rain, isEnabled: true),
+            WeatherField(type: .showers, isEnabled: true),
+            WeatherField(type: .snowfall, isEnabled: true),
+            WeatherField(type: .cloudCover, isEnabled: true),
+            WeatherField(type: .pressure, isEnabled: true),
+            WeatherField(type: .visibility, isEnabled: true),
+            WeatherField(type: .uvIndex, isEnabled: true),
+            WeatherField(type: .dewPoint, isEnabled: true),
+            WeatherField(type: .highTemp, isEnabled: true),
+            WeatherField(type: .lowTemp, isEnabled: true),
+            WeatherField(type: .sunrise, isEnabled: true),
+            WeatherField(type: .sunset, isEnabled: true)
         ]
+        
+        if let savedFields = try container.decodeIfPresent([WeatherField].self, forKey: .weatherFields) {
+            // Merge: keep saved fields and add any new ones that don't exist
+            var mergedFields = savedFields
+            let existingTypes = Set(savedFields.map { $0.type })
+            
+            for defaultField in defaultFields {
+                if !existingTypes.contains(defaultField.type) {
+                    // Add new field at the end, enabled by default
+                    mergedFields.append(defaultField)
+                }
+            }
+            
+            weatherFields = mergedFields
+        } else {
+            // No saved data, use all defaults
+            weatherFields = defaultFields
+        }
+        
+        // Hourly fields with migration: merge saved fields with new defaults
+        let defaultHourlyFields: [HourlyField] = [
+            HourlyField(type: .temperature, isEnabled: true),
+            HourlyField(type: .conditions, isEnabled: true),
+            HourlyField(type: .feelsLike, isEnabled: true),
+            HourlyField(type: .humidity, isEnabled: true),
+            HourlyField(type: .precipitation, isEnabled: true),
+            HourlyField(type: .precipitationProbability, isEnabled: true),
+            HourlyField(type: .rain, isEnabled: true),
+            HourlyField(type: .showers, isEnabled: true),
+            HourlyField(type: .snowfall, isEnabled: true),
+            HourlyField(type: .windSpeed, isEnabled: true),
+            HourlyField(type: .windDirection, isEnabled: true),
+            HourlyField(type: .windGusts, isEnabled: true),
+            HourlyField(type: .cloudCover, isEnabled: true),
+            HourlyField(type: .pressure, isEnabled: true),
+            HourlyField(type: .visibility, isEnabled: true),
+            HourlyField(type: .uvIndex, isEnabled: true),
+            HourlyField(type: .dewPoint, isEnabled: true)
+        ]
+        
+        if let savedHourlyFields = try container.decodeIfPresent([HourlyField].self, forKey: .hourlyFields) {
+            // Merge: keep saved fields and add any new ones that don't exist
+            var mergedFields = savedHourlyFields
+            let existingTypes = Set(savedHourlyFields.map { $0.type })
+            
+            for defaultField in defaultHourlyFields {
+                if !existingTypes.contains(defaultField.type) {
+                    // Add new field at the end, enabled by default
+                    mergedFields.append(defaultField)
+                }
+            }
+            
+            hourlyFields = mergedFields
+        } else {
+            // No saved data, use all defaults
+            hourlyFields = defaultHourlyFields
+        }
+        
+        // Daily fields with migration: merge saved fields with new defaults
+        let defaultDailyFields: [DailyField] = [
+            DailyField(type: .temperatureMax, isEnabled: true),
+            DailyField(type: .temperatureMin, isEnabled: true),
+            DailyField(type: .conditions, isEnabled: true),
+            DailyField(type: .feelsLikeMax, isEnabled: true),
+            DailyField(type: .feelsLikeMin, isEnabled: true),
+            DailyField(type: .sunrise, isEnabled: true),
+            DailyField(type: .sunset, isEnabled: true),
+            DailyField(type: .precipitationSum, isEnabled: true),
+            DailyField(type: .precipitationProbability, isEnabled: true),
+            DailyField(type: .precipitationHours, isEnabled: true),
+            DailyField(type: .rainSum, isEnabled: true),
+            DailyField(type: .showersSum, isEnabled: true),
+            DailyField(type: .snowfallSum, isEnabled: true),
+            DailyField(type: .windSpeedMax, isEnabled: true),
+            DailyField(type: .windGustsMax, isEnabled: true),
+            DailyField(type: .windDirectionDominant, isEnabled: true),
+            DailyField(type: .uvIndexMax, isEnabled: true),
+            DailyField(type: .daylightDuration, isEnabled: true),
+            DailyField(type: .sunshineDuration, isEnabled: true)
+        ]
+        
+        if let savedDailyFields = try container.decodeIfPresent([DailyField].self, forKey: .dailyFields) {
+            // Merge: keep saved fields and add any new ones that don't exist
+            var mergedFields = savedDailyFields
+            let existingTypes = Set(savedDailyFields.map { $0.type })
+            
+            for defaultField in defaultDailyFields {
+                if !existingTypes.contains(defaultField.type) {
+                    // Add new field at the end, enabled by default
+                    mergedFields.append(defaultField)
+                }
+            }
+            
+            dailyFields = mergedFields
+        } else {
+            // No saved data, use all defaults
+            dailyFields = defaultDailyFields
+        }
         
         detailCategories = try container.decodeIfPresent([DetailCategoryField].self, forKey: .detailCategories) ?? [
             DetailCategoryField(category: .weatherAlerts, isEnabled: true),
             DetailCategoryField(category: .todaysForecast, isEnabled: true),
             DetailCategoryField(category: .currentConditions, isEnabled: true),
-            DetailCategoryField(category: .precipitation, isEnabled: true),
             DetailCategoryField(category: .hourlyForecast, isEnabled: true),
             DetailCategoryField(category: .dailyForecast, isEnabled: true),
             DetailCategoryField(category: .historicalWeather, isEnabled: true),

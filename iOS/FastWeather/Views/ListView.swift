@@ -242,6 +242,9 @@ struct ListRowView: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(buildAccessibilityLabel())
         .animation(.easeInOut(duration: 0.2), value: highestSeverityAlert?.id)
+        // DISABLED: .task blocks causing 12-second delays during launch due to actor contention
+        // Alerts are already disabled in WeatherService, so this task does nothing anyway
+        /*
         .task(id: city.id) {
             guard !hasLoadedAlerts else { return }
             hasLoadedAlerts = true
@@ -252,6 +255,7 @@ struct ListRowView: View {
                 print("Failed to fetch alerts for \(city.name): \(error)")
             }
         }
+        */
     }
     
     private func buildWeatherSummary(_ weather: WeatherData) -> String {
@@ -312,7 +316,13 @@ struct ListRowView: View {
                    let probArray = hourly.precipitationProbability,
                    !probArray.isEmpty,
                    let prob = probArray[0], prob > 0 {
-                    let value = "\(prob)%"
+                    // Also get expected precipitation amount for that hour
+                    var value = "\(prob)%"
+                    if let precipArray = hourly.precipitation,
+                       !precipArray.isEmpty,
+                       let precipAmount = precipArray[0], precipAmount > 0.0 {
+                        value += " (\(formatPrecipitation(precipAmount)))"
+                    }
                     parts.append(isDetails ? "Precip Probability: \(value)" : value)
                 }
                 
@@ -470,7 +480,18 @@ struct ListRowView: View {
                    !probArray.isEmpty,
                    let prob = probArray[0], prob > 0 {
                     label += ", "
-                    label += isDetails ? "Precipitation Probability: \(prob)%" : "\(prob)%"
+                    // Also announce expected precipitation amount for that hour
+                    if let precipArray = hourly.precipitation,
+                       !precipArray.isEmpty,
+                       let precipAmount = precipArray[0], precipAmount > 0.0 {
+                        if isDetails {
+                            label += "Precipitation Probability: \(prob)%, Expected: \(formatPrecipitation(precipAmount))"
+                        } else {
+                            label += "\(prob)%, \(formatPrecipitation(precipAmount))"
+                        }
+                    } else {
+                        label += isDetails ? "Precipitation Probability: \(prob)%" : "\(prob)%"
+                    }
                 }
                 
             case .rain:

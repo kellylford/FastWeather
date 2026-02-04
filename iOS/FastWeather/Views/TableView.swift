@@ -195,7 +195,14 @@ struct TableRowView: View {
                   let probArray = hourly.precipitationProbability,
                   !probArray.isEmpty,
                   let prob = probArray[0], prob > 0 else { return nil }
-            return (showLabel ? "Precip Probability" : "", "\(prob)%")
+            // Also get expected precipitation amount for that hour
+            var value = "\(prob)%"
+            if let precipArray = hourly.precipitation,
+               !precipArray.isEmpty,
+               let precipAmount = precipArray[0], precipAmount > 0.0 {
+                value += " (\(formatPrecipitation(precipAmount)))"
+            }
+            return (showLabel ? "Precip Probability" : "", value)
             
         case .rain:
             guard let rain = weather.current.rain, rain > 0 else { return nil }

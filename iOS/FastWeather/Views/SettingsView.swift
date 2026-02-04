@@ -140,11 +140,11 @@ struct SettingsView: View {
                 Section(header: Text("Features"),
                        footer: Text("Enable or disable app features.")) {
                     Toggle("Expected Precipitation", isOn: $featureFlags.radarEnabled)
-                        .accessibilityLabel("Expected Precipitation feature")
+                        .accessibilityLabel("Expected Precipitation")
                         .accessibilityHint("Shows precipitation forecast visualization")
                     
                     Toggle("Weather Around Me", isOn: $featureFlags.weatherAroundMeEnabled)
-                        .accessibilityLabel("Weather Around Me feature")
+                        .accessibilityLabel("Weather Around Me")
                         .accessibilityHint("Compare weather conditions in nearby cities")
                     
                     Toggle("International Weather Alerts", isOn: $featureFlags.weatherKitAlertsEnabled)
@@ -194,6 +194,12 @@ struct SettingsView: View {
                 // City List View Data
                 Section(header: Text("City List View"),
                        footer: Text("Choose which data appears in your city list. Toggle to show/hide, use VoiceOver actions to reorder.")) {
+                    // Section description
+                    Text("Configure what weather information appears in the city list")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.bottom, 4)
+                    
                     ForEach(Array(settingsManager.settings.weatherFields.enumerated()), id: \.element.id) { index, field in
                         HStack {
                             Image(systemName: "line.3.horizontal")
@@ -234,59 +240,61 @@ struct SettingsView: View {
                         }
                         .accessibilityLabel("Daily High and Low temperatures")
                         .accessibilityHint(settingsManager.settings.showDailyHighLowInCityList ? "Enabled, double tap to disable" : "Disabled, double tap to enable")
-                    
-                    // UV Index for list view
-                    Toggle("UV Index", isOn: $settingsManager.settings.showUVIndexInCityList)
-                        .onChange(of: settingsManager.settings.showUVIndexInCityList) {
-                            settingsManager.saveSettings()
-                        }
-                        .accessibilityLabel("UV Index")
-                        .accessibilityHint(settingsManager.settings.showUVIndexInCityList ? "Enabled, double tap to disable" : "Disabled, double tap to enable")
                 }
                 
                 // Current Weather Detail Sections
                 Section(header: Text("Current Weather Detail View"),
                        footer: Text("Toggle which sections appear in the current weather detail view. Use VoiceOver actions to reorder sections.")) {
-                    ForEach(Array(settingsManager.settings.detailCategories.enumerated()), id: \.element.id) { index, category in
+                    ForEach(settingsManager.settings.detailCategories.indices, id: \.self) { index in
+                        let category = settingsManager.settings.detailCategories[index]
                         VStack(alignment: .leading, spacing: 8) {
+                            // Section name as heading with move actions
                             HStack {
                                 Image(systemName: "line.3.horizontal")
                                     .foregroundColor(.secondary)
                                     .accessibilityHidden(true)
                                 
-                                Toggle(isOn: Binding(
-                                    get: { category.isEnabled },
-                                    set: { newValue in
-                                        settingsManager.settings.detailCategories[index].isEnabled = newValue
-                                        settingsManager.saveSettings()
-                                    }
-                                )) {
-                                    Text(category.category.rawValue)
-                                        .font(.body.weight(.semibold))
-                                }
-                                .accessibilityLabel("\(category.category.rawValue) section")
-                                .accessibilityHint(category.isEnabled ? "Enabled, double tap to disable" : "Disabled, double tap to enable")
+                                Text(category.category.rawValue)
+                                    .font(.body.weight(.semibold))
                             }
+                            .accessibilityAddTraits(.isHeader)
+                            .accessibilityLabel(category.category.rawValue)
+                            .accessibilityAction(named: "Move Up") {
+                                moveCategoryUp(at: index)
+                            }
+                            .accessibilityAction(named: "Move Down") {
+                                moveCategoryDown(at: index)
+                            }
+                            .accessibilityAction(named: "Move to Top") {
+                                moveCategoryToTop(at: index)
+                            }
+                            .accessibilityAction(named: "Move to Bottom") {
+                                moveCategoryToBottom(at: index)
+                            }
+                            
+                            // Description text
+                            Text(categoryDescription(for: category.category))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            // Toggle for overall section
+                            Toggle("Enable \(category.category.rawValue)", isOn: Binding(
+                                get: { category.isEnabled },
+                                set: { newValue in
+                                    settingsManager.settings.detailCategories[index].isEnabled = newValue
+                                    settingsManager.saveSettings()
+                                }
+                            ))
+                            .accessibilityLabel("Enable \(category.category.rawValue) section")
+                            .accessibilityHint(category.isEnabled ? "Enabled, double tap to disable" : "Disabled, double tap to enable")
                             
                             // Show data items for this category
                             if category.isEnabled {
                                 categoryDataItems(for: category.category)
-                                    .padding(.leading, 32)
+                                    .padding(.leading, 16)
                             }
                         }
-                        .accessibilityElement(children: .contain)
-                        .accessibilityAction(named: "Move Up") {
-                            moveCategoryUp(at: index)
-                        }
-                        .accessibilityAction(named: "Move Down") {
-                            moveCategoryDown(at: index)
-                        }
-                        .accessibilityAction(named: "Move to Top") {
-                            moveCategoryToTop(at: index)
-                        }
-                        .accessibilityAction(named: "Move to Bottom") {
-                            moveCategoryToBottom(at: index)
-                        }
+                        .padding(.vertical, 8)
                     }
                     .onMove { from, to in
                         settingsManager.settings.detailCategories.move(fromOffsets: from, toOffset: to)
@@ -306,27 +314,6 @@ struct SettingsView: View {
                         settingsManager.resetToDefaults()
                     }
                     .accessibilityLabel("Reset all settings to default values")
-                }
-                
-                // Historical Weather section
-                Section(header: Text("Historical Weather"),
-                       footer: Text("Set how many years of historical data to retrieve. Lower values load faster.")) {
-                    Picker("Years of Data", selection: $settingsManager.settings.historicalYearsBack) {
-                        ForEach(1...85, id: \.self) { years in
-                            Text("\(years) \(years == 1 ? "year" : "years")").tag(years)
-                        }
-                    }
-                    .pickerStyle(.wheel)
-                    .onChange(of: settingsManager.settings.historicalYearsBack) {
-                        settingsManager.saveSettings()
-                    }
-                    .accessibilityLabel("Years of historical data, \(settingsManager.settings.historicalYearsBack) years")
-                    
-                    Button("Clear Historical Cache") {
-                        clearHistoricalCache()
-                    }
-                    .accessibilityLabel("Clear all cached historical weather data")
-                    .accessibilityHint("Tap to delete cached historical data for all cities")
                 }
                 
                 // User Guide section
@@ -438,6 +425,26 @@ struct SettingsView: View {
         UIAccessibility.post(notification: .announcement, argument: "Moved \(categoryName) to top")
     }
     
+    // MARK: - Category Descriptions
+    private func categoryDescription(for category: DetailCategory) -> String {
+        switch category {
+        case .weatherAlerts:
+            return "Active weather warnings and alerts"
+        case .currentConditions:
+            return "Temperature, wind, humidity, and atmospheric conditions"
+        case .todaysForecast:
+            return "Daily summary with high/low temperatures, sunrise/sunset, and precipitation alerts"
+        case .hourlyForecast:
+            return "24-hour detailed forecast with customizable data fields"
+        case .dailyForecast:
+            return "16-day forecast with customizable data fields"
+        case .historicalWeather:
+            return "Past year weather comparisons"
+        case .location:
+            return "Coordinates, elevation, and location details"
+        }
+    }
+    
     // MARK: - Category Data Items
     @ViewBuilder
     private func categoryDataItems(for category: DetailCategory) -> some View {
@@ -476,17 +483,6 @@ struct SettingsView: View {
                         settingsManager.saveSettings()
                     }
                     .accessibilityLabel("Dew point in current conditions")
-                
-            case .precipitation:
-                Text("• Current precipitation")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                Toggle("Precipitation Probability", isOn: $settingsManager.settings.showPrecipitationProbabilityInPrecipitation)
-                    .font(.caption)
-                    .onChange(of: settingsManager.settings.showPrecipitationProbabilityInPrecipitation) {
-                        settingsManager.saveSettings()
-                    }
-                    .accessibilityLabel("Precipitation probability")
                 
             case .todaysForecast:
                 Text("• Automatic daily summary")
@@ -543,81 +539,78 @@ struct SettingsView: View {
                     .accessibilityLabel("Sunshine duration")
                 
             case .hourlyForecast:
-                Toggle("Temperature", isOn: $settingsManager.settings.hourlyShowTemperature)
+                Text("Configure what data appears in the 24-hour forecast")
                     .font(.caption)
-                    .onChange(of: settingsManager.settings.hourlyShowTemperature) {
-                        settingsManager.saveSettings()
-                    }
-                    .accessibilityLabel("Temperature in hourly forecast")
+                    .foregroundColor(.secondary)
+                    .padding(.bottom, 4)
                 
-                Toggle("Conditions", isOn: $settingsManager.settings.hourlyShowConditions)
+                ForEach(settingsManager.settings.hourlyFields.indices, id: \.self) { index in
+                    let field = settingsManager.settings.hourlyFields[index]
+                    Toggle(field.type.rawValue, isOn: Binding(
+                        get: { settingsManager.settings.hourlyFields[index].isEnabled },
+                        set: { newValue in
+                            settingsManager.settings.hourlyFields[index].isEnabled = newValue
+                            settingsManager.saveSettings()
+                        }
+                    ))
                     .font(.caption)
-                    .onChange(of: settingsManager.settings.hourlyShowConditions) {
-                        settingsManager.saveSettings()
+                    .accessibilityLabel("\(field.type.rawValue) in hourly forecast")
+                    .accessibilityAction(named: "Move Up") {
+                        moveHourlyFieldUp(at: index)
                     }
-                    .accessibilityLabel("Weather conditions in hourly forecast")
-                
-                Toggle("Precipitation Probability", isOn: $settingsManager.settings.hourlyShowPrecipitationProbability)
-                    .font(.caption)
-                    .onChange(of: settingsManager.settings.hourlyShowPrecipitationProbability) {
-                        settingsManager.saveSettings()
+                    .accessibilityAction(named: "Move Down") {
+                        moveHourlyFieldDown(at: index)
                     }
-                    .accessibilityLabel("Precipitation probability in hourly forecast")
-                
-                Toggle("Wind", isOn: $settingsManager.settings.hourlyShowWind)
-                    .font(.caption)
-                    .onChange(of: settingsManager.settings.hourlyShowWind) {
-                        settingsManager.saveSettings()
-                    }
-                    .accessibilityLabel("Wind speed and direction in hourly forecast")
+                }
                 
             case .dailyForecast:
-                Toggle("High/Low Temperatures", isOn: $settingsManager.settings.dailyShowHighLow)
+                Text("Configure what data appears in the 16-day forecast")
                     .font(.caption)
-                    .onChange(of: settingsManager.settings.dailyShowHighLow) {
-                        settingsManager.saveSettings()
-                    }
-                    .accessibilityLabel("High and low temperatures in daily forecast")
+                    .foregroundColor(.secondary)
+                    .padding(.bottom, 4)
                 
-                Toggle("Conditions", isOn: $settingsManager.settings.dailyShowConditions)
+                ForEach(settingsManager.settings.dailyFields.indices, id: \.self) { index in
+                    let field = settingsManager.settings.dailyFields[index]
+                    Toggle(field.type.rawValue, isOn: Binding(
+                        get: { settingsManager.settings.dailyFields[index].isEnabled },
+                        set: { newValue in
+                            settingsManager.settings.dailyFields[index].isEnabled = newValue
+                            settingsManager.saveSettings()
+                        }
+                    ))
                     .font(.caption)
-                    .onChange(of: settingsManager.settings.dailyShowConditions) {
-                        settingsManager.saveSettings()
+                    .accessibilityLabel("\(field.type.rawValue) in daily forecast")
+                    .accessibilityAction(named: "Move Up") {
+                        moveDailyFieldUp(at: index)
                     }
-                    .accessibilityLabel("Weather conditions in daily forecast")
-                
-                Toggle("Precipitation Probability", isOn: $settingsManager.settings.dailyShowPrecipitationProbability)
-                    .font(.caption)
-                    .onChange(of: settingsManager.settings.dailyShowPrecipitationProbability) {
-                        settingsManager.saveSettings()
+                    .accessibilityAction(named: "Move Down") {
+                        moveDailyFieldDown(at: index)
                     }
-                    .accessibilityLabel("Precipitation probability in daily forecast")
-                
-                Toggle("Precipitation Amount", isOn: $settingsManager.settings.dailyShowPrecipitationAmount)
-                    .font(.caption)
-                    .onChange(of: settingsManager.settings.dailyShowPrecipitationAmount) {
-                        settingsManager.saveSettings()
-                    }
-                    .accessibilityLabel("Rain or snow amounts in daily forecast")
-                
-                Toggle("Wind", isOn: $settingsManager.settings.dailyShowWind)
-                    .font(.caption)
-                    .onChange(of: settingsManager.settings.dailyShowWind) {
-                        settingsManager.saveSettings()
-                    }
-                    .accessibilityLabel("Wind speed and direction in daily forecast")
-                
-                Toggle("UV Index", isOn: $settingsManager.settings.showUVIndexInDailyForecast)
-                    .font(.caption)
-                    .onChange(of: settingsManager.settings.showUVIndexInDailyForecast) {
-                        settingsManager.saveSettings()
-                    }
-                    .accessibilityLabel("UV index in daily forecast")
+                }
                 
             case .historicalWeather:
                 Text("• Past year comparisons")
                     .font(.caption)
                     .foregroundColor(.secondary)
+                
+                Picker("Years of Data", selection: $settingsManager.settings.historicalYearsBack) {
+                    ForEach(1...85, id: \.self) { years in
+                        Text("\(years) \(years == 1 ? "year" : "years")").tag(years)
+                    }
+                }
+                .pickerStyle(.menu)
+                .font(.caption)
+                .onChange(of: settingsManager.settings.historicalYearsBack) {
+                    settingsManager.saveSettings()
+                }
+                .accessibilityLabel("Years of historical data, \(settingsManager.settings.historicalYearsBack) years")
+                
+                Button("Clear Historical Cache") {
+                    clearHistoricalCache()
+                }
+                .font(.caption)
+                .accessibilityLabel("Clear all cached historical weather data")
+                .accessibilityHint("Tap to delete cached historical data for all cities")
                 
             case .location:
                 Text("• Coordinates, elevation")
@@ -649,6 +642,42 @@ struct SettingsView: View {
         let fieldName = settingsManager.settings.weatherFields[index].type.rawValue
         let belowFieldName = settingsManager.settings.weatherFields[index + 1].type.rawValue
         settingsManager.settings.weatherFields.move(fromOffsets: IndexSet(integer: index), toOffset: index + 2)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) below \(belowFieldName)")
+    }
+    
+    private func moveHourlyFieldUp(at index: Int) {
+        guard index > 0 else { return }
+        let fieldName = settingsManager.settings.hourlyFields[index].type.rawValue
+        let aboveFieldName = settingsManager.settings.hourlyFields[index - 1].type.rawValue
+        settingsManager.settings.hourlyFields.move(fromOffsets: IndexSet(integer: index), toOffset: index - 1)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) above \(aboveFieldName)")
+    }
+    
+    private func moveHourlyFieldDown(at index: Int) {
+        guard index < settingsManager.settings.hourlyFields.count - 1 else { return }
+        let fieldName = settingsManager.settings.hourlyFields[index].type.rawValue
+        let belowFieldName = settingsManager.settings.hourlyFields[index + 1].type.rawValue
+        settingsManager.settings.hourlyFields.move(fromOffsets: IndexSet(integer: index), toOffset: index + 2)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) below \(belowFieldName)")
+    }
+    
+    private func moveDailyFieldUp(at index: Int) {
+        guard index > 0 else { return }
+        let fieldName = settingsManager.settings.dailyFields[index].type.rawValue
+        let aboveFieldName = settingsManager.settings.dailyFields[index - 1].type.rawValue
+        settingsManager.settings.dailyFields.move(fromOffsets: IndexSet(integer: index), toOffset: index - 1)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) above \(aboveFieldName)")
+    }
+    
+    private func moveDailyFieldDown(at index: Int) {
+        guard index < settingsManager.settings.dailyFields.count - 1 else { return }
+        let fieldName = settingsManager.settings.dailyFields[index].type.rawValue
+        let belowFieldName = settingsManager.settings.dailyFields[index + 1].type.rawValue
+        settingsManager.settings.dailyFields.move(fromOffsets: IndexSet(integer: index), toOffset: index + 2)
         settingsManager.saveSettings()
         UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) below \(belowFieldName)")
     }

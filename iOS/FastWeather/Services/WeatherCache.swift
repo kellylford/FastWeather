@@ -50,9 +50,11 @@ class WeatherCache: ObservableObject {
     
     private let userDefaultsKey = "WeatherCache"
     private let maxCacheAge: TimeInterval = 86400 // 24 hours
+    private var hasLoadedFromDisk = false
     
     private init() {
-        loadCache()
+        // Don't load from disk immediately - defer until first access
+        print("📦 [LAUNCH] WeatherCache initialized (lazy loading enabled)")
     }
     
     // MARK: - Public Methods
@@ -61,6 +63,11 @@ class WeatherCache: ObservableObject {
     /// - Parameter cityId: The city's unique identifier
     /// - Returns: Cached weather if available and not expired, nil otherwise
     func get(for cityId: UUID) -> CachedWeather? {
+        // Lazy-load cache from disk on first access (not during app launch)
+        if !hasLoadedFromDisk {
+            loadCacheFromDisk()
+        }
+        
         guard let cached = cache[cityId] else {
             return nil
         }
@@ -117,9 +124,13 @@ class WeatherCache: ObservableObject {
     
     // MARK: - Persistence
     
-    private func loadCache() {
+    private func loadCacheFromDisk() {
+        let startTime = Date()
+        print("📦 [CACHE] Loading weather cache from disk...")
+        hasLoadedFromDisk = true
+        
         guard let data = UserDefaults.standard.data(forKey: userDefaultsKey) else {
-            print("📦 No cached weather data found")
+            print("📦 [CACHE] No cached weather data found (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s)")
             return
         }
         
@@ -135,9 +146,9 @@ class WeatherCache: ObservableObject {
             // Remove expired entries
             removeExpired()
             
-            print("📦 Loaded \(cache.count) cached weather \(cache.count == 1 ? "entry" : "entries")")
+            print("📦 [CACHE] Loaded \(cache.count) cached weather \(cache.count == 1 ? "entry" : "entries") (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s)")
         } catch {
-            print("⚠️ Failed to load weather cache: \(error.localizedDescription)")
+            print("⚠️ [CACHE] Failed to load weather cache: \(error.localizedDescription)")
             cache.removeAll()
         }
     }

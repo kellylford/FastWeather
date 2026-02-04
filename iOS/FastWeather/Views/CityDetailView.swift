@@ -310,30 +310,6 @@ struct CityDetailView: View {
             .padding(.horizontal)
             .accessibilityElement(children: .contain)
             
-        case .precipitation:
-            GroupBox(label: Label("Precipitation", systemImage: "cloud.rain")) {
-                VStack(spacing: 12) {
-                    if let precip = weather.current.precipitation {
-                        DetailRow(label: "Total", value: formatPrecipitation(precip))
-                        Divider()
-                    }
-                    if let rain = weather.current.rain {
-                        DetailRow(label: "Rain", value: formatPrecipitation(rain))
-                        Divider()
-                    }
-                    if let showers = weather.current.showers {
-                        DetailRow(label: "Showers", value: formatPrecipitation(showers))
-                        Divider()
-                    }
-                    if let snow = weather.current.snowfall {
-                        DetailRow(label: "Snowfall", value: formatPrecipitation(snow))
-                    }
-                }
-                .padding(.vertical, 8)
-            }
-            .padding(.horizontal)
-            .accessibilityElement(children: .contain)
-            
         case .hourlyForecast:
             if let hourly = weather.hourly,
                let timeArray = hourly.time,
@@ -349,17 +325,10 @@ struct CityDetailView: View {
                             let endIndex = min(startIndex + 24, timeArray.count)
                             
                             ForEach(startIndex..<endIndex, id: \.self) { index in
-                                if let time = timeArray[index],
-                                   let temperature = tempArray[index],
-                                   let weatherCode = weatherCodeArray[index],
-                                   let precipitation = precipArray[index] {
+                                if let time = timeArray[index] {
                                     HourlyForecastCard(
-                                        time: time,
-                                        temperature: temperature,
-                                        weatherCode: weatherCode,
-                                        precipitation: precipitation,
-                                        precipitationProbability: hourly.precipitationProbability?[index],
-                                        uvIndex: hourly.uvIndex?[index],
+                                        hourly: hourly,
+                                        index: index,
                                         settingsManager: settingsManager
                                     )
                                 }
@@ -377,26 +346,11 @@ struct CityDetailView: View {
                 GroupBox(label: Label("16-Day Forecast", systemImage: "calendar")) {
                     VStack(spacing: 0) {
                         ForEach(0..<min(16, daily.temperature2mMax.count), id: \.self) { index in
-                            if let high = daily.temperature2mMax[index],
-                               let low = daily.temperature2mMin[index],
-                               let sunriseArray = daily.sunrise,
-                               let sunrise = sunriseArray[index] {
-                                DailyForecastRow(
-                                    dayIndex: index,
-                                    sunrise: sunrise,
-                                    high: high,
-                                    low: low,
-                                    weatherCode: daily.weatherCode?[index],
-                                    precipitation: daily.precipitationSum?[index],
-                                    rain: daily.rainSum?[index],
-                                    snow: daily.snowfallSum?[index],
-                                    precipitationProbability: daily.precipitationProbabilityMax?[index],
-                                    uvIndexMax: daily.uvIndexMax?[index],
-                                    daylightDuration: daily.daylightDuration?[index],
-                                    sunshineDuration: daily.sunshineDuration?[index],
-                                    settingsManager: settingsManager
-                                )
-                            }
+                            DailyForecastRow(
+                                daily: daily,
+                                index: index,
+                                settingsManager: settingsManager
+                            )
                             
                             if index < min(15, daily.temperature2mMax.count - 1) {
                                 Divider()
@@ -716,20 +670,22 @@ struct DetailRow: View {
 }
 
 struct HourlyForecastCard: View {
-    let time: String
-    let temperature: Double
-    let weatherCode: Int
-    let precipitation: Double
-    let precipitationProbability: Int?
-    let uvIndex: Double?
+    let hourly: WeatherData.HourlyWeather
+    let index: Int
     let settingsManager: SettingsManager
     
+    private var time: String? {
+        hourly.time?[index]
+    }
+    
     private var formattedTime: String {
-        FormatHelper.formatTimeCompact(time)
+        guard let time = time else { return "--" }
+        return FormatHelper.formatTimeCompact(time)
     }
     
     private var weatherCodeEnum: WeatherCode? {
-        WeatherCode(rawValue: weatherCode)
+        guard let code = hourly.weatherCode?[index] else { return nil }
+        return WeatherCode(rawValue: code)
     }
     
     var body: some View {
@@ -738,47 +694,11 @@ struct HourlyForecastCard: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
             
-            if let weatherCode = weatherCodeEnum {
-                Image(systemName: weatherCode.systemImageName)
-                    .font(.title3)
-                    .foregroundColor(.blue)
-                    .frame(height: 30)
-            }
-            
-            Text(formatTemperature(temperature))
-                .font(.body)
-                .fontWeight(.semibold)
-            
-            // Precipitation with probability
-            if precipitation > 0 || (settingsManager.settings.showPrecipitationProbabilityInTodaysForecast && precipitationProbability ?? 0 > 0) {
-                HStack(spacing: 2) {
-                    Image(systemName: "drop.fill")
-                        .font(.caption2)
-                        .foregroundColor(.blue)
-                    
-                    if settingsManager.settings.showPrecipitationProbabilityInTodaysForecast, let prob = precipitationProbability, prob > 0 {
-                        Text("\(prob)%")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    } else if precipitation > 0 {
-                        Text(formatPrecipitation(precipitation))
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
+            // Build content based on enabled fields
+            ForEach(settingsManager.settings.hourlyFields.filter { $0.isEnabled }, id: \.id) { field in
+                if let content = getFieldContent(for: field.type) {
+                    content
                 }
-            }
-            
-            // UV Index badge (if enabled and UV > 0)
-            if settingsManager.settings.showUVIndexInTodaysForecast, let uv = uvIndex, uv > 0 {
-                let category = UVIndexCategory(uvIndex: uv)
-                Text("\(Int(uv.rounded()))")
-                    .font(.caption2)
-                    .fontWeight(.semibold)
-                    .padding(.horizontal, 4)
-                    .padding(.vertical, 2)
-                    .background(category.color.opacity(0.2))
-                    .foregroundColor(category.color)
-                    .cornerRadius(4)
             }
         }
         .frame(width: 70)
@@ -790,8 +710,105 @@ struct HourlyForecastCard: View {
         .accessibilityLabel(createAccessibilityLabel())
     }
     
+    private func getFieldContent(for fieldType: HourlyFieldType) -> AnyView? {
+        switch fieldType {
+        case .temperature:
+            if let temp = hourly.temperature2m?[index] {
+                return AnyView(Text(formatTemperature(temp))
+                    .font(.body)
+                    .fontWeight(.semibold))
+            }
+            
+        case .conditions:
+            if let weatherCode = weatherCodeEnum {
+                return AnyView(Image(systemName: weatherCode.systemImageName)
+                    .font(.title3)
+                    .foregroundColor(.blue)
+                    .frame(height: 30))
+            }
+            
+        case .precipitationProbability:
+            if let prob = hourly.precipitationProbability?[index], prob > 0 {
+                return AnyView(HStack(spacing: 2) {
+                    Image(systemName: "drop.fill")
+                        .font(.caption2)
+                        .foregroundColor(.blue)
+                    Text("\(prob)%")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                })
+            }
+            
+        case .precipitation:
+            if let precip = hourly.precipitation?[index], precip > 0 {
+                return AnyView(HStack(spacing: 2) {
+                    Image(systemName: "drop.fill")
+                        .font(.caption2)
+                        .foregroundColor(.blue)
+                    Text(formatPrecipitation(precip))
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                })
+            }
+            
+        case .uvIndex:
+            if let uv = hourly.uvIndex?[index], uv > 0 {
+                let category = UVIndexCategory(uvIndex: uv)
+                return AnyView(Text("\(Int(uv.rounded()))")
+                    .font(.caption2)
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 2)
+                    .background(category.color.opacity(0.2))
+                    .foregroundColor(category.color)
+                    .cornerRadius(4))
+            }
+            
+        case .windSpeed:
+            if let windSpeed = hourly.windSpeed10m?[index], windSpeed > 0 {
+                return AnyView(HStack(spacing: 2) {
+                    Image(systemName: "wind")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    Text(formatWindSpeed(windSpeed))
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                })
+            }
+            
+        case .windGusts:
+            if let windGusts = hourly.windgusts10m?[index], windGusts > 0 {
+                return AnyView(HStack(spacing: 2) {
+                    Image(systemName: "wind")
+                        .font(.caption2)
+                        .foregroundColor(.orange)
+                    Text(formatWindSpeed(windGusts))
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                })
+            }
+            
+        case .humidity:
+            if let humidity = hourly.relativeHumidity2m?[index] {
+                return AnyView(HStack(spacing: 2) {
+                    Image(systemName: "humidity")
+                        .font(.caption2)
+                        .foregroundColor(.blue)
+                    Text("\(humidity)%")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                })
+            }
+            
+        default:
+            break
+        }
+        return nil
+    }
+    
     private func createAccessibilityLabel() -> String {
-        // Extract hour for more natural speech
+        guard let time = time else { return "No data" }
+        
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
@@ -805,22 +822,63 @@ struct HourlyForecastCard: View {
             hourDescription = minute > 0 ? "\(hour12):\(String(format: "%02d", minute)) \(ampm)" : "\(hour12) \(ampm)"
         }
         
-        var label = "\(hourDescription), \(formatTemperature(temperature))"
-        if let weatherCode = weatherCodeEnum {
-            label += ", \(weatherCode.description)"
-        }
+        var label = hourDescription
         
-        if settingsManager.settings.showPrecipitationProbabilityInTodaysForecast, let prob = precipitationProbability, prob > 0 {
-            label += ", \(prob) percent chance of precipitation"
-        } else if precipitation > 0 {
-            label += ", precipitation \(formatPrecipitation(precipitation))"
-        }
-        
-        if settingsManager.settings.showUVIndexInTodaysForecast, let uv = uvIndex, uv > 0 {
-            label += ", \(getUVIndexDescription(uv))"
+        // Add enabled fields to label
+        for field in settingsManager.settings.hourlyFields.filter({ $0.isEnabled }) {
+            if let fieldText = getFieldAccessibilityText(for: field.type) {
+                label += ", \(fieldText)"
+            }
         }
         
         return label
+    }
+    
+    private func getFieldAccessibilityText(for fieldType: HourlyFieldType) -> String? {
+        switch fieldType {
+        case .temperature:
+            if let temp = hourly.temperature2m?[index] {
+                return formatTemperature(temp)
+            }
+            
+        case .conditions:
+            return weatherCodeEnum?.description
+            
+        case .precipitationProbability:
+            if let prob = hourly.precipitationProbability?[index], prob > 0 {
+                return "\(prob) percent chance of precipitation"
+            }
+            
+        case .precipitation:
+            if let precip = hourly.precipitation?[index], precip > 0 {
+                return "precipitation \(formatPrecipitation(precip))"
+            }
+            
+        case .uvIndex:
+            if let uv = hourly.uvIndex?[index], uv > 0 {
+                return getUVIndexDescription(uv)
+            }
+            
+        case .windSpeed:
+            if let windSpeed = hourly.windSpeed10m?[index], windSpeed > 0 {
+                return "wind \(formatWindSpeed(windSpeed))"
+            }
+            
+        case .windGusts:
+            if let windGusts = hourly.windgusts10m?[index], windGusts > 0 {
+                return "gusts \(formatWindSpeed(windGusts))"
+            }
+            
+        case .humidity:
+            if let humidity = hourly.relativeHumidity2m?[index] {
+                return "humidity \(humidity) percent"
+            }
+            
+        default:
+            return nil
+        }
+        
+        return nil
     }
     
     private func formatTemperature(_ celsius: Double) -> String {
@@ -832,33 +890,40 @@ struct HourlyForecastCard: View {
         let precip = settingsManager.settings.precipitationUnit.convert(mm)
         return String(format: "%.2f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
     }
+    
+    private func formatWindSpeed(_ kmh: Double) -> String {
+        let speed = settingsManager.settings.windSpeedUnit.convert(kmh)
+        return String(format: "%.0f %@", speed, settingsManager.settings.windSpeedUnit.rawValue)
+    }
 }
 
 struct DailyForecastRow: View {
-    let dayIndex: Int
-    let sunrise: String
-    let high: Double
-    let low: Double
-    let weatherCode: Int?
-    let precipitation: Double?
-    let rain: Double?
-    let snow: Double?
-    let precipitationProbability: Int?
-    let uvIndexMax: Double?
-    let daylightDuration: Double?
-    let sunshineDuration: Double?
+    let daily: WeatherData.DailyWeather
+    let index: Int
     let settingsManager: SettingsManager
     
+    private var sunrise: String? {
+        daily.sunrise?[index]
+    }
+    
+    private var high: Double? {
+        daily.temperature2mMax[index]
+    }
+    
+    private var low: Double? {
+        daily.temperature2mMin[index]
+    }
+    
     private var dayName: String {
-        guard let date = DateParser.parse(sunrise) else { return "" }
+        guard let sunrise = sunrise, let date = DateParser.parse(sunrise) else { return "" }
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MMM d"
         let dateString = dateFormatter.string(from: date)
         
-        if dayIndex == 0 {
+        if index == 0 {
             return "Today, \(dateString)"
-        } else if dayIndex == 1 {
+        } else if index == 1 {
             return "Tomorrow, \(dateString)"
         } else {
             let dayFormatter = DateFormatter()
@@ -869,55 +934,10 @@ struct DailyForecastRow: View {
     }
     
     private var weatherCodeEnum: WeatherCode? {
-        if let code = weatherCode {
+        if let code = daily.weatherCode?[index] {
             return WeatherCode(rawValue: code)
         }
         return nil
-    }
-    
-    private var accessibilityText: String {
-        var text = "\(dayName)"
-        if let weatherCode = weatherCodeEnum {
-            text += ", \(weatherCode.description)"
-        }
-        text += ", High \(formatTemperature(high)), Low \(formatTemperature(low))"
-        
-        if settingsManager.settings.dailyShowPrecipitationProbability, let prob = precipitationProbability, prob > 0 {
-            text += ", \(prob) percent chance of precipitation"
-            if settingsManager.settings.dailyShowPrecipitationAmount {
-                if let snowfall = snow, snowfall > 0 {
-                    text += ", \(formatSnowfall(snowfall)) of snow"
-                } else if let rainfall = rain, rainfall > 0 {
-                    text += ", \(formatPrecipitation(rainfall)) of rain"
-                } else if let precip = precipitation, precip > 0 {
-                    text += ", \(formatPrecipitation(precip)) expected"
-                } else {
-                    text += ", trace amounts expected"
-                }
-            }
-        } else if settingsManager.settings.dailyShowPrecipitationAmount {
-            if let snowfall = snow, snowfall > 0 {
-                text += ", \(formatSnowfall(snowfall)) of snow"
-            } else if let rainfall = rain, rainfall > 0 {
-                text += ", \(formatPrecipitation(rainfall)) of rain"
-            } else if let precip = precipitation, precip > 0 {
-                text += ", precipitation \(formatPrecipitation(precip))"
-            }
-        }
-        
-        if settingsManager.settings.showUVIndexInDailyForecast, let uvMax = uvIndexMax {
-            text += ", \(getUVIndexDescription(uvMax))"
-        }
-        
-        if settingsManager.settings.showDaylightDuration, let daylight = daylightDuration {
-            text += ", \(formatDuration(daylight)) of daylight"
-        }
-        
-        if settingsManager.settings.showSunshineDuration, let sunshine = sunshineDuration {
-            text += ", \(formatDuration(sunshine)) of sunshine"
-        }
-        
-        return text
     }
     
     var body: some View {
@@ -930,6 +950,7 @@ struct DailyForecastRow: View {
                 .frame(width: 140, alignment: .leading)
                 .accessibilityHidden(true)
                 
+                // Conditions icon - always show if available
                 if let weatherCode = weatherCodeEnum {
                     Image(systemName: weatherCode.systemImageName)
                         .font(.title3)
@@ -940,136 +961,267 @@ struct DailyForecastRow: View {
                 
                 Spacer()
                 
-                // Precipitation Probability
-                if settingsManager.settings.dailyShowPrecipitationProbability, let prob = precipitationProbability, prob > 0 {
-                    HStack(spacing: 4) {
-                        Image(systemName: "drop.fill")
-                            .font(.caption)
-                            .foregroundColor(.blue)
-                        Text("\(prob)%")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                // Dynamic fields based on settings (compact inline display)
+                ForEach(settingsManager.settings.dailyFields.filter { $0.isEnabled }, id: \.id) { field in
+                    if let content = getInlineFieldContent(for: field.type) {
+                        content
+                            .accessibilityHidden(true)
                     }
-                    .frame(width: 60)
+                }
+                
+                // Temperatures at the end
+                if isFieldEnabled(.temperatureMax) && isFieldEnabled(.temperatureMin),
+                   let high = high, let low = low {
+                    HStack(spacing: 8) {
+                        Text(formatTemperature(low))
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                        
+                        Text(formatTemperature(high))
+                            .font(.body)
+                            .fontWeight(.semibold)
+                    }
                     .accessibilityHidden(true)
                 }
-                
-                // Precipitation Amount (can show alongside probability)
-                if settingsManager.settings.dailyShowPrecipitationAmount {
-                    // Show snow or rain amount
-                    if let snowfall = snow, snowfall > 0 {
-                        HStack(spacing: 4) {
-                            Image(systemName: "snowflake")
-                                .font(.caption)
-                                .foregroundColor(.blue)
-                            Text(formatSnowfall(snowfall))
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        .frame(width: 60)
-                        .accessibilityHidden(true)
-                    } else if let rainfall = rain, rainfall > 0 {
-                        HStack(spacing: 4) {
-                            Image(systemName: "drop.fill")
-                                .font(.caption)
-                                .foregroundColor(.blue)
-                            Text(formatPrecipitation(rainfall))
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        .frame(width: 60)
-                        .accessibilityHidden(true)
-                    } else if let precip = precipitation, precip > 0 {
-                        HStack(spacing: 4) {
-                            Image(systemName: "drop.fill")
-                                .font(.caption)
-                                .foregroundColor(.blue)
-                            Text(formatPrecipitation(precip))
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        .frame(width: 60)
-                        .accessibilityHidden(true)
-                    } else if settingsManager.settings.dailyShowPrecipitationProbability,
-                              let prob = precipitationProbability, prob > 0 {
-                        // Show "trace" when there's probability but no measurable amount
-                        HStack(spacing: 4) {
-                            Image(systemName: "drop.fill")
-                                .font(.caption)
-                                .foregroundColor(.blue)
-                            Text("trace")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .italic()
-                        }
-                        .frame(width: 60)
-                        .accessibilityHidden(true)
-                    }
-                }
-                
-                HStack(spacing: 8) {
-                    Text(formatTemperature(low))
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                    
-                    Text(formatTemperature(high))
-                        .font(.body)
-                        .fontWeight(.semibold)
-                }
-                .accessibilityHidden(true)
             }
             
-            // Additional details (UV, Daylight, Sunshine)
-            if settingsManager.settings.showUVIndexInDailyForecast || settingsManager.settings.showDaylightDuration || settingsManager.settings.showSunshineDuration {
+            // Additional detail fields (shown below main row)
+            if hasAdditionalDetails() {
                 HStack(spacing: 12) {
-                    if settingsManager.settings.showUVIndexInDailyForecast, let uvMax = uvIndexMax {
-                        let category = UVIndexCategory(uvIndex: uvMax)
-                        HStack(spacing: 4) {
-                            Text("UV:")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                            Text("\(Int(uvMax.rounded()))")
-                                .font(.caption2)
-                                .fontWeight(.semibold)
-                                .padding(.horizontal, 4)
-                                .padding(.vertical, 2)
-                                .background(category.color.opacity(0.2))
-                                .foregroundColor(category.color)
-                                .cornerRadius(4)
+                    ForEach(settingsManager.settings.dailyFields.filter { $0.isEnabled }, id: \.id) { field in
+                        if let content = getDetailFieldContent(for: field.type) {
+                            content
+                                .accessibilityHidden(true)
                         }
-                        .accessibilityHidden(true)
                     }
-                    
-                    if settingsManager.settings.showDaylightDuration, let daylight = daylightDuration {
-                        HStack(spacing: 4) {
-                            Image(systemName: "sun.max")
-                                .font(.caption2)
-                            Text(formatDuration(daylight))
-                                .font(.caption2)
-                        }
-                        .foregroundColor(.secondary)
-                        .accessibilityHidden(true)
-                    }
-                    
-                    if settingsManager.settings.showSunshineDuration, let sunshine = sunshineDuration {
-                        HStack(spacing: 4) {
-                            Image(systemName: "sun.and.horizon")
-                                .font(.caption2)
-                            Text(formatDuration(sunshine))
-                                .font(.caption2)
-                        }
-                        .foregroundColor(.secondary)
-                        .accessibilityHidden(true)
-                    }
-                    
-                    Spacer()
                 }
-                .padding(.leading, 8)
             }
         }
         .padding(.vertical, 8)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilityText)
+        .accessibilityLabel(createAccessibilityLabel())
+    }
+    
+    private func getInlineFieldContent(for fieldType: DailyFieldType) -> AnyView? {
+        switch fieldType {
+        case .precipitationProbability:
+            if let prob = daily.precipitationProbabilityMax?[index], prob > 0 {
+                return AnyView(HStack(spacing: 4) {
+                    Image(systemName: "drop.fill")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                    Text("\(prob)%")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .frame(width: 60))
+            }
+            
+        case .rainSum:
+            if let rain = daily.rainSum?[index], rain > 0 {
+                return AnyView(HStack(spacing: 4) {
+                    Image(systemName: "drop.fill")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                    Text(formatPrecipitation(rain))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .frame(width: 60))
+            }
+            
+        case .snowfallSum:
+            if let snow = daily.snowfallSum?[index], snow > 0 {
+                return AnyView(HStack(spacing: 4) {
+                    Image(systemName: "snowflake")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                    Text(formatSnowfall(snow))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .frame(width: 60))
+            }
+            
+        case .precipitationSum:
+            if let precip = daily.precipitationSum?[index], precip > 0 {
+                return AnyView(HStack(spacing: 4) {
+                    Image(systemName: "drop.fill")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                    Text(formatPrecipitation(precip))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .frame(width: 60))
+            }
+            
+        default:
+            break
+        }
+        return nil
+    }
+    
+    private func getDetailFieldContent(for fieldType: DailyFieldType) -> AnyView? {
+        switch fieldType {
+        case .uvIndexMax:
+            if let uvMax = daily.uvIndexMax?[index], uvMax > 0 {
+                let category = UVIndexCategory(uvIndex: uvMax)
+                return AnyView(HStack(spacing: 4) {
+                    Text("UV:")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    Text("\(Int(uvMax.rounded()))")
+                        .font(.caption2)
+                        .fontWeight(.semibold)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
+                        .background(category.color.opacity(0.2))
+                        .foregroundColor(category.color)
+                        .cornerRadius(4)
+                })
+            }
+            
+        case .daylightDuration:
+            if let daylight = daily.daylightDuration?[index] {
+                return AnyView(HStack(spacing: 4) {
+                    Image(systemName: "sun.max")
+                        .font(.caption2)
+                    Text(formatDuration(daylight))
+                        .font(.caption2)
+                }
+                .foregroundColor(.secondary))
+            }
+            
+        case .sunshineDuration:
+            if let sunshine = daily.sunshineDuration?[index] {
+                return AnyView(HStack(spacing: 4) {
+                    Image(systemName: "sun.max.fill")
+                        .font(.caption2)
+                    Text(formatDuration(sunshine))
+                        .font(.caption2)
+                }
+                .foregroundColor(.secondary))
+            }
+            
+        case .windSpeedMax:
+            if let windMax = daily.windSpeed10mMax?[index], windMax > 0 {
+                return AnyView(HStack(spacing: 4) {
+                    Image(systemName: "wind")
+                        .font(.caption2)
+                    Text(formatWindSpeed(windMax))
+                        .font(.caption2)
+                }
+                .foregroundColor(.secondary))
+            }
+            
+        default:
+            break
+        }
+        return nil
+    }
+    
+    private func hasAdditionalDetails() -> Bool {
+        for field in settingsManager.settings.dailyFields.filter({ $0.isEnabled }) {
+            switch field.type {
+            case .uvIndexMax, .daylightDuration, .sunshineDuration, .windSpeedMax:
+                if getDetailFieldContent(for: field.type) != nil {
+                    return true
+                }
+            default:
+                continue
+            }
+        }
+        return false
+    }
+    
+    private func isFieldEnabled(_ type: DailyFieldType) -> Bool {
+        settingsManager.settings.dailyFields.first(where: { $0.type == type })?.isEnabled ?? false
+    }
+    
+    private func createAccessibilityLabel() -> String {
+        var text = dayName
+        
+        // Add enabled fields to label
+        for field in settingsManager.settings.dailyFields.filter({ $0.isEnabled }) {
+            if let fieldText = getFieldAccessibilityText(for: field.type) {
+                text += ", \(fieldText)"
+            }
+        }
+        
+        return text
+    }
+    
+    private func getFieldAccessibilityText(for fieldType: DailyFieldType) -> String? {
+        switch fieldType {
+        case .conditions:
+            return weatherCodeEnum?.description
+            
+        case .temperatureMax:
+            if let high = high {
+                return "High \(formatTemperature(high))"
+            }
+            
+        case .temperatureMin:
+            if let low = low {
+                return "Low \(formatTemperature(low))"
+            }
+            
+        case .precipitationProbability:
+            if let prob = daily.precipitationProbabilityMax?[index], prob > 0 {
+                return "\(prob) percent chance of precipitation"
+            }
+            
+        case .rainSum:
+            if let rain = daily.rainSum?[index], rain > 0 {
+                return "\(formatPrecipitation(rain)) of rain"
+            }
+            
+        case .snowfallSum:
+            if let snow = daily.snowfallSum?[index], snow > 0 {
+                return "\(formatSnowfall(snow)) of snow"
+            }
+            
+        case .precipitationSum:
+            if let precip = daily.precipitationSum?[index], precip > 0 {
+                return "precipitation \(formatPrecipitation(precip))"
+            }
+            
+        case .uvIndexMax:
+            if let uvMax = daily.uvIndexMax?[index] {
+                return getUVIndexDescription(uvMax)
+            }
+            
+        case .daylightDuration:
+            if let daylight = daily.daylightDuration?[index] {
+                return "\(formatDuration(daylight)) of daylight"
+            }
+            
+        case .sunshineDuration:
+            if let sunshine = daily.sunshineDuration?[index] {
+                return "\(formatDuration(sunshine)) of sunshine"
+            }
+            
+        case .windSpeedMax:
+            if let windMax = daily.windSpeed10mMax?[index] {
+                return "max wind \(formatWindSpeed(windMax))"
+            }
+            
+        case .sunrise:
+            if let sunrise = sunrise {
+                return "Sunrise \(FormatHelper.formatTime(sunrise))"
+            }
+            
+        case .sunset:
+            if let sunset = daily.sunset?[index] {
+                return "Sunset \(FormatHelper.formatTime(sunset))"
+            }
+            
+        default:
+            return nil
+        }
+        
+        return nil
     }
     
     private func formatTemperature(_ celsius: Double) -> String {
@@ -1079,17 +1231,28 @@ struct DailyForecastRow: View {
     
     private func formatPrecipitation(_ mm: Double) -> String {
         let precip = settingsManager.settings.precipitationUnit.convert(mm)
-        return String(format: "%.2f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
+        return String(format: "%.1f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
     }
     
     private func formatSnowfall(_ cm: Double) -> String {
-        // Snow is measured in cm (API) → convert to inches for US, keep cm elsewhere
-        switch settingsManager.settings.precipitationUnit {
-        case .inches:
-            let inches = cm * 0.393701
-            return String(format: "%.1f in", inches)
-        case .millimeters:
-            return String(format: "%.1f cm", cm)
+        // Convert cm to mm, then to user's unit
+        let mm = cm * 10
+        return formatPrecipitation(mm)
+    }
+    
+    private func formatWindSpeed(_ kmh: Double) -> String {
+        let speed = settingsManager.settings.windSpeedUnit.convert(kmh)
+        return String(format: "%.0f %@", speed, settingsManager.settings.windSpeedUnit.rawValue)
+    }
+    
+    private func formatDuration(_ seconds: Double) -> String {
+        let hours = Int(seconds / 3600)
+        let minutes = Int((seconds.truncatingRemainder(dividingBy: 3600)) / 60)
+        
+        if minutes > 0 {
+            return "\(hours)h \(minutes)m"
+        } else {
+            return "\(hours)h"
         }
     }
 }
@@ -1162,6 +1325,8 @@ struct WeatherAlertsSection: View {
         }
         .padding(.horizontal)
         .accessibilityElement(children: .contain)
+        // DISABLED: Alerts task causing delays and crashes - alerts are disabled in WeatherService
+        /*
         .task(id: city.id) {  // Use .task instead of .onAppear, re-run only if city changes
             guard !hasLoaded else { return }
             
@@ -1176,6 +1341,14 @@ struct WeatherAlertsSection: View {
                 hasLoaded = true
             } catch {
                 print("❌ Failed to fetch alerts for \(city.name): \(error)")
+                isLoading = false
+                hasLoaded = true
+            }
+        }
+        */
+        .onAppear {
+            // Since alerts are disabled, just mark as loaded immediately
+            if !hasLoaded {
                 isLoading = false
                 hasLoaded = true
             }

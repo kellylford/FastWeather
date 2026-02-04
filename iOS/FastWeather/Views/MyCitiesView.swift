@@ -14,6 +14,7 @@ struct MyCitiesView: View {
     @State private var showingAddCity = false
     @State private var selectedCityForHistory: City?
     @State private var selectedCityForDetail: City?
+    @State private var hasLoadedInitialWeather = false
     
     var body: some View {
         NavigationStack {
@@ -55,6 +56,7 @@ struct MyCitiesView: View {
             .refreshable {
                 await weatherService.refreshAllWeather()
             }
+            // Weather fetch moved to ContentView for faster startup
         }
     }
 }
