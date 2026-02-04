@@ -159,6 +159,10 @@ struct TableRowView: View {
     
     private func getFieldLabelAndValue(for fieldType: WeatherFieldType, weather: WeatherData, showLabel: Bool) -> (String, String)? {
         switch fieldType {
+        case .weatherAlerts:
+            // Weather alerts displayed separately, not as a field
+            return nil
+            
         case .temperature:
             return (showLabel ? "Temperature" : "", formatTemperature(weather.current.temperature2m))
             
@@ -262,7 +266,8 @@ struct TableRowView: View {
     
     private func formatTemperature(_ celsius: Double) -> String {
         let temp = settingsManager.settings.temperatureUnit.convert(celsius)
-        return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
+        let unit = settingsManager.settings.temperatureUnit == .fahrenheit ? "F" : "C"
+        return String(format: "%.0f°%@", temp, unit)
     }
     
     private func formatWindDirection(_ degrees: Int) -> String {

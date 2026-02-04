@@ -54,7 +54,6 @@ class WeatherCache: ObservableObject {
     
     private init() {
         // Don't load from disk immediately - defer until first access
-        print("📦 [LAUNCH] WeatherCache initialized (lazy loading enabled)")
     }
     
     // MARK: - Public Methods
@@ -107,7 +106,6 @@ class WeatherCache: ObservableObject {
     func clearAll() {
         cache.removeAll()
         saveCache()
-        print("🗑️ Cleared all weather cache")
     }
     
     /// Remove expired entries from cache
@@ -118,7 +116,6 @@ class WeatherCache: ObservableObject {
         
         if removed > 0 {
             saveCache()
-            print("🗑️ Removed \(removed) expired cache \(removed == 1 ? "entry" : "entries")")
         }
     }
     

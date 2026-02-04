@@ -497,7 +497,8 @@ struct WeatherAroundMeView: View {
     
     private func formatTemperature(_ celsius: Double) -> String {
         let temp = settingsManager.settings.temperatureUnit.convert(celsius)
-        return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
+        let unit = settingsManager.settings.temperatureUnit == .fahrenheit ? "F" : "C"
+        return String(format: "%.0f°%@", temp, unit)
     }
     
     /// Calculate actual distance between center city and directional location in user's preferred unit

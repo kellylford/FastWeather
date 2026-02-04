@@ -242,9 +242,6 @@ struct ListRowView: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(buildAccessibilityLabel())
         .animation(.easeInOut(duration: 0.2), value: highestSeverityAlert?.id)
-        // DISABLED: .task blocks causing 12-second delays during launch due to actor contention
-        // Alerts are already disabled in WeatherService, so this task does nothing anyway
-        /*
         .task(id: city.id) {
             guard !hasLoadedAlerts else { return }
             hasLoadedAlerts = true
@@ -252,10 +249,9 @@ struct ListRowView: View {
             do {
                 alerts = try await weatherService.fetchNWSAlerts(for: city)
             } catch {
-                print("Failed to fetch alerts for \(city.name): \(error)")
+                // Silently fail - alerts are optional
             }
         }
-        */
     }
     
     private func buildWeatherSummary(_ weather: WeatherData) -> String {
@@ -265,6 +261,10 @@ struct ListRowView: View {
         // Use the ordered and filtered weather fields from settings
         for field in settingsManager.settings.weatherFields where field.isEnabled {
             switch field.type {
+            case .weatherAlerts:
+                // Weather alerts shown separately in UI, not as text field
+                break
+                
             case .temperature:
                 // Skip temperature in summary since it's shown separately on the right
                 break
@@ -418,6 +418,17 @@ struct ListRowView: View {
         // Build label following the exact order of weatherFields, plus special fields in their positions
         for field in settingsManager.settings.weatherFields where field.isEnabled {
             switch field.type {
+            case .weatherAlerts:
+                // Add alerts in order based on settings
+                if let alert = highestSeverityAlert {
+                    label += ", "
+                    if alerts.count == 1 {
+                        label += isDetails ? "Alert: \(alert.event)" : alert.event
+                    } else {
+                        label += isDetails ? "Alerts: \(alert.event) and \(alerts.count - 1) more" : "\(alert.event) +\(alerts.count - 1)"
+                    }
+                }
+                
             case .temperature:
                 // Already added after city name
                 break
@@ -426,15 +437,6 @@ struct ListRowView: View {
                 if let weatherCode = weather.current.weatherCodeEnum {
                     label += ", "
                     label += isDetails ? "Conditions: \(weatherCode.description)" : weatherCode.description
-                }
-                
-                // Add alerts immediately after conditions (same position as visual display)
-                if let alert = highestSeverityAlert {
-                    if alerts.count == 1 {
-                        label += ", Alert: \(alert.event)"
-                    } else {
-                        label += ", Alerts: \(alert.event) and \(alerts.count - 1) more"
-                    }
                 }
                 
             case .feelsLike:
@@ -592,7 +594,8 @@ struct ListRowView: View {
     
     private func formatTemperature(_ celsius: Double) -> String {
         let temp = settingsManager.settings.temperatureUnit.convert(celsius)
-        return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
+        let unit = settingsManager.settings.temperatureUnit == .fahrenheit ? "F" : "C"
+        return String(format: "%.0f°%@", temp, unit)
     }
     
     private func formatWindSpeed(_ kmh: Double) -> String {

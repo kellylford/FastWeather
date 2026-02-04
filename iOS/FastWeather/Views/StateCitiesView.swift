@@ -200,7 +200,8 @@ struct CityLocationRowOptimized: View {
     
     private func formatTemperature(_ celsius: Double) -> String {
         let temp = settingsManager.settings.temperatureUnit.convert(celsius)
-        return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
+        let unit = settingsManager.settings.temperatureUnit == .fahrenheit ? "F" : "C"
+        return String(format: "%.0f°%@", temp, unit)
     }
 }
 
@@ -309,7 +310,8 @@ struct CityLocationRow: View {
     
     private func formatTemperature(_ celsius: Double) -> String {
         let temp = settingsManager.settings.temperatureUnit.convert(celsius)
-        return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
+        let unit = settingsManager.settings.temperatureUnit == .fahrenheit ? "F" : "C"
+        return String(format: "%.0f°%@", temp, unit)
     }
 }
 
@@ -510,7 +512,8 @@ struct CityLocationDetailView: View {
     // Formatting helpers
     private func formatTemperature(_ celsius: Double) -> String {
         let temp = settingsManager.settings.temperatureUnit.convert(celsius)
-        return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
+        let unit = settingsManager.settings.temperatureUnit == .fahrenheit ? "F" : "C"
+        return String(format: "%.0f°%@", temp, unit)
     }
     
     private func formatWindSpeed(_ kmh: Double) -> String {

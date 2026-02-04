@@ -36,10 +36,7 @@ class WeatherService: ObservableObject {
     private var browseCacheTimestamps: [String: Date] = [:]
     
     init() {
-        let startTime = Date()
-        print("🌤️ [LAUNCH] WeatherService init started at \(startTime)")
         loadSavedCities()
-        print("✅ [LAUNCH] WeatherService init complete (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s)")
     }
     
     // MARK: - City Management
@@ -76,16 +73,11 @@ class WeatherService: ObservableObject {
     
     // Fetch full weather data (16 days) for detail views
     func fetchWeather(for city: City) async {
-        print("⏰ [DEBUG] fetchWeather called for \(city.name) at \(Date()) - entering function")
-        let startTime = Date()
-        print("🌐 [API] fetchWeather started for \(city.name) at \(startTime)")
-        
         // DISABLED: Persistent cache is too slow (8.9s to load from UserDefaults)
         // Only use in-memory cache for performance
         
         // Check in-memory cache
         if isCacheValid(timestamp: cacheTimestamps[city.id]) {
-            print("✅ [CACHE] Using in-memory cached weather for \(city.name) (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s)")
             return
         }
         
@@ -110,10 +102,7 @@ class WeatherService: ObservableObject {
         }
         
         do {
-            let apiStartTime = Date()
-            print("🌐 [API] Making HTTP request for \(city.name)...")
             let (data, _) = try await URLSession.shared.data(from: url)
-            print("✅ [API] HTTP request complete for \(city.name) (\(String(format: "%.3f", Date().timeIntervalSince(apiStartTime)))s)")
             
             let decoder = JSONDecoder()
             let response = try decoder.decode(WeatherResponse.self, from: data)
@@ -127,12 +116,9 @@ class WeatherService: ObservableObject {
             
             // DISABLED: Persistent cache save is too slow
             // await persistentCache.set(weatherData, for: city.id)
-            
-            print("✅ [API] fetchWeather complete for \(city.name) (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s total)")
         } catch {
             await MainActor.run {
                 self.errorMessage = "Failed to fetch weather: \(error.localizedDescription)"
-                print("❌ [API] Weather fetch error for \(city.name): \(error)")
             }
         }
     }
@@ -247,20 +233,14 @@ class WeatherService: ObservableObject {
     }
     
     func refreshAllWeather() async {
-        let startTime = Date()
-        print("🔄 [REFRESH] refreshAllWeather started for \(savedCities.count) cities at \(startTime)")
-        
         await MainActor.run {
             isLoading = true
         }
         
         await withTaskGroup(of: Void.self) { group in
-            for (index, city) in savedCities.enumerated() {
+            for city in savedCities {
                 group.addTask {
-                    let cityStartTime = Date()
-                    print("📍 [REFRESH] Starting city \(index + 1)/\(self.savedCities.count): \(city.name)")
                     await self.fetchWeather(for: city)
-                    print("✅ [REFRESH] Completed city \(index + 1)/\(self.savedCities.count): \(city.name) (\(String(format: "%.3f", Date().timeIntervalSince(cityStartTime)))s)")
                 }
             }
         }
@@ -268,8 +248,6 @@ class WeatherService: ObservableObject {
         await MainActor.run {
             isLoading = false
         }
-        
-        print("✅ [REFRESH] refreshAllWeather complete (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s total for \(savedCities.count) cities)")
     }
     
     // MARK: - Historical Weather
@@ -450,17 +428,10 @@ class WeatherService: ObservableObject {
     /// - International: Apple WeatherKit (when feature flag enabled AND country supported)
     /// - Returns: Array of active weather alerts (empty if no alerts or service unavailable)
     func fetchNWSAlerts(for city: City) async throws -> [WeatherAlert] {
-        // TEMPORARILY DISABLED: NWS alerts causing crashes and 11-second delays during launch
-        // The FlexibleStringOrArray decoder is not handling all NWS API edge cases
-        print("ℹ️ NWS alerts temporarily disabled for performance and stability")
-        return []
-        
-        /* ORIGINAL CODE - RE-ENABLE AFTER FIXING CRASHES
         // Check cache first
         if let cached = alertsCache[city.id] {
             let age = Date().timeIntervalSince(cached.timestamp)
             if age < alertsCacheMinutes * 60 {
-                print("📦 Using cached alerts for \(city.name) (age: \(Int(age))s)")
                 return cached.alerts
             }
         }
@@ -473,17 +444,13 @@ class WeatherService: ObservableObject {
         // International cities: Use WeatherKit if enabled AND country supported
         if FeatureFlags.shared.weatherKitAlertsEnabled {
             if isWeatherKitSupported(for: city) {
-                print("🌍 Using WeatherKit for international city: \(city.name) (\(city.country))")
                 return try await fetchWeatherKitAlerts(for: city)
             } else {
-                print("🚫 WeatherKit not supported for \(city.country), skipping alert request for \(city.name)")
                 return []
             }
         } else {
-            print("ℹ️ WeatherKit disabled, no alerts for international city: \(city.name)")
             return []
         }
-        */
     }
     
     /// Fetches alerts directly from National Weather Service API (US only)
@@ -491,20 +458,16 @@ class WeatherService: ObservableObject {
         
         let urlString = "https://api.weather.gov/alerts/active?point=\(city.latitude),\(city.longitude)"
         guard let url = URL(string: urlString) else {
-            print("⚠️ Invalid NWS alerts URL for \(city.name)")
             return []
         }
         
         var request = URLRequest(url: url)
         request.setValue("FastWeather/1.0 iOS", forHTTPHeaderField: "User-Agent")
         
-        print("🚨 Fetching NWS alerts for \(city.name)...")
-        
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
             
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                print("⚠️ NWS alerts API returned non-200 status for \(city.name)")
                 return []
             }
             
@@ -554,11 +517,9 @@ class WeatherService: ObservableObject {
             // Cache the results
             alertsCache[city.id] = (activeAlerts, Date())
             
-            print("✅ Fetched \(activeAlerts.count) active alerts for \(city.name)")
             return activeAlerts
             
         } catch {
-            print("⚠️ Error fetching NWS alerts for \(city.name): \(error)")
             return []
         }
     }
@@ -677,28 +638,19 @@ class WeatherService: ObservableObject {
     }
     
     private func loadSavedCities() {
-        let startTime = Date()
-        print("📍 [LAUNCH] loadSavedCities started at \(startTime)")
-        
         if let data = UserDefaults.standard.data(forKey: userDefaultsKey),
            let cities = try? JSONDecoder().decode([City].self, from: data) {
             savedCities = cities
-            print("📍 [LAUNCH] Loaded \(cities.count) cities from UserDefaults (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s)")
             
             // DON'T fetch weather during init - let the view trigger it after appearing
             // This allows the UI to show immediately
-            print("⏭️ [LAUNCH] Deferring weather fetch until after UI loads")
         } else {
-            print("📍 [LAUNCH] No saved cities, using defaults")
             // Default cities
             savedCities = [
                 City(name: "Madison", state: "Wisconsin", country: "United States", latitude: 43.074761, longitude: -89.3837613),
                 City(name: "San Diego", state: "California", country: "United States", latitude: 32.7174202, longitude: -117.162772)
             ]
             saveCities()
-            print("⏭️ [LAUNCH] Deferring weather fetch until after UI loads")
         }
-        
-        print("✅ [LAUNCH] loadSavedCities complete (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s)")
     }
 }

@@ -586,7 +586,8 @@ struct CityDetailView: View {
     
     private func formatTemperature(_ celsius: Double) -> String {
         let temp = settingsManager.settings.temperatureUnit.convert(celsius)
-        return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
+        let unit = settingsManager.settings.temperatureUnit == .fahrenheit ? "F" : "C"
+        return String(format: "%.0f°%@", temp, unit)
     }
     
     private func formatWindSpeed(_ kmh: Double) -> String {
@@ -883,7 +884,8 @@ struct HourlyForecastCard: View {
     
     private func formatTemperature(_ celsius: Double) -> String {
         let temp = settingsManager.settings.temperatureUnit.convert(celsius)
-        return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
+        let unit = settingsManager.settings.temperatureUnit == .fahrenheit ? "F" : "C"
+        return String(format: "%.0f°%@", temp, unit)
     }
     
     private func formatPrecipitation(_ mm: Double) -> String {
@@ -1226,7 +1228,8 @@ struct DailyForecastRow: View {
     
     private func formatTemperature(_ celsius: Double) -> String {
         let temp = settingsManager.settings.temperatureUnit.convert(celsius)
-        return String(format: "%.0f%@", temp, settingsManager.settings.temperatureUnit.rawValue)
+        let unit = settingsManager.settings.temperatureUnit == .fahrenheit ? "F" : "C"
+        return String(format: "%.0f°%@", temp, unit)
     }
     
     private func formatPrecipitation(_ mm: Double) -> String {
@@ -1325,30 +1328,16 @@ struct WeatherAlertsSection: View {
         }
         .padding(.horizontal)
         .accessibilityElement(children: .contain)
-        // DISABLED: Alerts task causing delays and crashes - alerts are disabled in WeatherService
-        /*
-        .task(id: city.id) {  // Use .task instead of .onAppear, re-run only if city changes
+        .task(id: city.id) {
             guard !hasLoaded else { return }
             
-            print("🔵 WeatherAlertsSection loading for \(city.name)")
             do {
-                print("📱 Fetching alerts for \(city.name)...")
                 let fetchedAlerts = try await weatherService.fetchNWSAlerts(for: city)
-                print("✅ Fetched \(fetchedAlerts.count) alerts for \(city.name)")
                 
                 alerts = fetchedAlerts
                 isLoading = false
                 hasLoaded = true
             } catch {
-                print("❌ Failed to fetch alerts for \(city.name): \(error)")
-                isLoading = false
-                hasLoaded = true
-            }
-        }
-        */
-        .onAppear {
-            // Since alerts are disabled, just mark as loaded immediately
-            if !hasLoaded {
                 isLoading = false
                 hasLoaded = true
             }

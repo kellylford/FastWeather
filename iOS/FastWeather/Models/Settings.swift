@@ -18,12 +18,13 @@ enum ViewMode: String, CaseIterable, Codable {
 }
 
 enum WeatherFieldType: String, CaseIterable, Codable {
+    case weatherAlerts = "Weather Alerts"
     case temperature = "Temperature"
     case conditions = "Conditions"
     case feelsLike = "Feels Like"
     case humidity = "Humidity"
-    case windSpeed = "Wind Speed"
     case windDirection = "Wind Direction"
+    case windSpeed = "Wind Speed"
     case windGusts = "Wind Gusts"
     case precipitation = "Precipitation"
     case precipitationProbability = "Precipitation Probability"
@@ -325,12 +326,13 @@ struct AppSettings: Codable {
     
     // Ordered weather fields with enable/disable state (City List)
     var weatherFields: [WeatherField] = [
+        WeatherField(type: .weatherAlerts, isEnabled: true),
         WeatherField(type: .temperature, isEnabled: true),
         WeatherField(type: .conditions, isEnabled: true),
         WeatherField(type: .feelsLike, isEnabled: true),
         WeatherField(type: .humidity, isEnabled: false),
+        WeatherField(type: .windDirection, isEnabled: true),
         WeatherField(type: .windSpeed, isEnabled: true),
-        WeatherField(type: .windDirection, isEnabled: false),
         WeatherField(type: .windGusts, isEnabled: false),
         WeatherField(type: .precipitation, isEnabled: true),
         WeatherField(type: .precipitationProbability, isEnabled: false),
@@ -342,8 +344,8 @@ struct AppSettings: Codable {
         WeatherField(type: .visibility, isEnabled: false),
         WeatherField(type: .uvIndex, isEnabled: false),
         WeatherField(type: .dewPoint, isEnabled: false),
-        WeatherField(type: .highTemp, isEnabled: false),
-        WeatherField(type: .lowTemp, isEnabled: false),
+        WeatherField(type: .highTemp, isEnabled: true),
+        WeatherField(type: .lowTemp, isEnabled: true),
         WeatherField(type: .sunrise, isEnabled: false),
         WeatherField(type: .sunset, isEnabled: false)
     ]
@@ -445,12 +447,13 @@ struct AppSettings: Codable {
     init() {
         // All properties have default values, so we just need to set weatherFields, hourlyFields, dailyFields, and detailCategories
         self.weatherFields = [
+            WeatherField(type: .weatherAlerts, isEnabled: true),
             WeatherField(type: .temperature, isEnabled: true),
             WeatherField(type: .conditions, isEnabled: true),
             WeatherField(type: .feelsLike, isEnabled: true),
             WeatherField(type: .humidity, isEnabled: false),
+            WeatherField(type: .windDirection, isEnabled: true),
             WeatherField(type: .windSpeed, isEnabled: true),
-            WeatherField(type: .windDirection, isEnabled: false),
             WeatherField(type: .windGusts, isEnabled: false),
             WeatherField(type: .precipitation, isEnabled: true),
             WeatherField(type: .precipitationProbability, isEnabled: false),
@@ -462,8 +465,8 @@ struct AppSettings: Codable {
             WeatherField(type: .visibility, isEnabled: false),
             WeatherField(type: .uvIndex, isEnabled: false),
             WeatherField(type: .dewPoint, isEnabled: false),
-            WeatherField(type: .highTemp, isEnabled: false),
-            WeatherField(type: .lowTemp, isEnabled: false),
+            WeatherField(type: .highTemp, isEnabled: true),
+            WeatherField(type: .lowTemp, isEnabled: true),
             WeatherField(type: .sunrise, isEnabled: false),
             WeatherField(type: .sunset, isEnabled: false)
         ]
