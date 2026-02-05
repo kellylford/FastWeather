@@ -2,6 +2,10 @@
 
 **⚠️ CRITICAL**: Read this ENTIRE file before making ANY code changes. These are not suggestions - they are mandatory requirements.
 
+## About the Developer
+
+**The human you're working with is a lifelong VoiceOver user.** Do not explain how VoiceOver works, why accessibility matters, or provide education about screen reader usage. They have expert-level understanding of accessibility requirements and assistive technology. Focus responses on technical implementation details only.
+
 ## Development Philosophy & Implementation Standards
 
 ### Problem-Solving Approach (READ THIS FIRST)

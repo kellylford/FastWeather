@@ -277,6 +277,25 @@ struct UserGuideView: View {
                     BulletPoint("**High contrast** - Readable in all conditions")
                 }
                 
+                // Keyboard Shortcuts
+                GuideSection(
+                    icon: "command",
+                    title: "Keyboard Shortcuts",
+                    color: .green
+                ) {
+                    Text("Use external keyboard shortcuts for faster navigation (iPad with keyboard):")
+                    
+                    Text("**General:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("**⌘⇧N** - Add new city")
+                    
+                    Text("More keyboard shortcuts will be added in future updates.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 4)
+                }
+                
                 // Tips & Tricks
                 GuideSection(
                     icon: "lightbulb.fill",

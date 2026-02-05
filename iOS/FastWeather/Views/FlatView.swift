@@ -12,6 +12,7 @@ struct FlatView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @Binding var selectedCityForHistory: City?
     @Binding var selectedCityForDetail: City?
+    @State private var alertSheetItem: AlertSheetItem?  // Stable sheet item to prevent re-presentation loop
     
     var body: some View {
         List {
@@ -21,6 +22,9 @@ struct FlatView: View {
             }
         }
         .listStyle(.grouped)
+        .sheet(item: $alertSheetItem) { item in
+            AlertDetailView(alert: item.alert)
+        }
     }
     
     @ViewBuilder
@@ -38,38 +42,9 @@ struct FlatView: View {
             // Actions button
             actionsMenu(for: city, at: index)
         } header: {
-            cityHeader(for: city)
-        }
-    }
-    
-    @ViewBuilder
-    private func cityHeader(for city: City) -> some View {
-        if let weather = weatherService.weatherCache[city.id] {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(city.displayName)
-                        .font(.headline)
-                    
-                    // UV Index badge (only during daytime)
-                    if settingsManager.settings.showUVIndexInCityList,
-                       let isDay = weather.current.isDay, isDay == 1,
-                       let uvIndex = weather.current.uvIndex {
-                        UVBadge(uvIndex: uvIndex)
-                    }
-                }
-                
-                Spacer()
-                
-                Text(formatTemperature(weather.current.temperature2m))
-                    .font(.title2.weight(.semibold))
-            }
-            .textCase(nil)
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel("\(city.displayName), \(formatTemperature(weather.current.temperature2m))")
-        } else {
-            Text(city.displayName)
-                .font(.headline)
-                .textCase(nil)
+            CitySectionHeader(city: city, onAlertTap: { alert in
+                alertSheetItem = AlertSheetItem(city: city, alert: alert)
+            })
         }
     }
     
@@ -346,6 +321,106 @@ struct FlatView: View {
     private func viewHistoricalWeather(for city: City) {
         selectedCityForHistory = city
         UIAccessibility.post(notification: .announcement, argument: "Opening historical weather for \(city.displayName)")
+    }
+}
+
+// MARK: - City Section Header
+struct CitySectionHeader: View {
+    @EnvironmentObject var weatherService: WeatherService
+    @EnvironmentObject var settingsManager: SettingsManager
+    let city: City
+    let onAlertTap: (WeatherAlert) -> Void
+    
+    @State private var alerts: [WeatherAlert] = []
+    @State private var hasLoadedAlerts = false
+    
+    private var weather: WeatherData? {
+        weatherService.weatherCache[city.id]
+    }
+    
+    private var highestSeverityAlert: WeatherAlert? {
+        alerts.max(by: { $0.severity.rawValue < $1.severity.rawValue })
+    }
+    
+    var body: some View {
+        if let weather = weather {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(city.displayName)
+                        .font(.headline)
+                    
+                    // UV Index badge (only during daytime)
+                    if settingsManager.settings.showUVIndexInCityList,
+                       let isDay = weather.current.isDay, isDay == 1,
+                       let uvIndex = weather.current.uvIndex {
+                        UVBadge(uvIndex: uvIndex)
+                    }
+                }
+                
+                Spacer()
+                
+                HStack(spacing: 8) {
+                    // Alert badge (if any)
+                    if let alert = highestSeverityAlert {
+                        Button(action: {
+                            onAlertTap(alert)
+                        }) {
+                            Image(systemName: alert.severity.iconName)
+                                .foregroundColor(alert.severity.color)
+                                .font(.title3)
+                        }
+                        .buttonStyle(.borderless)
+                        .accessibilityLabel("Weather alert: \(alert.event)")
+                        .accessibilityHint("Double tap to view alert details")
+                        .transition(.scale.combined(with: .opacity))
+                    }
+                    
+                    Text(formatTemperature(weather.current.temperature2m))
+                        .font(.title2.weight(.semibold))
+                }
+            }
+            .textCase(nil)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(buildAccessibilityLabel(weather: weather))
+            .animation(.easeInOut(duration: 0.2), value: highestSeverityAlert?.id)
+            .task(id: city.id) {
+                guard !hasLoadedAlerts else { return }
+                hasLoadedAlerts = true
+                
+                do {
+                    alerts = try await weatherService.fetchNWSAlerts(for: city)
+                } catch {
+                    // Silently fail - alerts are optional
+                }
+            }
+        } else {
+            Text(city.displayName)
+                .font(.headline)
+                .textCase(nil)
+        }
+    }
+    
+    private func buildAccessibilityLabel(weather: WeatherData) -> String {
+        var label = "\(city.displayName), \(formatTemperature(weather.current.temperature2m))"
+        
+        // Add alerts if enabled and present
+        if settingsManager.settings.weatherFields.first(where: { $0.type == .weatherAlerts })?.isEnabled == true,
+           let alert = highestSeverityAlert {
+            label += ", "
+            if alerts.count == 1 {
+                label += "Alert: \(alert.event)"
+            } else {
+                label += "Alerts: \(alert.event) and \(alerts.count - 1) more"
+            }
+        }
+        
+        return label
+    }
+    
+    private func formatTemperature(_ celsius: Double) -> String {
+        let temp = settingsManager.settings.temperatureUnit.convert(celsius)
+        let unit = settingsManager.settings.temperatureUnit == .fahrenheit ? "F" : "C"
+        return String(format: "%.0f°%@", temp, unit)
     }
 }
 

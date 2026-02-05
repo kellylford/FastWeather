@@ -48,6 +48,7 @@ struct MyCitiesView: View {
                     }
                     .accessibilityLabel("Add City")
                     .accessibilityHint("Opens search to add a new city")
+                    .keyboardShortcut("n", modifiers: [.command, .shift])
                 }
             }
             .sheet(isPresented: $showingAddCity) {
