@@ -96,20 +96,24 @@ struct CityDetailView: View {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("\(precipProb)% chance of precipitation")
                                         .font(.subheadline)
+                                        .fixedSize(horizontal: false, vertical: true)
                                     // Show snow or rain amount based on which is present (if setting enabled)
                                     if settingsManager.settings.showPrecipitationAmount {
                                         if let snowfall = daily.snowfallSum?[0], snowfall > 0 {
                                             Text("\(formatSnowfall(snowfall)) of snow expected")
                                                 .font(.caption)
                                                 .foregroundColor(.secondary)
+                                                .fixedSize(horizontal: false, vertical: true)
                                         } else if let rain = daily.rainSum?[0], rain > 0 {
                                             Text("\(formatPrecipitation(rain)) of rain expected")
                                                 .font(.caption)
                                                 .foregroundColor(.secondary)
+                                                .fixedSize(horizontal: false, vertical: true)
                                         } else if let precipSum = daily.precipitationSum?[0], precipSum > 0 {
                                             Text("\(formatPrecipitation(precipSum)) expected")
                                                 .font(.caption)
                                                 .foregroundColor(.secondary)
+                                                .fixedSize(horizontal: false, vertical: true)
                                         }
                                     }
                                 }
@@ -145,9 +149,11 @@ struct CityDetailView: View {
                                     Text("UV Index: \(Int(uvMax.rounded())) (\(category.category))")
                                         .font(.subheadline)
                                         .fontWeight(.semibold)
+                                        .fixedSize(horizontal: false, vertical: true)
                                     Text("Sun protection recommended")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
+                                        .fixedSize(horizontal: false, vertical: true)
                                 }
                             }
                             .padding(8)
@@ -167,10 +173,12 @@ struct CityDetailView: View {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("Winds up to \(formatWindSpeed(windMax))")
                                         .font(.subheadline)
+                                        .fixedSize(horizontal: false, vertical: true)
                                     if let windDir = daily.winddirection10mDominant?[0] {
                                         Text("From \(degreesToCardinalLong(windDir))")
                                             .font(.caption)
                                             .foregroundColor(.secondary)
+                                            .fixedSize(horizontal: false, vertical: true)
                                     }
                                 }
                             }
@@ -661,9 +669,12 @@ struct DetailRow: View {
         HStack {
             Text(label)
                 .foregroundColor(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
             Spacer()
             Text(value)
                 .fontWeight(.medium)
+                .fixedSize(horizontal: false, vertical: true)
+                .multilineTextAlignment(.trailing)
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(label): \(value)")
@@ -702,7 +713,7 @@ struct HourlyForecastCard: View {
                 }
             }
         }
-        .frame(width: 70)
+        .frame(minWidth: 70)
         .padding(.vertical, 12)
         .padding(.horizontal, 8)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
@@ -948,8 +959,10 @@ struct DailyForecastRow: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(dayName)
                         .font(.body)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                .frame(width: 140, alignment: .leading)
+                .frame(minWidth: 100, maxWidth: 160, alignment: .leading)
                 .accessibilityHidden(true)
                 
                 // Conditions icon - always show if available
@@ -957,7 +970,7 @@ struct DailyForecastRow: View {
                     Image(systemName: weatherCode.systemImageName)
                         .font(.title3)
                         .foregroundColor(.blue)
-                        .frame(width: 30)
+                        .frame(width: 30, alignment: .center)
                         .accessibilityHidden(true)
                 }
                 
@@ -1016,7 +1029,7 @@ struct DailyForecastRow: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
-                .frame(width: 60))
+                .frame(minWidth: 50))
             }
             
         case .rainSum:
@@ -1029,7 +1042,7 @@ struct DailyForecastRow: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
-                .frame(width: 60))
+                .frame(minWidth: 50))
             }
             
         case .snowfallSum:
@@ -1042,7 +1055,7 @@ struct DailyForecastRow: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
-                .frame(width: 60))
+                .frame(minWidth: 50))
             }
             
         case .precipitationSum:
@@ -1055,7 +1068,7 @@ struct DailyForecastRow: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
-                .frame(width: 60))
+                .frame(minWidth: 50))
             }
             
         default:
