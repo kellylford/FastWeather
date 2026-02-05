@@ -902,7 +902,7 @@ struct HourlyForecastCard: View {
 struct DailyForecastRow: View {
     let daily: WeatherData.DailyWeather
     let index: Int
-    let settingsManager: SettingsManager
+    @ObservedObject var settingsManager: SettingsManager
     
     private var sunrise: String? {
         daily.sunrise?[index]
