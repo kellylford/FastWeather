@@ -673,7 +673,7 @@ struct DetailRow: View {
 struct HourlyForecastCard: View {
     let hourly: WeatherData.HourlyWeather
     let index: Int
-    let settingsManager: SettingsManager
+    @ObservedObject var settingsManager: SettingsManager
     
     private var time: String? {
         hourly.time?[index]

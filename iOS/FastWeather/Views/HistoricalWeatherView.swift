@@ -446,7 +446,7 @@ struct HistoricalWeatherView: View {
 
 struct HistoricalDayRow: View {
     let day: HistoricalDay
-    let settingsManager: SettingsManager
+    @ObservedObject var settingsManager: SettingsManager
     
     private var dateLabel: String {
         let dateFormatter = DateFormatter()
