@@ -14,10 +14,20 @@ class SettingsManager: ObservableObject {
     private let userDefaultsKey = "AppSettings"
     
     init() {
-        if let data = UserDefaults.standard.data(forKey: userDefaultsKey),
-           let settings = try? JSONDecoder().decode(AppSettings.self, from: data) {
-            self.settings = settings
+        // Try to load saved settings
+        if let data = UserDefaults.standard.data(forKey: userDefaultsKey) {
+            do {
+                self.settings = try JSONDecoder().decode(AppSettings.self, from: data)
+            } catch {
+                // Decoding failed - likely due to Settings structure change
+                // Clear corrupted data and use defaults
+                print("⚠️ Failed to decode settings (structure changed): \(error)")
+                print("🔄 Resetting to default settings")
+                UserDefaults.standard.removeObject(forKey: userDefaultsKey)
+                self.settings = AppSettings()
+            }
         } else {
+            // No saved settings - use defaults
             self.settings = AppSettings()
         }
     }
