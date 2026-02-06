@@ -1436,9 +1436,9 @@ struct MarineForecastSection: View {
     }
     
     var body: some View {
+        // Hide entire section if no data available (e.g., inland cities like Madison, WI)
         Group {
-            // Only show marine section if there's actual marine data available
-            if isLoading || hasMarineData() || dateOffset < 0 {
+            if isLoading || dateOffset < 0 || hasMarineData() {
                 GroupBox(label: Label("Marine Forecast", systemImage: "water.waves")) {
                     if isLoading {
                         ProgressView("Loading marine data...")
@@ -1476,12 +1476,12 @@ struct MarineForecastSection: View {
                     }
                 }
                 .padding(.horizontal)
-                .task(id: "\(city.id)-\(dateOffset)") {
-                    isLoading = true
-                    await weatherService.fetchMarineData(for: city, dateOffset: dateOffset)
-                    isLoading = false
-                }
             }
+        }
+        .task(id: "\(city.id)-\(dateOffset)") {
+            isLoading = true
+            await weatherService.fetchMarineData(for: city, dateOffset: dateOffset)
+            isLoading = false
         }
     }
 }
