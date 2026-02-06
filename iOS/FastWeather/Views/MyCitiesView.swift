@@ -171,7 +171,8 @@ struct MyCitiesView: View {
     private var toolbarContent: some ToolbarContent {
         ToolbarItemGroup(placement: .navigationBarLeading) {
             Button(action: navigateToPreviousDay) {
-                Image(systemName: "chevron.left")
+                Label("Previous", systemImage: "arrow.backward")
+                    .labelStyle(.iconOnly)
                     .imageScale(.large)
             }
             .disabled(dateOffset <= -maxDaysBack)
@@ -183,7 +184,8 @@ struct MyCitiesView: View {
                 .accessibilityLabel("Currently viewing \(dateDisplayString)")
             
             Button(action: navigateToNextDay) {
-                Image(systemName: "chevron.right")
+                Label("Next", systemImage: "arrow.forward")
+                    .labelStyle(.iconOnly)
                     .imageScale(.large)
             }
             .disabled(dateOffset >= maxDaysForward)
