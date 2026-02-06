@@ -163,7 +163,8 @@ struct MyCitiesView: View {
     private var toolbarContent: some ToolbarContent {
         ToolbarItemGroup(placement: .navigationBarLeading) {
             Button(action: navigateToPreviousDay) {
-                Image(systemName: "chevron.left.circle.fill")
+                Image(systemName: "chevron.left")
+                    .imageScale(.large)
             }
             .disabled(dateOffset <= -maxDaysBack)
             .accessibilityLabel("Previous day")
@@ -174,18 +175,19 @@ struct MyCitiesView: View {
                 .accessibilityLabel("Currently viewing \(dateDisplayString)")
             
             Button(action: navigateToNextDay) {
-                Image(systemName: "chevron.right.circle.fill")
+                Image(systemName: "chevron.right")
+                    .imageScale(.large)
             }
             .disabled(dateOffset >= maxDaysForward)
             .accessibilityLabel("Next day")
             
             if dateOffset != 0 {
-                Button(action: navigateToToday) {
-                    Label("Today", systemImage: "calendar")
-                        .font(.caption)
-                        .fontWeight(.semibold)
+                Button("Today") {
+                    navigateToToday()
                 }
-                .accessibilityLabel("Return to today")
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .accessibilityLabel("Go to today")
             }
         }
         
