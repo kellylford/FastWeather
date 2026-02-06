@@ -219,3 +219,50 @@ struct WeatherResponse: Codable {
     let daily: WeatherData.DailyWeather?
     let hourly: WeatherData.HourlyWeather?
 }
+
+// MARK: - Marine Weather Models
+
+struct MarineData: Codable {
+    let hourly: MarineHourly?
+    
+    struct MarineHourly: Codable {
+        let time: [String?]?
+        let waveHeight: [Double?]?
+        let waveDirection: [Int?]?
+        let wavePeriod: [Double?]?
+        let wavePeakPeriod: [Double?]?
+        let windWaveHeight: [Double?]?
+        let windWaveDirection: [Int?]?
+        let windWavePeriod: [Double?]?
+        let swellWaveHeight: [Double?]?
+        let swellWaveDirection: [Int?]?
+        let swellWavePeriod: [Double?]?
+        let oceanCurrentVelocity: [Double?]?
+        let oceanCurrentDirection: [Int?]?
+        let seaSurfaceTemperature: [Double?]?
+        let seaLevelHeight: [Double?]?
+        
+        enum CodingKeys: String, CodingKey {
+            case time
+            case waveHeight = "wave_height"
+            case waveDirection = "wave_direction"
+            case wavePeriod = "wave_period"
+            case wavePeakPeriod = "wave_peak_period"
+            case windWaveHeight = "wind_wave_height"
+            case windWaveDirection = "wind_wave_direction"
+            case windWavePeriod = "wind_wave_period"
+            case swellWaveHeight = "swell_wave_height"
+            case swellWaveDirection = "swell_wave_direction"
+            case swellWavePeriod = "swell_wave_period"
+            case oceanCurrentVelocity = "ocean_current_velocity"
+            case oceanCurrentDirection = "ocean_current_direction"
+            case seaSurfaceTemperature = "sea_surface_temperature"
+            case seaLevelHeight = "sea_level_height_msl"
+        }
+    }
+}
+
+// Container for Marine API response
+struct MarineResponse: Codable {
+    let hourly: MarineData.MarineHourly?
+}

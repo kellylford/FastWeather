@@ -12,12 +12,16 @@ struct TableView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @Binding var selectedCityForHistory: City?
     
+    // Date navigation parameters (for future compatibility)
+    let dateOffset: Int
+    let selectedDate: Date
+    
     var body: some View {
         List {
             ForEach(weatherService.savedCities.indices, id: \.self) { index in
                 let city = weatherService.savedCities[index]
-                NavigationLink(destination: CityDetailView(city: city)) {
-                    TableRowView(city: city)
+                NavigationLink(destination: CityDetailView(city: city, dateOffset: dateOffset, selectedDate: selectedDate)) {
+                    TableRowView(city: city, dateOffset: dateOffset)
                 }
                 .accessibilityElement(children: .combine)
                 .accessibilityAction(named: "Move Up") {
@@ -128,9 +132,11 @@ struct TableRowView: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
     let city: City
+    let dateOffset: Int
     
     private var weather: WeatherData? {
-        weatherService.weatherCache[city.id]
+        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+        return weatherService.weatherCache[cacheKey]
     }
     
     var body: some View {
@@ -321,7 +327,11 @@ struct CompactWeatherItem: View {
 }
 
 #Preview {
-    TableView(selectedCityForHistory: .constant(nil))
+    TableView(
+        selectedCityForHistory: .constant(nil),
+        dateOffset: 0,
+        selectedDate: Date()
+    )
         .environmentObject(WeatherService())
         .environmentObject(SettingsManager())
 }

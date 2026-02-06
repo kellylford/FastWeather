@@ -9,6 +9,9 @@ import SwiftUI
 
 struct CityDetailView: View {
     let city: City
+    let dateOffset: Int
+    let selectedDate: Date
+    
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
     @StateObject private var featureFlags = FeatureFlags.shared
@@ -22,20 +25,30 @@ struct CityDetailView: View {
     @State private var isRefreshing = false
     @State private var cacheMetadata: CachedWeather?
     
+    // Backward compatibility initializer (defaults to today)
+    init(city: City, dateOffset: Int = 0, selectedDate: Date = Date()) {
+        self.city = city
+        self.dateOffset = dateOffset
+        self.selectedDate = selectedDate
+    }
+    
     private var weather: WeatherData? {
-        weatherService.weatherCache[city.id]
+        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+        return weatherService.weatherCache[cacheKey]
     }
     
     private func refreshWeather() async {
         isRefreshing = true
-        await weatherService.fetchWeather(for: city)
+        await weatherService.fetchWeatherForDate(for: city, dateOffset: dateOffset)
         isRefreshing = false
         // Refresh cache metadata
-        cacheMetadata = await weatherService.getCacheMetadata(for: city.id)
+        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+        cacheMetadata = await weatherService.getCacheMetadata(for: cacheKey)
     }
     
     private func loadCacheMetadata() async {
-        cacheMetadata = await weatherService.getCacheMetadata(for: city.id)
+        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+        cacheMetadata = await weatherService.getCacheMetadata(for: cacheKey)
     }
     
     private func isCategoryEnabled(_ category: DetailCategory) -> Bool {
@@ -370,6 +383,9 @@ struct CityDetailView: View {
                 }
                 .padding(.horizontal)
             }
+            
+        case .marineForecast:
+            MarineForecastSection(city: city, dateOffset: dateOffset)
             
         case .historicalWeather:
             EmptyView() // Historical weather moved to separate screen
@@ -1355,5 +1371,304 @@ struct WeatherAlertsSection: View {
                 hasLoaded = true
             }
         }
+    }
+}
+
+// MARK: - Marine Forecast Section
+
+struct MarineForecastSection: View {
+    let city: City
+    let dateOffset: Int
+    
+    @EnvironmentObject var weatherService: WeatherService
+    @EnvironmentObject var settingsManager: SettingsManager
+    @State private var isLoading = false
+    
+    private var marineData: MarineData? {
+        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+        return weatherService.marineCache[cacheKey]
+    }
+    
+    private func enabledFields() -> [MarineFieldType] {
+        settingsManager.settings.marineFields
+            .filter { $0.isEnabled }
+            .map { $0.type }
+    }
+    
+    var body: some View {
+        GroupBox(label: Label("Marine Forecast", systemImage: "water.waves")) {
+            if isLoading {
+                ProgressView("Loading marine data...")
+                    .frame(minHeight: 100)
+                    .padding()
+            } else if dateOffset < 0 {
+                VStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.title)
+                        .foregroundColor(.orange)
+                    Text("Historical marine data not available")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .frame(minHeight: 100)
+                .padding()
+            } else if let marine = marineData, let hourly = marine.hourly {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 16) {
+                        ForEach(0..<min(24, hourly.time?.count ?? 0), id: \.self) { index in
+                            MarineForecastCard(hourly: hourly, index: index, enabledFields: enabledFields())
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                }
+            } else {
+                VStack(spacing: 8) {
+                    Image(systemName: "water.waves.slash")
+                        .font(.title)
+                        .foregroundColor(.secondary)
+                    Text("No marine data available")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                .frame(minHeight: 100)
+                .padding()
+            }
+        }
+        .padding(.horizontal)
+        .task(id: "\(city.id)-\(dateOffset)") {
+            isLoading = true
+            await weatherService.fetchMarineData(for: city, dateOffset: dateOffset)
+            isLoading = false
+        }
+    }
+}
+
+// MARK: - Marine Forecast Card
+
+struct MarineForecastCard: View {
+    let hourly: MarineData.MarineHourly
+    let index: Int
+    let enabledFields: [MarineFieldType]
+    
+    @EnvironmentObject var settingsManager: SettingsManager
+    
+    private var timeString: String {
+        guard let time = hourly.time?[index] else { return "Unknown" }
+        return FormatHelper.formatTimeCompact(time)
+    }
+    
+    private func formatWaveHeight(_ meters: Double?) -> String {
+        guard let meters = meters else { return "—" }
+        // Always show in meters for marine data (international standard)
+        return String(format: "%.1f m", meters)
+    }
+    
+    private func formatDirection(_ degrees: Int?) -> String {
+        guard let degrees = degrees else { return "—" }
+        let directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+        let index = Int((Double(degrees) + 22.5) / 45.0) % 8
+        return "\(directions[index]) (\(degrees)°)"
+    }
+    
+    private func formatPeriod(_ seconds: Double?) -> String {
+        guard let seconds = seconds else { return "—" }
+        return String(format: "%.1f s", seconds)
+    }
+    
+    private func formatTemperature(_ celsius: Double?) -> String {
+        guard let celsius = celsius else { return "—" }
+        let converted = settingsManager.settings.temperatureUnit.convert(celsius)
+        return String(format: "%.1f%@", converted, settingsManager.settings.temperatureUnit.rawValue)
+    }
+    
+    private func formatVelocity(_ kmh: Double?) -> String {
+        guard let kmh = kmh else { return "—" }
+        let converted = settingsManager.settings.windSpeedUnit.convert(kmh)
+        return String(format: "%.1f %@", converted, settingsManager.settings.windSpeedUnit.rawValue)
+    }
+    
+    private func formatSeaLevel(_ meters: Double?) -> String {
+        guard let meters = meters else { return "—" }
+        return String(format: "%.2f m", meters)
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(timeString)
+                .font(.headline)
+                .foregroundColor(.primary)
+            
+            ForEach(enabledFields, id: \.self) { field in
+                switch field {
+                case .waveHeight:
+                    if let value = hourly.waveHeight?[index] {
+                        MarineDataRow(label: "Wave Height", value: formatWaveHeight(value))
+                    }
+                case .waveDirection:
+                    if let value = hourly.waveDirection?[index] {
+                        MarineDataRow(label: "Wave Direction", value: formatDirection(value))
+                    }
+                case .wavePeriod:
+                    if let value = hourly.wavePeriod?[index] {
+                        MarineDataRow(label: "Wave Period", value: formatPeriod(value))
+                    }
+                case .wavePeakPeriod:
+                    if let value = hourly.wavePeakPeriod?[index] {
+                        MarineDataRow(label: "Peak Period", value: formatPeriod(value))
+                    }
+                case .windWaveHeight:
+                    if let value = hourly.windWaveHeight?[index] {
+                        MarineDataRow(label: "Wind Wave", value: formatWaveHeight(value))
+                    }
+                case .windWaveDirection:
+                    if let value = hourly.windWaveDirection?[index] {
+                        MarineDataRow(label: "Wind Wave Dir", value: formatDirection(value))
+                    }
+                case .windWavePeriod:
+                    if let value = hourly.windWavePeriod?[index] {
+                        MarineDataRow(label: "Wind Wave Period", value: formatPeriod(value))
+                    }
+                case .swellWaveHeight:
+                    if let value = hourly.swellWaveHeight?[index] {
+                        MarineDataRow(label: "Swell Height", value: formatWaveHeight(value))
+                    }
+                case .swellWaveDirection:
+                    if let value = hourly.swellWaveDirection?[index] {
+                        MarineDataRow(label: "Swell Direction", value: formatDirection(value))
+                    }
+                case .swellWavePeriod:
+                    if let value = hourly.swellWavePeriod?[index] {
+                        MarineDataRow(label: "Swell Period", value: formatPeriod(value))
+                    }
+                case .oceanCurrentVelocity:
+                    if let value = hourly.oceanCurrentVelocity?[index] {
+                        MarineDataRow(label: "Current Speed", value: formatVelocity(value))
+                    }
+                case .oceanCurrentDirection:
+                    if let value = hourly.oceanCurrentDirection?[index] {
+                        MarineDataRow(label: "Current Dir", value: formatDirection(value))
+                    }
+                case .seaSurfaceTemperature:
+                    if let value = hourly.seaSurfaceTemperature?[index] {
+                        MarineDataRow(label: "Sea Temp", value: formatTemperature(value))
+                    }
+                case .seaLevelHeight:
+                    if let value = hourly.seaLevelHeight?[index] {
+                        MarineDataRow(label: "Sea Level", value: formatSeaLevel(value))
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(10)
+        .frame(width: 180)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(createAccessibilityLabel())
+    }
+    
+    private func createAccessibilityLabel() -> String {
+        guard let time = hourly.time?[index] else { return "No data" }
+        
+        let timeFormatted = FormatHelper.formatTimeCompact(time)
+        var label = timeFormatted
+        
+        for field in enabledFields {
+            if let fieldText = getFieldAccessibilityText(for: field) {
+                label += ", \(fieldText)"
+            }
+        }
+        
+        return label
+    }
+    
+    private func getFieldAccessibilityText(for field: MarineFieldType) -> String? {
+        switch field {
+        case .waveHeight:
+            if let value = hourly.waveHeight?[index] {
+                return "Wave height \(formatWaveHeight(value))"
+            }
+        case .waveDirection:
+            if let value = hourly.waveDirection?[index] {
+                let directions = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"]
+                let dirIndex = Int((Double(value) + 22.5) / 45.0) % 8
+                return "Wave direction \(directions[dirIndex])"
+            }
+        case .wavePeriod:
+            if let value = hourly.wavePeriod?[index] {
+                return "Wave period \(formatPeriod(value))"
+            }
+        case .wavePeakPeriod:
+            if let value = hourly.wavePeakPeriod?[index] {
+                return "Peak period \(formatPeriod(value))"
+            }
+        case .windWaveHeight:
+            if let value = hourly.windWaveHeight?[index] {
+                return "Wind wave \(formatWaveHeight(value))"
+            }
+        case .windWaveDirection:
+            if let value = hourly.windWaveDirection?[index] {
+                let directions = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"]
+                let dirIndex = Int((Double(value) + 22.5) / 45.0) % 8
+                return "Wind wave direction \(directions[dirIndex])"
+            }
+        case .windWavePeriod:
+            if let value = hourly.windWavePeriod?[index] {
+                return "Wind wave period \(formatPeriod(value))"
+            }
+        case .swellWaveHeight:
+            if let value = hourly.swellWaveHeight?[index] {
+                return "Swell height \(formatWaveHeight(value))"
+            }
+        case .swellWaveDirection:
+            if let value = hourly.swellWaveDirection?[index] {
+                let directions = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"]
+                let dirIndex = Int((Double(value) + 22.5) / 45.0) % 8
+                return "Swell direction \(directions[dirIndex])"
+            }
+        case .swellWavePeriod:
+            if let value = hourly.swellWavePeriod?[index] {
+                return "Swell period \(formatPeriod(value))"
+            }
+        case .oceanCurrentVelocity:
+            if let value = hourly.oceanCurrentVelocity?[index] {
+                return "Current speed \(formatVelocity(value))"
+            }
+        case .oceanCurrentDirection:
+            if let value = hourly.oceanCurrentDirection?[index] {
+                let directions = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"]
+                let dirIndex = Int((Double(value) + 22.5) / 45.0) % 8
+                return "Current direction \(directions[dirIndex])"
+            }
+        case .seaSurfaceTemperature:
+            if let value = hourly.seaSurfaceTemperature?[index] {
+                return "Sea temperature \(formatTemperature(value))"
+            }
+        case .seaLevelHeight:
+            if let value = hourly.seaLevelHeight?[index] {
+                return "Sea level \(formatSeaLevel(value))"
+            }
+        }
+        return nil
+    }
+}
+
+struct MarineDataRow: View {
+    let label: String
+    let value: String
+    
+    var body: some View {
+        HStack {
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            Spacer()
+            Text(value)
+                .font(.caption)
+                .fontWeight(.medium)
+        }
+        .accessibilityHidden(true)
     }
 }

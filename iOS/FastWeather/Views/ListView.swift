@@ -14,6 +14,10 @@ struct ListView: View {
     @Binding var selectedCityForHistory: City?
     @State private var alertSheetItem: AlertSheetItem?  // Stable sheet item to prevent re-presentation loop
     
+    // Date navigation parameters
+    let dateOffset: Int
+    let selectedDate: Date
+    
     var body: some View {
         List {
             ForEach(weatherService.savedCities.indices, id: \.self) { index in
@@ -109,8 +113,8 @@ struct ListView: View {
     
     @ViewBuilder
     private func cityRow(for city: City, at index: Int) -> some View {
-        NavigationLink(destination: CityDetailView(city: city)) {
-            ListRowView(city: city, onAlertTap: { alert in
+        NavigationLink(destination: CityDetailView(city: city, dateOffset: dateOffset, selectedDate: selectedDate)) {
+            ListRowView(city: city, dateOffset: dateOffset, onAlertTap: { alert in
                 // Create stable AlertSheetItem to prevent re-presentation loop
                 alertSheetItem = AlertSheetItem(city: city, alert: alert)
             })
@@ -159,13 +163,15 @@ struct ListRowView: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
     let city: City
+    let dateOffset: Int
     let onAlertTap: (WeatherAlert) -> Void
     
     @State private var alerts: [WeatherAlert] = []
     @State private var hasLoadedAlerts = false
     
     private var weather: WeatherData? {
-        weatherService.weatherCache[city.id]
+        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+        return weatherService.weatherCache[cacheKey]
     }
     
     private var highestSeverityAlert: WeatherAlert? {
@@ -242,8 +248,15 @@ struct ListRowView: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(buildAccessibilityLabel())
         .animation(.easeInOut(duration: 0.2), value: highestSeverityAlert?.id)
-        .task(id: city.id) {
-            guard !hasLoadedAlerts else { return }
+        .task(id: "\(city.id)-\(dateOffset)") {
+            // Fetch weather for this city at this date offset if not cached
+            let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+            if weatherService.weatherCache[cacheKey] == nil {
+                await weatherService.fetchWeatherForDate(for: city, dateOffset: dateOffset)
+            }
+            
+            // Load alerts (only for current date)
+            guard !hasLoadedAlerts && dateOffset == 0 else { return }
             hasLoadedAlerts = true
             
             do {
@@ -630,7 +643,11 @@ struct ListRowView: View {
 }
 
 #Preview {
-    ListView(selectedCityForHistory: .constant(nil))
+    ListView(
+        selectedCityForHistory: .constant(nil),
+        dateOffset: 0,
+        selectedDate: Date()
+    )
         .environmentObject(WeatherService())
         .environmentObject(SettingsManager())
 }

@@ -16,52 +16,191 @@ struct MyCitiesView: View {
     @State private var selectedCityForDetail: City?
     @State private var hasLoadedInitialWeather = false
     
+    // Date navigation state
+    @State private var dateOffset: Int = 0  // 0 = today, +1 = tomorrow, -1 = yesterday
+    private let maxDaysForward = 7
+    private let maxDaysBack = 7
+    
+    // Computed properties for date display
+    private var selectedDate: Date {
+        let calendar = Calendar.current
+        return calendar.date(byAdding: .day, value: dateOffset, to: Date()) ?? Date()
+    }
+    
+    private var dateDisplayString: String {
+        if dateOffset == 0 {
+            return "Today"
+        } else if dateOffset == 1 {
+            return "Tomorrow"
+        } else if dateOffset == -1 {
+            return "Yesterday"
+        } else {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "EEE, MMM d"
+            return formatter.string(from: selectedDate)
+        }
+    }
+    
+    // MARK: - Computed Properties
+    
+    @ViewBuilder
+    private var mainContent: some View {
+        if weatherService.savedCities.isEmpty {
+            EmptyStateView()
+        } else {
+            switch settingsManager.settings.viewMode {
+            case .list:
+                ListView(
+                    selectedCityForHistory: $selectedCityForHistory,
+                    dateOffset: dateOffset,
+                    selectedDate: selectedDate
+                )
+            case .flat:
+                FlatView(
+                    selectedCityForHistory: $selectedCityForHistory,
+                    selectedCityForDetail: $selectedCityForDetail,
+                    dateOffset: dateOffset,
+                    selectedDate: selectedDate
+                )
+            }
+        }
+    }
+    
     var body: some View {
         NavigationStack {
-            Group {
-                if weatherService.savedCities.isEmpty {
-                    EmptyStateView()
-                } else {
-                    switch settingsManager.settings.viewMode {
-                    case .list:
-                        ListView(selectedCityForHistory: $selectedCityForHistory)
-                    case .flat:
-                        FlatView(selectedCityForHistory: $selectedCityForHistory, selectedCityForDetail: $selectedCityForDetail)
+            mainContent
+                .navigationTitle("Fast Weather")
+                .navigationDestination(item: $selectedCityForHistory) { city in
+                    HistoricalWeatherView(city: city, autoLoadToday: settingsManager.settings.viewMode == .list)
+                        .navigationTitle("Historical Weather")
+                        .navigationBarTitleDisplayMode(.inline)
+                }
+                .navigationDestination(item: $selectedCityForDetail) { city in
+                    CityDetailView(city: city)
+                    }
+                .toolbar {
+                    toolbarContent
+                }
+                .sheet(isPresented: $showingAddCity) {
+                    AddCitySearchView(initialSearchText: "")
+                }
+                .refreshable {
+                    await refreshAllCities()
+                }
+                .onChange(of: dateOffset) { oldValue, newValue in
+                    Task {
+                        await refreshAllCities()
                     }
                 }
-            }
-            .navigationTitle("Fast Weather")
-            .navigationDestination(item: $selectedCityForHistory) { city in
-                HistoricalWeatherView(city: city, autoLoadToday: settingsManager.settings.viewMode == .list)
-                    .navigationTitle("Historical Weather")
-                    .navigationBarTitleDisplayMode(.inline)
-            }
-            .navigationDestination(item: $selectedCityForDetail) { city in
-                CityDetailView(city: city)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        showingAddCity = true
-                    }) {
-                        Label("Add City", systemImage: "plus")
+                .accessibilityScrollAction { edge in
+                    switch edge {
+                    case .leading:
+                        navigateToPreviousDay()
+                    case .trailing:
+                        navigateToNextDay()
+                    default:
+                        break
                     }
-                    .accessibilityLabel("Add City")
-                    .accessibilityHint("Opens search to add a new city")
-                    .keyboardShortcut("n", modifiers: [.command, .shift])
+                }
+                .accessibilityAction(named: "Previous Day") {
+                    navigateToPreviousDay()
+                }
+                .accessibilityAction(named: "Next Day") {
+                    navigateToNextDay()
+                }
+                .gesture(swipeGesture)
+        }
+    }
+    
+    // MARK: - Helper Methods
+    
+    private func refreshAllCities() async {
+        for city in weatherService.savedCities {
+            await weatherService.fetchWeatherForDate(for: city, dateOffset: dateOffset)
+        }
+    }
+    
+    private func navigateToPreviousDay() {
+        guard dateOffset > -maxDaysBack else { return }
+        dateOffset -= 1
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        UIAccessibility.post(notification: .announcement, argument: "Viewing weather for \(dateDisplayString)")
+    }
+    
+    private func navigateToNextDay() {
+        guard dateOffset < maxDaysForward else { return }
+        dateOffset += 1
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        UIAccessibility.post(notification: .announcement, argument: "Viewing weather for \(dateDisplayString)")
+    }
+    
+    private func navigateToToday() {
+        dateOffset = 0
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        UIAccessibility.post(notification: .announcement, argument: "Returned to today")
+    }
+    
+    // MARK: - Accessors
+    
+    private var swipeGesture: some Gesture {
+        DragGesture(minimumDistance: 50)
+            .onEnded { gesture in
+                let horizontalSwipe = gesture.translation.width
+                let verticalSwipe = abs(gesture.translation.height)
+                
+                // Only process horizontal swipes
+                guard abs(horizontalSwipe) > verticalSwipe else { return }
+                
+                if horizontalSwipe > 100 && dateOffset > -maxDaysBack {
+                    navigateToPreviousDay()
+                } else if horizontalSwipe < -100 && dateOffset < maxDaysForward {
+                    navigateToNextDay()
                 }
             }
-            .sheet(isPresented: $showingAddCity) {
-                AddCitySearchView(initialSearchText: "")
+    }
+    
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItemGroup(placement: .navigationBarLeading) {
+            Button(action: navigateToPreviousDay) {
+                Image(systemName: "chevron.left.circle.fill")
             }
-            .refreshable {
-                await weatherService.refreshAllWeather()
+            .disabled(dateOffset <= -maxDaysBack)
+            .accessibilityLabel("Previous day")
+            
+            Text(dateDisplayString)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .accessibilityLabel("Currently viewing \(dateDisplayString)")
+            
+            Button(action: navigateToNextDay) {
+                Image(systemName: "chevron.right.circle.fill")
             }
-            // Weather fetch moved to ContentView for faster startup
+            .disabled(dateOffset >= maxDaysForward)
+            .accessibilityLabel("Next day")
+            
+            if dateOffset != 0 {
+                Button(action: navigateToToday) {
+                    Label("Today", systemImage: "calendar")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                }
+                .accessibilityLabel("Return to today")
+            }
+        }
+        
+        ToolbarItem(placement: .navigationBarTrailing) {
+            Button {
+                showingAddCity = true
+            } label: {
+                Label("Add City", systemImage: "plus")
+            }
+            .accessibilityLabel("Add City")
+            .accessibilityHint("Opens search to add a new city")
+            .keyboardShortcut("n", modifiers: [.command, .shift])
         }
     }
 }
-
 struct EmptyStateView: View {
     var body: some View {
         VStack(spacing: 20) {

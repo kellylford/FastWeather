@@ -438,6 +438,8 @@ struct SettingsView: View {
             return "24-hour detailed forecast with customizable data fields"
         case .dailyForecast:
             return "16-day forecast with customizable data fields"
+        case .marineForecast:
+            return "Wave heights, ocean currents, sea temperature, and tides"
         case .historicalWeather:
             return "Past year weather comparisons"
         case .location:
@@ -588,6 +590,31 @@ struct SettingsView: View {
                     }
                 }
                 
+            case .marineForecast:
+                Text("Configure marine forecast data (wave heights, currents, sea temperature)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding(.bottom, 4)
+                
+                ForEach(settingsManager.settings.marineFields.indices, id: \.self) { index in
+                    let field = settingsManager.settings.marineFields[index]
+                    Toggle(field.type.rawValue, isOn: Binding(
+                        get: { settingsManager.settings.marineFields[index].isEnabled },
+                        set: { newValue in
+                            settingsManager.settings.marineFields[index].isEnabled = newValue
+                            settingsManager.saveSettings()
+                        }
+                    ))
+                    .font(.caption)
+                    .accessibilityLabel("\(field.type.rawValue) in marine forecast")
+                    .accessibilityAction(named: "Move Up") {
+                        moveMarineFieldUp(at: index)
+                    }
+                    .accessibilityAction(named: "Move Down") {
+                        moveMarineFieldDown(at: index)
+                    }
+                }
+                
             case .historicalWeather:
                 Text("• Past year comparisons")
                     .font(.caption)
@@ -678,6 +705,24 @@ struct SettingsView: View {
         let fieldName = settingsManager.settings.dailyFields[index].type.rawValue
         let belowFieldName = settingsManager.settings.dailyFields[index + 1].type.rawValue
         settingsManager.settings.dailyFields.move(fromOffsets: IndexSet(integer: index), toOffset: index + 2)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) below \(belowFieldName)")
+    }
+    
+    private func moveMarineFieldUp(at index: Int) {
+        guard index > 0 else { return }
+        let fieldName = settingsManager.settings.marineFields[index].type.rawValue
+        let aboveFieldName = settingsManager.settings.marineFields[index - 1].type.rawValue
+        settingsManager.settings.marineFields.move(fromOffsets: IndexSet(integer: index), toOffset: index - 1)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) above \(aboveFieldName)")
+    }
+    
+    private func moveMarineFieldDown(at index: Int) {
+        guard index < settingsManager.settings.marineFields.count - 1 else { return }
+        let fieldName = settingsManager.settings.marineFields[index].type.rawValue
+        let belowFieldName = settingsManager.settings.marineFields[index + 1].type.rawValue
+        settingsManager.settings.marineFields.move(fromOffsets: IndexSet(integer: index), toOffset: index + 2)
         settingsManager.saveSettings()
         UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) below \(belowFieldName)")
     }
