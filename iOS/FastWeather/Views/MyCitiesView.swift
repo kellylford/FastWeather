@@ -122,19 +122,24 @@ struct MyCitiesView: View {
     
     private func navigateToPreviousDay() {
         guard dateOffset > -maxDaysBack else { return }
+        print("🔙 navigateToPreviousDay: dateOffset changing from \(dateOffset) to \(dateOffset - 1)")
         dateOffset -= 1
+        print("🔙 navigateToPreviousDay: dateOffset is now \(dateOffset), display: \(dateDisplayString)")
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         UIAccessibility.post(notification: .announcement, argument: "Viewing weather for \(dateDisplayString)")
     }
     
     private func navigateToNextDay() {
         guard dateOffset < maxDaysForward else { return }
+        print("▶️ navigateToNextDay: dateOffset changing from \(dateOffset) to \(dateOffset + 1)")
         dateOffset += 1
+        print("▶️ navigateToNextDay: dateOffset is now \(dateOffset), display: \(dateDisplayString)")
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         UIAccessibility.post(notification: .announcement, argument: "Viewing weather for \(dateDisplayString)")
     }
     
     private func navigateToToday() {
+        print("📅 navigateToToday: resetting dateOffset from \(dateOffset) to 0")
         dateOffset = 0
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         UIAccessibility.post(notification: .announcement, argument: "Returned to today")
@@ -151,9 +156,12 @@ struct MyCitiesView: View {
                 // Only process horizontal swipes
                 guard abs(horizontalSwipe) > verticalSwipe else { return }
                 
+                // iOS timeline convention: swipe LEFT (negative) = see future, swipe RIGHT (positive) = see past
                 if horizontalSwipe > 100 && dateOffset > -maxDaysBack {
+                    // Swipe RIGHT = go to previous day (back in time)
                     navigateToPreviousDay()
                 } else if horizontalSwipe < -100 && dateOffset < maxDaysForward {
+                    // Swipe LEFT = go to next day (forward in time)
                     navigateToNextDay()
                 }
             }
