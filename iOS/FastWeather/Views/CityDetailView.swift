@@ -1395,26 +1395,6 @@ struct MarineForecastSection: View {
             .map { $0.type }
     }
     
-    // Check if marine data has any meaningful values (not all nil)
-    private func hasMarineData() -> Bool {
-        guard let marine = marineData, let hourly = marine.hourly else {
-            return false
-        }
-        
-        // Check if any of the marine data arrays have non-nil values
-        let hasWaveHeight = hourly.waveHeight?.contains(where: { $0 != nil }) ?? false
-        let hasWaveDirection = hourly.waveDirection?.contains(where: { $0 != nil }) ?? false
-        let hasWavePeriod = hourly.wavePeriod?.contains(where: { $0 != nil }) ?? false
-        let hasSeaTemp = hourly.seaSurfaceTemperature?.contains(where: { $0 != nil }) ?? false
-        let hasSwellHeight = hourly.swellWaveHeight?.contains(where: { $0 != nil }) ?? false
-        let hasCurrentVelocity = hourly.oceanCurrentVelocity?.contains(where: { $0 != nil }) ?? false
-        let hasWindWaveHeight = hourly.windWaveHeight?.contains(where: { $0 != nil }) ?? false
-        let hasSeaLevel = hourly.seaLevelHeight?.contains(where: { $0 != nil }) ?? false
-        
-        return hasWaveHeight || hasWaveDirection || hasWavePeriod || hasSeaTemp || 
-               hasSwellHeight || hasCurrentVelocity || hasWindWaveHeight || hasSeaLevel
-    }
-    
     // Find index of current hour (or next available hour) in time array
     private func findCurrentHourIndex(in times: [String?]) -> Int {
         let now = Date()
@@ -1436,10 +1416,8 @@ struct MarineForecastSection: View {
     }
     
     var body: some View {
-        // Hide entire section if no data available (e.g., inland cities like Madison, WI)
         Group {
-            if isLoading || dateOffset < 0 || hasMarineData() {
-                GroupBox(label: Label("Marine Forecast", systemImage: "water.waves")) {
+            GroupBox(label: Label("Marine Forecast", systemImage: "water.waves")) {
                     if isLoading {
                         ProgressView("Loading marine data...")
                             .frame(minHeight: 100)
@@ -1476,7 +1454,6 @@ struct MarineForecastSection: View {
                     }
                 }
                 .padding(.horizontal)
-            }
         }
         .task(id: "\(city.id)-\(dateOffset)") {
             isLoading = true

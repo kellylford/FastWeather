@@ -14,8 +14,22 @@ class SettingsManager: ObservableObject {
     private let userDefaultsKey = "AppSettings"
     
     init() {
-        // Try to load saved settings
+        // Check settings version first to avoid decoding crashes from structure changes
         if let data = UserDefaults.standard.data(forKey: userDefaultsKey) {
+            // Try to extract just the version number without fully decoding
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let savedVersion = json["settingsVersion"] as? Int {
+                if savedVersion != AppSettings.currentVersion {
+                    // Version mismatch - clear old data to prevent decoding crashes
+                    print("⚠️ Settings version mismatch (saved: v\(savedVersion), current: v\(AppSettings.currentVersion))")
+                    print("🔄 Clearing old settings and resetting to defaults")
+                    UserDefaults.standard.removeObject(forKey: userDefaultsKey)
+                    self.settings = AppSettings()
+                    return
+                }
+            }
+            
+            // Version matches or couldn't determine - try to decode
             do {
                 self.settings = try JSONDecoder().decode(AppSettings.self, from: data)
             } catch {

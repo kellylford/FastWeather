@@ -291,6 +291,10 @@ enum DistanceUnit: String, CaseIterable, Codable {
 }
 
 struct AppSettings: Codable {
+    // Settings schema version - increment when structure changes
+    static let currentVersion = 2  // Bumped for marine/detail categories reordering
+    var settingsVersion: Int = AppSettings.currentVersion
+    
     var viewMode: ViewMode = .list
     var displayMode: DisplayMode = .condensed
     var temperatureUnit: TemperatureUnit = .fahrenheit
@@ -468,7 +472,7 @@ struct AppSettings: Codable {
     
     // Custom CodingKeys to handle private _weatherAroundMeDistance property
     enum CodingKeys: String, CodingKey {
-        case viewMode, displayMode, temperatureUnit, windSpeedUnit
+        case settingsVersion, viewMode, displayMode, temperatureUnit, windSpeedUnit
         case precipitationUnit, pressureUnit, distanceUnit, historicalYearsBack
         // Granular UV Index settings
         case showUVIndexInCurrentConditions, showUVIndexInTodaysForecast
