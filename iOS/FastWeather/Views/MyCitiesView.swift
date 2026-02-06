@@ -192,8 +192,10 @@ struct MyCitiesView: View {
             .accessibilityLabel("Next day")
             
             if dateOffset != 0 {
-                Button("Today") {
+                Button {
                     navigateToToday()
+                } label: {
+                    Label("Today", systemImage: "calendar.badge.clock")
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
