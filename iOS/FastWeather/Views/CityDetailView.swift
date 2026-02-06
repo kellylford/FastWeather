@@ -1395,52 +1395,93 @@ struct MarineForecastSection: View {
             .map { $0.type }
     }
     
-    var body: some View {
-        GroupBox(label: Label("Marine Forecast", systemImage: "water.waves")) {
-            if isLoading {
-                ProgressView("Loading marine data...")
-                    .frame(minHeight: 100)
-                    .padding()
-            } else if dateOffset < 0 {
-                VStack(spacing: 8) {
-                    Image(systemName: "exclamationmark.triangle")
-                        .font(.title)
-                        .foregroundColor(.orange)
-                    Text("Historical marine data not available")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
+    // Check if marine data has any meaningful values (not all nil)
+    private func hasMarineData() -> Bool {
+        guard let marine = marineData, let hourly = marine.hourly else {
+            return false
+        }
+        
+        // Check if any of the marine data arrays have non-nil values
+        let hasWaveHeight = hourly.waveHeight?.contains(where: { $0 != nil }) ?? false
+        let hasWaveDirection = hourly.waveDirection?.contains(where: { $0 != nil }) ?? false
+        let hasWavePeriod = hourly.wavePeriod?.contains(where: { $0 != nil }) ?? false
+        let hasSeaTemp = hourly.seaSurfaceTemperature?.contains(where: { $0 != nil }) ?? false
+        let hasSwellHeight = hourly.swellWaveHeight?.contains(where: { $0 != nil }) ?? false
+        let hasCurrentVelocity = hourly.oceanCurrentVelocity?.contains(where: { $0 != nil }) ?? false
+        let hasWindWaveHeight = hourly.windWaveHeight?.contains(where: { $0 != nil }) ?? false
+        let hasSeaLevel = hourly.seaLevelHeight?.contains(where: { $0 != nil }) ?? false
+        
+        return hasWaveHeight || hasWaveDirection || hasWavePeriod || hasSeaTemp || 
+               hasSwellHeight || hasCurrentVelocity || hasWindWaveHeight || hasSeaLevel
+    }
+    
+    // Find index of current hour (or next available hour) in time array
+    private func findCurrentHourIndex(in times: [String?]) -> Int {
+        let now = Date()
+        let calendar = Calendar.current
+        let currentHour = calendar.component(.hour, from: now)
+        
+        // Parse each time and find the one matching or after current hour
+        for (index, timeString) in times.enumerated() {
+            guard let timeString = timeString else { continue }
+            if let time = DateParser.parse(timeString) {
+                let hour = calendar.component(.hour, from: time)
+                if hour >= currentHour {
+                    return index
                 }
-                .frame(minHeight: 100)
-                .padding()
-            } else if let marine = marineData, let hourly = marine.hourly {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 16) {
-                        ForEach(0..<min(24, hourly.time?.count ?? 0), id: \.self) { index in
-                            MarineForecastCard(hourly: hourly, index: index, enabledFields: enabledFields())
-                        }
-                    }
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                }
-            } else {
-                VStack(spacing: 8) {
-                    Image(systemName: "water.waves.slash")
-                        .font(.title)
-                        .foregroundColor(.secondary)
-                    Text("No marine data available")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                .frame(minHeight: 100)
-                .padding()
             }
         }
-        .padding(.horizontal)
-        .task(id: "\(city.id)-\(dateOffset)") {
-            isLoading = true
-            await weatherService.fetchMarineData(for: city, dateOffset: dateOffset)
-            isLoading = false
+        
+        return 0 // Fallback to start if not found
+    }
+    
+    var body: some View {
+        Group {
+            // Only show marine section if there's actual marine data available
+            if isLoading || hasMarineData() || dateOffset < 0 {
+                GroupBox(label: Label("Marine Forecast", systemImage: "water.waves")) {
+                    if isLoading {
+                        ProgressView("Loading marine data...")
+                            .frame(minHeight: 100)
+                            .padding()
+                    } else if dateOffset < 0 {
+                        VStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.title)
+                                .foregroundColor(.orange)
+                            Text("Historical marine data not available")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
+                        .frame(minHeight: 100)
+                        .padding()
+                    } else if let marine = marineData, let hourly = marine.hourly {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 16) {
+                                // Show next 24 hours starting from current hour (like hourly forecast)
+                                if let timeArray = hourly.time, !timeArray.isEmpty {
+                                    let currentHourIndex = findCurrentHourIndex(in: timeArray)
+                                    let startIndex = currentHourIndex >= 0 ? currentHourIndex : 0
+                                    let endIndex = min(startIndex + 24, timeArray.count)
+                                    
+                                    ForEach(startIndex..<endIndex, id: \.self) { index in
+                                        MarineForecastCard(hourly: hourly, index: index, enabledFields: enabledFields())
+                                    }
+                                }
+                            }
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
+                        }
+                    }
+                }
+                .padding(.horizontal)
+                .task(id: "\(city.id)-\(dateOffset)") {
+                    isLoading = true
+                    await weatherService.fetchMarineData(for: city, dateOffset: dateOffset)
+                    isLoading = false
+                }
+            }
         }
     }
 }

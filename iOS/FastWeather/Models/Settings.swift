@@ -426,6 +426,7 @@ struct AppSettings: Codable {
     
     // Ordered marine forecast fields with enable/disable state (Marine Forecast)
     var marineFields: [MarineField] = [
+        MarineField(type: .seaLevelHeight, isEnabled: true),  // Tides - shown first
         MarineField(type: .waveHeight, isEnabled: true),
         MarineField(type: .waveDirection, isEnabled: true),
         MarineField(type: .wavePeriod, isEnabled: true),
@@ -435,7 +436,6 @@ struct AppSettings: Codable {
         MarineField(type: .windWaveHeight, isEnabled: false),
         MarineField(type: .swellWaveDirection, isEnabled: false),
         MarineField(type: .oceanCurrentDirection, isEnabled: false),
-        MarineField(type: .seaLevelHeight, isEnabled: false),
         MarineField(type: .wavePeakPeriod, isEnabled: false),
         MarineField(type: .windWaveDirection, isEnabled: false),
         MarineField(type: .windWavePeriod, isEnabled: false),
@@ -449,8 +449,8 @@ struct AppSettings: Codable {
         DetailCategoryField(category: .currentConditions, isEnabled: true),
         DetailCategoryField(category: .hourlyForecast, isEnabled: true),
         DetailCategoryField(category: .dailyForecast, isEnabled: true),
-        DetailCategoryField(category: .marineForecast, isEnabled: true),
         DetailCategoryField(category: .historicalWeather, isEnabled: true),
+        DetailCategoryField(category: .marineForecast, isEnabled: true),
         DetailCategoryField(category: .location, isEnabled: true)
     ]
     
@@ -564,6 +564,7 @@ struct AppSettings: Codable {
         ]
         
         self.marineFields = [
+            MarineField(type: .seaLevelHeight, isEnabled: true),  // Tides - shown first
             MarineField(type: .waveHeight, isEnabled: true),
             MarineField(type: .waveDirection, isEnabled: true),
             MarineField(type: .wavePeriod, isEnabled: true),
@@ -573,7 +574,6 @@ struct AppSettings: Codable {
             MarineField(type: .windWaveHeight, isEnabled: false),
             MarineField(type: .swellWaveDirection, isEnabled: false),
             MarineField(type: .oceanCurrentDirection, isEnabled: false),
-            MarineField(type: .seaLevelHeight, isEnabled: false),
             MarineField(type: .wavePeakPeriod, isEnabled: false),
             MarineField(type: .windWaveDirection, isEnabled: false),
             MarineField(type: .windWavePeriod, isEnabled: false),
@@ -586,8 +586,8 @@ struct AppSettings: Codable {
             DetailCategoryField(category: .currentConditions, isEnabled: true),
             DetailCategoryField(category: .hourlyForecast, isEnabled: true),
             DetailCategoryField(category: .dailyForecast, isEnabled: true),
-            DetailCategoryField(category: .marineForecast, isEnabled: true),
             DetailCategoryField(category: .historicalWeather, isEnabled: true),
+            DetailCategoryField(category: .marineForecast, isEnabled: true),
             DetailCategoryField(category: .location, isEnabled: true),
         ]
     }
@@ -785,6 +785,7 @@ struct AppSettings: Codable {
         
         // Marine fields with migration: merge saved fields with new defaults
         let defaultMarineFields: [MarineField] = [
+            MarineField(type: .seaLevelHeight, isEnabled: true),  // Tides - shown first
             MarineField(type: .waveHeight, isEnabled: true),
             MarineField(type: .waveDirection, isEnabled: true),
             MarineField(type: .wavePeriod, isEnabled: true),
@@ -794,7 +795,6 @@ struct AppSettings: Codable {
             MarineField(type: .windWaveHeight, isEnabled: false),
             MarineField(type: .swellWaveDirection, isEnabled: false),
             MarineField(type: .oceanCurrentDirection, isEnabled: false),
-            MarineField(type: .seaLevelHeight, isEnabled: false),
             MarineField(type: .wavePeakPeriod, isEnabled: false),
             MarineField(type: .windWaveDirection, isEnabled: false),
             MarineField(type: .windWavePeriod, isEnabled: false),
@@ -826,8 +826,8 @@ struct AppSettings: Codable {
             DetailCategoryField(category: .currentConditions, isEnabled: true),
             DetailCategoryField(category: .hourlyForecast, isEnabled: true),
             DetailCategoryField(category: .dailyForecast, isEnabled: true),
-            DetailCategoryField(category: .marineForecast, isEnabled: true),
             DetailCategoryField(category: .historicalWeather, isEnabled: true),
+            DetailCategoryField(category: .marineForecast, isEnabled: true),
             DetailCategoryField(category: .location, isEnabled: true)
         ]
         

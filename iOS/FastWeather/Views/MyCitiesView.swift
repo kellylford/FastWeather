@@ -31,12 +31,27 @@ struct MyCitiesView: View {
         if dateOffset == 0 {
             return "Today"
         } else if dateOffset == 1 {
-            return "Tomorrow"
+            return "Tmrw"  // Abbreviated to prevent truncation confusion with "Today"
         } else if dateOffset == -1 {
             return "Yesterday"
         } else {
             let formatter = DateFormatter()
             formatter.dateFormat = "EEE, MMM d"
+            return formatter.string(from: selectedDate)
+        }
+    }
+    
+    // Full date string for VoiceOver (not abbreviated)
+    private var accessibilityDateString: String {
+        if dateOffset == 0 {
+            return "Today"
+        } else if dateOffset == 1 {
+            return "Tomorrow"  // Full word for VoiceOver (visual shows "Tmrw")
+        } else if dateOffset == -1 {
+            return "Yesterday"
+        } else {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "EEEE, MMMM d"  // Full day/month names for VoiceOver
             return formatter.string(from: selectedDate)
         }
     }
@@ -122,24 +137,19 @@ struct MyCitiesView: View {
     
     private func navigateToPreviousDay() {
         guard dateOffset > -maxDaysBack else { return }
-        print("🔙 navigateToPreviousDay: dateOffset changing from \(dateOffset) to \(dateOffset - 1)")
         dateOffset -= 1
-        print("🔙 navigateToPreviousDay: dateOffset is now \(dateOffset), display: \(dateDisplayString)")
         UINotificationFeedbackGenerator().notificationOccurred(.success)
-        UIAccessibility.post(notification: .announcement, argument: "Viewing weather for \(dateDisplayString)")
+        UIAccessibility.post(notification: .announcement, argument: "Viewing weather for \(accessibilityDateString)")
     }
     
     private func navigateToNextDay() {
         guard dateOffset < maxDaysForward else { return }
-        print("▶️ navigateToNextDay: dateOffset changing from \(dateOffset) to \(dateOffset + 1)")
         dateOffset += 1
-        print("▶️ navigateToNextDay: dateOffset is now \(dateOffset), display: \(dateDisplayString)")
         UINotificationFeedbackGenerator().notificationOccurred(.success)
-        UIAccessibility.post(notification: .announcement, argument: "Viewing weather for \(dateDisplayString)")
+        UIAccessibility.post(notification: .announcement, argument: "Viewing weather for \(accessibilityDateString)")
     }
     
     private func navigateToToday() {
-        print("📅 navigateToToday: resetting dateOffset from \(dateOffset) to 0")
         dateOffset = 0
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         UIAccessibility.post(notification: .announcement, argument: "Returned to today")
@@ -181,7 +191,7 @@ struct MyCitiesView: View {
             Text(dateDisplayString)
                 .font(.subheadline)
                 .fontWeight(.semibold)
-                .accessibilityLabel("Currently viewing \(dateDisplayString)")
+                .accessibilityLabel("Currently viewing \(accessibilityDateString)")
             
             Button(action: navigateToNextDay) {
                 Label("Next", systemImage: "arrow.forward")
