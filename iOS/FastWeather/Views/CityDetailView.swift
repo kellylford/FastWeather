@@ -1461,8 +1461,13 @@ struct MarineForecastCard: View {
     
     private func formatWaveHeight(_ meters: Double?) -> String {
         guard let meters = meters else { return "—" }
-        // Always show in meters for marine data (international standard)
-        return String(format: "%.1f m", meters)
+        // NWS uses feet for wave heights in US waters, meters internationally
+        if settingsManager.settings.distanceUnit == .miles {
+            let feet = meters * 3.28084
+            return String(format: "%.1f ft", feet)
+        } else {
+            return String(format: "%.1f m", meters)
+        }
     }
     
     private func formatDirection(_ degrees: Int?) -> String {
@@ -1485,13 +1490,21 @@ struct MarineForecastCard: View {
     
     private func formatVelocity(_ kmh: Double?) -> String {
         guard let kmh = kmh else { return "—" }
+        // NWS uses knots for marine velocities (1 knot = 1.852 km/h)
+        // For consistency with app settings, we use windSpeedUnit but could add knots as option
         let converted = settingsManager.settings.windSpeedUnit.convert(kmh)
         return String(format: "%.1f %@", converted, settingsManager.settings.windSpeedUnit.rawValue)
     }
     
     private func formatSeaLevel(_ meters: Double?) -> String {
         guard let meters = meters else { return "—" }
-        return String(format: "%.2f m", meters)
+        // NWS uses feet for sea level/tides in US waters, meters internationally
+        if settingsManager.settings.distanceUnit == .miles {
+            let feet = meters * 3.28084
+            return String(format: "%.2f ft", feet)
+        } else {
+            return String(format: "%.2f m", meters)
+        }
     }
     
     var body: some View {
@@ -1588,7 +1601,9 @@ struct MarineForecastCard: View {
         switch field {
         case .waveHeight:
             if let value = hourly.waveHeight?[index] {
-                return "Wave height \(formatWaveHeight(value))"
+                let unit = settingsManager.settings.distanceUnit == .miles ? "feet" : "meters"
+                let formatted = formatWaveHeight(value)
+                return "Wave height \(formatted)".replacingOccurrences(of: " ft", with: " \(unit)").replacingOccurrences(of: " m", with: " \(unit)")
             }
         case .waveDirection:
             if let value = hourly.waveDirection?[index] {
@@ -1606,7 +1621,9 @@ struct MarineForecastCard: View {
             }
         case .windWaveHeight:
             if let value = hourly.windWaveHeight?[index] {
-                return "Wind wave \(formatWaveHeight(value))"
+                let unit = settingsManager.settings.distanceUnit == .miles ? "feet" : "meters"
+                let formatted = formatWaveHeight(value)
+                return "Wind wave \(formatted)".replacingOccurrences(of: " ft", with: " \(unit)").replacingOccurrences(of: " m", with: " \(unit)")
             }
         case .windWaveDirection:
             if let value = hourly.windWaveDirection?[index] {
@@ -1620,7 +1637,9 @@ struct MarineForecastCard: View {
             }
         case .swellWaveHeight:
             if let value = hourly.swellWaveHeight?[index] {
-                return "Swell height \(formatWaveHeight(value))"
+                let unit = settingsManager.settings.distanceUnit == .miles ? "feet" : "meters"
+                let formatted = formatWaveHeight(value)
+                return "Swell height \(formatted)".replacingOccurrences(of: " ft", with: " \(unit)").replacingOccurrences(of: " m", with: " \(unit)")
             }
         case .swellWaveDirection:
             if let value = hourly.swellWaveDirection?[index] {
@@ -1648,7 +1667,9 @@ struct MarineForecastCard: View {
             }
         case .seaLevelHeight:
             if let value = hourly.seaLevelHeight?[index] {
-                return "Sea level \(formatSeaLevel(value))"
+                let unit = settingsManager.settings.distanceUnit == .miles ? "feet" : "meters"
+                let formatted = formatSeaLevel(value)
+                return "Sea level \(formatted)".replacingOccurrences(of: " ft", with: " \(unit)").replacingOccurrences(of: " m", with: " \(unit)")
             }
         }
         return nil
