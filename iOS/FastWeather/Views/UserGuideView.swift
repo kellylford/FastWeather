@@ -321,6 +321,9 @@ struct UserGuideView: View {
                     BulletPoint("**Map pin** - Location/browse (VoiceOver: \"Browse by state or country\")")
                     BulletPoint("**Book** - User guide (VoiceOver: \"User Guide\")")
                     BulletPoint("**Hammer** - Developer settings (VoiceOver: \"Developer Settings\")")
+                    BulletPoint("**Left arrow** - Previous day in Weather in Time (VoiceOver: \"Previous\")")
+                    BulletPoint("**Right arrow** - Next day in Weather in Time (VoiceOver: \"Next\")")
+                    BulletPoint("**Calendar with clock badge** - Return to Today button (VoiceOver: \"Today\")")
                     
                     Text("**Data Visualization Icons:**")
                         .fontWeight(.semibold)
@@ -331,6 +334,7 @@ struct UserGuideView: View {
                     BulletPoint("**Compass arrows** - Wind direction (VoiceOver: \"Wind from [direction]\")")
                     BulletPoint("**Clock** - Time/timestamp (VoiceOver: formatted time)")
                     BulletPoint("**Calendar with clock** - Historical weather (VoiceOver: \"View historical weather\")")
+                    BulletPoint("**Water waves** - Marine Forecast section (VoiceOver: \"Marine Forecast\")")
                     
                     Text("**Status Icons:**")
                         .fontWeight(.semibold)

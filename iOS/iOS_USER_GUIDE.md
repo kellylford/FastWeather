@@ -222,6 +222,9 @@ VoiceOver announces: "Weather alert: [event name]" with severity level
 - **Map pin** - Location/browse (VoiceOver: "Browse by state or country")
 - **Book** - User guide (VoiceOver: "User Guide")
 - **Hammer** - Developer settings (VoiceOver: "Developer Settings")
+- **Left arrow** - Previous day in Weather in Time (VoiceOver: "Previous")
+- **Right arrow** - Next day in Weather in Time (VoiceOver: "Next")
+- **Calendar with clock badge** - Return to Today button (VoiceOver: "Today")
 
 ### Data Visualization Icons
 
@@ -231,6 +234,7 @@ VoiceOver announces: "Weather alert: [event name]" with severity level
 - **Compass arrows** - Wind direction (VoiceOver: "Wind from [direction]")
 - **Clock** - Time/timestamp (VoiceOver: formatted time)
 - **Calendar with clock** - Historical weather (VoiceOver: "View historical weather")
+- **Water waves** - Marine Forecast section (VoiceOver: "Marine Forecast")
 
 ### Status Icons
 
