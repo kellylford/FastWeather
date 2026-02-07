@@ -73,6 +73,91 @@ struct UserGuideView: View {
                     BulletPoint("Activate the **+** (Add City) button to add interesting cities")
                 }
                 
+                // Weather in Time
+                GuideSection(
+                    icon: "clock.fill",
+                    title: "Weather in Time",
+                    color: .mint
+                ) {
+                    Text("Weather in Time is aimed at answering the question about tomorrow's weather with a bit of a different approach. It will show you the conditions for all cities in your city list for the same time of day on the previous or next seven days.")
+                        .padding(.bottom, 4)
+                    
+                    Text("**Navigating Through Dates:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("**VoiceOver users:** Use the **three-finger swipe left or right** gestures to move between days")
+                    BulletPoint("**Sighted users:** Use the **left and right arrow buttons** at the top of the screen to navigate between days")
+                    BulletPoint("Both methods work for moving backward (earlier dates) or forward (future dates) by one day at a time")
+                    
+                    Text("**Return to Today:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("Activate the **Return to Today** button located at the top of the My Cities screen")
+                    BulletPoint("This button appears when viewing any date other than today")
+                    BulletPoint("Instantly returns all cities to current day's weather")
+                    
+                    Text("**Important Background Behavior:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("The app does **not** automatically revert back to today when it goes to the background. It only resets to today when you completely close and reopen the app. If the weather looks incorrect, check which day you're viewing at the top of the screen.")
+                        .font(.callout)
+                        .foregroundColor(.orange)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 8)
+                    
+                    Text("**How It Works:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("**City list shows weather for the selected date** - All cities update together when you change dates")
+                    BulletPoint("**City detail view matches the selected date** - Opening a city shows details for the day you're viewing")
+                    BulletPoint("**Date range:** 7 days in the past to 7 days in the future")
+                    BulletPoint("**Same time each day** - See consistent comparisons across dates")
+                }
+                
+                // Marine Forecast
+                GuideSection(
+                    icon: "water.waves",
+                    title: "Marine Forecast",
+                    color: .teal
+                ) {
+                    Text("View tidal and marine conditions for coastal cities over the next 24 hours. This feature is useful for planning beach trips, boating, surfing, or understanding coastal weather patterns.")
+                        .padding(.bottom, 4)
+                    
+                    Text("**What's Included:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("**Sea Level Height** - Tidal information showing water level changes throughout the day")
+                    BulletPoint("**Wave Height** - Current and forecasted wave conditions")
+                    BulletPoint("**Wave Direction** - Direction waves are coming from")
+                    BulletPoint("**Wave Period** - Time between wave crests")
+                    BulletPoint("**Sea Surface Temperature** - Current water temperature")
+                    BulletPoint("**Swell Wave Height** - Long-period wave conditions")
+                    BulletPoint("**Ocean Current Velocity** - Speed of ocean currents")
+                    BulletPoint("Additional detailed metrics available in settings")
+                    
+                    Text("**Accessing Marine Forecast:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("Open any city's detail view")
+                    BulletPoint("Scroll to the **Marine Forecast** section")
+                    BulletPoint("Section appears when enabled in Settings → Detail Categories")
+                    BulletPoint("Displays 24-hour forecast starting from current time")
+                    
+                    Text("**Customization:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("Go to Settings → Marine Forecast to customize which marine fields are displayed")
+                    BulletPoint("Reorder marine fields by dragging")
+                    BulletPoint("Enable/disable individual data points based on your needs")
+                    BulletPoint("Marine Forecast can be hidden entirely in Settings → Detail Categories")
+                    
+                    Text("**Note:** Marine forecast data is available for coastal locations. Inland cities may show limited or no marine data. Sea Level Height (tidal data) is enabled by default and shown first in the marine section.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 8)
+                        .padding(.leading, 16)
+                }
+                
                 // City Detail View
                 GuideSection(
                     icon: "info.circle.fill",
@@ -83,8 +168,17 @@ struct UserGuideView: View {
                     BulletPoint("**Current conditions** with temperature, humidity, wind")
                     BulletPoint("**Hourly forecast** for next 24 hours")
                     BulletPoint("**Daily forecast** for 16 days")
+                    BulletPoint("**Marine forecast** for coastal locations (if enabled)")
                     BulletPoint("**Actions menu** for historical data and more")
                     BulletPoint("**Weather alerts** when active (U.S. only)")
+                    
+                    Text("**Weather in Time Integration:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("All weather details in this view are based on the date you've selected using Weather in Time. If you're viewing tomorrow's weather in your city list, opening a city's detail view will show tomorrow's forecast, not today's.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
                 }
                 
                 // Actions Menu
