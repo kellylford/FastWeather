@@ -170,7 +170,7 @@ struct UserGuideView: View {
                     BulletPoint("**Daily forecast** for 16 days")
                     BulletPoint("**Marine forecast** for coastal locations (if enabled)")
                     BulletPoint("**Actions menu** for historical data and more")
-                    BulletPoint("**Weather alerts** when active (U.S. only)")
+                    BulletPoint("**Weather alerts** when active (U.S. and select international locations)")
                     
                     Text("**Weather in Time Integration:**")
                         .fontWeight(.semibold)

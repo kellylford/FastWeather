@@ -108,7 +108,7 @@ Explore comprehensive weather information:
 - **Daily forecast** for 16 days
 - **Marine forecast** for coastal locations (if enabled)
 - **Actions menu** for historical data and more
-- **Weather alerts** when active (U.S. only)
+- **Weather alerts** when active (U.S. and select international locations)
 
 ### Weather in Time Integration
 
