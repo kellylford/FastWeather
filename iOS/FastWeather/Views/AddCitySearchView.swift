@@ -245,6 +245,10 @@ struct AddCitySearchView: View {
         return placemarks.compactMap { placemark -> GeocodingResult? in
             guard let location = placemark.location else { return nil }
             
+            // Normalize country name to English
+            let nativeCountry = placemark.country
+            let normalizedCountry = CountryNames.normalize(nativeCountry, isoCode: placemark.isoCountryCode)
+            
             // Build display name from placemark components
             var displayParts: [String] = []
             
@@ -254,7 +258,7 @@ struct AddCitySearchView: View {
             if let administrativeArea = placemark.administrativeArea {
                 displayParts.append(administrativeArea)
             }
-            if let country = placemark.country {
+            if let country = normalizedCountry {
                 displayParts.append(country)
             }
             

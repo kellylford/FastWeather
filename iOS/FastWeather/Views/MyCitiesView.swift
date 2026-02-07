@@ -107,16 +107,6 @@ struct MyCitiesView: View {
                         await refreshAllCities()
                     }
                 }
-                .accessibilityScrollAction { edge in
-                    switch edge {
-                    case .leading:
-                        navigateToNextDay()
-                    case .trailing:
-                        navigateToPreviousDay()
-                    default:
-                        break
-                    }
-                }
                 .accessibilityAction(named: "Previous Day") {
                     navigateToPreviousDay()
                 }
@@ -192,6 +182,20 @@ struct MyCitiesView: View {
                 .font(.subheadline)
                 .fontWeight(.semibold)
                 .accessibilityLabel("Currently viewing \(accessibilityDateString)")
+                .accessibilityAddTraits(.isButton)
+                .accessibilityHint("Swipe up for next day, swipe down for previous day")
+                .accessibilityAdjustableAction { direction in
+                    switch direction {
+                    case .increment:
+                        // Swipe up = next day
+                        navigateToNextDay()
+                    case .decrement:
+                        // Swipe down = previous day
+                        navigateToPreviousDay()
+                    @unknown default:
+                        break
+                    }
+                }
             
             Button(action: navigateToNextDay) {
                 Label("Next", systemImage: "arrow.forward")

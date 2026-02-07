@@ -53,6 +53,7 @@ class WeatherService: ObservableObject {
     
     init() {
         loadSavedCities()
+        migrateCountryNamesIfNeeded()
     }
     
     // MARK: - City Management
@@ -930,6 +931,71 @@ class WeatherService: ObservableObject {
             UserDefaults.standard.set(encoded, forKey: userDefaultsKey)
         }
     }
+    
+    // MARK: - Data Migration
+    
+    /// Migrate country names from native language to English (one-time)
+    private func migrateCountryNamesIfNeeded() {
+        let migrationKey = "countryNamesMigrated_v1"
+        
+        // Check if migration already completed
+        guard !UserDefaults.standard.bool(forKey: migrationKey) else {
+            print("✅ Country names already migrated")
+            return
+        }
+        
+        print("🔄 Migrating country names to English...")
+        var migratedCount = 0
+        
+        // Create backup before migration
+        if let encoded = try? JSONEncoder().encode(savedCities) {
+            UserDefaults.standard.set(encoded, forKey: "cities_backup_preMigration")
+            print("  Created backup of \(savedCities.count) cities")
+        }
+        
+        // Migrate each city's country name
+        var updatedCities: [City] = []
+        for city in savedCities {
+            let oldCountry = city.country
+            let normalizedCountry = CountryNames.normalize(oldCountry)
+            let newCountry = normalizedCountry ?? oldCountry // Use original if normalization returns nil
+            
+            if oldCountry != newCountry {
+                // Create new City with updated country
+                let updatedCity = City(
+                    id: city.id,
+                    name: city.name,
+                    state: city.state,
+                    country: newCountry,
+                    latitude: city.latitude,
+                    longitude: city.longitude
+                )
+                updatedCities.append(updatedCity)
+                migratedCount += 1
+                print("  \(city.name): '\(oldCountry)' → '\(newCountry)'")
+            } else {
+                updatedCities.append(city)
+            }
+        }
+        
+        // Update savedCities with migrated data
+        savedCities = updatedCities
+        
+        // Save migrated cities if any changes made
+        if migratedCount > 0 {
+            saveCities()
+            print("✅ Migration complete: \(migratedCount) cities updated")
+            
+            // Note: VoiceOver announcement handled by view layer
+        } else {
+            print("✅ Migration complete: No cities needed updating")
+        }
+        
+        // Mark migration as complete (even if no changes)
+        UserDefaults.standard.set(true, forKey: migrationKey)
+    }
+    
+    // MARK: - Persistence
     
     private func loadSavedCities() {
         if let data = UserDefaults.standard.data(forKey: userDefaultsKey),

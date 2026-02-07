@@ -43,8 +43,9 @@ Weather in Time is aimed at answering the question about tomorrow's weather with
 
 ### Navigating Through Dates
 
-- **VoiceOver users:** Use the **three-finger swipe left or right** gestures to move between days
-- **Sighted users:** Use the **left and right arrow buttons** at the top of the screen to navigate between days
+- **VoiceOver users:** Focus on the **date display** at the top of the screen (e.g., "Today"), then **swipe up for next day** or **swipe down for previous day**
+- **Alternative:** Use the **left and right arrow buttons** in the toolbar to navigate between days
+- **Scrolling cities:** Use **three-finger swipe up or down** to scroll through your city list
 - Both methods work for moving backward (earlier dates) or forward (future dates) by one day at a time
 
 ### Return to Today
