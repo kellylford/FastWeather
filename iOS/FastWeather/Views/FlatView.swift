@@ -284,11 +284,7 @@ struct FlatView: View {
     }
     
     private func formatTime(_ isoString: String) -> String {
-        guard let date = DateParser.parse(isoString) else { return isoString }
-        
-        let timeFormatter = DateFormatter()
-        timeFormatter.timeStyle = .short
-        return timeFormatter.string(from: date)
+        return FormatHelper.formatTime(isoString)
     }
     
 // MARK: - Actions
@@ -355,6 +351,8 @@ struct CitySectionHeader: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(city.displayName)
                         .font(.headline)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                     
                     // UV Index badge (only during daytime)
                     if settingsManager.settings.showUVIndexInCityList,

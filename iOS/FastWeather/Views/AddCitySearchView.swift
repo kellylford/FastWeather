@@ -131,6 +131,8 @@ struct AddCitySearchView: View {
                                     Text(result.displayName)
                                         .font(.body)
                                         .foregroundColor(.primary)
+                                        .lineLimit(2)
+                                        .truncationMode(.tail)
                                     
                                     Text(String(format: "%.4f, %.4f", result.latitude, result.longitude))
                                         .font(.caption)

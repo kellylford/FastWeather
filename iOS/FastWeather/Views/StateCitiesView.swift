@@ -143,6 +143,8 @@ struct CityLocationRowOptimized: View {
                             Text(weatherCode.description)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
                         }
                     }
                 } else if isLoading {
@@ -238,6 +240,8 @@ struct CityLocationRow: View {
                             .foregroundColor(.primary)
                         if let weatherCode = weatherData.current.weatherCodeEnum {
                             Text(weatherCode.description)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }

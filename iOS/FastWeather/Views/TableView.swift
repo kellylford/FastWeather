@@ -143,6 +143,8 @@ struct TableRowView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(city.displayName)
                 .font(.headline)
+                .lineLimit(1)
+                .truncationMode(.tail)
             
             if let weather = weather {
                 let isDetails = settingsManager.settings.displayMode == .details

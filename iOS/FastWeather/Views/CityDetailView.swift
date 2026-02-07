@@ -1334,6 +1334,7 @@ struct WeatherAlertsSection: View {
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                         .lineLimit(2)
+                                        .truncationMode(.tail)
                                 }
                                 
                                 Spacer()

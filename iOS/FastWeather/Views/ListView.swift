@@ -184,12 +184,15 @@ struct ListRowView: View {
                 Text(city.displayName)
                     .font(.body)
                     .fontWeight(.medium)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
                 
                 if let weather = weather {
                     Text(buildWeatherSummary(weather))
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .lineLimit(2)
+                        .truncationMode(.tail)
                 } else {
                     Text("Loading...")
                         .font(.caption)
