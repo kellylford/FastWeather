@@ -944,7 +944,10 @@ struct DailyForecastRow: View {
     }
     
     private var dayName: String {
-        guard let sunrise = sunrise, let date = DateParser.parse(sunrise) else { return "" }
+        guard let sunrise = sunrise, let date = DateParser.parse(sunrise) else {
+            print("⚠️ DailyForecastRow: Failed to parse sunrise '\(sunrise ?? "nil")' for day \(index)")
+            return "Unknown Date"
+        }
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MMM d"
@@ -978,7 +981,7 @@ struct DailyForecastRow: View {
                         .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                .frame(minWidth: 100, maxWidth: 160, alignment: .leading)
+                .frame(minWidth: 120, maxWidth: 200, alignment: .leading)
                 .accessibilityHidden(true)
                 
                 // Conditions icon - always show if available
