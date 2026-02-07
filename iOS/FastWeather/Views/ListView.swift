@@ -256,7 +256,14 @@ struct ListRowView: View {
             }
             
             // Load alerts (only for current date)
-            guard !hasLoadedAlerts && dateOffset == 0 else { return }
+            // Clear alerts when viewing past/future days
+            if dateOffset != 0 {
+                alerts = []
+                hasLoadedAlerts = false
+                return
+            }
+            
+            guard !hasLoadedAlerts else { return }
             hasLoadedAlerts = true
             
             do {

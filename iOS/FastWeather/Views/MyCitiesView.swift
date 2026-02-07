@@ -110,9 +110,9 @@ struct MyCitiesView: View {
                 .accessibilityScrollAction { edge in
                     switch edge {
                     case .leading:
-                        navigateToPreviousDay()
-                    case .trailing:
                         navigateToNextDay()
+                    case .trailing:
+                        navigateToPreviousDay()
                     default:
                         break
                     }
