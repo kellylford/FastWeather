@@ -4793,7 +4793,11 @@ function showAlertDetails(alertDataStr) {
     // Focus the close button after DOM is ready
     requestAnimationFrame(() => {
         const closeBtn = document.getElementById('close-alert-details-btn');
-        if (closeBtn) closeBtn.focus();
+        if (closeBtn) {
+            closeBtn.focus();
+        } else {
+            console.warn('Alert dialog close button not found for focus');
+        }
     });
     
     announceToScreenReader(`Weather alert: ${alert.event}. ${alert.severity} severity.`);
@@ -4847,7 +4851,11 @@ async function showHistoricalWeather(cityKey, lat, lon) {
     // Focus the first button in the controls after DOM is ready
     requestAnimationFrame(() => {
         const prevBtn = document.getElementById('hist-prev-btn');
-        if (prevBtn) prevBtn.focus();
+        if (prevBtn) {
+            prevBtn.focus();
+        } else {
+            console.warn('Historical weather navigation button not found for focus');
+        }
     });
     
     announceToScreenReader(`Historical weather for ${cityKey.split(',')[0]} - showing this day over the past 20 years`);
@@ -5214,7 +5222,11 @@ async function showPrecipitationNowcast(cityKey, lat, lon) {
     // Focus the close button after DOM is ready
     requestAnimationFrame(() => {
         const closeBtn = document.getElementById('close-precipitation-nowcast-btn');
-        if (closeBtn) closeBtn.focus();
+        if (closeBtn) {
+            closeBtn.focus();
+        } else {
+            console.warn('Precipitation dialog close button not found for focus');
+        }
     });
     
     try {
@@ -5363,7 +5375,11 @@ async function showWeatherAroundMe(cityKey, lat, lon) {
     // Focus the first radius selector button after DOM is ready
     requestAnimationFrame(() => {
         const firstRadiusBtn = content.querySelector('.radius-selector button');
-        if (firstRadiusBtn) firstRadiusBtn.focus();
+        if (firstRadiusBtn) {
+            firstRadiusBtn.focus();
+        } else {
+            console.warn('Weather Around Me radius selector not found for focus');
+        }
     });
     
     // Default distance based on unit

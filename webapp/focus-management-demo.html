@@ -287,6 +287,13 @@
             const dialog = document.getElementById(dialogId);
             const status = document.getElementById('status-' + statusNum);
             
+            // Clean up event listener to prevent memory leaks
+            const handler = focusTrapHandlers.get(dialog);
+            if (handler) {
+                dialog.removeEventListener('keydown', handler);
+                focusTrapHandlers.delete(dialog);
+            }
+            
             // Hide dialog
             dialog.hidden = true;
             
@@ -308,6 +315,13 @@
             if (e.key === 'Escape') {
                 const openDialogs = document.querySelectorAll('.modal:not([hidden])');
                 openDialogs.forEach(dialog => {
+                    // Clean up event listener
+                    const handler = focusTrapHandlers.get(dialog);
+                    if (handler) {
+                        dialog.removeEventListener('keydown', handler);
+                        focusTrapHandlers.delete(dialog);
+                    }
+                    
                     dialog.hidden = true;
                     
                     // Return focus
