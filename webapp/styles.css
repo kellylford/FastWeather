@@ -338,6 +338,7 @@ section {
     min-width: 32px;
     border-radius: var(--border-radius);
     background: var(--primary-bg);
+    color: var(--text-primary);
     border: 1px solid var(--border-color);
     cursor: pointer;
     transition: background-color 0.2s;
@@ -428,6 +429,7 @@ section {
     padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--border-radius);
     background: var(--secondary-bg);
+    color: var(--text-primary);
     border: 1px solid var(--border-color);
     cursor: pointer;
     font-size: var(--font-size-base);
