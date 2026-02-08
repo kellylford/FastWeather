@@ -1810,11 +1810,11 @@ a:hover {
 
 /* === Keyboard Shortcut Hints === */
 .shortcut-hint {
-    opacity: 0.9; /* Slightly reduced from 1.0 for subtle styling while maintaining readability */
     font-size: 0.85em;
     margin-left: 0.25rem;
     font-weight: normal;
     color: #ffffff; /* White text ensures WCAG 2.2 AA compliance on button backgrounds */
+    /* Note: opacity removed to maintain full contrast ratio for accessibility */
 }
 
 /* === Feature Action Buttons === */
