@@ -316,7 +316,7 @@ section {
 
 .city-link-btn:hover {
     text-decoration: underline;
-    color: var(--link-hover-color);
+    color: var(--link-hover);
 }
 
 .city-link-btn:focus {
@@ -760,7 +760,7 @@ legend {
 
 .city-title-btn:hover {
     text-decoration: underline;
-    color: var(--link-hover-color);
+    color: var(--link-hover);
 }
 
 .city-title-btn:focus {
