@@ -106,6 +106,8 @@ let cities = {};
 let weatherData = {};
 let currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 let currentCityMatches = [];
+// Focus return element for dialog management
+// Safe to use single variable because closeAllModals() ensures only one dialog is open at a time
 let focusReturnElement = null;
 let currentView = 'flat'; // 'flat', 'table', or 'list'
 let listNavigationHandler = null;
@@ -5352,11 +5354,11 @@ async function showWeatherAroundMe(cityKey, lat, lon) {
     dialog.hidden = false;
     trapFocus(dialog);
     
-    // Focus the first radius selector button
-    setTimeout(() => {
+    // Focus the first radius selector button after DOM is ready
+    requestAnimationFrame(() => {
         const firstRadiusBtn = content.querySelector('.radius-selector button');
         if (firstRadiusBtn) firstRadiusBtn.focus();
-    }, 100);
+    });
     
     // Default distance based on unit
     const defaultDistance = isKm ? 240 : 150;

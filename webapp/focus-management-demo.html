@@ -207,15 +207,24 @@
     <script>
         let focusReturnElement = null;
         
-        // Focus trap implementation (same as FastWeather)
+        // Focus trap implementation with proper cleanup
+        // Store the handler so we can remove it later if needed
+        const focusTrapHandlers = new WeakMap();
+        
         function trapFocus(element) {
+            // Remove existing handler if present (though in practice closeAllModals ensures only one dialog is open)
+            const existingHandler = focusTrapHandlers.get(element);
+            if (existingHandler) {
+                element.removeEventListener('keydown', existingHandler);
+            }
+            
             const focusableElements = element.querySelectorAll(
                 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
             );
             const firstFocusable = focusableElements[0];
             const lastFocusable = focusableElements[focusableElements.length - 1];
             
-            element.addEventListener('keydown', function(e) {
+            const handler = function(e) {
                 if (e.key !== 'Tab') return;
                 
                 if (e.shiftKey) {
@@ -229,7 +238,10 @@
                         e.preventDefault();
                     }
                 }
-            });
+            };
+            
+            element.addEventListener('keydown', handler);
+            focusTrapHandlers.set(element, handler);
         }
         
         // Open dialog with focus management
@@ -237,6 +249,10 @@
             const dialog = document.getElementById(dialogId);
             const statusId = dialogId.replace('test-dialog-', 'status-');
             const status = document.getElementById(statusId);
+            
+            // Note: In production FastWeather, closeAllModals() is called before saving focus,
+            // which ensures only one dialog is open at a time and prevents race conditions.
+            // The single focusReturnElement variable is safe because only one dialog can be open.
             
             // Save current focus
             focusReturnElement = document.activeElement;
