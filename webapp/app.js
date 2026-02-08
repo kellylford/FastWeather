@@ -425,6 +425,9 @@ function initializeEventListeners() {
             closeAllModals();
         }
     });
+    
+    // Initialize dialog close functionality (backdrop click + close button)
+    initializeDialogCloseFunctionality();
 }
 
 // Keyboard shortcuts
@@ -4564,6 +4567,41 @@ function closeAllModals() {
         focusReturnElement.focus();
         focusReturnElement = null;
     }
+}
+
+// Initialize dialog close functionality (backdrop click + close button)
+function initializeDialogCloseFunctionality() {
+    const modals = document.querySelectorAll('.modal');
+    
+    modals.forEach(modal => {
+        // Add close button if not already present
+        const modalContent = modal.querySelector('.modal-content');
+        if (modalContent && !modalContent.querySelector('.modal-close-btn')) {
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'modal-close-btn';
+            closeBtn.setAttribute('aria-label', 'Close dialog');
+            closeBtn.setAttribute('type', 'button');
+            closeBtn.innerHTML = '&times;';
+            closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeAllModals();
+                announceToScreenReader('Dialog closed');
+            });
+            
+            // Insert close button as first child of modal-content
+            modalContent.insertBefore(closeBtn, modalContent.firstChild);
+        }
+        
+        // Add backdrop click handler
+        // Click on modal backdrop (not content) closes the dialog
+        modal.addEventListener('click', (e) => {
+            // Only close if clicking the backdrop (modal itself), not the content
+            if (e.target === modal) {
+                closeAllModals();
+                announceToScreenReader('Dialog closed');
+            }
+        });
+    });
 }
 
 // Focus trap for modal dialogs

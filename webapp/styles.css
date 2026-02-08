@@ -941,6 +941,51 @@ legend {
     margin-bottom: var(--spacing-lg);
 }
 
+/* Close button in top-right corner */
+.modal-close-btn {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    background: transparent;
+    border: 2px solid var(--text-color);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.5rem;
+    line-height: 1;
+    padding: 0;
+    color: var(--text-color);
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.modal-close-btn:hover,
+.modal-close-btn:focus {
+    background-color: var(--button-hover-bg);
+    border-color: var(--button-hover-bg);
+    color: var(--button-text);
+}
+
+.modal-close-btn:focus {
+    outline: 3px solid var(--focus-outline);
+    outline-offset: 2px;
+}
+
+.modal-content {
+    position: relative;
+    background-color: var(--card-bg);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-lg);
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
 .modal-buttons {
     display: flex;
     gap: var(--spacing-md);
