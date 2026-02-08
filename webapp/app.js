@@ -2793,6 +2793,9 @@ function renderListView(container) {
     const cityNames = Object.keys(cities);
     const isCondensed = currentConfig.listViewStyle === 'condensed';
     
+    // Variable to hold updateButtonLabels function - will be assigned later
+    let updateButtonLabels = null;
+    
     // Create list items
     cityNames.forEach(async (cityName, index) => {
         const [lat, lon] = cities[cityName];
@@ -2940,6 +2943,24 @@ function renderListView(container) {
         item.dataset.index = index;
         
         container.appendChild(item);
+        
+        // Add click handler for mouse selection (WCAG 2.2 AA compliance)
+        item.addEventListener('click', function() {
+            const clickedIndex = parseInt(this.dataset.index);
+            const container = document.getElementById('city-list');
+            const items = container.querySelectorAll('.list-view-item');
+            
+            // Update active item
+            setActiveListItem(container, items, clickedIndex);
+            
+            // Update button labels
+            if (updateButtonLabels) {
+                updateButtonLabels(clickedIndex);
+            }
+            
+            // Announce to screen reader
+            announceToScreenReader(this.textContent);
+        });
     });
     
     // Set initial active descendant
@@ -3000,7 +3021,7 @@ function renderListView(container) {
     };
     
     // Function to update button labels and alert badge based on current selection
-    const updateButtonLabels = async (index) => {
+    updateButtonLabels = async (index) => {
         const items = container.querySelectorAll('.list-view-item');
         if (items[index]) {
             const cityName = items[index].dataset.cityName;
