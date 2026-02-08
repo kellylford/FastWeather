@@ -3939,7 +3939,12 @@ function openConfigDialog() {
 function applyConfiguration() {
     updateConfigFromForm();
     renderCityList();
-    announceToScreenReader('Configuration applied');
+    
+    // Show visual confirmation banner
+    showConfigFeedback(false);
+    
+    // Announce to screen readers
+    announceToScreenReader('Configuration applied successfully. Changes are now visible in your weather display.');
 }
 
 function saveConfiguration() {
@@ -3947,7 +3952,12 @@ function saveConfiguration() {
     saveConfigToStorage();
     renderCityList();
     closeConfigDialog();
-    announceToScreenReader('Configuration saved');
+    
+    // Show visual confirmation banner
+    showConfigFeedback(true);
+    
+    // Announce to screen readers
+    announceToScreenReader('Configuration saved successfully and will be remembered for future visits. Changes are now visible in your weather display.');
 }
 
 function updateConfigFromForm() {
@@ -4103,6 +4113,56 @@ function closeConfigDialog() {
         focusReturnElement.focus();
         focusReturnElement = null;
     }
+}
+
+// Helper function to show visual feedback banner
+function showConfigFeedback(saved) {
+    // Remove any existing feedback banner
+    const existingBanner = document.getElementById('config-feedback-banner');
+    if (existingBanner) {
+        existingBanner.remove();
+    }
+    
+    // Create feedback banner
+    const banner = document.createElement('div');
+    banner.id = 'config-feedback-banner';
+    banner.className = 'config-feedback-banner';
+    banner.setAttribute('role', 'status');
+    banner.setAttribute('aria-live', 'polite');
+    banner.setAttribute('aria-atomic', 'true');
+    
+    // Create banner content
+    const icon = document.createElement('span');
+    icon.className = 'feedback-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = '✓';
+    
+    const message = document.createElement('span');
+    message.className = 'feedback-message';
+    message.textContent = saved ? 
+        'Settings saved successfully! Your preferences will be remembered. Check the weather display below to see your changes.' : 
+        'Settings applied! Check the weather display below to see your changes. Use "Save & Close" to remember these settings for future visits.';
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'feedback-close';
+    closeBtn.setAttribute('aria-label', 'Dismiss notification');
+    closeBtn.textContent = '×';
+    closeBtn.addEventListener('click', () => banner.remove());
+    
+    banner.appendChild(icon);
+    banner.appendChild(message);
+    banner.appendChild(closeBtn);
+    
+    // Append banner to body to ensure it's above the modal
+    document.body.appendChild(banner);
+    
+    // Auto-dismiss after 10 seconds
+    setTimeout(() => {
+        if (banner.parentNode) {
+            banner.classList.add('fade-out');
+            setTimeout(() => banner.remove(), 300);
+        }
+    }, 10000);
 }
 
 // Reset functions
