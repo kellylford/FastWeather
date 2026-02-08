@@ -4790,9 +4790,11 @@ function showAlertDetails(alertDataStr) {
     dialog.hidden = false;
     trapFocus(dialog);
     
-    // Focus the close button
-    const closeBtn = document.getElementById('close-alert-details-btn');
-    if (closeBtn) closeBtn.focus();
+    // Focus the close button after DOM is ready
+    requestAnimationFrame(() => {
+        const closeBtn = document.getElementById('close-alert-details-btn');
+        if (closeBtn) closeBtn.focus();
+    });
     
     announceToScreenReader(`Weather alert: ${alert.event}. ${alert.severity} severity.`);
 }
@@ -4842,9 +4844,11 @@ async function showHistoricalWeather(cityKey, lat, lon) {
     dialog.hidden = false;
     trapFocus(dialog);
     
-    // Focus the first button in the controls
-    const prevBtn = document.getElementById('hist-prev-btn');
-    if (prevBtn) prevBtn.focus();
+    // Focus the first button in the controls after DOM is ready
+    requestAnimationFrame(() => {
+        const prevBtn = document.getElementById('hist-prev-btn');
+        if (prevBtn) prevBtn.focus();
+    });
     
     announceToScreenReader(`Historical weather for ${cityKey.split(',')[0]} - showing this day over the past 20 years`);
     
@@ -5207,9 +5211,11 @@ async function showPrecipitationNowcast(cityKey, lat, lon) {
     dialog.hidden = false;
     trapFocus(dialog);
     
-    // Focus the close button
-    const closeBtn = document.getElementById('close-precipitation-nowcast-btn');
-    if (closeBtn) closeBtn.focus();
+    // Focus the close button after DOM is ready
+    requestAnimationFrame(() => {
+        const closeBtn = document.getElementById('close-precipitation-nowcast-btn');
+        if (closeBtn) closeBtn.focus();
+    });
     
     try {
         const data = await fetchPrecipitationNowcast(lat, lon);
