@@ -473,7 +473,10 @@ function setupTabNavigation() {
     
     tablists.forEach(tablist => {
         const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
-        const panels = Array.from(tablist.parentElement.querySelectorAll('[role="tabpanel"]'));
+        
+        // Get panels associated with this tablist's tabs via aria-controls
+        const panelIds = tabs.map(tab => tab.getAttribute('aria-controls')).filter(Boolean);
+        const panels = panelIds.map(id => document.getElementById(id)).filter(Boolean);
         
         tabs.forEach((tab, index) => {
             tab.addEventListener('click', () => activateTab(tab, tabs, panels));
