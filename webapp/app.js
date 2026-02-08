@@ -4718,11 +4718,11 @@ function trapFocus(element) {
  * @param {HTMLElement|string|null} focusTarget - Element to focus (element, CSS selector, or null for first focusable)
  */
 function openDialog(dialog, focusTarget = null) {
-    // Save current focus to return to when dialog closes
-    focusReturnElement = document.activeElement;
-    
-    // Close any other open modals
+    // Close any other open modals first (this will restore focus if needed)
     closeAllModals();
+
+    // Save current focus to return to when THIS dialog closes (after closing other modals)
+    focusReturnElement = document.activeElement;
     
     // Show the dialog
     dialog.hidden = false;

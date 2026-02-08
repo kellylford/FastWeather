@@ -1,9 +1,9 @@
 // FastWeather Service Worker
 // Enables offline functionality and faster loading
-// UPDATED: January 28, 2026 - Debug default cities issue
+// UPDATED: February 8, 2026 - Focus return fix
 
-const CACHE_NAME = 'fastweather-v6-debug';
-const RUNTIME_CACHE = 'fastweather-runtime-v6';
+const CACHE_NAME = 'fastweather-v7';
+const RUNTIME_CACHE = 'fastweather-runtime-v7';
 
 // Files to cache for offline use
 const STATIC_CACHE_URLS = [
