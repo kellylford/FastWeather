@@ -1903,3 +1903,104 @@ a:hover {
 .feature-btn .icon {
     font-size: 1.1rem;
 }
+/* === Configuration Feedback Banner === */
+.config-feedback-banner {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10001;
+    background-color: #10b981;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    max-width: 90%;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-1rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.config-feedback-banner.fade-out {
+    animation: fadeOut 0.3s ease-out;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.config-feedback-banner .feedback-icon {
+    font-size: 1.5rem;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.config-feedback-banner .feedback-message {
+    flex: 1;
+    font-size: 0.9375rem;
+    line-height: 1.4;
+}
+
+.config-feedback-banner .feedback-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+    flex-shrink: 0;
+}
+
+.config-feedback-banner .feedback-close:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.config-feedback-banner .feedback-close:focus {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .config-feedback-banner {
+        border: 2px solid white;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .config-feedback-banner {
+        animation: none;
+    }
+    
+    .config-feedback-banner.fade-out {
+        animation: none;
+        opacity: 0;
+    }
+}
