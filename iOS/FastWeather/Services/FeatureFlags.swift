@@ -47,6 +47,14 @@ class FeatureFlags: ObservableObject {
         }
     }
     
+    /// Enable/disable My Data custom section in city detail view
+    /// When enabled, users can configure a custom data section with any Open-Meteo parameter
+    @Published var myDataEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(myDataEnabled, forKey: "feature_my_data_enabled")
+        }
+    }
+    
     // MARK: - Initialization
     
     private init() {
@@ -55,6 +63,7 @@ class FeatureFlags: ObservableObject {
         self.weatherAroundMeEnabled = UserDefaults.standard.bool(forKey: "feature_weather_around_me_enabled")
         self.userGuideEnabled = UserDefaults.standard.bool(forKey: "feature_user_guide_enabled")
         self.weatherKitAlertsEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_alerts_enabled")
+        self.myDataEnabled = UserDefaults.standard.bool(forKey: "feature_my_data_enabled")
         
         // Default values (if first launch or not set)
         // All features enabled by default for production
@@ -70,6 +79,9 @@ class FeatureFlags: ObservableObject {
         if !UserDefaults.standard.contains(key: "feature_weatherkit_alerts_enabled") {
             self.weatherKitAlertsEnabled = true  // Enabled by default for international alerts
         }
+        if !UserDefaults.standard.contains(key: "feature_my_data_enabled") {
+            self.myDataEnabled = true  // Enabled by default
+        }
     }
     
     // MARK: - Helper Methods
@@ -80,6 +92,7 @@ class FeatureFlags: ObservableObject {
         weatherAroundMeEnabled = true
         userGuideEnabled = true
         weatherKitAlertsEnabled = true  // Default: enabled
+        myDataEnabled = true  // Default: enabled
         print("🔧 Feature flags reset to defaults")
     }
     
@@ -89,6 +102,7 @@ class FeatureFlags: ObservableObject {
         weatherAroundMeEnabled = true
         userGuideEnabled = true
         weatherKitAlertsEnabled = true
+        myDataEnabled = true
         print("🔧 All features enabled")
     }
     
@@ -98,6 +112,7 @@ class FeatureFlags: ObservableObject {
         weatherAroundMeEnabled = false
         userGuideEnabled = false
         weatherKitAlertsEnabled = false
+        myDataEnabled = false
         print("🔧 All features disabled")
     }
 }

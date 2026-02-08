@@ -10,7 +10,9 @@ import SwiftUI
 struct DeveloperSettingsView: View {
     @StateObject private var featureFlags = FeatureFlags.shared
     @EnvironmentObject var settingsManager: SettingsManager
+    @EnvironmentObject var weatherService: WeatherService
     @Environment(\.dismiss) private var dismiss
+    @State private var showingMyDataConfig = false
     
     var body: some View {
         NavigationView {
@@ -21,6 +23,38 @@ struct DeveloperSettingsView: View {
                     Toggle("WeatherKit International Alerts", isOn: $featureFlags.weatherKitAlertsEnabled)
                         .accessibilityLabel("WeatherKit International Alerts feature toggle")
                         .accessibilityHint(featureFlags.weatherKitAlertsEnabled ? "WeatherKit alerts for international cities are currently enabled. US cities use NWS." : "WeatherKit alerts are currently disabled. Only US cities will show alerts via NWS.")
+                    
+                    Toggle("My Data Custom Section", isOn: $featureFlags.myDataEnabled)
+                        .accessibilityLabel("My Data custom section feature toggle")
+                        .accessibilityHint(featureFlags.myDataEnabled ? "My Data section is enabled. You can add custom data points to city detail views." : "My Data section is disabled and will not appear in city detail views.")
+                }
+                
+                // My Data configuration
+                if featureFlags.myDataEnabled {
+                    Section(header: Text("My Data"),
+                            footer: Text("Configure a custom section in the city detail view with any available weather data point from the Open-Meteo API.")) {
+                        Button(action: { showingMyDataConfig = true }) {
+                            HStack {
+                                Image(systemName: "chart.bar.doc.horizontal")
+                                    .foregroundColor(.accentColor)
+                                    .accessibilityHidden(true)
+                                Text("My Data")
+                                Spacer()
+                                let count = settingsManager.settings.myDataFields.filter { $0.isEnabled }.count
+                                if count > 0 {
+                                    Text("\(count) data point\(count == 1 ? "" : "s")")
+                                        .foregroundColor(.secondary)
+                                        .font(.subheadline)
+                                }
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .accessibilityHidden(true)
+                            }
+                        }
+                        .accessibilityLabel("My Data configuration")
+                        .accessibilityHint("Opens the My Data configuration screen to add or remove custom data points")
+                    }
                 }
                 
                 Section(header: Text("Location Features"), footer: Text("Current location uses GPS to automatically detect your city. This requires location permission.")) {
@@ -126,6 +160,11 @@ struct DeveloperSettingsView: View {
                     }
                 }
             }
+            .sheet(isPresented: $showingMyDataConfig) {
+                MyDataConfigView()
+                    .environmentObject(settingsManager)
+                    .environmentObject(weatherService)
+            }
         }
     }
 }
@@ -133,4 +172,5 @@ struct DeveloperSettingsView: View {
 #Preview {
     DeveloperSettingsView()
         .environmentObject(SettingsManager())
+        .environmentObject(WeatherService())
 }

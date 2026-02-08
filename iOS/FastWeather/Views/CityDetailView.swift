@@ -414,6 +414,40 @@ struct CityDetailView: View {
             }
             .padding(.horizontal)
             .accessibilityElement(children: .contain)
+            
+        case .myData:
+            if featureFlags.myDataEnabled {
+                let enabledFields = settingsManager.settings.myDataFields.filter { $0.isEnabled }
+                if !enabledFields.isEmpty {
+                    GroupBox(label: Label("My Data", systemImage: "chart.bar.doc.horizontal")) {
+                        VStack(spacing: 12) {
+                            ForEach(Array(enabledFields.enumerated()), id: \.element.id) { index, field in
+                                if index > 0 {
+                                    Divider()
+                                }
+                                let value = myDataValue(for: field.parameter, weather: weather)
+                                DetailRow(
+                                    label: field.parameter.displayName,
+                                    value: value
+                                )
+                            }
+                        }
+                        .padding(.vertical, 8)
+                    }
+                    .padding(.horizontal)
+                    .accessibilityElement(children: .contain)
+                } else {
+                    GroupBox(label: Label("My Data", systemImage: "chart.bar.doc.horizontal")) {
+                        Text("No data points selected. Configure in Settings, then Developer Settings, then My Data.")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.vertical, 8)
+                    }
+                    .padding(.horizontal)
+                    .accessibilityElement(children: .contain)
+                }
+            }
         }
     }
     
@@ -655,6 +689,38 @@ struct CityDetailView: View {
     
     private func formatTime(_ isoString: String) -> String {
         FormatHelper.formatTime(isoString)
+    }
+    
+    /// Get the formatted display value for a My Data parameter from weather data
+    private func myDataValue(for parameter: MyDataParameter, weather: WeatherData) -> String {
+        let current = weather.current
+        
+        // Check named properties first for already-decoded fields
+        let rawValue: Double?
+        switch parameter {
+        case .temperature2m: rawValue = current.temperature2m
+        case .apparentTemperature: rawValue = current.apparentTemperature
+        case .relativeHumidity2m: rawValue = current.relativeHumidity2m.map { Double($0) }
+        case .dewPoint2m: rawValue = current.dewpoint2m
+        case .windSpeed10m: rawValue = current.windSpeed10m
+        case .windDirection10m: rawValue = current.windDirection10m.map { Double($0) }
+        case .windGusts10m: rawValue = current.windGusts10m
+        case .precipitation: rawValue = current.precipitation
+        case .rain: rawValue = current.rain
+        case .showers: rawValue = current.showers
+        case .snowfall: rawValue = current.snowfall
+        case .pressureMsl: rawValue = current.pressureMsl
+        case .cloudCover: rawValue = Double(current.cloudCover)
+        case .visibility: rawValue = current.visibility
+        case .weatherCode: rawValue = Double(current.weatherCode)
+        case .isDay: rawValue = current.isDay.map { Double($0) }
+        case .uvIndex: rawValue = current.uvIndex
+        default:
+            rawValue = current.myDataValues?[parameter.apiKey]
+        }
+        
+        guard let value = rawValue else { return "N/A" }
+        return MyDataFormatHelper.format(parameter: parameter, value: value, settings: settingsManager.settings)
     }
     
     private func findCurrentHourIndex(in times: [String?]) -> Int {

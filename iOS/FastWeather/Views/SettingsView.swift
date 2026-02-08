@@ -247,6 +247,11 @@ struct SettingsView: View {
                        footer: Text("Toggle which sections appear in the current weather detail view. Use VoiceOver actions to reorder sections.")) {
                     ForEach(settingsManager.settings.detailCategories.indices, id: \.self) { index in
                         let category = settingsManager.settings.detailCategories[index]
+                        
+                        // Hide My Data category if feature flag is disabled
+                        if category.category == .myData && !featureFlags.myDataEnabled {
+                            EmptyView()
+                        } else {
                         VStack(alignment: .leading, spacing: 8) {
                             // Section name as heading with move actions
                             HStack {
@@ -295,6 +300,7 @@ struct SettingsView: View {
                             }
                         }
                         .padding(.vertical, 8)
+                        }
                     }
                     .onMove { from, to in
                         settingsManager.settings.detailCategories.move(fromOffsets: from, toOffset: to)
@@ -444,6 +450,8 @@ struct SettingsView: View {
             return "Past year weather comparisons"
         case .location:
             return "Coordinates, elevation, and location details"
+        case .myData:
+            return "Your custom data points from the Open-Meteo API"
         }
     }
     
@@ -643,6 +651,43 @@ struct SettingsView: View {
                 Text("• Coordinates, elevation")
                     .font(.caption)
                     .foregroundColor(.secondary)
+                
+            case .myData:
+                if settingsManager.settings.myDataFields.isEmpty {
+                    Text("No data points configured. Use Developer Settings and then My Data to add data points.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                } else {
+                    Text("Configure which of your selected data points appear")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.bottom, 4)
+                    
+                    ForEach(settingsManager.settings.myDataFields.indices, id: \.self) { index in
+                        let field = settingsManager.settings.myDataFields[index]
+                        Toggle(field.parameter.displayName, isOn: Binding(
+                            get: { settingsManager.settings.myDataFields[index].isEnabled },
+                            set: { newValue in
+                                settingsManager.settings.myDataFields[index].isEnabled = newValue
+                                settingsManager.saveSettings()
+                            }
+                        ))
+                        .font(.caption)
+                        .accessibilityLabel("\(field.parameter.displayName) in My Data")
+                        .accessibilityAction(named: "Move Up") {
+                            moveMyDataFieldUp(at: index)
+                        }
+                        .accessibilityAction(named: "Move Down") {
+                            moveMyDataFieldDown(at: index)
+                        }
+                        .accessibilityAction(named: "Move to Top") {
+                            moveMyDataFieldToTop(at: index)
+                        }
+                        .accessibilityAction(named: "Move to Bottom") {
+                            moveMyDataFieldToBottom(at: index)
+                        }
+                    }
+                }
             }
         }
     }
@@ -725,6 +770,40 @@ struct SettingsView: View {
         settingsManager.settings.marineFields.move(fromOffsets: IndexSet(integer: index), toOffset: index + 2)
         settingsManager.saveSettings()
         UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) below \(belowFieldName)")
+    }
+    
+    private func moveMyDataFieldUp(at index: Int) {
+        guard index > 0 else { return }
+        let fieldName = settingsManager.settings.myDataFields[index].parameter.displayName
+        let aboveFieldName = settingsManager.settings.myDataFields[index - 1].parameter.displayName
+        settingsManager.settings.myDataFields.move(fromOffsets: IndexSet(integer: index), toOffset: index - 1)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) above \(aboveFieldName)")
+    }
+    
+    private func moveMyDataFieldDown(at index: Int) {
+        guard index < settingsManager.settings.myDataFields.count - 1 else { return }
+        let fieldName = settingsManager.settings.myDataFields[index].parameter.displayName
+        let belowFieldName = settingsManager.settings.myDataFields[index + 1].parameter.displayName
+        settingsManager.settings.myDataFields.move(fromOffsets: IndexSet(integer: index), toOffset: index + 2)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) below \(belowFieldName)")
+    }
+    
+    private func moveMyDataFieldToTop(at index: Int) {
+        guard index > 0 else { return }
+        let fieldName = settingsManager.settings.myDataFields[index].parameter.displayName
+        settingsManager.settings.myDataFields.move(fromOffsets: IndexSet(integer: index), toOffset: 0)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) to top")
+    }
+    
+    private func moveMyDataFieldToBottom(at index: Int) {
+        guard index < settingsManager.settings.myDataFields.count - 1 else { return }
+        let fieldName = settingsManager.settings.myDataFields[index].parameter.displayName
+        settingsManager.settings.myDataFields.move(fromOffsets: IndexSet(integer: index), toOffset: settingsManager.settings.myDataFields.count)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) to bottom")
     }
 }
 

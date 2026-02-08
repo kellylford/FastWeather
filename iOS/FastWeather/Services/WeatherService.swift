@@ -56,6 +56,28 @@ class WeatherService: ObservableObject {
         migrateCountryNamesIfNeeded()
     }
     
+    // MARK: - My Data Dynamic Parameters
+    
+    /// Appends user-selected My Data API parameters to the base current params string.
+    /// Reads directly from UserDefaults to avoid coupling to SettingsManager.
+    static func appendMyDataParameters(to baseParams: String) -> String {
+        guard let data = UserDefaults.standard.data(forKey: "AppSettings"),
+              let settings = try? JSONDecoder().decode(AppSettings.self, from: data) else {
+            return baseParams
+        }
+        
+        let enabledParams = settings.myDataFields.filter { $0.isEnabled }
+        guard !enabledParams.isEmpty else { return baseParams }
+        
+        let existingKeys = Set(baseParams.split(separator: ",").map { String($0) })
+        let newKeys = enabledParams
+            .map { $0.parameter.apiKey }
+            .filter { !existingKeys.contains($0) }
+        
+        if newKeys.isEmpty { return baseParams }
+        return baseParams + "," + newKeys.joined(separator: ",")
+    }
+    
     // MARK: - City Management
     
     func addCity(_ city: City) {
@@ -120,10 +142,14 @@ class WeatherService: ObservableObject {
         }
         
         // For today and future dates, use forecast API
+        // Build current parameters including any My Data selections
+        let baseCurrentParams = "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility,wind_gusts_10m,uv_index,dewpoint_2m"
+        let currentParams = Self.appendMyDataParameters(to: baseCurrentParams)
+        
         let params = [
             "latitude": String(city.latitude),
             "longitude": String(city.longitude),
-            "current": "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility,wind_gusts_10m,uv_index,dewpoint_2m",
+            "current": currentParams,
             "hourly": "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,windgusts_10m,uv_index,dewpoint_2m",
             "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,rain_sum,snowfall_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration,windspeed_10m_max,winddirection_10m_dominant",
             "forecast_days": "16",

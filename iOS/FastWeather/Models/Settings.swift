@@ -146,6 +146,7 @@ enum DetailCategory: String, CaseIterable, Codable {
     case marineForecast = "Marine Forecast"
     case historicalWeather = "Historical Weather"
     case location = "Location"
+    case myData = "My Data"
 }
 
 struct DetailCategoryField: Codable, Identifiable, Equatable {
@@ -156,6 +157,18 @@ struct DetailCategoryField: Codable, Identifiable, Equatable {
     init(category: DetailCategory, isEnabled: Bool = true) {
         self.id = category.rawValue
         self.category = category
+        self.isEnabled = isEnabled
+    }
+}
+
+struct MyDataField: Codable, Identifiable, Equatable {
+    let id: String
+    let parameter: MyDataParameter
+    var isEnabled: Bool
+    
+    init(parameter: MyDataParameter, isEnabled: Bool = true) {
+        self.id = parameter.rawValue
+        self.parameter = parameter
         self.isEnabled = isEnabled
     }
 }
@@ -292,7 +305,7 @@ enum DistanceUnit: String, CaseIterable, Codable {
 
 struct AppSettings: Codable {
     // Settings schema version - increment when structure changes
-    static let currentVersion = 2  // Bumped for marine/detail categories reordering
+    static let currentVersion = 2  // Note: My Data fields handled via migration in init(from:)
     var settingsVersion: Int = AppSettings.currentVersion
     
     var viewMode: ViewMode = .list
@@ -458,6 +471,9 @@ struct AppSettings: Codable {
         DetailCategoryField(category: .location, isEnabled: true)
     ]
     
+    // User-configured My Data fields (custom section with Open-Meteo parameters)
+    var myDataFields: [MyDataField] = []
+    
     // Legacy properties for backward compatibility (deprecated)
     var showTemperature: Bool = true
     var showConditions: Bool = true
@@ -489,6 +505,7 @@ struct AppSettings: Codable {
         case dailyShowHighLow, dailyShowConditions, dailyShowPrecipitationProbability, dailyShowPrecipitationAmount, dailyShowWind
         case _weatherAroundMeDistance = "weatherAroundMeDistance"
         case weatherFields, hourlyFields, dailyFields, marineFields, detailCategories
+        case myDataFields
         // Legacy properties
         case showTemperature, showConditions, showFeelsLike, showHumidity
         case showWindSpeed, showWindDirection, showHighTemp, showLowTemp
@@ -593,7 +610,10 @@ struct AppSettings: Codable {
             DetailCategoryField(category: .historicalWeather, isEnabled: true),
             DetailCategoryField(category: .marineForecast, isEnabled: true),
             DetailCategoryField(category: .location, isEnabled: true),
+            DetailCategoryField(category: .myData, isEnabled: false),
         ]
+        
+        self.myDataFields = []
     }
     
     // Custom Decodable implementation
@@ -832,7 +852,8 @@ struct AppSettings: Codable {
             DetailCategoryField(category: .dailyForecast, isEnabled: true),
             DetailCategoryField(category: .historicalWeather, isEnabled: true),
             DetailCategoryField(category: .marineForecast, isEnabled: true),
-            DetailCategoryField(category: .location, isEnabled: true)
+            DetailCategoryField(category: .location, isEnabled: true),
+            DetailCategoryField(category: .myData, isEnabled: false)
         ]
         
         if let savedCategories = try container.decodeIfPresent([DetailCategoryField].self, forKey: .detailCategories) {
@@ -852,6 +873,9 @@ struct AppSettings: Codable {
             // No saved data, use all defaults
             detailCategories = defaultCategories
         }
+        
+        // My Data fields (user-configured custom data points)
+        myDataFields = try container.decodeIfPresent([MyDataField].self, forKey: .myDataFields) ?? []
         
         // Legacy properties
         showTemperature = try container.decodeIfPresent(Bool.self, forKey: .showTemperature) ?? true
@@ -915,6 +939,7 @@ struct AppSettings: Codable {
         try container.encode(dailyFields, forKey: .dailyFields)
         try container.encode(marineFields, forKey: .marineFields)
         try container.encode(detailCategories, forKey: .detailCategories)
+        try container.encode(myDataFields, forKey: .myDataFields)
         
         // Legacy properties
         try container.encode(showTemperature, forKey: .showTemperature)
