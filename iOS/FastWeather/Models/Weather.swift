@@ -326,7 +326,47 @@ struct WeatherResponse: Codable {
 // MARK: - Marine Weather Models
 
 struct MarineData: Codable {
+    let current: MarineCurrent?
     let hourly: MarineHourly?
+    
+    struct MarineCurrent: Codable {
+        var myDataValues: [String: Double]?
+        
+        enum CodingKeys: String, CodingKey {
+            // Marine API parameter keys
+            case wave_height, wave_direction, wave_period, wave_peak_period
+            case wind_wave_height, wind_wave_direction, wind_wave_period
+            case swell_wave_height, swell_wave_direction, swell_wave_period
+            case ocean_current_velocity, ocean_current_direction
+            case sea_surface_temperature, sea_level_height_msl
+        }
+        
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            var extras: [String: Double] = [:]
+            
+            // Sweep all marine current parameters into myDataValues
+            for key in container.allKeys {
+                if let value = try? container.decode(Double.self, forKey: key) {
+                    extras[key.stringValue] = value
+                }
+            }
+            
+            myDataValues = extras.isEmpty ? nil : extras
+        }
+        
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            // Encode myDataValues back to individual keys
+            if let values = myDataValues {
+                for (key, value) in values {
+                    if let codingKey = CodingKeys(stringValue: key) {
+                        try container.encode(value, forKey: codingKey)
+                    }
+                }
+            }
+        }
+    }
     
     struct MarineHourly: Codable {
         let time: [String?]?
@@ -367,5 +407,67 @@ struct MarineData: Codable {
 
 // Container for Marine API response
 struct MarineResponse: Codable {
+    let current: MarineData.MarineCurrent?
     let hourly: MarineData.MarineHourly?
+}
+
+// MARK: - Air Quality Models
+
+struct AirQualityData: Codable {
+    let current: AirQualityCurrent?
+    
+    struct AirQualityCurrent: Codable {
+        var myDataValues: [String: Double]?
+        
+        enum CodingKeys: String, CodingKey {
+            // Air Quality API parameter keys - Basic Pollutants
+            case pm10, pm2_5, carbon_monoxide, nitrogen_dioxide, sulphur_dioxide, ozone
+            case aerosol_optical_depth, dust, uv_index, uv_index_clear_sky
+            case ammonia, carbon_dioxide, methane
+            
+            // Pollen
+            case alder_pollen, birch_pollen, grass_pollen, mugwort_pollen
+            case olive_pollen, ragweed_pollen
+            
+            // Air Quality Indices (main)
+            case european_aqi, us_aqi
+            
+            // Air Quality sub-indices (returned by API even when not requested)
+            case european_aqi_pm2_5, european_aqi_pm10
+            case european_aqi_nitrogen_dioxide, european_aqi_ozone, european_aqi_sulphur_dioxide
+            case us_aqi_pm2_5, us_aqi_pm10, us_aqi_nitrogen_dioxide
+            case us_aqi_carbon_monoxide, us_aqi_ozone, us_aqi_sulphur_dioxide
+        }
+        
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            var extras: [String: Double] = [:]
+            
+            // Sweep all air quality current parameters into myDataValues
+            for key in container.allKeys {
+                if let value = try? container.decode(Double.self, forKey: key) {
+                    extras[key.stringValue] = value
+                }
+            }
+            
+            myDataValues = extras.isEmpty ? nil : extras
+        }
+        
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            // Encode myDataValues back to individual keys
+            if let values = myDataValues {
+                for (key, value) in values {
+                    if let codingKey = CodingKeys(stringValue: key) {
+                        try container.encode(value, forKey: codingKey)
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Container for Air Quality API response
+struct AirQualityResponse: Codable {
+    let current: AirQualityData.AirQualityCurrent?
 }

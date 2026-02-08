@@ -40,6 +40,7 @@ class WeatherService: ObservableObject {
     private let baseURL = "https://api.open-meteo.com/v1/forecast"
     private let historicalURL = "https://archive-api.open-meteo.com/v1/archive"
     private let marineURL = "https://marine-api.open-meteo.com/v1/marine"
+    private let airQualityURL = "https://air-quality-api.open-meteo.com/v1/air-quality"
     private let userDefaultsKey = "SavedCities"
     
     // Performance settings (matching Windows version)
@@ -76,6 +77,83 @@ class WeatherService: ObservableObject {
         
         if newKeys.isEmpty { return baseParams }
         return baseParams + "," + newKeys.joined(separator: ",")
+    }
+    
+    /// Fetches marine current values for selected My Data parameters.
+    /// Returns a dictionary of API key -> value for marine parameters only.
+    private func fetchMyDataMarineValues(for city: City) async -> [String: Double]? {
+        guard let data = UserDefaults.standard.data(forKey: "AppSettings"),
+              let settings = try? JSONDecoder().decode(AppSettings.self, from: data) else {
+            return nil
+        }
+        
+        // Get enabled marine parameters
+        let marineParams = settings.myDataFields
+            .filter { $0.isEnabled && $0.parameter.apiEndpoint == .marine }
+            .map { $0.parameter.apiKey }
+        
+        guard !marineParams.isEmpty else { return nil }
+        
+        // Build marine API request with current parameters
+        let params = [
+            "latitude": String(city.latitude),
+            "longitude": String(city.longitude),
+            "current": marineParams.joined(separator: ","),
+            "cell_selection": "sea"
+        ]
+        
+        var components = URLComponents(string: marineURL)!
+        components.queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
+        
+        guard let url = components.url else { return nil }
+        
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let decoder = JSONDecoder()
+            let response = try decoder.decode(MarineResponse.self, from: data)
+            return response.current?.myDataValues
+        } catch {
+            print("❌ Failed to fetch marine My Data: \(error.localizedDescription)")
+            return nil
+        }
+    }
+    
+    /// Fetches air quality current values for selected My Data parameters.
+    /// Returns a dictionary of API key -> value for air quality parameters only.
+    private func fetchMyDataAirQualityValues(for city: City) async -> [String: Double]? {
+        guard let data = UserDefaults.standard.data(forKey: "AppSettings"),
+              let settings = try? JSONDecoder().decode(AppSettings.self, from: data) else {
+            return nil
+        }
+        
+        // Get enabled air quality parameters
+        let airQualityParams = settings.myDataFields
+            .filter { $0.isEnabled && $0.parameter.apiEndpoint == .airQuality }
+            .map { $0.parameter.apiKey }
+        
+        guard !airQualityParams.isEmpty else { return nil }
+        
+        // Build air quality API request with current parameters
+        let params = [
+            "latitude": String(city.latitude),
+            "longitude": String(city.longitude),
+            "current": airQualityParams.joined(separator: ",")
+        ]
+        
+        var components = URLComponents(string: airQualityURL)!
+        components.queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
+        
+        guard let url = components.url else { return nil }
+        
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let decoder = JSONDecoder()
+            let response = try decoder.decode(AirQualityResponse.self, from: data)
+            return response.current?.myDataValues
+        } catch {
+            print("❌ Failed to fetch air quality My Data: \(error.localizedDescription)")
+            return nil
+        }
     }
     
     // MARK: - City Management
@@ -255,8 +333,56 @@ class WeatherService: ObservableObject {
                 weatherData = WeatherData(current: current, daily: singleDayDaily, hourly: hourlyForDay)
             }
             
+            // MARK: - Merge Marine & Air Quality My Data values (dateOffset = 0 only)
+            // For current conditions (today), fetch marine and air quality parameters if selected
+            var finalWeatherData = weatherData
+            if dateOffset == 0 {
+                var mergedMyDataValues = weatherData.current.myDataValues ?? [:]
+                
+                // Fetch marine My Data values if any marine parameters are selected
+                if let marineValues = await fetchMyDataMarineValues(for: city) {
+                    mergedMyDataValues.merge(marineValues) { (_, new) in new }
+                    print("✅ Merged \(marineValues.count) marine My Data values")
+                }
+                
+                // Fetch air quality My Data values if any air quality parameters are selected
+                if let airQualityValues = await fetchMyDataAirQualityValues(for: city) {
+                    mergedMyDataValues.merge(airQualityValues) { (_, new) in new }
+                    print("✅ Merged \(airQualityValues.count) air quality My Data values")
+                }
+                
+                // Update weatherData with merged My Data values if any were added
+                if !mergedMyDataValues.isEmpty {
+                    let updatedCurrent = WeatherData.CurrentWeather(
+                        temperature2m: weatherData.current.temperature2m,
+                        relativeHumidity2m: weatherData.current.relativeHumidity2m,
+                        apparentTemperature: weatherData.current.apparentTemperature,
+                        isDay: weatherData.current.isDay,
+                        precipitation: weatherData.current.precipitation,
+                        rain: weatherData.current.rain,
+                        showers: weatherData.current.showers,
+                        snowfall: weatherData.current.snowfall,
+                        weatherCode: weatherData.current.weatherCode,
+                        cloudCover: weatherData.current.cloudCover,
+                        pressureMsl: weatherData.current.pressureMsl,
+                        windSpeed10m: weatherData.current.windSpeed10m,
+                        windDirection10m: weatherData.current.windDirection10m,
+                        visibility: weatherData.current.visibility,
+                        windGusts10m: weatherData.current.windGusts10m,
+                        uvIndex: weatherData.current.uvIndex,
+                        dewpoint2m: weatherData.current.dewpoint2m,
+                        myDataValues: mergedMyDataValues
+                    )
+                    finalWeatherData = WeatherData(
+                        current: updatedCurrent,
+                        daily: weatherData.daily,
+                        hourly: weatherData.hourly
+                    )
+                }
+            }
+            
             await MainActor.run {
-                self.weatherCache[cacheKey] = weatherData
+                self.weatherCache[cacheKey] = finalWeatherData
                 self.cacheTimestamps[cacheKey] = Date()
             }
         } catch {
@@ -509,7 +635,7 @@ class WeatherService: ObservableObject {
             
             if dateOffset == 0 {
                 // For today, use all data as-is
-                marineData = MarineData(hourly: response.hourly)
+                marineData = MarineData(current: nil, hourly: response.hourly)
             } else if dateOffset > 0 {
                 // For future dates, extract that day's hourly data (24 hours)
                 guard let hourly = response.hourly,
@@ -541,7 +667,7 @@ class WeatherService: ObservableObject {
                         seaSurfaceTemperature: hourly.seaSurfaceTemperature.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
                         seaLevelHeight: hourly.seaLevelHeight.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) }
                     )
-                    marineData = MarineData(hourly: extractedHourly)
+                    marineData = MarineData(current: nil, hourly: extractedHourly)
                 } else {
                     await MainActor.run {
                         self.errorMessage = "Marine data not available for this date"

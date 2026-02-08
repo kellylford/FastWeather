@@ -18,6 +18,7 @@ struct MyDataConfigView: View {
     @State private var previewCityIndex: Int = 0
     @State private var previewWeather: WeatherData?
     @State private var isLoadingPreview: Bool = false
+    @State private var showResetConfirmation: Bool = false
     
     private var previewCity: City? {
         guard !weatherService.savedCities.isEmpty,
@@ -102,7 +103,7 @@ struct MyDataConfigView: View {
                 // Summary of selected items
                 if !settingsManager.settings.myDataFields.isEmpty {
                     Section(header: Text("Selected Data Points")) {
-                        ForEach(settingsManager.settings.myDataFields, id: \.id) { field in
+                        ForEach(settingsManager.settings.myDataFields) { field in
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(field.parameter.displayName)
@@ -130,7 +131,9 @@ struct MyDataConfigView: View {
                             }
                         }
                         
-                        Button(role: .destructive, action: removeAllParameters) {
+                        Button(role: .destructive, action: {
+                            showResetConfirmation = true
+                        }) {
                             Label("Remove All", systemImage: "trash")
                         }
                         .accessibilityLabel("Remove all selected data points")
@@ -141,6 +144,17 @@ struct MyDataConfigView: View {
             .navigationTitle("My Data")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(role: .destructive, action: {
+                        showResetConfirmation = true
+                    }) {
+                        Label("Reset", systemImage: "arrow.counterclockwise")
+                    }
+                    .disabled(settingsManager.settings.myDataFields.isEmpty)
+                    .accessibilityLabel("Reset My Data")
+                    .accessibilityHint("Removes all data points from My Data section")
+                }
+                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
                         // Auto-enable the My Data section if user added data points
@@ -155,6 +169,22 @@ struct MyDataConfigView: View {
                         dismiss()
                     }
                 }
+            }
+            .confirmationDialog(
+                "Reset My Data",
+                isPresented: $showResetConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Remove All Data Points", role: .destructive) {
+                    // Defer removal to next run loop to ensure dialog dismissal completes
+                    DispatchQueue.main.async {
+                        removeAllParameters()
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                let count = settingsManager.settings.myDataFields.count
+                Text("This will remove all \(count) data point\(count == 1 ? "" : "s") from My Data.")
             }
             .task {
                 await loadPreviewWeather()
@@ -294,14 +324,20 @@ struct MyDataConfigView: View {
     }
     
     private func removeParameter(_ parameter: MyDataParameter) {
-        settingsManager.settings.myDataFields.removeAll { $0.parameter == parameter }
-        settingsManager.saveSettings()
+        withAnimation {
+            var updatedFields = settingsManager.settings.myDataFields
+            updatedFields.removeAll { $0.parameter == parameter }
+            settingsManager.settings.myDataFields = updatedFields
+            settingsManager.saveSettings()
+        }
         UIAccessibility.post(notification: .announcement, argument: "\(parameter.displayName) removed from My Data")
     }
     
     private func removeAllParameters() {
-        settingsManager.settings.myDataFields.removeAll()
-        settingsManager.saveSettings()
+        withAnimation {
+            settingsManager.settings.myDataFields = []
+            settingsManager.saveSettings()
+        }
         UIAccessibility.post(notification: .announcement, argument: "All data points removed from My Data")
     }
     

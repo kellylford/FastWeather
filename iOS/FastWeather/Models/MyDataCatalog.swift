@@ -554,10 +554,45 @@ enum MyDataParameter: String, CaseIterable, Codable, Equatable, Hashable {
         }
     }
     
+    /// API endpoint required to fetch this parameter
+    var apiEndpoint: MyDataAPIEndpoint {
+        switch self {
+        // Marine API parameters
+        case .waveHeight, .waveDirection, .wavePeriod, .wavePeakPeriod,
+             .windWaveHeight, .windWaveDirection, .windWavePeriod, .windWavePeakPeriod,
+             .swellWaveHeight, .swellWaveDirection, .swellWavePeriod, .swellWavePeakPeriod,
+             .secondarySwellWaveHeight, .secondarySwellWaveDirection, .secondarySwellWavePeriod,
+             .tertiarySwellWaveHeight, .tertiarySwellWaveDirection, .tertiarySwellWavePeriod,
+             .oceanCurrentVelocity, .oceanCurrentDirection,
+             .seaSurfaceTemperature, .seaLevelHeightMsl:
+            return .marine
+            
+        // Air Quality API parameters
+        case .pm10, .pm25, .carbonMonoxide, .nitrogenDioxide, .sulphurDioxide, .ozone,
+             .aerosolOpticalDepth, .dust, .uvIndexAirQuality, .uvIndexClearSky,
+             .ammonia, .carbonDioxide, .methane,
+             .europeanAqi, .usAqi,
+             .alderPollen, .birchPollen, .grassPollen, .mugwortPollen, .olivePollen, .ragweedPollen:
+            return .airQuality
+            
+        // All other parameters use the standard forecast API
+        default:
+            return .forecast
+        }
+    }
+    
     /// Parameters grouped by category
     static func parameters(for category: MyDataCategory) -> [MyDataParameter] {
         allCases.filter { $0.category == category }
     }
+}
+
+// MARK: - API Endpoint types
+
+enum MyDataAPIEndpoint {
+    case forecast      // api.open-meteo.com/v1/forecast
+    case marine        // marine-api.open-meteo.com/v1/marine  
+    case airQuality    // air-quality-api.open-meteo.com/v1/air-quality
 }
 
 // MARK: - Unit types for formatting
@@ -620,7 +655,14 @@ struct MyDataFormatHelper {
             }
             
         case .distanceMeters:
-            return String(format: "%.2f m", value)
+            // Wave heights, sea level - convert to feet if using imperial
+            switch settings.distanceUnit {
+            case .miles:
+                let feet = value * 3.28084
+                return String(format: "%.1f ft", feet)
+            case .kilometers:
+                return String(format: "%.1f m", value)
+            }
             
         case .altitudeMeters:
             switch settings.distanceUnit {

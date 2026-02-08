@@ -13,6 +13,7 @@ struct SettingsView: View {
     @StateObject private var featureFlags = FeatureFlags.shared
     @State private var showingResetAlert = false
     @State private var showingDeveloperSettings = false
+    @State private var showingMyDataConfig = false
     
     // Get app version and build number from Info.plist
     private var appVersion: String {
@@ -391,6 +392,11 @@ struct SettingsView: View {
             .sheet(isPresented: $showingDeveloperSettings) {
                 DeveloperSettingsView()
             }
+            .sheet(isPresented: $showingMyDataConfig) {
+                MyDataConfigView()
+                    .environmentObject(settingsManager)
+                    .environmentObject(weatherService)
+            }
         }
         .navigationViewStyle(.stack)
     }
@@ -654,38 +660,67 @@ struct SettingsView: View {
                 
             case .myData:
                 if settingsManager.settings.myDataFields.isEmpty {
-                    Text("No data points configured. Use Developer Settings and then My Data to add data points.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("No data points configured.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Button(action: {
+                            showingMyDataConfig = true
+                        }) {
+                            Label("Choose Fields", systemImage: "plus.circle")
+                                .font(.caption)
+                        }
+                        .accessibilityLabel("Choose My Data fields")
+                        .accessibilityHint("Opens configuration to select which weather data points to display")
+                    }
                 } else {
-                    Text("Configure which of your selected data points appear")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .padding(.bottom, 4)
-                    
-                    ForEach(settingsManager.settings.myDataFields.indices, id: \.self) { index in
-                        let field = settingsManager.settings.myDataFields[index]
-                        Toggle(field.parameter.displayName, isOn: Binding(
-                            get: { settingsManager.settings.myDataFields[index].isEnabled },
-                            set: { newValue in
-                                settingsManager.settings.myDataFields[index].isEnabled = newValue
-                                settingsManager.saveSettings()
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Configure which of your selected data points appear")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        ForEach(settingsManager.settings.myDataFields.indices, id: \.self) { index in
+                            let field = settingsManager.settings.myDataFields[index]
+                            Toggle(field.parameter.displayName, isOn: Binding(
+                                get: { 
+                                    guard index < settingsManager.settings.myDataFields.count else { return false }
+                                    return settingsManager.settings.myDataFields[index].isEnabled 
+                                },
+                                set: { newValue in
+                                    guard index < settingsManager.settings.myDataFields.count else { return }
+                                    settingsManager.settings.myDataFields[index].isEnabled = newValue
+                                    settingsManager.saveSettings()
+                                }
+                            ))
+                            .font(.caption)
+                            .accessibilityLabel("\(field.parameter.displayName) in My Data")
+                            .accessibilityAction(named: "Move Up") {
+                                moveMyDataFieldUp(at: index)
                             }
-                        ))
-                        .font(.caption)
-                        .accessibilityLabel("\(field.parameter.displayName) in My Data")
-                        .accessibilityAction(named: "Move Up") {
-                            moveMyDataFieldUp(at: index)
+                            .accessibilityAction(named: "Move Down") {
+                                moveMyDataFieldDown(at: index)
+                            }
+                            .accessibilityAction(named: "Move to Top") {
+                                moveMyDataFieldToTop(at: index)
+                            }
+                            .accessibilityAction(named: "Move to Bottom") {
+                                moveMyDataFieldToBottom(at: index)
+                            }
                         }
-                        .accessibilityAction(named: "Move Down") {
-                            moveMyDataFieldDown(at: index)
+                        .onMove { from, to in
+                            settingsManager.settings.myDataFields.move(fromOffsets: from, toOffset: to)
+                            settingsManager.saveSettings()
                         }
-                        .accessibilityAction(named: "Move to Top") {
-                            moveMyDataFieldToTop(at: index)
+                        
+                        Button(action: {
+                            showingMyDataConfig = true
+                        }) {
+                            Label("Choose Fields", systemImage: "slider.horizontal.3")
+                                .font(.caption)
                         }
-                        .accessibilityAction(named: "Move to Bottom") {
-                            moveMyDataFieldToBottom(at: index)
-                        }
+                        .accessibilityLabel("Choose My Data fields")
+                        .accessibilityHint("Opens configuration to add or remove weather data points")
                     }
                 }
             }
