@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure Dialog Feedback - Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+        
+        .demo-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        button {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #2563eb;
+            color: white;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #1d4ed8;
+        }
+        
+        button:focus {
+            outline: 3px solid #93c5fd;
+            outline-offset: 2px;
+        }
+        
+        /* Config Feedback Banner Styles */
+        .config-feedback-banner {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10001;
+            background-color: #10b981;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            max-width: 90%;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-1rem);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .config-feedback-banner.fade-out {
+            animation: fadeOut 0.3s ease-out;
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+
+        .config-feedback-banner .feedback-icon {
+            font-size: 1.5rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .config-feedback-banner .feedback-message {
+            flex: 1;
+            font-size: 0.9375rem;
+            line-height: 1.4;
+        }
+
+        .config-feedback-banner .feedback-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .config-feedback-banner .feedback-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .config-feedback-banner .feedback-close:focus {
+            outline: 2px solid white;
+            outline-offset: 2px;
+        }
+
+        @media (prefers-contrast: high) {
+            .config-feedback-banner {
+                border: 2px solid white;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .config-feedback-banner {
+                animation: none;
+            }
+            
+            .config-feedback-banner.fade-out {
+                animation: none;
+                opacity: 0;
+            }
+        }
+        
+        .info {
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        
+        code {
+            background: #f1f5f9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>Configure Dialog Feedback Demo</h1>
+        
+        <div class="info">
+            <p><strong>Purpose:</strong> This demo shows the visual feedback banner that appears when users apply or save configuration changes in FastWeather.</p>
+        </div>
+        
+        <div class="button-group">
+            <button onclick="showApplyFeedback()">Show "Apply" Feedback</button>
+            <button onclick="showSaveFeedback()">Show "Save & Close" Feedback</button>
+        </div>
+        
+        <div class="info">
+            <p><strong>Key Features:</strong></p>
+            <ul>
+                <li>Auto-dismisses after 10 seconds</li>
+                <li>Manual close button (×)</li>
+                <li>WCAG 2.2 AA compliant (role="status", aria-live="polite")</li>
+                <li>Keyboard accessible</li>
+                <li>Supports reduced motion preferences</li>
+                <li>High contrast mode compatible</li>
+            </ul>
+        </div>
+        
+        <div class="info">
+            <p><strong>Implementation:</strong> The banner is created in <code>showConfigFeedback(saved)</code> function in <code>app.js</code> and styled in <code>styles.css</code>.</p>
+        </div>
+    </div>
+
+    <script>
+        function showConfigFeedback(saved) {
+            // Remove any existing feedback banner
+            const existingBanner = document.getElementById('config-feedback-banner');
+            if (existingBanner) {
+                existingBanner.remove();
+            }
+            
+            // Create feedback banner
+            const banner = document.createElement('div');
+            banner.id = 'config-feedback-banner';
+            banner.className = 'config-feedback-banner';
+            banner.setAttribute('role', 'status');
+            banner.setAttribute('aria-live', 'polite');
+            banner.setAttribute('aria-atomic', 'true');
+            
+            // Create banner content
+            const icon = document.createElement('span');
+            icon.className = 'feedback-icon';
+            icon.setAttribute('aria-hidden', 'true');
+            icon.textContent = '✓';
+            
+            const message = document.createElement('span');
+            message.className = 'feedback-message';
+            message.textContent = saved ? 
+                'Settings saved successfully! Your preferences will be remembered. Check the weather display below to see your changes.' : 
+                'Settings applied! Check the weather display below to see your changes. Use "Save & Close" to remember these settings for future visits.';
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'feedback-close';
+            closeBtn.setAttribute('aria-label', 'Dismiss notification');
+            closeBtn.textContent = '×';
+            closeBtn.addEventListener('click', () => banner.remove());
+            
+            banner.appendChild(icon);
+            banner.appendChild(message);
+            banner.appendChild(closeBtn);
+            
+            // Append banner to body
+            document.body.appendChild(banner);
+            
+            // Auto-dismiss after 10 seconds
+            setTimeout(() => {
+                if (banner.parentNode) {
+                    banner.classList.add('fade-out');
+                    setTimeout(() => banner.remove(), 300);
+                }
+            }, 10000);
+        }
+        
+        function showApplyFeedback() {
+            showConfigFeedback(false);
+        }
+        
+        function showSaveFeedback() {
+            showConfigFeedback(true);
+        }
+    </script>
+</body>
+</html>
