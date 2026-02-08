@@ -266,4 +266,41 @@ describe('Accessibility Tests', () => {
     });
     expect(results).toHaveNoViolations();
   });
+
+  test('dialog close button has proper ARIA label', async () => {
+    container.innerHTML = `
+      <div class="modal" role="dialog" aria-labelledby="test-title" aria-modal="true">
+        <div class="modal-content">
+          <button class="modal-close-btn" aria-label="Close dialog" type="button">×</button>
+          <h3 id="test-title">Test Dialog</h3>
+          <p>Dialog content</p>
+          <div class="modal-buttons">
+            <button>Close</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+    
+    // Verify close button has proper aria-label
+    const closeBtn = container.querySelector('.modal-close-btn');
+    expect(closeBtn).toHaveAttribute('aria-label', 'Close dialog');
+    expect(closeBtn).toHaveAttribute('type', 'button');
+  });
+
+  test('dialog close button meets minimum target size', async () => {
+    container.innerHTML = `
+      <button class="modal-close-btn" aria-label="Close dialog" 
+              style="width: 36px; height: 36px; border-radius: 50%;">
+        ×
+      </button>
+    `;
+
+    const results = await axe(container, {
+      runOnly: ['target-size']
+    });
+    expect(results).toHaveNoViolations();
+  });
 });
