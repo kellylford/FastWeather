@@ -5173,10 +5173,14 @@ async function showPrecipitationNowcast(cityKey, lat, lon) {
     const content = document.getElementById('precipitation-nowcast-content');
     const title = document.getElementById('precipitation-nowcast-title');
     
+    // Ensure all modals are closed before opening this one
+    closeAllModals();
+    
+    // Set up the dialog
     title.textContent = `Expected Precipitation - ${cityKey.split(',')[0]}`;
     content.innerHTML = '<p>Loading precipitation forecast...</p>';
     
-    closeAllModals();
+    // Show the dialog only after ensuring others are closed
     dialog.hidden = false;
     
     try {
@@ -5276,6 +5280,10 @@ async function showWeatherAroundMe(cityKey, lat, lon) {
     const content = document.getElementById('weather-around-me-content');
     const title = document.getElementById('weather-around-me-title');
     
+    // Ensure all modals are closed before opening this one
+    closeAllModals();
+    
+    // Set up the dialog
     title.textContent = `Weather Around ${cityKey.split(',')[0]}`;
     
     const distanceUnit = currentConfig.units.distance;
@@ -5312,7 +5320,7 @@ async function showWeatherAroundMe(cityKey, lat, lon) {
         </div>
     `;
     
-    closeAllModals();
+    // Show the dialog only after ensuring others are closed
     dialog.hidden = false;
     
     // Default distance based on unit
