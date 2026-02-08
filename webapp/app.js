@@ -468,39 +468,43 @@ function handleKeyboardShortcuts(e) {
 
 // Tab navigation
 function setupTabNavigation() {
-    const tabs = document.querySelectorAll('[role="tab"]');
-    const panels = document.querySelectorAll('[role="tabpanel"]');
+    // Find all tablists and set up navigation for each one independently
+    const tablists = document.querySelectorAll('[role="tablist"]');
     
-    tabs.forEach((tab, index) => {
-        tab.addEventListener('click', () => activateTab(tab, panels));
-        tab.addEventListener('keydown', (e) => {
-            let newIndex = index;
-            
-            if (e.key === 'ArrowRight') {
-                newIndex = (index + 1) % tabs.length;
-                e.preventDefault();
-            } else if (e.key === 'ArrowLeft') {
-                newIndex = (index - 1 + tabs.length) % tabs.length;
-                e.preventDefault();
-            } else if (e.key === 'Home') {
-                newIndex = 0;
-                e.preventDefault();
-            } else if (e.key === 'End') {
-                newIndex = tabs.length - 1;
-                e.preventDefault();
-            }
-            
-            if (newIndex !== index) {
-                activateTab(tabs[newIndex], panels);
-                tabs[newIndex].focus();
-            }
+    tablists.forEach(tablist => {
+        const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+        const panels = Array.from(tablist.parentElement.querySelectorAll('[role="tabpanel"]'));
+        
+        tabs.forEach((tab, index) => {
+            tab.addEventListener('click', () => activateTab(tab, tabs, panels));
+            tab.addEventListener('keydown', (e) => {
+                let newIndex = index;
+                
+                if (e.key === 'ArrowRight') {
+                    newIndex = (index + 1) % tabs.length;
+                    e.preventDefault();
+                } else if (e.key === 'ArrowLeft') {
+                    newIndex = (index - 1 + tabs.length) % tabs.length;
+                    e.preventDefault();
+                } else if (e.key === 'Home') {
+                    newIndex = 0;
+                    e.preventDefault();
+                } else if (e.key === 'End') {
+                    newIndex = tabs.length - 1;
+                    e.preventDefault();
+                }
+                
+                if (newIndex !== index) {
+                    activateTab(tabs[newIndex], tabs, panels);
+                    tabs[newIndex].focus();
+                }
+            });
         });
     });
 }
 
-function activateTab(selectedTab, panels) {
-    const tabs = document.querySelectorAll('[role="tab"]');
-    
+function activateTab(selectedTab, tabs, panels) {
+    // Only affect tabs and panels within the same tablist
     tabs.forEach(tab => {
         tab.setAttribute('aria-selected', 'false');
         tab.setAttribute('tabindex', '-1');
@@ -514,7 +518,10 @@ function activateTab(selectedTab, panels) {
     selectedTab.setAttribute('tabindex', '0');
     
     const panelId = selectedTab.getAttribute('aria-controls');
-    document.getElementById(panelId).hidden = false;
+    const selectedPanel = document.getElementById(panelId);
+    if (selectedPanel) {
+        selectedPanel.hidden = false;
+    }
 }
 
 // Add city handler
