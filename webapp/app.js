@@ -3411,7 +3411,7 @@ function renderCurrentConditions(weather) {
         html += '</div>';
     } else {
         // Flat/Card view (default)
-        html += '<dl>';
+        html += '<dl class="weather-details">';
         html += `<dt>Temperature:</dt><dd>${convertTemperature(current.temperature_2m)}°${currentConfig.units.temperature}</dd>`;
         html += `<dt>Feels Like:</dt><dd>${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}</dd>`;
         html += `<dt>Weather:</dt><dd>${WEATHER_CODES[current.weather_code] || 'Unknown'}</dd>`;
