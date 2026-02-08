@@ -826,18 +826,11 @@ function showCitySelectionDialog(originalInput, matches) {
     // Set aria-activedescendant to the first option
     listBox.setAttribute('aria-activedescendant', 'city-option-0');
     
-    closeAllModals();
-    focusReturnElement = document.activeElement;
-    dialog.hidden = false;
-    
     // Add keyboard navigation to listBox
     listBox.addEventListener('keydown', handleCityListKeydown);
     
-    // Set up focus trap
-    trapFocus(dialog);
-    
-    // Focus the listbox
-    listBox.focus();
+    // Use centralized dialog opening with focus on listbox
+    openDialog(dialog, listBox);
     
     // Scroll first option into view
     const firstOption = listBox.querySelector('#city-option-0');
@@ -3282,10 +3275,8 @@ async function showFullWeather(cityName, lat, lon) {
     title.textContent = `Full Weather Details - ${cityName}`;
     content.innerHTML = '<p class="loading-text">Loading detailed forecast...</p>';
     
-    closeAllModals();
-    focusReturnElement = document.activeElement;
-    dialog.hidden = false;
-    trapFocus(dialog);
+    // Use centralized dialog opening with proper focus management
+    openDialog(dialog);
     
     try {
         const weather = await fetchWeatherForCity(cityName, lat, lon, true);
@@ -3924,11 +3915,10 @@ function openConfigDialog() {
         if (dailyDetailViewInput) dailyDetailViewInput.checked = true;
         
         console.log('About to close modals and show dialog');
-        closeAllModals();
-        focusReturnElement = document.activeElement;
-        dialog.hidden = false;
-        trapFocus(dialog);
-        document.getElementById('current-tab').focus();
+        
+        // Use centralized dialog opening with focus on first tab
+        openDialog(dialog, '#current-tab');
+        
         console.log('Dialog should now be visible');
     } catch (error) {
         console.error('Error in openConfigDialog:', error);
@@ -4590,6 +4580,56 @@ function trapFocus(element) {
         }
     });
 }
+
+/**
+ * Opens a dialog with proper focus management for WCAG 2.2 AA compliance
+ * @param {HTMLElement} dialog - The dialog element to open
+ * @param {HTMLElement|string|null} focusTarget - Element to focus (element, CSS selector, or null for first focusable)
+ */
+function openDialog(dialog, focusTarget = null) {
+    // Save current focus to return to when dialog closes
+    focusReturnElement = document.activeElement;
+    
+    // Close any other open modals
+    closeAllModals();
+    
+    // Show the dialog
+    dialog.hidden = false;
+    
+    // Set up focus trap
+    trapFocus(dialog);
+    
+    // Move focus to the specified element or first focusable element
+    if (focusTarget) {
+        const targetElement = typeof focusTarget === 'string' 
+            ? dialog.querySelector(focusTarget) 
+            : focusTarget;
+        
+        if (targetElement) {
+            targetElement.focus();
+        } else {
+            // Fallback to first focusable element
+            focusFirstElement(dialog);
+        }
+    } else {
+        // Focus first focusable element
+        focusFirstElement(dialog);
+    }
+}
+
+/**
+ * Focuses the first focusable element in a container
+ * @param {HTMLElement} container - Container to search for focusable elements
+ */
+function focusFirstElement(container) {
+    const focusableElements = container.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"]), [role="listbox"]'
+    );
+    
+    if (focusableElements.length > 0) {
+        focusableElements[0].focus();
+    }
+}
 // ==================== NEW FEATURES ====================
 
 // ===== WEATHER ALERTS (NWS API for US locations) =====
@@ -4783,13 +4823,17 @@ function showAlertDetails(alertDataStr) {
         </div>
     `;
     
-    closeAllModals();
-    dialog.hidden = false;
+    // Use centralized dialog opening with proper focus management
+    openDialog(dialog);
     announceToScreenReader(`Weather alert: ${alert.event}. ${alert.severity} severity.`);
 }
 
 document.getElementById('close-alert-details-btn')?.addEventListener('click', () => {
     document.getElementById('alert-details-dialog').hidden = true;
+    if (focusReturnElement) {
+        focusReturnElement.focus();
+        focusReturnElement = null;
+    }
 });
 
 // ===== HISTORICAL WEATHER =====
@@ -4823,8 +4867,8 @@ async function showHistoricalWeather(cityKey, lat, lon) {
         </div>
     `;
     
-    closeAllModals();
-    dialog.hidden = false;
+    // Use centralized dialog opening with proper focus management
+    openDialog(dialog);
     announceToScreenReader(`Historical weather for ${cityKey.split(',')[0]} - showing this day over the past 20 years`);
     
     // Automatically load data
@@ -5165,6 +5209,10 @@ function adjustHistoricalYear(yearShift) {
 
 document.getElementById('close-historical-weather-btn')?.addEventListener('click', () => {
     document.getElementById('historical-weather-dialog').hidden = true;
+    if (focusReturnElement) {
+        focusReturnElement.focus();
+        focusReturnElement = null;
+    }
 });
 
 // ===== PRECIPITATION NOWCAST =====
@@ -5176,8 +5224,8 @@ async function showPrecipitationNowcast(cityKey, lat, lon) {
     title.textContent = `Expected Precipitation - ${cityKey.split(',')[0]}`;
     content.innerHTML = '<p>Loading precipitation forecast...</p>';
     
-    closeAllModals();
-    dialog.hidden = false;
+    // Use centralized dialog opening with proper focus management
+    openDialog(dialog);
     
     try {
         const data = await fetchPrecipitationNowcast(lat, lon);
@@ -5268,6 +5316,10 @@ function renderPrecipitationNowcast(data) {
 
 document.getElementById('close-precipitation-nowcast-btn')?.addEventListener('click', () => {
     document.getElementById('precipitation-nowcast-dialog').hidden = true;
+    if (focusReturnElement) {
+        focusReturnElement.focus();
+        focusReturnElement = null;
+    }
 });
 
 // ===== WEATHER AROUND ME =====
@@ -5312,8 +5364,8 @@ async function showWeatherAroundMe(cityKey, lat, lon) {
         </div>
     `;
     
-    closeAllModals();
-    dialog.hidden = false;
+    // Use centralized dialog opening with proper focus management
+    openDialog(dialog);
     
     // Default distance based on unit
     const defaultDistance = isKm ? 240 : 150;
@@ -5492,6 +5544,10 @@ function generateWeatherSummary(weatherResults, cityKey) {
 
 document.getElementById('close-weather-around-me-btn')?.addEventListener('click', () => {
     document.getElementById('weather-around-me-dialog').hidden = true;
+    if (focusReturnElement) {
+        focusReturnElement.focus();
+        focusReturnElement = null;
+    }
 });
 
 // Helper function for date/time formatting
