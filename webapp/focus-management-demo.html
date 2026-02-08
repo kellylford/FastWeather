@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dialog Focus Management Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #2563eb;
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+        
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        
+        button:hover {
+            background: #1d4ed8;
+        }
+        
+        button:focus {
+            outline: 3px solid #fbbf24;
+            outline-offset: 2px;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal[hidden] {
+            display: none;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-content h3 {
+            margin-top: 0;
+            color: #1f2937;
+        }
+        
+        .modal-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            background: #e0f2fe;
+            border: 1px solid #0284c7;
+            border-radius: 4px;
+            color: #0c4a6e;
+        }
+        
+        .instructions {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            color: #92400e;
+        }
+        
+        .instructions ul {
+            margin: 10px 0;
+        }
+        
+        .success {
+            color: #065f46;
+            background: #d1fae5;
+            border-color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dialog Focus Management Test</h1>
+    
+    <div class="instructions">
+        <h3>🎯 Testing Instructions (Keyboard Navigation)</h3>
+        <ul>
+            <li><strong>Tab:</strong> Press Tab to navigate to the "Open Dialog" button</li>
+            <li><strong>Enter:</strong> Press Enter or Space to open the dialog</li>
+            <li><strong>Focus Check:</strong> Notice that focus automatically moves into the dialog</li>
+            <li><strong>Tab Through:</strong> Press Tab to cycle through dialog buttons (focus trap)</li>
+            <li><strong>Escape:</strong> Press Escape to close the dialog</li>
+            <li><strong>Return Focus:</strong> Notice focus returns to the "Open Dialog" button</li>
+            <li><strong>Alt Test:</strong> Click "Close" button - focus should also return</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 1: Basic Dialog</h2>
+        <p>This tests the core focus management pattern used in FastWeather dialogs.</p>
+        <button id="open-dialog-1" onclick="openDialog('test-dialog-1')">Open Dialog</button>
+        <div id="status-1" class="status" style="display: none;"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Alert Dialog</h2>
+        <p>This tests the alert dialog pattern (similar to weather alerts).</p>
+        <button id="open-dialog-2" onclick="openDialog('test-dialog-2')">Open Alert Dialog</button>
+        <div id="status-2" class="status" style="display: none;"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Multiple Interactions</h2>
+        <p>Open and close the dialog multiple times to test focus consistency.</p>
+        <button id="open-dialog-3" onclick="openDialog('test-dialog-3')">Open Dialog (Multiple Tests)</button>
+        <div id="status-3" class="status" style="display: none;"></div>
+    </div>
+    
+    <!-- Dialog 1 -->
+    <div id="test-dialog-1" 
+         class="modal" 
+         role="dialog" 
+         aria-labelledby="dialog-1-title" 
+         aria-modal="true"
+         hidden>
+        <div class="modal-content">
+            <h3 id="dialog-1-title">Test Dialog 1</h3>
+            <p>Focus should have moved to the first button in this dialog.</p>
+            <p>Try pressing Tab to cycle through buttons. When you reach the last button and press Tab again, focus should wrap to the first button (focus trap).</p>
+            <div class="modal-buttons">
+                <button onclick="closeDialog('test-dialog-1', '1')">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dialog 2 -->
+    <div id="test-dialog-2" 
+         class="modal" 
+         role="alertdialog" 
+         aria-labelledby="dialog-2-title" 
+         aria-modal="true"
+         hidden>
+        <div class="modal-content">
+            <h3 id="dialog-2-title">Weather Alert</h3>
+            <p><strong>Severe Weather Warning</strong></p>
+            <p>This is an example of an alert dialog. Focus should be on the Close button.</p>
+            <div class="modal-buttons">
+                <button onclick="closeDialog('test-dialog-2', '2')">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dialog 3 -->
+    <div id="test-dialog-3" 
+         class="modal" 
+         role="dialog" 
+         aria-labelledby="dialog-3-title" 
+         aria-modal="true"
+         hidden>
+        <div class="modal-content">
+            <h3 id="dialog-3-title">Multiple Buttons Test</h3>
+            <p>This dialog has multiple buttons to test focus trap behavior.</p>
+            <div class="modal-buttons">
+                <button id="dialog-3-first">First Button</button>
+                <button>Second Button</button>
+                <button>Third Button</button>
+                <button onclick="closeDialog('test-dialog-3', '3')">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let focusReturnElement = null;
+        
+        // Focus trap implementation (same as FastWeather)
+        function trapFocus(element) {
+            const focusableElements = element.querySelectorAll(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            );
+            const firstFocusable = focusableElements[0];
+            const lastFocusable = focusableElements[focusableElements.length - 1];
+            
+            element.addEventListener('keydown', function(e) {
+                if (e.key !== 'Tab') return;
+                
+                if (e.shiftKey) {
+                    if (document.activeElement === firstFocusable) {
+                        lastFocusable.focus();
+                        e.preventDefault();
+                    }
+                } else {
+                    if (document.activeElement === lastFocusable) {
+                        firstFocusable.focus();
+                        e.preventDefault();
+                    }
+                }
+            });
+        }
+        
+        // Open dialog with focus management
+        function openDialog(dialogId) {
+            const dialog = document.getElementById(dialogId);
+            const statusId = dialogId.replace('test-dialog-', 'status-');
+            const status = document.getElementById(statusId);
+            
+            // Save current focus
+            focusReturnElement = document.activeElement;
+            
+            // Show dialog
+            dialog.hidden = false;
+            
+            // Set up focus trap
+            trapFocus(dialog);
+            
+            // Move focus into dialog
+            const focusableElements = dialog.querySelectorAll(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            );
+            if (focusableElements.length > 0) {
+                // Focus first button for dialog-3, otherwise focus close button
+                if (dialogId === 'test-dialog-3') {
+                    document.getElementById('dialog-3-first').focus();
+                } else {
+                    focusableElements[focusableElements.length - 1].focus(); // Close button
+                }
+            }
+            
+            // Update status
+            status.style.display = 'block';
+            status.textContent = '✓ Dialog opened - Focus moved into dialog';
+            status.className = 'status success';
+        }
+        
+        // Close dialog and return focus
+        function closeDialog(dialogId, statusNum) {
+            const dialog = document.getElementById(dialogId);
+            const status = document.getElementById('status-' + statusNum);
+            
+            // Hide dialog
+            dialog.hidden = true;
+            
+            // Return focus to trigger button
+            if (focusReturnElement) {
+                focusReturnElement.focus();
+                
+                // Update status
+                status.textContent = '✓ Dialog closed - Focus returned to trigger button';
+                status.className = 'status success';
+                
+                // Clear the saved element
+                focusReturnElement = null;
+            }
+        }
+        
+        // Close all dialogs on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const openDialogs = document.querySelectorAll('.modal:not([hidden])');
+                openDialogs.forEach(dialog => {
+                    dialog.hidden = true;
+                    
+                    // Return focus
+                    if (focusReturnElement) {
+                        focusReturnElement.focus();
+                        
+                        // Update all status messages
+                        document.querySelectorAll('.status').forEach(status => {
+                            status.style.display = 'block';
+                            status.textContent = '✓ Dialog closed with Escape - Focus returned';
+                            status.className = 'status success';
+                        });
+                        
+                        focusReturnElement = null;
+                    }
+                });
+            }
+        });
+        
+        // Show initial instruction
+        console.log('Dialog Focus Management Demo loaded.');
+        console.log('Press Tab to navigate to buttons, Enter to open dialogs, Escape to close.');
+    </script>
+</body>
+</html>
