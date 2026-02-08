@@ -4784,12 +4784,24 @@ function showAlertDetails(alertDataStr) {
     `;
     
     closeAllModals();
+    focusReturnElement = document.activeElement;
     dialog.hidden = false;
+    trapFocus(dialog);
+    
+    // Focus the close button
+    const closeBtn = document.getElementById('close-alert-details-btn');
+    if (closeBtn) closeBtn.focus();
+    
     announceToScreenReader(`Weather alert: ${alert.event}. ${alert.severity} severity.`);
 }
 
 document.getElementById('close-alert-details-btn')?.addEventListener('click', () => {
-    document.getElementById('alert-details-dialog').hidden = true;
+    const dialog = document.getElementById('alert-details-dialog');
+    dialog.hidden = true;
+    if (focusReturnElement) {
+        focusReturnElement.focus();
+        focusReturnElement = null;
+    }
 });
 
 // ===== HISTORICAL WEATHER =====
@@ -4824,7 +4836,14 @@ async function showHistoricalWeather(cityKey, lat, lon) {
     `;
     
     closeAllModals();
+    focusReturnElement = document.activeElement;
     dialog.hidden = false;
+    trapFocus(dialog);
+    
+    // Focus the first button in the controls
+    const prevBtn = document.getElementById('hist-prev-btn');
+    if (prevBtn) prevBtn.focus();
+    
     announceToScreenReader(`Historical weather for ${cityKey.split(',')[0]} - showing this day over the past 20 years`);
     
     // Automatically load data
@@ -5164,7 +5183,12 @@ function adjustHistoricalYear(yearShift) {
 }
 
 document.getElementById('close-historical-weather-btn')?.addEventListener('click', () => {
-    document.getElementById('historical-weather-dialog').hidden = true;
+    const dialog = document.getElementById('historical-weather-dialog');
+    dialog.hidden = true;
+    if (focusReturnElement) {
+        focusReturnElement.focus();
+        focusReturnElement = null;
+    }
 });
 
 // ===== PRECIPITATION NOWCAST =====
@@ -5177,7 +5201,13 @@ async function showPrecipitationNowcast(cityKey, lat, lon) {
     content.innerHTML = '<p>Loading precipitation forecast...</p>';
     
     closeAllModals();
+    focusReturnElement = document.activeElement;
     dialog.hidden = false;
+    trapFocus(dialog);
+    
+    // Focus the close button
+    const closeBtn = document.getElementById('close-precipitation-nowcast-btn');
+    if (closeBtn) closeBtn.focus();
     
     try {
         const data = await fetchPrecipitationNowcast(lat, lon);
@@ -5267,7 +5297,12 @@ function renderPrecipitationNowcast(data) {
 }
 
 document.getElementById('close-precipitation-nowcast-btn')?.addEventListener('click', () => {
-    document.getElementById('precipitation-nowcast-dialog').hidden = true;
+    const dialog = document.getElementById('precipitation-nowcast-dialog');
+    dialog.hidden = true;
+    if (focusReturnElement) {
+        focusReturnElement.focus();
+        focusReturnElement = null;
+    }
 });
 
 // ===== WEATHER AROUND ME =====
@@ -5313,7 +5348,15 @@ async function showWeatherAroundMe(cityKey, lat, lon) {
     `;
     
     closeAllModals();
+    focusReturnElement = document.activeElement;
     dialog.hidden = false;
+    trapFocus(dialog);
+    
+    // Focus the first radius selector button
+    setTimeout(() => {
+        const firstRadiusBtn = content.querySelector('.radius-selector button');
+        if (firstRadiusBtn) firstRadiusBtn.focus();
+    }, 100);
     
     // Default distance based on unit
     const defaultDistance = isKm ? 240 : 150;
@@ -5491,7 +5534,12 @@ function generateWeatherSummary(weatherResults, cityKey) {
 }
 
 document.getElementById('close-weather-around-me-btn')?.addEventListener('click', () => {
-    document.getElementById('weather-around-me-dialog').hidden = true;
+    const dialog = document.getElementById('weather-around-me-dialog');
+    dialog.hidden = true;
+    if (focusReturnElement) {
+        focusReturnElement.focus();
+        focusReturnElement = null;
+    }
 });
 
 // Helper function for date/time formatting
