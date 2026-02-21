@@ -6,145 +6,117 @@
 //
 
 import Foundation
-import CoreLocation
 
 class DirectionalCityService {
     static let shared = DirectionalCityService()
     
     private init() {}
     
-    // Cache geocoded results to avoid repeated API calls
+    // Cache results to avoid recomputing for the same direction/distance
     private var geocodeCache: [String: [DirectionalCityInfo]] = [:]
     
-    /// Find cities along a bearing using reverse geocoding
+    // Lazy-loaded city list from bundled cache JSON
+    private var _allCachedCities: [CityLocation]? = nil
+    private func allCachedCities() -> [CityLocation] {
+        if let cached = _allCachedCities { return cached }
+        var all: [CityLocation] = []
+        for resource in ["us-cities-cached", "international-cities-cached"] {
+            if let url = Bundle.main.url(forResource: resource, withExtension: "json"),
+               let data = try? Data(contentsOf: url),
+               let decoded = try? JSONDecoder().decode([String: [CityLocation]].self, from: data) {
+                all.append(contentsOf: decoded.values.flatMap { $0 })
+            } else {
+                print("⚠️ DirectionalCityService: could not load \(resource).json")
+            }
+        }
+        _allCachedCities = all
+        return all
+    }
+    
+    /// Find cities within a ±22.5° cone in the given direction using the bundled city cache.
+    /// Returns immediately (no network calls) with results sorted by distance.
     func findCities(from centerCity: City, direction: CardinalDirection, maxDistance: Double = 300) async -> [DirectionalCityInfo] {
         let cacheKey = "\(centerCity.id)-\(direction.rawValue)-\(Int(maxDistance))"
         
-        // Return cached results if available
         if let cached = geocodeCache[cacheKey] {
             return cached
         }
         
+        let cities = allCachedCities()
         var results: [DirectionalCityInfo] = []
-        let geocoder = CLGeocoder()
-        let centerLocation = CLLocation(latitude: centerCity.latitude, longitude: centerCity.longitude)
         
-        // Calculate points at 10-mile intervals up to maxDistance
-        let interval: Double = 10
-        var distance: Double = interval
-        
-        while distance <= maxDistance {
-            // Calculate destination coordinates
-            let destination = calculateDestination(
-                from: centerLocation.coordinate,
-                bearing: direction.bearing,
-                distanceMiles: distance
+        for cityLocation in cities {
+            // Skip the center city itself
+            if cityLocation.name.lowercased() == centerCity.name.lowercased(),
+               (cityLocation.state ?? "") == (centerCity.state ?? "") {
+                continue
+            }
+            
+            let dist = distanceMilesBetween(
+                fromLat: centerCity.latitude, fromLon: centerCity.longitude,
+                toLat: cityLocation.latitude, toLon: cityLocation.longitude
             )
+            guard dist > 0, dist <= maxDistance else { continue }
             
-            let location = CLLocation(latitude: destination.latitude, longitude: destination.longitude)
+            let bearing = bearingBetween(
+                fromLat: centerCity.latitude, fromLon: centerCity.longitude,
+                toLat: cityLocation.latitude, toLon: cityLocation.longitude
+            )
+            guard isInCone(cityBearing: bearing, targetBearing: direction.bearing) else { continue }
             
-            // Reverse geocode to find city at this point
-            do {
-                // Rate limit: 2 seconds per request to respect Apple's CLGeocoder limits
-                // (Apple recommends 1 request/minute, but allows burst capacity with delays)
-                if distance > interval {
-                    try await Task.sleep(nanoseconds: 2_000_000_000)
-                }
-                
-                let placemarks = try await geocoder.reverseGeocodeLocation(location)
-                
-                if let placemark = placemarks.first,
-                   let cityName = placemark.locality ?? placemark.subLocality {
-                    
-                    // Skip if this is the same as center city
-                    if cityName.lowercased() != centerCity.name.lowercased() {
-                        let state = placemark.administrativeArea
-                        let country = placemark.country ?? "Unknown"
-                        
-                        // Calculate actual bearing to verify
-                        let actualBearing = calculateBearing(from: centerLocation, to: location)
-                        
-                        let cityInfo = DirectionalCityInfo(
-                            name: cityName,
-                            state: state,
-                            country: country,
-                            latitude: destination.latitude,
-                            longitude: destination.longitude,
-                            distanceMiles: distance,
-                            bearing: actualBearing
-                        )
-                        
-                        // Only add if not duplicate
-                        if !results.contains(where: { $0.name.lowercased() == cityName.lowercased() }) {
-                            results.append(cityInfo)
-                        }
-                    }
-                }
-            } catch {
-                print("⚠️ Geocoding failed at \(distance) miles (\(direction.rawValue)): \(error.localizedDescription)")
-                
-                // If we hit rate limit, wait longer before continuing
-                if (error as NSError).domain == kCLErrorDomain,
-                   (error as NSError).code == CLError.network.rawValue {
-                    print("🚫 Rate limit detected, waiting 5 seconds...")
-                    try? await Task.sleep(nanoseconds: 5_000_000_000)
-                }
-                // Continue to next point even if this one fails
-            }
-            
-            distance += interval
-            
-            // Limit to reasonable number of requests
-            if results.count >= 20 {
-                break
-            }
+            results.append(DirectionalCityInfo(
+                name: cityLocation.name,
+                state: cityLocation.state,
+                country: cityLocation.country,
+                latitude: cityLocation.latitude,
+                longitude: cityLocation.longitude,
+                distanceMiles: dist,
+                bearing: bearing
+            ))
         }
         
-        // Cache results
-        geocodeCache[cacheKey] = results
+        results.sort { $0.distanceMiles < $1.distanceMiles }
+        let final = Array(results.prefix(20))
         
-        return results
+        geocodeCache[cacheKey] = final
+        return final
     }
     
-    /// Calculate destination coordinates given start point, bearing, and distance
-    private func calculateDestination(from: CLLocationCoordinate2D, bearing: Double, distanceMiles: Double) -> CLLocationCoordinate2D {
-        let distanceMeters = distanceMiles * 1609.34
-        let earthRadius: Double = 6371000 // meters
-        
-        let lat1 = from.latitude * .pi / 180
-        let lon1 = from.longitude * .pi / 180
-        let bearingRad = bearing * .pi / 180
-        
-        let lat2 = asin(sin(lat1) * cos(distanceMeters / earthRadius) +
-                       cos(lat1) * sin(distanceMeters / earthRadius) * cos(bearingRad))
-        
-        let lon2 = lon1 + atan2(sin(bearingRad) * sin(distanceMeters / earthRadius) * cos(lat1),
-                                cos(distanceMeters / earthRadius) - sin(lat1) * sin(lat2))
-        
-        return CLLocationCoordinate2D(
-            latitude: lat2 * 180 / .pi,
-            longitude: lon2 * 180 / .pi
-        )
-    }
+    // MARK: - Geometry helpers
     
-    /// Calculate bearing from one location to another (0-360°)
-    private func calculateBearing(from: CLLocation, to: CLLocation) -> Double {
-        let lat1 = from.coordinate.latitude * .pi / 180
-        let lon1 = from.coordinate.longitude * .pi / 180
-        let lat2 = to.coordinate.latitude * .pi / 180
-        let lon2 = to.coordinate.longitude * .pi / 180
-        
+    /// Forward azimuth (0–360°) from one lat/lon to another.
+    private func bearingBetween(fromLat: Double, fromLon: Double, toLat: Double, toLon: Double) -> Double {
+        let lat1 = fromLat * .pi / 180
+        let lon1 = fromLon * .pi / 180
+        let lat2 = toLat * .pi / 180
+        let lon2 = toLon * .pi / 180
         let dLon = lon2 - lon1
-        
         let y = sin(dLon) * cos(lat2)
         let x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon)
-        
-        var bearing = atan2(y, x) * 180 / .pi
-        bearing = (bearing + 360).truncatingRemainder(dividingBy: 360)
-        
-        return bearing
+        var b = atan2(y, x) * 180 / .pi
+        b = (b + 360).truncatingRemainder(dividingBy: 360)
+        return b
+    }
+    
+    /// Great-circle distance in miles between two lat/lon points.
+    private func distanceMilesBetween(fromLat: Double, fromLon: Double, toLat: Double, toLon: Double) -> Double {
+        let earthRadiusMiles = 3958.8
+        let lat1 = fromLat * .pi / 180
+        let lat2 = toLat * .pi / 180
+        let dLat = lat2 - lat1
+        let dLon = (toLon - fromLon) * .pi / 180
+        let a = sin(dLat/2) * sin(dLat/2) + cos(lat1) * cos(lat2) * sin(dLon/2) * sin(dLon/2)
+        let c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        return earthRadiusMiles * c
+    }
+    
+    /// Returns true if `cityBearing` falls within `coneDegrees` of `targetBearing` (handles 0°/360° wrap).
+    private func isInCone(cityBearing: Double, targetBearing: Double, coneDegrees: Double = 22.5) -> Bool {
+        let diff = abs((cityBearing - targetBearing + 180).truncatingRemainder(dividingBy: 360) - 180)
+        return diff <= coneDegrees
     }
 }
+
 
 // MARK: - Data Models
 

@@ -28,6 +28,8 @@ struct WeatherAroundMeView: View {
     @State private var alertMessage = ""
     @State private var directionalWeatherData: [UUID: (temp: Double, condition: String)] = [:]
     @State private var isLoadingCities = false
+    // Shared WeatherService instance so batchFetchWeatherBasic cache is reused across all city fetches
+    @State private var directionalWeatherService = WeatherService()
     
     init(city: City, defaultDistance: Double = 150) {
         self.city = city
@@ -530,42 +532,39 @@ struct WeatherAroundMeView: View {
     }
     
     private func loadWeatherForCity(_ cityInfo: DirectionalCityInfo) async {
-        // Don't reload if we already have data
         guard directionalWeatherData[cityInfo.id] == nil else { return }
-        
         do {
-            let weatherService = WeatherService()
-            let weather = try await weatherService.fetchWeatherBasic(
+            let weather = try await directionalWeatherService.fetchWeatherBasic(
                 latitude: cityInfo.latitude,
                 longitude: cityInfo.longitude
             )
-            
             let temp = weather.current.temperature2m
             let condition = weather.current.weatherCodeEnum?.description ?? "Unknown"
-            
             await MainActor.run {
                 directionalWeatherData[cityInfo.id] = (temp: temp, condition: condition)
             }
         } catch {
-            // Silently fail for individual cities
-            print("Failed to load weather for \(cityInfo.name): \(error)")
+            print("⚠️ Failed to load weather for \(cityInfo.name): \(error)")
         }
     }
     
-    /// Prefetch weather data for current city and next few cities
+    /// Fetch weather for all cities in the direction list in parallel using a single shared WeatherService.
     private func prefetchWeatherData() async {
-        // Prefetch current + next 4 cities (total of 5)
-        let endIndex = min(currentCityIndex + 5, citiesInDirection.count)
+        let pending = citiesInDirection.filter { directionalWeatherData[$0.id] == nil }
+        guard !pending.isEmpty else { return }
         
-        for index in currentCityIndex..<endIndex {
-            guard citiesInDirection.indices.contains(index) else { continue }
-            let cityInfo = citiesInDirection[index]
-            
-            // Skip if already loaded
-            guard directionalWeatherData[cityInfo.id] == nil else { continue }
-            
-            // Load in background
-            await loadWeatherForCity(cityInfo)
+        let locations = pending.map { (latitude: $0.latitude, longitude: $0.longitude) }
+        let weatherBatch = await directionalWeatherService.batchFetchWeatherBasic(for: locations)
+        
+        await MainActor.run {
+            for cityInfo in pending {
+                let key = "\(cityInfo.latitude),\(cityInfo.longitude)"
+                if let weather = weatherBatch[key] {
+                    let temp = weather.current.temperature2m
+                    let condition = weather.current.weatherCodeEnum?.description ?? "Unknown"
+                    directionalWeatherData[cityInfo.id] = (temp: temp, condition: condition)
+                }
+            }
         }
     }
     
