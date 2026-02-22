@@ -425,9 +425,6 @@ function initializeEventListeners() {
             closeAllModals();
         }
     });
-    
-    // Initialize dialog close functionality (backdrop click + close button)
-    initializeDialogCloseFunctionality();
 }
 
 // Keyboard shortcuts
@@ -471,46 +468,39 @@ function handleKeyboardShortcuts(e) {
 
 // Tab navigation
 function setupTabNavigation() {
-    // Find all tablists and set up navigation for each one independently
-    const tablists = document.querySelectorAll('[role="tablist"]');
+    const tabs = document.querySelectorAll('[role="tab"]');
+    const panels = document.querySelectorAll('[role="tabpanel"]');
     
-    tablists.forEach(tablist => {
-        const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
-        
-        // Get panels associated with this tablist's tabs via aria-controls
-        const panelIds = tabs.map(tab => tab.getAttribute('aria-controls')).filter(Boolean);
-        const panels = panelIds.map(id => document.getElementById(id)).filter(Boolean);
-        
-        tabs.forEach((tab, index) => {
-            tab.addEventListener('click', () => activateTab(tab, tabs, panels));
-            tab.addEventListener('keydown', (e) => {
-                let newIndex = index;
-                
-                if (e.key === 'ArrowRight') {
-                    newIndex = (index + 1) % tabs.length;
-                    e.preventDefault();
-                } else if (e.key === 'ArrowLeft') {
-                    newIndex = (index - 1 + tabs.length) % tabs.length;
-                    e.preventDefault();
-                } else if (e.key === 'Home') {
-                    newIndex = 0;
-                    e.preventDefault();
-                } else if (e.key === 'End') {
-                    newIndex = tabs.length - 1;
-                    e.preventDefault();
-                }
-                
-                if (newIndex !== index) {
-                    activateTab(tabs[newIndex], tabs, panels);
-                    tabs[newIndex].focus();
-                }
-            });
+    tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => activateTab(tab, panels));
+        tab.addEventListener('keydown', (e) => {
+            let newIndex = index;
+            
+            if (e.key === 'ArrowRight') {
+                newIndex = (index + 1) % tabs.length;
+                e.preventDefault();
+            } else if (e.key === 'ArrowLeft') {
+                newIndex = (index - 1 + tabs.length) % tabs.length;
+                e.preventDefault();
+            } else if (e.key === 'Home') {
+                newIndex = 0;
+                e.preventDefault();
+            } else if (e.key === 'End') {
+                newIndex = tabs.length - 1;
+                e.preventDefault();
+            }
+            
+            if (newIndex !== index) {
+                activateTab(tabs[newIndex], panels);
+                tabs[newIndex].focus();
+            }
         });
     });
 }
 
-function activateTab(selectedTab, tabs, panels) {
-    // Only affect tabs and panels within the same tablist
+function activateTab(selectedTab, panels) {
+    const tabs = document.querySelectorAll('[role="tab"]');
+    
     tabs.forEach(tab => {
         tab.setAttribute('aria-selected', 'false');
         tab.setAttribute('tabindex', '-1');
@@ -524,10 +514,7 @@ function activateTab(selectedTab, tabs, panels) {
     selectedTab.setAttribute('tabindex', '0');
     
     const panelId = selectedTab.getAttribute('aria-controls');
-    const selectedPanel = document.getElementById(panelId);
-    if (selectedPanel) {
-        selectedPanel.hidden = false;
-    }
+    document.getElementById(panelId).hidden = false;
 }
 
 // Add city handler
@@ -839,11 +826,18 @@ function showCitySelectionDialog(originalInput, matches) {
     // Set aria-activedescendant to the first option
     listBox.setAttribute('aria-activedescendant', 'city-option-0');
     
+    closeAllModals();
+    focusReturnElement = document.activeElement;
+    dialog.hidden = false;
+    
     // Add keyboard navigation to listBox
     listBox.addEventListener('keydown', handleCityListKeydown);
     
-    // Use centralized dialog opening with focus on listbox
-    openDialog(dialog, listBox);
+    // Set up focus trap
+    trapFocus(dialog);
+    
+    // Focus the listbox
+    listBox.focus();
     
     // Scroll first option into view
     const firstOption = listBox.querySelector('#city-option-0');
@@ -1405,7 +1399,7 @@ function renderStateCitiesFlatWithWeather(container, citiesData) {
     container.setAttribute('role', 'list');
     
     citiesData.forEach((cityData) => {
-        const card = document.createElement('div');
+        const card = document.createElement('article');
         card.className = 'city-card state-city-card';
         card.setAttribute('role', 'listitem');
         
@@ -1431,7 +1425,6 @@ function renderStateCitiesFlatWithWeather(container, citiesData) {
             details.className = 'weather-details';
             
             const forecastDetails = document.createElement('dl');
-            forecastDetails.className = 'weather-details';
             let hasForecastData = false;
             
             // Render fields in custom order
@@ -2182,7 +2175,7 @@ function renderFlatView(container) {
 
 // Create city card
 function createCityCard(cityName, lat, lon, weather, index) {
-    const card = document.createElement('div');
+    const card = document.createElement('article');
     card.className = 'city-card';
     card.setAttribute('role', 'listitem');
     
@@ -2191,7 +2184,6 @@ function createCityCard(cityName, lat, lon, weather, index) {
     
     const titleButton = document.createElement('button');
     titleButton.className = 'city-title-btn';
-    titleButton.title = `View full weather details for ${cityName}`;
     titleButton.addEventListener('click', () => showFullWeather(cityName, lat, lon));
     
     const title = document.createElement('h3');
@@ -2216,7 +2208,6 @@ function createCityCard(cityName, lat, lon, weather, index) {
         details.className = 'weather-details';
         
         const forecastDetails = document.createElement('dl');
-        forecastDetails.className = 'weather-details';
         let hasForecastData = false;
         
         // Render fields in custom order
@@ -2349,7 +2340,7 @@ function createCityCard(cityName, lat, lon, weather, index) {
         () => showHistoricalWeather(cityName, lat, lon)
     );
     historyBtn.className = 'feature-btn';
-    historyBtn.setAttribute('aria-label', `History - View historical weather for ${cityName}`);
+    historyBtn.setAttribute('aria-label', `View historical weather for ${cityName}`);
     featureActions.appendChild(historyBtn);
     
     // Expected Precipitation button
@@ -2367,20 +2358,29 @@ function createCityCard(cityName, lat, lon, weather, index) {
         () => showWeatherAroundMe(cityName, lat, lon)
     );
     aroundBtn.className = 'feature-btn';
-    aroundBtn.setAttribute('aria-label', `Around Me - View weather around ${cityName}`);
+    aroundBtn.setAttribute('aria-label', `View weather around ${cityName}`);
     featureActions.appendChild(aroundBtn);
     
-    // Weather Alert badge (will be populated asynchronously)
+    // Weather Alert badge
     const alertContainer = document.createElement('span');
     alertContainer.id = `alert-badge-${index}`;
     alertContainer.className = 'alert-container';
     featureActions.appendChild(alertContainer);
-    
-    // Fetch and display alerts asynchronously
-    fetchWeatherAlerts(cityName, lat, lon).then(alerts => {
-        const alertHTML = renderAlertBadge(alerts);
-        alertContainer.innerHTML = alertHTML;
-    });
+
+    // Render immediately from cache if available; otherwise fetch async.
+    // Use document.getElementById at resolve time (not the captured reference) so
+    // the badge lands in the current DOM even if renderCityList() rebuilt the cards
+    // while the NWS request was in flight.
+    const _flatCached = alertsCache[cityName];
+    if (_flatCached && (Date.now() - _flatCached.timestamp < 600000)) {
+        alertContainer.innerHTML = renderAlertBadge(_flatCached.alerts);
+    } else {
+        const _flatBadgeId = `alert-badge-${index}`;
+        fetchWeatherAlerts(cityName, lat, lon).then(alerts => {
+            const el = document.getElementById(_flatBadgeId);
+            if (el) el.innerHTML = renderAlertBadge(alerts);
+        });
+    }
     
     card.appendChild(featureActions);
     
@@ -2390,20 +2390,20 @@ function createCityCard(cityName, lat, lon, weather, index) {
     
     // Move up button
     if (index > 0) {
-        const upBtn = createButton('↑ Move Up', `Move ${cityName} up in list`, () => moveCityUp(cityName));
+        const upBtn = createButton('↑', `Move ${cityName} up in list`, () => moveCityUp(cityName));
         upBtn.className = 'icon-btn';
         controls.appendChild(upBtn);
     }
     
     // Move down button
     if (index < Object.keys(cities).length - 1) {
-        const downBtn = createButton('↓ Move Down', `Move ${cityName} down in list`, () => moveCityDown(cityName));
+        const downBtn = createButton('↓', `Move ${cityName} down in list`, () => moveCityDown(cityName));
         downBtn.className = 'icon-btn';
         controls.appendChild(downBtn);
     }
     
     // Remove button
-    const removeBtn = createButton('🗑️ Remove', `Remove ${cityName} from list`, () => removeCity(cityName));
+    const removeBtn = createButton('🗑️', `Remove ${cityName} from list`, () => removeCity(cityName));
     removeBtn.className = 'icon-btn remove-btn';
     controls.appendChild(removeBtn);
     
@@ -2519,7 +2519,6 @@ function renderTableView(container) {
         cityLink.href = '#';
         cityLink.textContent = cityName;
         cityLink.className = 'city-link';
-        cityLink.title = `View full weather details for ${cityName}`;
         cityLink.addEventListener('click', (e) => {
             e.preventDefault();
             showFullWeather(cityName, lat, lon);
@@ -2531,12 +2530,24 @@ function renderTableView(container) {
         const alertSpan = document.createElement('span');
         alertSpan.id = `alert-badge-table-${index}`;
         alertSpan.style.marginLeft = '8px';
-        fetchWeatherAlerts(cityName, lat, lon).then(alerts => {
-            const badgeHTML = renderAlertBadge(alerts);
-            if (badgeHTML) {
-                alertSpan.innerHTML = badgeHTML;
-            }
-        });
+
+        // Render immediately from cache if available; otherwise fetch async.
+        // Look up by ID at resolve time so the badge lands in the current DOM
+        // even if renderCityList() rebuilt the table while the NWS request was in flight.
+        const _tableCached = alertsCache[cityName];
+        if (_tableCached && (Date.now() - _tableCached.timestamp < 600000)) {
+            const badgeHTML = renderAlertBadge(_tableCached.alerts);
+            if (badgeHTML) alertSpan.innerHTML = badgeHTML;
+        } else {
+            const _tableBadgeId = `alert-badge-table-${index}`;
+            fetchWeatherAlerts(cityName, lat, lon).then(alerts => {
+                const el = document.getElementById(_tableBadgeId);
+                if (el) {
+                    const badgeHTML = renderAlertBadge(alerts);
+                    if (badgeHTML) el.innerHTML = badgeHTML;
+                }
+            });
+        }
         cityCell.appendChild(alertSpan);
         
         row.appendChild(cityCell);
@@ -2639,7 +2650,7 @@ function renderTableView(container) {
         // Feature buttons with icons
         const historyBtn = createButton('📊', () => showHistoricalWeather(cityName, lat, lon));
         historyBtn.className = 'icon-btn-small feature-btn-small';
-        historyBtn.setAttribute('aria-label', `History - View historical weather for ${cityName}`);
+        historyBtn.setAttribute('aria-label', `View historical weather for ${cityName}`);
         historyBtn.title = 'Historical Weather';
         actionsDiv.appendChild(historyBtn);
         
@@ -2651,24 +2662,24 @@ function renderTableView(container) {
         
         const aroundBtn = createButton('🧭', () => showWeatherAroundMe(cityName, lat, lon));
         aroundBtn.className = 'icon-btn-small feature-btn-small';
-        aroundBtn.setAttribute('aria-label', `Around Me - View weather around ${cityName}`);
+        aroundBtn.setAttribute('aria-label', `View weather around ${cityName}`);
         aroundBtn.title = 'Weather Around Me';
         actionsDiv.appendChild(aroundBtn);
         
         // Movement buttons
         if (index > 0) {
-            const upBtn = createButton('↑ Move Up', `Move ${cityName} up in list`, () => moveCityUp(cityName));
+            const upBtn = createButton('↑', `Move ${cityName} up`, () => moveCityUp(cityName));
             upBtn.className = 'icon-btn-small';
             actionsDiv.appendChild(upBtn);
         }
         
         if (index < Object.keys(cities).length - 1) {
-            const downBtn = createButton('↓ Move Down', `Move ${cityName} down in list`, () => moveCityDown(cityName));
+            const downBtn = createButton('↓', `Move ${cityName} down`, () => moveCityDown(cityName));
             downBtn.className = 'icon-btn-small';
             actionsDiv.appendChild(downBtn);
         }
         
-        const removeBtn = createButton('🗑️ Remove', `Remove ${cityName} from list`, () => removeCity(cityName));
+        const removeBtn = createButton('🗑️', `Remove ${cityName}`, () => removeCity(cityName));
         removeBtn.className = 'icon-btn-small remove-btn';
         actionsDiv.appendChild(removeBtn);
         
@@ -2800,9 +2811,6 @@ function renderListView(container) {
     let activeIndex = 0;
     const cityNames = Object.keys(cities);
     const isCondensed = currentConfig.listViewStyle === 'condensed';
-    
-    // Variable to hold updateButtonLabels function - will be assigned later
-    let updateButtonLabels = null;
     
     // Create list items
     cityNames.forEach(async (cityName, index) => {
@@ -2951,24 +2959,6 @@ function renderListView(container) {
         item.dataset.index = index;
         
         container.appendChild(item);
-        
-        // Add click handler for mouse selection (WCAG 2.2 AA compliance)
-        item.addEventListener('click', function() {
-            const clickedIndex = parseInt(this.dataset.index);
-            const container = document.getElementById('city-list');
-            const items = container.querySelectorAll('.list-view-item');
-            
-            // Update active item
-            setActiveListItem(container, items, clickedIndex);
-            
-            // Update button labels
-            if (updateButtonLabels) {
-                updateButtonLabels(clickedIndex);
-            }
-            
-            // Announce to screen reader
-            announceToScreenReader(this.textContent);
-        });
     });
     
     // Set initial active descendant
@@ -3029,7 +3019,7 @@ function renderListView(container) {
     };
     
     // Function to update button labels and alert badge based on current selection
-    updateButtonLabels = async (index) => {
+    const updateButtonLabels = async (index) => {
         const items = container.querySelectorAll('.list-view-item');
         if (items[index]) {
             const cityName = items[index].dataset.cityName;
@@ -3311,8 +3301,10 @@ async function showFullWeather(cityName, lat, lon) {
     title.textContent = `Full Weather Details - ${cityName}`;
     content.innerHTML = '<p class="loading-text">Loading detailed forecast...</p>';
     
-    // Use centralized dialog opening with proper focus management
-    openDialog(dialog);
+    closeAllModals();
+    focusReturnElement = document.activeElement;
+    dialog.hidden = false;
+    trapFocus(dialog);
     
     try {
         const weather = await fetchWeatherForCity(cityName, lat, lon, true);
@@ -3438,7 +3430,7 @@ function renderCurrentConditions(weather) {
         html += '</div>';
     } else {
         // Flat/Card view (default)
-        html += '<dl class="weather-details">';
+        html += '<dl>';
         html += `<dt>Temperature:</dt><dd>${convertTemperature(current.temperature_2m)}°${currentConfig.units.temperature}</dd>`;
         html += `<dt>Feels Like:</dt><dd>${convertTemperature(current.apparent_temperature)}°${currentConfig.units.temperature}</dd>`;
         html += `<dt>Weather:</dt><dd>${WEATHER_CODES[current.weather_code] || 'Unknown'}</dd>`;
@@ -3951,10 +3943,11 @@ function openConfigDialog() {
         if (dailyDetailViewInput) dailyDetailViewInput.checked = true;
         
         console.log('About to close modals and show dialog');
-        
-        // Use centralized dialog opening with focus on first tab
-        openDialog(dialog, '#current-tab');
-        
+        closeAllModals();
+        focusReturnElement = document.activeElement;
+        dialog.hidden = false;
+        trapFocus(dialog);
+        document.getElementById('current-tab').focus();
         console.log('Dialog should now be visible');
     } catch (error) {
         console.error('Error in openConfigDialog:', error);
@@ -3965,12 +3958,7 @@ function openConfigDialog() {
 function applyConfiguration() {
     updateConfigFromForm();
     renderCityList();
-    
-    // Show visual confirmation banner
-    showConfigFeedback(false);
-    
-    // Announce to screen readers
-    announceToScreenReader('Configuration applied successfully. Changes are now visible in your weather display.');
+    announceToScreenReader('Configuration applied');
 }
 
 function saveConfiguration() {
@@ -3978,12 +3966,7 @@ function saveConfiguration() {
     saveConfigToStorage();
     renderCityList();
     closeConfigDialog();
-    
-    // Show visual confirmation banner
-    showConfigFeedback(true);
-    
-    // Announce to screen readers
-    announceToScreenReader('Configuration saved successfully and will be remembered for future visits. Changes are now visible in your weather display.');
+    announceToScreenReader('Configuration saved');
 }
 
 function updateConfigFromForm() {
@@ -4139,56 +4122,6 @@ function closeConfigDialog() {
         focusReturnElement.focus();
         focusReturnElement = null;
     }
-}
-
-// Helper function to show visual feedback banner
-function showConfigFeedback(saved) {
-    // Remove any existing feedback banner
-    const existingBanner = document.getElementById('config-feedback-banner');
-    if (existingBanner) {
-        existingBanner.remove();
-    }
-    
-    // Create feedback banner
-    const banner = document.createElement('div');
-    banner.id = 'config-feedback-banner';
-    banner.className = 'config-feedback-banner';
-    banner.setAttribute('role', 'status');
-    banner.setAttribute('aria-live', 'polite');
-    banner.setAttribute('aria-atomic', 'true');
-    
-    // Create banner content
-    const icon = document.createElement('span');
-    icon.className = 'feedback-icon';
-    icon.setAttribute('aria-hidden', 'true');
-    icon.textContent = '✓';
-    
-    const message = document.createElement('span');
-    message.className = 'feedback-message';
-    message.textContent = saved ? 
-        'Settings saved successfully! Your preferences will be remembered. Check the weather display below to see your changes.' : 
-        'Settings applied! Check the weather display below to see your changes. Use "Save & Close" to remember these settings for future visits.';
-    
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'feedback-close';
-    closeBtn.setAttribute('aria-label', 'Dismiss notification');
-    closeBtn.textContent = '×';
-    closeBtn.addEventListener('click', () => banner.remove());
-    
-    banner.appendChild(icon);
-    banner.appendChild(message);
-    banner.appendChild(closeBtn);
-    
-    // Append banner to body to ensure it's above the modal
-    document.body.appendChild(banner);
-    
-    // Auto-dismiss after 10 seconds
-    setTimeout(() => {
-        if (banner.parentNode) {
-            banner.classList.add('fade-out');
-            setTimeout(() => banner.remove(), 300);
-        }
-    }, 10000);
 }
 
 // Reset functions
@@ -4652,41 +4585,6 @@ function closeAllModals() {
     }
 }
 
-// Initialize dialog close functionality (backdrop click + close button)
-function initializeDialogCloseFunctionality() {
-    const modals = document.querySelectorAll('.modal');
-    
-    modals.forEach(modal => {
-        // Add close button if not already present
-        const modalContent = modal.querySelector('.modal-content');
-        if (modalContent && !modalContent.querySelector('.modal-close-btn')) {
-            const closeBtn = document.createElement('button');
-            closeBtn.className = 'modal-close-btn';
-            closeBtn.setAttribute('aria-label', 'Close dialog');
-            closeBtn.setAttribute('type', 'button');
-            closeBtn.innerHTML = '&times;';
-            closeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                closeAllModals();
-                announceToScreenReader('Dialog closed');
-            });
-            
-            // Insert close button as first child of modal-content
-            modalContent.insertBefore(closeBtn, modalContent.firstChild);
-        }
-        
-        // Add backdrop click handler
-        // Click on modal backdrop (not content) closes the dialog
-        modal.addEventListener('click', (e) => {
-            // Only close if clicking the backdrop (modal itself), not the content
-            if (e.target === modal) {
-                closeAllModals();
-                announceToScreenReader('Dialog closed');
-            }
-        });
-    });
-}
-
 // Focus trap for modal dialogs
 function trapFocus(element) {
     const focusableElements = element.querySelectorAll(
@@ -4710,56 +4608,6 @@ function trapFocus(element) {
             }
         }
     });
-}
-
-/**
- * Opens a dialog with proper focus management for WCAG 2.2 AA compliance
- * @param {HTMLElement} dialog - The dialog element to open
- * @param {HTMLElement|string|null} focusTarget - Element to focus (element, CSS selector, or null for first focusable)
- */
-function openDialog(dialog, focusTarget = null) {
-    // Close any other open modals first (this will restore focus if needed)
-    closeAllModals();
-
-    // Save current focus to return to when THIS dialog closes (after closing other modals)
-    focusReturnElement = document.activeElement;
-    
-    // Show the dialog
-    dialog.hidden = false;
-    
-    // Set up focus trap
-    trapFocus(dialog);
-    
-    // Move focus to the specified element or first focusable element
-    if (focusTarget) {
-        const targetElement = typeof focusTarget === 'string' 
-            ? dialog.querySelector(focusTarget) 
-            : focusTarget;
-        
-        if (targetElement) {
-            targetElement.focus();
-        } else {
-            // Fallback to first focusable element
-            focusFirstElement(dialog);
-        }
-    } else {
-        // Focus first focusable element
-        focusFirstElement(dialog);
-    }
-}
-
-/**
- * Focuses the first focusable element in a container
- * @param {HTMLElement} container - Container to search for focusable elements
- */
-function focusFirstElement(container) {
-    const focusableElements = container.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"]), [role="listbox"]'
-    );
-    
-    if (focusableElements.length > 0) {
-        focusableElements[0].focus();
-    }
 }
 // ==================== NEW FEATURES ====================
 
@@ -4954,17 +4802,13 @@ function showAlertDetails(alertDataStr) {
         </div>
     `;
     
-    // Use centralized dialog opening with proper focus management
-    openDialog(dialog);
+    closeAllModals();
+    dialog.hidden = false;
     announceToScreenReader(`Weather alert: ${alert.event}. ${alert.severity} severity.`);
 }
 
 document.getElementById('close-alert-details-btn')?.addEventListener('click', () => {
     document.getElementById('alert-details-dialog').hidden = true;
-    if (focusReturnElement) {
-        focusReturnElement.focus();
-        focusReturnElement = null;
-    }
 });
 
 // ===== HISTORICAL WEATHER =====
@@ -4998,8 +4842,8 @@ async function showHistoricalWeather(cityKey, lat, lon) {
         </div>
     `;
     
-    // Use centralized dialog opening with proper focus management
-    openDialog(dialog);
+    closeAllModals();
+    dialog.hidden = false;
     announceToScreenReader(`Historical weather for ${cityKey.split(',')[0]} - showing this day over the past 20 years`);
     
     // Automatically load data
@@ -5340,10 +5184,6 @@ function adjustHistoricalYear(yearShift) {
 
 document.getElementById('close-historical-weather-btn')?.addEventListener('click', () => {
     document.getElementById('historical-weather-dialog').hidden = true;
-    if (focusReturnElement) {
-        focusReturnElement.focus();
-        focusReturnElement = null;
-    }
 });
 
 // ===== PRECIPITATION NOWCAST =====
@@ -5355,8 +5195,8 @@ async function showPrecipitationNowcast(cityKey, lat, lon) {
     title.textContent = `Expected Precipitation - ${cityKey.split(',')[0]}`;
     content.innerHTML = '<p>Loading precipitation forecast...</p>';
     
-    // Use centralized dialog opening with proper focus management
-    openDialog(dialog);
+    closeAllModals();
+    dialog.hidden = false;
     
     try {
         const data = await fetchPrecipitationNowcast(lat, lon);
@@ -5447,10 +5287,6 @@ function renderPrecipitationNowcast(data) {
 
 document.getElementById('close-precipitation-nowcast-btn')?.addEventListener('click', () => {
     document.getElementById('precipitation-nowcast-dialog').hidden = true;
-    if (focusReturnElement) {
-        focusReturnElement.focus();
-        focusReturnElement = null;
-    }
 });
 
 // ===== WEATHER AROUND ME =====
@@ -5495,8 +5331,8 @@ async function showWeatherAroundMe(cityKey, lat, lon) {
         </div>
     `;
     
-    // Use centralized dialog opening with proper focus management
-    openDialog(dialog);
+    closeAllModals();
+    dialog.hidden = false;
     
     // Default distance based on unit
     const defaultDistance = isKm ? 240 : 150;
@@ -5675,10 +5511,6 @@ function generateWeatherSummary(weatherResults, cityKey) {
 
 document.getElementById('close-weather-around-me-btn')?.addEventListener('click', () => {
     document.getElementById('weather-around-me-dialog').hidden = true;
-    if (focusReturnElement) {
-        focusReturnElement.focus();
-        focusReturnElement = null;
-    }
 });
 
 // Helper function for date/time formatting
