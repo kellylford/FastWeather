@@ -880,8 +880,12 @@ struct AppSettings: Codable {
             
             for defaultCategory in defaultCategories {
                 if !existingCategoryTypes.contains(defaultCategory.category) {
-                    // Add new category at the end, enabled by default
-                    mergedCategories.append(defaultCategory)
+                    // Insert before My Data so it always stays last
+                    if let myDataIndex = mergedCategories.firstIndex(where: { $0.category == .myData }) {
+                        mergedCategories.insert(defaultCategory, at: myDataIndex)
+                    } else {
+                        mergedCategories.append(defaultCategory)
+                    }
                 }
             }
             
