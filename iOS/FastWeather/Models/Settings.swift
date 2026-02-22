@@ -415,7 +415,7 @@ struct AppSettings: Codable {
         HourlyField(type: .precipitationProbability, isEnabled: true),
         HourlyField(type: .rain, isEnabled: true),
         HourlyField(type: .showers, isEnabled: true),
-        HourlyField(type: .snowfall, isEnabled: true),
+        HourlyField(type: .snowfall, isEnabled: false), // disabled: .precipitation already shows snow amounts
         HourlyField(type: .windSpeed, isEnabled: true),
         HourlyField(type: .windDirection, isEnabled: true),
         HourlyField(type: .windGusts, isEnabled: true),
@@ -563,7 +563,7 @@ struct AppSettings: Codable {
             HourlyField(type: .precipitationProbability, isEnabled: true),
             HourlyField(type: .rain, isEnabled: true),
             HourlyField(type: .showers, isEnabled: true),
-            HourlyField(type: .snowfall, isEnabled: true),
+            HourlyField(type: .snowfall, isEnabled: false), // disabled: .precipitation already shows snow amounts
             HourlyField(type: .windSpeed, isEnabled: true),
             HourlyField(type: .windDirection, isEnabled: true),
             HourlyField(type: .windGusts, isEnabled: true),
@@ -753,7 +753,7 @@ struct AppSettings: Codable {
             HourlyField(type: .precipitationProbability, isEnabled: true),
             HourlyField(type: .rain, isEnabled: true),
             HourlyField(type: .showers, isEnabled: true),
-            HourlyField(type: .snowfall, isEnabled: true),
+            HourlyField(type: .snowfall, isEnabled: false), // disabled: .precipitation already shows snow amounts
             HourlyField(type: .windSpeed, isEnabled: true),
             HourlyField(type: .windDirection, isEnabled: true),
             HourlyField(type: .windGusts, isEnabled: true),
