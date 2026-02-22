@@ -435,7 +435,7 @@ struct AppSettings: Codable {
         DailyField(type: .feelsLikeMin, isEnabled: false),
         DailyField(type: .sunrise, isEnabled: true),
         DailyField(type: .sunset, isEnabled: true),
-        DailyField(type: .precipitationSum, isEnabled: false),
+        DailyField(type: .precipitationSum, isEnabled: true),   // enabled: shows snow or rain amount
         DailyField(type: .precipitationProbability, isEnabled: true),
         DailyField(type: .precipitationHours, isEnabled: false),
         DailyField(type: .rainSum, isEnabled: false),
@@ -582,7 +582,7 @@ struct AppSettings: Codable {
             DailyField(type: .feelsLikeMin, isEnabled: false),
             DailyField(type: .sunrise, isEnabled: true),
             DailyField(type: .sunset, isEnabled: true),
-            DailyField(type: .precipitationSum, isEnabled: false),
+            DailyField(type: .precipitationSum, isEnabled: true),   // enabled: shows snow or rain amount
             DailyField(type: .precipitationProbability, isEnabled: true),
             DailyField(type: .precipitationHours, isEnabled: false),
             DailyField(type: .rainSum, isEnabled: false),
@@ -791,7 +791,7 @@ struct AppSettings: Codable {
             DailyField(type: .feelsLikeMin, isEnabled: false),
             DailyField(type: .sunrise, isEnabled: true),
             DailyField(type: .sunset, isEnabled: true),
-            DailyField(type: .precipitationSum, isEnabled: false),
+            DailyField(type: .precipitationSum, isEnabled: true),   // enabled: shows snow or rain amount
             DailyField(type: .precipitationProbability, isEnabled: true),
             DailyField(type: .precipitationHours, isEnabled: false),
             DailyField(type: .rainSum, isEnabled: false),

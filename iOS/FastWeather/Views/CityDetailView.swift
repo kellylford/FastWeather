@@ -966,12 +966,34 @@ struct HourlyForecastCard: View {
             }
             
         case .precipitation:
-            if let precip = hourly.precipitation?[index], precip > 0 {
+            let snowfallAmt = hourly.snowfall?[index] ?? 0
+            if snowfallAmt > 0 {
+                return AnyView(HStack(spacing: 2) {
+                    Image(systemName: "snowflake")
+                        .font(.caption2)
+                        .foregroundColor(.blue)
+                    Text(formatSnowfall(snowfallAmt))
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                })
+            } else if let precip = hourly.precipitation?[index], precip > 0 {
                 return AnyView(HStack(spacing: 2) {
                     Image(systemName: "drop.fill")
                         .font(.caption2)
                         .foregroundColor(.blue)
                     Text(formatPrecipitation(precip))
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                })
+            }
+            
+        case .snowfall:
+            if let snow = hourly.snowfall?[index], snow > 0 {
+                return AnyView(HStack(spacing: 2) {
+                    Image(systemName: "snowflake")
+                        .font(.caption2)
+                        .foregroundColor(.blue)
+                    Text(formatSnowfall(snow))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 })
@@ -1076,8 +1098,16 @@ struct HourlyForecastCard: View {
             }
             
         case .precipitation:
-            if let precip = hourly.precipitation?[index], precip > 0 {
+            let snowfallAmt = hourly.snowfall?[index] ?? 0
+            if snowfallAmt > 0 {
+                return "snowfall \(formatSnowfall(snowfallAmt))"
+            } else if let precip = hourly.precipitation?[index], precip > 0 {
                 return "precipitation \(formatPrecipitation(precip))"
+            }
+            
+        case .snowfall:
+            if let snow = hourly.snowfall?[index], snow > 0 {
+                return "snowfall \(formatSnowfall(snow))"
             }
             
         case .uvIndex:
@@ -1116,6 +1146,15 @@ struct HourlyForecastCard: View {
     private func formatPrecipitation(_ mm: Double) -> String {
         let precip = settingsManager.settings.precipitationUnit.convert(mm)
         return String(format: "%.2f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
+    }
+    
+    private func formatSnowfall(_ cm: Double) -> String {
+        switch settingsManager.settings.precipitationUnit {
+        case .inches:
+            return String(format: "%.1f in", cm * 0.393701)
+        case .millimeters:
+            return String(format: "%.1f cm", cm)
+        }
     }
     
     private func formatWindSpeed(_ kmh: Double) -> String {
@@ -1276,7 +1315,18 @@ struct DailyForecastRow: View {
             }
             
         case .precipitationSum:
-            if let precip = daily.precipitationSum?[index], precip > 0 {
+            // Prefer snowfall in proper units when snow is expected; fall back to liquid total
+            if let snow = daily.snowfallSum?[index], snow > 0 {
+                return AnyView(HStack(spacing: 4) {
+                    Image(systemName: "snowflake")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                    Text(formatSnowfall(snow))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .frame(minWidth: 50))
+            } else if let precip = daily.precipitationSum?[index], precip > 0 {
                 return AnyView(HStack(spacing: 4) {
                     Image(systemName: "drop.fill")
                         .font(.caption)
@@ -1415,7 +1465,9 @@ struct DailyForecastRow: View {
             }
             
         case .precipitationSum:
-            if let precip = daily.precipitationSum?[index], precip > 0 {
+            if let snow = daily.snowfallSum?[index], snow > 0 {
+                return "\(formatSnowfall(snow)) of snow"
+            } else if let precip = daily.precipitationSum?[index], precip > 0 {
                 return "precipitation \(formatPrecipitation(precip))"
             }
             
@@ -1468,9 +1520,12 @@ struct DailyForecastRow: View {
     }
     
     private func formatSnowfall(_ cm: Double) -> String {
-        // Convert cm to mm, then to user's unit
-        let mm = cm * 10
-        return formatPrecipitation(mm)
+        switch settingsManager.settings.precipitationUnit {
+        case .inches:
+            return String(format: "%.1f in", cm * 0.393701)
+        case .millimeters:
+            return String(format: "%.1f cm", cm)
+        }
     }
     
     private func formatWindSpeed(_ kmh: Double) -> String {

@@ -228,7 +228,7 @@ class WeatherService: ObservableObject {
             "latitude": String(city.latitude),
             "longitude": String(city.longitude),
             "current": currentParams,
-            "hourly": "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,windgusts_10m,uv_index,dewpoint_2m",
+            "hourly": "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,windgusts_10m,uv_index,dewpoint_2m,snowfall",
             "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,rain_sum,snowfall_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration,windspeed_10m_max,winddirection_10m_dominant",
             "forecast_days": "16",
             "timezone": "auto"
@@ -325,7 +325,8 @@ class WeatherService: ObservableObject {
                             precipitationProbability: hourly.precipitationProbability.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
                             uvIndex: hourly.uvIndex.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
                             windgusts10m: hourly.windgusts10m.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
-                            dewpoint2m: hourly.dewpoint2m.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) }
+                            dewpoint2m: hourly.dewpoint2m.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                            snowfall: hourly.snowfall.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) }
                         )
                     }
                 }
@@ -514,7 +515,7 @@ class WeatherService: ObservableObject {
             "latitude": String(latitude),
             "longitude": String(longitude),
             "current": "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility,wind_gusts_10m,uv_index,dewpoint_2m",
-            "hourly": "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,windgusts_10m,uv_index,dewpoint_2m",
+            "hourly": "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,windgusts_10m,uv_index,dewpoint_2m,snowfall",
             "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,rain_sum,snowfall_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration,windspeed_10m_max,winddirection_10m_dominant",
             "forecast_days": "16",
             "timezone": "auto"

@@ -291,7 +291,7 @@ struct WeatherData: Codable {
         let time: [String?]?  // Optional for basic mode (not requested)
         let temperature2m: [Double?]?  // Optional for basic mode (not requested)
         let weatherCode: [Int?]?  // Optional for basic mode (not requested)
-        let precipitation: [Double?]?  // Optional for basic mode (not requested)
+        let precipitation: [Double?]?  // Total precipitation (rain+showers+snow water equiv) in mm
         let relativeHumidity2m: [Int?]?  // Optional for basic mode (not requested)
         let windSpeed10m: [Double?]?  // Optional for basic mode (not requested)
         let cloudcover: [Int?]?  // Used in basic mode
@@ -299,6 +299,7 @@ struct WeatherData: Codable {
         let uvIndex: [Double?]?
         let windgusts10m: [Double?]?
         let dewpoint2m: [Double?]?
+        let snowfall: [Double?]?  // Hourly snowfall in cm
         
         enum CodingKeys: String, CodingKey {
             case time
@@ -312,6 +313,7 @@ struct WeatherData: Codable {
             case uvIndex = "uv_index"
             case windgusts10m = "windgusts_10m"
             case dewpoint2m = "dewpoint_2m"
+            case snowfall
         }
     }
 }
