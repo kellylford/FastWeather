@@ -391,6 +391,11 @@ struct CityDetailView: View {
             if let daily = weather.daily, daily.temperature2mMax.count > 1 {
                 GroupBox(label: Label("16-Day Forecast", systemImage: "calendar")) {
                     VStack(spacing: 0) {
+                        DailyForecastSummaryView(daily: daily, settingsManager: settingsManager)
+                            .padding(.horizontal)
+                            .padding(.top, 4)
+                            .padding(.bottom, 8)
+                        Divider()
                         ForEach(0..<min(16, daily.temperature2mMax.count), id: \.self) { index in
                             DailyForecastRow(
                                 daily: daily,
@@ -1160,6 +1165,133 @@ struct HourlyForecastCard: View {
     private func formatWindSpeed(_ kmh: Double) -> String {
         let speed = settingsManager.settings.windSpeedUnit.convert(kmh)
         return String(format: "%.0f %@", speed, settingsManager.settings.windSpeedUnit.rawValue)
+    }
+}
+
+// MARK: - 16-Day Forecast Summary
+
+struct DailyForecastSummaryView: View {
+    let daily: WeatherData.DailyWeather
+    @ObservedObject var settingsManager: SettingsManager
+
+    private var dayCount: Int {
+        min(16, daily.temperature2mMax.count)
+    }
+
+    private var isFahrenheit: Bool {
+        settingsManager.settings.temperatureUnit == .fahrenheit
+    }
+
+    // Temperature trend: compare first-3-day average high vs last-3-day average high
+    private var temperatureTrendText: String? {
+        guard dayCount >= 6 else { return nil }
+        let highs = (0..<dayCount).compactMap { daily.temperature2mMax[$0] }
+        guard highs.count >= 6 else { return nil }
+
+        let firstAvg = highs.prefix(3).reduce(0, +) / 3.0
+        let lastAvg = highs.suffix(3).reduce(0, +) / 3.0
+        let threshold = isFahrenheit ? 5.0 : 3.0
+        let diff = lastAvg - firstAvg
+        guard abs(diff) >= threshold else { return nil }
+
+        let firstVal = Int(settingsManager.settings.temperatureUnit.convert(firstAvg).rounded())
+        let lastVal = Int(settingsManager.settings.temperatureUnit.convert(lastAvg).rounded())
+        let unit = settingsManager.settings.temperatureUnit.rawValue
+
+        if diff > 0 {
+            return "Highs climb from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days."
+        } else {
+            return "Highs fall from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days."
+        }
+    }
+
+    // Precipitation summary: count wet days and snow days
+    private var precipitationText: String {
+        var wetDays = 0
+        var snowDays = 0
+
+        for i in 0..<dayCount {
+            let prob = daily.precipitationProbabilityMax?[i]
+            let precip = daily.precipitationSum?[i]
+            let snow = daily.snowfallSum?[i]
+
+            let isWet: Bool
+            if let p = prob {
+                isWet = p >= 40
+            } else {
+                isWet = (precip ?? 0) > 0.5 || (snow ?? 0) > 0.1
+            }
+
+            if isWet {
+                wetDays += 1
+                if (snow ?? 0) > 0.1 {
+                    snowDays += 1
+                }
+            }
+        }
+
+        switch (wetDays, snowDays) {
+        case (0, _):
+            return "Dry conditions expected throughout the period."
+        case (1, 0):
+            return "One day of rain expected."
+        case (1, 1):
+            return "One day of snow expected."
+        case (let w, 0):
+            return "Rain expected on \(w) of the next \(dayCount) days."
+        case (let w, let s) where s == w:
+            return "Snow expected on \(s) of the next \(dayCount) days."
+        default:
+            return "Precipitation on \(wetDays) days, including snow on \(snowDays)."
+        }
+    }
+
+    // Wind alert: only mention if any day exceeds 56 km/h (~35 mph)
+    private var windAlertText: String? {
+        let thresholdKmh = 56.0
+        guard let windSpeeds = daily.windSpeed10mMax else { return nil }
+
+        var maxSpeed = 0.0
+        var maxIndex = 0
+        for i in 0..<dayCount {
+            let speed = windSpeeds[i] ?? 0
+            if speed > maxSpeed {
+                maxSpeed = speed
+                maxIndex = i
+            }
+        }
+        guard maxSpeed > thresholdKmh else { return nil }
+
+        let convertedSpeed = Int(settingsManager.settings.windSpeedUnit.convert(maxSpeed).rounded())
+        let unit = settingsManager.settings.windSpeedUnit.rawValue
+        return "Strong winds up to \(convertedSpeed) \(unit) expected \(dayNameForIndex(maxIndex))."
+    }
+
+    private func dayNameForIndex(_ index: Int) -> String {
+        if let sunriseStr = daily.sunrise?[index], let date = DateParser.parse(sunriseStr) {
+            if index == 0 { return "today" }
+            if index == 1 { return "tomorrow" }
+            let fmt = DateFormatter()
+            fmt.dateFormat = "EEEE"
+            return fmt.string(from: date)
+        }
+        return "day \(index + 1)"
+    }
+
+    private var summaryText: String {
+        var parts: [String] = []
+        if let trend = temperatureTrendText { parts.append(trend) }
+        parts.append(precipitationText)
+        if let wind = windAlertText { parts.append(wind) }
+        return parts.joined(separator: " ")
+    }
+
+    var body: some View {
+        Text(summaryText)
+            .font(.subheadline)
+            .foregroundColor(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityLabel(summaryText)
     }
 }
 
