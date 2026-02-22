@@ -1182,6 +1182,47 @@ struct DailyForecastSummaryView: View {
         settingsManager.settings.temperatureUnit == .fahrenheit
     }
 
+    // Returns a natural-language day label with the calendar date included.
+    // e.g. "today", "tomorrow", "Thursday, March 5"
+    private func dayLabel(for index: Int) -> String {
+        guard let sunriseStr = daily.sunrise?[index], let date = DateParser.parse(sunriseStr) else {
+            return "day \(index + 1)"
+        }
+        if index == 0 { return "today" }
+        if index == 1 { return "tomorrow" }
+        let fmt = DateFormatter()
+        fmt.dateFormat = "EEEE, MMM d"
+        return fmt.string(from: date)
+    }
+
+    // Formats a list of day indices as natural English: "March 3", "March 3 and March 5",
+    // "March 3, March 5, and March 7". For 4+ items just returns the count phrase.
+    private func dateList(indices: [Int], noun: String) -> String {
+        guard !indices.isEmpty else { return "" }
+        let shortFmt = DateFormatter()
+        shortFmt.dateFormat = "MMM d"
+
+        func shortDate(_ index: Int) -> String {
+            guard let sunriseStr = daily.sunrise?[index], let date = DateParser.parse(sunriseStr) else {
+                return "day \(index + 1)"
+            }
+            if index == 0 { return "today" }
+            if index == 1 { return "tomorrow" }
+            return shortFmt.string(from: date)
+        }
+
+        switch indices.count {
+        case 1:
+            return "\(noun) on \(shortDate(indices[0]))"
+        case 2:
+            return "\(noun) on \(shortDate(indices[0])) and \(shortDate(indices[1]))"
+        case 3:
+            return "\(noun) on \(shortDate(indices[0])), \(shortDate(indices[1])), and \(shortDate(indices[2]))"
+        default:
+            return "\(noun) on \(indices.count) days"
+        }
+    }
+
     // Temperature trend: compare first-3-day average high vs last-3-day average high
     private var temperatureTrendText: String? {
         guard dayCount >= 6 else { return nil }
@@ -1200,30 +1241,30 @@ struct DailyForecastSummaryView: View {
         let lastVal = Int(convert(lastAvg).rounded())
 
         if diff > 0 {
-            // Warming trend — mention peak if it's notably above the ending average (mid-period spike)
-            let peakHigh = highs.max() ?? lastAvg
-            let peakVal = Int(convert(peakHigh).rounded())
-            if peakHigh > lastAvg + threshold {
-                return "Highs climb from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days, with a peak of \(peakVal)\(unit)."
+            // Warming trend — mention peak with date if notably above ending average
+            if let peakHigh = highs.max(), peakHigh > lastAvg + threshold,
+               let peakIndex = (0..<dayCount).first(where: { (daily.temperature2mMax[$0] ?? 0) == peakHigh }) {
+                let peakVal = Int(convert(peakHigh).rounded())
+                return "Highs climb from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days, with a peak of \(peakVal)\(unit) on \(dayLabel(for: peakIndex))."
             } else {
                 return "Highs climb from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days."
             }
         } else {
-            // Cooling trend — mention trough if it's notably below the ending average (mid-period cold snap)
-            let troughLow = highs.min() ?? lastAvg
-            let troughVal = Int(convert(troughLow).rounded())
-            if troughLow < lastAvg - threshold {
-                return "Highs fall from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days, with a low of \(troughVal)\(unit)."
+            // Cooling trend — mention trough with date if notably below ending average
+            if let troughLow = highs.min(), troughLow < lastAvg - threshold,
+               let troughIndex = (0..<dayCount).first(where: { (daily.temperature2mMax[$0] ?? 0) == troughLow }) {
+                let troughVal = Int(convert(troughLow).rounded())
+                return "Highs fall from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days, with a low of \(troughVal)\(unit) on \(dayLabel(for: troughIndex))."
             } else {
                 return "Highs fall from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days."
             }
         }
     }
 
-    // Precipitation summary: count wet days and snow days
+    // Precipitation summary: collect specific day indices for snow and rain
     private var precipitationText: String {
-        var wetDays = 0
-        var snowDays = 0
+        var rainIndices: [Int] = []
+        var snowIndices: [Int] = []
 
         for i in 0..<dayCount {
             let prob = daily.precipitationProbabilityMax?[i]
@@ -1238,26 +1279,31 @@ struct DailyForecastSummaryView: View {
             }
 
             if isWet {
-                wetDays += 1
                 if (snow ?? 0) > 0.1 {
-                    snowDays += 1
+                    snowIndices.append(i)
+                } else {
+                    rainIndices.append(i)
                 }
             }
         }
 
-        switch (wetDays, snowDays) {
+        let wetCount = rainIndices.count + snowIndices.count
+
+        switch (wetCount, snowIndices.count) {
         case (0, _):
             return "Dry conditions expected throughout the period."
-        case (1, 0):
-            return "One day of rain expected."
-        case (1, 1):
-            return "One day of snow expected."
-        case (let w, 0):
-            return "Rain expected on \(w) of the next \(dayCount) days."
+        case (_, 0):
+            // Rain only
+            return "\(dateList(indices: rainIndices, noun: "Rain expected").capitalized)."
         case (let w, let s) where s == w:
-            return "Snow expected on \(s) of the next \(dayCount) days."
+            // Snow only
+            return "\(dateList(indices: snowIndices, noun: "Snow expected").capitalized)."
         default:
-            return "Precipitation on \(wetDays) days, including snow on \(snowDays)."
+            // Mix — lead with snow dates, then mention total rain days
+            let snowPart = dateList(indices: snowIndices, noun: "snow")
+            let rainCount = rainIndices.count
+            let rainPart = rainCount == 1 ? "rain on 1 other day" : "rain on \(rainCount) other days"
+            return "Precipitation expected, with \(snowPart) and \(rainPart)."
         }
     }
 
@@ -1279,18 +1325,7 @@ struct DailyForecastSummaryView: View {
 
         let convertedSpeed = Int(settingsManager.settings.windSpeedUnit.convert(maxSpeed).rounded())
         let unit = settingsManager.settings.windSpeedUnit.rawValue
-        return "Strong winds up to \(convertedSpeed) \(unit) expected \(dayNameForIndex(maxIndex))."
-    }
-
-    private func dayNameForIndex(_ index: Int) -> String {
-        if let sunriseStr = daily.sunrise?[index], let date = DateParser.parse(sunriseStr) {
-            if index == 0 { return "today" }
-            if index == 1 { return "tomorrow" }
-            let fmt = DateFormatter()
-            fmt.dateFormat = "EEEE"
-            return fmt.string(from: date)
-        }
-        return "day \(index + 1)"
+        return "Strong winds up to \(convertedSpeed) \(unit) expected \(dayLabel(for: maxIndex))."
     }
 
     private var summaryText: String {
