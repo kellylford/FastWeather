@@ -199,11 +199,12 @@ struct TableRowView: View {
             return (showLabel ? "Wind Gusts" : "", formatWindSpeed(windGusts))
             
         case .precipitation:
-            let snowfall = weather.current.snowfall ?? 0
+            let snowfall = weather.daily?.snowfallSum?.first.flatMap { $0 } ?? weather.current.snowfall ?? 0
+            let precip = weather.daily?.precipitationSum?.first.flatMap { $0 } ?? weather.current.precipitation ?? 0
             if snowfall > 0 {
                 return (showLabel ? "Snow" : "", formatSnowfall(snowfall))
             }
-            guard let precip = weather.current.precipitation, precip > 0 else { return nil }
+            guard precip > 0 else { return nil }
             return (showLabel ? "Rain" : "", formatPrecipitation(precip))
             
         case .precipitationProbability:
@@ -229,7 +230,8 @@ struct TableRowView: View {
             return (showLabel ? "Showers" : "", formatPrecipitation(showers))
             
         case .snowfall:
-            guard let snow = weather.current.snowfall, snow > 0 else { return nil }
+            let snow = weather.daily?.snowfallSum?.first.flatMap { $0 } ?? weather.current.snowfall ?? 0
+            guard snow > 0 else { return nil }
             return (showLabel ? "Snow" : "", formatSnowfall(snow))
             
         case .cloudCover:

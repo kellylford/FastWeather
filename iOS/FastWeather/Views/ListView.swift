@@ -328,11 +328,12 @@ struct ListRowView: View {
                 }
                 
             case .precipitation:
-                let snowfall = weather.current.snowfall ?? 0
+                let snowfall = weather.daily?.snowfallSum?.first.flatMap { $0 } ?? weather.current.snowfall ?? 0
+                let precip = weather.daily?.precipitationSum?.first.flatMap { $0 } ?? weather.current.precipitation ?? 0
                 if snowfall > 0 {
                     let value = formatSnowfall(snowfall)
                     parts.append(isDetails ? "Snow: \(value)" : value)
-                } else if let precip = weather.current.precipitation, precip > 0 {
+                } else if precip > 0 {
                     let value = formatPrecipitation(precip)
                     parts.append(isDetails ? "Rain: \(value)" : value)
                 }
@@ -366,7 +367,8 @@ struct ListRowView: View {
                 }
                 
             case .snowfall:
-                if let snow = weather.current.snowfall, snow > 0 {
+                let snow = weather.daily?.snowfallSum?.first.flatMap { $0 } ?? weather.current.snowfall ?? 0
+                if snow > 0 {
                     let value = formatSnowfall(snow)
                     parts.append(isDetails ? "Snow: \(value)" : value)
                 }
@@ -497,11 +499,12 @@ struct ListRowView: View {
                 }
                 
             case .precipitation:
-                let snowfall = weather.current.snowfall ?? 0
+                let snowfall = weather.daily?.snowfallSum?.first.flatMap { $0 } ?? weather.current.snowfall ?? 0
+                let precip = weather.daily?.precipitationSum?.first.flatMap { $0 } ?? weather.current.precipitation ?? 0
                 if snowfall > 0 {
                     label += ", "
                     label += isDetails ? "Snow: \(formatSnowfall(snowfall))" : formatSnowfall(snowfall)
-                } else if let precip = weather.current.precipitation, precip > 0 {
+                } else if precip > 0 {
                     label += ", "
                     label += isDetails ? "Rain: \(formatPrecipitation(precip))" : formatPrecipitation(precip)
                 }
@@ -540,7 +543,8 @@ struct ListRowView: View {
                 }
                 
             case .snowfall:
-                if let snow = weather.current.snowfall, snow > 0 {
+                let snow = weather.daily?.snowfallSum?.first.flatMap { $0 } ?? weather.current.snowfall ?? 0
+                if snow > 0 {
                     label += ", "
                     label += isDetails ? "Snow: \(formatSnowfall(snow))" : formatSnowfall(snow)
                 }
