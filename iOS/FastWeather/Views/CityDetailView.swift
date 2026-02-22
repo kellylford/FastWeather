@@ -462,6 +462,96 @@ struct CityDetailView: View {
                     .accessibilityElement(children: .contain)
                 }
             }
+            
+        case .astronomy:
+            GroupBox(label: Label("Astronomy", systemImage: "moon.stars")) {
+                VStack(spacing: 12) {
+                    let moonPhase = MoonCalculator.phase(for: selectedDate)
+                    let phaseName = MoonCalculator.phaseName(for: selectedDate)
+                    let illuminationPct = MoonCalculator.illumination(for: selectedDate)
+                    let phaseSymbol = MoonCalculator.phaseSymbol(for: selectedDate)
+
+                    // Phase icon + name
+                    HStack(spacing: 12) {
+                        Image(systemName: phaseSymbol)
+                            .font(.system(size: 36))
+                            .foregroundColor(.secondary)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(phaseName)
+                                .font(.headline)
+                            Text("\(Int(illuminationPct.rounded()))% illuminated")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Moon phase: \(phaseName), \(Int(illuminationPct.rounded())) percent illuminated")
+
+                    Divider()
+
+                    // Moonrise / Moonset
+                    let moonTimes = MoonCalculator.riseAndSet(
+                        for: selectedDate,
+                        latitude: city.latitude,
+                        longitude: city.longitude
+                    )
+
+                    let timeFormatter: DateFormatter = {
+                        let f = DateFormatter()
+                        f.dateFormat = "h:mm a"
+                        return f
+                    }()
+
+                    if settingsManager.settings.showMoonriseInAstronomy || settingsManager.settings.showMoonsetInAstronomy {
+                        HStack {
+                            if settingsManager.settings.showMoonriseInAstronomy {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "moon.circle")
+                                        .foregroundColor(.secondary)
+                                        .accessibilityHidden(true)
+                                    if let rise = moonTimes.rise {
+                                        Text(timeFormatter.string(from: rise))
+                                            .font(.subheadline)
+                                    } else {
+                                        Text("—")
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                                .accessibilityElement(children: .ignore)
+                                .accessibilityLabel("Moonrise: \(moonTimes.rise.map { timeFormatter.string(from: $0) } ?? "not available")")
+                            }
+
+                            if settingsManager.settings.showMoonriseInAstronomy && settingsManager.settings.showMoonsetInAstronomy {
+                                Spacer()
+                            }
+
+                            if settingsManager.settings.showMoonsetInAstronomy {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "moon.circle.fill")
+                                        .foregroundColor(.secondary)
+                                        .accessibilityHidden(true)
+                                    if let set = moonTimes.set {
+                                        Text(timeFormatter.string(from: set))
+                                            .font(.subheadline)
+                                    } else {
+                                        Text("—")
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                                .accessibilityElement(children: .ignore)
+                                .accessibilityLabel("Moonset: \(moonTimes.set.map { timeFormatter.string(from: $0) } ?? "not available")")
+                            }
+                        }
+                    }
+                }
+                .padding(.vertical, 8)
+            }
+            .padding(.horizontal)
+            .accessibilityElement(children: .contain)
         }
     }
     

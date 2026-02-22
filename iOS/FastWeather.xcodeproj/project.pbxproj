@@ -16,6 +16,8 @@
 		6CA5EB93D785DE05210F375A /* DeveloperSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F0E524751DEEAE77391AD2 /* DeveloperSettingsView.swift */; };
 		7B789880182BB3780DACFD9E /* DateParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84585CC21719C6078A0B9F83 /* DateParserTests.swift */; };
 		90B76CB12EE73F0BF533980A /* HistoricalWeatherCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808AC3615E6E747E006B95C9 /* HistoricalWeatherCache.swift */; };
+				6B0A5D23AB1E6BAB93B5BCED /* MoonCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DEF54F1AE97F7891D18FB90 /* MoonCalculator.swift */; };
+				6B0A5D23AB1E6BAB93B5BCED /* MoonCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DEF54F1AE97F7891D18FB90 /* MoonCalculator.swift */; };
 		A10000001 /* WeatherFastApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000 /* WeatherFastApp.swift */; };
 		A10000003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000002 /* ContentView.swift */; };
 		A10000005 /* City.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000004 /* City.swift */; };
@@ -72,6 +74,8 @@
 		5C214A72B9AB146E98AAFD1B /* DeveloperSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeveloperSettingsView.swift; sourceTree = "<group>"; };
 		63BC18B80FA54B507B3AD22C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		808AC3615E6E747E006B95C9 /* HistoricalWeatherCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HistoricalWeatherCache.swift; sourceTree = "<group>"; };
+				2DEF54F1AE97F7891D18FB90 /* MoonCalculator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MoonCalculator.swift; sourceTree = "<group>"; };
+				2DEF54F1AE97F7891D18FB90 /* MoonCalculator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MoonCalculator.swift; sourceTree = "<group>"; };
 		84585CC21719C6078A0B9F83 /* DateParserTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DateParserTests.swift; path = FastWeatherTests/DateParserTests.swift; sourceTree = "<group>"; };
 		85875A99B89892AAE4709A31 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = Info.plist; path = FastWeatherTests/Info.plist; sourceTree = "<group>"; };
 		91C990465E49C005E87F407B /* CountryNames.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CountryNames.swift; sourceTree = "<group>"; };
@@ -234,6 +238,8 @@
 				3B7B06EFA7D170A6D9BA8847 /* WeatherHelpers.swift */,
 				A5456D76628AB29EB3D6E266 /* WeatherCache.swift */,
 				808AC3615E6E747E006B95C9 /* HistoricalWeatherCache.swift */,
+								2DEF54F1AE97F7891D18FB90 /* MoonCalculator.swift */,
+								2DEF54F1AE97F7891D18FB90 /* MoonCalculator.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -418,6 +424,8 @@
 				21615169040A120F379786F1 /* WeatherHelpers.swift in Sources */,
 				4B07E53F90DD3EA9329F2D45 /* WeatherCache.swift in Sources */,
 				90B76CB12EE73F0BF533980A /* HistoricalWeatherCache.swift in Sources */,
+								6B0A5D23AB1E6BAB93B5BCED /* MoonCalculator.swift in Sources */,
+								6B0A5D23AB1E6BAB93B5BCED /* MoonCalculator.swift in Sources */,
 				FFDCDC0E6C3FE2E629DA343D /* CountryNames.swift in Sources */,
 				A1000MYDCB1 /* MyDataCatalog.swift in Sources */,
 				A1000MYDVB1 /* MyDataConfigView.swift in Sources */,

@@ -458,6 +458,8 @@ struct SettingsView: View {
             return "Coordinates, elevation, and location details"
         case .myData:
             return "Your custom data points from the Open-Meteo API"
+        case .astronomy:
+            return "Moon phase, illumination, moonrise, and moonset"
         }
     }
     
@@ -663,6 +665,23 @@ struct SettingsView: View {
                 Text("• Coordinates, elevation")
                     .font(.caption)
                     .foregroundColor(.secondary)
+
+            case .astronomy:
+                Text("• Moon phase and illumination percentage")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Toggle("Moonrise", isOn: $settingsManager.settings.showMoonriseInAstronomy)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.showMoonriseInAstronomy) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Moonrise time in astronomy section")
+                Toggle("Moonset", isOn: $settingsManager.settings.showMoonsetInAstronomy)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.showMoonsetInAstronomy) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Moonset time in astronomy section")
                 
             case .myData:
                 if settingsManager.settings.myDataFields.isEmpty {

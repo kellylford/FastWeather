@@ -147,6 +147,7 @@ enum DetailCategory: String, CaseIterable, Codable {
     case historicalWeather = "Historical Weather"
     case location = "Location"
     case myData = "My Data"
+    case astronomy = "Astronomy"
 }
 
 struct DetailCategoryField: Codable, Identifiable, Equatable {
@@ -333,6 +334,10 @@ struct AppSettings: Codable {
     // Current precipitation rate in current conditions section
     var showCurrentPrecipitationInCurrentConditions: Bool = true
     
+    // Astronomy section options
+    var showMoonriseInAstronomy: Bool = true
+    var showMoonsetInAstronomy: Bool = true
+    
     // Granular Precipitation Probability options (by section)
     var showPrecipitationProbabilityInPrecipitation: Bool = true
     var showPrecipitationProbabilityInTodaysForecast: Bool = true  // Shows as alerts
@@ -501,6 +506,8 @@ struct AppSettings: Codable {
         case showWindGustsInCurrentConditions, showWindGustsInTodaysForecast
         // Current precipitation rate
         case showCurrentPrecipitationInCurrentConditions
+        // Astronomy section
+        case showMoonriseInAstronomy, showMoonsetInAstronomy
         // Granular Precipitation Probability settings
         case showPrecipitationProbabilityInPrecipitation, showPrecipitationProbabilityInTodaysForecast
         // Other enhanced data
@@ -609,6 +616,7 @@ struct AppSettings: Codable {
         self.detailCategories = [
             DetailCategoryField(category: .weatherAlerts, isEnabled: true),
             DetailCategoryField(category: .todaysForecast, isEnabled: true),
+            DetailCategoryField(category: .astronomy, isEnabled: true),
             DetailCategoryField(category: .currentConditions, isEnabled: true),
             DetailCategoryField(category: .hourlyForecast, isEnabled: true),
             DetailCategoryField(category: .dailyForecast, isEnabled: true),
@@ -671,6 +679,8 @@ struct AppSettings: Codable {
         // Other enhanced data
         showPrecipitationAmount = try container.decodeIfPresent(Bool.self, forKey: .showPrecipitationAmount) ?? true
         showCurrentPrecipitationInCurrentConditions = try container.decodeIfPresent(Bool.self, forKey: .showCurrentPrecipitationInCurrentConditions) ?? true
+        showMoonriseInAstronomy = try container.decodeIfPresent(Bool.self, forKey: .showMoonriseInAstronomy) ?? true
+        showMoonsetInAstronomy = try container.decodeIfPresent(Bool.self, forKey: .showMoonsetInAstronomy) ?? true
         showDewPoint = try container.decodeIfPresent(Bool.self, forKey: .showDewPoint) ?? false
         showDaylightDuration = try container.decodeIfPresent(Bool.self, forKey: .showDaylightDuration) ?? true
         showSunshineDuration = try container.decodeIfPresent(Bool.self, forKey: .showSunshineDuration) ?? false
@@ -853,6 +863,7 @@ struct AppSettings: Codable {
         let defaultCategories: [DetailCategoryField] = [
             DetailCategoryField(category: .weatherAlerts, isEnabled: true),
             DetailCategoryField(category: .todaysForecast, isEnabled: true),
+            DetailCategoryField(category: .astronomy, isEnabled: true),
             DetailCategoryField(category: .currentConditions, isEnabled: true),
             DetailCategoryField(category: .hourlyForecast, isEnabled: true),
             DetailCategoryField(category: .dailyForecast, isEnabled: true),
@@ -919,6 +930,8 @@ struct AppSettings: Codable {
         try container.encode(showWindGustsInCurrentConditions, forKey: .showWindGustsInCurrentConditions)
         try container.encode(showWindGustsInTodaysForecast, forKey: .showWindGustsInTodaysForecast)
         try container.encode(showCurrentPrecipitationInCurrentConditions, forKey: .showCurrentPrecipitationInCurrentConditions)
+        try container.encode(showMoonriseInAstronomy, forKey: .showMoonriseInAstronomy)
+        try container.encode(showMoonsetInAstronomy, forKey: .showMoonsetInAstronomy)
         
         try container.encode(showPrecipitationProbabilityInPrecipitation, forKey: .showPrecipitationProbabilityInPrecipitation)
         try container.encode(showPrecipitationProbabilityInTodaysForecast, forKey: .showPrecipitationProbabilityInTodaysForecast)
