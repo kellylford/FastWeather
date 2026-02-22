@@ -1565,7 +1565,7 @@ struct WeatherAlertsSection: View {
             do {
                 let fetchedAlerts = try await weatherService.fetchNWSAlerts(for: city)
                 
-                alerts = fetchedAlerts
+                alerts = fetchedAlerts.sorted { $0.severity.sortOrder < $1.severity.sortOrder }
                 isLoading = false
                 hasLoaded = true
             } catch {

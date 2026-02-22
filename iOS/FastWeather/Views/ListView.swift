@@ -175,7 +175,7 @@ struct ListRowView: View {
     }
     
     private var highestSeverityAlert: WeatherAlert? {
-        alerts.max(by: { $0.severity.rawValue < $1.severity.rawValue })
+        alerts.min(by: { $0.severity.sortOrder < $1.severity.sortOrder })
     }
     
     var body: some View {
