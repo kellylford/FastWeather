@@ -4735,7 +4735,7 @@ function renderAlertBadge(alerts) {
         : `${alerts.length} weather alerts: ${escapeHtml(highestSeverityAlert.event)} and ${alerts.length - 1} more`;
     
     return `<button class="alert-badge ${highestSeverityAlert.severity}" 
-                    onclick="showAlertDetails(\`${JSON.stringify(highestSeverityAlert).replace(/`/g, '\\`')}\`)"
+                    onclick="showAlertDetails('${encodeURIComponent(JSON.stringify(highestSeverityAlert))}')" 
                     aria-label="${srLabel}"
                     title="${escapeHtml(highestSeverityAlert.event)}">
                 <span aria-hidden="true">${icon}</span>
@@ -4743,7 +4743,7 @@ function renderAlertBadge(alerts) {
 }
 
 function showAlertDetails(alertDataStr) {
-    const alert = JSON.parse(alertDataStr);
+    const alert = JSON.parse(decodeURIComponent(alertDataStr));
     const dialog = document.getElementById('alert-details-dialog');
     const content = document.getElementById('alert-details-content');
     
