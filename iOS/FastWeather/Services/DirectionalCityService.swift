@@ -169,10 +169,15 @@ public struct DirectionalCityInfo: Identifiable {
     
     public var displayName: String {
         var parts = [name]
-        if let state = state {
-            parts.append(state)
-        }
+        if let state = state { parts.append(state) }
         parts.append(country)
+        return parts.joined(separator: ", ")
+    }
+    
+    public func displayName(relativeTo homeCountry: String) -> String {
+        var parts = [name]
+        if let state = state { parts.append(state) }
+        if country != homeCountry { parts.append(country) }
         return parts.joined(separator: ", ")
     }
 }

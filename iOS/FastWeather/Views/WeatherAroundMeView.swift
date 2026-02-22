@@ -334,7 +334,7 @@ struct WeatherAroundMeView: View {
                 let currentCity = citiesInDirection[currentCityIndex]
                 
                 VStack(spacing: 8) {
-                    Text(currentCity.displayName)
+                    Text(currentCity.displayName(relativeTo: city.country))
                         .font(.headline)
                         .multilineTextAlignment(.center)
                     
@@ -571,8 +571,8 @@ struct WeatherAroundMeView: View {
     private func showAllCities() {
         // Capture values at the moment the alert is triggered to prevent flashing
         alertTitle = "Cities to the \(selectedDirection.rawValue)"
-        alertMessage = citiesInDirection.map { city in
-            "\(city.displayName) (~\(Int(city.distanceMiles)) mi)"
+        alertMessage = citiesInDirection.map { cityInfo in
+            "\(cityInfo.displayName(relativeTo: city.country)) (~\(Int(cityInfo.distanceMiles)) mi)"
         }.joined(separator: "\n")
         showingAllCities = true
     }
@@ -639,9 +639,9 @@ struct WeatherAroundMeView: View {
         let actualDistance = calculateDistance(from: city, to: location)
         var label = "\(location.direction)"
         if let locationName = location.locationName {
-            label += ", near \(locationName), approximately \(actualDistance) \(settingsManager.settings.distanceUnit.rawValue)"
+            label += ", near \(locationName), \(actualDistance) \(settingsManager.settings.distanceUnit.rawValue)"
         } else {
-            label += ", approximately \(actualDistance) \(settingsManager.settings.distanceUnit.rawValue)"
+            label += ", \(actualDistance) \(settingsManager.settings.distanceUnit.rawValue)"
         }
         if let temp = location.temperature {
             label += ", \(formatTemperature(temp))"
@@ -653,11 +653,11 @@ struct WeatherAroundMeView: View {
     }
     
     private func cityExplorerAccessibilityLabel(_ cityInfo: DirectionalCityInfo) -> String {
-        var label = "\(cityInfo.displayName), "
+        var label = "\(cityInfo.displayName(relativeTo: city.country)), "
         if let weather = directionalWeatherData[cityInfo.id] {
             label += "\(formatTemperature(weather.temp)), \(weather.condition), "
         }
-        label += "approximately \(Int(cityInfo.distanceMiles)) \(settingsManager.settings.distanceUnit.rawValue), \(currentCityIndex + 1) of \(citiesInDirection.count)"
+        label += "\(Int(cityInfo.distanceMiles)) \(settingsManager.settings.distanceUnit.rawValue), \(currentCityIndex + 1) of \(citiesInDirection.count)"
         return label
     }
 }
