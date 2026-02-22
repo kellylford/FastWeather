@@ -497,9 +497,13 @@ struct ListRowView: View {
                 }
                 
             case .precipitation:
-                if let precip = weather.current.precipitation, precip > 0 {
+                let snowfall = weather.current.snowfall ?? 0
+                if snowfall > 0 {
                     label += ", "
-                    label += isDetails ? "Precipitation: \(formatPrecipitation(precip))" : formatPrecipitation(precip)
+                    label += isDetails ? "Snow: \(formatSnowfall(snowfall))" : formatSnowfall(snowfall)
+                } else if let precip = weather.current.precipitation, precip > 0 {
+                    label += ", "
+                    label += isDetails ? "Rain: \(formatPrecipitation(precip))" : formatPrecipitation(precip)
                 }
                 
             case .precipitationProbability:
@@ -538,7 +542,7 @@ struct ListRowView: View {
             case .snowfall:
                 if let snow = weather.current.snowfall, snow > 0 {
                     label += ", "
-                    label += isDetails ? "Snowfall: \(formatPrecipitation(snow))" : formatPrecipitation(snow)
+                    label += isDetails ? "Snow: \(formatSnowfall(snow))" : formatSnowfall(snow)
                 }
                 
             case .cloudCover:
