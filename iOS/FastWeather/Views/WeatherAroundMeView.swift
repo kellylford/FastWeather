@@ -352,7 +352,7 @@ struct WeatherAroundMeView: View {
                             .accessibilityLabel("Loading weather")
                     }
                     
-                    Text(settingsManager.settings.distanceUnit.format(currentCity.distanceMiles))
+                    Text(formatDistanceFromMiles(currentCity.distanceMiles))
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
@@ -503,6 +503,13 @@ struct WeatherAroundMeView: View {
         return String(format: "%.0f°%@", temp, unit)
     }
     
+    /// Convert a miles value to the user's preferred distance unit and format it
+    private func formatDistanceFromMiles(_ miles: Double) -> String {
+        let km = miles * 1.60934
+        let value = settingsManager.settings.distanceUnit.convert(km)
+        return settingsManager.settings.distanceUnit.format(value)
+    }
+    
     /// Calculate actual distance between center city and directional location in user's preferred unit
     private func calculateDistance(from center: City, to location: DirectionalLocation) -> Int {
         let centerLocation = CLLocation(latitude: center.latitude, longitude: center.longitude)
@@ -572,7 +579,7 @@ struct WeatherAroundMeView: View {
         // Capture values at the moment the alert is triggered to prevent flashing
         alertTitle = "Cities to the \(selectedDirection.rawValue)"
         alertMessage = citiesInDirection.map { cityInfo in
-            "\(cityInfo.displayName(relativeTo: city.country)) (~\(Int(cityInfo.distanceMiles)) mi)"
+            "\(cityInfo.displayName(relativeTo: city.country)) (~\(formatDistanceFromMiles(cityInfo.distanceMiles)))"
         }.joined(separator: "\n")
         showingAllCities = true
     }
@@ -657,7 +664,7 @@ struct WeatherAroundMeView: View {
         if let weather = directionalWeatherData[cityInfo.id] {
             label += "\(formatTemperature(weather.temp)), \(weather.condition), "
         }
-        label += "\(Int(cityInfo.distanceMiles)) \(settingsManager.settings.distanceUnit.rawValue), \(currentCityIndex + 1) of \(citiesInDirection.count)"
+        label += "\(formatDistanceFromMiles(cityInfo.distanceMiles)), \(currentCityIndex + 1) of \(citiesInDirection.count)"
         return label
     }
 }
