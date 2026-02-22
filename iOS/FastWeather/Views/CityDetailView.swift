@@ -37,6 +37,17 @@ struct CityDetailView: View {
         return weatherService.weatherCache[cacheKey]
     }
     
+    private var isSaved: Bool {
+        weatherService.savedCities.contains {
+            $0.latitude == city.latitude && $0.longitude == city.longitude
+        }
+    }
+    
+    private func addCity() {
+        weatherService.addCity(city)
+        UIAccessibility.post(notification: .announcement, argument: "\(city.displayName) added to My Cities")
+    }
+    
     private func refreshWeather() async {
         isRefreshing = true
         await weatherService.fetchWeatherForDate(for: city, dateOffset: dateOffset)
@@ -603,6 +614,21 @@ struct CityDetailView: View {
                     }
                     .padding()
                     
+                    // Add to My Cities (shown when browsing a city not yet in saved list)
+                    if !isSaved {
+                        Button(action: addCity) {
+                            Label("Add to My Cities", systemImage: "plus.circle.fill")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.blue)
+                                .cornerRadius(12)
+                        }
+                        .padding(.horizontal)
+                        .accessibilityLabel("Add \(city.displayName) to My Cities")
+                    }
+                    
                     // Actions Menu
                     Menu {
                         Button(action: {
@@ -631,13 +657,15 @@ struct CityDetailView: View {
                             }
                         }
                         
-                        Divider()
-                        
-                        Button(role: .destructive, action: { 
-                            removalCityName = city.name
-                            showingRemoveConfirmation = true 
-                        }) {
-                            Label("Remove City", systemImage: "trash")
+                        if isSaved {
+                            Divider()
+                            
+                            Button(role: .destructive, action: { 
+                                removalCityName = city.name
+                                showingRemoveConfirmation = true 
+                            }) {
+                                Label("Remove City", systemImage: "trash")
+                            }
                         }
                     } label: {
                         HStack {
