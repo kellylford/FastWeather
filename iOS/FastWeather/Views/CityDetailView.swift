@@ -309,6 +309,20 @@ struct CityDetailView: View {
                         Divider()
                     }
                     
+                    // Current precipitation rate (if enabled and > 0)
+                    if settingsManager.settings.showCurrentPrecipitationInCurrentConditions {
+                        let currentSnow = weather.current.snowfall ?? 0
+                        let currentPrecip = weather.current.precipitation ?? 0
+                        if currentSnow > 0 {
+                            DetailRow(label: "Snowfall", value: formatSnowfall(currentSnow))
+                            Divider()
+                        } else if currentPrecip > 0 {
+                            let rain = weather.current.rain ?? 0
+                            DetailRow(label: rain > 0 ? "Rainfall" : "Precipitation", value: formatPrecipitation(currentPrecip))
+                            Divider()
+                        }
+                    }
+                    
                     // Dew Point (if enabled)
                     if settingsManager.settings.showDewPoint,
                        let dewPoint = weather.current.dewpoint2m {

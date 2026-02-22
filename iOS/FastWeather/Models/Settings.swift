@@ -330,6 +330,9 @@ struct AppSettings: Codable {
     var showWindGustsInCurrentConditions: Bool = true
     var showWindGustsInTodaysForecast: Bool = true  // Shows as alerts when high
     
+    // Current precipitation rate in current conditions section
+    var showCurrentPrecipitationInCurrentConditions: Bool = true
+    
     // Granular Precipitation Probability options (by section)
     var showPrecipitationProbabilityInPrecipitation: Bool = true
     var showPrecipitationProbabilityInTodaysForecast: Bool = true  // Shows as alerts
@@ -496,6 +499,8 @@ struct AppSettings: Codable {
         case showDailyHighLowInCityList
         // Granular Wind Gusts settings
         case showWindGustsInCurrentConditions, showWindGustsInTodaysForecast
+        // Current precipitation rate
+        case showCurrentPrecipitationInCurrentConditions
         // Granular Precipitation Probability settings
         case showPrecipitationProbabilityInPrecipitation, showPrecipitationProbabilityInTodaysForecast
         // Other enhanced data
@@ -665,6 +670,7 @@ struct AppSettings: Codable {
         
         // Other enhanced data
         showPrecipitationAmount = try container.decodeIfPresent(Bool.self, forKey: .showPrecipitationAmount) ?? true
+        showCurrentPrecipitationInCurrentConditions = try container.decodeIfPresent(Bool.self, forKey: .showCurrentPrecipitationInCurrentConditions) ?? true
         showDewPoint = try container.decodeIfPresent(Bool.self, forKey: .showDewPoint) ?? false
         showDaylightDuration = try container.decodeIfPresent(Bool.self, forKey: .showDaylightDuration) ?? true
         showSunshineDuration = try container.decodeIfPresent(Bool.self, forKey: .showSunshineDuration) ?? false
@@ -912,6 +918,7 @@ struct AppSettings: Codable {
         
         try container.encode(showWindGustsInCurrentConditions, forKey: .showWindGustsInCurrentConditions)
         try container.encode(showWindGustsInTodaysForecast, forKey: .showWindGustsInTodaysForecast)
+        try container.encode(showCurrentPrecipitationInCurrentConditions, forKey: .showCurrentPrecipitationInCurrentConditions)
         
         try container.encode(showPrecipitationProbabilityInPrecipitation, forKey: .showPrecipitationProbabilityInPrecipitation)
         try container.encode(showPrecipitationProbabilityInTodaysForecast, forKey: .showPrecipitationProbabilityInTodaysForecast)

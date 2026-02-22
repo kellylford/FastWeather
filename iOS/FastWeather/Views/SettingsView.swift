@@ -493,6 +493,12 @@ struct SettingsView: View {
                         settingsManager.saveSettings()
                     }
                     .accessibilityLabel("UV index in current conditions")
+                Toggle("Current Precipitation Rate", isOn: $settingsManager.settings.showCurrentPrecipitationInCurrentConditions)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.showCurrentPrecipitationInCurrentConditions) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Current precipitation rate in current conditions")
                 Toggle("Dew Point", isOn: $settingsManager.settings.showDewPoint)
                     .font(.caption)
                     .onChange(of: settingsManager.settings.showDewPoint) {
