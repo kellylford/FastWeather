@@ -328,9 +328,13 @@ struct ListRowView: View {
                 }
                 
             case .precipitation:
-                if let precip = weather.current.precipitation, precip > 0 {
+                let snowfall = weather.current.snowfall ?? 0
+                if snowfall > 0 {
+                    let value = formatSnowfall(snowfall)
+                    parts.append(isDetails ? "Snow: \(value)" : value)
+                } else if let precip = weather.current.precipitation, precip > 0 {
                     let value = formatPrecipitation(precip)
-                    parts.append(isDetails ? "Precipitation: \(value)" : value)
+                    parts.append(isDetails ? "Rain: \(value)" : value)
                 }
                 
             case .precipitationProbability:
@@ -363,8 +367,8 @@ struct ListRowView: View {
                 
             case .snowfall:
                 if let snow = weather.current.snowfall, snow > 0 {
-                    let value = formatPrecipitation(snow)
-                    parts.append(isDetails ? "Snowfall: \(value)" : value)
+                    let value = formatSnowfall(snow)
+                    parts.append(isDetails ? "Snow: \(value)" : value)
                 }
                 
             case .cloudCover:
@@ -635,6 +639,13 @@ struct ListRowView: View {
     private func formatPrecipitation(_ mm: Double) -> String {
         let precip = settingsManager.settings.precipitationUnit.convert(mm)
         return String(format: "%.1f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
+    }
+    
+    private func formatSnowfall(_ cm: Double) -> String {
+        switch settingsManager.settings.precipitationUnit {
+        case .inches: return String(format: "%.1f in", cm * 0.393701)
+        case .millimeters: return String(format: "%.1f cm", cm)
+        }
     }
     
     private func formatPressure(_ hPa: Double) -> String {

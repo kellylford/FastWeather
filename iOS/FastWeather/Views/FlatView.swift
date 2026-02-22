@@ -183,8 +183,12 @@ struct FlatView: View {
             return (showLabel ? "Wind Gusts" : "", formatWindSpeed(windGusts))
             
         case .precipitation:
+            let snowfall = weather.current.snowfall ?? 0
+            if snowfall > 0 {
+                return (showLabel ? "Snow" : "", formatSnowfall(snowfall))
+            }
             guard let precip = weather.current.precipitation, precip > 0 else { return nil }
-            return (showLabel ? "Precipitation" : "", formatPrecipitation(precip))
+            return (showLabel ? "Rain" : "", formatPrecipitation(precip))
             
         case .precipitationProbability:
             guard let hourly = weather.hourly,
@@ -210,7 +214,7 @@ struct FlatView: View {
             
         case .snowfall:
             guard let snow = weather.current.snowfall, snow > 0 else { return nil }
-            return (showLabel ? "Snowfall" : "", formatPrecipitation(snow))
+            return (showLabel ? "Snow" : "", formatSnowfall(snow))
             
         case .cloudCover:
             let cc = weather.current.cloudCover
@@ -271,6 +275,13 @@ struct FlatView: View {
     private func formatPrecipitation(_ mm: Double) -> String {
         let precip = settingsManager.settings.precipitationUnit.convert(mm)
         return String(format: "%.1f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
+    }
+    
+    private func formatSnowfall(_ cm: Double) -> String {
+        switch settingsManager.settings.precipitationUnit {
+        case .inches: return String(format: "%.1f in", cm * 0.393701)
+        case .millimeters: return String(format: "%.1f cm", cm)
+        }
     }
     
     private func formatPressure(_ hPa: Double) -> String {
