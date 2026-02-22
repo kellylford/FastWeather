@@ -1194,14 +1194,29 @@ struct DailyForecastSummaryView: View {
         let diff = lastAvg - firstAvg
         guard abs(diff) >= threshold else { return nil }
 
-        let firstVal = Int(settingsManager.settings.temperatureUnit.convert(firstAvg).rounded())
-        let lastVal = Int(settingsManager.settings.temperatureUnit.convert(lastAvg).rounded())
+        let convert = settingsManager.settings.temperatureUnit.convert
         let unit = settingsManager.settings.temperatureUnit.rawValue
+        let firstVal = Int(convert(firstAvg).rounded())
+        let lastVal = Int(convert(lastAvg).rounded())
 
         if diff > 0 {
-            return "Highs climb from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days."
+            // Warming trend — mention peak if it's notably above the ending average (mid-period spike)
+            let peakHigh = highs.max() ?? lastAvg
+            let peakVal = Int(convert(peakHigh).rounded())
+            if peakHigh > lastAvg + threshold {
+                return "Highs climb from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days, with a peak of \(peakVal)\(unit)."
+            } else {
+                return "Highs climb from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days."
+            }
         } else {
-            return "Highs fall from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days."
+            // Cooling trend — mention trough if it's notably below the ending average (mid-period cold snap)
+            let troughLow = highs.min() ?? lastAvg
+            let troughVal = Int(convert(troughLow).rounded())
+            if troughLow < lastAvg - threshold {
+                return "Highs fall from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days, with a low of \(troughVal)\(unit)."
+            } else {
+                return "Highs fall from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days."
+            }
         }
     }
 
