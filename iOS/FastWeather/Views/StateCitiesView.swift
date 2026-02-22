@@ -57,6 +57,7 @@ struct StateCitiesView: View {
         await MainActor.run {
             weatherData = results
             isLoadingWeather = false
+            hasCompletedInitialLoad = true
         }
     }
 }
