@@ -30,7 +30,7 @@ struct StateCitiesView: View {
     var body: some View {
         List {
             ForEach(filteredCities, id: \.self) { cityLocation in
-                NavigationLink(destination: CityLocationDetailView(cityLocation: cityLocation)) {
+                NavigationLink(destination: BrowseCityDetailDestination(cityLocation: cityLocation)) {
                     CityLocationRowOptimized(
                         cityLocation: cityLocation,
                         weatherData: weatherData[cityLocation.cacheKey],
@@ -57,6 +57,7 @@ struct StateCitiesView: View {
         await MainActor.run {
             weatherData = results
             isLoadingWeather = false
+            hasCompletedInitialLoad = true
         }
     }
 }
@@ -84,7 +85,7 @@ struct CountryCitiesView: View {
     var body: some View {
         List {
             ForEach(filteredCities, id: \.self) { cityLocation in
-                NavigationLink(destination: CityLocationDetailView(cityLocation: cityLocation)) {
+                NavigationLink(destination: BrowseCityDetailDestination(cityLocation: cityLocation)) {
                     CityLocationRowOptimized(
                         cityLocation: cityLocation,
                         weatherData: weatherData[cityLocation.cacheKey],
@@ -143,6 +144,8 @@ struct CityLocationRowOptimized: View {
                             Text(weatherCode.description)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
                         }
                     }
                 } else if isLoading {
@@ -238,6 +241,8 @@ struct CityLocationRow: View {
                             .foregroundColor(.primary)
                         if let weatherCode = weatherData.current.weatherCodeEnum {
                             Text(weatherCode.description)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -544,6 +549,28 @@ struct CityLocationDetailView: View {
         let timeFormatter = DateFormatter()
         timeFormatter.timeStyle = .short
         return timeFormatter.string(from: date)
+    }
+}
+
+// MARK: - Browse City Detail Destination
+
+/// Wraps CityDetailView for browse mode, ensuring a stable City UUID for caching
+/// and triggering a weather fetch when the browse city hasn't been loaded yet.
+struct BrowseCityDetailDestination: View {
+    let cityLocation: CityLocation
+    @EnvironmentObject var weatherService: WeatherService
+    @State private var browseCity: City
+    
+    init(cityLocation: CityLocation) {
+        self.cityLocation = cityLocation
+        _browseCity = State(initialValue: cityLocation.toCity())
+    }
+    
+    var body: some View {
+        CityDetailView(city: browseCity)
+            .task {
+                await weatherService.fetchWeatherForDate(for: browseCity, dateOffset: 0)
+            }
     }
 }
 

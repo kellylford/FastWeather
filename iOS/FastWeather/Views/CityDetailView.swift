@@ -9,6 +9,9 @@ import SwiftUI
 
 struct CityDetailView: View {
     let city: City
+    let dateOffset: Int
+    let selectedDate: Date
+    
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
     @StateObject private var featureFlags = FeatureFlags.shared
@@ -22,20 +25,41 @@ struct CityDetailView: View {
     @State private var isRefreshing = false
     @State private var cacheMetadata: CachedWeather?
     
+    // Backward compatibility initializer (defaults to today)
+    init(city: City, dateOffset: Int = 0, selectedDate: Date = Date()) {
+        self.city = city
+        self.dateOffset = dateOffset
+        self.selectedDate = selectedDate
+    }
+    
     private var weather: WeatherData? {
-        weatherService.weatherCache[city.id]
+        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+        return weatherService.weatherCache[cacheKey]
+    }
+    
+    private var isSaved: Bool {
+        weatherService.savedCities.contains {
+            $0.latitude == city.latitude && $0.longitude == city.longitude
+        }
+    }
+    
+    private func addCity() {
+        weatherService.addCity(city)
+        UIAccessibility.post(notification: .announcement, argument: "\(city.displayName) added to My Cities")
     }
     
     private func refreshWeather() async {
         isRefreshing = true
-        await weatherService.fetchWeather(for: city)
+        await weatherService.fetchWeatherForDate(for: city, dateOffset: dateOffset)
         isRefreshing = false
         // Refresh cache metadata
-        cacheMetadata = await weatherService.getCacheMetadata(for: city.id)
+        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+        cacheMetadata = await weatherService.getCacheMetadata(for: cacheKey)
     }
     
     private func loadCacheMetadata() async {
-        cacheMetadata = await weatherService.getCacheMetadata(for: city.id)
+        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+        cacheMetadata = await weatherService.getCacheMetadata(for: cacheKey)
     }
     
     private func isCategoryEnabled(_ category: DetailCategory) -> Bool {
@@ -296,6 +320,20 @@ struct CityDetailView: View {
                         Divider()
                     }
                     
+                    // Current precipitation rate (if enabled and > 0)
+                    if settingsManager.settings.showCurrentPrecipitationInCurrentConditions {
+                        let currentSnow = weather.current.snowfall ?? 0
+                        let currentPrecip = weather.current.precipitation ?? 0
+                        if currentSnow > 0 {
+                            DetailRow(label: "Snowfall", value: formatSnowfall(currentSnow))
+                            Divider()
+                        } else if currentPrecip > 0 {
+                            let rain = weather.current.rain ?? 0
+                            DetailRow(label: rain > 0 ? "Rainfall" : "Precipitation", value: formatPrecipitation(currentPrecip))
+                            Divider()
+                        }
+                    }
+                    
                     // Dew Point (if enabled)
                     if settingsManager.settings.showDewPoint,
                        let dewPoint = weather.current.dewpoint2m {
@@ -353,6 +391,11 @@ struct CityDetailView: View {
             if let daily = weather.daily, daily.temperature2mMax.count > 1 {
                 GroupBox(label: Label("16-Day Forecast", systemImage: "calendar")) {
                     VStack(spacing: 0) {
+                        DailyForecastSummaryView(daily: daily, settingsManager: settingsManager)
+                            .padding(.horizontal)
+                            .padding(.top, 4)
+                            .padding(.bottom, 8)
+                        Divider()
                         ForEach(0..<min(16, daily.temperature2mMax.count), id: \.self) { index in
                             DailyForecastRow(
                                 daily: daily,
@@ -370,6 +413,9 @@ struct CityDetailView: View {
                 }
                 .padding(.horizontal)
             }
+            
+        case .marineForecast:
+            MarineForecastSection(city: city, dateOffset: dateOffset)
             
         case .historicalWeather:
             EmptyView() // Historical weather moved to separate screen
@@ -393,6 +439,130 @@ struct CityDetailView: View {
                     DetailRow(label: "Country", value: city.country)
                     Divider()
                     DetailRow(label: "Coordinates", value: String(format: "%.4f, %.4f", city.latitude, city.longitude))
+                }
+                .padding(.vertical, 8)
+            }
+            .padding(.horizontal)
+            .accessibilityElement(children: .contain)
+            
+        case .myData:
+            if featureFlags.myDataEnabled {
+                let enabledFields = settingsManager.settings.myDataFields.filter { $0.isEnabled }
+                if !enabledFields.isEmpty {
+                    GroupBox(label: Label("My Data", systemImage: "chart.bar.doc.horizontal")) {
+                        VStack(spacing: 12) {
+                            ForEach(Array(enabledFields.enumerated()), id: \.element.id) { index, field in
+                                if index > 0 {
+                                    Divider()
+                                }
+                                let value = myDataValue(for: field.parameter, weather: weather)
+                                DetailRow(
+                                    label: field.parameter.displayName,
+                                    value: value
+                                )
+                            }
+                        }
+                        .padding(.vertical, 8)
+                    }
+                    .padding(.horizontal)
+                    .accessibilityElement(children: .contain)
+                } else {
+                    GroupBox(label: Label("My Data", systemImage: "chart.bar.doc.horizontal")) {
+                        Text("No data points selected. Configure in Settings, then Developer Settings, then My Data.")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.vertical, 8)
+                    }
+                    .padding(.horizontal)
+                    .accessibilityElement(children: .contain)
+                }
+            }
+            
+        case .astronomy:
+            GroupBox(label: Label("Astronomy", systemImage: "moon.stars")) {
+                VStack(spacing: 12) {
+                    let moonPhase = MoonCalculator.phase(for: selectedDate)
+                    let phaseName = MoonCalculator.phaseName(for: selectedDate)
+                    let illuminationPct = MoonCalculator.illumination(for: selectedDate)
+                    let phaseSymbol = MoonCalculator.phaseSymbol(for: selectedDate)
+
+                    // Phase icon + name
+                    HStack(spacing: 12) {
+                        Image(systemName: phaseSymbol)
+                            .font(.system(size: 36))
+                            .foregroundColor(.secondary)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(phaseName)
+                                .font(.headline)
+                            Text("\(Int(illuminationPct.rounded()))% illuminated")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Moon phase: \(phaseName), \(Int(illuminationPct.rounded())) percent illuminated")
+
+                    Divider()
+
+                    // Moonrise / Moonset
+                    let moonTimes = MoonCalculator.riseAndSet(
+                        for: selectedDate,
+                        latitude: city.latitude,
+                        longitude: city.longitude
+                    )
+
+                    let timeFormatter: DateFormatter = {
+                        let f = DateFormatter()
+                        f.dateFormat = "h:mm a"
+                        return f
+                    }()
+
+                    if settingsManager.settings.showMoonriseInAstronomy || settingsManager.settings.showMoonsetInAstronomy {
+                        HStack {
+                            if settingsManager.settings.showMoonriseInAstronomy {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "moon.circle")
+                                        .foregroundColor(.secondary)
+                                        .accessibilityHidden(true)
+                                    if let rise = moonTimes.rise {
+                                        Text(timeFormatter.string(from: rise))
+                                            .font(.subheadline)
+                                    } else {
+                                        Text("—")
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                                .accessibilityElement(children: .ignore)
+                                .accessibilityLabel("Moonrise: \(moonTimes.rise.map { timeFormatter.string(from: $0) } ?? "not available")")
+                            }
+
+                            if settingsManager.settings.showMoonriseInAstronomy && settingsManager.settings.showMoonsetInAstronomy {
+                                Spacer()
+                            }
+
+                            if settingsManager.settings.showMoonsetInAstronomy {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "moon.circle.fill")
+                                        .foregroundColor(.secondary)
+                                        .accessibilityHidden(true)
+                                    if let set = moonTimes.set {
+                                        Text(timeFormatter.string(from: set))
+                                            .font(.subheadline)
+                                    } else {
+                                        Text("—")
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                                .accessibilityElement(children: .ignore)
+                                .accessibilityLabel("Moonset: \(moonTimes.set.map { timeFormatter.string(from: $0) } ?? "not available")")
+                            }
+                        }
+                    }
                 }
                 .padding(.vertical, 8)
             }
@@ -449,6 +619,21 @@ struct CityDetailView: View {
                     }
                     .padding()
                     
+                    // Add to My Cities (shown when browsing a city not yet in saved list)
+                    if !isSaved {
+                        Button(action: addCity) {
+                            Label("Add to My Cities", systemImage: "plus.circle.fill")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.blue)
+                                .cornerRadius(12)
+                        }
+                        .padding(.horizontal)
+                        .accessibilityLabel("Add \(city.displayName) to My Cities")
+                    }
+                    
                     // Actions Menu
                     Menu {
                         Button(action: {
@@ -477,13 +662,15 @@ struct CityDetailView: View {
                             }
                         }
                         
-                        Divider()
-                        
-                        Button(role: .destructive, action: { 
-                            removalCityName = city.name
-                            showingRemoveConfirmation = true 
-                        }) {
-                            Label("Remove City", systemImage: "trash")
+                        if isSaved {
+                            Divider()
+                            
+                            Button(role: .destructive, action: { 
+                                removalCityName = city.name
+                                showingRemoveConfirmation = true 
+                            }) {
+                                Label("Remove City", systemImage: "trash")
+                            }
                         }
                     } label: {
                         HStack {
@@ -641,6 +828,38 @@ struct CityDetailView: View {
         FormatHelper.formatTime(isoString)
     }
     
+    /// Get the formatted display value for a My Data parameter from weather data
+    private func myDataValue(for parameter: MyDataParameter, weather: WeatherData) -> String {
+        let current = weather.current
+        
+        // Check named properties first for already-decoded fields
+        let rawValue: Double?
+        switch parameter {
+        case .temperature2m: rawValue = current.temperature2m
+        case .apparentTemperature: rawValue = current.apparentTemperature
+        case .relativeHumidity2m: rawValue = current.relativeHumidity2m.map { Double($0) }
+        case .dewPoint2m: rawValue = current.dewpoint2m
+        case .windSpeed10m: rawValue = current.windSpeed10m
+        case .windDirection10m: rawValue = current.windDirection10m.map { Double($0) }
+        case .windGusts10m: rawValue = current.windGusts10m
+        case .precipitation: rawValue = current.precipitation
+        case .rain: rawValue = current.rain
+        case .showers: rawValue = current.showers
+        case .snowfall: rawValue = current.snowfall
+        case .pressureMsl: rawValue = current.pressureMsl
+        case .cloudCover: rawValue = Double(current.cloudCover)
+        case .visibility: rawValue = current.visibility
+        case .weatherCode: rawValue = Double(current.weatherCode)
+        case .isDay: rawValue = current.isDay.map { Double($0) }
+        case .uvIndex: rawValue = current.uvIndex
+        default:
+            rawValue = current.myDataValues?[parameter.apiKey]
+        }
+        
+        guard let value = rawValue else { return "N/A" }
+        return MyDataFormatHelper.format(parameter: parameter, value: value, settings: settingsManager.settings)
+    }
+    
     private func findCurrentHourIndex(in times: [String?]) -> Int {
         let now = Date()
         let calendar = Calendar.current
@@ -752,12 +971,34 @@ struct HourlyForecastCard: View {
             }
             
         case .precipitation:
-            if let precip = hourly.precipitation?[index], precip > 0 {
+            let snowfallAmt = hourly.snowfall?[index] ?? 0
+            if snowfallAmt > 0 {
+                return AnyView(HStack(spacing: 2) {
+                    Image(systemName: "snowflake")
+                        .font(.caption2)
+                        .foregroundColor(.blue)
+                    Text(formatSnowfall(snowfallAmt))
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                })
+            } else if let precip = hourly.precipitation?[index], precip > 0 {
                 return AnyView(HStack(spacing: 2) {
                     Image(systemName: "drop.fill")
                         .font(.caption2)
                         .foregroundColor(.blue)
                     Text(formatPrecipitation(precip))
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                })
+            }
+            
+        case .snowfall:
+            if let snow = hourly.snowfall?[index], snow > 0 {
+                return AnyView(HStack(spacing: 2) {
+                    Image(systemName: "snowflake")
+                        .font(.caption2)
+                        .foregroundColor(.blue)
+                    Text(formatSnowfall(snow))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 })
@@ -862,8 +1103,16 @@ struct HourlyForecastCard: View {
             }
             
         case .precipitation:
-            if let precip = hourly.precipitation?[index], precip > 0 {
+            let snowfallAmt = hourly.snowfall?[index] ?? 0
+            if snowfallAmt > 0 {
+                return "snowfall \(formatSnowfall(snowfallAmt))"
+            } else if let precip = hourly.precipitation?[index], precip > 0 {
                 return "precipitation \(formatPrecipitation(precip))"
+            }
+            
+        case .snowfall:
+            if let snow = hourly.snowfall?[index], snow > 0 {
+                return "snowfall \(formatSnowfall(snow))"
             }
             
         case .uvIndex:
@@ -904,9 +1153,195 @@ struct HourlyForecastCard: View {
         return String(format: "%.2f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
     }
     
+    private func formatSnowfall(_ cm: Double) -> String {
+        switch settingsManager.settings.precipitationUnit {
+        case .inches:
+            return String(format: "%.1f in", cm * 0.393701)
+        case .millimeters:
+            return String(format: "%.1f cm", cm)
+        }
+    }
+    
     private func formatWindSpeed(_ kmh: Double) -> String {
         let speed = settingsManager.settings.windSpeedUnit.convert(kmh)
         return String(format: "%.0f %@", speed, settingsManager.settings.windSpeedUnit.rawValue)
+    }
+}
+
+// MARK: - 16-Day Forecast Summary
+
+struct DailyForecastSummaryView: View {
+    let daily: WeatherData.DailyWeather
+    @ObservedObject var settingsManager: SettingsManager
+
+    private var dayCount: Int {
+        min(16, daily.temperature2mMax.count)
+    }
+
+    private var isFahrenheit: Bool {
+        settingsManager.settings.temperatureUnit == .fahrenheit
+    }
+
+    // Returns a natural-language day label with the calendar date included.
+    // e.g. "today", "tomorrow", "Thursday, March 5"
+    private func dayLabel(for index: Int) -> String {
+        guard let sunriseStr = daily.sunrise?[index], let date = DateParser.parse(sunriseStr) else {
+            return "day \(index + 1)"
+        }
+        if index == 0 { return "today" }
+        if index == 1 { return "tomorrow" }
+        let fmt = DateFormatter()
+        fmt.dateFormat = "EEEE, MMM d"
+        return fmt.string(from: date)
+    }
+
+    // Formats a list of day indices as natural English: "March 3", "March 3 and March 5",
+    // "March 3, March 5, and March 7". For 4+ items just returns the count phrase.
+    private func dateList(indices: [Int], noun: String) -> String {
+        guard !indices.isEmpty else { return "" }
+        let shortFmt = DateFormatter()
+        shortFmt.dateFormat = "MMM d"
+
+        func shortDate(_ index: Int) -> String {
+            guard let sunriseStr = daily.sunrise?[index], let date = DateParser.parse(sunriseStr) else {
+                return "day \(index + 1)"
+            }
+            if index == 0 { return "today" }
+            if index == 1 { return "tomorrow" }
+            return shortFmt.string(from: date)
+        }
+
+        switch indices.count {
+        case 1:
+            return "\(noun) on \(shortDate(indices[0]))"
+        case 2:
+            return "\(noun) on \(shortDate(indices[0])) and \(shortDate(indices[1]))"
+        case 3:
+            return "\(noun) on \(shortDate(indices[0])), \(shortDate(indices[1])), and \(shortDate(indices[2]))"
+        default:
+            return "\(noun) on \(indices.count) days"
+        }
+    }
+
+    // Temperature trend: compare first-3-day average high vs last-3-day average high
+    private var temperatureTrendText: String? {
+        guard dayCount >= 6 else { return nil }
+        let highs = (0..<dayCount).compactMap { daily.temperature2mMax[$0] }
+        guard highs.count >= 6 else { return nil }
+
+        let firstAvg = highs.prefix(3).reduce(0, +) / 3.0
+        let lastAvg = highs.suffix(3).reduce(0, +) / 3.0
+        let threshold = isFahrenheit ? 5.0 : 3.0
+        let diff = lastAvg - firstAvg
+        guard abs(diff) >= threshold else { return nil }
+
+        let convert = settingsManager.settings.temperatureUnit.convert
+        let unit = settingsManager.settings.temperatureUnit.rawValue
+        let firstVal = Int(convert(firstAvg).rounded())
+        let lastVal = Int(convert(lastAvg).rounded())
+
+        if diff > 0 {
+            // Warming trend — mention peak with date if notably above ending average
+            if let peakHigh = highs.max(), peakHigh > lastAvg + threshold,
+               let peakIndex = (0..<dayCount).first(where: { (daily.temperature2mMax[$0] ?? 0) == peakHigh }) {
+                let peakVal = Int(convert(peakHigh).rounded())
+                return "Highs climb from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days, with a peak of \(peakVal)\(unit) on \(dayLabel(for: peakIndex))."
+            } else {
+                return "Highs climb from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days."
+            }
+        } else {
+            // Cooling trend — mention trough with date if notably below ending average
+            if let troughLow = highs.min(), troughLow < lastAvg - threshold,
+               let troughIndex = (0..<dayCount).first(where: { (daily.temperature2mMax[$0] ?? 0) == troughLow }) {
+                let troughVal = Int(convert(troughLow).rounded())
+                return "Highs fall from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days, with a low of \(troughVal)\(unit) on \(dayLabel(for: troughIndex))."
+            } else {
+                return "Highs fall from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days."
+            }
+        }
+    }
+
+    // Precipitation summary: collect specific day indices for snow and rain
+    private var precipitationText: String {
+        var rainIndices: [Int] = []
+        var snowIndices: [Int] = []
+
+        for i in 0..<dayCount {
+            let prob = daily.precipitationProbabilityMax?[i]
+            let precip = daily.precipitationSum?[i]
+            let snow = daily.snowfallSum?[i]
+
+            let isWet: Bool
+            if let p = prob {
+                isWet = p >= 40
+            } else {
+                isWet = (precip ?? 0) > 0.5 || (snow ?? 0) > 0.1
+            }
+
+            if isWet {
+                if (snow ?? 0) > 0.1 {
+                    snowIndices.append(i)
+                } else {
+                    rainIndices.append(i)
+                }
+            }
+        }
+
+        let wetCount = rainIndices.count + snowIndices.count
+
+        switch (wetCount, snowIndices.count) {
+        case (0, _):
+            return "Dry conditions expected throughout the period."
+        case (_, 0):
+            // Rain only
+            return "\(dateList(indices: rainIndices, noun: "Rain expected").capitalized)."
+        case (let w, let s) where s == w:
+            // Snow only
+            return "\(dateList(indices: snowIndices, noun: "Snow expected").capitalized)."
+        default:
+            // Mix — lead with snow dates, then mention total rain days
+            let snowPart = dateList(indices: snowIndices, noun: "snow")
+            let rainCount = rainIndices.count
+            let rainPart = rainCount == 1 ? "rain on 1 other day" : "rain on \(rainCount) other days"
+            return "Precipitation expected, with \(snowPart) and \(rainPart)."
+        }
+    }
+
+    // Wind alert: only mention if any day exceeds 56 km/h (~35 mph)
+    private var windAlertText: String? {
+        let thresholdKmh = 56.0
+        guard let windSpeeds = daily.windSpeed10mMax else { return nil }
+
+        var maxSpeed = 0.0
+        var maxIndex = 0
+        for i in 0..<dayCount {
+            let speed = windSpeeds[i] ?? 0
+            if speed > maxSpeed {
+                maxSpeed = speed
+                maxIndex = i
+            }
+        }
+        guard maxSpeed > thresholdKmh else { return nil }
+
+        let convertedSpeed = Int(settingsManager.settings.windSpeedUnit.convert(maxSpeed).rounded())
+        let unit = settingsManager.settings.windSpeedUnit.rawValue
+        return "Strong winds up to \(convertedSpeed) \(unit) expected \(dayLabel(for: maxIndex))."
+    }
+
+    private var summaryText: String {
+        var parts: [String] = []
+        if let trend = temperatureTrendText { parts.append(trend) }
+        parts.append(precipitationText)
+        if let wind = windAlertText { parts.append(wind) }
+        return parts.joined(separator: " ")
+    }
+
+    var body: some View {
+        Text(summaryText)
+            .font(.subheadline)
+            .foregroundColor(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityLabel(summaryText)
     }
 }
 
@@ -928,7 +1363,10 @@ struct DailyForecastRow: View {
     }
     
     private var dayName: String {
-        guard let sunrise = sunrise, let date = DateParser.parse(sunrise) else { return "" }
+        guard let sunrise = sunrise, let date = DateParser.parse(sunrise) else {
+            print("⚠️ DailyForecastRow: Failed to parse sunrise '\(sunrise ?? "nil")' for day \(index)")
+            return "Unknown Date"
+        }
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MMM d"
@@ -962,7 +1400,7 @@ struct DailyForecastRow: View {
                         .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                .frame(minWidth: 100, maxWidth: 160, alignment: .leading)
+                .frame(minWidth: 120, maxWidth: 200, alignment: .leading)
                 .accessibilityHidden(true)
                 
                 // Conditions icon - always show if available
@@ -1059,7 +1497,18 @@ struct DailyForecastRow: View {
             }
             
         case .precipitationSum:
-            if let precip = daily.precipitationSum?[index], precip > 0 {
+            // Prefer snowfall in proper units when snow is expected; fall back to liquid total
+            if let snow = daily.snowfallSum?[index], snow > 0 {
+                return AnyView(HStack(spacing: 4) {
+                    Image(systemName: "snowflake")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                    Text(formatSnowfall(snow))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .frame(minWidth: 50))
+            } else if let precip = daily.precipitationSum?[index], precip > 0 {
                 return AnyView(HStack(spacing: 4) {
                     Image(systemName: "drop.fill")
                         .font(.caption)
@@ -1198,7 +1647,9 @@ struct DailyForecastRow: View {
             }
             
         case .precipitationSum:
-            if let precip = daily.precipitationSum?[index], precip > 0 {
+            if let snow = daily.snowfallSum?[index], snow > 0 {
+                return "\(formatSnowfall(snow)) of snow"
+            } else if let precip = daily.precipitationSum?[index], precip > 0 {
                 return "precipitation \(formatPrecipitation(precip))"
             }
             
@@ -1251,9 +1702,12 @@ struct DailyForecastRow: View {
     }
     
     private func formatSnowfall(_ cm: Double) -> String {
-        // Convert cm to mm, then to user's unit
-        let mm = cm * 10
-        return formatPrecipitation(mm)
+        switch settingsManager.settings.precipitationUnit {
+        case .inches:
+            return String(format: "%.1f in", cm * 0.393701)
+        case .millimeters:
+            return String(format: "%.1f cm", cm)
+        }
     }
     
     private func formatWindSpeed(_ kmh: Double) -> String {
@@ -1315,6 +1769,7 @@ struct WeatherAlertsSection: View {
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                         .lineLimit(2)
+                                        .truncationMode(.tail)
                                 }
                                 
                                 Spacer()
@@ -1347,7 +1802,7 @@ struct WeatherAlertsSection: View {
             do {
                 let fetchedAlerts = try await weatherService.fetchNWSAlerts(for: city)
                 
-                alerts = fetchedAlerts
+                alerts = fetchedAlerts.sorted { $0.severity.sortOrder < $1.severity.sortOrder }
                 isLoading = false
                 hasLoaded = true
             } catch {
@@ -1355,5 +1810,343 @@ struct WeatherAlertsSection: View {
                 hasLoaded = true
             }
         }
+    }
+}
+
+// MARK: - Marine Forecast Section
+
+struct MarineForecastSection: View {
+    let city: City
+    let dateOffset: Int
+    
+    @EnvironmentObject var weatherService: WeatherService
+    @EnvironmentObject var settingsManager: SettingsManager
+    @State private var isLoading = false
+    
+    private var marineData: MarineData? {
+        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+        return weatherService.marineCache[cacheKey]
+    }
+    
+    private func enabledFields() -> [MarineFieldType] {
+        settingsManager.settings.marineFields
+            .filter { $0.isEnabled }
+            .map { $0.type }
+    }
+    
+    // Find index of current hour (or next available hour) in time array
+    private func findCurrentHourIndex(in times: [String?]) -> Int {
+        let now = Date()
+        let calendar = Calendar.current
+        let currentHour = calendar.component(.hour, from: now)
+        
+        // Parse each time and find the one matching or after current hour
+        for (index, timeString) in times.enumerated() {
+            guard let timeString = timeString else { continue }
+            if let time = DateParser.parse(timeString) {
+                let hour = calendar.component(.hour, from: time)
+                if hour >= currentHour {
+                    return index
+                }
+            }
+        }
+        
+        return 0 // Fallback to start if not found
+    }
+    
+    var body: some View {
+        Group {
+            GroupBox(label: Label("Marine Forecast", systemImage: "water.waves")) {
+                    if isLoading {
+                        ProgressView("Loading marine data...")
+                            .frame(minHeight: 100)
+                            .padding()
+                    } else if dateOffset < 0 {
+                        VStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.title)
+                                .foregroundColor(.orange)
+                            Text("Historical marine data not available")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
+                        .frame(minHeight: 100)
+                        .padding()
+                    } else if let marine = marineData, let hourly = marine.hourly {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 16) {
+                                // Show next 24 hours starting from current hour (like hourly forecast)
+                                if let timeArray = hourly.time, !timeArray.isEmpty {
+                                    let currentHourIndex = findCurrentHourIndex(in: timeArray)
+                                    let startIndex = currentHourIndex >= 0 ? currentHourIndex : 0
+                                    let endIndex = min(startIndex + 24, timeArray.count)
+                                    
+                                    ForEach(startIndex..<endIndex, id: \.self) { index in
+                                        MarineForecastCard(hourly: hourly, index: index, enabledFields: enabledFields())
+                                    }
+                                }
+                            }
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
+                        }
+                    }
+                }
+                .padding(.horizontal)
+        }
+        .task(id: "\(city.id)-\(dateOffset)") {
+            isLoading = true
+            await weatherService.fetchMarineData(for: city, dateOffset: dateOffset)
+            isLoading = false
+        }
+    }
+}
+
+// MARK: - Marine Forecast Card
+
+struct MarineForecastCard: View {
+    let hourly: MarineData.MarineHourly
+    let index: Int
+    let enabledFields: [MarineFieldType]
+    
+    @EnvironmentObject var settingsManager: SettingsManager
+    
+    private var timeString: String {
+        guard let time = hourly.time?[index] else { return "Unknown" }
+        return FormatHelper.formatTimeCompact(time)
+    }
+    
+    private func formatWaveHeight(_ meters: Double?) -> String {
+        guard let meters = meters else { return "—" }
+        // NWS uses feet for wave heights in US waters, meters internationally
+        if settingsManager.settings.distanceUnit == .miles {
+            let feet = meters * 3.28084
+            return String(format: "%.1f ft", feet)
+        } else {
+            return String(format: "%.1f m", meters)
+        }
+    }
+    
+    private func formatDirection(_ degrees: Int?) -> String {
+        guard let degrees = degrees else { return "—" }
+        let directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+        let index = Int((Double(degrees) + 22.5) / 45.0) % 8
+        return "\(directions[index]) (\(degrees)°)"
+    }
+    
+    private func formatPeriod(_ seconds: Double?) -> String {
+        guard let seconds = seconds else { return "—" }
+        return String(format: "%.1f s", seconds)
+    }
+    
+    private func formatTemperature(_ celsius: Double?) -> String {
+        guard let celsius = celsius else { return "—" }
+        let converted = settingsManager.settings.temperatureUnit.convert(celsius)
+        return String(format: "%.1f%@", converted, settingsManager.settings.temperatureUnit.rawValue)
+    }
+    
+    private func formatVelocity(_ kmh: Double?) -> String {
+        guard let kmh = kmh else { return "—" }
+        // NWS uses knots for marine velocities (1 knot = 1.852 km/h)
+        // For consistency with app settings, we use windSpeedUnit but could add knots as option
+        let converted = settingsManager.settings.windSpeedUnit.convert(kmh)
+        return String(format: "%.1f %@", converted, settingsManager.settings.windSpeedUnit.rawValue)
+    }
+    
+    private func formatSeaLevel(_ meters: Double?) -> String {
+        guard let meters = meters else { return "—" }
+        // NWS uses feet for sea level/tides in US waters, meters internationally
+        if settingsManager.settings.distanceUnit == .miles {
+            let feet = meters * 3.28084
+            return String(format: "%.2f ft", feet)
+        } else {
+            return String(format: "%.2f m", meters)
+        }
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(timeString)
+                .font(.headline)
+                .foregroundColor(.primary)
+            
+            ForEach(enabledFields, id: \.self) { field in
+                switch field {
+                case .waveHeight:
+                    if let value = hourly.waveHeight?[index] {
+                        MarineDataRow(label: "Wave Height", value: formatWaveHeight(value))
+                    }
+                case .waveDirection:
+                    if let value = hourly.waveDirection?[index] {
+                        MarineDataRow(label: "Wave Direction", value: formatDirection(value))
+                    }
+                case .wavePeriod:
+                    if let value = hourly.wavePeriod?[index] {
+                        MarineDataRow(label: "Wave Period", value: formatPeriod(value))
+                    }
+                case .wavePeakPeriod:
+                    if let value = hourly.wavePeakPeriod?[index] {
+                        MarineDataRow(label: "Peak Period", value: formatPeriod(value))
+                    }
+                case .windWaveHeight:
+                    if let value = hourly.windWaveHeight?[index] {
+                        MarineDataRow(label: "Wind Wave", value: formatWaveHeight(value))
+                    }
+                case .windWaveDirection:
+                    if let value = hourly.windWaveDirection?[index] {
+                        MarineDataRow(label: "Wind Wave Dir", value: formatDirection(value))
+                    }
+                case .windWavePeriod:
+                    if let value = hourly.windWavePeriod?[index] {
+                        MarineDataRow(label: "Wind Wave Period", value: formatPeriod(value))
+                    }
+                case .swellWaveHeight:
+                    if let value = hourly.swellWaveHeight?[index] {
+                        MarineDataRow(label: "Swell Height", value: formatWaveHeight(value))
+                    }
+                case .swellWaveDirection:
+                    if let value = hourly.swellWaveDirection?[index] {
+                        MarineDataRow(label: "Swell Direction", value: formatDirection(value))
+                    }
+                case .swellWavePeriod:
+                    if let value = hourly.swellWavePeriod?[index] {
+                        MarineDataRow(label: "Swell Period", value: formatPeriod(value))
+                    }
+                case .oceanCurrentVelocity:
+                    if let value = hourly.oceanCurrentVelocity?[index] {
+                        MarineDataRow(label: "Current Speed", value: formatVelocity(value))
+                    }
+                case .oceanCurrentDirection:
+                    if let value = hourly.oceanCurrentDirection?[index] {
+                        MarineDataRow(label: "Current Dir", value: formatDirection(value))
+                    }
+                case .seaSurfaceTemperature:
+                    if let value = hourly.seaSurfaceTemperature?[index] {
+                        MarineDataRow(label: "Sea Temp", value: formatTemperature(value))
+                    }
+                case .seaLevelHeight:
+                    if let value = hourly.seaLevelHeight?[index] {
+                        MarineDataRow(label: "Sea Level", value: formatSeaLevel(value))
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(10)
+        .frame(width: 180)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(createAccessibilityLabel())
+    }
+    
+    private func createAccessibilityLabel() -> String {
+        guard let time = hourly.time?[index] else { return "No data" }
+        
+        let timeFormatted = FormatHelper.formatTimeCompact(time)
+        var label = timeFormatted
+        
+        for field in enabledFields {
+            if let fieldText = getFieldAccessibilityText(for: field) {
+                label += ", \(fieldText)"
+            }
+        }
+        
+        return label
+    }
+    
+    private func getFieldAccessibilityText(for field: MarineFieldType) -> String? {
+        switch field {
+        case .waveHeight:
+            if let value = hourly.waveHeight?[index] {
+                let unit = settingsManager.settings.distanceUnit == .miles ? "feet" : "meters"
+                let formatted = formatWaveHeight(value)
+                return "Wave height \(formatted)".replacingOccurrences(of: " ft", with: " \(unit)").replacingOccurrences(of: " m", with: " \(unit)")
+            }
+        case .waveDirection:
+            if let value = hourly.waveDirection?[index] {
+                let directions = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"]
+                let dirIndex = Int((Double(value) + 22.5) / 45.0) % 8
+                return "Wave direction \(directions[dirIndex])"
+            }
+        case .wavePeriod:
+            if let value = hourly.wavePeriod?[index] {
+                return "Wave period \(formatPeriod(value))"
+            }
+        case .wavePeakPeriod:
+            if let value = hourly.wavePeakPeriod?[index] {
+                return "Peak period \(formatPeriod(value))"
+            }
+        case .windWaveHeight:
+            if let value = hourly.windWaveHeight?[index] {
+                let unit = settingsManager.settings.distanceUnit == .miles ? "feet" : "meters"
+                let formatted = formatWaveHeight(value)
+                return "Wind wave \(formatted)".replacingOccurrences(of: " ft", with: " \(unit)").replacingOccurrences(of: " m", with: " \(unit)")
+            }
+        case .windWaveDirection:
+            if let value = hourly.windWaveDirection?[index] {
+                let directions = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"]
+                let dirIndex = Int((Double(value) + 22.5) / 45.0) % 8
+                return "Wind wave direction \(directions[dirIndex])"
+            }
+        case .windWavePeriod:
+            if let value = hourly.windWavePeriod?[index] {
+                return "Wind wave period \(formatPeriod(value))"
+            }
+        case .swellWaveHeight:
+            if let value = hourly.swellWaveHeight?[index] {
+                let unit = settingsManager.settings.distanceUnit == .miles ? "feet" : "meters"
+                let formatted = formatWaveHeight(value)
+                return "Swell height \(formatted)".replacingOccurrences(of: " ft", with: " \(unit)").replacingOccurrences(of: " m", with: " \(unit)")
+            }
+        case .swellWaveDirection:
+            if let value = hourly.swellWaveDirection?[index] {
+                let directions = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"]
+                let dirIndex = Int((Double(value) + 22.5) / 45.0) % 8
+                return "Swell direction \(directions[dirIndex])"
+            }
+        case .swellWavePeriod:
+            if let value = hourly.swellWavePeriod?[index] {
+                return "Swell period \(formatPeriod(value))"
+            }
+        case .oceanCurrentVelocity:
+            if let value = hourly.oceanCurrentVelocity?[index] {
+                return "Current speed \(formatVelocity(value))"
+            }
+        case .oceanCurrentDirection:
+            if let value = hourly.oceanCurrentDirection?[index] {
+                let directions = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"]
+                let dirIndex = Int((Double(value) + 22.5) / 45.0) % 8
+                return "Current direction \(directions[dirIndex])"
+            }
+        case .seaSurfaceTemperature:
+            if let value = hourly.seaSurfaceTemperature?[index] {
+                return "Sea temperature \(formatTemperature(value))"
+            }
+        case .seaLevelHeight:
+            if let value = hourly.seaLevelHeight?[index] {
+                let unit = settingsManager.settings.distanceUnit == .miles ? "feet" : "meters"
+                let formatted = formatSeaLevel(value)
+                return "Sea level \(formatted)".replacingOccurrences(of: " ft", with: " \(unit)").replacingOccurrences(of: " m", with: " \(unit)")
+            }
+        }
+        return nil
+    }
+}
+
+struct MarineDataRow: View {
+    let label: String
+    let value: String
+    
+    var body: some View {
+        HStack {
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            Spacer()
+            Text(value)
+                .font(.caption)
+                .fontWeight(.medium)
+        }
+        .accessibilityHidden(true)
     }
 }

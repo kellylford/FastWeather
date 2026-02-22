@@ -23,7 +23,7 @@ class LocationService: NSObject, ObservableObject {
     // MARK: - Private Properties
     
     private let locationManager = CLLocationManager()
-    private var locationContinuation: CheckedContinuation<CLLocation, Error>?
+    nonisolated(unsafe) private var locationContinuation: CheckedContinuation<CLLocation, Error>?
     
     // MARK: - Singleton
     
@@ -122,19 +122,23 @@ class LocationService: NSObject, ObservableObject {
 // MARK: - CLLocationManagerDelegate
 
 extension LocationService: CLLocationManagerDelegate {
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        authorizationStatus = manager.authorizationStatus
+    nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        Task { @MainActor in
+            authorizationStatus = manager.authorizationStatus
+        }
     }
     
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.first else { return }
         
-        currentLocation = location
+        Task { @MainActor in
+            currentLocation = location
+        }
         locationContinuation?.resume(returning: location)
         locationContinuation = nil
     }
     
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+    nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         let locationError = error as? CLError
         
         let errorMessage: String
@@ -149,7 +153,9 @@ extension LocationService: CLLocationManagerDelegate {
             errorMessage = "Location error: \(error.localizedDescription)"
         }
         
-        self.locationError = errorMessage
+        Task { @MainActor in
+            self.locationError = errorMessage
+        }
         locationContinuation?.resume(throwing: LocationError.locationUnavailable(errorMessage))
         locationContinuation = nil
     }

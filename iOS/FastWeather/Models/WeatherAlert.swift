@@ -38,6 +38,17 @@ enum AlertSeverity: String, Codable, CaseIterable {
     case minor = "Minor"
     case unknown = "Unknown"
     
+    /// Lower number = more critical. Used for sorting and picking the highest-severity alert.
+    var sortOrder: Int {
+        switch self {
+        case .extreme:  return 0
+        case .severe:   return 1
+        case .moderate: return 2
+        case .minor:    return 3
+        case .unknown:  return 4
+        }
+    }
+    
     var color: Color {
         switch self {
         case .extreme: return .red
