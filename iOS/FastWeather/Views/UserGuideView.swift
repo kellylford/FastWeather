@@ -71,6 +71,23 @@ struct UserGuideView: View {
                     BulletPoint("Navigate through states/countries → cities")
                     BulletPoint("View weather without adding to your list")
                     BulletPoint("Activate the **+** (Add City) button to add interesting cities")
+                    
+                    Text("**Sorting Cities:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("Once inside a state or country's city list, the **sort button** (two arrows pointing up and down) in the top-right corner lets you change the order cities appear. VoiceOver announces this button as \"Sort cities. Current sort: [sort order name].\"")
+                        .padding(.bottom, 4)
+                    BulletPoint("**Name (A–Z)** — Default alphabetical order")
+                    BulletPoint("**Name (Z–A)** — Reverse alphabetical")
+                    BulletPoint("**North to South** — Cities ordered from highest to lowest latitude")
+                    BulletPoint("**South to North** — Cities ordered from lowest to highest latitude")
+                    BulletPoint("**East to West** — Cities ordered from highest to lowest longitude")
+                    BulletPoint("**West to East** — Cities ordered from lowest to highest longitude")
+                    Text("The active sort option is marked with a checkmark. Geographic sorts are useful for exploring cities along a coastline, mountain range, or river corridor. The sort resets to **Name (A–Z)** each time you open a new state or country.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.top, 4)
                 }
                 
                 // Weather in Time
@@ -342,7 +359,7 @@ struct UserGuideView: View {
                         .padding(.top, 8)
                     BulletPoint("**Warning triangle** - Error or unavailable (VoiceOver: describes issue)")
                     BulletPoint("**Checkmark** - Selected item (VoiceOver: \"Selected\")")
-                    BulletPoint("**Sort arrows** - Reorder indicator (VoiceOver: \"Reorder\" or drag hint)")
+                    BulletPoint("**Two arrows up and down** - Browse Cities sort button (VoiceOver: \"Sort cities. Current sort: [sort order name]\")")
                     
                     Text("**Important:** All icons are decorative only. VoiceOver users receive full information through text labels and announcements. You never need to see icons to use the app.")
                         .font(.callout)

@@ -4907,6 +4907,356 @@
       "country": "United States",
       "lat": 34.2928774,
       "lon": -91.3378987
+    },
+    {
+      "name": "Bald Knob",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.3098066,
+      "lon": -91.5679114
+    },
+    {
+      "name": "Haskell",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 34.5014817,
+      "lon": -92.636552
+    },
+    {
+      "name": "Corning",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 36.4092192,
+      "lon": -90.5831267
+    },
+    {
+      "name": "Mountain View",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.8684075,
+      "lon": -92.1176521
+    },
+    {
+      "name": "Johnson",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 36.1328564,
+      "lon": -94.1654821
+    },
+    {
+      "name": "Little Flock",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 36.3786595,
+      "lon": -94.1352041
+    },
+    {
+      "name": "England",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 34.5442609,
+      "lon": -91.9690285
+    },
+    {
+      "name": "Charleston",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.2971836,
+      "lon": -94.036739
+    },
+    {
+      "name": "Gosnell",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.9599607,
+      "lon": -89.9716723
+    },
+    {
+      "name": "Alexander",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 34.6295373,
+      "lon": -92.4412674
+    },
+    {
+      "name": "Shannon Hills",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 34.6200931,
+      "lon": -92.3954325
+    },
+    {
+      "name": "Hamburg",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 33.2281757,
+      "lon": -91.7976285
+    },
+    {
+      "name": "North Crossett",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 33.1656769,
+      "lon": -91.9415204
+    },
+    {
+      "name": "Gentry",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 36.2675793,
+      "lon": -94.4846602
+    },
+    {
+      "name": "Hoxie",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 36.0504339,
+      "lon": -90.9750717
+    },
+    {
+      "name": "Clinton",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.5928879,
+      "lon": -92.4573348
+    },
+    {
+      "name": "Danville",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.0539792,
+      "lon": -93.3935185
+    },
+    {
+      "name": "Pottsville",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.2481394,
+      "lon": -93.049061
+    },
+    {
+      "name": "Horseshoe Bend",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 36.2200685,
+      "lon": -91.7474413
+    },
+    {
+      "name": "Carlisle",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 34.7831469,
+      "lon": -91.7465235
+    },
+    {
+      "name": "Bono",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.9089594,
+      "lon": -90.7987293
+    },
+    {
+      "name": "Augusta",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.2838668,
+      "lon": -91.3633678
+    },
+    {
+      "name": "West Fork",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.9242477,
+      "lon": -94.1885387
+    },
+    {
+      "name": "Lavaca",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.3361438,
+      "lon": -94.1782325
+    },
+    {
+      "name": "Marked Tree",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.532718,
+      "lon": -90.4208919
+    },
+    {
+      "name": "Elkins",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 36.0014682,
+      "lon": -94.0082547
+    },
+    {
+      "name": "Lincoln",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.9494569,
+      "lon": -94.4233612
+    },
+    {
+      "name": "Gurdon",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 33.9182285,
+      "lon": -93.1488168
+    },
+    {
+      "name": "Judsonia",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.270085,
+      "lon": -91.6398575
+    },
+    {
+      "name": "Wrightsville",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 34.6023156,
+      "lon": -92.216815
+    },
+    {
+      "name": "Fairfield Bay",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.6052619,
+      "lon": -92.2677334
+    },
+    {
+      "name": "Bull Shoals",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 36.383956,
+      "lon": -92.5815527
+    },
+    {
+      "name": "Goshen",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 36.1011886,
+      "lon": -93.9913099
+    },
+    {
+      "name": "Lake Village",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 33.3294799,
+      "lon": -91.2850584
+    },
+    {
+      "name": "Leachville",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.9373712,
+      "lon": -90.2580479
+    },
+    {
+      "name": "Gassville",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 36.2831238,
+      "lon": -92.4940505
+    },
+    {
+      "name": "Dermott",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 33.52539,
+      "lon": -91.4359538
+    },
+    {
+      "name": "Lake City",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.8180165,
+      "lon": -90.4346778
+    },
+    {
+      "name": "Cave City",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.9401748,
+      "lon": -91.5480777
+    },
+    {
+      "name": "Smackover",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 33.3648455,
+      "lon": -92.7248822
+    },
+    {
+      "name": "Bay",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.7428864,
+      "lon": -90.5625134
+    },
+    {
+      "name": "Rector",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 36.2630583,
+      "lon": -90.2926055
+    },
+    {
+      "name": "Earle",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.270644,
+      "lon": -90.4657018
+    },
+    {
+      "name": "Des Arc",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 34.9770353,
+      "lon": -91.4951307
+    },
+    {
+      "name": "Lepanto",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.6099726,
+      "lon": -90.333123
+    },
+    {
+      "name": "Mulberry",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.5006417,
+      "lon": -94.0515919
+    },
+    {
+      "name": "Kensett",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.2317523,
+      "lon": -91.6676357
+    },
+    {
+      "name": "Tuckerman",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 35.7311049,
+      "lon": -91.1988284
+    },
+    {
+      "name": "Melbourne",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 36.0595148,
+      "lon": -91.9084819
+    },
+    {
+      "name": "Murfreesboro",
+      "state": "Arkansas",
+      "country": "United States",
+      "lat": 34.0623308,
+      "lon": -93.6899049
     }
   ],
   "California": [
@@ -5609,6 +5959,1406 @@
       "country": "United States",
       "lat": 36.9743626,
       "lon": -122.0294673
+    },
+    {
+      "name": "Rialto",
+      "lat": 34.1064,
+      "lon": -117.3703,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Jurupa Valley",
+      "lat": 33.9798,
+      "lon": -117.4516,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Westminster",
+      "lat": 33.7579,
+      "lon": -117.9859,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Clovis",
+      "lat": 36.8252,
+      "lon": -119.7029,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Citrus Heights",
+      "lat": 38.7071,
+      "lon": -121.2811,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "San Leandro",
+      "lat": 37.7249,
+      "lon": -122.1561,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Newport Beach",
+      "lat": 33.617,
+      "lon": -117.9294,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Hawthorne",
+      "lat": 33.9128,
+      "lon": -118.3426,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Whittier",
+      "lat": 33.9749,
+      "lon": -118.0339,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Alhambra",
+      "lat": 34.093,
+      "lon": -118.1271,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Pleasanton",
+      "lat": 37.6624,
+      "lon": -121.8747,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Buena Park",
+      "lat": 33.8704,
+      "lon": -117.9962,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Lakewood",
+      "lat": 33.8503,
+      "lon": -118.1172,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Baldwin Park",
+      "lat": 34.0855,
+      "lon": -117.9612,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Chino",
+      "lat": 34.0134,
+      "lon": -117.6901,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Menifee",
+      "lat": 33.6864,
+      "lon": -117.177,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Lake Forest",
+      "lat": 33.6469,
+      "lon": -117.6859,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "San Ramon",
+      "lat": 37.7648,
+      "lon": -121.9544,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Chino Hills",
+      "lat": 33.9927,
+      "lon": -117.7601,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Bellflower",
+      "lat": 33.8826,
+      "lon": -118.1168,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Union City",
+      "lat": 37.5873,
+      "lon": -122.0216,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Upland",
+      "lat": 34.0975,
+      "lon": -117.6484,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Pittsburg",
+      "lat": 38.0268,
+      "lon": -121.8854,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Lynwood",
+      "lat": 33.9248,
+      "lon": -118.2024,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Walnut Creek",
+      "lat": 37.9021,
+      "lon": -122.0619,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Hemet",
+      "lat": 33.7475,
+      "lon": -116.972,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Tustin",
+      "lat": 33.7459,
+      "lon": -117.8262,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Apple Valley",
+      "lat": 34.5008,
+      "lon": -117.1859,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Redlands",
+      "lat": 34.055,
+      "lon": -117.1827,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Redondo Beach",
+      "lat": 33.8398,
+      "lon": -118.3846,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Yorba Linda",
+      "lat": 33.8901,
+      "lon": -117.825,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Eastvale",
+      "lat": 33.9747,
+      "lon": -117.5665,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Dublin",
+      "lat": 37.7022,
+      "lon": -121.9358,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Laguna Niguel",
+      "lat": 33.5225,
+      "lon": -117.7076,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Brentwood",
+      "lat": 37.9318,
+      "lon": -121.696,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Pico Rivera",
+      "lat": 33.9831,
+      "lon": -118.0967,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "South San Francisco",
+      "lat": 37.6535,
+      "lon": -122.4169,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Montebello",
+      "lat": 34.0159,
+      "lon": -118.112,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Camarillo",
+      "lat": 34.2176,
+      "lon": -119.0384,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Huntington Park",
+      "lat": 33.9806,
+      "lon": -118.2252,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Encinitas",
+      "lat": 33.037,
+      "lon": -117.292,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Castro Valley",
+      "lat": 37.6946,
+      "lon": -122.0857,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "La Mesa",
+      "lat": 32.7678,
+      "lon": -117.0231,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Petaluma",
+      "lat": 38.2326,
+      "lon": -122.6365,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Monterey Park",
+      "lat": 34.0515,
+      "lon": -118.1298,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Santee",
+      "lat": 32.8384,
+      "lon": -116.9739,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Porterville",
+      "lat": 36.0652,
+      "lon": -119.0168,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Rancho Cordova",
+      "lat": 38.5891,
+      "lon": -121.3027,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Tulare",
+      "lat": 36.2077,
+      "lon": -119.3473,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Cupertino",
+      "lat": 37.3229,
+      "lon": -122.0323,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "La Habra",
+      "lat": 33.9316,
+      "lon": -117.9455,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Gilroy",
+      "lat": 37.0065,
+      "lon": -121.5632,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Gardena",
+      "lat": 33.8816,
+      "lon": -118.2936,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "San Rafael",
+      "lat": 37.9748,
+      "lon": -122.5317,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Diamond Bar",
+      "lat": 34.0286,
+      "lon": -117.8103,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Hanford",
+      "lat": 36.3278,
+      "lon": -119.6462,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Arcadia",
+      "lat": 34.1362,
+      "lon": -118.0401,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "National City",
+      "lat": 32.6781,
+      "lon": -117.0992,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Woodland",
+      "lat": 38.6786,
+      "lon": -121.7733,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Fountain Valley",
+      "lat": 33.7038,
+      "lon": -117.9627,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Delano",
+      "lat": 35.7688,
+      "lon": -119.2471,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Rosemead",
+      "lat": 34.0809,
+      "lon": -118.0732,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Paramount",
+      "lat": 33.8989,
+      "lon": -118.171,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Highland",
+      "lat": 34.1121,
+      "lon": -117.1808,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Novato",
+      "lat": 38.1062,
+      "lon": -122.5681,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Cathedral City",
+      "lat": 33.781,
+      "lon": -116.4641,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Colton",
+      "lat": 34.0669,
+      "lon": -117.3243,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Perris",
+      "lat": 33.7819,
+      "lon": -117.2298,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Watsonville",
+      "lat": 36.9093,
+      "lon": -121.7529,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Palm Desert",
+      "lat": 33.7288,
+      "lon": -116.3826,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Rancho Santa Margarita",
+      "lat": 33.6409,
+      "lon": -117.6029,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Glendora",
+      "lat": 34.1361,
+      "lon": -117.8653,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Yucaipa",
+      "lat": 34.0336,
+      "lon": -117.0431,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Rocklin",
+      "lat": 38.7907,
+      "lon": -121.2358,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Placentia",
+      "lat": 33.8715,
+      "lon": -117.8617,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Newark",
+      "lat": 37.5297,
+      "lon": -122.0402,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Cerritos",
+      "lat": 33.8644,
+      "lon": -118.0539,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "San Jacinto",
+      "lat": 33.784,
+      "lon": -116.9589,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Poway",
+      "lat": 32.9628,
+      "lon": -117.0359,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "La Mirada",
+      "lat": 33.9061,
+      "lon": -118.0107,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Cypress",
+      "lat": 33.8248,
+      "lon": -118.0399,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Covina",
+      "lat": 34.0878,
+      "lon": -117.8891,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "San Luis Obispo",
+      "lat": 35.2828,
+      "lon": -120.6596,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Azusa",
+      "lat": 34.1339,
+      "lon": -117.9056,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Morgan Hill",
+      "lat": 37.1304,
+      "lon": -121.6545,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Ceres",
+      "lat": 37.5949,
+      "lon": -120.9577,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Bell Gardens",
+      "lat": 33.9695,
+      "lon": -118.1504,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Lake Elsinore",
+      "lat": 33.6681,
+      "lon": -117.3273,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Palm Springs",
+      "lat": 33.8246,
+      "lon": -116.5403,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Danville",
+      "lat": 37.8226,
+      "lon": -122.0008,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "El Centro",
+      "lat": 32.792,
+      "lon": -115.5631,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "West Sacramento",
+      "lat": 38.5805,
+      "lon": -121.5302,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Altadena",
+      "lat": 34.1899,
+      "lon": -118.1317,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Oakley",
+      "lat": 37.9974,
+      "lon": -121.7125,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Coachella",
+      "lat": 33.6795,
+      "lon": -116.1763,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Campbell",
+      "lat": 37.2871,
+      "lon": -121.9449,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Rancho Palos Verdes",
+      "lat": 33.7483,
+      "lon": -118.3708,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "La Puente",
+      "lat": 34.0281,
+      "lon": -117.9531,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Aliso Viejo",
+      "lat": 33.5761,
+      "lon": -117.7258,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "San Bruno",
+      "lat": 37.6249,
+      "lon": -122.4146,
+      "state": "California",
+      "country": "United States"
+    },
+    {
+      "name": "Rohnert Park",
+      "state": "California",
+      "country": "United States",
+      "lat": 38.3396367,
+      "lon": -122.701098
+    },
+    {
+      "name": "Lompoc",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.6391501,
+      "lon": -120.4579009
+    },
+    {
+      "name": "San Gabriel",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0990995,
+      "lon": -118.1085554
+    },
+    {
+      "name": "Lincoln",
+      "state": "California",
+      "country": "United States",
+      "lat": 38.8915741,
+      "lon": -121.29318
+    },
+    {
+      "name": "Culver City",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0211224,
+      "lon": -118.396466
+    },
+    {
+      "name": "Adelanto",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.5838077,
+      "lon": -117.4082453
+    },
+    {
+      "name": "Calexico",
+      "state": "California",
+      "country": "United States",
+      "lat": 32.6713154,
+      "lon": -115.4927113
+    },
+    {
+      "name": "Brea",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.9170444,
+      "lon": -117.888855
+    },
+    {
+      "name": "Martinez",
+      "state": "California",
+      "country": "United States",
+      "lat": 38.0138934,
+      "lon": -122.1338674
+    },
+    {
+      "name": "La Quinta",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.677474,
+      "lon": -116.2958789
+    },
+    {
+      "name": "Bell",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.9747806,
+      "lon": -118.1866361
+    },
+    {
+      "name": "Pacifica",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.5980374,
+      "lon": -122.4995234
+    },
+    {
+      "name": "Monrovia",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1483499,
+      "lon": -118.0014517
+    },
+    {
+      "name": "Wildomar",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.5939372,
+      "lon": -117.2414989
+    },
+    {
+      "name": "Los Banos",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.0592253,
+      "lon": -120.8505342
+    },
+    {
+      "name": "San Dimas",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1065404,
+      "lon": -117.8069361
+    },
+    {
+      "name": "Hollister",
+      "state": "California",
+      "country": "United States",
+      "lat": 36.8524545,
+      "lon": -121.4016021
+    },
+    {
+      "name": "Moorpark",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.285558,
+      "lon": -118.8820414
+    },
+    {
+      "name": "Temple City",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1082994,
+      "lon": -118.0577568
+    },
+    {
+      "name": "Montclair",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0775104,
+      "lon": -117.6897776
+    },
+    {
+      "name": "Manhattan Beach",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.8872777,
+      "lon": -118.4104324
+    },
+    {
+      "name": "Claremont",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0966764,
+      "lon": -117.7197785
+    },
+    {
+      "name": "La Presa",
+      "state": "California",
+      "country": "United States",
+      "lat": 32.7081085,
+      "lon": -116.9972487
+    },
+    {
+      "name": "Beverly Hills",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0696501,
+      "lon": -118.3963062
+    },
+    {
+      "name": "San Juan Capistrano",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.5016932,
+      "lon": -117.6625509
+    },
+    {
+      "name": "Pleasant Hill",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.9479786,
+      "lon": -122.0607963
+    },
+    {
+      "name": "West Hollywood",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0923014,
+      "lon": -118.3692894
+    },
+    {
+      "name": "Menlo Park",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.4519671,
+      "lon": -122.177992
+    },
+    {
+      "name": "Dana Point",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.4669721,
+      "lon": -117.6981075
+    },
+    {
+      "name": "La Verne",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1008426,
+      "lon": -117.7678355
+    },
+    {
+      "name": "East Palo Alto",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.4688273,
+      "lon": -122.141075
+    },
+    {
+      "name": "Lawndale",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.8951219,
+      "lon": -118.3526323
+    },
+    {
+      "name": "Desert Hot Springs",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.961124,
+      "lon": -116.5016784
+    },
+    {
+      "name": "Fallbrook",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.3764196,
+      "lon": -117.2511466
+    },
+    {
+      "name": "Laguna Hills",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.5948758,
+      "lon": -117.6882067
+    },
+    {
+      "name": "Orcutt",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.8651757,
+      "lon": -120.4472231
+    },
+    {
+      "name": "Walnut",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0203253,
+      "lon": -117.8659441
+    },
+    {
+      "name": "Spring Valley",
+      "state": "California",
+      "country": "United States",
+      "lat": 32.7307741,
+      "lon": -116.97138
+    },
+    {
+      "name": "San Pablo",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.9621457,
+      "lon": -122.3455263
+    },
+    {
+      "name": "Foster City",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.5600336,
+      "lon": -122.2688522
+    },
+    {
+      "name": "Atascadero",
+      "state": "California",
+      "country": "United States",
+      "lat": 35.4894169,
+      "lon": -120.6707255
+    },
+    {
+      "name": "Los Gatos",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.226611,
+      "lon": -121.9746797
+    },
+    {
+      "name": "Saratoga",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.2638324,
+      "lon": -122.0230146
+    },
+    {
+      "name": "Los Altos",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.3790629,
+      "lon": -122.116578
+    },
+    {
+      "name": "Goleta",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.4358295,
+      "lon": -119.8276389
+    },
+    {
+      "name": "Paso Robles",
+      "state": "California",
+      "country": "United States",
+      "lat": 35.6262618,
+      "lon": -120.6901319
+    },
+    {
+      "name": "Suisun City",
+      "state": "California",
+      "country": "United States",
+      "lat": 38.2382474,
+      "lon": -122.040244
+    },
+    {
+      "name": "Banning",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.9255685,
+      "lon": -116.875289
+    },
+    {
+      "name": "Monterey",
+      "state": "California",
+      "country": "United States",
+      "lat": 36.600256,
+      "lon": -121.8946388
+    },
+    {
+      "name": "Maywood",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.9866807,
+      "lon": -118.185349
+    },
+    {
+      "name": "Santa Paula",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.3541659,
+      "lon": -119.0592705
+    },
+    {
+      "name": "Benicia",
+      "state": "California",
+      "country": "United States",
+      "lat": 38.049365,
+      "lon": -122.1585777
+    },
+    {
+      "name": "Twentynine Palms",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1356915,
+      "lon": -116.0543506
+    },
+    {
+      "name": "Ridgecrest",
+      "state": "California",
+      "country": "United States",
+      "lat": 35.6206924,
+      "lon": -117.672097
+    },
+    {
+      "name": "Lemon Grove",
+      "state": "California",
+      "country": "United States",
+      "lat": 32.7425516,
+      "lon": -117.0314172
+    },
+    {
+      "name": "Burlingame",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.5780965,
+      "lon": -122.3473099
+    },
+    {
+      "name": "Atwater",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.3477174,
+      "lon": -120.609084
+    },
+    {
+      "name": "Norco",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.9323307,
+      "lon": -117.5508901
+    },
+    {
+      "name": "San Carlos",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.504936,
+      "lon": -122.261823
+    },
+    {
+      "name": "Lafayette",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.8857582,
+      "lon": -122.1180201
+    },
+    {
+      "name": "Beaumont",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.9299925,
+      "lon": -116.9763092
+    },
+    {
+      "name": "Eureka",
+      "state": "California",
+      "country": "United States",
+      "lat": 40.8018746,
+      "lon": -124.1707558
+    },
+    {
+      "name": "Brawley",
+      "state": "California",
+      "country": "United States",
+      "lat": 32.9786566,
+      "lon": -115.530267
+    },
+    {
+      "name": "Hercules",
+      "state": "California",
+      "country": "United States",
+      "lat": 38.0171441,
+      "lon": -122.2885808
+    },
+    {
+      "name": "Ladera Ranch",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.5520801,
+      "lon": -117.6384556
+    },
+    {
+      "name": "Imperial Beach",
+      "state": "California",
+      "country": "United States",
+      "lat": 32.583893,
+      "lon": -117.1130487
+    },
+    {
+      "name": "Belmont",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.5164926,
+      "lon": -122.2941914
+    },
+    {
+      "name": "Soledad",
+      "state": "California",
+      "country": "United States",
+      "lat": 36.426921,
+      "lon": -121.3271861
+    },
+    {
+      "name": "South Pasadena",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1133062,
+      "lon": -118.1478291
+    },
+    {
+      "name": "Wasco",
+      "state": "California",
+      "country": "United States",
+      "lat": 35.5941238,
+      "lon": -119.3409457
+    },
+    {
+      "name": "El Cerrito",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.9154056,
+      "lon": -122.301411
+    },
+    {
+      "name": "Barstow",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.8986215,
+      "lon": -117.0244313
+    },
+    {
+      "name": "Windsor",
+      "state": "California",
+      "country": "United States",
+      "lat": 38.5471327,
+      "lon": -122.8163802
+    },
+    {
+      "name": "Cudahy",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.9620584,
+      "lon": -118.1835395
+    },
+    {
+      "name": "Mountain House",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.7832614,
+      "lon": -121.542726
+    },
+    {
+      "name": "Reedley",
+      "state": "California",
+      "country": "United States",
+      "lat": 36.5963906,
+      "lon": -119.4511877
+    },
+    {
+      "name": "Seal Beach",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.7423967,
+      "lon": -118.1055926
+    },
+    {
+      "name": "San Fernando",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.28497,
+      "lon": -118.437652
+    },
+    {
+      "name": "Sanger",
+      "state": "California",
+      "country": "United States",
+      "lat": 36.708006,
+      "lon": -119.5559652
+    },
+    {
+      "name": "Bloomington",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0701151,
+      "lon": -117.395582
+    },
+    {
+      "name": "South Lake Tahoe",
+      "state": "California",
+      "country": "United States",
+      "lat": 38.9319293,
+      "lon": -119.9780188
+    },
+    {
+      "name": "San Lorenzo",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.6810422,
+      "lon": -122.1244088
+    },
+    {
+      "name": "Corcoran",
+      "state": "California",
+      "country": "United States",
+      "lat": 36.0981045,
+      "lon": -119.5603728
+    },
+    {
+      "name": "Galt",
+      "state": "California",
+      "country": "United States",
+      "lat": 38.2546373,
+      "lon": -121.2999485
+    },
+    {
+      "name": "Loma Linda",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0537971,
+      "lon": -117.2610925
+    },
+    {
+      "name": "Calabasas",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1446643,
+      "lon": -118.644097
+    },
+    {
+      "name": "Isla Vista",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.4115125,
+      "lon": -119.8562131
+    },
+    {
+      "name": "Laguna Beach",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.5426975,
+      "lon": -117.785366
+    },
+    {
+      "name": "Lemoore",
+      "state": "California",
+      "country": "United States",
+      "lat": 36.3006495,
+      "lon": -119.7827122
+    },
+    {
+      "name": "Selma",
+      "state": "California",
+      "country": "United States",
+      "lat": 36.5707838,
+      "lon": -119.6120765
+    },
+    {
+      "name": "Riverbank",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.7360396,
+      "lon": -120.9354895
+    },
+    {
+      "name": "Agoura Hills",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1481692,
+      "lon": -118.7655456
+    },
+    {
+      "name": "Winter Gardens",
+      "state": "California",
+      "country": "United States",
+      "lat": 32.8311613,
+      "lon": -116.9333599
+    },
+    {
+      "name": "Duarte",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1394513,
+      "lon": -117.9772873
+    },
+    {
+      "name": "Ashland",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.6946528,
+      "lon": -122.1138531
+    },
+    {
+      "name": "Rancho San Diego",
+      "state": "California",
+      "country": "United States",
+      "lat": 32.7472748,
+      "lon": -116.9353032
+    },
+    {
+      "name": "Port Hueneme",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1477558,
+      "lon": -119.1951559
+    },
+    {
+      "name": "Yucca Valley",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1236205,
+      "lon": -116.4139839
+    },
+    {
+      "name": "Linda",
+      "state": "California",
+      "country": "United States",
+      "lat": 39.1219439,
+      "lon": -121.566054
+    },
+    {
+      "name": "South El Monte",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0519548,
+      "lon": -118.0467339
     }
   ],
   "Colorado": [
@@ -9117,6 +10867,356 @@
       "country": "United States",
       "lat": 29.2854132,
       "lon": -81.0557921
+    },
+    {
+      "name": "Valrico",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 27.9378338,
+      "lon": -82.2327525
+    },
+    {
+      "name": "Dunedin",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.0116627,
+      "lon": -82.7893788
+    },
+    {
+      "name": "Lake Worth Beach",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 26.6159698,
+      "lon": -80.0569927
+    },
+    {
+      "name": "Riviera Beach",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 26.784343,
+      "lon": -80.0650293
+    },
+    {
+      "name": "Apopka",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.6732806,
+      "lon": -81.5116471
+    },
+    {
+      "name": "Merritt Island",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.3581193,
+      "lon": -80.6968385
+    },
+    {
+      "name": "Parkland",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 26.3100794,
+      "lon": -80.23727
+    },
+    {
+      "name": "Greenacres",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 26.623679,
+      "lon": -80.1253213
+    },
+    {
+      "name": "Winter Springs",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.6987317,
+      "lon": -81.3055188
+    },
+    {
+      "name": "Lauderdale Lakes",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 26.1667184,
+      "lon": -80.2085565
+    },
+    {
+      "name": "Fruit Cove",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 30.1012477,
+      "lon": -81.6184195
+    },
+    {
+      "name": "Plant City",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.01633,
+      "lon": -82.1234803
+    },
+    {
+      "name": "East Lake",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.1083705,
+      "lon": -82.696848
+    },
+    {
+      "name": "Sun City Center",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 27.7123035,
+      "lon": -82.3519192
+    },
+    {
+      "name": "Lake Magdalene",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.0693268,
+      "lon": -82.4593625
+    },
+    {
+      "name": "Cutler Bay",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 25.5783,
+      "lon": -80.3377
+    },
+    {
+      "name": "Buenaventura Lakes",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.3284955,
+      "lon": -81.3512642
+    },
+    {
+      "name": "Aventura",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 25.9564812,
+      "lon": -80.1392121
+    },
+    {
+      "name": "Cooper City",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 26.057783,
+      "lon": -80.2695109
+    },
+    {
+      "name": "Ponte Vedra Beach",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 30.2274645,
+      "lon": -81.3800824
+    },
+    {
+      "name": "Saint Cloud",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.2498534,
+      "lon": -81.2839038
+    },
+    {
+      "name": "Dania Beach",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 26.0524224,
+      "lon": -80.143929
+    },
+    {
+      "name": "Ruskin",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 27.7206448,
+      "lon": -82.4340374
+    },
+    {
+      "name": "Winter Park",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.5977707,
+      "lon": -81.3510264
+    },
+    {
+      "name": "Crestview",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 30.7621326,
+      "lon": -86.5705084
+    },
+    {
+      "name": "Bayonet Point",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.3266726,
+      "lon": -82.6834337
+    },
+    {
+      "name": "Apollo Beach",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 27.7741547,
+      "lon": -82.4062097
+    },
+    {
+      "name": "Westchase",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.0554771,
+      "lon": -82.6236135
+    },
+    {
+      "name": "Keystone",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.1289307,
+      "lon": -82.5749461
+    },
+    {
+      "name": "Tarpon Springs",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.1470965,
+      "lon": -82.756367
+    },
+    {
+      "name": "Oak Ridge",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.4723368,
+      "lon": -81.417477
+    },
+    {
+      "name": "Rockledge",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.330831,
+      "lon": -80.7349162
+    },
+    {
+      "name": "Casselberry",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.6714702,
+      "lon": -81.3382005
+    },
+    {
+      "name": "Hunters Creek",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.3643294,
+      "lon": -81.4239993
+    },
+    {
+      "name": "Immokalee",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 26.4185404,
+      "lon": -81.4173997
+    },
+    {
+      "name": "Jacksonville Beach",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 30.2946859,
+      "lon": -81.3931396
+    },
+    {
+      "name": "Port Saint John",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.476224,
+      "lon": -80.7791031
+    },
+    {
+      "name": "West Melbourne",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.0736261,
+      "lon": -80.6718389
+    },
+    {
+      "name": "Palmetto Bay",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 25.6217715,
+      "lon": -80.3247748
+    },
+    {
+      "name": "Eustis",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.8527675,
+      "lon": -81.6853534
+    },
+    {
+      "name": "Wekiwa Springs",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.6896886,
+      "lon": -81.4070761
+    },
+    {
+      "name": "Northdale",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.0945156,
+      "lon": -82.5076412
+    },
+    {
+      "name": "Bloomingdale",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 27.8938428,
+      "lon": -82.2441265
+    },
+    {
+      "name": "Leisure City",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 25.4953878,
+      "lon": -80.4292223
+    },
+    {
+      "name": "Temple Terrace",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.0352964,
+      "lon": -82.3892596
+    },
+    {
+      "name": "Sunny Isles Beach",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 25.9426915,
+      "lon": -80.1218486
+    },
+    {
+      "name": "Miami Lakes",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 25.9087056,
+      "lon": -80.3086619
+    },
+    {
+      "name": "Princeton",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 25.5384989,
+      "lon": -80.4089973
+    },
+    {
+      "name": "Edgewater",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 28.9888754,
+      "lon": -80.9022758
+    },
+    {
+      "name": "Doral",
+      "state": "Florida",
+      "country": "United States",
+      "lat": 25.8195424,
+      "lon": -80.3553302
     }
   ],
   "Georgia": [
@@ -11923,6 +14023,356 @@
       "country": "United States",
       "lat": 42.6504719,
       "lon": -112.193022
+    },
+    {
+      "name": "Moyie Springs",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 48.7263285,
+      "lon": -116.188528
+    },
+    {
+      "name": "Hazelton",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 42.5958678,
+      "lon": -114.136699
+    },
+    {
+      "name": "Potlatch",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 46.9214798,
+      "lon": -116.896971
+    },
+    {
+      "name": "Menan",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 43.720744,
+      "lon": -111.98997
+    },
+    {
+      "name": "Horseshoe Bend",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 43.9145834,
+      "lon": -116.1984788
+    },
+    {
+      "name": "Ponderay",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 48.3054806,
+      "lon": -116.533803
+    },
+    {
+      "name": "Hauser",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 47.7722341,
+      "lon": -117.028724
+    },
+    {
+      "name": "Council",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 44.7298876,
+      "lon": -116.438198
+    },
+    {
+      "name": "Athol",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 47.9479601,
+      "lon": -116.707974
+    },
+    {
+      "name": "Franklin",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 42.0168752,
+      "lon": -111.8041815
+    },
+    {
+      "name": "Kooskia / leewikees",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 46.1448942,
+      "lon": -115.9779188
+    },
+    {
+      "name": "Inkom",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 42.7963041,
+      "lon": -112.254137
+    },
+    {
+      "name": "Roberts",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 43.720188,
+      "lon": -112.126363
+    },
+    {
+      "name": "Ririe",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 43.63131,
+      "lon": -111.773593
+    },
+    {
+      "name": "Dubois",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 44.176298,
+      "lon": -112.23082
+    },
+    {
+      "name": "Smelterville",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 47.5426994,
+      "lon": -116.181556
+    },
+    {
+      "name": "Juliaetta",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 46.5787804,
+      "lon": -116.705986
+    },
+    {
+      "name": "Downey",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 42.4285297,
+      "lon": -112.124407
+    },
+    {
+      "name": "Hayden Lake",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 47.7587944,
+      "lon": -116.756857
+    },
+    {
+      "name": "Pierce",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 46.4910207,
+      "lon": -115.799028
+    },
+    {
+      "name": "Mackay",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 43.91463,
+      "lon": -113.613355
+    },
+    {
+      "name": "Deary",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 46.7993412,
+      "lon": -116.555989
+    },
+    {
+      "name": "New Meadows",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 44.9712808,
+      "lon": -116.284017
+    },
+    {
+      "name": "Nezperce",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 46.2348914,
+      "lon": -116.240697
+    },
+    {
+      "name": "Carey",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 43.307683,
+      "lon": -113.944752
+    },
+    {
+      "name": "Lewisville",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 43.695744,
+      "lon": -112.010526
+    },
+    {
+      "name": "Craigmont",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 46.241276,
+      "lon": -116.467088
+    },
+    {
+      "name": "Georgetown",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 42.4764425,
+      "lon": -111.3703902
+    },
+    {
+      "name": "Idaho City",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 43.8280309,
+      "lon": -115.834496
+    },
+    {
+      "name": "Dover",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 48.2515871,
+      "lon": -116.610904
+    },
+    {
+      "name": "Lava Hot Springs",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 42.6193625,
+      "lon": -112.011071
+    },
+    {
+      "name": "Firth",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 43.305193,
+      "lon": -112.183029
+    },
+    {
+      "name": "Grand View",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 42.9896139,
+      "lon": -116.09343
+    },
+    {
+      "name": "Dayton",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 42.1129787,
+      "lon": -111.993566
+    },
+    {
+      "name": "Kootenai",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 48.3102038,
+      "lon": -116.513525
+    },
+    {
+      "name": "Weston",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 42.0371465,
+      "lon": -111.979397
+    },
+    {
+      "name": "Richfield",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 43.0530802,
+      "lon": -114.1524662
+    },
+    {
+      "name": "Basalt",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 43.315471,
+      "lon": -112.164417
+    },
+    {
+      "name": "Eden",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 42.6059001,
+      "lon": -114.209645
+    },
+    {
+      "name": "Weippe",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 46.3760149,
+      "lon": -115.938194
+    },
+    {
+      "name": "Culdesac",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 46.3746103,
+      "lon": -116.673203
+    },
+    {
+      "name": "Bancroft",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 42.7201961,
+      "lon": -111.88579
+    },
+    {
+      "name": "Cambridge",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 44.572596,
+      "lon": -116.6760812
+    },
+    {
+      "name": "Kendrick",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 46.6140599,
+      "lon": -116.646541
+    },
+    {
+      "name": "Declo",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 42.5182428,
+      "lon": -113.628064
+    },
+    {
+      "name": "Rockland",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 42.5732468,
+      "lon": -112.877212
+    },
+    {
+      "name": "Parker",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 43.9594911,
+      "lon": -111.7581744
+    },
+    {
+      "name": "Arimo",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 42.559917,
+      "lon": -112.171354
+    },
+    {
+      "name": "Harrison",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 47.4542999,
+      "lon": -116.786025
+    },
+    {
+      "name": "Bovill",
+      "state": "Idaho",
+      "country": "United States",
+      "lat": 46.8585606,
+      "lon": -116.393439
     }
   ],
   "Illinois": [
@@ -14729,6 +17179,356 @@
       "country": "United States",
       "lat": 42.016055,
       "lon": -94.3741093
+    },
+    {
+      "name": "Carlisle",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 41.4986831,
+      "lon": -93.4867511
+    },
+    {
+      "name": "Rock Valley",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 43.205241,
+      "lon": -96.294843
+    },
+    {
+      "name": "Monticello",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 42.2382752,
+      "lon": -91.1869428
+    },
+    {
+      "name": "Cresco",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 43.3736148,
+      "lon": -92.1161444
+    },
+    {
+      "name": "West Liberty",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 41.5700231,
+      "lon": -91.2637695
+    },
+    {
+      "name": "Waukon",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 43.2694242,
+      "lon": -91.4757884
+    },
+    {
+      "name": "Carter Lake",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 41.2851284,
+      "lon": -95.917157
+    },
+    {
+      "name": "Albia",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 41.0264561,
+      "lon": -92.8075217
+    },
+    {
+      "name": "Emmetsburg",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 43.1108076,
+      "lon": -94.6781897
+    },
+    {
+      "name": "Osage",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 43.2841235,
+      "lon": -92.8112231
+    },
+    {
+      "name": "Eagle Grove",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 42.6641418,
+      "lon": -93.9046225
+    },
+    {
+      "name": "New Hampton",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 43.059421,
+      "lon": -92.3181158
+    },
+    {
+      "name": "Robins",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 42.0709929,
+      "lon": -91.6668122
+    },
+    {
+      "name": "Story City",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 42.1872062,
+      "lon": -93.5957713
+    },
+    {
+      "name": "Williamsburg",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 41.6612394,
+      "lon": -92.0095079
+    },
+    {
+      "name": "Milford",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 43.32396,
+      "lon": -95.1508003
+    },
+    {
+      "name": "West Burlington",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 40.825083,
+      "lon": -91.1565496
+    },
+    {
+      "name": "Tipton",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 41.7697016,
+      "lon": -91.1281732
+    },
+    {
+      "name": "Tama",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 41.9625958,
+      "lon": -92.5792797
+    },
+    {
+      "name": "Garner",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 43.102147,
+      "lon": -93.6020069
+    },
+    {
+      "name": "Solon",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 41.8072344,
+      "lon": -91.4940604
+    },
+    {
+      "name": "Wilton",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 41.5889154,
+      "lon": -91.0168179
+    },
+    {
+      "name": "Onawa",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 42.0268269,
+      "lon": -96.0974618
+    },
+    {
+      "name": "Sibley",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 43.3989852,
+      "lon": -95.7520256
+    },
+    {
+      "name": "Fairfax",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 41.9194471,
+      "lon": -91.7810132
+    },
+    {
+      "name": "Clarion",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 42.7317899,
+      "lon": -93.7321871
+    },
+    {
+      "name": "Madrid",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 41.8766526,
+      "lon": -93.8232813
+    },
+    {
+      "name": "Hawarden",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 42.9956607,
+      "lon": -96.485317
+    },
+    {
+      "name": "Bloomfield",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 40.7511569,
+      "lon": -92.4145672
+    },
+    {
+      "name": "Missouri Valley",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 41.5564975,
+      "lon": -95.8879438
+    },
+    {
+      "name": "Eldora",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 42.3606883,
+      "lon": -93.099609
+    },
+    {
+      "name": "Kalona",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 41.483118,
+      "lon": -91.7061856
+    },
+    {
+      "name": "Rock Rapids",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 43.4303235,
+      "lon": -96.1674831
+    },
+    {
+      "name": "Grundy Center",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 42.3616501,
+      "lon": -92.7685327
+    },
+    {
+      "name": "Center Point",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 42.1908265,
+      "lon": -91.7851772
+    },
+    {
+      "name": "Hudson",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 42.4065857,
+      "lon": -92.4553008
+    },
+    {
+      "name": "Jesup",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 42.4750516,
+      "lon": -92.0632129
+    },
+    {
+      "name": "West Branch",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 41.6720735,
+      "lon": -91.3459735
+    },
+    {
+      "name": "Postville",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 43.0865887,
+      "lon": -91.5684784
+    },
+    {
+      "name": "West Union",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 42.9624184,
+      "lon": -91.8076644
+    },
+    {
+      "name": "Mitchellville",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 41.6685039,
+      "lon": -93.3578028
+    },
+    {
+      "name": "Belmond",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 42.8459977,
+      "lon": -93.6143413
+    },
+    {
+      "name": "Marengo",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 41.8001041,
+      "lon": -92.069382
+    },
+    {
+      "name": "Cascade",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 42.2984881,
+      "lon": -91.0142226
+    },
+    {
+      "name": "Hull",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 43.1897632,
+      "lon": -96.1338818
+    },
+    {
+      "name": "Toledo",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 41.9958439,
+      "lon": -92.5790678
+    },
+    {
+      "name": "Bellevue",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 42.2587152,
+      "lon": -90.4230824
+    },
+    {
+      "name": "Belle Plaine",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 41.8969202,
+      "lon": -92.277323
+    },
+    {
+      "name": "Ely",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 41.8726859,
+      "lon": -91.5854027
+    },
+    {
+      "name": "La Porte City",
+      "state": "Iowa",
+      "country": "United States",
+      "lat": 42.3149911,
+      "lon": -92.1921275
     }
   ],
   "Kansas": [
@@ -16483,6 +19283,356 @@
       "country": "United States",
       "lat": 38.599243,
       "lon": -83.3187952
+    },
+    {
+      "name": "Whitesburg",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 37.1184318,
+      "lon": -82.8268265
+    },
+    {
+      "name": "Owenton",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 38.536456,
+      "lon": -84.8418926
+    },
+    {
+      "name": "Manchester",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 37.1537007,
+      "lon": -83.7618641
+    },
+    {
+      "name": "Augusta",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 38.7717376,
+      "lon": -84.0057628
+    },
+    {
+      "name": "Beattyville",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 37.5717526,
+      "lon": -83.7068606
+    },
+    {
+      "name": "Elkhorn City",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 37.3039971,
+      "lon": -82.3509795
+    },
+    {
+      "name": "Millersburg",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 38.30202,
+      "lon": -84.1474297
+    },
+    {
+      "name": "Taylorsville",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 38.0317303,
+      "lon": -85.3425348
+    },
+    {
+      "name": "West Point",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 37.9986058,
+      "lon": -85.9517919
+    },
+    {
+      "name": "Middletown",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 38.2452668,
+      "lon": -85.5395595
+    },
+    {
+      "name": "Shepherdsville",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 37.9885936,
+      "lon": -85.7158246
+    },
+    {
+      "name": "Edgewood",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 39.0186719,
+      "lon": -84.581888
+    },
+    {
+      "name": "Elsmere",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 39.0125608,
+      "lon": -84.6046663
+    },
+    {
+      "name": "Fort Mitchell",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 39.0595047,
+      "lon": -84.5474432
+    },
+    {
+      "name": "Villa Hills",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 39.0633933,
+      "lon": -84.5929998
+    },
+    {
+      "name": "Hillview",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 38.0697889,
+      "lon": -85.6855146
+    },
+    {
+      "name": "Oak Grove",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 36.6650471,
+      "lon": -87.4427878
+    },
+    {
+      "name": "Highland Heights",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 39.0330902,
+      "lon": -84.4521512
+    },
+    {
+      "name": "Taylor Mill",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 38.9975616,
+      "lon": -84.4963306
+    },
+    {
+      "name": "Cold Spring",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 39.0217283,
+      "lon": -84.4399406
+    },
+    {
+      "name": "Fort Wright",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 39.0517272,
+      "lon": -84.5341096
+    },
+    {
+      "name": "Douglass Hills",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 38.2378484,
+      "lon": -85.5527377
+    },
+    {
+      "name": "Union",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 38.9458951,
+      "lon": -84.680501
+    },
+    {
+      "name": "Dayton",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 39.1128377,
+      "lon": -84.4727198
+    },
+    {
+      "name": "Hurstbourne",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 38.2381263,
+      "lon": -85.5882937
+    },
+    {
+      "name": "Reidland",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 37.0175574,
+      "lon": -88.5314345
+    },
+    {
+      "name": "Greenville",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 37.2011539,
+      "lon": -87.1788854
+    },
+    {
+      "name": "Vine Grove",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 37.8100674,
+      "lon": -85.9813524
+    },
+    {
+      "name": "Southgate",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 39.072005,
+      "lon": -84.4727195
+    },
+    {
+      "name": "Crescent Springs",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 39.0514492,
+      "lon": -84.5816106
+    },
+    {
+      "name": "Russell",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 38.5173028,
+      "lon": -82.6976631
+    },
+    {
+      "name": "Providence",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 37.397545,
+      "lon": -87.7627898
+    },
+    {
+      "name": "Beaver Dam",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 37.4019918,
+      "lon": -86.8758256
+    },
+    {
+      "name": "Crestview Hills",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 39.0272829,
+      "lon": -84.5849438
+    },
+    {
+      "name": "Indian Hills",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 38.2725704,
+      "lon": -85.6627394
+    },
+    {
+      "name": "Rineyville",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 37.7510358,
+      "lon": -85.9730185
+    },
+    {
+      "name": "Wilder",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 39.0564732,
+      "lon": -84.4867731
+    },
+    {
+      "name": "Park Hills",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 39.0714491,
+      "lon": -84.5321652
+    },
+    {
+      "name": "Marion",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 37.3328286,
+      "lon": -88.0811349
+    },
+    {
+      "name": "Graymoor-Devondale",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 38.2702877,
+      "lon": -85.6159137
+    },
+    {
+      "name": "Hodgenville",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 37.5737487,
+      "lon": -85.740353
+    },
+    {
+      "name": "Calvert City",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 37.0333896,
+      "lon": -88.3500362
+    },
+    {
+      "name": "Anchorage",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 38.2665993,
+      "lon": -85.5330114
+    },
+    {
+      "name": "Russell Springs",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 37.0566246,
+      "lon": -85.0875858
+    },
+    {
+      "name": "Lakeside Park",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 39.0356162,
+      "lon": -84.5691102
+    },
+    {
+      "name": "Hartford",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 37.4511591,
+      "lon": -86.9091596
+    },
+    {
+      "name": "Pioneer Village",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 38.0606219,
+      "lon": -85.6777364
+    },
+    {
+      "name": "Windy Hills",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 38.2739593,
+      "lon": -85.6344057
+    },
+    {
+      "name": "Morgantown",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 37.2256023,
+      "lon": -86.6835998
+    },
+    {
+      "name": "Dawson Springs",
+      "state": "Kentucky",
+      "country": "United States",
+      "lat": 37.1672684,
+      "lon": -87.6925074
     }
   ],
   "Louisiana": [
@@ -22095,6 +25245,356 @@
       "country": "United States",
       "lat": 47.52326,
       "lon": -92.536571
+    },
+    {
+      "name": "Grand Rapids",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 47.237166,
+      "lon": -93.530214
+    },
+    {
+      "name": "Little Falls",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.9763545,
+      "lon": -94.3625024
+    },
+    {
+      "name": "Mahtomedi",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.0696886,
+      "lon": -92.9516037
+    },
+    {
+      "name": "Baxter",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 46.3433005,
+      "lon": -94.286666
+    },
+    {
+      "name": "East Grand Forks",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 47.9317013,
+      "lon": -97.0175792
+    },
+    {
+      "name": "Crookston",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 47.7739988,
+      "lon": -96.6081167
+    },
+    {
+      "name": "Lake Elmo",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.0021685,
+      "lon": -92.8801862
+    },
+    {
+      "name": "Cambridge",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.5727408,
+      "lon": -93.2243921
+    },
+    {
+      "name": "New Prague",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 44.5433331,
+      "lon": -93.5760445
+    },
+    {
+      "name": "Saint Francis",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.3864283,
+      "lon": -93.3597084
+    },
+    {
+      "name": "Waite Park",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.5537128,
+      "lon": -94.2334634
+    },
+    {
+      "name": "Litchfield",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.1271847,
+      "lon": -94.5280474
+    },
+    {
+      "name": "Saint Joseph",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.5645229,
+      "lon": -94.3180516
+    },
+    {
+      "name": "Victoria",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 44.8585738,
+      "lon": -93.6616266
+    },
+    {
+      "name": "Kasson",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 44.0297055,
+      "lon": -92.7503451
+    },
+    {
+      "name": "Stewartville",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 43.8554243,
+      "lon": -92.4883221
+    },
+    {
+      "name": "Corcoran",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.0951069,
+      "lon": -93.5475651
+    },
+    {
+      "name": "Glencoe",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 44.7691886,
+      "lon": -94.1515671
+    },
+    {
+      "name": "Chisago City",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.3735757,
+      "lon": -92.8899376
+    },
+    {
+      "name": "Montevideo",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 44.942523,
+      "lon": -95.723559
+    },
+    {
+      "name": "Jordan",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 44.6663146,
+      "lon": -93.6261918
+    },
+    {
+      "name": "Redwood Falls",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 44.5393721,
+      "lon": -95.1164478
+    },
+    {
+      "name": "Morris",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.586072,
+      "lon": -95.913941
+    },
+    {
+      "name": "La Crescent",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 43.8280216,
+      "lon": -91.3040274
+    },
+    {
+      "name": "Delano",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.0419073,
+      "lon": -93.7891331
+    },
+    {
+      "name": "Belle Plaine",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 44.622741,
+      "lon": -93.7685729
+    },
+    {
+      "name": "Princeton",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.5698156,
+      "lon": -93.5803054
+    },
+    {
+      "name": "Baldwin",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.5184659,
+      "lon": -93.5924778
+    },
+    {
+      "name": "Chisholm",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 47.489926,
+      "lon": -92.883528
+    },
+    {
+      "name": "Dayton",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.243854,
+      "lon": -93.5149576
+    },
+    {
+      "name": "Saint James",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 43.9824577,
+      "lon": -94.6269181
+    },
+    {
+      "name": "Lake City",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 44.4478474,
+      "lon": -92.2678663
+    },
+    {
+      "name": "Luverne",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 43.6542342,
+      "lon": -96.2127811
+    },
+    {
+      "name": "Windom",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 43.8663464,
+      "lon": -95.1169366
+    },
+    {
+      "name": "Le Sueur",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 44.4612348,
+      "lon": -93.9154299
+    },
+    {
+      "name": "Pipestone",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 44.000584,
+      "lon": -96.317502
+    },
+    {
+      "name": "Cannon Falls",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 44.5068445,
+      "lon": -92.9062175
+    },
+    {
+      "name": "Lindström",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.3894083,
+      "lon": -92.8479921
+    },
+    {
+      "name": "Wadena",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 46.4424614,
+      "lon": -95.1361386
+    },
+    {
+      "name": "Wayzata",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 44.970759,
+      "lon": -93.511947
+    },
+    {
+      "name": "Sauk Centre",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.7377454,
+      "lon": -94.9523889
+    },
+    {
+      "name": "Wyoming",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.3363551,
+      "lon": -92.9971631
+    },
+    {
+      "name": "Rockford",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.0882963,
+      "lon": -93.7344099
+    },
+    {
+      "name": "Two Harbors",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 47.0257139,
+      "lon": -91.6730523
+    },
+    {
+      "name": "Park Rapids",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 46.9221813,
+      "lon": -95.0586322
+    },
+    {
+      "name": "Saint Augusta",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.4785762,
+      "lon": -94.1541547
+    },
+    {
+      "name": "Mora",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 45.8763597,
+      "lon": -93.2969493
+    },
+    {
+      "name": "Jackson",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 43.6207916,
+      "lon": -94.9886022
+    },
+    {
+      "name": "Blue Earth",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 43.637455,
+      "lon": -94.1021821
+    },
+    {
+      "name": "Ely",
+      "state": "Minnesota",
+      "country": "United States",
+      "lat": 47.901571,
+      "lon": -91.8572479
     }
   ],
   "Mississippi": [
@@ -24901,6 +28401,356 @@
       "country": "United States",
       "lat": 47.271061,
       "lon": -111.700537
+    },
+    {
+      "name": "Bridger",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 45.2957807,
+      "lon": -108.9137544
+    },
+    {
+      "name": "Busby",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 45.5373179,
+      "lon": -106.956004
+    },
+    {
+      "name": "Victor",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 46.4165889,
+      "lon": -114.1501
+    },
+    {
+      "name": "Vaughn",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 47.5605132,
+      "lon": -111.5458075
+    },
+    {
+      "name": "Havre North",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 48.558237,
+      "lon": -109.6711313
+    },
+    {
+      "name": "Culbertson",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 48.1449031,
+      "lon": -104.5165641
+    },
+    {
+      "name": "Sheridan",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 45.456484,
+      "lon": -112.197168
+    },
+    {
+      "name": "Heart Butte",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 48.2852641,
+      "lon": -112.8341692
+    },
+    {
+      "name": "Walkerville",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 46.030064,
+      "lon": -112.535223
+    },
+    {
+      "name": "Fairview",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 47.856408,
+      "lon": -104.044933
+    },
+    {
+      "name": "Pryor / Baáhpuuo",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 45.4279616,
+      "lon": -108.533803
+    },
+    {
+      "name": "Joliet",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 45.4850626,
+      "lon": -108.9703595
+    },
+    {
+      "name": "Belt",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 47.387633,
+      "lon": -110.927528
+    },
+    {
+      "name": "Hot Springs",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 47.6091041,
+      "lon": -114.668741
+    },
+    {
+      "name": "Fromberg",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 45.3921696,
+      "lon": -108.9065335
+    },
+    {
+      "name": "Fortine",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 48.7644075,
+      "lon": -114.903242
+    },
+    {
+      "name": "Twin Bridges",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 45.54437,
+      "lon": -112.331112
+    },
+    {
+      "name": "Ekalaka",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 45.8907706,
+      "lon": -104.5474596
+    },
+    {
+      "name": "East Glacier Park Village",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 48.4469123,
+      "lon": -113.2231482
+    },
+    {
+      "name": "Dutton",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 47.844249,
+      "lon": -111.71171
+    },
+    {
+      "name": "Clyde Park",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 45.886879,
+      "lon": -110.603819
+    },
+    {
+      "name": "Sunburst",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 48.882602,
+      "lon": -111.910475
+    },
+    {
+      "name": "Beaver Creek",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 48.5544426,
+      "lon": -109.7921487
+    },
+    {
+      "name": "Nashua",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 48.132242,
+      "lon": -106.35642
+    },
+    {
+      "name": "West Havre",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 48.554394,
+      "lon": -109.7386937
+    },
+    {
+      "name": "Denton",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 47.318629,
+      "lon": -109.948201
+    },
+    {
+      "name": "Hysham",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 46.2930448,
+      "lon": -107.2330065
+    },
+    {
+      "name": "Savage",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 47.4527932,
+      "lon": -104.343276
+    },
+    {
+      "name": "Geraldine",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 47.6032974,
+      "lon": -110.2664376
+    },
+    {
+      "name": "Brockton",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 48.149271,
+      "lon": -104.9177887
+    },
+    {
+      "name": "Trout Creek",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 47.8370305,
+      "lon": -115.598067
+    },
+    {
+      "name": "Lima",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 44.6361718,
+      "lon": -112.5912118
+    },
+    {
+      "name": "Hobson",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 47.000263,
+      "lon": -109.873654
+    },
+    {
+      "name": "Medicine Lake",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 48.501414,
+      "lon": -104.504677
+    },
+    {
+      "name": "Virginia City",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 45.2935505,
+      "lon": -111.9442329
+    },
+    {
+      "name": "Froid",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 48.334753,
+      "lon": -104.49383
+    },
+    {
+      "name": "Basin",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 46.2710113,
+      "lon": -112.263513
+    },
+    {
+      "name": "Saco",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 48.4566091,
+      "lon": -107.3437749
+    },
+    {
+      "name": "Moore",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 46.975523,
+      "lon": -109.696854
+    },
+    {
+      "name": "Paradise",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 47.3891183,
+      "lon": -114.801462
+    },
+    {
+      "name": "Reed Point",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 45.7087865,
+      "lon": -109.5419967
+    },
+    {
+      "name": "Richey",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 47.643904,
+      "lon": -105.074976
+    },
+    {
+      "name": "Melrose",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 45.6321074,
+      "lon": -112.685289
+    },
+    {
+      "name": "Hingham",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 48.554991,
+      "lon": -110.422166
+    },
+    {
+      "name": "Bainville",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 48.139777,
+      "lon": -104.222916
+    },
+    {
+      "name": "Winifred",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 47.557759,
+      "lon": -109.374902
+    },
+    {
+      "name": "Kevin",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 48.745231,
+      "lon": -111.965372
+    },
+    {
+      "name": "Westby",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 48.869958,
+      "lon": -104.052304
+    },
+    {
+      "name": "Broadview",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 46.0977314,
+      "lon": -108.8770972
+    },
+    {
+      "name": "Judith Gap",
+      "state": "Montana",
+      "country": "United States",
+      "lat": 46.677179,
+      "lon": -109.75185
     }
   ],
   "Nebraska": [
@@ -27707,6 +31557,356 @@
       "country": "United States",
       "lat": 42.8384221,
       "lon": -71.1470037
+    },
+    {
+      "name": "Sandown",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 42.928698,
+      "lon": -71.1870053
+    },
+    {
+      "name": "Rindge",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 42.7511964,
+      "lon": -72.0098021
+    },
+    {
+      "name": "Kingston",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 42.9364768,
+      "lon": -71.0533918
+    },
+    {
+      "name": "Rye",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.0120186,
+      "lon": -70.7719426
+    },
+    {
+      "name": "Nottingham",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.115019,
+      "lon": -71.100082
+    },
+    {
+      "name": "Auburn",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.0045289,
+      "lon": -71.348398
+    },
+    {
+      "name": "New Ipswich",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 42.7481421,
+      "lon": -71.8542429
+    },
+    {
+      "name": "Barnstead",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.3397897,
+      "lon": -71.2592585
+    },
+    {
+      "name": "Northfield",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.4400718,
+      "lon": -71.5932621
+    },
+    {
+      "name": "Newton",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 42.8695335,
+      "lon": -71.0345018
+    },
+    {
+      "name": "Brookline",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 42.7348102,
+      "lon": -71.6581267
+    },
+    {
+      "name": "Fremont",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 42.9909194,
+      "lon": -71.1425606
+    },
+    {
+      "name": "Allenstown",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.1275077,
+      "lon": -71.4321179
+    },
+    {
+      "name": "Chester",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 42.9567525,
+      "lon": -71.2572846
+    },
+    {
+      "name": "North Hampton",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 42.9689814,
+      "lon": -70.8359489
+    },
+    {
+      "name": "Epsom",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.223191,
+      "lon": -71.332169
+    },
+    {
+      "name": "Brentwood",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 42.9786981,
+      "lon": -71.0728369
+    },
+    {
+      "name": "Lee",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.12354,
+      "lon": -71.011505
+    },
+    {
+      "name": "Danville",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 42.9125877,
+      "lon": -71.124504
+    },
+    {
+      "name": "Candia",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.077916,
+      "lon": -71.277237
+    },
+    {
+      "name": "Deerfield",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.1301713,
+      "lon": -71.238819
+    },
+    {
+      "name": "Greenland",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.0361995,
+      "lon": -70.8328322
+    },
+    {
+      "name": "Northwood",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.194664,
+      "lon": -71.151581
+    },
+    {
+      "name": "Strafford",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.327176,
+      "lon": -71.18454
+    },
+    {
+      "name": "Gilmanton",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.4250327,
+      "lon": -71.4139907
+    },
+    {
+      "name": "Boscawen",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.315187,
+      "lon": -71.621246
+    },
+    {
+      "name": "Chesterfield",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 42.8873038,
+      "lon": -72.4703661
+    },
+    {
+      "name": "Grantham",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.4899555,
+      "lon": -72.1370166
+    },
+    {
+      "name": "Sunapee",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.3874615,
+      "lon": -72.0876516
+    },
+    {
+      "name": "Campton",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.8235868,
+      "lon": -71.6389687
+    },
+    {
+      "name": "Sanbornton",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.489296,
+      "lon": -71.582794
+    },
+    {
+      "name": "Tamworth",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.860277,
+      "lon": -71.263504
+    },
+    {
+      "name": "Dunbarton",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.102988,
+      "lon": -71.617126
+    },
+    {
+      "name": "Thornton",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.8953858,
+      "lon": -71.6779814
+    },
+    {
+      "name": "Rollinsford",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.236199,
+      "lon": -70.820618
+    },
+    {
+      "name": "Madison",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.8993653,
+      "lon": -71.148834
+    },
+    {
+      "name": "Chichester",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.249704,
+      "lon": -71.400146
+    },
+    {
+      "name": "New Durham",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.436966,
+      "lon": -71.172867
+    },
+    {
+      "name": "Mont Vernon",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 42.8945294,
+      "lon": -71.6742394
+    },
+    {
+      "name": "Fitzwilliam",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 42.7806288,
+      "lon": -72.1455316
+    },
+    {
+      "name": "East Kingston",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 42.925644,
+      "lon": -71.0167243
+    },
+    {
+      "name": "Canterbury",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.337165,
+      "lon": -71.565628
+    },
+    {
+      "name": "Andover",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.4366616,
+      "lon": -71.8197481
+    },
+    {
+      "name": "Kensington",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 42.9283343,
+      "lon": -70.9434892
+    },
+    {
+      "name": "Holderness",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.732406,
+      "lon": -71.588974
+    },
+    {
+      "name": "Newbury",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.3213132,
+      "lon": -72.0362956
+    },
+    {
+      "name": "Deering",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.073402,
+      "lon": -71.845093
+    },
+    {
+      "name": "Webster",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.3292843,
+      "lon": -71.7167362
+    },
+    {
+      "name": "Alstead",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.1489499,
+      "lon": -72.3612996
+    },
+    {
+      "name": "Middleton",
+      "state": "New Hampshire",
+      "country": "United States",
+      "lat": 43.4782944,
+      "lon": -71.0708656
     }
   ],
   "New Jersey": [
@@ -31565,6 +35765,356 @@
       "country": "United States",
       "lat": 35.3337279,
       "lon": -81.8649245
+    },
+    {
+      "name": "Elon",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 36.1029132,
+      "lon": -79.5066895
+    },
+    {
+      "name": "Hampstead",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 34.3676686,
+      "lon": -77.7105332
+    },
+    {
+      "name": "Selma",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.5365485,
+      "lon": -78.2844435
+    },
+    {
+      "name": "Brevard",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.2334472,
+      "lon": -82.7342919
+    },
+    {
+      "name": "Knightdale",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.7878975,
+      "lon": -78.4822938
+    },
+    {
+      "name": "Hamlet",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 34.8863657,
+      "lon": -79.6972143
+    },
+    {
+      "name": "Mocksville",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.8940236,
+      "lon": -80.5617846
+    },
+    {
+      "name": "Carolina Beach",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 34.0351727,
+      "lon": -77.8935966
+    },
+    {
+      "name": "Williamston",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.8546039,
+      "lon": -77.0555114
+    },
+    {
+      "name": "Cherryville",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.3787442,
+      "lon": -81.3789739
+    },
+    {
+      "name": "Bessemer City",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.284733,
+      "lon": -81.283906
+    },
+    {
+      "name": "Hillsborough",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 36.075382,
+      "lon": -79.0993958
+    },
+    {
+      "name": "Harrisburg",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.3258295,
+      "lon": -80.6454979
+    },
+    {
+      "name": "Wadesboro",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 34.9681767,
+      "lon": -80.07674
+    },
+    {
+      "name": "Marion",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.6841022,
+      "lon": -82.0091028
+    },
+    {
+      "name": "Edenton",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 36.057938,
+      "lon": -76.6077213
+    },
+    {
+      "name": "Ayden",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.4711635,
+      "lon": -77.4175729
+    },
+    {
+      "name": "Fairview",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.1384728,
+      "lon": -80.5374699
+    },
+    {
+      "name": "Seven Lakes",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.2634588,
+      "lon": -79.5851415
+    },
+    {
+      "name": "Whiteville",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 34.3217345,
+      "lon": -78.703148
+    },
+    {
+      "name": "Midland",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.2273656,
+      "lon": -80.5006219
+    },
+    {
+      "name": "Granite Falls",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.7965205,
+      "lon": -81.4306458
+    },
+    {
+      "name": "Mount Olive",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.1965532,
+      "lon": -78.0663788
+    },
+    {
+      "name": "Raeford",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 34.9809996,
+      "lon": -79.2241998
+    },
+    {
+      "name": "Valdese",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.7431562,
+      "lon": -81.5633738
+    },
+    {
+      "name": "Farmville",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.5954381,
+      "lon": -77.5852496
+    },
+    {
+      "name": "Nashville",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.974598,
+      "lon": -77.9655406
+    },
+    {
+      "name": "Ahoskie",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 36.2855245,
+      "lon": -76.9857687
+    },
+    {
+      "name": "Beaufort",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 34.7163146,
+      "lon": -76.6645903
+    },
+    {
+      "name": "Spindale",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.3574856,
+      "lon": -81.9312068
+    },
+    {
+      "name": "North Wilkesboro",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 36.1584651,
+      "lon": -81.1475841
+    },
+    {
+      "name": "Elkin",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 36.2440504,
+      "lon": -80.8507968
+    },
+    {
+      "name": "Rutherfordton",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.3692877,
+      "lon": -81.9567716
+    },
+    {
+      "name": "Canton",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.5328838,
+      "lon": -82.8373558
+    },
+    {
+      "name": "Burgaw",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 34.5521113,
+      "lon": -77.926098
+    },
+    {
+      "name": "Emerald Isle",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 34.6653135,
+      "lon": -77.0382187
+    },
+    {
+      "name": "Elizabethtown",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 34.6293372,
+      "lon": -78.6052899
+    },
+    {
+      "name": "Randleman",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.8179143,
+      "lon": -79.8030873
+    },
+    {
+      "name": "Wilkesboro",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 36.1483916,
+      "lon": -81.1517636
+    },
+    {
+      "name": "Wingate",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 34.9843176,
+      "lon": -80.4492319
+    },
+    {
+      "name": "Franklin",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.1823171,
+      "lon": -83.3815429
+    },
+    {
+      "name": "Dallas",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.3160119,
+      "lon": -81.1765654
+    },
+    {
+      "name": "Troy",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.3584743,
+      "lon": -79.8944901
+    },
+    {
+      "name": "Benson",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.3814368,
+      "lon": -78.5480563
+    },
+    {
+      "name": "Kitty Hawk",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 36.0664318,
+      "lon": -75.6935448
+    },
+    {
+      "name": "Plymouth",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.8668281,
+      "lon": -76.7485555
+    },
+    {
+      "name": "Lillington",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.399121,
+      "lon": -78.8156001
+    },
+    {
+      "name": "Nags Head",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.9573923,
+      "lon": -75.624062
+    },
+    {
+      "name": "Cramerton",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 35.2387504,
+      "lon": -81.0750757
+    },
+    {
+      "name": "Marshville",
+      "state": "North Carolina",
+      "country": "United States",
+      "lat": 34.988486,
+      "lon": -80.3670085
     }
   ],
   "North Dakota": [
@@ -34371,6 +38921,356 @@
       "country": "United States",
       "lat": 36.7095328,
       "lon": -99.8934936
+    },
+    {
+      "name": "Texhoma",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 36.5049779,
+      "lon": -101.785748
+    },
+    {
+      "name": "Davis",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 34.5034796,
+      "lon": -97.1188924
+    },
+    {
+      "name": "Stroud",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.7477749,
+      "lon": -96.6566742
+    },
+    {
+      "name": "Newcastle",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.2472869,
+      "lon": -97.59976
+    },
+    {
+      "name": "The Village",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.5658553,
+      "lon": -97.5494185
+    },
+    {
+      "name": "Warr Acres",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.5225569,
+      "lon": -97.6189353
+    },
+    {
+      "name": "Glenpool",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.9553523,
+      "lon": -96.008778
+    },
+    {
+      "name": "Newalla",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.4046678,
+      "lon": -97.1620178
+    },
+    {
+      "name": "Blanchard",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.1380007,
+      "lon": -97.6583681
+    },
+    {
+      "name": "Catoosa",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 36.188987,
+      "lon": -95.745817
+    },
+    {
+      "name": "Tuttle",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.2908947,
+      "lon": -97.8122658
+    },
+    {
+      "name": "Lone Grove",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 34.1753716,
+      "lon": -97.2627946
+    },
+    {
+      "name": "Harrah",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.4895085,
+      "lon": -97.1636408
+    },
+    {
+      "name": "Hinton",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.4715518,
+      "lon": -98.3556589
+    },
+    {
+      "name": "Slaughterville",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.0872931,
+      "lon": -97.3350288
+    },
+    {
+      "name": "Fort Gibson",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.7975463,
+      "lon": -95.2503409
+    },
+    {
+      "name": "McLoud",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.4358996,
+      "lon": -97.0914163
+    },
+    {
+      "name": "Pocola",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.2318746,
+      "lon": -94.4809945
+    },
+    {
+      "name": "Nichols Hills",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.5508857,
+      "lon": -97.5489318
+    },
+    {
+      "name": "Spencer",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.5228433,
+      "lon": -97.3772618
+    },
+    {
+      "name": "Checotah",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.4700917,
+      "lon": -95.5230691
+    },
+    {
+      "name": "Dewey",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 36.7959193,
+      "lon": -95.9355387
+    },
+    {
+      "name": "Heavener",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 34.8892677,
+      "lon": -94.600781
+    },
+    {
+      "name": "Cleveland",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 36.3099921,
+      "lon": -96.4641953
+    },
+    {
+      "name": "Muldrow",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.4062034,
+      "lon": -94.5988306
+    },
+    {
+      "name": "Roland",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.4212021,
+      "lon": -94.5146616
+    },
+    {
+      "name": "Tonkawa",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 36.6783679,
+      "lon": -97.3100442
+    },
+    {
+      "name": "Okemah",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.4325854,
+      "lon": -96.3050064
+    },
+    {
+      "name": "Verdigris",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 36.2348197,
+      "lon": -95.6910927
+    },
+    {
+      "name": "Jay",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 36.4205128,
+      "lon": -94.798185
+    },
+    {
+      "name": "New Cordell",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.2953232,
+      "lon": -98.9885471
+    },
+    {
+      "name": "Lindsay",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 34.8347959,
+      "lon": -97.6025319
+    },
+    {
+      "name": "Drumright",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.9884013,
+      "lon": -96.6011294
+    },
+    {
+      "name": "Bethel Acres",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.308681,
+      "lon": -97.0255798
+    },
+    {
+      "name": "Eufaula",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.2873764,
+      "lon": -95.5825302
+    },
+    {
+      "name": "Healdton",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 34.2331475,
+      "lon": -97.4878023
+    },
+    {
+      "name": "Jones",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.5614129,
+      "lon": -97.2919826
+    },
+    {
+      "name": "Walters",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 34.3598075,
+      "lon": -98.3078258
+    },
+    {
+      "name": "Marietta",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 33.937045,
+      "lon": -97.1166788
+    },
+    {
+      "name": "Commerce",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 36.9332857,
+      "lon": -94.8770392
+    },
+    {
+      "name": "Nicoma Park",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.4911782,
+      "lon": -97.3230941
+    },
+    {
+      "name": "Calera",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 33.9345433,
+      "lon": -96.4286022
+    },
+    {
+      "name": "Cache",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 34.6295165,
+      "lon": -98.6286741
+    },
+    {
+      "name": "Spiro",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.2412073,
+      "lon": -94.619944
+    },
+    {
+      "name": "Wynnewood",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 34.6434171,
+      "lon": -97.1644656
+    },
+    {
+      "name": "Chelsea",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 36.5355939,
+      "lon": -95.4324166
+    },
+    {
+      "name": "Perkins",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.9740886,
+      "lon": -97.0337692
+    },
+    {
+      "name": "Lexington",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.0147945,
+      "lon": -97.3355835
+    },
+    {
+      "name": "Prague",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 35.4866036,
+      "lon": -96.6858998
+    },
+    {
+      "name": "Newkirk",
+      "state": "Oklahoma",
+      "country": "United States",
+      "lat": 36.8823649,
+      "lon": -97.0536785
     }
   ],
   "Oregon": [
@@ -37177,6 +42077,13 @@
       "country": "United States",
       "lat": 41.6047381,
       "lon": -71.6074257
+    },
+    {
+      "name": "Pottersville",
+      "state": "Rhode Island",
+      "country": "United States",
+      "lat": 41.5252205,
+      "lon": -71.132519
     }
   ],
   "South Carolina": [

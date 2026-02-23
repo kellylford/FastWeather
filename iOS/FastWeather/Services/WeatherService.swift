@@ -922,6 +922,9 @@ class WeatherService: ObservableObject {
             let nwsResponse = try decoder.decode(NWSAlertsResponse.self, from: data)
             
             // Convert NWS features to WeatherAlert objects
+            // NWS dates are real ISO8601 with timezone — one formatter created once, outside the closure
+            // to avoid ICU internal-cache memory corruption when allocating per-iteration on a background thread
+            let nwsDateFormatter = ISO8601DateFormatter()
             let alerts = nwsResponse.features.compactMap { feature -> WeatherAlert? in
                 let props = feature.properties
                 
@@ -935,10 +938,9 @@ class WeatherService: ObservableObject {
                 default: severity = .unknown
                 }
                 
-                // Parse onset and expires dates (ISO8601 format from NWS)
-                let dateFormatter = ISO8601DateFormatter()
-                let onset = props.onset.flatMap { dateFormatter.date(from: $0) } ?? Date()
-                let expires = props.expires.flatMap { dateFormatter.date(from: $0) } ?? Date().addingTimeInterval(86400)
+                // Parse onset and expires dates
+                let onset = props.onset.flatMap { nwsDateFormatter.date(from: $0) } ?? Date()
+                let expires = props.expires.flatMap { nwsDateFormatter.date(from: $0) } ?? Date().addingTimeInterval(86400)
                 
                 return WeatherAlert(
                     id: props.id,

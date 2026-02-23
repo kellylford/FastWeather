@@ -306,9 +306,12 @@ enum DistanceUnit: String, CaseIterable, Codable {
 
 struct AppSettings: Codable {
     // Settings schema version - increment when structure changes
-    static let currentVersion = 2  // Note: My Data fields handled via migration in init(from:)
-    var settingsVersion: Int = AppSettings.currentVersion
-    
+    // v3: Force wipe of v2 stored data — NSException crash caused by type mismatch in stored JSON
+    //     (e.g. a field stored as a number where decoder expects an array).
+    //     Bumping version triggers a one-time settings reset on all affected devices.
+    static let currentVersion = 3  // Note: My Data fields handled via migration in init(from:)
+    var settingsVersion: Int = AppSettings.currentVersion  // = 3
+
     var viewMode: ViewMode = .list
     var displayMode: DisplayMode = .condensed
     var temperatureUnit: TemperatureUnit = .fahrenheit

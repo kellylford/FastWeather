@@ -11,6 +11,7 @@ struct SettingsView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @EnvironmentObject var weatherService: WeatherService
     @StateObject private var featureFlags = FeatureFlags.shared
+    @AppStorage("defaultBrowseSortOrder") private var defaultBrowseSortOrderRaw: String = "Name (A–Z)"
     @State private var showingResetAlert = false
     @State private var showingDeveloperSettings = false
     @State private var showingMyDataConfig = false
@@ -135,6 +136,27 @@ struct SettingsView: View {
                     }
                     .accessibilityLabel("Default distance for Weather Around Me, currently \(settingsManager.settings.distanceUnit.format(settingsManager.settings.weatherAroundMeDistance))")
                     .accessibilityHint("Sets the default radius when viewing weather conditions around a city")
+                }
+                
+                // Browse Cities section
+                Section(header: Text("Browse Cities")) {
+                    Picker(selection: Binding(
+                        get: { BrowseSortOrder(rawValue: defaultBrowseSortOrderRaw) ?? .nameAZ },
+                        set: { defaultBrowseSortOrderRaw = $0.rawValue }
+                    )) {
+                        ForEach(BrowseSortOrder.allCases) { order in
+                            Text(order.rawValue).tag(order)
+                        }
+                    } label: {
+                        HStack {
+                            Text("Default City Sort")
+                            Spacer()
+                            Text(BrowseSortOrder(rawValue: defaultBrowseSortOrderRaw)?.rawValue ?? "Name (A–Z)")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .accessibilityLabel("Default browse city sort order, currently \(BrowseSortOrder(rawValue: defaultBrowseSortOrderRaw)?.rawValue ?? "Name (A–Z)")")
+                    .accessibilityHint("Sets the initial sort order when opening a state or country's city list")
                 }
                 
                 // Features section

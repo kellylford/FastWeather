@@ -7,26 +7,83 @@
 
 import SwiftUI
 
+// Sort options available when browsing cities by state or country
+enum BrowseSortOrder: String, CaseIterable, Identifiable, Codable {
+    case nameAZ    = "Name (A–Z)"
+    case nameZA    = "Name (Z–A)"
+    case northSouth = "North to South"
+    case southNorth = "South to North"
+    case eastWest  = "East to West"
+    case westEast  = "West to East"
+
+    var id: String { rawValue }
+
+    var systemImage: String {
+        switch self {
+        case .nameAZ:    return "textformat.abc"
+        case .nameZA:    return "textformat.abc"
+        case .northSouth: return "arrow.down"
+        case .southNorth: return "arrow.up"
+        case .eastWest:  return "arrow.right"
+        case .westEast:  return "arrow.left"
+        }
+    }
+}
+
+// Primary geography sort; use secondary axis only when primary values are exactly equal
+private func geographySort(
+    _ a: CityLocation, _ b: CityLocation,
+    primary: KeyPath<CityLocation, Double>,
+    primaryDescending: Bool,
+    secondary: KeyPath<CityLocation, Double>,
+    secondaryDescending: Bool
+) -> Bool {
+    let aP = a[keyPath: primary]
+    let bP = b[keyPath: primary]
+    if aP != bP {
+        return primaryDescending ? aP > bP : aP < bP
+    }
+    let aS = a[keyPath: secondary]
+    let bS = b[keyPath: secondary]
+    return secondaryDescending ? aS > bS : aS < bS
+}
+
 struct StateCitiesView: View {
     let state: String
     @ObservedObject var cityDataService: CityDataService
     @EnvironmentObject var weatherService: WeatherService
+    @AppStorage("defaultBrowseSortOrder") private var defaultSortRaw: String = BrowseSortOrder.nameAZ.rawValue
     @State private var searchText = ""
     @State private var weatherData: [String: WeatherData] = [:]
     @State private var isLoadingWeather = false
     @State private var hasCompletedInitialLoad = false
-    
+    @State private var sortOrder: BrowseSortOrder = .nameAZ
+
     private var cities: [CityLocation] {
         cityDataService.cities(forState: state)
     }
-    
+
     private var filteredCities: [CityLocation] {
+        let base: [CityLocation]
         if searchText.isEmpty {
-            return cities
+            base = cities
+        } else {
+            base = cities.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
         }
-        return cities.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+        return base.sorted(by: sortComparator)
     }
-    
+
+    private func sortComparator(_ a: CityLocation, _ b: CityLocation) -> Bool {
+        switch sortOrder {
+        case .nameAZ:    return a.name.localizedCompare(b.name) == .orderedAscending
+        case .nameZA:    return a.name.localizedCompare(b.name) == .orderedDescending
+        case .northSouth: return geographySort(a, b, primary: \.latitude,  primaryDescending: true,  secondary: \.longitude, secondaryDescending: false)
+        case .southNorth: return geographySort(a, b, primary: \.latitude,  primaryDescending: false, secondary: \.longitude, secondaryDescending: false)
+        case .eastWest:  return geographySort(a, b, primary: \.longitude, primaryDescending: true,  secondary: \.latitude,  secondaryDescending: true)
+        case .westEast:  return geographySort(a, b, primary: \.longitude, primaryDescending: false, secondary: \.latitude,  secondaryDescending: true)
+        }
+    }
+
     var body: some View {
         List {
             ForEach(filteredCities, id: \.self) { cityLocation in
@@ -42,18 +99,52 @@ struct StateCitiesView: View {
         .navigationTitle(state)
         .searchable(text: $searchText, prompt: "Search cities in \(state)")
         .accessibilityElement(children: .contain)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                sortMenu
+            }
+        }
+        .onAppear {
+            sortOrder = BrowseSortOrder(rawValue: defaultSortRaw) ?? .nameAZ
+        }
         .task {
             await loadAllWeather()
         }
     }
-    
+
+    private var sortMenu: some View {
+        Menu {
+            Section("Alphabetical") {
+                ForEach([BrowseSortOrder.nameAZ, .nameZA]) { option in
+                    Button {
+                        sortOrder = option
+                    } label: {
+                        Label(option.rawValue, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
+                    }
+                }
+            }
+            Section("Geographic") {
+                ForEach([BrowseSortOrder.northSouth, .southNorth, .eastWest, .westEast]) { option in
+                    Button {
+                        sortOrder = option
+                    } label: {
+                        Label(option.rawValue, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
+                    }
+                }
+            }
+        } label: {
+            Label("Sort", systemImage: "arrow.up.arrow.down")
+        }
+        .accessibilityLabel("Sort cities. Current sort: \(sortOrder.rawValue)")
+    }
+
     private func loadAllWeather() async {
         guard weatherData.isEmpty && !isLoadingWeather else { return }
         isLoadingWeather = true
-        
+
         let locations = cities.map { (latitude: $0.latitude, longitude: $0.longitude) }
         let results = await weatherService.batchFetchWeatherBasic(for: locations)
-        
+
         await MainActor.run {
             weatherData = results
             isLoadingWeather = false
@@ -66,22 +157,38 @@ struct CountryCitiesView: View {
     let country: String
     @ObservedObject var cityDataService: CityDataService
     @EnvironmentObject var weatherService: WeatherService
+    @AppStorage("defaultBrowseSortOrder") private var defaultSortRaw: String = BrowseSortOrder.nameAZ.rawValue
     @State private var searchText = ""
     @State private var weatherData: [String: WeatherData] = [:]
     @State private var isLoadingWeather = false
     @State private var hasCompletedInitialLoad = false
-    
+    @State private var sortOrder: BrowseSortOrder = .nameAZ
+
     private var cities: [CityLocation] {
         cityDataService.cities(forCountry: country)
     }
-    
+
     private var filteredCities: [CityLocation] {
+        let base: [CityLocation]
         if searchText.isEmpty {
-            return cities
+            base = cities
+        } else {
+            base = cities.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
         }
-        return cities.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+        return base.sorted(by: sortComparator)
     }
-    
+
+    private func sortComparator(_ a: CityLocation, _ b: CityLocation) -> Bool {
+        switch sortOrder {
+        case .nameAZ:    return a.name.localizedCompare(b.name) == .orderedAscending
+        case .nameZA:    return a.name.localizedCompare(b.name) == .orderedDescending
+        case .northSouth: return geographySort(a, b, primary: \.latitude,  primaryDescending: true,  secondary: \.longitude, secondaryDescending: false)
+        case .southNorth: return geographySort(a, b, primary: \.latitude,  primaryDescending: false, secondary: \.longitude, secondaryDescending: false)
+        case .eastWest:  return geographySort(a, b, primary: \.longitude, primaryDescending: true,  secondary: \.latitude,  secondaryDescending: true)
+        case .westEast:  return geographySort(a, b, primary: \.longitude, primaryDescending: false, secondary: \.latitude,  secondaryDescending: true)
+        }
+    }
+
     var body: some View {
         List {
             ForEach(filteredCities, id: \.self) { cityLocation in
@@ -97,18 +204,52 @@ struct CountryCitiesView: View {
         .navigationTitle(country)
         .searchable(text: $searchText, prompt: "Search cities in \(country)")
         .accessibilityElement(children: .contain)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                sortMenu
+            }
+        }
+        .onAppear {
+            sortOrder = BrowseSortOrder(rawValue: defaultSortRaw) ?? .nameAZ
+        }
         .task {
             await loadAllWeather()
         }
     }
-    
+
+    private var sortMenu: some View {
+        Menu {
+            Section("Alphabetical") {
+                ForEach([BrowseSortOrder.nameAZ, .nameZA]) { option in
+                    Button {
+                        sortOrder = option
+                    } label: {
+                        Label(option.rawValue, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
+                    }
+                }
+            }
+            Section("Geographic") {
+                ForEach([BrowseSortOrder.northSouth, .southNorth, .eastWest, .westEast]) { option in
+                    Button {
+                        sortOrder = option
+                    } label: {
+                        Label(option.rawValue, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
+                    }
+                }
+            }
+        } label: {
+            Label("Sort", systemImage: "arrow.up.arrow.down")
+        }
+        .accessibilityLabel("Sort cities. Current sort: \(sortOrder.rawValue)")
+    }
+
     private func loadAllWeather() async {
         guard weatherData.isEmpty && !isLoadingWeather else { return }
         isLoadingWeather = true
-        
+
         let locations = cities.map { (latitude: $0.latitude, longitude: $0.longitude) }
         let results = await weatherService.batchFetchWeatherBasic(for: locations)
-        
+
         await MainActor.run {
             weatherData = results
             isLoadingWeather = false

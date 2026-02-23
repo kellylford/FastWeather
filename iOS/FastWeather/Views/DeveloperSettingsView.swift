@@ -27,6 +27,10 @@ struct DeveloperSettingsView: View {
                     Toggle("My Data Custom Section", isOn: $featureFlags.myDataEnabled)
                         .accessibilityLabel("My Data custom section feature toggle")
                         .accessibilityHint(featureFlags.myDataEnabled ? "My Data section is enabled. You can add custom data points to city detail views." : "My Data section is disabled and will not appear in city detail views.")
+                    
+                    Toggle("16-Day Forecast Layout Fix", isOn: $featureFlags.forecastLayoutFix)
+                        .accessibilityLabel("16-Day Forecast layout fix toggle")
+                        .accessibilityHint(featureFlags.forecastLayoutFix ? "Layout fix is on. Temperature values in the forecast are pinned to prevent clipping on narrow screens." : "Layout fix is off. Enable this if high and low temperatures are clipped or wrapping in the 16-day forecast.")
                 }
                 
                 // My Data configuration

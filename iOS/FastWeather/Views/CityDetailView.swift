@@ -1349,6 +1349,7 @@ struct DailyForecastRow: View {
     let daily: WeatherData.DailyWeather
     let index: Int
     @ObservedObject var settingsManager: SettingsManager
+    @StateObject private var featureFlags = FeatureFlags.shared
     
     private var sunrise: String? {
         daily.sunrise?[index]
@@ -1434,6 +1435,9 @@ struct DailyForecastRow: View {
                             .font(.body)
                             .fontWeight(.semibold)
                     }
+                    // Pin temperature column to its natural width when layout fix is enabled,
+                    // preventing clipping or wrapping on narrow screens (e.g. iPhone 13 Pro).
+                    .fixedSize(horizontal: featureFlags.forecastLayoutFix, vertical: false)
                     .accessibilityHidden(true)
                 }
             }
