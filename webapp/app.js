@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Update view button label and menu checkmarks to match initial view
     const viewLabel = currentView.charAt(0).toUpperCase() + currentView.slice(1);
     document.getElementById('current-view-label').textContent = `View: ${viewLabel}`;
-    document.querySelectorAll('#view-menu [role="menuitem"]').forEach(item => {
+    document.querySelectorAll('#view-menu [role="menuitemradio"]').forEach(item => {
         const isSelected = item.dataset.view === currentView;
         item.setAttribute('aria-checked', isSelected ? 'true' : 'false');
     });
@@ -343,7 +343,7 @@ function initializeEventListeners() {
     viewMenuBtn.addEventListener('click', toggleViewMenu);
     
     // Menu item clicks
-    document.querySelectorAll('#view-menu [role="menuitem"]').forEach(item => {
+    document.querySelectorAll('#view-menu [role="menuitemradio"]').forEach(item => {
         item.addEventListener('click', (e) => {
             const view = e.target.dataset.view;
             switchView(view);
@@ -1933,7 +1933,7 @@ function openViewMenu() {
     viewMenuBtn.setAttribute('aria-expanded', 'true');
     
     // Focus first menu item
-    const firstItem = viewMenu.querySelector('[role="menuitem"]');
+    const firstItem = viewMenu.querySelector('[role="menuitemradio"]');
     if (firstItem) {
         firstItem.focus();
     }
@@ -1948,7 +1948,7 @@ function closeViewMenu() {
 }
 
 function handleViewMenuKeydown(e) {
-    const items = Array.from(e.currentTarget.querySelectorAll('[role="menuitem"]'));
+    const items = Array.from(e.currentTarget.querySelectorAll('[role="menuitemradio"]'));
     const currentIndex = items.indexOf(document.activeElement);
     
     let handled = false;
@@ -2003,7 +2003,7 @@ function switchView(view) {
     saveConfigToStorage();
     
     // Update menu item states
-    document.querySelectorAll('#view-menu [role="menuitem"]').forEach(item => {
+    document.querySelectorAll('#view-menu [role="menuitemradio"]').forEach(item => {
         const isSelected = item.dataset.view === view;
         item.setAttribute('aria-checked', isSelected ? 'true' : 'false');
     });
