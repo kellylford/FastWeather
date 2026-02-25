@@ -18,7 +18,7 @@
     --text-primary: #1a1a1a;
     --text-secondary: #4a4a4a;
     --text-muted: #6a6a6a;
-    --border-color: #d0d0d0;
+    --border-color: #959595;
     --focus-outline: #0066cc;
     --link-color: #0066cc;
     --link-hover: #004999;
@@ -84,6 +84,23 @@ h4 { font-size: var(--font-size-lg); }
 
 p {
     margin-bottom: var(--spacing-md);
+}
+
+/* === Skip Link (WCAG requirement) === */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--button-primary);
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-md);
+    text-decoration: none;
+    border-radius: 0 0 var(--border-radius) 0;
+    z-index: 100;
+}
+
+.skip-link:focus {
+    top: 0;
 }
 
 /* === Visually Hidden (for screen readers) === */
@@ -177,7 +194,7 @@ section {
 }
 
 #view-menu-btn {
-    background: var(--secondary-bg);
+    background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     padding: 8px 16px;
     border-radius: var(--border-radius);
@@ -192,7 +209,7 @@ section {
 }
 
 #view-menu-btn:hover {
-    background: var(--primary-bg);
+    background: var(--bg-primary);
 }
 
 #view-menu-btn:focus {
@@ -205,7 +222,7 @@ section {
     top: 100%;
     left: 0;
     margin-top: 4px;
-    background: var(--secondary-bg);
+    background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -248,7 +265,7 @@ section {
 }
 
 #view-menu [role="menuitem"]:hover {
-    background: var(--primary-bg);
+    background: var(--bg-primary);
 }
 
 #view-menu [role="menuitem"]:focus {
@@ -262,13 +279,13 @@ section {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     border-radius: var(--border-radius);
-    background: var(--secondary-bg);
+    background: var(--bg-secondary);
 }
 
 .weather-table {
     width: 100%;
     border-collapse: collapse;
-    background: var(--secondary-bg);
+    background: var(--bg-secondary);
 }
 
 .weather-table th,
@@ -280,7 +297,7 @@ section {
 }
 
 .weather-table thead th {
-    background: var(--primary-bg);
+    background: var(--bg-primary);
     font-weight: 600;
     color: var(--text-primary);
 }
@@ -291,7 +308,7 @@ section {
 }
 
 .weather-table tbody tr:hover {
-    background: var(--primary-bg);
+    background: var(--bg-primary);
 }
 
 .weather-table tbody tr:last-child td,
@@ -316,7 +333,7 @@ section {
 
 .city-link-btn:hover {
     text-decoration: underline;
-    color: var(--link-hover);
+    color: var(--link-hover-color);
 }
 
 .city-link-btn:focus {
@@ -337,8 +354,7 @@ section {
     min-height: 32px;
     min-width: 32px;
     border-radius: var(--border-radius);
-    background: var(--primary-bg);
-    color: var(--text-primary);
+    background: var(--bg-primary);
     border: 1px solid var(--border-color);
     cursor: pointer;
     transition: background-color 0.2s;
@@ -363,7 +379,7 @@ section {
 .list-view-item {
     padding: var(--spacing-md);
     border-bottom: 1px solid var(--border-color);
-    background: var(--secondary-bg);
+    background: var(--bg-secondary);
     transition: background-color 0.2s;
     min-height: 44px;
     display: flex;
@@ -428,8 +444,7 @@ section {
 .list-control-btn {
     padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--border-radius);
-    background: var(--secondary-bg);
-    color: var(--text-primary);
+    background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     cursor: pointer;
     font-size: var(--font-size-base);
@@ -533,33 +548,16 @@ button:disabled {
     font-size: var(--font-size-lg);
 }
 
-.location-btn {
-    background-color: var(--button-secondary);
-    border: 2px solid var(--border-color);
-}
-
-.location-btn:hover:not(:disabled) {
-    background-color: var(--button-secondary-hover);
-    border-color: var(--focus-outline);
-}
-
-.location-btn:disabled {
-    opacity: 0.6;
-    cursor: wait;
-}
-
 .icon-btn:hover {
     background-color: var(--button-secondary-hover);
 }
 
 .remove-btn, .remove-btn-small {
     background-color: var(--button-danger);
-    color: white;
 }
 
 .remove-btn:hover, .remove-btn-small:hover {
     background-color: var(--button-danger-hover);
-    color: white;
 }
 
 .back-btn {
@@ -604,19 +602,6 @@ legend {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: var(--spacing-md);
-}
-
-/* Reduce columns at medium zoom levels */
-@media (max-width: 1200px) {
-    .checkbox-grid {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    }
-}
-
-@media (max-width: 900px) {
-    .checkbox-grid {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    }
 }
 
 .checkbox-grid label {
@@ -690,36 +675,6 @@ legend {
     cursor: not-allowed;
 }
 
-/* === Check All / Uncheck All Buttons === */
-.check-all-btn,
-.uncheck-all-btn,
-.secondary-btn {
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--border-color);
-    background-color: var(--card-bg);
-    color: var(--text-primary);
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-size: var(--font-size-base);
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-    min-height: 36px;
-}
-
-.check-all-btn:hover,
-.uncheck-all-btn:hover,
-.secondary-btn:hover {
-    background-color: var(--button-primary);
-    color: white;
-    border-color: var(--button-primary);
-}
-
-.check-all-btn:focus,
-.uncheck-all-btn:focus,
-.secondary-btn:focus {
-    outline: 2px solid var(--focus-outline);
-    outline-offset: 2px;
-}
-
 /* === City Cards === */
 #city-list {
     display: grid;
@@ -762,7 +717,7 @@ legend {
 
 .city-title-btn:hover {
     text-decoration: underline;
-    color: var(--link-hover);
+    color: var(--link-hover-color);
 }
 
 .city-title-btn:focus {
@@ -806,17 +761,6 @@ legend {
 .weather-desc {
     font-size: var(--font-size-lg);
     color: var(--text-secondary);
-}
-
-.uv-badge {
-    display: inline-block;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: calc(var(--border-radius) * 2);
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    line-height: 1.4;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .weather-details {
@@ -931,61 +875,9 @@ legend {
     max-width: 800px;
 }
 
-/* Better responsive handling for high zoom */
-@media (max-width: 1000px) {
-    .modal-content.large {
-        max-width: 90%;
-    }
-}
-
 .modal-content h3 {
     margin-top: 0;
     margin-bottom: var(--spacing-lg);
-}
-
-/* Close button in top-right corner */
-.modal-close-btn {
-    position: absolute;
-    top: var(--spacing-md);
-    right: var(--spacing-md);
-    background: transparent;
-    border: 2px solid var(--text-color);
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 1.5rem;
-    line-height: 1;
-    padding: 0;
-    color: var(--text-color);
-    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
-}
-
-.modal-close-btn:hover,
-.modal-close-btn:focus {
-    background-color: var(--button-hover-bg);
-    border-color: var(--button-hover-bg);
-    color: var(--button-text);
-}
-
-.modal-close-btn:focus {
-    outline: 3px solid var(--focus-outline);
-    outline-offset: 2px;
-}
-
-.modal-content {
-    position: relative;
-    background-color: var(--card-bg);
-    padding: var(--spacing-xl);
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow-lg);
-    max-width: 500px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
 }
 
 .modal-buttons {
@@ -1036,7 +928,6 @@ legend {
     gap: var(--spacing-xs);
     border-bottom: 2px solid var(--border-color);
     margin-bottom: var(--spacing-lg);
-    flex-wrap: wrap;
 }
 
 .tabs button,
@@ -1050,17 +941,6 @@ legend {
     cursor: pointer;
     min-height: auto;
     transition: all 0.2s ease;
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-
-/* Allow tabs to stack more on smaller screens/high zoom */
-@media (max-width: 900px) {
-    .tabs button,
-    .location-tabs button {
-        padding: var(--spacing-sm) var(--spacing-md);
-        font-size: 0.9rem;
-    }
 }
 
 .tabs button:hover,
@@ -1192,7 +1072,7 @@ footer a:hover {
 /* === Links === */
 a {
     color: var(--link-color);
-    text-decoration: none;
+    text-decoration: underline;
 }
 
 a:hover {
@@ -1265,6 +1145,11 @@ a:hover {
     
     .modal-content {
         padding: var(--spacing-md);
+    }
+    
+    .tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
     }
 }
 
@@ -1455,8 +1340,8 @@ a:hover {
         --card-bg: #2a2a2a;
         --text-primary: #e0e0e0;
         --text-secondary: #b0b0b0;
-        --text-muted: #888888;
-        --border-color: #404040;
+        --text-muted: #a0a0a0;
+        --border-color: #6b6b6b;
         --focus-outline: #4da3ff;
         --link-color: #4da3ff;
         --link-hover: #7ab8ff;
@@ -1503,7 +1388,7 @@ a:hover {
 
 .alert-badge.severe {
     background-color: #fd7e14;
-    color: white;
+    color: #000000; /* Black text for 8.1:1 contrast ratio */
 }
 
 .alert-badge.moderate {
@@ -1855,15 +1740,6 @@ a:hover {
     color: var(--text-secondary);
 }
 
-/* === Keyboard Shortcut Hints === */
-.shortcut-hint {
-    font-size: 0.85em;
-    margin-left: 0.25rem;
-    font-weight: normal;
-    color: #ffffff; /* White text ensures WCAG 2.2 AA compliance on button backgrounds */
-    /* Note: opacity removed to maintain full contrast ratio for accessibility */
-}
-
 /* === Feature Action Buttons === */
 .feature-actions {
     display: flex;
@@ -1902,105 +1778,4 @@ a:hover {
 
 .feature-btn .icon {
     font-size: 1.1rem;
-}
-/* === Configuration Feedback Banner === */
-.config-feedback-banner {
-    position: fixed;
-    top: 1rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10001;
-    background-color: #10b981;
-    color: white;
-    padding: 1rem 1.5rem;
-    border-radius: var(--border-radius);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    max-width: 90%;
-    animation: slideDown 0.3s ease-out;
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateX(-50%) translateY(-1rem);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
-    }
-}
-
-.config-feedback-banner.fade-out {
-    animation: fadeOut 0.3s ease-out;
-}
-
-@keyframes fadeOut {
-    from {
-        opacity: 1;
-    }
-    to {
-        opacity: 0;
-    }
-}
-
-.config-feedback-banner .feedback-icon {
-    font-size: 1.5rem;
-    font-weight: bold;
-    flex-shrink: 0;
-}
-
-.config-feedback-banner .feedback-message {
-    flex: 1;
-    font-size: 0.9375rem;
-    line-height: 1.4;
-}
-
-.config-feedback-banner .feedback-close {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-    line-height: 1;
-    cursor: pointer;
-    padding: 0;
-    margin: 0;
-    width: 2rem;
-    height: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: background-color 0.2s ease;
-    flex-shrink: 0;
-}
-
-.config-feedback-banner .feedback-close:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-.config-feedback-banner .feedback-close:focus {
-    outline: 2px solid white;
-    outline-offset: 2px;
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-    .config-feedback-banner {
-        border: 2px solid white;
-    }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-    .config-feedback-banner {
-        animation: none;
-    }
-    
-    .config-feedback-banner.fade-out {
-        animation: none;
-        opacity: 0;
-    }
 }
