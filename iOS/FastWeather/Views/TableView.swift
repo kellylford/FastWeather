@@ -12,12 +12,16 @@ struct TableView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @Binding var selectedCityForHistory: City?
     
+    // Date navigation parameters (for future compatibility)
+    let dateOffset: Int
+    let selectedDate: Date
+    
     var body: some View {
         List {
             ForEach(weatherService.savedCities.indices, id: \.self) { index in
                 let city = weatherService.savedCities[index]
-                NavigationLink(destination: CityDetailView(city: city)) {
-                    TableRowView(city: city)
+                NavigationLink(destination: CityDetailView(city: city, dateOffset: dateOffset, selectedDate: selectedDate)) {
+                    TableRowView(city: city, dateOffset: dateOffset)
                 }
                 .accessibilityElement(children: .combine)
                 .accessibilityAction(named: "Move Up") {
@@ -128,15 +132,19 @@ struct TableRowView: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
     let city: City
+    let dateOffset: Int
     
     private var weather: WeatherData? {
-        weatherService.weatherCache[city.id]
+        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+        return weatherService.weatherCache[cacheKey]
     }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(city.displayName)
                 .font(.headline)
+                .lineLimit(1)
+                .truncationMode(.tail)
             
             if let weather = weather {
                 let isDetails = settingsManager.settings.displayMode == .details
@@ -191,8 +199,13 @@ struct TableRowView: View {
             return (showLabel ? "Wind Gusts" : "", formatWindSpeed(windGusts))
             
         case .precipitation:
-            guard let precip = weather.current.precipitation, precip > 0 else { return nil }
-            return (showLabel ? "Precipitation" : "", formatPrecipitation(precip))
+            let snowfall = weather.daily?.snowfallSum?.first.flatMap { $0 } ?? weather.current.snowfall ?? 0
+            let precip = weather.daily?.precipitationSum?.first.flatMap { $0 } ?? weather.current.precipitation ?? 0
+            if snowfall > 0 {
+                return (showLabel ? "Snow" : "", formatSnowfall(snowfall))
+            }
+            guard precip > 0 else { return nil }
+            return (showLabel ? "Rain" : "", formatPrecipitation(precip))
             
         case .precipitationProbability:
             guard let hourly = weather.hourly,
@@ -217,8 +230,9 @@ struct TableRowView: View {
             return (showLabel ? "Showers" : "", formatPrecipitation(showers))
             
         case .snowfall:
-            guard let snow = weather.current.snowfall, snow > 0 else { return nil }
-            return (showLabel ? "Snowfall" : "", formatPrecipitation(snow))
+            let snow = weather.daily?.snowfallSum?.first.flatMap { $0 } ?? weather.current.snowfall ?? 0
+            guard snow > 0 else { return nil }
+            return (showLabel ? "Snow" : "", formatSnowfall(snow))
             
         case .cloudCover:
             let cc = weather.current.cloudCover
@@ -281,6 +295,13 @@ struct TableRowView: View {
         return String(format: "%.1f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
     }
     
+    private func formatSnowfall(_ cm: Double) -> String {
+        switch settingsManager.settings.precipitationUnit {
+        case .inches: return String(format: "%.1f in", cm * 0.393701)
+        case .millimeters: return String(format: "%.1f cm", cm)
+        }
+    }
+    
     private func formatPressure(_ hPa: Double) -> String {
         let pressure = settingsManager.settings.pressureUnit.convert(hPa)
         return String(format: "%.1f %@", pressure, settingsManager.settings.pressureUnit.rawValue)
@@ -321,7 +342,11 @@ struct CompactWeatherItem: View {
 }
 
 #Preview {
-    TableView(selectedCityForHistory: .constant(nil))
+    TableView(
+        selectedCityForHistory: .constant(nil),
+        dateOffset: 0,
+        selectedDate: Date()
+    )
         .environmentObject(WeatherService())
         .environmentObject(SettingsManager())
 }

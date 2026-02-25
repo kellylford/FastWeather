@@ -14,6 +14,10 @@ struct FlatView: View {
     @Binding var selectedCityForDetail: City?
     @State private var alertSheetItem: AlertSheetItem?  // Stable sheet item to prevent re-presentation loop
     
+    // Date navigation parameters
+    let dateOffset: Int
+    let selectedDate: Date
+    
     var body: some View {
         List {
             ForEach(weatherService.savedCities.indices, id: \.self) { index in
@@ -31,7 +35,8 @@ struct FlatView: View {
     private func citySection(for city: City, at index: Int) -> some View {
         Section {
             // Weather detail rows
-            if let weather = weatherService.weatherCache[city.id] {
+            let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+            if let weather = weatherService.weatherCache[cacheKey] {
                 weatherDetailRows(for: weather)
             } else {
                 ProgressView("Loading...")
@@ -42,7 +47,7 @@ struct FlatView: View {
             // Actions button
             actionsMenu(for: city, at: index)
         } header: {
-            CitySectionHeader(city: city, onAlertTap: { alert in
+            CitySectionHeader(city: city, dateOffset: dateOffset, onAlertTap: { alert in
                 alertSheetItem = AlertSheetItem(city: city, alert: alert)
             })
         }
@@ -178,8 +183,13 @@ struct FlatView: View {
             return (showLabel ? "Wind Gusts" : "", formatWindSpeed(windGusts))
             
         case .precipitation:
-            guard let precip = weather.current.precipitation, precip > 0 else { return nil }
-            return (showLabel ? "Precipitation" : "", formatPrecipitation(precip))
+            let snowfall = weather.daily?.snowfallSum?.first.flatMap { $0 } ?? weather.current.snowfall ?? 0
+            let precip = weather.daily?.precipitationSum?.first.flatMap { $0 } ?? weather.current.precipitation ?? 0
+            if snowfall > 0 {
+                return (showLabel ? "Snow" : "", formatSnowfall(snowfall))
+            }
+            guard precip > 0 else { return nil }
+            return (showLabel ? "Rain" : "", formatPrecipitation(precip))
             
         case .precipitationProbability:
             guard let hourly = weather.hourly,
@@ -204,8 +214,9 @@ struct FlatView: View {
             return (showLabel ? "Showers" : "", formatPrecipitation(showers))
             
         case .snowfall:
-            guard let snow = weather.current.snowfall, snow > 0 else { return nil }
-            return (showLabel ? "Snowfall" : "", formatPrecipitation(snow))
+            let snow = weather.daily?.snowfallSum?.first.flatMap { $0 } ?? weather.current.snowfall ?? 0
+            guard snow > 0 else { return nil }
+            return (showLabel ? "Snow" : "", formatSnowfall(snow))
             
         case .cloudCover:
             let cc = weather.current.cloudCover
@@ -268,6 +279,13 @@ struct FlatView: View {
         return String(format: "%.1f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
     }
     
+    private func formatSnowfall(_ cm: Double) -> String {
+        switch settingsManager.settings.precipitationUnit {
+        case .inches: return String(format: "%.1f in", cm * 0.393701)
+        case .millimeters: return String(format: "%.1f cm", cm)
+        }
+    }
+    
     private func formatPressure(_ hPa: Double) -> String {
         let pressure = settingsManager.settings.pressureUnit.convert(hPa)
         return String(format: "%.1f %@", pressure, settingsManager.settings.pressureUnit.rawValue)
@@ -279,11 +297,7 @@ struct FlatView: View {
     }
     
     private func formatTime(_ isoString: String) -> String {
-        guard let date = DateParser.parse(isoString) else { return isoString }
-        
-        let timeFormatter = DateFormatter()
-        timeFormatter.timeStyle = .short
-        return timeFormatter.string(from: date)
+        return FormatHelper.formatTime(isoString)
     }
     
 // MARK: - Actions
@@ -329,17 +343,19 @@ struct CitySectionHeader: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
     let city: City
+    let dateOffset: Int
     let onAlertTap: (WeatherAlert) -> Void
     
     @State private var alerts: [WeatherAlert] = []
     @State private var hasLoadedAlerts = false
     
     private var weather: WeatherData? {
-        weatherService.weatherCache[city.id]
+        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+        return weatherService.weatherCache[cacheKey]
     }
     
     private var highestSeverityAlert: WeatherAlert? {
-        alerts.max(by: { $0.severity.rawValue < $1.severity.rawValue })
+        alerts.min(by: { $0.severity.sortOrder < $1.severity.sortOrder })
     }
     
     var body: some View {
@@ -348,6 +364,8 @@ struct CitySectionHeader: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(city.displayName)
                         .font(.headline)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                     
                     // UV Index badge (only during daytime)
                     if settingsManager.settings.showUVIndexInCityList,
@@ -383,7 +401,21 @@ struct CitySectionHeader: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(buildAccessibilityLabel(weather: weather))
             .animation(.easeInOut(duration: 0.2), value: highestSeverityAlert?.id)
-            .task(id: city.id) {
+            .task(id: "\(city.id)-\(dateOffset)") {
+                // Fetch weather for this city at this date offset if not cached
+                let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+                if weatherService.weatherCache[cacheKey] == nil {
+                    await weatherService.fetchWeatherForDate(for: city, dateOffset: dateOffset)
+                }
+                
+                // Load alerts (only for current date)
+                // Clear alerts when viewing past/future days
+                if dateOffset != 0 {
+                    alerts = []
+                    hasLoadedAlerts = false
+                    return
+                }
+                
                 guard !hasLoadedAlerts else { return }
                 hasLoadedAlerts = true
                 
@@ -425,7 +457,12 @@ struct CitySectionHeader: View {
 }
 
 #Preview {
-    FlatView(selectedCityForHistory: .constant(nil), selectedCityForDetail: .constant(nil))
+    FlatView(
+        selectedCityForHistory: .constant(nil),
+        selectedCityForDetail: .constant(nil),
+        dateOffset: 0,
+        selectedDate: Date()
+    )
         .environmentObject(WeatherService())
         .environmentObject(SettingsManager())
 }

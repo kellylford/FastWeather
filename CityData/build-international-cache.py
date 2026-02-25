@@ -9,6 +9,7 @@ import time
 import requests
 import re
 from pathlib import Path
+from country_names import normalize_country, get_unmapped_warning
 
 # Country name to ISO 3166-1 alpha-2 code mapping
 COUNTRY_CODES = {
@@ -159,8 +160,19 @@ def geocode_city(city_name, country_name, country_code):
             result = results[0]
             address = result.get('address', {})
             
-            # Get the most appropriate country name from the result
-            result_country = address.get('country', country_name)
+            # Get country code and normalize to English
+            country_code_iso = address.get('country_code', '').upper()
+            native_country = address.get('country', country_name)
+            
+            # Normalize country name to English
+            normalized_country = normalize_country(native_country, country_code_iso)
+            
+            # Log the mapping for verification
+            if normalized_country != native_country:
+                print(f"  Mapped {country_code_iso} '{native_country}' → '{normalized_country}'")
+            elif country_code_iso and country_code_iso not in ['US', 'GB', 'CA', 'AU']:
+                # Warn about unmapped codes (exclude common English-speaking countries)
+                print(f"  {get_unmapped_warning(native_country, country_code_iso)}")
             
             # Get state/province/region if available
             state = (address.get('state') or 
@@ -171,7 +183,7 @@ def geocode_city(city_name, country_name, country_code):
             return {
                 'name': city_name,
                 'state': state,
-                'country': result_country,
+                'country': normalized_country,
                 'lat': float(result['lat']),
                 'lon': float(result['lon'])
             }
@@ -253,5 +265,7 @@ if __name__ == '__main__':
     print("and saves progress after each country in case of interruption.")
     print("="*60)
     
-    input("\nPress Enter to start...")
+    # Auto-start for background execution
+    # input("\nPress Enter to start...")
+    print("\nStarting cache rebuild...")
     main()

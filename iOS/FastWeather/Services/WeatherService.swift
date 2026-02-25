@@ -12,9 +12,23 @@ import CoreLocation
 import WeatherKit
 #endif
 
+// MARK: - WeatherCacheKey
+/// Cache key for date-aware weather data
+/// Allows caching weather for the same city on different days
+struct WeatherCacheKey: Hashable {
+    let cityId: UUID
+    let dateOffset: Int  // 0 = today, +1 = tomorrow, -1 = yesterday
+    
+    init(cityId: UUID, dateOffset: Int = 0) {
+        self.cityId = cityId
+        self.dateOffset = dateOffset
+    }
+}
+
 class WeatherService: ObservableObject {
     @Published var savedCities: [City] = []
-    @Published var weatherCache: [UUID: WeatherData] = [:]
+    @Published var weatherCache: [WeatherCacheKey: WeatherData] = [:]
+    @Published var marineCache: [WeatherCacheKey: MarineData] = [:]
     @Published var browseWeatherCache: [String: WeatherData] = [:] // Cache for browse cities
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
@@ -25,6 +39,8 @@ class WeatherService: ObservableObject {
     
     private let baseURL = "https://api.open-meteo.com/v1/forecast"
     private let historicalURL = "https://archive-api.open-meteo.com/v1/archive"
+    private let marineURL = "https://marine-api.open-meteo.com/v1/marine"
+    private let airQualityURL = "https://air-quality-api.open-meteo.com/v1/air-quality"
     private let userDefaultsKey = "SavedCities"
     
     // Performance settings (matching Windows version)
@@ -32,11 +48,112 @@ class WeatherService: ObservableObject {
     private let maxConcurrentRequests = 5 // Limit parallel API calls
     
     // Cache timestamp tracking
-    private var cacheTimestamps: [UUID: Date] = [:]
+    private var cacheTimestamps: [WeatherCacheKey: Date] = [:]
+    private var marineCacheTimestamps: [WeatherCacheKey: Date] = [:]
     private var browseCacheTimestamps: [String: Date] = [:]
     
     init() {
         loadSavedCities()
+        migrateCountryNamesIfNeeded()
+    }
+    
+    // MARK: - My Data Dynamic Parameters
+    
+    /// Appends user-selected My Data API parameters to the base current params string.
+    /// Reads directly from UserDefaults to avoid coupling to SettingsManager.
+    static func appendMyDataParameters(to baseParams: String) -> String {
+        guard let data = UserDefaults.standard.data(forKey: "AppSettings"),
+              let settings = try? JSONDecoder().decode(AppSettings.self, from: data) else {
+            return baseParams
+        }
+        
+        let enabledParams = settings.myDataFields.filter { $0.isEnabled }
+        guard !enabledParams.isEmpty else { return baseParams }
+        
+        let existingKeys = Set(baseParams.split(separator: ",").map { String($0) })
+        let newKeys = enabledParams
+            .map { $0.parameter.apiKey }
+            .filter { !existingKeys.contains($0) }
+        
+        if newKeys.isEmpty { return baseParams }
+        return baseParams + "," + newKeys.joined(separator: ",")
+    }
+    
+    /// Fetches marine current values for selected My Data parameters.
+    /// Returns a dictionary of API key -> value for marine parameters only.
+    private func fetchMyDataMarineValues(for city: City) async -> [String: Double]? {
+        guard let data = UserDefaults.standard.data(forKey: "AppSettings"),
+              let settings = try? JSONDecoder().decode(AppSettings.self, from: data) else {
+            return nil
+        }
+        
+        // Get enabled marine parameters
+        let marineParams = settings.myDataFields
+            .filter { $0.isEnabled && $0.parameter.apiEndpoint == .marine }
+            .map { $0.parameter.apiKey }
+        
+        guard !marineParams.isEmpty else { return nil }
+        
+        // Build marine API request with current parameters
+        let params = [
+            "latitude": String(city.latitude),
+            "longitude": String(city.longitude),
+            "current": marineParams.joined(separator: ","),
+            "cell_selection": "sea"
+        ]
+        
+        var components = URLComponents(string: marineURL)!
+        components.queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
+        
+        guard let url = components.url else { return nil }
+        
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let decoder = JSONDecoder()
+            let response = try decoder.decode(MarineResponse.self, from: data)
+            return response.current?.myDataValues
+        } catch {
+            print("❌ Failed to fetch marine My Data: \(error.localizedDescription)")
+            return nil
+        }
+    }
+    
+    /// Fetches air quality current values for selected My Data parameters.
+    /// Returns a dictionary of API key -> value for air quality parameters only.
+    private func fetchMyDataAirQualityValues(for city: City) async -> [String: Double]? {
+        guard let data = UserDefaults.standard.data(forKey: "AppSettings"),
+              let settings = try? JSONDecoder().decode(AppSettings.self, from: data) else {
+            return nil
+        }
+        
+        // Get enabled air quality parameters
+        let airQualityParams = settings.myDataFields
+            .filter { $0.isEnabled && $0.parameter.apiEndpoint == .airQuality }
+            .map { $0.parameter.apiKey }
+        
+        guard !airQualityParams.isEmpty else { return nil }
+        
+        // Build air quality API request with current parameters
+        let params = [
+            "latitude": String(city.latitude),
+            "longitude": String(city.longitude),
+            "current": airQualityParams.joined(separator: ",")
+        ]
+        
+        var components = URLComponents(string: airQualityURL)!
+        components.queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
+        
+        guard let url = components.url else { return nil }
+        
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let decoder = JSONDecoder()
+            let response = try decoder.decode(AirQualityResponse.self, from: data)
+            return response.current?.myDataValues
+        } catch {
+            print("❌ Failed to fetch air quality My Data: \(error.localizedDescription)")
+            return nil
+        }
     }
     
     // MARK: - City Management
@@ -53,8 +170,9 @@ class WeatherService: ObservableObject {
     
     func removeCity(_ city: City) {
         savedCities.removeAll { $0.id == city.id }
-        weatherCache.removeValue(forKey: city.id)
-        cacheTimestamps.removeValue(forKey: city.id)
+        // Remove all cached weather data for this city (all date offsets)
+        weatherCache = weatherCache.filter { $0.key.cityId != city.id }
+        cacheTimestamps = cacheTimestamps.filter { $0.key.cityId != city.id }
         saveCities()
     }
     
@@ -73,19 +191,44 @@ class WeatherService: ObservableObject {
     
     // Fetch full weather data (16 days) for detail views
     func fetchWeather(for city: City) async {
-        // DISABLED: Persistent cache is too slow (8.9s to load from UserDefaults)
-        // Only use in-memory cache for performance
+        // Default to today (dateOffset = 0) for backward compatibility
+        await fetchWeatherForDate(for: city, dateOffset: 0)
+    }
+    
+    // Fetch weather data for a specific date offset
+    func fetchWeatherForDate(for city: City, dateOffset: Int) async {
+        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
         
         // Check in-memory cache
-        if isCacheValid(timestamp: cacheTimestamps[city.id]) {
+        if isCacheValid(timestamp: cacheTimestamps[cacheKey]) {
             return
         }
+        
+        // Calculate the target date
+        let calendar = Calendar.current
+        guard let targetDate = calendar.date(byAdding: .day, value: dateOffset, to: Date()) else {
+            await MainActor.run {
+                self.errorMessage = "Invalid date calculation"
+            }
+            return
+        }
+        
+        // For past dates, use archive API
+        if dateOffset < 0 {
+            await fetchHistoricalWeatherForCity(city: city, targetDate: targetDate, cacheKey: cacheKey)
+            return
+        }
+        
+        // For today and future dates, use forecast API
+        // Build current parameters including any My Data selections
+        let baseCurrentParams = "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility,wind_gusts_10m,uv_index,dewpoint_2m"
+        let currentParams = Self.appendMyDataParameters(to: baseCurrentParams)
         
         let params = [
             "latitude": String(city.latitude),
             "longitude": String(city.longitude),
-            "current": "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility,wind_gusts_10m,uv_index,dewpoint_2m",
-            "hourly": "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,windgusts_10m,uv_index,dewpoint_2m",
+            "current": currentParams,
+            "hourly": "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,windgusts_10m,uv_index,dewpoint_2m,snowfall",
             "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,rain_sum,snowfall_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration,windspeed_10m_max,winddirection_10m_dominant",
             "forecast_days": "16",
             "timezone": "auto"
@@ -107,18 +250,220 @@ class WeatherService: ObservableObject {
             let decoder = JSONDecoder()
             let response = try decoder.decode(WeatherResponse.self, from: data)
             
-            let weatherData = WeatherData(current: response.current, daily: response.daily, hourly: response.hourly)
-            
-            await MainActor.run {
-                self.weatherCache[city.id] = weatherData
-                self.cacheTimestamps[city.id] = Date()
+            // For dateOffset = 0 (today), use the current weather directly
+            // For dateOffset > 0 (future), extract that day's data from daily/hourly arrays
+            let weatherData: WeatherData
+            if dateOffset == 0 {
+                weatherData = WeatherData(current: response.current, daily: response.daily, hourly: response.hourly)
+            } else {
+                // Extract the specific day's data from the arrays
+                guard let daily = response.daily,
+                      dateOffset < daily.temperature2mMax.count else {
+                    await MainActor.run {
+                        self.errorMessage = "Future date out of range"
+                    }
+                    return
+                }
+                
+                // Build synthetic "current" weather from that day's max/min temps and weather code
+                let avgTemp = ((daily.temperature2mMax[dateOffset] ?? 0) + (daily.temperature2mMin[dateOffset] ?? 0)) / 2
+                let current = WeatherData.CurrentWeather(
+                    temperature2m: avgTemp,
+                    relativeHumidity2m: nil,
+                    apparentTemperature: avgTemp,
+                    isDay: 1,
+                    precipitation: daily.precipitationSum?[dateOffset] ?? 0,
+                    rain: daily.rainSum?[dateOffset] ?? 0,
+                    showers: nil,
+                    snowfall: daily.snowfallSum?[dateOffset] ?? 0,
+                    weatherCode: daily.weatherCode?[dateOffset] ?? 0,
+                    cloudCover: 0,
+                    pressureMsl: nil,
+                    windSpeed10m: daily.windSpeed10mMax?[dateOffset] ?? 0,
+                    windDirection10m: nil,
+                    visibility: nil,
+                    windGusts10m: nil,
+                    uvIndex: daily.uvIndexMax?[dateOffset] ?? nil,
+                    dewpoint2m: nil
+                )
+                
+                // Extract just this day's data from daily arrays (single-element arrays)
+                let singleDayDaily = WeatherData.DailyWeather(
+                    temperature2mMax: [daily.temperature2mMax[dateOffset]].compactMap { $0 },
+                    temperature2mMin: [daily.temperature2mMin[dateOffset]].compactMap { $0 },
+                    sunrise: daily.sunrise.map { [$0[dateOffset]].compactMap { $0 } },
+                    sunset: daily.sunset.map { [$0[dateOffset]].compactMap { $0 } },
+                    weatherCode: daily.weatherCode.map { [$0[dateOffset]].compactMap { $0 } },
+                    precipitationSum: daily.precipitationSum.map { [$0[dateOffset]].compactMap { $0 } },
+                    rainSum: daily.rainSum.map { [$0[dateOffset]].compactMap { $0 } },
+                    snowfallSum: daily.snowfallSum.map { [$0[dateOffset]].compactMap { $0 } },
+                    precipitationProbabilityMax: daily.precipitationProbabilityMax.map { [$0[dateOffset]].compactMap { $0 } },
+                    uvIndexMax: daily.uvIndexMax.map { [$0[dateOffset]].compactMap { $0 } },
+                    daylightDuration: daily.daylightDuration.map { [$0[dateOffset]].compactMap { $0 } },
+                    sunshineDuration: daily.sunshineDuration.map { [$0[dateOffset]].compactMap { $0 } },
+                    windSpeed10mMax: daily.windSpeed10mMax.map { [$0[dateOffset]].compactMap { $0 } },
+                    winddirection10mDominant: daily.winddirection10mDominant.map { [$0[dateOffset]].compactMap { $0 } }
+                )
+                
+                // Extract hourly data for that specific day (24 hours starting at midnight of target date)
+                // Each day has 24 hourly entries, so day N starts at index N*24
+                var hourlyForDay: WeatherData.HourlyWeather? = nil
+                if let hourly = response.hourly,
+                   let hourlyTemp = hourly.temperature2m,
+                   let hourlyTime = hourly.time {
+                    let hourlyStartIdx = dateOffset * 24
+                    let hourlyEndIdx = min(hourlyStartIdx + 24, hourlyTemp.count)
+                    if hourlyStartIdx < hourlyTemp.count {
+                        hourlyForDay = WeatherData.HourlyWeather(
+                            time: Array(hourlyTime[hourlyStartIdx..<hourlyEndIdx]),
+                            temperature2m: Array(hourlyTemp[hourlyStartIdx..<hourlyEndIdx]),
+                            weatherCode: hourly.weatherCode.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                            precipitation: hourly.precipitation.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                            relativeHumidity2m: hourly.relativeHumidity2m.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                            windSpeed10m: hourly.windSpeed10m.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                            cloudcover: hourly.cloudcover.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                            precipitationProbability: hourly.precipitationProbability.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                            uvIndex: hourly.uvIndex.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                            windgusts10m: hourly.windgusts10m.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                            dewpoint2m: hourly.dewpoint2m.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                            snowfall: hourly.snowfall.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) }
+                        )
+                    }
+                }
+                
+                weatherData = WeatherData(current: current, daily: singleDayDaily, hourly: hourlyForDay)
             }
             
-            // DISABLED: Persistent cache save is too slow
-            // await persistentCache.set(weatherData, for: city.id)
+            // MARK: - Merge Marine & Air Quality My Data values (dateOffset = 0 only)
+            // For current conditions (today), fetch marine and air quality parameters if selected
+            var finalWeatherData = weatherData
+            if dateOffset == 0 {
+                var mergedMyDataValues = weatherData.current.myDataValues ?? [:]
+                
+                // Fetch marine My Data values if any marine parameters are selected
+                if let marineValues = await fetchMyDataMarineValues(for: city) {
+                    mergedMyDataValues.merge(marineValues) { (_, new) in new }
+                    print("✅ Merged \(marineValues.count) marine My Data values")
+                }
+                
+                // Fetch air quality My Data values if any air quality parameters are selected
+                if let airQualityValues = await fetchMyDataAirQualityValues(for: city) {
+                    mergedMyDataValues.merge(airQualityValues) { (_, new) in new }
+                    print("✅ Merged \(airQualityValues.count) air quality My Data values")
+                }
+                
+                // Update weatherData with merged My Data values if any were added
+                if !mergedMyDataValues.isEmpty {
+                    let updatedCurrent = WeatherData.CurrentWeather(
+                        temperature2m: weatherData.current.temperature2m,
+                        relativeHumidity2m: weatherData.current.relativeHumidity2m,
+                        apparentTemperature: weatherData.current.apparentTemperature,
+                        isDay: weatherData.current.isDay,
+                        precipitation: weatherData.current.precipitation,
+                        rain: weatherData.current.rain,
+                        showers: weatherData.current.showers,
+                        snowfall: weatherData.current.snowfall,
+                        weatherCode: weatherData.current.weatherCode,
+                        cloudCover: weatherData.current.cloudCover,
+                        pressureMsl: weatherData.current.pressureMsl,
+                        windSpeed10m: weatherData.current.windSpeed10m,
+                        windDirection10m: weatherData.current.windDirection10m,
+                        visibility: weatherData.current.visibility,
+                        windGusts10m: weatherData.current.windGusts10m,
+                        uvIndex: weatherData.current.uvIndex,
+                        dewpoint2m: weatherData.current.dewpoint2m,
+                        myDataValues: mergedMyDataValues
+                    )
+                    finalWeatherData = WeatherData(
+                        current: updatedCurrent,
+                        daily: weatherData.daily,
+                        hourly: weatherData.hourly
+                    )
+                }
+            }
+            
+            await MainActor.run {
+                self.weatherCache[cacheKey] = finalWeatherData
+                self.cacheTimestamps[cacheKey] = Date()
+            }
         } catch {
             await MainActor.run {
                 self.errorMessage = "Failed to fetch weather: \(error.localizedDescription)"
+            }
+        }
+    }
+    
+    // Helper: Fetch historical weather for a city on a specific past date
+    private func fetchHistoricalWeatherForCity(city: City, targetDate: Date, cacheKey: WeatherCacheKey) async {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let dateString = dateFormatter.string(from: targetDate)
+        
+        do {
+            // Fetch single day from archive API
+            let response = try await fetchHistoricalWeather(for: city, startDate: dateString, endDate: dateString)
+            
+            // Convert historical data to WeatherData format
+            let daily = response.daily
+            guard !daily.time.isEmpty,
+                  let firstIndex = daily.time.indices.first else {
+                await MainActor.run {
+                    self.errorMessage = "No historical data available for \(dateString)"
+                }
+                return
+            }
+            
+            // Create minimal current weather from daily data
+            let avgTemp = ((daily.temperature2mMax[firstIndex] ?? 0) + (daily.temperature2mMin[firstIndex] ?? 0)) / 2
+            let avgApparentTemp = ((daily.apparentTemperatureMax[firstIndex] ?? 0) + (daily.apparentTemperatureMin[firstIndex] ?? 0)) / 2
+            
+            let current = WeatherData.CurrentWeather(
+                temperature2m: avgTemp,
+                relativeHumidity2m: nil,
+                apparentTemperature: avgApparentTemp,
+                isDay: 1,
+                precipitation: daily.precipitationSum[firstIndex] ?? 0,
+                rain: daily.rainSum[firstIndex] ?? 0,
+                showers: nil,
+                snowfall: daily.snowfallSum[firstIndex] ?? 0,
+                weatherCode: daily.weatherCode[firstIndex] ?? 0,
+                cloudCover: 0,
+                pressureMsl: nil,
+                windSpeed10m: daily.windSpeed10mMax[firstIndex] ?? 0,
+                windDirection10m: nil,
+                visibility: nil,
+                windGusts10m: nil,
+                uvIndex: nil,
+                dewpoint2m: nil
+            )
+            
+            // Create daily weather data
+            let dailyWeather = WeatherData.DailyWeather(
+                temperature2mMax: daily.temperature2mMax,
+                temperature2mMin: daily.temperature2mMin,
+                sunrise: daily.sunrise,
+                sunset: daily.sunset,
+                weatherCode: daily.weatherCode,
+                precipitationSum: daily.precipitationSum,
+                rainSum: daily.rainSum,
+                snowfallSum: daily.snowfallSum,
+                precipitationProbabilityMax: nil,
+                uvIndexMax: nil,
+                daylightDuration: nil,
+                sunshineDuration: nil,
+                windSpeed10mMax: daily.windSpeed10mMax,
+                winddirection10mDominant: nil
+            )
+            
+            let weatherData = WeatherData(current: current, daily: dailyWeather, hourly: nil)
+            
+            await MainActor.run {
+                self.weatherCache[cacheKey] = weatherData
+                self.cacheTimestamps[cacheKey] = Date()
+            }
+        } catch {
+            await MainActor.run {
+                self.errorMessage = "Failed to fetch historical weather: \(error.localizedDescription)"
             }
         }
     }
@@ -170,7 +515,7 @@ class WeatherService: ObservableObject {
             "latitude": String(latitude),
             "longitude": String(longitude),
             "current": "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility,wind_gusts_10m,uv_index,dewpoint_2m",
-            "hourly": "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,windgusts_10m,uv_index,dewpoint_2m",
+            "hourly": "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,windgusts_10m,uv_index,dewpoint_2m,snowfall",
             "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,rain_sum,snowfall_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration,windspeed_10m_max,winddirection_10m_dominant",
             "forecast_days": "16",
             "timezone": "auto"
@@ -247,6 +592,105 @@ class WeatherService: ObservableObject {
         
         await MainActor.run {
             isLoading = false
+        }
+    }
+    
+    // MARK: - Marine Weather
+    
+    // Fetch marine forecast data for a specific city and date offset
+    func fetchMarineData(for city: City, dateOffset: Int = 0) async {
+        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+        
+        // Check in-memory cache
+        if isCacheValid(timestamp: marineCacheTimestamps[cacheKey]) {
+            return
+        }
+        
+        // Marine API params - request all available marine variables
+        let params = [
+            "latitude": String(city.latitude),
+            "longitude": String(city.longitude),
+            "hourly": "wave_height,wave_direction,wave_period,wave_peak_period,wind_wave_height,wind_wave_direction,wind_wave_period,swell_wave_height,swell_wave_direction,swell_wave_period,ocean_current_velocity,ocean_current_direction,sea_surface_temperature,sea_level_height_msl",
+            "forecast_days": "7",
+            "timezone": "auto",
+            "cell_selection": "sea"  // Prefer sea grid cells for accurate marine data
+        ]
+        
+        var components = URLComponents(string: marineURL)!
+        components.queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
+        
+        guard let url = components.url else {
+            await MainActor.run {
+                self.errorMessage = "Invalid marine API URL"
+            }
+            return
+        }
+        
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let decoder = JSONDecoder()
+            let response = try decoder.decode(MarineResponse.self, from: data)
+            
+            // Extract marine data for the specific date offset
+            var marineData: MarineData
+            
+            if dateOffset == 0 {
+                // For today, use all data as-is
+                marineData = MarineData(current: nil, hourly: response.hourly)
+            } else if dateOffset > 0 {
+                // For future dates, extract that day's hourly data (24 hours)
+                guard let hourly = response.hourly,
+                      let hourlyTime = hourly.time else {
+                    await MainActor.run {
+                        self.errorMessage = "No marine data available"
+                    }
+                    return
+                }
+                
+                let hourlyStartIdx = dateOffset * 24
+                let hourlyEndIdx = min(hourlyStartIdx + 24, hourlyTime.count)
+                
+                if hourlyStartIdx < hourlyTime.count {
+                    let extractedHourly = MarineData.MarineHourly(
+                        time: Array(hourlyTime[hourlyStartIdx..<hourlyEndIdx]),
+                        waveHeight: hourly.waveHeight.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                        waveDirection: hourly.waveDirection.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                        wavePeriod: hourly.wavePeriod.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                        wavePeakPeriod: hourly.wavePeakPeriod.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                        windWaveHeight: hourly.windWaveHeight.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                        windWaveDirection: hourly.windWaveDirection.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                        windWavePeriod: hourly.windWavePeriod.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                        swellWaveHeight: hourly.swellWaveHeight.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                        swellWaveDirection: hourly.swellWaveDirection.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                        swellWavePeriod: hourly.swellWavePeriod.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                        oceanCurrentVelocity: hourly.oceanCurrentVelocity.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                        oceanCurrentDirection: hourly.oceanCurrentDirection.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                        seaSurfaceTemperature: hourly.seaSurfaceTemperature.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                        seaLevelHeight: hourly.seaLevelHeight.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) }
+                    )
+                    marineData = MarineData(current: nil, hourly: extractedHourly)
+                } else {
+                    await MainActor.run {
+                        self.errorMessage = "Marine data not available for this date"
+                    }
+                    return
+                }
+            } else {
+                // dateOffset < 0 - past dates not supported by marine API (no historical marine data)
+                await MainActor.run {
+                    self.errorMessage = "Historical marine data not available"
+                }
+                return
+            }
+            
+            await MainActor.run {
+                self.marineCache[cacheKey] = marineData
+                self.marineCacheTimestamps[cacheKey] = Date()
+            }
+        } catch {
+            await MainActor.run {
+                self.errorMessage = "Failed to fetch marine data: \(error.localizedDescription)"
+            }
         }
     }
     
@@ -618,9 +1062,13 @@ class WeatherService: ObservableObject {
     // MARK: - Cache Management
     
     /// Get cache metadata for a city (for displaying "Using cached data from...")
-    func getCacheMetadata(for cityId: UUID) async -> CachedWeather? {
-        // DISABLED: Persistent cache too slow
-        return nil
+    func getCacheMetadata(for cacheKey: WeatherCacheKey) async -> CachedWeather? {
+        guard let timestamp = cacheTimestamps[cacheKey],
+              let weather = weatherCache[cacheKey] else {
+            return nil
+        }
+        
+        return CachedWeather(weather: weather, timestamp: timestamp, cityId: cacheKey.cityId)
     }
     
     /// Clear all persistent cached weather data
@@ -636,6 +1084,71 @@ class WeatherService: ObservableObject {
             UserDefaults.standard.set(encoded, forKey: userDefaultsKey)
         }
     }
+    
+    // MARK: - Data Migration
+    
+    /// Migrate country names from native language to English (one-time)
+    private func migrateCountryNamesIfNeeded() {
+        let migrationKey = "countryNamesMigrated_v1"
+        
+        // Check if migration already completed
+        guard !UserDefaults.standard.bool(forKey: migrationKey) else {
+            print("✅ Country names already migrated")
+            return
+        }
+        
+        print("🔄 Migrating country names to English...")
+        var migratedCount = 0
+        
+        // Create backup before migration
+        if let encoded = try? JSONEncoder().encode(savedCities) {
+            UserDefaults.standard.set(encoded, forKey: "cities_backup_preMigration")
+            print("  Created backup of \(savedCities.count) cities")
+        }
+        
+        // Migrate each city's country name
+        var updatedCities: [City] = []
+        for city in savedCities {
+            let oldCountry = city.country
+            let normalizedCountry = CountryNames.normalize(oldCountry)
+            let newCountry = normalizedCountry ?? oldCountry // Use original if normalization returns nil
+            
+            if oldCountry != newCountry {
+                // Create new City with updated country
+                let updatedCity = City(
+                    id: city.id,
+                    name: city.name,
+                    state: city.state,
+                    country: newCountry,
+                    latitude: city.latitude,
+                    longitude: city.longitude
+                )
+                updatedCities.append(updatedCity)
+                migratedCount += 1
+                print("  \(city.name): '\(oldCountry)' → '\(newCountry)'")
+            } else {
+                updatedCities.append(city)
+            }
+        }
+        
+        // Update savedCities with migrated data
+        savedCities = updatedCities
+        
+        // Save migrated cities if any changes made
+        if migratedCount > 0 {
+            saveCities()
+            print("✅ Migration complete: \(migratedCount) cities updated")
+            
+            // Note: VoiceOver announcement handled by view layer
+        } else {
+            print("✅ Migration complete: No cities needed updating")
+        }
+        
+        // Mark migration as complete (even if no changes)
+        UserDefaults.standard.set(true, forKey: migrationKey)
+    }
+    
+    // MARK: - Persistence
     
     private func loadSavedCities() {
         if let data = UserDefaults.standard.data(forKey: userDefaultsKey),

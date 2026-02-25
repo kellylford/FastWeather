@@ -205,6 +205,7 @@ struct RadarView: View {
                             Text(point.time)
                                 .font(.caption2)
                                 .lineLimit(1)
+                                .truncationMode(.middle)
                                 .minimumScaleFactor(0.5)
                         }
                     }

@@ -1,76 +1,4 @@
 {
-  "Antarctica": [
-    {
-      "name": "McMurdo Station",
-      "state": "Ross Island",
-      "country": "Antarctica",
-      "lat": -77.85,
-      "lon": 166.67
-    },
-    {
-      "name": "Amundsen-Scott South Pole Station",
-      "state": "South Pole",
-      "country": "Antarctica",
-      "lat": -90.0,
-      "lon": 0.0
-    },
-    {
-      "name": "Palmer Station",
-      "state": "Anvers Island",
-      "country": "Antarctica",
-      "lat": -64.77,
-      "lon": -64.05
-    },
-    {
-      "name": "Rothera Research Station",
-      "state": "Adelaide Island",
-      "country": "Antarctica",
-      "lat": -67.57,
-      "lon": -68.13
-    },
-    {
-      "name": "Casey Station",
-      "state": "Wilkes Land",
-      "country": "Antarctica",
-      "lat": -66.28,
-      "lon": 110.53
-    },
-    {
-      "name": "Davis Station",
-      "state": "Vestfold Hills",
-      "country": "Antarctica",
-      "lat": -68.58,
-      "lon": 77.97
-    },
-    {
-      "name": "Mawson Station",
-      "state": "Mac. Robertson Land",
-      "country": "Antarctica",
-      "lat": -67.60,
-      "lon": 62.87
-    },
-    {
-      "name": "Vostok Station",
-      "state": "Princess Elizabeth Land",
-      "country": "Antarctica",
-      "lat": -78.47,
-      "lon": 106.83
-    },
-    {
-      "name": "Halley Research Station",
-      "state": "Brunt Ice Shelf",
-      "country": "Antarctica",
-      "lat": -75.58,
-      "lon": -26.65
-    },
-    {
-      "name": "Concordia Station",
-      "state": "Dome C",
-      "country": "Antarctica",
-      "lat": -75.10,
-      "lon": 123.38
-    }
-  ],
   "Argentina": [
     {
       "name": "Buenos Aires",
@@ -5045,133 +4973,133 @@
     {
       "name": "Doha",
       "state": "الدوحة",
-      "country": "قطر",
+      "country": "Qatar",
       "lat": 25.3108807,
       "lon": 51.5081812
     },
     {
       "name": "Al Rayyan",
       "state": "الريان",
-      "country": "قطر",
+      "country": "Qatar",
       "lat": 24.9304741,
       "lon": 50.9776888
     },
     {
       "name": "Umm Salal",
       "state": "أم صلال",
-      "country": "قطر",
+      "country": "Qatar",
       "lat": 25.4647654,
       "lon": 51.3383996
     },
     {
       "name": "Al Wakrah",
       "state": "الوكرة",
-      "country": "قطر",
+      "country": "Qatar",
       "lat": 25.0037453,
       "lon": 51.4103338
     },
     {
       "name": "Al Khor",
       "state": "الخور والذخيرة",
-      "country": "قطر",
+      "country": "Qatar",
       "lat": 25.7567822,
       "lon": 51.3269839
     },
     {
       "name": "Mesaieed",
       "state": "الوكرة",
-      "country": "قطر",
+      "country": "Qatar",
       "lat": 24.9953944,
       "lon": 51.5493583
     },
     {
       "name": "Dukhan",
       "state": "الشحانية",
-      "country": "قطر",
+      "country": "Qatar",
       "lat": 25.4188602,
       "lon": 50.7876198
     },
     {
       "name": "Al Shamal",
       "state": "الشمال",
-      "country": "قطر",
+      "country": "Qatar",
       "lat": 26.0517166,
       "lon": 51.2005821
     },
     {
       "name": "Madinat ash Shamal",
       "state": "الشمال",
-      "country": "قطر",
+      "country": "Qatar",
       "lat": 26.1182868,
       "lon": 51.2156827
     },
     {
       "name": "Al Ghuwariyah",
       "state": "الخور والذخيرة",
-      "country": "قطر",
+      "country": "Qatar",
       "lat": 25.8444937,
       "lon": 51.2673
     },
     {
       "name": "Simaisma",
       "state": "الضعاين",
-      "country": "قطر",
+      "country": "Qatar",
       "lat": 25.5772027,
       "lon": 51.4838309
     },
     {
       "name": "Al Wukair",
       "state": "الوكرة",
-      "country": "قطر",
+      "country": "Qatar",
       "lat": 25.150147,
       "lon": 51.5440883
     },
     {
       "name": "Al Khawr",
       "state": "الخور والذخيرة",
-      "country": "قطر",
+      "country": "Qatar",
       "lat": 25.7567822,
       "lon": 51.3269839
     },
     {
       "name": "Lusail",
       "state": "الضعاين",
-      "country": "قطر",
+      "country": "Qatar",
       "lat": 25.4228888,
       "lon": 51.5197163
     },
     {
       "name": "Al Daayen",
       "state": "الضعاين",
-      "country": "قطر",
+      "country": "Qatar",
       "lat": 25.509742,
       "lon": 51.4422699
     },
     {
       "name": "Al Shahaniya",
       "state": "الشحانية",
-      "country": "قطر",
+      "country": "Qatar",
       "lat": 25.4450415,
       "lon": 51.0111063
     },
     {
       "name": "Fuwayrit",
       "state": "الشمال",
-      "country": "قطر",
+      "country": "Qatar",
       "lat": 26.0249974,
       "lon": 51.3723603
     },
     {
       "name": "Rawdat Rashed",
       "state": "الشحانية",
-      "country": "قطر",
+      "country": "Qatar",
       "lat": 25.2347842,
       "lon": 51.205327
     },
     {
       "name": "Umm Bab",
       "state": "الشحانية",
-      "country": "قطر",
+      "country": "Qatar",
       "lat": 25.2091532,
       "lon": 50.8011349
     }
@@ -13274,133 +13202,133 @@
     {
       "name": "Beirut",
       "state": "محافظة بيروت",
-      "country": "لبنان",
+      "country": "Lebanon",
       "lat": 33.8892265,
       "lon": 35.5025585
     },
     {
       "name": "Tripoli",
       "state": "محافظة الشمال",
-      "country": "لبنان",
+      "country": "Lebanon",
       "lat": 34.4373616,
       "lon": 35.8348551
     },
     {
       "name": "Sidon",
       "state": "محافظة الجنوب",
-      "country": "لبنان",
+      "country": "Lebanon",
       "lat": 33.564733,
       "lon": 35.374978
     },
     {
       "name": "Tyre",
       "state": "محافظة الجنوب",
-      "country": "لبنان",
+      "country": "Lebanon",
       "lat": 33.2721211,
       "lon": 35.1964023
     },
     {
       "name": "Nabatieh",
       "state": "محافظة النبطية",
-      "country": "لبنان",
+      "country": "Lebanon",
       "lat": 33.3079104,
       "lon": 35.5059689
     },
     {
       "name": "Zahle",
       "state": "محافظة البقاع",
-      "country": "لبنان",
+      "country": "Lebanon",
       "lat": 33.8477069,
       "lon": 35.9024955
     },
     {
       "name": "Baalbek",
       "state": "محافظة بعلبك الهرمل",
-      "country": "لبنان",
+      "country": "Lebanon",
       "lat": 34.0078871,
       "lon": 36.2118106
     },
     {
       "name": "Jounieh",
       "state": "محافظة كسروان جبيل",
-      "country": "لبنان",
+      "country": "Lebanon",
       "lat": 33.9741506,
       "lon": 35.6200633
     },
     {
       "name": "Byblos",
       "state": "محافظة كسروان جبيل",
-      "country": "لبنان",
+      "country": "Lebanon",
       "lat": 34.1236954,
       "lon": 35.6493557
     },
     {
       "name": "Aley",
       "state": "محافظة جبل لبنان",
-      "country": "لبنان",
+      "country": "Lebanon",
       "lat": 33.8082697,
       "lon": 35.6061181
     },
     {
       "name": "Batroun",
       "state": "محافظة الشمال",
-      "country": "لبنان",
+      "country": "Lebanon",
       "lat": 34.2548879,
       "lon": 35.6588567
     },
     {
       "name": "Halba",
       "state": "محافظة عكار",
-      "country": "لبنان",
+      "country": "Lebanon",
       "lat": 34.5543076,
       "lon": 36.0723493
     },
     {
       "name": "Bint Jbeil",
       "state": "محافظة النبطية",
-      "country": "لبنان",
+      "country": "Lebanon",
       "lat": 33.1195382,
       "lon": 35.4327933
     },
     {
       "name": "Jezzine",
       "state": "محافظة الجنوب",
-      "country": "لبنان",
+      "country": "Lebanon",
       "lat": 33.5439343,
       "lon": 35.5843949
     },
     {
       "name": "Rashaya",
       "state": "محافظة البقاع",
-      "country": "لبنان",
+      "country": "Lebanon",
       "lat": 33.5014243,
       "lon": 35.8448806
     },
     {
       "name": "Marjayoun",
       "state": "محافظة النبطية",
-      "country": "لبنان",
+      "country": "Lebanon",
       "lat": 33.3592529,
       "lon": 35.5902134
     },
     {
       "name": "Deir el Qamar",
       "state": "محافظة جبل لبنان",
-      "country": "لبنان",
+      "country": "Lebanon",
       "lat": 33.6979691,
       "lon": 35.5647431
     },
     {
       "name": "Bcharré",
       "state": "محافظة الشمال",
-      "country": "لبنان",
+      "country": "Lebanon",
       "lat": 34.2507231,
       "lon": 36.0099915
     },
     {
       "name": "Zgharta",
       "state": "محافظة الشمال",
-      "country": "لبنان",
+      "country": "Lebanon",
       "lat": 34.3929847,
       "lon": 35.8967113
     }
@@ -13551,126 +13479,126 @@
     {
       "name": "Manama",
       "state": "محافظة العاصمة",
-      "country": "البحرين",
+      "country": "Bahrain",
       "lat": 26.2235041,
       "lon": 50.5822436
     },
     {
       "name": "Riffa",
       "state": "المحافظة الجنوبية",
-      "country": "البحرين",
+      "country": "Bahrain",
       "lat": 26.1315261,
       "lon": 50.5503431
     },
     {
       "name": "Muharraq",
       "state": "محافظة المحرق",
-      "country": "البحرين",
+      "country": "Bahrain",
       "lat": 26.2465946,
       "lon": 50.6164127
     },
     {
       "name": "Hamad Town",
       "state": "المحافظة الشمالية",
-      "country": "البحرين",
+      "country": "Bahrain",
       "lat": 26.1267463,
       "lon": 50.4983356
     },
     {
       "name": "A'ali",
       "state": "المحافظة الشمالية",
-      "country": "البحرين",
+      "country": "Bahrain",
       "lat": 26.1544539,
       "lon": 50.5273639
     },
     {
       "name": "Isa Town",
       "state": "المحافظة الجنوبية",
-      "country": "البحرين",
+      "country": "Bahrain",
       "lat": 26.1741995,
       "lon": 50.5473432
     },
     {
       "name": "Sitra",
       "state": "المحافظة الجنوبية",
-      "country": "البحرين",
+      "country": "Bahrain",
       "lat": 26.1478317,
       "lon": 50.6320232
     },
     {
       "name": "Budaiya",
       "state": "المحافظة الشمالية",
-      "country": "البحرين",
+      "country": "Bahrain",
       "lat": 26.2156292,
       "lon": 50.4523545
     },
     {
       "name": "Jidhafs",
       "state": "محافظة العاصمة",
-      "country": "البحرين",
+      "country": "Bahrain",
       "lat": 26.2203138,
       "lon": 50.5400879
     },
     {
       "name": "Sanabis",
       "state": "محافظة العاصمة",
-      "country": "البحرين",
+      "country": "Bahrain",
       "lat": 26.226196,
       "lon": 50.5452432
     },
     {
       "name": "Tubli",
       "state": "محافظة العاصمة",
-      "country": "البحرين",
+      "country": "Bahrain",
       "lat": 26.1672253,
       "lon": 50.5916531
     },
     {
       "name": "Dar Kulayb",
       "state": "المحافظة الشمالية",
-      "country": "البحرين",
+      "country": "Bahrain",
       "lat": 26.0651104,
       "lon": 50.5122187
     },
     {
       "name": "Barbar",
       "state": "المحافظة الشمالية",
-      "country": "البحرين",
+      "country": "Bahrain",
       "lat": 26.2261951,
       "lon": 50.4841605
     },
     {
       "name": "Galali",
       "state": "محافظة المحرق",
-      "country": "البحرين",
-      "lat": 26.2742183,
+      "country": "Bahrain",
+      "lat": 26.2742184,
       "lon": 50.6519916
     },
     {
       "name": "Sanad",
       "state": "محافظة العاصمة",
-      "country": "البحرين",
+      "country": "Bahrain",
       "lat": 26.1501874,
       "lon": 50.5841248
     },
     {
       "name": "Juffair",
       "state": "محافظة العاصمة",
-      "country": "البحرين",
+      "country": "Bahrain",
       "lat": 26.2146274,
       "lon": 50.6041274
     },
     {
       "name": "Adliya",
       "state": "محافظة العاصمة",
-      "country": "البحرين",
+      "country": "Bahrain",
       "lat": 26.2138794,
       "lon": 50.5861658
     },
     {
       "name": "Saar",
       "state": "المحافظة الشمالية",
-      "country": "البحرين",
+      "country": "Bahrain",
       "lat": 26.1898256,
       "lon": 50.4941714
     }
@@ -14105,133 +14033,133 @@
     {
       "name": "Tashkent",
       "state": "",
-      "country": "Oʻzbekiston",
+      "country": "Uzbekistan",
       "lat": 41.3123363,
       "lon": 69.2787079
     },
     {
       "name": "Namangan",
       "state": "Namangan Viloyati",
-      "country": "Oʻzbekiston",
+      "country": "Uzbekistan",
       "lat": 40.9996482,
       "lon": 71.6726238
     },
     {
       "name": "Samarkand",
       "state": "Samarqand Viloyati",
-      "country": "Oʻzbekiston",
+      "country": "Uzbekistan",
       "lat": 39.6550017,
       "lon": 66.9756954
     },
     {
       "name": "Andijan",
       "state": "Andijon Viloyati",
-      "country": "Oʻzbekiston",
+      "country": "Uzbekistan",
       "lat": 40.7833471,
       "lon": 72.3506746
     },
     {
       "name": "Bukhara",
       "state": "Buxoro Viloyati",
-      "country": "Oʻzbekiston",
+      "country": "Uzbekistan",
       "lat": 39.7759835,
       "lon": 64.415153
     },
     {
       "name": "Nukus",
       "state": "Qaraqalpaqstan Respublikası",
-      "country": "Oʻzbekiston",
+      "country": "Uzbekistan",
       "lat": 42.4600229,
       "lon": 59.6176603
     },
     {
       "name": "Qarshi",
       "state": "Qashqadaryo Viloyati",
-      "country": "Oʻzbekiston",
+      "country": "Uzbekistan",
       "lat": 38.839824,
       "lon": 65.7927794
     },
     {
       "name": "Kokand",
       "state": "Farg'ona Viloyati",
-      "country": "Oʻzbekiston",
+      "country": "Uzbekistan",
       "lat": 40.5408463,
       "lon": 70.9473889
     },
     {
       "name": "Fergana",
       "state": "Farg'ona Viloyati",
-      "country": "Oʻzbekiston",
+      "country": "Uzbekistan",
       "lat": 40.396877,
       "lon": 71.7847942
     },
     {
       "name": "Margilan",
       "state": "Farg'ona Viloyati",
-      "country": "Oʻzbekiston",
+      "country": "Uzbekistan",
       "lat": 40.4739429,
       "lon": 71.7240763
     },
     {
       "name": "Jizzakh",
       "state": "Jizzax Viloyati",
-      "country": "Oʻzbekiston",
+      "country": "Uzbekistan",
       "lat": 40.3319095,
       "lon": 67.4551198
     },
     {
       "name": "Urgench",
       "state": "Xorazm Viloyati",
-      "country": "Oʻzbekiston",
-      "lat": 41.556975,
-      "lon": 60.6327004
+      "country": "Uzbekistan",
+      "lat": 41.5517903,
+      "lon": 60.631281
     },
     {
       "name": "Navoi",
       "state": "Navoiy Viloyati",
-      "country": "Oʻzbekiston",
+      "country": "Uzbekistan",
       "lat": 42.0,
       "lon": 64.0
     },
     {
       "name": "Termez",
       "state": "Surxondaryo Viloyati",
-      "country": "Oʻzbekiston",
+      "country": "Uzbekistan",
       "lat": 37.2442466,
       "lon": 67.283151
     },
     {
       "name": "Chirchiq",
       "state": "Toshkent Viloyati",
-      "country": "Oʻzbekiston",
+      "country": "Uzbekistan",
       "lat": 41.4726157,
       "lon": 69.5811915
     },
     {
       "name": "Angren",
       "state": "Toshkent Viloyati",
-      "country": "Oʻzbekiston",
+      "country": "Uzbekistan",
       "lat": 41.0212207,
       "lon": 70.0795361
     },
     {
       "name": "Khiva",
       "state": "Xorazm Viloyati",
-      "country": "Oʻzbekiston",
+      "country": "Uzbekistan",
       "lat": 41.3775101,
       "lon": 60.3634553
     },
     {
       "name": "Gulistan",
       "state": "Sirdaryo Viloyati",
-      "country": "Oʻzbekiston",
+      "country": "Uzbekistan",
       "lat": 40.4959816,
       "lon": 68.7758675
     },
     {
       "name": "Bekabad",
       "state": "Toshkent Viloyati",
-      "country": "Oʻzbekiston",
+      "country": "Uzbekistan",
       "lat": 40.2198721,
       "lon": 69.2477842
     }

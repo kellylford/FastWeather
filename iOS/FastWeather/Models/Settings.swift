@@ -84,6 +84,23 @@ enum DailyFieldType: String, CaseIterable, Codable {
     case sunshineDuration = "Sunshine Duration"
 }
 
+enum MarineFieldType: String, CaseIterable, Codable {
+    case waveHeight = "Wave Height"
+    case waveDirection = "Wave Direction"
+    case wavePeriod = "Wave Period"
+    case seaSurfaceTemperature = "Sea Surface Temperature"
+    case swellWaveHeight = "Swell Wave Height"
+    case oceanCurrentVelocity = "Ocean Current Velocity"
+    case windWaveHeight = "Wind Wave Height"
+    case swellWaveDirection = "Swell Wave Direction"
+    case oceanCurrentDirection = "Ocean Current Direction"
+    case seaLevelHeight = "Sea Level Height (Tides)"
+    case wavePeakPeriod = "Wave Peak Period"
+    case windWaveDirection = "Wind Wave Direction"
+    case windWavePeriod = "Wind Wave Period"
+    case swellWavePeriod = "Swell Wave Period"
+}
+
 struct HourlyField: Codable, Identifiable, Equatable {
     let id: String
     let type: HourlyFieldType
@@ -108,14 +125,29 @@ struct DailyField: Codable, Identifiable, Equatable {
     }
 }
 
+struct MarineField: Codable, Identifiable, Equatable {
+    let id: String
+    let type: MarineFieldType
+    var isEnabled: Bool
+    
+    init(type: MarineFieldType, isEnabled: Bool = true) {
+        self.id = type.rawValue
+        self.type = type
+        self.isEnabled = isEnabled
+    }
+}
+
 enum DetailCategory: String, CaseIterable, Codable {
     case weatherAlerts = "Weather Alerts"
     case currentConditions = "Current Conditions"
     case todaysForecast = "Today's Forecast"
     case hourlyForecast = "24-Hour Forecast"
     case dailyForecast = "16-Day Forecast"
+    case marineForecast = "Marine Forecast"
     case historicalWeather = "Historical Weather"
     case location = "Location"
+    case myData = "My Data"
+    case astronomy = "Astronomy"
 }
 
 struct DetailCategoryField: Codable, Identifiable, Equatable {
@@ -126,6 +158,18 @@ struct DetailCategoryField: Codable, Identifiable, Equatable {
     init(category: DetailCategory, isEnabled: Bool = true) {
         self.id = category.rawValue
         self.category = category
+        self.isEnabled = isEnabled
+    }
+}
+
+struct MyDataField: Codable, Identifiable, Equatable {
+    let id: String
+    let parameter: MyDataParameter
+    var isEnabled: Bool
+    
+    init(parameter: MyDataParameter, isEnabled: Bool = true) {
+        self.id = parameter.rawValue
+        self.parameter = parameter
         self.isEnabled = isEnabled
     }
 }
@@ -261,6 +305,10 @@ enum DistanceUnit: String, CaseIterable, Codable {
 }
 
 struct AppSettings: Codable {
+    // Settings schema version - increment when structure changes
+    static let currentVersion = 2  // Note: My Data fields handled via migration in init(from:)
+    var settingsVersion: Int = AppSettings.currentVersion
+    
     var viewMode: ViewMode = .list
     var displayMode: DisplayMode = .condensed
     var temperatureUnit: TemperatureUnit = .fahrenheit
@@ -282,6 +330,13 @@ struct AppSettings: Codable {
     // Granular Wind Gusts display options (by section)
     var showWindGustsInCurrentConditions: Bool = true
     var showWindGustsInTodaysForecast: Bool = true  // Shows as alerts when high
+    
+    // Current precipitation rate in current conditions section
+    var showCurrentPrecipitationInCurrentConditions: Bool = true
+    
+    // Astronomy section options
+    var showMoonriseInAstronomy: Bool = true
+    var showMoonsetInAstronomy: Bool = true
     
     // Granular Precipitation Probability options (by section)
     var showPrecipitationProbabilityInPrecipitation: Bool = true
@@ -360,7 +415,7 @@ struct AppSettings: Codable {
         HourlyField(type: .precipitationProbability, isEnabled: true),
         HourlyField(type: .rain, isEnabled: true),
         HourlyField(type: .showers, isEnabled: true),
-        HourlyField(type: .snowfall, isEnabled: true),
+        HourlyField(type: .snowfall, isEnabled: false), // disabled: .precipitation already shows snow amounts
         HourlyField(type: .windSpeed, isEnabled: true),
         HourlyField(type: .windDirection, isEnabled: true),
         HourlyField(type: .windGusts, isEnabled: true),
@@ -380,7 +435,7 @@ struct AppSettings: Codable {
         DailyField(type: .feelsLikeMin, isEnabled: false),
         DailyField(type: .sunrise, isEnabled: true),
         DailyField(type: .sunset, isEnabled: true),
-        DailyField(type: .precipitationSum, isEnabled: false),
+        DailyField(type: .precipitationSum, isEnabled: true),   // enabled: shows snow or rain amount
         DailyField(type: .precipitationProbability, isEnabled: true),
         DailyField(type: .precipitationHours, isEnabled: false),
         DailyField(type: .rainSum, isEnabled: false),
@@ -394,6 +449,24 @@ struct AppSettings: Codable {
         DailyField(type: .sunshineDuration, isEnabled: false)
     ]
     
+    // Ordered marine forecast fields with enable/disable state (Marine Forecast)
+    var marineFields: [MarineField] = [
+        MarineField(type: .seaLevelHeight, isEnabled: true),  // Tides - shown first
+        MarineField(type: .waveHeight, isEnabled: true),
+        MarineField(type: .waveDirection, isEnabled: true),
+        MarineField(type: .wavePeriod, isEnabled: true),
+        MarineField(type: .seaSurfaceTemperature, isEnabled: true),
+        MarineField(type: .swellWaveHeight, isEnabled: true),
+        MarineField(type: .oceanCurrentVelocity, isEnabled: true),
+        MarineField(type: .windWaveHeight, isEnabled: false),
+        MarineField(type: .swellWaveDirection, isEnabled: false),
+        MarineField(type: .oceanCurrentDirection, isEnabled: false),
+        MarineField(type: .wavePeakPeriod, isEnabled: false),
+        MarineField(type: .windWaveDirection, isEnabled: false),
+        MarineField(type: .windWavePeriod, isEnabled: false),
+        MarineField(type: .swellWavePeriod, isEnabled: false)
+    ]
+    
     // Detail categories with enable/disable and order control
     var detailCategories: [DetailCategoryField] = [
         DetailCategoryField(category: .weatherAlerts, isEnabled: true),
@@ -401,8 +474,13 @@ struct AppSettings: Codable {
         DetailCategoryField(category: .currentConditions, isEnabled: true),
         DetailCategoryField(category: .hourlyForecast, isEnabled: true),
         DetailCategoryField(category: .dailyForecast, isEnabled: true),
+        DetailCategoryField(category: .historicalWeather, isEnabled: true),
+        DetailCategoryField(category: .marineForecast, isEnabled: true),
         DetailCategoryField(category: .location, isEnabled: true)
     ]
+    
+    // User-configured My Data fields (custom section with Open-Meteo parameters)
+    var myDataFields: [MyDataField] = []
     
     // Legacy properties for backward compatibility (deprecated)
     var showTemperature: Bool = true
@@ -418,7 +496,7 @@ struct AppSettings: Codable {
     
     // Custom CodingKeys to handle private _weatherAroundMeDistance property
     enum CodingKeys: String, CodingKey {
-        case viewMode, displayMode, temperatureUnit, windSpeedUnit
+        case settingsVersion, viewMode, displayMode, temperatureUnit, windSpeedUnit
         case precipitationUnit, pressureUnit, distanceUnit, historicalYearsBack
         // Granular UV Index settings
         case showUVIndexInCurrentConditions, showUVIndexInTodaysForecast
@@ -426,6 +504,10 @@ struct AppSettings: Codable {
         case showDailyHighLowInCityList
         // Granular Wind Gusts settings
         case showWindGustsInCurrentConditions, showWindGustsInTodaysForecast
+        // Current precipitation rate
+        case showCurrentPrecipitationInCurrentConditions
+        // Astronomy section
+        case showMoonriseInAstronomy, showMoonsetInAstronomy
         // Granular Precipitation Probability settings
         case showPrecipitationProbabilityInPrecipitation, showPrecipitationProbabilityInTodaysForecast
         // Other enhanced data
@@ -434,7 +516,8 @@ struct AppSettings: Codable {
         case hourlyShowTemperature, hourlyShowConditions, hourlyShowPrecipitationProbability, hourlyShowWind
         case dailyShowHighLow, dailyShowConditions, dailyShowPrecipitationProbability, dailyShowPrecipitationAmount, dailyShowWind
         case _weatherAroundMeDistance = "weatherAroundMeDistance"
-        case weatherFields, hourlyFields, dailyFields, detailCategories
+        case weatherFields, hourlyFields, dailyFields, marineFields, detailCategories
+        case myDataFields
         // Legacy properties
         case showTemperature, showConditions, showFeelsLike, showHumidity
         case showWindSpeed, showWindDirection, showHighTemp, showLowTemp
@@ -480,7 +563,7 @@ struct AppSettings: Codable {
             HourlyField(type: .precipitationProbability, isEnabled: true),
             HourlyField(type: .rain, isEnabled: true),
             HourlyField(type: .showers, isEnabled: true),
-            HourlyField(type: .snowfall, isEnabled: true),
+            HourlyField(type: .snowfall, isEnabled: false), // disabled: .precipitation already shows snow amounts
             HourlyField(type: .windSpeed, isEnabled: true),
             HourlyField(type: .windDirection, isEnabled: true),
             HourlyField(type: .windGusts, isEnabled: true),
@@ -499,7 +582,7 @@ struct AppSettings: Codable {
             DailyField(type: .feelsLikeMin, isEnabled: false),
             DailyField(type: .sunrise, isEnabled: true),
             DailyField(type: .sunset, isEnabled: true),
-            DailyField(type: .precipitationSum, isEnabled: false),
+            DailyField(type: .precipitationSum, isEnabled: true),   // enabled: shows snow or rain amount
             DailyField(type: .precipitationProbability, isEnabled: true),
             DailyField(type: .precipitationHours, isEnabled: false),
             DailyField(type: .rainSum, isEnabled: false),
@@ -513,15 +596,37 @@ struct AppSettings: Codable {
             DailyField(type: .sunshineDuration, isEnabled: false)
         ]
         
+        self.marineFields = [
+            MarineField(type: .seaLevelHeight, isEnabled: true),  // Tides - shown first
+            MarineField(type: .waveHeight, isEnabled: true),
+            MarineField(type: .waveDirection, isEnabled: true),
+            MarineField(type: .wavePeriod, isEnabled: true),
+            MarineField(type: .seaSurfaceTemperature, isEnabled: true),
+            MarineField(type: .swellWaveHeight, isEnabled: true),
+            MarineField(type: .oceanCurrentVelocity, isEnabled: true),
+            MarineField(type: .windWaveHeight, isEnabled: false),
+            MarineField(type: .swellWaveDirection, isEnabled: false),
+            MarineField(type: .oceanCurrentDirection, isEnabled: false),
+            MarineField(type: .wavePeakPeriod, isEnabled: false),
+            MarineField(type: .windWaveDirection, isEnabled: false),
+            MarineField(type: .windWavePeriod, isEnabled: false),
+            MarineField(type: .swellWavePeriod, isEnabled: false)
+        ]
+        
         self.detailCategories = [
             DetailCategoryField(category: .weatherAlerts, isEnabled: true),
             DetailCategoryField(category: .todaysForecast, isEnabled: true),
+            DetailCategoryField(category: .astronomy, isEnabled: true),
             DetailCategoryField(category: .currentConditions, isEnabled: true),
             DetailCategoryField(category: .hourlyForecast, isEnabled: true),
             DetailCategoryField(category: .dailyForecast, isEnabled: true),
             DetailCategoryField(category: .historicalWeather, isEnabled: true),
+            DetailCategoryField(category: .marineForecast, isEnabled: true),
             DetailCategoryField(category: .location, isEnabled: true),
+            DetailCategoryField(category: .myData, isEnabled: false),
         ]
+        
+        self.myDataFields = []
     }
     
     // Custom Decodable implementation
@@ -573,6 +678,9 @@ struct AppSettings: Codable {
         
         // Other enhanced data
         showPrecipitationAmount = try container.decodeIfPresent(Bool.self, forKey: .showPrecipitationAmount) ?? true
+        showCurrentPrecipitationInCurrentConditions = try container.decodeIfPresent(Bool.self, forKey: .showCurrentPrecipitationInCurrentConditions) ?? true
+        showMoonriseInAstronomy = try container.decodeIfPresent(Bool.self, forKey: .showMoonriseInAstronomy) ?? true
+        showMoonsetInAstronomy = try container.decodeIfPresent(Bool.self, forKey: .showMoonsetInAstronomy) ?? true
         showDewPoint = try container.decodeIfPresent(Bool.self, forKey: .showDewPoint) ?? false
         showDaylightDuration = try container.decodeIfPresent(Bool.self, forKey: .showDaylightDuration) ?? true
         showSunshineDuration = try container.decodeIfPresent(Bool.self, forKey: .showSunshineDuration) ?? false
@@ -645,7 +753,7 @@ struct AppSettings: Codable {
             HourlyField(type: .precipitationProbability, isEnabled: true),
             HourlyField(type: .rain, isEnabled: true),
             HourlyField(type: .showers, isEnabled: true),
-            HourlyField(type: .snowfall, isEnabled: true),
+            HourlyField(type: .snowfall, isEnabled: false), // disabled: .precipitation already shows snow amounts
             HourlyField(type: .windSpeed, isEnabled: true),
             HourlyField(type: .windDirection, isEnabled: true),
             HourlyField(type: .windGusts, isEnabled: true),
@@ -683,7 +791,7 @@ struct AppSettings: Codable {
             DailyField(type: .feelsLikeMin, isEnabled: false),
             DailyField(type: .sunrise, isEnabled: true),
             DailyField(type: .sunset, isEnabled: true),
-            DailyField(type: .precipitationSum, isEnabled: false),
+            DailyField(type: .precipitationSum, isEnabled: true),   // enabled: shows snow or rain amount
             DailyField(type: .precipitationProbability, isEnabled: true),
             DailyField(type: .precipitationHours, isEnabled: false),
             DailyField(type: .rainSum, isEnabled: false),
@@ -715,15 +823,80 @@ struct AppSettings: Codable {
             dailyFields = defaultDailyFields
         }
         
-        detailCategories = try container.decodeIfPresent([DetailCategoryField].self, forKey: .detailCategories) ?? [
+        // Marine fields with migration: merge saved fields with new defaults
+        let defaultMarineFields: [MarineField] = [
+            MarineField(type: .seaLevelHeight, isEnabled: true),  // Tides - shown first
+            MarineField(type: .waveHeight, isEnabled: true),
+            MarineField(type: .waveDirection, isEnabled: true),
+            MarineField(type: .wavePeriod, isEnabled: true),
+            MarineField(type: .seaSurfaceTemperature, isEnabled: true),
+            MarineField(type: .swellWaveHeight, isEnabled: true),
+            MarineField(type: .oceanCurrentVelocity, isEnabled: true),
+            MarineField(type: .windWaveHeight, isEnabled: false),
+            MarineField(type: .swellWaveDirection, isEnabled: false),
+            MarineField(type: .oceanCurrentDirection, isEnabled: false),
+            MarineField(type: .wavePeakPeriod, isEnabled: false),
+            MarineField(type: .windWaveDirection, isEnabled: false),
+            MarineField(type: .windWavePeriod, isEnabled: false),
+            MarineField(type: .swellWavePeriod, isEnabled: false)
+        ]
+        
+        if let savedMarineFields = try container.decodeIfPresent([MarineField].self, forKey: .marineFields) {
+            // Merge: keep saved fields and add any new ones that don't exist
+            var mergedFields = savedMarineFields
+            let existingTypes = Set(savedMarineFields.map { $0.type })
+            
+            for defaultField in defaultMarineFields {
+                if !existingTypes.contains(defaultField.type) {
+                    // Add new field at the end
+                    mergedFields.append(defaultField)
+                }
+            }
+            
+            marineFields = mergedFields
+        } else {
+            // No saved data, use all defaults
+            marineFields = defaultMarineFields
+        }
+        
+        // Detail categories with migration: merge saved categories with new defaults
+        let defaultCategories: [DetailCategoryField] = [
             DetailCategoryField(category: .weatherAlerts, isEnabled: true),
             DetailCategoryField(category: .todaysForecast, isEnabled: true),
+            DetailCategoryField(category: .astronomy, isEnabled: true),
             DetailCategoryField(category: .currentConditions, isEnabled: true),
             DetailCategoryField(category: .hourlyForecast, isEnabled: true),
             DetailCategoryField(category: .dailyForecast, isEnabled: true),
             DetailCategoryField(category: .historicalWeather, isEnabled: true),
+            DetailCategoryField(category: .marineForecast, isEnabled: true),
             DetailCategoryField(category: .location, isEnabled: true),
+            DetailCategoryField(category: .myData, isEnabled: false)
         ]
+        
+        if let savedCategories = try container.decodeIfPresent([DetailCategoryField].self, forKey: .detailCategories) {
+            // Merge: keep saved categories and add any new ones that don't exist
+            var mergedCategories = savedCategories
+            let existingCategoryTypes = Set(savedCategories.map { $0.category })
+            
+            for defaultCategory in defaultCategories {
+                if !existingCategoryTypes.contains(defaultCategory.category) {
+                    // Insert before My Data so it always stays last
+                    if let myDataIndex = mergedCategories.firstIndex(where: { $0.category == .myData }) {
+                        mergedCategories.insert(defaultCategory, at: myDataIndex)
+                    } else {
+                        mergedCategories.append(defaultCategory)
+                    }
+                }
+            }
+            
+            detailCategories = mergedCategories
+        } else {
+            // No saved data, use all defaults
+            detailCategories = defaultCategories
+        }
+        
+        // My Data fields (user-configured custom data points)
+        myDataFields = try container.decodeIfPresent([MyDataField].self, forKey: .myDataFields) ?? []
         
         // Legacy properties
         showTemperature = try container.decodeIfPresent(Bool.self, forKey: .showTemperature) ?? true
@@ -760,6 +933,9 @@ struct AppSettings: Codable {
         
         try container.encode(showWindGustsInCurrentConditions, forKey: .showWindGustsInCurrentConditions)
         try container.encode(showWindGustsInTodaysForecast, forKey: .showWindGustsInTodaysForecast)
+        try container.encode(showCurrentPrecipitationInCurrentConditions, forKey: .showCurrentPrecipitationInCurrentConditions)
+        try container.encode(showMoonriseInAstronomy, forKey: .showMoonriseInAstronomy)
+        try container.encode(showMoonsetInAstronomy, forKey: .showMoonsetInAstronomy)
         
         try container.encode(showPrecipitationProbabilityInPrecipitation, forKey: .showPrecipitationProbabilityInPrecipitation)
         try container.encode(showPrecipitationProbabilityInTodaysForecast, forKey: .showPrecipitationProbabilityInTodaysForecast)
@@ -783,7 +959,11 @@ struct AppSettings: Codable {
         
         try container.encode(_weatherAroundMeDistance, forKey: ._weatherAroundMeDistance)
         try container.encode(weatherFields, forKey: .weatherFields)
+        try container.encode(hourlyFields, forKey: .hourlyFields)
+        try container.encode(dailyFields, forKey: .dailyFields)
+        try container.encode(marineFields, forKey: .marineFields)
         try container.encode(detailCategories, forKey: .detailCategories)
+        try container.encode(myDataFields, forKey: .myDataFields)
         
         // Legacy properties
         try container.encode(showTemperature, forKey: .showTemperature)

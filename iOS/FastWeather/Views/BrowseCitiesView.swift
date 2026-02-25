@@ -116,6 +116,7 @@ struct USStatesListView: View {
             
             if !selectedState.isEmpty {
                 StateCitiesView(state: selectedState, cityDataService: cityDataService)
+                    .id(selectedState)
             } else {
                 Spacer()
                 VStack(spacing: 12) {
@@ -206,6 +207,7 @@ struct CountriesListView: View {
             
             if !selectedCountry.isEmpty {
                 CountryCitiesView(country: selectedCountry, cityDataService: cityDataService)
+                    .id(selectedCountry)
             } else {
                 Spacer()
                 VStack(spacing: 12) {

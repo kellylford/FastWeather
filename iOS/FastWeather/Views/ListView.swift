@@ -14,6 +14,10 @@ struct ListView: View {
     @Binding var selectedCityForHistory: City?
     @State private var alertSheetItem: AlertSheetItem?  // Stable sheet item to prevent re-presentation loop
     
+    // Date navigation parameters
+    let dateOffset: Int
+    let selectedDate: Date
+    
     var body: some View {
         List {
             ForEach(weatherService.savedCities.indices, id: \.self) { index in
@@ -109,8 +113,8 @@ struct ListView: View {
     
     @ViewBuilder
     private func cityRow(for city: City, at index: Int) -> some View {
-        NavigationLink(destination: CityDetailView(city: city)) {
-            ListRowView(city: city, onAlertTap: { alert in
+        NavigationLink(destination: CityDetailView(city: city, dateOffset: dateOffset, selectedDate: selectedDate)) {
+            ListRowView(city: city, dateOffset: dateOffset, onAlertTap: { alert in
                 // Create stable AlertSheetItem to prevent re-presentation loop
                 alertSheetItem = AlertSheetItem(city: city, alert: alert)
             })
@@ -159,17 +163,19 @@ struct ListRowView: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
     let city: City
+    let dateOffset: Int
     let onAlertTap: (WeatherAlert) -> Void
     
     @State private var alerts: [WeatherAlert] = []
     @State private var hasLoadedAlerts = false
     
     private var weather: WeatherData? {
-        weatherService.weatherCache[city.id]
+        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+        return weatherService.weatherCache[cacheKey]
     }
     
     private var highestSeverityAlert: WeatherAlert? {
-        alerts.max(by: { $0.severity.rawValue < $1.severity.rawValue })
+        alerts.min(by: { $0.severity.sortOrder < $1.severity.sortOrder })
     }
     
     var body: some View {
@@ -178,12 +184,15 @@ struct ListRowView: View {
                 Text(city.displayName)
                     .font(.body)
                     .fontWeight(.medium)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
                 
                 if let weather = weather {
                     Text(buildWeatherSummary(weather))
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .lineLimit(2)
+                        .truncationMode(.tail)
                 } else {
                     Text("Loading...")
                         .font(.caption)
@@ -242,7 +251,21 @@ struct ListRowView: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(buildAccessibilityLabel())
         .animation(.easeInOut(duration: 0.2), value: highestSeverityAlert?.id)
-        .task(id: city.id) {
+        .task(id: "\(city.id)-\(dateOffset)") {
+            // Fetch weather for this city at this date offset if not cached
+            let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+            if weatherService.weatherCache[cacheKey] == nil {
+                await weatherService.fetchWeatherForDate(for: city, dateOffset: dateOffset)
+            }
+            
+            // Load alerts (only for current date)
+            // Clear alerts when viewing past/future days
+            if dateOffset != 0 {
+                alerts = []
+                hasLoadedAlerts = false
+                return
+            }
+            
             guard !hasLoadedAlerts else { return }
             hasLoadedAlerts = true
             
@@ -305,9 +328,14 @@ struct ListRowView: View {
                 }
                 
             case .precipitation:
-                if let precip = weather.current.precipitation, precip > 0 {
+                let snowfall = weather.daily?.snowfallSum?.first.flatMap { $0 } ?? weather.current.snowfall ?? 0
+                let precip = weather.daily?.precipitationSum?.first.flatMap { $0 } ?? weather.current.precipitation ?? 0
+                if snowfall > 0 {
+                    let value = formatSnowfall(snowfall)
+                    parts.append(isDetails ? "Snow: \(value)" : value)
+                } else if precip > 0 {
                     let value = formatPrecipitation(precip)
-                    parts.append(isDetails ? "Precipitation: \(value)" : value)
+                    parts.append(isDetails ? "Rain: \(value)" : value)
                 }
                 
             case .precipitationProbability:
@@ -339,9 +367,10 @@ struct ListRowView: View {
                 }
                 
             case .snowfall:
-                if let snow = weather.current.snowfall, snow > 0 {
-                    let value = formatPrecipitation(snow)
-                    parts.append(isDetails ? "Snowfall: \(value)" : value)
+                let snow = weather.daily?.snowfallSum?.first.flatMap { $0 } ?? weather.current.snowfall ?? 0
+                if snow > 0 {
+                    let value = formatSnowfall(snow)
+                    parts.append(isDetails ? "Snow: \(value)" : value)
                 }
                 
             case .cloudCover:
@@ -470,9 +499,14 @@ struct ListRowView: View {
                 }
                 
             case .precipitation:
-                if let precip = weather.current.precipitation, precip > 0 {
+                let snowfall = weather.daily?.snowfallSum?.first.flatMap { $0 } ?? weather.current.snowfall ?? 0
+                let precip = weather.daily?.precipitationSum?.first.flatMap { $0 } ?? weather.current.precipitation ?? 0
+                if snowfall > 0 {
                     label += ", "
-                    label += isDetails ? "Precipitation: \(formatPrecipitation(precip))" : formatPrecipitation(precip)
+                    label += isDetails ? "Snow: \(formatSnowfall(snowfall))" : formatSnowfall(snowfall)
+                } else if precip > 0 {
+                    label += ", "
+                    label += isDetails ? "Rain: \(formatPrecipitation(precip))" : formatPrecipitation(precip)
                 }
                 
             case .precipitationProbability:
@@ -509,9 +543,10 @@ struct ListRowView: View {
                 }
                 
             case .snowfall:
-                if let snow = weather.current.snowfall, snow > 0 {
+                let snow = weather.daily?.snowfallSum?.first.flatMap { $0 } ?? weather.current.snowfall ?? 0
+                if snow > 0 {
                     label += ", "
-                    label += isDetails ? "Snowfall: \(formatPrecipitation(snow))" : formatPrecipitation(snow)
+                    label += isDetails ? "Snow: \(formatSnowfall(snow))" : formatSnowfall(snow)
                 }
                 
             case .cloudCover:
@@ -614,6 +649,13 @@ struct ListRowView: View {
         return String(format: "%.1f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
     }
     
+    private func formatSnowfall(_ cm: Double) -> String {
+        switch settingsManager.settings.precipitationUnit {
+        case .inches: return String(format: "%.1f in", cm * 0.393701)
+        case .millimeters: return String(format: "%.1f cm", cm)
+        }
+    }
+    
     private func formatPressure(_ hPa: Double) -> String {
         let pressure = settingsManager.settings.pressureUnit.convert(hPa)
         return String(format: "%.1f %@", pressure, settingsManager.settings.pressureUnit.rawValue)
@@ -630,7 +672,11 @@ struct ListRowView: View {
 }
 
 #Preview {
-    ListView(selectedCityForHistory: .constant(nil))
+    ListView(
+        selectedCityForHistory: .constant(nil),
+        dateOffset: 0,
+        selectedDate: Date()
+    )
         .environmentObject(WeatherService())
         .environmentObject(SettingsManager())
 }

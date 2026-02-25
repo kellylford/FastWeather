@@ -9,6 +9,7 @@ import time
 import requests
 import re
 from pathlib import Path
+from country_names import normalize_country
 
 # Load the city names from JavaScript file
 with open('us-cities-data.js', 'r', encoding='utf-8') as f:
@@ -51,10 +52,16 @@ def geocode_city(city_name, state_name):
         if results and len(results) > 0:
             result = results[0]
             address = result.get('address', {})
+            
+            # Normalize country name (handles "USA", "United States of America", etc.)
+            country_code_iso = address.get('country_code', '').upper()
+            native_country = address.get('country', 'United States')
+            normalized_country = normalize_country(native_country, country_code_iso)
+            
             return {
                 'name': city_name,
                 'state': address.get('state', state_name),
-                'country': address.get('country', 'United States'),
+                'country': normalized_country,
                 'lat': float(result['lat']),
                 'lon': float(result['lon'])
             }

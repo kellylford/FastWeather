@@ -13,6 +13,7 @@ struct SettingsView: View {
     @StateObject private var featureFlags = FeatureFlags.shared
     @State private var showingResetAlert = false
     @State private var showingDeveloperSettings = false
+    @State private var showingMyDataConfig = false
     
     // Get app version and build number from Info.plist
     private var appVersion: String {
@@ -247,6 +248,11 @@ struct SettingsView: View {
                        footer: Text("Toggle which sections appear in the current weather detail view. Use VoiceOver actions to reorder sections.")) {
                     ForEach(settingsManager.settings.detailCategories.indices, id: \.self) { index in
                         let category = settingsManager.settings.detailCategories[index]
+                        
+                        // Hide My Data category if feature flag is disabled
+                        if category.category == .myData && !featureFlags.myDataEnabled {
+                            EmptyView()
+                        } else {
                         VStack(alignment: .leading, spacing: 8) {
                             // Section name as heading with move actions
                             HStack {
@@ -295,6 +301,7 @@ struct SettingsView: View {
                             }
                         }
                         .padding(.vertical, 8)
+                        }
                     }
                     .onMove { from, to in
                         settingsManager.settings.detailCategories.move(fromOffsets: from, toOffset: to)
@@ -385,6 +392,11 @@ struct SettingsView: View {
             .sheet(isPresented: $showingDeveloperSettings) {
                 DeveloperSettingsView()
             }
+            .sheet(isPresented: $showingMyDataConfig) {
+                MyDataConfigView()
+                    .environmentObject(settingsManager)
+                    .environmentObject(weatherService)
+            }
         }
         .navigationViewStyle(.stack)
     }
@@ -438,10 +450,16 @@ struct SettingsView: View {
             return "24-hour detailed forecast with customizable data fields"
         case .dailyForecast:
             return "16-day forecast with customizable data fields"
+        case .marineForecast:
+            return "Wave heights, ocean currents, sea temperature, and tides"
         case .historicalWeather:
             return "Past year weather comparisons"
         case .location:
             return "Coordinates, elevation, and location details"
+        case .myData:
+            return "Your custom data points from the Open-Meteo API"
+        case .astronomy:
+            return "Moon phase, illumination, moonrise, and moonset"
         }
     }
     
@@ -477,6 +495,12 @@ struct SettingsView: View {
                         settingsManager.saveSettings()
                     }
                     .accessibilityLabel("UV index in current conditions")
+                Toggle("Current Precipitation Rate", isOn: $settingsManager.settings.showCurrentPrecipitationInCurrentConditions)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.showCurrentPrecipitationInCurrentConditions) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Current precipitation rate in current conditions")
                 Toggle("Dew Point", isOn: $settingsManager.settings.showDewPoint)
                     .font(.caption)
                     .onChange(of: settingsManager.settings.showDewPoint) {
@@ -588,6 +612,31 @@ struct SettingsView: View {
                     }
                 }
                 
+            case .marineForecast:
+                Text("Configure marine forecast data (wave heights, currents, sea temperature)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding(.bottom, 4)
+                
+                ForEach(settingsManager.settings.marineFields.indices, id: \.self) { index in
+                    let field = settingsManager.settings.marineFields[index]
+                    Toggle(field.type.rawValue, isOn: Binding(
+                        get: { settingsManager.settings.marineFields[index].isEnabled },
+                        set: { newValue in
+                            settingsManager.settings.marineFields[index].isEnabled = newValue
+                            settingsManager.saveSettings()
+                        }
+                    ))
+                    .font(.caption)
+                    .accessibilityLabel("\(field.type.rawValue) in marine forecast")
+                    .accessibilityAction(named: "Move Up") {
+                        moveMarineFieldUp(at: index)
+                    }
+                    .accessibilityAction(named: "Move Down") {
+                        moveMarineFieldDown(at: index)
+                    }
+                }
+                
             case .historicalWeather:
                 Text("• Past year comparisons")
                     .font(.caption)
@@ -616,6 +665,89 @@ struct SettingsView: View {
                 Text("• Coordinates, elevation")
                     .font(.caption)
                     .foregroundColor(.secondary)
+
+            case .astronomy:
+                Text("• Moon phase and illumination percentage")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Toggle("Moonrise", isOn: $settingsManager.settings.showMoonriseInAstronomy)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.showMoonriseInAstronomy) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Moonrise time in astronomy section")
+                Toggle("Moonset", isOn: $settingsManager.settings.showMoonsetInAstronomy)
+                    .font(.caption)
+                    .onChange(of: settingsManager.settings.showMoonsetInAstronomy) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Moonset time in astronomy section")
+                
+            case .myData:
+                if settingsManager.settings.myDataFields.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("No data points configured.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Button(action: {
+                            showingMyDataConfig = true
+                        }) {
+                            Label("Choose Fields", systemImage: "plus.circle")
+                                .font(.caption)
+                        }
+                        .accessibilityLabel("Choose My Data fields")
+                        .accessibilityHint("Opens configuration to select which weather data points to display")
+                    }
+                } else {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Configure which of your selected data points appear")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        ForEach(settingsManager.settings.myDataFields.indices, id: \.self) { index in
+                            let field = settingsManager.settings.myDataFields[index]
+                            Toggle(field.parameter.displayName, isOn: Binding(
+                                get: { 
+                                    guard index < settingsManager.settings.myDataFields.count else { return false }
+                                    return settingsManager.settings.myDataFields[index].isEnabled 
+                                },
+                                set: { newValue in
+                                    guard index < settingsManager.settings.myDataFields.count else { return }
+                                    settingsManager.settings.myDataFields[index].isEnabled = newValue
+                                    settingsManager.saveSettings()
+                                }
+                            ))
+                            .font(.caption)
+                            .accessibilityLabel("\(field.parameter.displayName) in My Data")
+                            .accessibilityAction(named: "Move Up") {
+                                moveMyDataFieldUp(at: index)
+                            }
+                            .accessibilityAction(named: "Move Down") {
+                                moveMyDataFieldDown(at: index)
+                            }
+                            .accessibilityAction(named: "Move to Top") {
+                                moveMyDataFieldToTop(at: index)
+                            }
+                            .accessibilityAction(named: "Move to Bottom") {
+                                moveMyDataFieldToBottom(at: index)
+                            }
+                        }
+                        .onMove { from, to in
+                            settingsManager.settings.myDataFields.move(fromOffsets: from, toOffset: to)
+                            settingsManager.saveSettings()
+                        }
+                        
+                        Button(action: {
+                            showingMyDataConfig = true
+                        }) {
+                            Label("Choose Fields", systemImage: "slider.horizontal.3")
+                                .font(.caption)
+                        }
+                        .accessibilityLabel("Choose My Data fields")
+                        .accessibilityHint("Opens configuration to add or remove weather data points")
+                    }
+                }
             }
         }
     }
@@ -680,6 +812,58 @@ struct SettingsView: View {
         settingsManager.settings.dailyFields.move(fromOffsets: IndexSet(integer: index), toOffset: index + 2)
         settingsManager.saveSettings()
         UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) below \(belowFieldName)")
+    }
+    
+    private func moveMarineFieldUp(at index: Int) {
+        guard index > 0 else { return }
+        let fieldName = settingsManager.settings.marineFields[index].type.rawValue
+        let aboveFieldName = settingsManager.settings.marineFields[index - 1].type.rawValue
+        settingsManager.settings.marineFields.move(fromOffsets: IndexSet(integer: index), toOffset: index - 1)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) above \(aboveFieldName)")
+    }
+    
+    private func moveMarineFieldDown(at index: Int) {
+        guard index < settingsManager.settings.marineFields.count - 1 else { return }
+        let fieldName = settingsManager.settings.marineFields[index].type.rawValue
+        let belowFieldName = settingsManager.settings.marineFields[index + 1].type.rawValue
+        settingsManager.settings.marineFields.move(fromOffsets: IndexSet(integer: index), toOffset: index + 2)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) below \(belowFieldName)")
+    }
+    
+    private func moveMyDataFieldUp(at index: Int) {
+        guard index > 0 else { return }
+        let fieldName = settingsManager.settings.myDataFields[index].parameter.displayName
+        let aboveFieldName = settingsManager.settings.myDataFields[index - 1].parameter.displayName
+        settingsManager.settings.myDataFields.move(fromOffsets: IndexSet(integer: index), toOffset: index - 1)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) above \(aboveFieldName)")
+    }
+    
+    private func moveMyDataFieldDown(at index: Int) {
+        guard index < settingsManager.settings.myDataFields.count - 1 else { return }
+        let fieldName = settingsManager.settings.myDataFields[index].parameter.displayName
+        let belowFieldName = settingsManager.settings.myDataFields[index + 1].parameter.displayName
+        settingsManager.settings.myDataFields.move(fromOffsets: IndexSet(integer: index), toOffset: index + 2)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) below \(belowFieldName)")
+    }
+    
+    private func moveMyDataFieldToTop(at index: Int) {
+        guard index > 0 else { return }
+        let fieldName = settingsManager.settings.myDataFields[index].parameter.displayName
+        settingsManager.settings.myDataFields.move(fromOffsets: IndexSet(integer: index), toOffset: 0)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) to top")
+    }
+    
+    private func moveMyDataFieldToBottom(at index: Int) {
+        guard index < settingsManager.settings.myDataFields.count - 1 else { return }
+        let fieldName = settingsManager.settings.myDataFields[index].parameter.displayName
+        settingsManager.settings.myDataFields.move(fromOffsets: IndexSet(integer: index), toOffset: settingsManager.settings.myDataFields.count)
+        settingsManager.saveSettings()
+        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) to bottom")
     }
 }
 
