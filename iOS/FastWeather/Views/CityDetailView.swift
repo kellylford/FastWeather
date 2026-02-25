@@ -885,15 +885,30 @@ struct DetailRow: View {
     let value: String
     
     var body: some View {
-        HStack {
-            Text(label)
-                .foregroundColor(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            Spacer()
-            Text(value)
-                .fontWeight(.medium)
-                .fixedSize(horizontal: false, vertical: true)
-                .multilineTextAlignment(.trailing)
+        // ViewThatFits tries the inline HStack first. The value Text uses
+        // .fixedSize(horizontal: true) so it expresses its full natural width,
+        // which lets ViewThatFits correctly detect when label + value exceed
+        // the available width and switch to the stacked fallback instead of
+        // silently truncating or trailing-wrapping the value.
+        ViewThatFits(in: .horizontal) {
+            // Preferred: single-row inline layout
+            HStack(alignment: .firstTextBaseline) {
+                Text(label)
+                    .foregroundColor(.secondary)
+                Spacer(minLength: 16)
+                Text(value)
+                    .fontWeight(.medium)
+                    .multilineTextAlignment(.trailing)
+                    .fixedSize(horizontal: true, vertical: false)
+            }
+            
+            // Fallback: stacked layout when value is too long for inline
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .foregroundColor(.secondary)
+                Text(value)
+                    .fontWeight(.medium)
+            }
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(label): \(value)")
