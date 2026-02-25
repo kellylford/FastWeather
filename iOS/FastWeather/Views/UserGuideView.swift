@@ -305,14 +305,168 @@ struct UserGuideView: View {
                     Text("**Weather Condition Icons:**")
                         .fontWeight(.semibold)
                         .padding(.top, 8)
-                    BulletPoint("**Sun** - Clear sky (VoiceOver: condition name)")
-                    BulletPoint("**Cloud with sun** - Partly cloudy")
-                    BulletPoint("**Cloud** - Overcast")
-                    BulletPoint("**Cloud with rain** - Rain")
-                    BulletPoint("**Cloud with snow** - Snow")
-                    BulletPoint("**Cloud with lightning** - Thunderstorm")
-                    BulletPoint("**Fog cloud** - Fog or mist")
-                    Text("VoiceOver announces: \"Weather condition: [description]\"")
+                    
+                    // Clear / Mainly clear
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "sun.max.fill")
+                            .font(.title2)
+                            .foregroundColor(.yellow)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Clear sky / Mainly clear")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Clear sky\" or \"Mainly clear\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    // Partly cloudy
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "cloud.sun.fill")
+                            .font(.title2)
+                            .foregroundColor(.orange)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Partly cloudy")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Partly cloudy\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    // Overcast
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "cloud.fill")
+                            .font(.title2)
+                            .foregroundColor(.gray)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Overcast")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Overcast\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    // Fog / Rime fog
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "cloud.fog.fill")
+                            .font(.title2)
+                            .foregroundColor(.gray)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Fog / Depositing rime fog")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Fog\" or \"Depositing rime fog\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    // Drizzle
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "cloud.drizzle.fill")
+                            .font(.title2)
+                            .foregroundColor(.blue)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Light / Moderate / Dense drizzle")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Light drizzle\", \"Moderate drizzle\", or \"Dense drizzle\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    // Freezing drizzle / Freezing rain
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "cloud.sleet.fill")
+                            .font(.title2)
+                            .foregroundColor(.cyan)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Freezing drizzle / Freezing rain")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Light freezing drizzle\", \"Dense freezing drizzle\", \"Light freezing rain\", or \"Heavy freezing rain\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    // Rain
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "cloud.rain.fill")
+                            .font(.title2)
+                            .foregroundColor(.blue)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Slight / Moderate / Heavy rain")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Slight rain\", \"Moderate rain\", or \"Heavy rain\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    // Snow fall / Snow grains / Snow showers
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "cloud.snow.fill")
+                            .font(.title2)
+                            .foregroundColor(.cyan)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Snow fall / Snow grains / Snow showers")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Slight snow fall\", \"Moderate snow fall\", \"Heavy snow fall\", \"Snow grains\", \"Slight snow showers\", or \"Heavy snow showers\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    // Rain showers
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "cloud.heavyrain.fill")
+                            .font(.title2)
+                            .foregroundColor(.indigo)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Slight / Moderate / Violent rain showers")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Slight rain showers\", \"Moderate rain showers\", or \"Violent rain showers\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    // Thunderstorm
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "cloud.bolt.rain.fill")
+                            .font(.title2)
+                            .foregroundColor(.purple)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Thunderstorm / Thunderstorm with hail")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Thunderstorm\", \"Thunderstorm with slight hail\", or \"Thunderstorm with heavy hail\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    Text("VoiceOver announces the exact weather condition by name.")
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .padding(.leading, 16)
