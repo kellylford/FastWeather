@@ -602,7 +602,7 @@ struct CityDetailView: View {
                         // Temperature and condition
                         if let weatherCode = weather.current.weatherCodeEnum {
                             Image(systemName: weatherCode.systemImageName)
-                                .font(.system(size: 80))
+                                .font(.system(size: 60))
                                 .foregroundColor(.blue)
                                 .accessibilityHidden(true)
                             
@@ -1349,7 +1349,6 @@ struct DailyForecastRow: View {
     let daily: WeatherData.DailyWeather
     let index: Int
     @ObservedObject var settingsManager: SettingsManager
-    @StateObject private var featureFlags = FeatureFlags.shared
     
     private var sunrise: String? {
         daily.sunrise?[index]
@@ -1393,56 +1392,85 @@ struct DailyForecastRow: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 12) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(dayName)
-                        .font(.body)
-                        .lineLimit(2)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .frame(minWidth: 120, maxWidth: 200, alignment: .leading)
-                .accessibilityHidden(true)
+        VStack(alignment: .leading, spacing: 6) {
+            
+            // ── Row 1: Day label (greedy width) + temperatures (pinned right) ──────────
+            // Day name gets all remaining space after the temperatures, so it never
+            // gets squeezed regardless of screen size or how many other fields are shown.
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(dayName)
+                    .font(.body)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityHidden(true)
                 
-                // Conditions icon - always show if available
-                if let weatherCode = weatherCodeEnum {
-                    Image(systemName: weatherCode.systemImageName)
-                        .font(.title3)
-                        .foregroundColor(.blue)
-                        .frame(width: 30, alignment: .center)
-                        .accessibilityHidden(true)
-                }
-                
-                Spacer()
-                
-                // Dynamic fields based on settings (compact inline display)
-                ForEach(settingsManager.settings.dailyFields.filter { $0.isEnabled }, id: \.id) { field in
-                    if let content = getInlineFieldContent(for: field.type) {
-                        content
-                            .accessibilityHidden(true)
-                    }
-                }
-                
-                // Temperatures at the end
-                if isFieldEnabled(.temperatureMax) && isFieldEnabled(.temperatureMin),
-                   let high = high, let low = low {
+                // Temperatures are always .fixedSize so they never wrap or clip
+                if isFieldEnabled(.temperatureMin) && isFieldEnabled(.temperatureMax),
+                   let low = low, let high = high {
                     HStack(spacing: 8) {
                         Text(formatTemperature(low))
-                            .font(.body)
                             .foregroundColor(.secondary)
-                        
                         Text(formatTemperature(high))
-                            .font(.body)
                             .fontWeight(.semibold)
                     }
-                    // Pin temperature column to its natural width when layout fix is enabled,
-                    // preventing clipping or wrapping on narrow screens (e.g. iPhone 13 Pro).
-                    .fixedSize(horizontal: featureFlags.forecastLayoutFix, vertical: false)
+                    .font(.body)
+                    .fixedSize(horizontal: true, vertical: false)
                     .accessibilityHidden(true)
+                } else if isFieldEnabled(.temperatureMax), let high = high {
+                    Text(formatTemperature(high))
+                        .font(.body)
+                        .fontWeight(.semibold)
+                        .fixedSize(horizontal: true, vertical: false)
+                        .accessibilityHidden(true)
+                } else if isFieldEnabled(.temperatureMin), let low = low {
+                    Text(formatTemperature(low))
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: true, vertical: false)
+                        .accessibilityHidden(true)
                 }
             }
             
-            // Additional detail fields (shown below main row)
+            // ── Row 2: Condition icon + description + inline precipitation badges ────
+            // This row has the full screen width available, so condition text can use
+            // as much space as needed and truncates gracefully only if the user has
+            // enabled many inline badges.
+            let hasInlineContent: Bool = weatherCodeEnum != nil ||
+                settingsManager.settings.dailyFields
+                    .filter { $0.isEnabled }
+                    .contains { getInlineFieldContent(for: $0.type) != nil }
+            
+            if hasInlineContent {
+                HStack(alignment: .center, spacing: 8) {
+                    if let weatherCode = weatherCodeEnum {
+                        Image(systemName: weatherCode.systemImageName)
+                            .font(.subheadline)
+                            .foregroundColor(.blue)
+                            .accessibilityHidden(true)
+                        
+                        // Show condition description when the conditions field is enabled
+                        if isFieldEnabled(.conditions) {
+                            Text(weatherCode.description)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                                .accessibilityHidden(true)
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    // Inline precipitation / accumulation badges
+                    ForEach(settingsManager.settings.dailyFields.filter { $0.isEnabled }, id: \.id) { field in
+                        if let content = getInlineFieldContent(for: field.type) {
+                            content
+                                .accessibilityHidden(true)
+                        }
+                    }
+                }
+            }
+            
+            // ── Row 3: Secondary detail fields (UV, daylight, sunshine, max wind) ────
             if hasAdditionalDetails() {
                 HStack(spacing: 12) {
                     ForEach(settingsManager.settings.dailyFields.filter { $0.isEnabled }, id: \.id) { field in

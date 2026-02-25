@@ -55,15 +55,6 @@ class FeatureFlags: ObservableObject {
         }
     }
     
-    /// Fix for 16-day forecast row layout clipping on narrower screens (e.g. iPhone 13 Pro).
-    /// Applies .fixedSize to the temperature column so high/low never wrap or get clipped.
-    /// Safe to enable without affecting layout on larger-screen devices.
-    @Published var forecastLayoutFix: Bool {
-        didSet {
-            UserDefaults.standard.set(forecastLayoutFix, forKey: "feature_forecast_layout_fix")
-        }
-    }
-    
     // MARK: - Initialization
     
     private init() {
@@ -73,7 +64,6 @@ class FeatureFlags: ObservableObject {
         self.userGuideEnabled = UserDefaults.standard.bool(forKey: "feature_user_guide_enabled")
         self.weatherKitAlertsEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_alerts_enabled")
         self.myDataEnabled = UserDefaults.standard.bool(forKey: "feature_my_data_enabled")
-        self.forecastLayoutFix = UserDefaults.standard.bool(forKey: "feature_forecast_layout_fix")
         
         // Default values (if first launch or not set)
         // All features enabled by default for production
@@ -92,9 +82,6 @@ class FeatureFlags: ObservableObject {
         if !UserDefaults.standard.contains(key: "feature_my_data_enabled") {
             self.myDataEnabled = true  // Enabled by default
         }
-        if !UserDefaults.standard.contains(key: "feature_forecast_layout_fix") {
-            self.forecastLayoutFix = false  // Off by default — enable for narrow-screen testing
-        }
     }
     
     // MARK: - Helper Methods
@@ -106,7 +93,6 @@ class FeatureFlags: ObservableObject {
         userGuideEnabled = true
         weatherKitAlertsEnabled = true  // Default: enabled
         myDataEnabled = true  // Default: enabled
-        forecastLayoutFix = false  // Default: off
         print("🔧 Feature flags reset to defaults")
     }
     
