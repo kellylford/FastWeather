@@ -49,3 +49,7 @@ package-lock.json
 
 # Web test files
 webapp/test-role-fix.html
+/.github/agents
+/.github
+.github/copilot-instructions.md
+.github/copilot-instructions.md
