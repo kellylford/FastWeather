@@ -5782,11 +5782,137 @@
   ],
   "Malaysia": [
     {
-      "name": "Kuala Lumpur",
-      "state": "Kuala Lumpur",
+      "name": "Alor Gajah",
+      "state": "Melaka",
       "country": "Malaysia",
-      "lat": 3.1516964,
-      "lon": 101.6942371
+      "lat": 2.3803,
+      "lon": 102.2061
+    },
+    {
+      "name": "Alor Setar",
+      "state": "Kedah",
+      "country": "Malaysia",
+      "lat": 6.1231908,
+      "lon": 100.3683962
+    },
+    {
+      "name": "Ampang",
+      "state": "Selangor",
+      "country": "Malaysia",
+      "lat": 3.1474,
+      "lon": 101.7626
+    },
+    {
+      "name": "Bahau",
+      "state": "Negeri Sembilan",
+      "country": "Malaysia",
+      "lat": 2.8143,
+      "lon": 102.3994
+    },
+    {
+      "name": "Balik Pulau",
+      "state": "Pulau Pinang",
+      "country": "Malaysia",
+      "lat": 5.3467,
+      "lon": 100.233
+    },
+    {
+      "name": "Baling",
+      "state": "Kedah",
+      "country": "Malaysia",
+      "lat": 5.6789,
+      "lon": 100.9215
+    },
+    {
+      "name": "Banting",
+      "state": "Selangor",
+      "country": "Malaysia",
+      "lat": 2.8164,
+      "lon": 101.5031
+    },
+    {
+      "name": "Batu Ferringhi",
+      "state": "Pulau Pinang",
+      "country": "Malaysia",
+      "lat": 5.468,
+      "lon": 100.4441
+    },
+    {
+      "name": "Batu Gajah",
+      "state": "Perak",
+      "country": "Malaysia",
+      "lat": 4.4692,
+      "lon": 101.0315
+    },
+    {
+      "name": "Batu Pahat",
+      "state": "Johor",
+      "country": "Malaysia",
+      "lat": 1.8547,
+      "lon": 102.9325
+    },
+    {
+      "name": "Beaufort",
+      "state": "Sabah",
+      "country": "Malaysia",
+      "lat": 5.3567,
+      "lon": 115.7526
+    },
+    {
+      "name": "Bentong",
+      "state": "Pahang",
+      "country": "Malaysia",
+      "lat": 3.5155,
+      "lon": 101.909
+    },
+    {
+      "name": "Besut",
+      "state": "Terengganu",
+      "country": "Malaysia",
+      "lat": 5.7024,
+      "lon": 102.5646
+    },
+    {
+      "name": "Betong",
+      "state": "Sarawak",
+      "country": "Malaysia",
+      "lat": 1.4003,
+      "lon": 111.5151
+    },
+    {
+      "name": "Bintulu",
+      "state": "Sarawak",
+      "country": "Malaysia",
+      "lat": 3.1874261,
+      "lon": 113.0472803
+    },
+    {
+      "name": "Bukit Mertajam",
+      "state": "Pulau Pinang",
+      "country": "Malaysia",
+      "lat": 5.3638,
+      "lon": 100.4584
+    },
+    {
+      "name": "Butterworth",
+      "state": "Pulau Pinang",
+      "country": "Malaysia",
+      "lat": 5.3995,
+      "lon": 100.3643
+    },
+    {
+      "name": "Cameron Highlands",
+      "state": "Pahang",
+      "country": "Malaysia",
+      "lat": 4.4696,
+      "lon": 101.3816
+    },
+    {
+      "name": "Dungun",
+      "state": "Terengganu",
+      "country": "Malaysia",
+      "lat": 4.7588,
+      "lon": 103.4173
     },
     {
       "name": "George Town",
@@ -5803,18 +5929,25 @@
       "lon": 101.0900236
     },
     {
-      "name": "Shah Alam",
-      "state": "Selangor",
+      "name": "Iskandar Puteri",
+      "state": "Johor",
       "country": "Malaysia",
-      "lat": 3.0739429,
-      "lon": 101.5185278
+      "lat": 1.4522711,
+      "lon": 103.6144729
     },
     {
-      "name": "Petaling Jaya",
-      "state": "Selangor",
+      "name": "Jasin",
+      "state": "Melaka",
       "country": "Malaysia",
-      "lat": 3.0988792,
-      "lon": 101.6454202
+      "lat": 2.3027,
+      "lon": 102.4368
+    },
+    {
+      "name": "Jerantut",
+      "state": "Pahang",
+      "country": "Malaysia",
+      "lat": 3.9368,
+      "lon": 102.3634
     },
     {
       "name": "Johor Bahru",
@@ -5824,32 +5957,74 @@
       "lon": 103.7649059
     },
     {
-      "name": "Malacca City",
-      "state": "Melaka",
+      "name": "Kajang",
+      "state": "Selangor",
       "country": "Malaysia",
-      "lat": 2.1942647,
-      "lon": 102.2486651
+      "lat": 2.9934,
+      "lon": 101.7876
     },
     {
-      "name": "Alor Setar",
-      "state": "Kedah",
+      "name": "Kampar",
+      "state": "Perak",
       "country": "Malaysia",
-      "lat": 6.1231908,
-      "lon": 100.3683962
+      "lat": 4.3068,
+      "lon": 101.1473
     },
     {
-      "name": "Seremban",
-      "state": "Negeri Sembilan",
+      "name": "Kangar",
+      "state": "Perlis",
       "country": "Malaysia",
-      "lat": 2.723099,
-      "lon": 101.9400601
+      "lat": 6.4414,
+      "lon": 100.1986
     },
     {
-      "name": "Kuching",
+      "name": "Kapit",
       "state": "Sarawak",
       "country": "Malaysia",
-      "lat": 1.5597561,
-      "lon": 110.345397
+      "lat": 2.0184,
+      "lon": 112.9311
+    },
+    {
+      "name": "Kemaman",
+      "state": "Terengganu",
+      "country": "Malaysia",
+      "lat": 4.2344,
+      "lon": 103.4191
+    },
+    {
+      "name": "Keningau",
+      "state": "Sabah",
+      "country": "Malaysia",
+      "lat": 5.3374,
+      "lon": 116.166
+    },
+    {
+      "name": "Klang",
+      "state": "Selangor",
+      "country": "Malaysia",
+      "lat": 3.0448394,
+      "lon": 101.4447363
+    },
+    {
+      "name": "Kluang",
+      "state": "Johor",
+      "country": "Malaysia",
+      "lat": 2.0228,
+      "lon": 103.3176
+    },
+    {
+      "name": "Kota Belud",
+      "state": "Sabah",
+      "country": "Malaysia",
+      "lat": 6.346,
+      "lon": 116.4318
+    },
+    {
+      "name": "Kota Bharu",
+      "state": "Kelantan",
+      "country": "Malaysia",
+      "lat": 6.1247911,
+      "lon": 102.2378065
     },
     {
       "name": "Kota Kinabalu",
@@ -5857,6 +6032,48 @@
       "country": "Malaysia",
       "lat": 5.9780066,
       "lon": 116.0728988
+    },
+    {
+      "name": "Kota Samarahan",
+      "state": "Sarawak",
+      "country": "Malaysia",
+      "lat": 1.4557,
+      "lon": 110.4636
+    },
+    {
+      "name": "Kuala Kangsar",
+      "state": "Perak",
+      "country": "Malaysia",
+      "lat": 4.774,
+      "lon": 100.9382
+    },
+    {
+      "name": "Kuala Krai",
+      "state": "Kelantan",
+      "country": "Malaysia",
+      "lat": 5.5319,
+      "lon": 102.1999
+    },
+    {
+      "name": "Kuala Lumpur",
+      "state": "Kuala Lumpur",
+      "country": "Malaysia",
+      "lat": 3.1516964,
+      "lon": 101.6942371
+    },
+    {
+      "name": "Kuala Pilah",
+      "state": "Negeri Sembilan",
+      "country": "Malaysia",
+      "lat": 2.7393,
+      "lon": 102.2476
+    },
+    {
+      "name": "Kuala Selangor",
+      "state": "Selangor",
+      "country": "Malaysia",
+      "lat": 3.3337,
+      "lon": 101.2583
     },
     {
       "name": "Kuala Terengganu",
@@ -5873,39 +6090,109 @@
       "lon": 103.3219191
     },
     {
-      "name": "Klang",
-      "state": "Selangor",
-      "country": "Malaysia",
-      "lat": 3.0448394,
-      "lon": 101.4447363
-    },
-    {
-      "name": "Iskandar Puteri",
-      "state": "Johor",
-      "country": "Malaysia",
-      "lat": 1.4522711,
-      "lon": 103.6144729
-    },
-    {
-      "name": "Sandakan",
-      "state": "Sabah",
-      "country": "Malaysia",
-      "lat": 5.8391274,
-      "lon": 118.1158598
-    },
-    {
-      "name": "Taiping",
-      "state": "Perak",
-      "country": "Malaysia",
-      "lat": 4.8546772,
-      "lon": 100.7438831
-    },
-    {
-      "name": "Bintulu",
+      "name": "Kuching",
       "state": "Sarawak",
       "country": "Malaysia",
-      "lat": 3.1874261,
-      "lon": 113.0472803
+      "lat": 1.5597561,
+      "lon": 110.345397
+    },
+    {
+      "name": "Kudat",
+      "state": "Sabah",
+      "country": "Malaysia",
+      "lat": 6.8882,
+      "lon": 116.8461
+    },
+    {
+      "name": "Kulai",
+      "state": "Johor",
+      "country": "Malaysia",
+      "lat": 1.6633,
+      "lon": 103.5967
+    },
+    {
+      "name": "Kulim",
+      "state": "Kedah",
+      "country": "Malaysia",
+      "lat": 5.3694,
+      "lon": 100.5618
+    },
+    {
+      "name": "Labuan",
+      "state": "Labuan",
+      "country": "Malaysia",
+      "lat": 5.2831,
+      "lon": 115.2308
+    },
+    {
+      "name": "Lahad Datu",
+      "state": "Sabah",
+      "country": "Malaysia",
+      "lat": 5.0282,
+      "lon": 118.3295
+    },
+    {
+      "name": "Langkawi",
+      "state": "Kedah",
+      "country": "Malaysia",
+      "lat": 6.35,
+      "lon": 99.8004
+    },
+    {
+      "name": "Lawas",
+      "state": "Sarawak",
+      "country": "Malaysia",
+      "lat": 4.8531,
+      "lon": 115.4056
+    },
+    {
+      "name": "Limbang",
+      "state": "Sarawak",
+      "country": "Malaysia",
+      "lat": 4.7477,
+      "lon": 115.0116
+    },
+    {
+      "name": "Lumut",
+      "state": "Perak",
+      "country": "Malaysia",
+      "lat": 4.2317,
+      "lon": 100.6283
+    },
+    {
+      "name": "Machang",
+      "state": "Kelantan",
+      "country": "Malaysia",
+      "lat": 5.7706,
+      "lon": 102.2211
+    },
+    {
+      "name": "Malacca City",
+      "state": "Melaka",
+      "country": "Malaysia",
+      "lat": 2.1942647,
+      "lon": 102.2486651
+    },
+    {
+      "name": "Marang",
+      "state": "Terengganu",
+      "country": "Malaysia",
+      "lat": 5.2009,
+      "lon": 103.215
+    },
+    {
+      "name": "Marudi",
+      "state": "Sarawak",
+      "country": "Malaysia",
+      "lat": 4.1836,
+      "lon": 114.3254
+    },
+    {
+      "name": "Mersing",
+      "state": "Johor",
+      "country": "Malaysia",
+      "lat": 2.4361,
+      "lon": 103.8394
     },
     {
       "name": "Miri",
@@ -5915,11 +6202,207 @@
       "lon": 113.9880199
     },
     {
+      "name": "Muar",
+      "state": "Johor",
+      "country": "Malaysia",
+      "lat": 2.0442,
+      "lon": 102.5689
+    },
+    {
+      "name": "Mukah",
+      "state": "Sarawak",
+      "country": "Malaysia",
+      "lat": 2.9013,
+      "lon": 112.0922
+    },
+    {
+      "name": "Nilai",
+      "state": "Negeri Sembilan",
+      "country": "Malaysia",
+      "lat": 2.8127,
+      "lon": 101.797
+    },
+    {
+      "name": "Padang Besar",
+      "state": "Perlis",
+      "country": "Malaysia",
+      "lat": 6.6491,
+      "lon": 100.3103
+    },
+    {
+      "name": "Papar",
+      "state": "Sabah",
+      "country": "Malaysia",
+      "lat": 5.734,
+      "lon": 115.9394
+    },
+    {
+      "name": "Parit Buntar",
+      "state": "Perak",
+      "country": "Malaysia",
+      "lat": 5.1162,
+      "lon": 100.4997
+    },
+    {
+      "name": "Pasir Gudang",
+      "state": "Johor",
+      "country": "Malaysia",
+      "lat": 1.474,
+      "lon": 103.9021
+    },
+    {
+      "name": "Pasir Mas",
+      "state": "Kelantan",
+      "country": "Malaysia",
+      "lat": 6.0412,
+      "lon": 102.1381
+    },
+    {
+      "name": "Pekan",
+      "state": "Pahang",
+      "country": "Malaysia",
+      "lat": 3.4864,
+      "lon": 103.3899
+    },
+    {
+      "name": "Penampang",
+      "state": "Sabah",
+      "country": "Malaysia",
+      "lat": 5.9266,
+      "lon": 116.0929
+    },
+    {
+      "name": "Petaling Jaya",
+      "state": "Selangor",
+      "country": "Malaysia",
+      "lat": 3.0988792,
+      "lon": 101.6454202
+    },
+    {
+      "name": "Port Dickson",
+      "state": "Negeri Sembilan",
+      "country": "Malaysia",
+      "lat": 2.5226,
+      "lon": 101.7972
+    },
+    {
+      "name": "Puchong",
+      "state": "Selangor",
+      "country": "Malaysia",
+      "lat": 3.025,
+      "lon": 101.6238
+    },
+    {
+      "name": "Putrajaya",
+      "state": "Putrajaya",
+      "country": "Malaysia",
+      "lat": 2.9264,
+      "lon": 101.6964
+    },
+    {
+      "name": "Ranau",
+      "state": "Sabah",
+      "country": "Malaysia",
+      "lat": 5.9597,
+      "lon": 116.6698
+    },
+    {
+      "name": "Raub",
+      "state": "Pahang",
+      "country": "Malaysia",
+      "lat": 3.7985,
+      "lon": 101.8593
+    },
+    {
+      "name": "Rawang",
+      "state": "Selangor",
+      "country": "Malaysia",
+      "lat": 3.3181,
+      "lon": 101.5749
+    },
+    {
+      "name": "Sandakan",
+      "state": "Sabah",
+      "country": "Malaysia",
+      "lat": 5.8391274,
+      "lon": 118.1158598
+    },
+    {
+      "name": "Sarikei",
+      "state": "Sarawak",
+      "country": "Malaysia",
+      "lat": 2.1271,
+      "lon": 111.5154
+    },
+    {
+      "name": "Segamat",
+      "state": "Johor",
+      "country": "Malaysia",
+      "lat": 2.5162,
+      "lon": 102.8146
+    },
+    {
+      "name": "Semenyih",
+      "state": "Selangor",
+      "country": "Malaysia",
+      "lat": 2.9424,
+      "lon": 101.8436
+    },
+    {
+      "name": "Semporna",
+      "state": "Sabah",
+      "country": "Malaysia",
+      "lat": 4.4823,
+      "lon": 118.6092
+    },
+    {
+      "name": "Sepang",
+      "state": "Selangor",
+      "country": "Malaysia",
+      "lat": 2.735,
+      "lon": 101.7203
+    },
+    {
+      "name": "Seremban",
+      "state": "Negeri Sembilan",
+      "country": "Malaysia",
+      "lat": 2.723099,
+      "lon": 101.9400601
+    },
+    {
+      "name": "Serian",
+      "state": "Sarawak",
+      "country": "Malaysia",
+      "lat": 1.1737,
+      "lon": 110.5655
+    },
+    {
+      "name": "Shah Alam",
+      "state": "Selangor",
+      "country": "Malaysia",
+      "lat": 3.0739429,
+      "lon": 101.5185278
+    },
+    {
       "name": "Sibu",
       "state": "Sarawak",
       "country": "Malaysia",
       "lat": 2.2996601,
       "lon": 111.8710012
+    },
+    {
+      "name": "Sitiawan",
+      "state": "Perak",
+      "country": "Malaysia",
+      "lat": 4.2169,
+      "lon": 100.6946
+    },
+    {
+      "name": "Sri Aman",
+      "state": "Sarawak",
+      "country": "Malaysia",
+      "lat": 1.2399,
+      "lon": 111.4624
     },
     {
       "name": "Subang Jaya",
@@ -5929,11 +6412,25 @@
       "lon": 101.5823339
     },
     {
-      "name": "Kota Bharu",
+      "name": "Sungai Petani",
+      "state": "Kedah",
+      "country": "Malaysia",
+      "lat": 5.6474,
+      "lon": 100.4882
+    },
+    {
+      "name": "Taiping",
+      "state": "Perak",
+      "country": "Malaysia",
+      "lat": 4.8546772,
+      "lon": 100.7438831
+    },
+    {
+      "name": "Tanah Merah",
       "state": "Kelantan",
       "country": "Malaysia",
-      "lat": 6.1247911,
-      "lon": 102.2378065
+      "lat": 5.8024,
+      "lon": 102.1479
     },
     {
       "name": "Tawau",
@@ -5941,6 +6438,20 @@
       "country": "Malaysia",
       "lat": 4.2435206,
       "lon": 117.885331
+    },
+    {
+      "name": "Teluk Intan",
+      "state": "Perak",
+      "country": "Malaysia",
+      "lat": 4.0218,
+      "lon": 101.0195
+    },
+    {
+      "name": "Temerloh",
+      "state": "Pahang",
+      "country": "Malaysia",
+      "lat": 3.4524,
+      "lon": 102.4189
     }
   ],
   "Morocco": [
