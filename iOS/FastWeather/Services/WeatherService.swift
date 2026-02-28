@@ -835,6 +835,7 @@ class WeatherService: ObservableObject {
     // MARK: - Weather Alerts (NWS & WeatherKit)
     
     private var alertsCache: [UUID: (alerts: [WeatherAlert], timestamp: Date)] = [:]
+    private let alertsCacheLock = NSLock()
     private let alertsCacheMinutes: TimeInterval = 5
     
     /// Countries where WeatherKit alerts are known to work
@@ -873,7 +874,7 @@ class WeatherService: ObservableObject {
     /// - Returns: Array of active weather alerts (empty if no alerts or service unavailable)
     func fetchNWSAlerts(for city: City) async throws -> [WeatherAlert] {
         // Check cache first
-        if let cached = alertsCache[city.id] {
+        if let cached = alertsCacheLock.withLock({ alertsCache[city.id] }) {
             let age = Date().timeIntervalSince(cached.timestamp)
             if age < alertsCacheMinutes * 60 {
                 return cached.alerts
@@ -961,7 +962,7 @@ class WeatherService: ObservableObject {
             let activeAlerts = alerts.filter { !$0.isExpired }
             
             // Cache the results
-            alertsCache[city.id] = (activeAlerts, Date())
+            alertsCacheLock.withLock { alertsCache[city.id] = (activeAlerts, Date()) }
             
             return activeAlerts
             
@@ -1019,7 +1020,7 @@ class WeatherService: ObservableObject {
             let activeAlerts = alerts.filter { !$0.isExpired }
             
             // Cache results
-            alertsCache[city.id] = (activeAlerts, Date())
+            alertsCacheLock.withLock { alertsCache[city.id] = (activeAlerts, Date()) }
             
             print("✅ Fetched \(activeAlerts.count) WeatherKit alerts for \(city.name)")
             return activeAlerts
@@ -1052,7 +1053,7 @@ class WeatherService: ObservableObject {
             }
             
             // Cache empty result to avoid repeated failed requests
-            alertsCache[city.id] = ([], Date())
+            alertsCacheLock.withLock { alertsCache[city.id] = ([], Date()) }
             return []
         }
         #else
