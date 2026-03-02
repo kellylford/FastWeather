@@ -28,7 +28,7 @@ struct WeatherCacheKey: Hashable {
 class WeatherService: ObservableObject {
     @Published var savedCities: [City] = []
     @Published var weatherCache: [WeatherCacheKey: WeatherData] = [:]
-    @Published var marineCache: [WeatherCacheKey: MarineData] = [:]
+    @Published var marineCache:     [WeatherCacheKey: MarineData] = [:]
     @Published var browseWeatherCache: [String: WeatherData] = [:] // Cache for browse cities
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
