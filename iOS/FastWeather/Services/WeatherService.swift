@@ -907,7 +907,7 @@ class WeatherService: ObservableObject {
         }
         
         var request = URLRequest(url: url)
-        request.setValue("FastWeather/1.0 iOS", forHTTPHeaderField: "User-Agent")
+        request.setValue("WeatherFast/1.0 iOS", forHTTPHeaderField: "User-Agent")
         
         do {
             let (data, response) = try await URLSession.shared.data(for: request)

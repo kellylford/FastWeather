@@ -24,7 +24,7 @@ struct UserGuideView: View {
             VStack(alignment: .leading, spacing: 24) {
                 // Header
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Welcome to FastWeather")
+                    Text("Welcome to Weather Fast")
                         .font(.largeTitle)
                         .fontWeight(.bold)
                     
@@ -539,7 +539,7 @@ struct UserGuideView: View {
                     title: "Accessibility",
                     color: .teal
                 ) {
-                    Text("FastWeather is designed for VoiceOver users:")
+                    Text("Weather Fast is designed for VoiceOver users:")
                     BulletPoint("**Complete VoiceOver support** - All features accessible")
                     BulletPoint("**Descriptive labels** - Clear, context-aware announcements")
                     BulletPoint("**Logical navigation** - Efficient screen reader flow")
@@ -586,7 +586,7 @@ struct UserGuideView: View {
                     title: "Weather Data",
                     color: .cyan
                 ) {
-                    Text("FastWeather uses reliable, free data sources:")
+                    Text("Weather Fast uses reliable, free data sources:")
                     BulletPoint("**Open-Meteo** - Current and forecast weather")
                     BulletPoint("**Historical Archive** - Weather back to 1940")
                     BulletPoint("**NWS Alerts** - U.S. weather warnings (when available)")
@@ -604,7 +604,7 @@ struct UserGuideView: View {
                     Text("Need more help?")
                         .font(.headline)
                     
-                    Text("FastWeather is designed to be intuitive. Explore the app and discover features as you use it. Most actions are available through standard iOS gestures and VoiceOver commands.")
+                    Text("Weather Fast is designed to be intuitive. Explore the app and discover features as you use it. Most actions are available through standard iOS gestures and VoiceOver commands.")
                         .font(.body)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)

@@ -355,7 +355,7 @@ struct SettingsView: View {
                         }
                     }
                     .accessibilityLabel("User Guide")
-                    .accessibilityHint("Learn how to use FastWeather features")
+                    .accessibilityHint("Learn how to use Weather Fast features")
                 }
                 
                 // About section

@@ -14,7 +14,7 @@ class RegionalWeatherService {
     
     // Cache for reverse geocoded location names (key: "lat,lon", value: city name)
     private var locationNameCache: [String: String] = [:]
-    private let cacheQueue = DispatchQueue(label: "com.fastweather.locationcache")
+    private let cacheQueue = DispatchQueue(label: "com.weatherfast.locationcache")
     
     // Actor to serialize geocoding requests to respect rate limits
     private actor GeocodingCoordinator {
