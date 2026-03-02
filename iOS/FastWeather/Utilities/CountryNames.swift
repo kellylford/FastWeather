@@ -1,6 +1,6 @@
 //
 //  CountryNames.swift
-//  FastWeather
+//  Fast Weather
 //
 //  Country code mapping for normalizing country names to US English
 //

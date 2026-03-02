@@ -75,7 +75,7 @@ struct MoonCalculator {
         }
     }
 
-    /// SF Symbol name for the current moon phase (requires iOS 16+; FastWeather requires iOS 17+).
+    /// SF Symbol name for the current moon phase (requires iOS 16+; Weather Fast requires iOS 17+).
     static func phaseSymbol(for date: Date) -> String {
         let p = phase(for: date)
         switch p {

@@ -84,7 +84,7 @@ struct MyCitiesView: View {
     var body: some View {
         NavigationStack {
             mainContent
-                .navigationTitle("Fast Weather")
+                .navigationTitle("Weather Fast")
                 .navigationDestination(item: $selectedCityForHistory) { city in
                     HistoricalWeatherView(city: city, autoLoadToday: settingsManager.settings.viewMode == .list)
                         .navigationTitle("Historical Weather")

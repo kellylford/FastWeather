@@ -182,7 +182,7 @@ enum LocationError: LocalizedError {
     var recoverySuggestion: String? {
         switch self {
         case .permissionDenied:
-            return "Go to Settings > Privacy > Location Services and enable location for Fast Weather."
+            return "Go to Settings > Privacy > Location Services and enable location for Weather Fast."
         case .locationUnavailable:
             return "Make sure Location Services are enabled and you have a good signal. Try again in a moment."
         case .geocodingFailed:
