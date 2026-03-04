@@ -295,6 +295,19 @@ struct UserGuideView: View {
                 ) {
                     Text("Visual icons used throughout the app with VoiceOver equivalents:")
                     
+                    Text("**App Icon:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("The Weather Fast app icon features a large \"WF\" monogram in white against a bright blue sky background, with decorative white clouds surrounding the text. The sunny atmosphere conveys clear, accessible weather information.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                    Text("VoiceOver: \"Weather Fast\"")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 8)
+                    
                     Text("**Tab Bar Icons:**")
                         .fontWeight(.semibold)
                         .padding(.top, 8)
