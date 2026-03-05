@@ -1,0 +1,76 @@
+Fast Weather - Clean, Accessible Weather Forecasts
+
+Get the weather information you need, fast. No clutter, no tracking, no subscriptions—just accurate forecasts delivered in a beautifully simple interface designed for everyone.
+
+WHY FAST WEATHER?
+
+• Lightning Fast: Current conditions at a glance, detailed forecasts when you need them
+• Built from the ground up with VoiceOver users in mind
+• Your Privacy Matters: No tracking, no analytics, no ads. Your city list stays on your device
+• No API Key Required: Powered by Open-Meteo's free weather service
+• Two View Modes: Choose how you view your weather—Flat or List view
+
+COMPREHENSIVE WEATHER DATA
+
+Current Conditions:
+• Temperature and "feels like" with humidity
+• Wind speed, direction, and gusts
+• UV Index with color-coded risk levels
+• Dew point, pressure, visibility, cloud cover
+• Precipitation tracking (rain, showers, snow)
+
+Hourly Forecast:
+• 24-hour outlook with detailed conditions
+• Rain probability and precipitation amounts
+• UV Index, wind, humidity, and more
+• Perfect for planning your day
+
+Daily Forecast:
+• 16-day extended outlook
+• High and low temperatures
+• Sunrise, sunset, and daylight duration
+• Rain probability and UV Index
+
+Weather Around Me:
+• Regional weather in all 8 directions (N, S, E, W, NE, NW, SE, SW)
+• Adjustable distance radius to see the bigger picture
+• Compare conditions in surrounding areas
+• Explore nearby cities and their weather
+
+Historical Weather:
+• View past weather for any date going back years
+• Compare the same date across multiple years
+• Browse consecutive days of historical data
+• Perfect for trip planning and trend analysis
+
+PERSONALIZE YOUR EXPERIENCE
+
+Two View Modes:
+• Flat View: Beautiful cards with full weather details
+• List View: Minimalist single-line efficiency
+
+Choose Your Units:
+• Temperature: Fahrenheit or Celsius
+• Wind Speed: mph or km/h
+• Precipitation: inches or millimeters
+• Pressure: inHg or hPa
+• Visibility: miles or kilometers
+
+Customize Fields:
+• Show or hide specific weather data
+• Configure what appears in city list view
+• Set your preferred default view mode
+• Tailor the app to your needs
+
+SMART CITY MANAGEMENT
+
+• Browse cities by US state or international country
+• Add multiple cities with one-tap
+• Swipe to delete unwanted cities
+• Drag to reorder in Table and List views
+
+ABOUT THE DATA
+
+Weather data provided by Open-Meteo.com (Creative Commons BY 4.0). Geocoding powered by OpenStreetMap. Both services are respected, reliable, and privacy-friendly.
+
+Whether you're checking if you need an umbrella or planning a week-long trip, Fast Weather gives you the information you need without the hassle. Download today and experience weather forecasts the way they should be—fast, clear, and accessible to everyone.
