@@ -1,6 +1,6 @@
 # Deployment Checklist
 
-Quick reference for uploading to fastweather.online
+Quick reference for uploading to weatherfast.online
 
 ## 📦 Files to Upload
 
@@ -41,20 +41,20 @@ Upload these files from `webapp/` folder to your server:
 ### 1. HTTPS & Security (Most Important!)
 ```bash
 # Test HTTPS redirect
-curl -I http://fastweather.online
+curl -I http://weatherfast.online
 
 # Should show:
 # HTTP/1.1 301 Moved Permanently
-# Location: https://fastweather.online/
+# Location: https://weatherfast.online/
 ```
 
 ### 2. Security Headers Check
 Visit: https://securityheaders.com/
-- Enter: `https://fastweather.online`
+- Enter: `https://weatherfast.online`
 - Should get **A** or **A+** rating
 
 ### 3. Browser Testing
-- [ ] Open https://fastweather.online in browser
+- [ ] Open https://weatherfast.online in browser
 - [ ] Click "Use My Current Location" - should prompt for permission
 - [ ] Add a city manually - should work
 - [ ] Refresh page - cities should persist
@@ -68,14 +68,14 @@ Open Chrome DevTools (F12):
 - [ ] **Lighthouse** - Run PWA audit (should score 90+)
 
 ### 5. Mobile Testing
-- [ ] Open on phone: https://fastweather.online
+- [ ] Open on phone: https://weatherfast.online
 - [ ] Test "Add to Home Screen" feature
 - [ ] Verify responsive layout
 - [ ] Test geolocation on mobile
 
 ### 6. Performance Testing
 Visit: https://pagespeed.web.dev/
-- Enter: `https://fastweather.online`
+- Enter: `https://weatherfast.online`
 - Should get 90+ on mobile and desktop
 
 ## 🔧 Troubleshooting

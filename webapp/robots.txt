@@ -8,4 +8,4 @@ Disallow: /debug.html
 Disallow: /table-test.html
 
 # Sitemap (create one if you want better SEO)
-# Sitemap: https://fastweather.online/sitemap.xml
+# Sitemap: https://weatherfast.online/sitemap.xml
