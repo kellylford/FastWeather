@@ -46,8 +46,21 @@ struct TableView: View {
     @State private var scrollOffset: CGFloat = 0
     @State private var navigationTarget: City?
 
-    // Fixed width for each data column. City column fills remaining space.
-    private static let dataColumnWidth: CGFloat = 52
+    // Minimum city column width — city names won't be squeezed below this.
+    private static let cityColumnMinWidth: CGFloat = 120
+    // Leading padding applied to city column text.
+    private static let cityLeadingPad: CGFloat = 12
+
+    /// Compute per-data-column width from the available container width.
+    /// Minimum 56pt (fits "72°F"), maximum 90pt (fits "29.92 inHg").
+    private func columnWidth(containerWidth: CGFloat, columnCount: Int) -> CGFloat {
+        guard columnCount > 0 else { return 64 }
+        let available = containerWidth
+            - Self.cityColumnMinWidth
+            - Self.cityLeadingPad
+        let computed = available / CGFloat(columnCount)
+        return min(max(computed, 56), 90)
+    }
 
     // MARK: - Column configuration
 
@@ -116,14 +129,17 @@ struct TableView: View {
     var body: some View {
         let cities = weatherService.savedCities
         let columns = activeColumns
-        let a11yHeaders = accessibilityHeaders(columns: columns)
-        let a11yRows = accessibilityRows(cities: cities, columns: columns)
-        let activationHandlers: [() -> Bool] = cities.map { city in
-            { [self] in
-                DispatchQueue.main.async { self.navigationTarget = city }
-                return true
+
+        GeometryReader { geo in
+            let colWidth = columnWidth(containerWidth: geo.size.width, columnCount: columns.count)
+            let a11yHeaders = accessibilityHeaders(columns: columns)
+            let a11yRows = accessibilityRows(cities: cities, columns: columns)
+            let activationHandlers: [() -> Bool] = cities.map { city in
+                { [self] in
+                    DispatchQueue.main.async { self.navigationTarget = city }
+                    return true
+                }
             }
-        }
 
         ScrollView {
             VStack(spacing: 0) {
@@ -133,11 +149,11 @@ struct TableView: View {
                     Text("City")
                         .font(.caption.bold())
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading, 12)
+                        .padding(.leading, Self.cityLeadingPad)
                     ForEach(columns) { field in
                         Text(shortName(for: field.type))
                             .font(.caption.bold())
-                            .frame(width: Self.dataColumnWidth, alignment: .trailing)
+                            .frame(width: colWidth, alignment: .trailing)
                             .padding(.trailing, 6)
                     }
                 }
@@ -157,17 +173,17 @@ struct TableView: View {
                                 .lineLimit(1)
                                 .truncationMode(.tail)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.leading, 12)
+                                .padding(.leading, Self.cityLeadingPad)
 
                             if cachedWeather(for: city) == nil {
                                 ProgressView()
-                                    .frame(width: Self.dataColumnWidth * CGFloat(max(1, columns.count)))
+                                    .frame(width: colWidth * CGFloat(max(1, columns.count)))
                             } else {
                                 ForEach(columns) { field in
                                     Text(displayValue(for: field.type, city: city))
                                         .font(.caption.monospacedDigit())
                                         .lineLimit(1)
-                                        .frame(width: Self.dataColumnWidth, alignment: .trailing)
+                                        .frame(width: colWidth, alignment: .trailing)
                                         .padding(.trailing, 6)
                                 }
                             }
@@ -239,6 +255,7 @@ struct TableView: View {
         .navigationDestination(item: $navigationTarget) { city in
             CityDetailView(city: city, dateOffset: dateOffset, selectedDate: selectedDate)
         }
+        } // end GeometryReader
     }
 
     // MARK: - Move
