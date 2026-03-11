@@ -193,7 +193,7 @@ struct SettingsView: View {
                         settingsManager.saveSettings()
                     }
                     .accessibilityLabel("View mode, currently \(settingsManager.settings.viewMode.rawValue)")
-                    .accessibilityHint("Choose between List or Flat view")
+                    .accessibilityHint("Choose between Flat, List, or Table view")
                     
                     Picker(selection: $settingsManager.settings.displayMode) {
                         ForEach(DisplayMode.allCases, id: \.self) { mode in

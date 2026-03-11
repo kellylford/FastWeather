@@ -51,7 +51,7 @@ class HistoricalWeatherCache {
         do {
             let data = try Data(contentsOf: file)
             let cached = try JSONDecoder().decode([HistoricalDay].self, from: data)
-            print("✅ Loaded cached historical data for \(city.name) on \(monthDay): \(cached.count) years")
+
             return cached
         } catch {
             print("❌ Error loading cached historical data: \(error)")
@@ -66,7 +66,7 @@ class HistoricalWeatherCache {
         do {
             let encoded = try JSONEncoder().encode(data)
             try encoded.write(to: file)
-            print("✅ Cached historical data for \(city.name) on \(monthDay): \(data.count) years")
+
         } catch {
             print("❌ Error caching historical data: \(error)")
         }
@@ -76,13 +76,13 @@ class HistoricalWeatherCache {
     func clearCache(for city: City) {
         let cityDir = cityDirectory(for: city)
         try? fileManager.removeItem(at: cityDir)
-        print("✅ Cleared historical cache for \(city.name)")
+
     }
     
     // Clear all cached historical data
     func clearAllCaches() {
         try? fileManager.removeItem(at: cacheDirectory)
-        print("✅ Cleared all historical weather caches")
+
     }
     
     // Get cache size for a city in bytes

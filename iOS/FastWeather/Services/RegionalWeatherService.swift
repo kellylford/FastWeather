@@ -189,7 +189,6 @@ class RegionalWeatherService {
                 )
                 locationName = name
                 setCachedLocationName(name, latitude: location.lat, longitude: location.lon)
-                print("✅ Reverse geocoded \(location.direction): \(name)")
             } catch {
                 print("⚠️ Failed to reverse geocode \(location.direction): \(error.localizedDescription)")
                 locationName = nil
@@ -237,7 +236,6 @@ class RegionalWeatherService {
         }
         
         let locationName = parts.isEmpty ? "Unknown location" : parts.joined(separator: ", ")
-        print("✅ CLGeocoder result: \(locationName)")
         
         return locationName
     }

@@ -343,13 +343,11 @@ class WeatherService: ObservableObject {
                 // Fetch marine My Data values if any marine parameters are selected
                 if let marineValues = await fetchMyDataMarineValues(for: city) {
                     mergedMyDataValues.merge(marineValues) { (_, new) in new }
-                    print("✅ Merged \(marineValues.count) marine My Data values")
                 }
                 
                 // Fetch air quality My Data values if any air quality parameters are selected
                 if let airQualityValues = await fetchMyDataAirQualityValues(for: city) {
                     mergedMyDataValues.merge(airQualityValues) { (_, new) in new }
-                    print("✅ Merged \(airQualityValues.count) air quality My Data values")
                 }
                 
                 // Update weatherData with merged My Data values if any were added
@@ -730,7 +728,6 @@ class WeatherService: ObservableObject {
         // Check cache first - but only use it if it has enough years
         if let cached = HistoricalWeatherCache.shared.getCached(for: city, monthDay: cacheKey) {
             if cached.count >= yearsBack {
-                print("✅ Using cached historical data for \(city.name) on \(monthDay) ending \(actualEndYear) (\(cached.count) years cached, \(yearsBack) requested)")
                 // Return only the requested number of years (most recent ones)
                 return Array(cached.prefix(yearsBack))
             } else {
@@ -828,7 +825,6 @@ class WeatherService: ObservableObject {
         // Cache the results with endYear in key
         HistoricalWeatherCache.shared.cache(historicalDays, for: city, monthDay: cacheKey)
         
-        print("✅ Fetched \(historicalDays.count) years of historical data for \(city.name) on \(monthDay) ending \(actualEndYear)")
         return historicalDays
     }
     
@@ -1022,7 +1018,7 @@ class WeatherService: ObservableObject {
             // Cache results
             alertsCacheLock.withLock { alertsCache[city.id] = (activeAlerts, Date()) }
             
-            print("✅ Fetched \(activeAlerts.count) WeatherKit alerts for \(city.name)")
+
             return activeAlerts
             
         } catch {
@@ -1096,17 +1092,14 @@ class WeatherService: ObservableObject {
         
         // Check if migration already completed
         guard !UserDefaults.standard.bool(forKey: migrationKey) else {
-            print("✅ Country names already migrated")
             return
         }
         
-        print("🔄 Migrating country names to English...")
         var migratedCount = 0
         
         // Create backup before migration
         if let encoded = try? JSONEncoder().encode(savedCities) {
             UserDefaults.standard.set(encoded, forKey: "cities_backup_preMigration")
-            print("  Created backup of \(savedCities.count) cities")
         }
         
         // Migrate each city's country name
@@ -1128,7 +1121,6 @@ class WeatherService: ObservableObject {
                 )
                 updatedCities.append(updatedCity)
                 migratedCount += 1
-                print("  \(city.name): '\(oldCountry)' → '\(newCountry)'")
             } else {
                 updatedCities.append(city)
             }
@@ -1140,11 +1132,6 @@ class WeatherService: ObservableObject {
         // Save migrated cities if any changes made
         if migratedCount > 0 {
             saveCities()
-            print("✅ Migration complete: \(migratedCount) cities updated")
-            
-            // Note: VoiceOver announcement handled by view layer
-        } else {
-            print("✅ Migration complete: No cities needed updating")
         }
         
         // Mark migration as complete (even if no changes)

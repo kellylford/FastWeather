@@ -13,8 +13,9 @@ enum DisplayMode: String, CaseIterable, Codable {
 }
 
 enum ViewMode: String, CaseIterable, Codable {
-    case list = "List"
     case flat = "Flat"
+    case list = "List"
+    case table = "Table"
 }
 
 enum WeatherFieldType: String, CaseIterable, Codable {

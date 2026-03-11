@@ -163,14 +163,14 @@ struct WeatherAroundMeView: View {
             // Your Location
             currentLocationCard(regional.center)
             
+            // Regional Summary
+            regionalSummaryCard(regional)
+            
             // Directional Weather Cards
             directionalWeatherSection(regional)
             
             // Directional Explorer
             directionalExplorerSection()
-            
-            // Regional Summary
-            regionalSummaryCard(regional)
             
             // Data Attribution
             Text("Weather data by Open-Meteo.com")
@@ -295,6 +295,7 @@ struct WeatherAroundMeView: View {
                 .accessibilityLabel("Select direction to explore")
                 .accessibilityValue(selectedDirection.rawValue)
                 .onChange(of: selectedDirection) {
+                    UIAccessibility.post(notification: .announcement, argument: selectedDirection.rawValue)
                     loadCitiesInDirection()
                 }
                 
@@ -459,14 +460,7 @@ struct WeatherAroundMeView: View {
         errorMessage = nil
         
         do {
-            print("🔄 Loading regional weather for \(city.name) at \(settingsManager.settings.distanceUnit.format(distanceMiles))...")
             let data = try await RegionalWeatherService.shared.fetchRegionalWeather(for: city, distanceMiles: distanceMiles)
-            
-            print("✅ Received regional weather data:")
-            print("   Center: \(data.center.direction) - locationName: \(data.center.locationName ?? "nil")")
-            for direction in data.directions {
-                print("   \(direction.direction): locationName = \(direction.locationName ?? "nil")")
-            }
             
             await MainActor.run {
                 self.regionalWeather = data
@@ -660,7 +654,11 @@ struct WeatherAroundMeView: View {
     }
     
     private func cityExplorerAccessibilityLabel(_ cityInfo: DirectionalCityInfo) -> String {
-        var label = "\(cityInfo.displayName(relativeTo: city.country)), "
+        // Waypoints with a real geocoded name are announced as cities.
+        // Only fallback distance labels (e.g. "~30 mi South") use "Weather point".
+        let isDistanceFallback = cityInfo.isWaypoint && cityInfo.name.hasPrefix("~")
+        let prefix = isDistanceFallback ? "Weather point" : "City"
+        var label = "\(prefix): \(cityInfo.displayName(relativeTo: city.country)), "
         if let weather = directionalWeatherData[cityInfo.id] {
             label += "\(formatTemperature(weather.temp)), \(weather.condition), "
         }
