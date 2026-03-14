@@ -397,12 +397,21 @@ struct CityDetailView: View {
                             .padding(.bottom, 8)
                         Divider()
                         ForEach(0..<min(16, daily.temperature2mMax.count), id: \.self) { index in
-                            DailyForecastRow(
-                                daily: daily,
-                                index: index,
+                            NavigationLink(destination: DayDetailView(
+                                city: city,
+                                dayIndex: index,
+                                weather: weather,
                                 settingsManager: settingsManager
-                            )
-                            
+                            )) {
+                                DailyForecastRow(
+                                    daily: daily,
+                                    index: index,
+                                    settingsManager: settingsManager
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityHint("Double tap to see detailed forecast for this day")
+
                             if index < min(15, daily.temperature2mMax.count - 1) {
                                 Divider()
                                     .padding(.leading)
@@ -743,6 +752,7 @@ struct CityDetailView: View {
             NavigationView {
                 WeatherAroundMeView(city: city, defaultDistance: settingsManager.settings.weatherAroundMeDistance)
                     .environmentObject(settingsManager)
+                    .environmentObject(weatherService)
                     .toolbar {
                         ToolbarItem(placement: .navigationBarTrailing) {
                             Button("Done") {

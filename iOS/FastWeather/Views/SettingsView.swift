@@ -178,7 +178,7 @@ struct SettingsView: View {
                 // Display preferences section
                 Section(header: Text("Display Options")) {
                     Picker(selection: $settingsManager.settings.viewMode) {
-                        ForEach(ViewMode.allCases, id: \.self) { mode in
+                        ForEach(ViewMode.allCases.filter { $0 != .table || featureFlags.tableViewEnabled }, id: \.self) { mode in
                             Text(mode.rawValue).tag(mode)
                         }
                     } label: {
@@ -193,7 +193,7 @@ struct SettingsView: View {
                         settingsManager.saveSettings()
                     }
                     .accessibilityLabel("View mode, currently \(settingsManager.settings.viewMode.rawValue)")
-                    .accessibilityHint("Choose between Flat, List, or Table view")
+                    .accessibilityHint("Choose between Flat and List view. Table view can be enabled in Developer Settings.")
                     
                     Picker(selection: $settingsManager.settings.displayMode) {
                         ForEach(DisplayMode.allCases, id: \.self) { mode in

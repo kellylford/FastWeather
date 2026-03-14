@@ -44,6 +44,7 @@
 		A1000ALERTB2 /* AlertDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000ALERT2 /* AlertDetailView.swift */; };
 		A1000MYDCB1 /* MyDataCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000MYDC1 /* MyDataCatalog.swift */; };
 		A1000MYDVB1 /* MyDataConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000MYDV1 /* MyDataConfigView.swift */; };
+		A1000DAYDVB1 /* DayDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000DAYDV1 /* DayDetailView.swift */; };
 		A1000HISTB1 /* HistoricalWeather.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000HIST1 /* HistoricalWeather.swift */; };
 		A1000HISTB3 /* HistoricalWeatherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000HIST3 /* HistoricalWeatherView.swift */; };
 		A1000WARMB1 /* WeatherAroundMeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000WARM1 /* WeatherAroundMeView.swift */; };
@@ -111,6 +112,7 @@
 		A1000ALERT2 /* AlertDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertDetailView.swift; sourceTree = "<group>"; };
 		A1000MYDC1 /* MyDataCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyDataCatalog.swift; sourceTree = "<group>"; };
 		A1000MYDV1 /* MyDataConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyDataConfigView.swift; sourceTree = "<group>"; };
+		A1000DAYDV1 /* DayDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetailView.swift; sourceTree = "<group>"; };
 		A1000HIST1 /* HistoricalWeather.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoricalWeather.swift; sourceTree = "<group>"; };
 		A1000HIST3 /* HistoricalWeatherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoricalWeatherView.swift; sourceTree = "<group>"; };
 		A1000WARM1 /* WeatherAroundMeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherAroundMeView.swift; sourceTree = "<group>"; };
@@ -219,6 +221,7 @@
 				A1000WARM1 /* WeatherAroundMeView.swift */,
 				9BE8987965BEC94AF7BD11D7 /* UserGuideView.swift */,
 				A1000MYDV1 /* MyDataConfigView.swift */,
+				A1000DAYDV1 /* DayDetailView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -429,6 +432,7 @@
 				FFDCDC0E6C3FE2E629DA343D /* CountryNames.swift in Sources */,
 				A1000MYDCB1 /* MyDataCatalog.swift in Sources */,
 				A1000MYDVB1 /* MyDataConfigView.swift in Sources */,
+				A1000DAYDVB1 /* DayDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

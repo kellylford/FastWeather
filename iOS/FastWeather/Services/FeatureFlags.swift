@@ -55,6 +55,15 @@ class FeatureFlags: ObservableObject {
         }
     }
     
+    /// Enable/disable Table view mode on the home screen
+    /// Off by default — Table view has text clipping issues and is an experimental layout.
+    /// When disabled the Table option is hidden from the View Mode picker in Settings.
+    @Published var tableViewEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(tableViewEnabled, forKey: "feature_table_view_enabled")
+        }
+    }
+    
     // MARK: - Initialization
     
     private init() {
@@ -64,6 +73,7 @@ class FeatureFlags: ObservableObject {
         self.userGuideEnabled = UserDefaults.standard.bool(forKey: "feature_user_guide_enabled")
         self.weatherKitAlertsEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_alerts_enabled")
         self.myDataEnabled = UserDefaults.standard.bool(forKey: "feature_my_data_enabled")
+        self.tableViewEnabled = UserDefaults.standard.bool(forKey: "feature_table_view_enabled")
         
         // Default values (if first launch or not set)
         // All features enabled by default for production
@@ -82,6 +92,9 @@ class FeatureFlags: ObservableObject {
         if !UserDefaults.standard.contains(key: "feature_my_data_enabled") {
             self.myDataEnabled = true  // Enabled by default
         }
+        if !UserDefaults.standard.contains(key: "feature_table_view_enabled") {
+            self.tableViewEnabled = false  // Disabled by default — experimental layout
+        }
     }
     
     // MARK: - Helper Methods
@@ -93,6 +106,7 @@ class FeatureFlags: ObservableObject {
         userGuideEnabled = true
         weatherKitAlertsEnabled = true  // Default: enabled
         myDataEnabled = true  // Default: enabled
+        tableViewEnabled = false  // Default: disabled
         print("🔧 Feature flags reset to defaults")
     }
     
@@ -103,6 +117,7 @@ class FeatureFlags: ObservableObject {
         userGuideEnabled = true
         weatherKitAlertsEnabled = true
         myDataEnabled = true
+        tableViewEnabled = true
         print("🔧 All features enabled")
     }
     
@@ -113,6 +128,7 @@ class FeatureFlags: ObservableObject {
         userGuideEnabled = false
         weatherKitAlertsEnabled = false
         myDataEnabled = false
+        tableViewEnabled = false
         print("🔧 All features disabled")
     }
 }
