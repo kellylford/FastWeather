@@ -695,8 +695,9 @@ struct WeatherAroundMeView: View {
         // Waypoints with a real geocoded name are announced as cities.
         // Only fallback distance labels (e.g. "~30 mi South") use "Weather point".
         let isDistanceFallback = cityInfo.isWaypoint && cityInfo.name.hasPrefix("~")
-        let prefix = isDistanceFallback ? "Weather point" : "City"
-        var label = "\(prefix): \(cityInfo.displayName(relativeTo: city.country)), "
+        var label = isDistanceFallback
+            ? "Weather point: \(cityInfo.displayName(relativeTo: city.country)), "
+            : "\(cityInfo.displayName(relativeTo: city.country)), "
         if let weather = directionalWeatherData[cityInfo.id] {
             label += "\(formatTemperature(weather.temp)), \(weather.condition), "
         }
