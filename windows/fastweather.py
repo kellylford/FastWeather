@@ -45,8 +45,6 @@ WeatherReadyEvent, EVT_WEATHER_READY = wx.lib.newevent.NewEvent()
 WeatherErrorEvent, EVT_WEATHER_ERROR = wx.lib.newevent.NewEvent()
 GeoReadyEvent, EVT_GEO_READY = wx.lib.newevent.NewEvent()
 GeoErrorEvent, EVT_GEO_ERROR = wx.lib.newevent.NewEvent()
-AlertsReadyEvent, EVT_ALERTS_READY = wx.lib.newevent.NewEvent()
-AlertsErrorEvent, EVT_ALERTS_ERROR = wx.lib.newevent.NewEvent()
 
 class WeatherFetchThread(threading.Thread):
     def __init__(self, notify_window, city_name, lat, lon, detail="basic", forecast_days=16):
@@ -119,132 +117,6 @@ class GeocodingThread(threading.Thread):
             wx.PostEvent(self.notify_window, GeoReadyEvent(data=(self.city_input, matches)))
         except Exception as e:
             wx.PostEvent(self.notify_window, GeoErrorEvent(data=str(e)))
-
-class AlertsFetchThread(threading.Thread):
-    """Fetches active weather alerts from the NWS API (US locations only)."""
-    def __init__(self, notify_window, city_name, lat, lon):
-        super().__init__()
-        self.notify_window = notify_window
-        self.city_name = city_name
-        self.lat = lat
-        self.lon = lon
-        self.daemon = True
-        self.start()
-
-    def run(self):
-        try:
-            url = f"https://api.weather.gov/alerts/active?point={self.lat},{self.lon}"
-            headers = {"User-Agent": "FastWeather/1.1 (Windows; github.com/kellylford/fastweather)"}
-            response = requests.get(url, headers=headers, timeout=10)
-            if response.status_code == 404:
-                # NWS returns 404 for points outside US coverage area
-                wx.PostEvent(self.notify_window, AlertsReadyEvent(data=(self.city_name, [])))
-                return
-            response.raise_for_status()
-            alerts = self._parse_alerts(response.json())
-            wx.PostEvent(self.notify_window, AlertsReadyEvent(data=(self.city_name, alerts)))
-        except Exception as e:
-            wx.PostEvent(self.notify_window, AlertsErrorEvent(data=(self.city_name, str(e))))
-
-    def _parse_alerts(self, nws_data):
-        if not nws_data or 'features' not in nws_data:
-            return []
-        alerts = []
-        for feature in nws_data['features']:
-            props = feature.get('properties', {})
-            def flex(field, p=props):
-                val = p.get(field, '')
-                if isinstance(val, list):
-                    return ' '.join(str(v) for v in val)
-                return str(val) if val else ''
-            alerts.append({
-                'event':       props.get('event', 'Weather Alert'),
-                'severity':    props.get('severity', 'Unknown'),
-                'headline':    flex('headline'),
-                'description': flex('description'),
-                'instruction': flex('instruction'),
-                'area':        flex('areaDesc'),
-            })
-        return alerts
-
-class WeatherAlertsDialog(wx.Dialog):
-    """Displays active NWS weather alerts for a US city."""
-    SEVERITY_ORDER = ['Extreme', 'Severe', 'Moderate', 'Minor', 'Unknown']
-
-    def __init__(self, parent, city_name, alerts):
-        super().__init__(parent, title=f"Weather Alerts - {city_name}",
-                         size=(720, 520), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
-        self.alerts = sorted(
-            alerts,
-            key=lambda a: self.SEVERITY_ORDER.index(a['severity'])
-                          if a['severity'] in self.SEVERITY_ORDER else 99
-        )
-        panel = wx.Panel(self)
-        vbox = wx.BoxSizer(wx.VERTICAL)
-
-        if not self.alerts:
-            vbox.Add(wx.StaticText(panel, label="No active weather alerts for this location."),
-                     0, wx.ALL, 15)
-        else:
-            count = len(self.alerts)
-            label = f"{count} active weather alert{'s' if count != 1 else ''} " \
-                    f"\u2014 select one to read details:"
-            vbox.Add(wx.StaticText(panel, label=label), 0, wx.ALL | wx.EXPAND, 10)
-
-            splitter = wx.SplitterWindow(panel, style=wx.SP_LIVE_UPDATE | wx.SP_3D)
-
-            top_panel = wx.Panel(splitter)
-            top_sizer = wx.BoxSizer(wx.VERTICAL)
-            self.alert_list = wx.ListBox(top_panel, style=wx.LB_SINGLE)
-            for a in self.alerts:
-                self.alert_list.Append(f"[{a['severity']}] {a['event']}")
-            top_sizer.Add(self.alert_list, 1, wx.EXPAND | wx.ALL, 3)
-            top_panel.SetSizer(top_sizer)
-
-            bottom_panel = wx.Panel(splitter)
-            bottom_sizer = wx.BoxSizer(wx.VERTICAL)
-            self.detail_text = wx.TextCtrl(
-                bottom_panel,
-                style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_WORDWRAP
-            )
-            self.detail_text.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT,
-                                             wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
-            bottom_sizer.Add(self.detail_text, 1, wx.EXPAND | wx.ALL, 3)
-            bottom_panel.SetSizer(bottom_sizer)
-
-            splitter.SplitHorizontally(top_panel, bottom_panel, 160)
-            vbox.Add(splitter, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
-
-            self.alert_list.Bind(wx.EVT_LISTBOX, self.on_select_alert)
-            self.alert_list.SetSelection(0)
-            self._show_alert(0)
-
-        close_btn = wx.Button(panel, wx.ID_CLOSE, "Close")
-        vbox.Add(close_btn, 0, wx.ALIGN_CENTER | wx.ALL, 10)
-        self.Bind(wx.EVT_BUTTON, lambda e: self.EndModal(wx.ID_CLOSE), close_btn)
-        panel.SetSizer(vbox)
-        close_btn.SetFocus()
-
-    def on_select_alert(self, event):
-        idx = self.alert_list.GetSelection()
-        if idx != wx.NOT_FOUND:
-            self._show_alert(idx)
-
-    def _show_alert(self, idx):
-        a = self.alerts[idx]
-        lines = [
-            f"Event: {a['event']}",
-            f"Severity: {a['severity']}",
-        ]
-        if a['area']:
-            lines.append(f"Affected area: {a['area']}")
-        if a['headline']:
-            lines.append(f"\n{a['headline']}")
-        if a['description']:
-            lines.append(f"\nDetails:\n{a['description']}")
-        if a['instruction']:
-            lines.append(f"\nWhat to do:\n{a['instruction']}")
-        self.detail_text.SetValue('\n'.join(lines))
 
 class CitySelectionDialog(wx.Dialog):
     def __init__(self, parent, matches, original_input):
@@ -644,8 +516,6 @@ class AccessibleWeatherApp(wx.Frame):
         self.Bind(EVT_WEATHER_ERROR, self.on_weather_error)
         self.Bind(EVT_GEO_READY, self.on_geo_ready)
         self.Bind(EVT_GEO_ERROR, self.on_geo_error)
-        self.Bind(EVT_ALERTS_READY, self.on_alerts_ready)
-        self.Bind(EVT_ALERTS_ERROR, self.on_alerts_error)
         
         wx.CallAfter(self.set_initial_focus)
 
@@ -707,11 +577,8 @@ class AccessibleWeatherApp(wx.Frame):
         self.lbl_full_title = wx.StaticText(self.full_view, label="Full Weather")
         self.lbl_full_title.SetFont(wx.Font(14, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
         self.btn_config = wx.Button(self.full_view, label="Configure")
-        self.btn_alerts = wx.Button(self.full_view, label="Alerts")
-        self.btn_alerts.Show(False)
         head_row.Add(self.btn_back, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 10)
         head_row.Add(self.lbl_full_title, 1, wx.ALIGN_CENTER_VERTICAL)
-        head_row.Add(self.btn_alerts, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
         head_row.Add(self.btn_config, 0, wx.ALIGN_CENTER_VERTICAL)
         fv_sizer.Add(head_row, 0, wx.EXPAND | wx.ALL, 10)
         
@@ -741,7 +608,6 @@ class AccessibleWeatherApp(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.on_refresh, self.btn_refresh)
         self.Bind(wx.EVT_BUTTON, self.on_full_weather, self.btn_full)
         self.Bind(wx.EVT_BUTTON, self.on_back, self.btn_back)
-        self.Bind(wx.EVT_BUTTON, self.on_show_alerts, self.btn_alerts)
         self.Bind(wx.EVT_BUTTON, self.on_config, self.btn_config)
         self.Bind(wx.EVT_BUTTON, self.on_config, self.btn_config_main)
         self.city_list.Bind(wx.EVT_KEY_DOWN, self.on_list_key)
@@ -1062,22 +928,12 @@ class AccessibleWeatherApp(wx.Frame):
         city = self.city_list.GetString(sel).split(" - ")[0]
         lat, lon = self.city_data[city]
         self.current_full_city = (city, lat, lon)
-        self.current_alerts = []
         self.lbl_full_title.SetLabel(f"Full Weather - {city}")
         self.weather_display.Clear()
         self.weather_display.Append("Loading...")
         self.book.SetSelection(1)
         self.weather_display.SetFocus()
         WeatherFetchThread(self, city, lat, lon, "full")
-        # Fetch NWS alerts for US cities
-        if self.is_us_city(city):
-            self.btn_alerts.SetLabel("Alerts (Loading...)")
-            self.btn_alerts.Enable(False)
-            self.btn_alerts.Show(True)
-            AlertsFetchThread(self, city, lat, lon)
-        else:
-            self.btn_alerts.Show(False)
-        self.full_view.Layout()
 
     def on_back(self, event):
         self.book.SetSelection(0)
@@ -1101,51 +957,6 @@ class AccessibleWeatherApp(wx.Frame):
         # Refresh full weather view if active
         if hasattr(self, 'current_full_city') and self.book.GetSelection() == 1:
             self.on_full_weather(None)
-
-    def is_us_city(self, city_name):
-        """Returns True if city is in the United States (NWS alerts only cover US locations)."""
-        return 'United States' in city_name
-
-    def classify_weather_code(self, code):
-        """Returns a screen-reader-friendly precipitation type indicator for a WMO weather code."""
-        snow_codes     = {71, 73, 75, 77, 85, 86}
-        rain_codes     = {51, 53, 55, 61, 63, 65, 80, 81, 82}
-        freezing_codes = {56, 57, 66, 67}
-        thunder_codes  = {95, 96, 99}
-        if code in snow_codes:     return '[Snow]'
-        if code in freezing_codes: return '[Sleet]'
-        if code in rain_codes:     return '[Rain]'
-        if code in thunder_codes:  return '[Thunder]'
-        return ''
-
-    def on_alerts_ready(self, event):
-        city, alerts = event.data
-        if not hasattr(self, 'current_full_city') or self.current_full_city[0] != city:
-            return
-        self.current_alerts = alerts
-        if alerts:
-            self.btn_alerts.SetLabel(f"Alerts ({len(alerts)})")
-            self.btn_alerts.Enable(True)
-        else:
-            self.btn_alerts.SetLabel("No Alerts")
-            self.btn_alerts.Enable(False)
-        self.btn_alerts.Show(True)
-        self.full_view.Layout()
-
-    def on_alerts_error(self, event):
-        city, err = event.data
-        if hasattr(self, 'current_full_city') and self.current_full_city[0] == city:
-            self.btn_alerts.SetLabel("Alerts (N/A)")
-            self.btn_alerts.Enable(False)
-
-    def on_show_alerts(self, event):
-        if not hasattr(self, 'current_full_city'):
-            return
-        city = self.current_full_city[0]
-        alerts = getattr(self, 'current_alerts', [])
-        dlg = WeatherAlertsDialog(self, city, alerts)
-        dlg.ShowModal()
-        dlg.Destroy()
 
     def degrees_to_cardinal(self, degrees):
         directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
@@ -1196,13 +1007,8 @@ class AccessibleWeatherApp(wx.Frame):
             
             cloud_text = ""
             
-            # Use WMO weather code for condition description when available — more precise
-            # than cloud cover percentage and also covers precipitation conditions
-            weather_code = curr.get("weather_code", curr.get("weathercode"))
-            if weather_code is not None:
-                code_desc = self.weather_code_description.get(weather_code, "")
-                cloud_text = f", {code_desc}" if code_desc else ""
-            elif "cloud_cover" in curr:
+            # Try to get cloud cover directly (new API)
+            if "cloud_cover" in curr:
                 cc = curr["cloud_cover"]
                 if cc <= 12: desc = "clear"
                 elif cc <= 37: desc = "mostly clear"
@@ -1252,20 +1058,16 @@ class AccessibleWeatherApp(wx.Frame):
                 temp_min = self.format_temperature_short(temp_min_c)
                 daily_temps = f" (High: {temp_max}, Low: {temp_min})"
             
-            # Use weather code for precise precipitation type (more reliable than checking amounts)
+            # Check for current precipitation
             precip_text = ""
-            if weather_code is not None:
-                indicator = self.classify_weather_code(weather_code)
-                if indicator:
-                    precip_text = f" {indicator}"
-            else:
-                snowfall = curr.get("snowfall", 0)
-                rain = curr.get("rain", 0)
-                showers = curr.get("showers", 0)
-                if snowfall >= 0.01:
-                    precip_text = " [Snow]"
-                elif rain >= 0.01 or showers >= 0.01:
-                    precip_text = " [Rain]"
+            snowfall = curr.get("snowfall", 0)
+            rain = curr.get("rain", 0)
+            showers = curr.get("showers", 0)
+            
+            if snowfall >= 0.01:
+                precip_text = " [Snow]"
+            elif rain >= 0.01 or showers >= 0.01:
+                precip_text = " [Rain]"
             
             temp_display = self.format_temperature_short(temp_c)
             new_text = f"{city} - {temp_display}{cloud_text}{precip_text}{daily_temps}"
@@ -1311,29 +1113,6 @@ class AccessibleWeatherApp(wx.Frame):
                 for k in keys:
                     if k in curr: return curr[k]
                 return default
-
-            # Condition (always shown — WMO weather code gives rain/snow/clear in one label)
-            wc_raw = curr.get('weather_code', curr.get('weathercode'))
-            if wc_raw is not None:
-                wc = int(wc_raw)
-                condition_desc = self.weather_code_description.get(wc, "")
-                precip_ind = self.classify_weather_code(wc)
-                if condition_desc:
-                    cond_line = f"Condition: {condition_desc}"
-                    if precip_ind:
-                        cond_line += f" {precip_ind}"
-                    lines.append(cond_line)
-                # When actively precipitating, auto-show type breakdown (regardless of config toggles)
-                if wc >= 51:
-                    snow_rate  = get_val(['snowfall'], 0) or 0
-                    rain_rate  = get_val(['rain'], 0) or 0
-                    shwr_rate  = get_val(['showers'], 0) or 0
-                    if snow_rate >= 0.01:
-                        lines.append(f"  Snowfall rate: {self.format_precipitation(snow_rate)}")
-                    if rain_rate >= 0.01:
-                        lines.append(f"  Rain rate: {self.format_precipitation(rain_rate)}")
-                    if shwr_rate >= 0.01:
-                        lines.append(f"  Shower rate: {self.format_precipitation(shwr_rate)}")
 
             # Temperature
             if cfg_curr.get('temperature', True):
@@ -1455,7 +1234,6 @@ class AccessibleWeatherApp(wx.Frame):
             snow_depth = hourly.get('snow_depth', [])
             rain = hourly.get('rain', [])
             showers = hourly.get('showers', [])
-            hourly_codes = hourly.get('weathercode', [])
             
             # Find start
             start = 0
@@ -1484,12 +1262,6 @@ class AccessibleWeatherApp(wx.Frame):
                 if cfg_hourly.get('temperature', True) and i < len(temps):
                     parts.append(self.format_temperature_short(temps[i]))
                 
-                # Precipitation type indicator from hourly weather code
-                if i < len(hourly_codes) and hourly_codes[i] is not None:
-                    hc_ind = self.classify_weather_code(hourly_codes[i])
-                    if hc_ind:
-                        parts.append(hc_ind)
-
                 if cfg_hourly.get('feels_like', False) and i < len(app_temps):
                     parts.append(f"Feels Like {self.format_temperature_short(app_temps[i])}")
 
@@ -1549,7 +1321,6 @@ class AccessibleWeatherApp(wx.Frame):
             snowfall_sum = daily.get('snowfall_sum', [])
             rain_sum = daily.get('rain_sum', [])
             showers_sum = daily.get('showers_sum', [])
-            daily_codes = daily.get('weathercode', [])
             
             for i in range(len(times)):
                 d = datetime.strptime(times[i], "%Y-%m-%d").strftime("%a %b %d")
@@ -1561,21 +1332,6 @@ class AccessibleWeatherApp(wx.Frame):
                 if cfg_daily.get('temperature_min', True) and i < len(mins):
                     parts.append(f"Low {self.format_temperature_short(mins[i])}")
                 
-                # Precipitation type indicator from daily weather code
-                if i < len(daily_codes) and daily_codes[i] is not None:
-                    dc_ind = self.classify_weather_code(daily_codes[i])
-                    if dc_ind:
-                        parts.append(dc_ind)
-
-                # Auto-show snow/rain totals when present, even if not enabled in config
-                # (skipped if the user already has those config fields enabled to avoid duplication)
-                if i < len(snowfall_sum) and snowfall_sum[i] and snowfall_sum[i] >= 0.01:
-                    if not cfg_daily.get('snowfall_sum', False):
-                        parts.append(f"{self.format_precipitation(snowfall_sum[i])} snow")
-                if i < len(rain_sum) and rain_sum[i] and rain_sum[i] >= 0.01:
-                    if not cfg_daily.get('rain_sum', False):
-                        parts.append(f"{self.format_precipitation(rain_sum[i])} rain")
-
                 if cfg_daily.get('precipitation_sum', True) and i < len(precip_sum):
                     p = precip_sum[i]
                     if p > 0: parts.append(f"{self.format_precipitation(p)} precip")
