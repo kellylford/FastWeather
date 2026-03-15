@@ -181,6 +181,12 @@ class WeatherService: ObservableObject {
         saveCities()
     }
     
+    /// Flush all in-memory weather cache entries so the next fetch is a live network call.
+    func clearWeatherCache() {
+        weatherCache = [:]
+        cacheTimestamps = [:]
+    }
+    
     // MARK: - Weather Fetching
     
     // Check if cached data is still valid
@@ -379,6 +385,13 @@ class WeatherService: ObservableObject {
                     )
                 }
             }
+            
+            // Optionally overlay WeatherKit snow totals over the Open-Meteo values
+            #if canImport(WeatherKit)
+            if #available(iOS 16.0, *), FeatureFlags.shared.weatherKitSnowEnabled {
+                finalWeatherData = await applyWeatherKitSnowOverlay(for: city, dateOffset: dateOffset, into: finalWeatherData)
+            }
+            #endif
             
             await MainActor.run {
                 self.weatherCache[cacheKey] = finalWeatherData
@@ -827,6 +840,62 @@ class WeatherService: ObservableObject {
         
         return historicalDays
     }
+    
+    // MARK: - WeatherKit Snow Override
+    
+    /// Replaces Open-Meteo snowfall_sum values with WeatherKit daily snowfallAmount.
+    /// Called only when the "WeatherKit Snow Totals" dev flag is enabled.
+    /// On any WeatherKit error the original weatherData is returned unchanged.
+    #if canImport(WeatherKit)
+    @available(iOS 16.0, *)
+    private func applyWeatherKitSnowOverlay(for city: City, dateOffset: Int, into weatherData: WeatherData) async -> WeatherData {
+        guard let daily = weatherData.daily else { return weatherData }
+        // WeatherKit provides at most 10 days; beyond that fall back silently
+        guard dateOffset < 10 else { return weatherData }
+        
+        let location = CLLocation(latitude: city.latitude, longitude: city.longitude)
+        do {
+            let dailyForecast = try await WeatherKit.WeatherService.shared.weather(for: location, including: .daily)
+            let forecasts = dailyForecast.forecast
+            
+            let newSnowfallSum: [Double?]
+            if dateOffset == 0 {
+                // Full array: overlay WK values for the first N days WK covers
+                var snow: [Double?] = daily.snowfallSum ?? Array(repeating: nil, count: daily.temperature2mMax.count)
+                for i in 0..<min(forecasts.count, snow.count) {
+                    snow[i] = forecasts[i].snowfallAmount.converted(to: .centimeters).value
+                }
+                newSnowfallSum = snow
+            } else {
+                // Single-day slice: replace with WK value for that specific day
+                guard dateOffset < forecasts.count else { return weatherData }
+                newSnowfallSum = [forecasts[dateOffset].snowfallAmount.converted(to: .centimeters).value]
+            }
+            
+            let newDaily = WeatherData.DailyWeather(
+                temperature2mMax: daily.temperature2mMax,
+                temperature2mMin: daily.temperature2mMin,
+                sunrise: daily.sunrise,
+                sunset: daily.sunset,
+                weatherCode: daily.weatherCode,
+                precipitationSum: daily.precipitationSum,
+                rainSum: daily.rainSum,
+                snowfallSum: newSnowfallSum,
+                precipitationProbabilityMax: daily.precipitationProbabilityMax,
+                uvIndexMax: daily.uvIndexMax,
+                daylightDuration: daily.daylightDuration,
+                sunshineDuration: daily.sunshineDuration,
+                windSpeed10mMax: daily.windSpeed10mMax,
+                winddirection10mDominant: daily.winddirection10mDominant
+            )
+            print("❄️ WK snow overlay applied for \(city.name) offset=\(dateOffset) days=\(forecasts.count)")
+            return WeatherData(current: weatherData.current, daily: newDaily, hourly: weatherData.hourly)
+        } catch {
+            print("⚠️ WK snow overlay failed for \(city.name): \(error.localizedDescription)")
+            return weatherData
+        }
+    }
+    #endif
     
     // MARK: - Weather Alerts (NWS & WeatherKit)
     

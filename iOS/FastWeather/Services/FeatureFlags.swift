@@ -64,6 +64,15 @@ class FeatureFlags: ObservableObject {
         }
     }
     
+    /// Use WeatherKit daily snow totals instead of Open-Meteo snowfall_sum.
+    /// Off by default. When on, WeatherKit daily snowfallAmount (cm) overwrites
+    /// the Open-Meteo value after each fetch. Falls back to Open-Meteo on error.
+    @Published var weatherKitSnowEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(weatherKitSnowEnabled, forKey: "feature_weatherkit_snow_enabled")
+        }
+    }
+    
     // MARK: - Initialization
     
     private init() {
@@ -74,6 +83,7 @@ class FeatureFlags: ObservableObject {
         self.weatherKitAlertsEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_alerts_enabled")
         self.myDataEnabled = UserDefaults.standard.bool(forKey: "feature_my_data_enabled")
         self.tableViewEnabled = UserDefaults.standard.bool(forKey: "feature_table_view_enabled")
+        self.weatherKitSnowEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_snow_enabled")
         
         // Default values (if first launch or not set)
         // All features enabled by default for production
@@ -95,6 +105,9 @@ class FeatureFlags: ObservableObject {
         if !UserDefaults.standard.contains(key: "feature_table_view_enabled") {
             self.tableViewEnabled = false  // Disabled by default — experimental layout
         }
+        if !UserDefaults.standard.contains(key: "feature_weatherkit_snow_enabled") {
+            self.weatherKitSnowEnabled = true  // On by default
+        }
     }
     
     // MARK: - Helper Methods
@@ -107,6 +120,7 @@ class FeatureFlags: ObservableObject {
         weatherKitAlertsEnabled = true  // Default: enabled
         myDataEnabled = true  // Default: enabled
         tableViewEnabled = false  // Default: disabled
+        weatherKitSnowEnabled = true  // Default: enabled
         print("🔧 Feature flags reset to defaults")
     }
     
@@ -118,6 +132,7 @@ class FeatureFlags: ObservableObject {
         weatherKitAlertsEnabled = true
         myDataEnabled = true
         tableViewEnabled = true
+        weatherKitSnowEnabled = true
         print("🔧 All features enabled")
     }
     
@@ -129,6 +144,7 @@ class FeatureFlags: ObservableObject {
         weatherKitAlertsEnabled = false
         myDataEnabled = false
         tableViewEnabled = false
+        weatherKitSnowEnabled = false
         print("🔧 All features disabled")
     }
 }

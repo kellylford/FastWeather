@@ -28,6 +28,14 @@ struct DeveloperSettingsView: View {
                         .accessibilityLabel("My Data custom section feature toggle")
                         .accessibilityHint(featureFlags.myDataEnabled ? "My Data section is enabled. You can add custom data points to city detail views." : "My Data section is disabled and will not appear in city detail views.")
                     
+                    Toggle("WeatherKit Snow Totals", isOn: $featureFlags.weatherKitSnowEnabled)
+                        .accessibilityLabel("WeatherKit Snow Totals feature toggle")
+                        .accessibilityHint(featureFlags.weatherKitSnowEnabled ? "WeatherKit snow is enabled. Daily snow totals come from Apple WeatherKit instead of Open-Meteo." : "WeatherKit snow is disabled. Daily snow totals use Open-Meteo. Enable to test WeatherKit accuracy on lake-effect snow events.")
+                        .onChange(of: featureFlags.weatherKitSnowEnabled) {
+                            weatherService.clearWeatherCache()
+                            Task { await weatherService.refreshAllWeather() }
+                        }
+
                     Toggle("Enable Table View", isOn: $featureFlags.tableViewEnabled)
                         .accessibilityLabel("Enable Table View feature toggle")
                         .accessibilityHint(featureFlags.tableViewEnabled ? "Table view is enabled. Table option will appear in the View Mode picker in Settings." : "Table view is disabled. Table option will not appear in the View Mode picker in Settings.")
