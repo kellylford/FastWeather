@@ -134,7 +134,7 @@ struct ListView: View {
             }
         }
 
-        let endIndex = min(startIndex + 4, times.count)
+        let endIndex = min(startIndex + settingsManager.settings.glanceAheadHours, times.count)
         guard startIndex < endIndex else { return "Forecast not yet loaded" }
 
         let unit = settingsManager.settings.temperatureUnit
@@ -155,11 +155,11 @@ struct ListView: View {
         let diff = lastTemp - firstTemp
         let tempPart: String
         if abs(diff) < 3 {
-            tempPart = "Around \(roundedLast)°\(unit.rawValue)"
+            tempPart = "Around \(roundedLast)\(unit.rawValue)"
         } else if diff > 0 {
-            tempPart = "Increasing to around \(roundedLast)°\(unit.rawValue)"
+            tempPart = "Increasing to around \(roundedLast)\(unit.rawValue)"
         } else {
-            tempPart = "Decreasing to around \(roundedLast)°\(unit.rawValue)"
+            tempPart = "Decreasing to around \(roundedLast)\(unit.rawValue)"
         }
 
         let maxPrecip = precipSlice.max() ?? 0
@@ -224,7 +224,7 @@ struct ListView: View {
         }
         .accessibilityAction(named: "Glance Ahead") {
             let summary = glanceAheadSummary(for: city)
-            UIAccessibility.post(notification: .announcement, argument: "\(city.displayName). Glance Ahead: \(summary)")
+            UIAccessibility.post(notification: .announcement, argument: summary)
         }
         .contextMenu(menuItems: {
             contextMenuContent(for: city, at: index)

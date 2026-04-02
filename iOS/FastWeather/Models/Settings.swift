@@ -355,6 +355,7 @@ struct AppSettings: Codable {
     var pressureUnit: PressureUnit = PressureUnit.defaultUnit
     var distanceUnit: DistanceUnit = DistanceUnit.defaultUnit
     var historicalYearsBack: Int = 20
+    var glanceAheadHours: Int = 4
     
     // Granular UV Index display options (by section)
     var showUVIndexInCurrentConditions: Bool = true
@@ -535,7 +536,7 @@ struct AppSettings: Codable {
     // Custom CodingKeys to handle private _weatherAroundMeDistance property
     enum CodingKeys: String, CodingKey {
         case settingsVersion, viewMode, displayMode, temperatureUnit, windSpeedUnit
-        case precipitationUnit, pressureUnit, distanceUnit, historicalYearsBack
+        case precipitationUnit, pressureUnit, distanceUnit, historicalYearsBack, glanceAheadHours
         // Granular UV Index settings
         case showUVIndexInCurrentConditions, showUVIndexInTodaysForecast
         case showUVIndexInDailyForecast, showUVIndexInCityList
@@ -679,6 +680,7 @@ struct AppSettings: Codable {
         pressureUnit = try container.decodeIfPresent(PressureUnit.self, forKey: .pressureUnit) ?? PressureUnit.defaultUnit
         distanceUnit = try container.decodeIfPresent(DistanceUnit.self, forKey: .distanceUnit) ?? DistanceUnit.defaultUnit
         historicalYearsBack = try container.decodeIfPresent(Int.self, forKey: .historicalYearsBack) ?? 20
+        glanceAheadHours = try container.decodeIfPresent(Int.self, forKey: .glanceAheadHours) ?? 4
         
         // Granular UV Index settings (with migration from deprecated showUVIndex)
         if let deprecated = try? container.decode(Bool.self, forKey: .showUVIndex) {
@@ -961,6 +963,7 @@ struct AppSettings: Codable {
         try container.encode(pressureUnit, forKey: .pressureUnit)
         try container.encode(distanceUnit, forKey: .distanceUnit)
         try container.encode(historicalYearsBack, forKey: .historicalYearsBack)
+        try container.encode(glanceAheadHours, forKey: .glanceAheadHours)
         
         // Granular settings
         try container.encode(showUVIndexInCurrentConditions, forKey: .showUVIndexInCurrentConditions)

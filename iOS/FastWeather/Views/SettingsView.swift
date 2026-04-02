@@ -263,6 +263,17 @@ struct SettingsView: View {
                         }
                         .accessibilityLabel("Daily High and Low temperatures")
                         .accessibilityHint(settingsManager.settings.showDailyHighLowInCityList ? "Enabled, double tap to disable" : "Disabled, double tap to enable")
+
+                    Picker("Glance Ahead Time", selection: $settingsManager.settings.glanceAheadHours) {
+                        ForEach(1...8, id: \.self) { hours in
+                            Text("\(hours) \(hours == 1 ? "hour" : "hours")").tag(hours)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .onChange(of: settingsManager.settings.glanceAheadHours) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Glance Ahead Time, \(settingsManager.settings.glanceAheadHours) \(settingsManager.settings.glanceAheadHours == 1 ? "hour" : "hours")")
                 }
                 
                 // Current Weather Detail Sections
