@@ -111,6 +111,87 @@ struct ListView: View {
         }
     }
     
+    private func glanceAheadSummary(for city: City) -> String {
+        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: 0)
+        guard let weather = weatherService.weatherCache[cacheKey],
+              let hourly = weather.hourly,
+              let times = hourly.time,
+              let temps = hourly.temperature2m,
+              let precips = hourly.precipitationProbability else {
+            return "Forecast not yet loaded"
+        }
+
+        // Find the first hourly index at or after the current hour
+        let calendar = Calendar.current
+        let currentHour = calendar.component(.hour, from: Date())
+        var startIndex = 0
+        for (i, timeString) in times.enumerated() {
+            guard let ts = timeString, let date = DateParser.parse(ts) else { continue }
+            let hour = calendar.component(.hour, from: date)
+            if hour >= currentHour {
+                startIndex = i
+                break
+            }
+        }
+
+        let endIndex = min(startIndex + 4, times.count)
+        guard startIndex < endIndex else { return "Forecast not yet loaded" }
+
+        let unit = settingsManager.settings.temperatureUnit
+        let tempSlice = (startIndex..<endIndex).compactMap { i -> Double? in
+            guard i < temps.count, let raw = temps[i] else { return nil }
+            return unit.convert(raw)
+        }
+        let precipSlice = (startIndex..<endIndex).compactMap { i -> Int? in
+            guard i < precips.count else { return nil }
+            return precips[i]
+        }
+
+        guard let firstTemp = tempSlice.first, let lastTemp = tempSlice.last else {
+            return "Forecast not yet loaded"
+        }
+
+        let roundedLast = Int(lastTemp.rounded())
+        let diff = lastTemp - firstTemp
+        let tempPart: String
+        if abs(diff) < 3 {
+            tempPart = "Around \(roundedLast)°\(unit.rawValue)"
+        } else if diff > 0 {
+            tempPart = "Increasing to around \(roundedLast)°\(unit.rawValue)"
+        } else {
+            tempPart = "Decreasing to around \(roundedLast)°\(unit.rawValue)"
+        }
+
+        let maxPrecip = precipSlice.max() ?? 0
+        let precipPart: String
+        if maxPrecip <= 5 {
+            precipPart = "no precipitation expected"
+        } else {
+            precipPart = "\(maxPrecip)% chance of precipitation"
+        }
+
+        return "\(tempPart), \(precipPart)"
+    }
+
+    @ViewBuilder
+    private func glanceAheadPreview(for city: City) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(city.displayName)
+                .font(.headline)
+                .lineLimit(1)
+            Text("Next 4 Hours")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .textCase(.uppercase)
+            Text(glanceAheadSummary(for: city))
+                .font(.body)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding()
+        .frame(minWidth: 280, alignment: .leading)
+        .background(.regularMaterial)
+    }
+
     @ViewBuilder
     private func cityRow(for city: City, at index: Int) -> some View {
         NavigationLink(destination: CityDetailView(city: city, dateOffset: dateOffset, selectedDate: selectedDate)) {
@@ -141,8 +222,14 @@ struct ListView: View {
         .accessibilityAction(named: "View Historical Weather") {
             viewHistoricalWeather(for: city)
         }
-        .contextMenu {
+        .accessibilityAction(named: "Glance Ahead") {
+            let summary = glanceAheadSummary(for: city)
+            UIAccessibility.post(notification: .announcement, argument: "\(city.displayName). Glance Ahead: \(summary)")
+        }
+        .contextMenu(menuItems: {
             contextMenuContent(for: city, at: index)
+        }) {
+            glanceAheadPreview(for: city)
         }
     }
 }

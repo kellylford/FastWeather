@@ -199,6 +199,14 @@ enum TemperatureUnit: String, CaseIterable, Codable {
             return celsius
         }
     }
+    
+    static var defaultUnit: TemperatureUnit {
+        if Locale.current.measurementSystem == .us {
+            return .fahrenheit
+        } else {
+            return .celsius
+        }
+    }
 }
 
 enum WindSpeedUnit: String, CaseIterable, Codable {
@@ -213,6 +221,16 @@ enum WindSpeedUnit: String, CaseIterable, Codable {
             return kmh
         }
     }
+    
+    static var defaultUnit: WindSpeedUnit {
+        let system = Locale.current.measurementSystem
+        if system == .metric {
+            return .kmh
+        } else {
+            // .us and .uk both conventionally use mph
+            return .mph
+        }
+    }
 }
 
 enum PrecipitationUnit: String, CaseIterable, Codable {
@@ -225,6 +243,14 @@ enum PrecipitationUnit: String, CaseIterable, Codable {
             return mm * 0.0393701
         case .millimeters:
             return mm
+        }
+    }
+    
+    static var defaultUnit: PrecipitationUnit {
+        if Locale.current.measurementSystem == .us {
+            return .inches
+        } else {
+            return .millimeters
         }
     }
 }
@@ -242,6 +268,14 @@ enum PressureUnit: String, CaseIterable, Codable {
             return hPa * 0.02953
         case .mmHg:
             return hPa * 0.750062
+        }
+    }
+    
+    static var defaultUnit: PressureUnit {
+        if Locale.current.measurementSystem == .us {
+            return .inHg
+        } else {
+            return .hPa
         }
     }
 }
@@ -315,10 +349,10 @@ struct AppSettings: Codable {
 
     var viewMode: ViewMode = .list
     var displayMode: DisplayMode = .condensed
-    var temperatureUnit: TemperatureUnit = .fahrenheit
-    var windSpeedUnit: WindSpeedUnit = .mph
-    var precipitationUnit: PrecipitationUnit = .inches
-    var pressureUnit: PressureUnit = .inHg
+    var temperatureUnit: TemperatureUnit = TemperatureUnit.defaultUnit
+    var windSpeedUnit: WindSpeedUnit = WindSpeedUnit.defaultUnit
+    var precipitationUnit: PrecipitationUnit = PrecipitationUnit.defaultUnit
+    var pressureUnit: PressureUnit = PressureUnit.defaultUnit
     var distanceUnit: DistanceUnit = DistanceUnit.defaultUnit
     var historicalYearsBack: Int = 20
     
@@ -639,10 +673,10 @@ struct AppSettings: Codable {
         
         viewMode = try container.decodeIfPresent(ViewMode.self, forKey: .viewMode) ?? .list
         displayMode = try container.decodeIfPresent(DisplayMode.self, forKey: .displayMode) ?? .condensed
-        temperatureUnit = try container.decodeIfPresent(TemperatureUnit.self, forKey: .temperatureUnit) ?? .fahrenheit
-        windSpeedUnit = try container.decodeIfPresent(WindSpeedUnit.self, forKey: .windSpeedUnit) ?? .mph
-        precipitationUnit = try container.decodeIfPresent(PrecipitationUnit.self, forKey: .precipitationUnit) ?? .inches
-        pressureUnit = try container.decodeIfPresent(PressureUnit.self, forKey: .pressureUnit) ?? .inHg
+        temperatureUnit = try container.decodeIfPresent(TemperatureUnit.self, forKey: .temperatureUnit) ?? TemperatureUnit.defaultUnit
+        windSpeedUnit = try container.decodeIfPresent(WindSpeedUnit.self, forKey: .windSpeedUnit) ?? WindSpeedUnit.defaultUnit
+        precipitationUnit = try container.decodeIfPresent(PrecipitationUnit.self, forKey: .precipitationUnit) ?? PrecipitationUnit.defaultUnit
+        pressureUnit = try container.decodeIfPresent(PressureUnit.self, forKey: .pressureUnit) ?? PressureUnit.defaultUnit
         distanceUnit = try container.decodeIfPresent(DistanceUnit.self, forKey: .distanceUnit) ?? DistanceUnit.defaultUnit
         historicalYearsBack = try container.decodeIfPresent(Int.self, forKey: .historicalYearsBack) ?? 20
         
