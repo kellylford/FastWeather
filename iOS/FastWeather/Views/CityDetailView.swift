@@ -1263,7 +1263,7 @@ struct HourlyHeadingRow: View {
                 .padding(.vertical, 10)
                 .padding(.horizontal, 16)
                 .accessibilityAddTraits(.isHeader)
-                .accessibilityLabel("Time: \(formattedTime)")
+                .accessibilityLabel(formattedTime)
 
             ForEach(settingsManager.settings.hourlyFields.filter { $0.isEnabled }, id: \.id) { field in
                 if let (label, value) = fieldText(for: field.type) {

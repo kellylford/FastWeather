@@ -51,13 +51,23 @@ private func geographySort(
 struct StateCitiesView: View {
     let state: String
     @ObservedObject var cityDataService: CityDataService
+    let favoritesService: BrowseFavoritesService
+    let overrideSortOrder: BrowseSortOrder?
     @EnvironmentObject var weatherService: WeatherService
     @AppStorage("defaultBrowseSortOrder") private var defaultSortRaw: String = BrowseSortOrder.nameAZ.rawValue
     @State private var searchText = ""
     @State private var weatherData: [String: WeatherData] = [:]
     @State private var isLoadingWeather = false
     @State private var hasCompletedInitialLoad = false
-    @State private var sortOrder: BrowseSortOrder = .nameAZ
+    @State private var sortOrder: BrowseSortOrder
+
+    init(state: String, cityDataService: CityDataService, favoritesService: BrowseFavoritesService, overrideSortOrder: BrowseSortOrder?) {
+        self.state = state
+        self.cityDataService = cityDataService
+        self.favoritesService = favoritesService
+        self.overrideSortOrder = overrideSortOrder
+        self._sortOrder = State(initialValue: overrideSortOrder ?? .nameAZ)
+    }
 
     private var cities: [CityLocation] {
         cityDataService.cities(forState: state)
@@ -103,13 +113,33 @@ struct StateCitiesView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 sortMenu
             }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                favoriteButton
+            }
         }
         .onAppear {
-            sortOrder = BrowseSortOrder(rawValue: defaultSortRaw) ?? .nameAZ
+            if overrideSortOrder == nil {
+                sortOrder = BrowseSortOrder(rawValue: defaultSortRaw) ?? .nameAZ
+            }
         }
         .task {
             await loadAllWeather()
         }
+    }
+
+    private var favoriteButton: some View {
+        let isFav = favoritesService.isFavorite(name: state, regionType: .us)
+        return Button {
+            if isFav {
+                favoritesService.remove(name: state, regionType: .us)
+            } else {
+                favoritesService.add(name: state, regionType: .us, sortOrder: sortOrder)
+            }
+        } label: {
+            Image(systemName: isFav ? "star.fill" : "star")
+                .foregroundColor(isFav ? .yellow : nil)
+        }
+        .accessibilityLabel(isFav ? "\(state), Remove from Favorites" : "\(state), Add to Favorites")
     }
 
     private var sortMenu: some View {
@@ -156,13 +186,23 @@ struct StateCitiesView: View {
 struct CountryCitiesView: View {
     let country: String
     @ObservedObject var cityDataService: CityDataService
+    let favoritesService: BrowseFavoritesService
+    let overrideSortOrder: BrowseSortOrder?
     @EnvironmentObject var weatherService: WeatherService
     @AppStorage("defaultBrowseSortOrder") private var defaultSortRaw: String = BrowseSortOrder.nameAZ.rawValue
     @State private var searchText = ""
     @State private var weatherData: [String: WeatherData] = [:]
     @State private var isLoadingWeather = false
     @State private var hasCompletedInitialLoad = false
-    @State private var sortOrder: BrowseSortOrder = .nameAZ
+    @State private var sortOrder: BrowseSortOrder
+
+    init(country: String, cityDataService: CityDataService, favoritesService: BrowseFavoritesService, overrideSortOrder: BrowseSortOrder?) {
+        self.country = country
+        self.cityDataService = cityDataService
+        self.favoritesService = favoritesService
+        self.overrideSortOrder = overrideSortOrder
+        self._sortOrder = State(initialValue: overrideSortOrder ?? .nameAZ)
+    }
 
     private var cities: [CityLocation] {
         cityDataService.cities(forCountry: country)
@@ -208,13 +248,33 @@ struct CountryCitiesView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 sortMenu
             }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                favoriteButton
+            }
         }
         .onAppear {
-            sortOrder = BrowseSortOrder(rawValue: defaultSortRaw) ?? .nameAZ
+            if overrideSortOrder == nil {
+                sortOrder = BrowseSortOrder(rawValue: defaultSortRaw) ?? .nameAZ
+            }
         }
         .task {
             await loadAllWeather()
         }
+    }
+
+    private var favoriteButton: some View {
+        let isFav = favoritesService.isFavorite(name: country, regionType: .international)
+        return Button {
+            if isFav {
+                favoritesService.remove(name: country, regionType: .international)
+            } else {
+                favoritesService.add(name: country, regionType: .international, sortOrder: sortOrder)
+            }
+        } label: {
+            Image(systemName: isFav ? "star.fill" : "star")
+                .foregroundColor(isFav ? .yellow : nil)
+        }
+        .accessibilityLabel(isFav ? "\(country), Remove from Favorites" : "\(country), Add to Favorites")
     }
 
     private var sortMenu: some View {
@@ -716,6 +776,7 @@ struct BrowseCityDetailDestination: View {
 }
 
 #Preview {
-    StateCitiesView(state: "California", cityDataService: CityDataService())
+    let favoritesService = BrowseFavoritesService()
+    StateCitiesView(state: "California", cityDataService: CityDataService(), favoritesService: favoritesService, overrideSortOrder: nil)
         .environmentObject(WeatherService())
 }

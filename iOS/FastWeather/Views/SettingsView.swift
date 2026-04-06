@@ -276,9 +276,8 @@ struct SettingsView: View {
                     .accessibilityLabel("Glance Ahead Time, \(settingsManager.settings.glanceAheadHours) \(settingsManager.settings.glanceAheadHours == 1 ? "hour" : "hours")")
                 }
                 
-                // Current Weather Detail Sections
-                Section(header: Text("Current Weather Detail View"),
-                       footer: Text("Toggle which sections appear in the current weather detail view. Use VoiceOver actions to reorder sections.")) {
+                // Hourly and Daily Display section
+                Section(header: Text("Hourly and Daily Display")) {
                     Picker(selection: $settingsManager.settings.forecastDetailLayout) {
                         ForEach(ForecastDetailLayout.allCases, id: \.self) { layout in
                             Text(layout.rawValue).tag(layout)
@@ -296,7 +295,11 @@ struct SettingsView: View {
                     }
                     .accessibilityLabel("Forecast layout, currently \(settingsManager.settings.forecastDetailLayout.rawValue)")
                     .accessibilityHint("List shows the standard compact forecast. Headings shows each time period as a section with individual field rows.")
+                }
 
+                // Current Weather Detail Sections
+                Section(header: Text("Current Weather Detail View"),
+                       footer: Text("Toggle which sections appear in the current weather detail view. Use VoiceOver actions to reorder sections.")) {
                     ForEach(settingsManager.settings.detailCategories.indices, id: \.self) { index in
                         let category = settingsManager.settings.detailCategories[index]
                         

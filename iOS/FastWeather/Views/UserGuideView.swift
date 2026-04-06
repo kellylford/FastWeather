@@ -527,6 +527,43 @@ struct UserGuideView: View {
                     BulletPoint("**Warning triangle** - Error or unavailable (VoiceOver: describes issue)")
                     BulletPoint("**Checkmark** - Selected item (VoiceOver: \"Selected\")")
                     BulletPoint("**Two arrows up and down** - Browse Cities sort button (VoiceOver: \"Sort cities. Current sort: [sort order name]\")")
+
+                    Text("**Decorative Illustrations:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("These large gray illustrations appear on the Browse Cities tab when no state or country has been selected yet. They are purely decorative and are hidden from VoiceOver — the text prompt beside them conveys the same meaning.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 4)
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "map")
+                            .font(.title2)
+                            .foregroundColor(.secondary)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Tri-fold paper map (U.S. States tab)")
+                                .fontWeight(.semibold)
+                            Text("A stylized folded road map outline with two vertical crease lines. Appears alongside \"Select a state to view cities\". Hidden from VoiceOver.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "globe")
+                            .font(.title2)
+                            .foregroundColor(.secondary)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Globe (International tab)")
+                                .fontWeight(.semibold)
+                            Text("A sphere with horizontal and curved longitude lines suggesting the Earth. Appears alongside \"Select a country to view cities\". Hidden from VoiceOver.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
                     
                     Text("**Important:** All icons are decorative only. VoiceOver users receive full information through text labels and announcements. You never need to see icons to use the app.")
                         .font(.callout)

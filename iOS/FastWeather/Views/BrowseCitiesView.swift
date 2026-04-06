@@ -7,218 +7,146 @@
 
 import SwiftUI
 
+// Navigation destinations for the Browse Cities stack
+enum BrowseDestination: Hashable {
+    case region(BrowseRegionType)
+    case stateCities(name: String, sortOrder: BrowseSortOrder?)
+    case countryCities(name: String, sortOrder: BrowseSortOrder?)
+}
+
 struct BrowseCitiesView: View {
     @StateObject private var cityDataService = CityDataService()
-    @State private var selectedRegionType: RegionType = .us
-    
-    enum RegionType: String, CaseIterable {
-        case us = "United States"
-        case international = "International"
-    }
-    
+    @StateObject private var favoritesService = BrowseFavoritesService()
+    @State private var navPath: [BrowseDestination] = []
+
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                Picker("Region", selection: $selectedRegionType) {
-                    ForEach(RegionType.allCases, id: \.self) { type in
-                        Text(type.rawValue).tag(type)
+        NavigationStack(path: $navPath) {
+            List {
+                if !favoritesService.favorites.isEmpty {
+                    Section("Favorites") {
+                        ForEach(favoritesService.favorites) { favorite in
+                            Button {
+                                switch favorite.regionType {
+                                case .us:
+                                    navPath.append(.stateCities(name: favorite.name, sortOrder: favorite.sortOrder))
+                                case .international:
+                                    navPath.append(.countryCities(name: favorite.name, sortOrder: favorite.sortOrder))
+                                }
+                            } label: {
+                                Text(favorite.name)
+                                    .foregroundColor(.primary)
+                            }
+                            .accessibilityLabel(favorite.name)
+                            .accessibilityHint("Double tap to browse cities")
+                        }
                     }
                 }
-                .pickerStyle(.segmented)
-                .padding()
-                .accessibilityLabel("Select region to browse")
-                
-                switch selectedRegionType {
-                case .us:
-                    USStatesListView(cityDataService: cityDataService)
-                case .international:
-                    CountriesListView(cityDataService: cityDataService)
+
+                Section("Browse by Region") {
+                    Button {
+                        navPath.append(.region(.us))
+                    } label: {
+                        Label("United States", systemImage: "flag.fill")
+                            .foregroundColor(.primary)
+                    }
+                    .accessibilityHint("Double tap to browse U.S. states")
+
+                    Button {
+                        navPath.append(.region(.international))
+                    } label: {
+                        Label("International", systemImage: "globe")
+                            .foregroundColor(.primary)
+                    }
+                    .accessibilityHint("Double tap to browse countries")
                 }
             }
             .navigationTitle("Browse Cities")
+            .navigationDestination(for: BrowseDestination.self) { destination in
+                switch destination {
+                case .region(.us):
+                    USStatesListView(cityDataService: cityDataService, navPath: $navPath)
+                case .region(.international):
+                    CountriesListView(cityDataService: cityDataService, navPath: $navPath)
+                case .stateCities(let name, let sortOrder):
+                    StateCitiesView(
+                        state: name,
+                        cityDataService: cityDataService,
+                        favoritesService: favoritesService,
+                        overrideSortOrder: sortOrder
+                    )
+                case .countryCities(let name, let sortOrder):
+                    CountryCitiesView(
+                        country: name,
+                        cityDataService: cityDataService,
+                        favoritesService: favoritesService,
+                        overrideSortOrder: sortOrder
+                    )
+                }
+            }
         }
-        .navigationViewStyle(.stack)
     }
 }
 
 struct USStatesListView: View {
     @ObservedObject var cityDataService: CityDataService
-    @State private var selectedState: String = ""
-    @State private var showingStatePicker = false
-    
+    @Binding var navPath: [BrowseDestination]
+    @State private var searchText = ""
+
+    private var filteredStates: [String] {
+        searchText.isEmpty ? cityDataService.usStates :
+            cityDataService.usStates.filter { $0.localizedCaseInsensitiveContains(searchText) }
+    }
+
     var body: some View {
-        VStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Select a State")
-                    .font(.headline)
-                    .padding(.horizontal)
-                
-                Button(action: {
-                    showingStatePicker = true
-                }) {
-                    HStack {
-                        Text(selectedState.isEmpty ? "Choose a state..." : selectedState)
-                            .foregroundColor(selectedState.isEmpty ? .secondary : .primary)
-                        Spacer()
-                        Image(systemName: "chevron.down")
-                            .foregroundColor(.secondary)
-                    }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(10)
-                }
-                .padding(.horizontal)
-                .accessibilityLabel(selectedState.isEmpty ? "Choose a state" : "Selected state: \(selectedState)")
-                .accessibilityHint("Double tap to see list of states")
-                .sheet(isPresented: $showingStatePicker) {
-                    NavigationView {
-                        List {
-                            if cityDataService.usStates.isEmpty {
-                                Text("Loading states...")
-                                    .foregroundColor(.secondary)
-                            } else {
-                                ForEach(cityDataService.usStates, id: \.self) { state in
-                                    Button(action: {
-                                        selectedState = state
-                                        showingStatePicker = false
-                                    }) {
-                                        HStack {
-                                            Text(state)
-                                                .foregroundColor(.primary)
-                                            Spacer()
-                                            if selectedState == state {
-                                                Image(systemName: "checkmark")
-                                                    .foregroundColor(.accentColor)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        .navigationTitle("Select State")
-                        .navigationBarTitleDisplayMode(.inline)
-                        .toolbar {
-                            ToolbarItem(placement: .navigationBarTrailing) {
-                                Button("Done") {
-                                    showingStatePicker = false
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                Text("\(cityDataService.usStates.count) states available")
-                    .font(.caption)
+        List {
+            if cityDataService.usStates.isEmpty {
+                Text("Loading states...")
                     .foregroundColor(.secondary)
-                    .padding(.horizontal)
-            }
-            .padding(.top)
-            
-            if !selectedState.isEmpty {
-                StateCitiesView(state: selectedState, cityDataService: cityDataService)
-                    .id(selectedState)
             } else {
-                Spacer()
-                VStack(spacing: 12) {
-                    Image(systemName: "map")
-                        .font(.system(size: 64))
-                        .foregroundColor(.secondary)
-                    Text("Select a state to view cities")
-                        .foregroundColor(.secondary)
+                ForEach(filteredStates, id: \.self) { state in
+                    Button {
+                        navPath.append(.stateCities(name: state, sortOrder: nil))
+                    } label: {
+                        Text(state)
+                            .foregroundColor(.primary)
+                    }
+                    .accessibilityHint("Double tap to browse cities in \(state)")
                 }
-                Spacer()
             }
         }
+        .navigationTitle("United States")
+        .searchable(text: $searchText, prompt: "Search states")
     }
 }
 
 struct CountriesListView: View {
     @ObservedObject var cityDataService: CityDataService
-    @State private var selectedCountry: String = ""
-    @State private var showingCountryPicker = false
-    
+    @Binding var navPath: [BrowseDestination]
+    @State private var searchText = ""
+
+    private var filteredCountries: [String] {
+        searchText.isEmpty ? cityDataService.countries :
+            cityDataService.countries.filter { $0.localizedCaseInsensitiveContains(searchText) }
+    }
+
     var body: some View {
-        VStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Select a Country")
-                    .font(.headline)
-                    .padding(.horizontal)
-                
-                Button(action: {
-                    showingCountryPicker = true
-                }) {
-                    HStack {
-                        Text(selectedCountry.isEmpty ? "Choose a country..." : selectedCountry)
-                            .foregroundColor(selectedCountry.isEmpty ? .secondary : .primary)
-                        Spacer()
-                        Image(systemName: "chevron.down")
-                            .foregroundColor(.secondary)
-                    }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(10)
-                }
-                .padding(.horizontal)
-                .accessibilityLabel(selectedCountry.isEmpty ? "Choose a country" : "Selected country: \(selectedCountry)")
-                .accessibilityHint("Double tap to see list of countries")
-                .sheet(isPresented: $showingCountryPicker) {
-                    NavigationView {
-                        List {
-                            if cityDataService.countries.isEmpty {
-                                Text("Loading countries...")
-                                    .foregroundColor(.secondary)
-                            } else {
-                                ForEach(cityDataService.countries, id: \.self) { country in
-                                    Button(action: {
-                                        selectedCountry = country
-                                        showingCountryPicker = false
-                                    }) {
-                                        HStack {
-                                            Text(country)
-                                                .foregroundColor(.primary)
-                                            Spacer()
-                                            if selectedCountry == country {
-                                                Image(systemName: "checkmark")
-                                                    .foregroundColor(.accentColor)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        .navigationTitle("Select Country")
-                        .navigationBarTitleDisplayMode(.inline)
-                        .toolbar {
-                            ToolbarItem(placement: .navigationBarTrailing) {
-                                Button("Done") {
-                                    showingCountryPicker = false
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                Text("\(cityDataService.countries.count) countries available")
-                    .font(.caption)
+        List {
+            if cityDataService.countries.isEmpty {
+                Text("Loading countries...")
                     .foregroundColor(.secondary)
-                    .padding(.horizontal)
-            }
-            .padding(.top)
-            
-            if !selectedCountry.isEmpty {
-                CountryCitiesView(country: selectedCountry, cityDataService: cityDataService)
-                    .id(selectedCountry)
             } else {
-                Spacer()
-                VStack(spacing: 12) {
-                    Image(systemName: "globe")
-                        .font(.system(size: 64))
-                        .foregroundColor(.secondary)
-                    Text("Select a country to view cities")
-                        .foregroundColor(.secondary)
+                ForEach(filteredCountries, id: \.self) { country in
+                    Button {
+                        navPath.append(.countryCities(name: country, sortOrder: nil))
+                    } label: {
+                        Text(country)
+                            .foregroundColor(.primary)
+                    }
+                    .accessibilityHint("Double tap to browse cities in \(country)")
                 }
-                Spacer()
             }
         }
+        .navigationTitle("International")
+        .searchable(text: $searchText, prompt: "Search countries")
     }
 }
