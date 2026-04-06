@@ -363,64 +363,109 @@ struct CityDetailView: View {
                let tempArray = hourly.temperature2m,
                let weatherCodeArray = hourly.weatherCode,
                let precipArray = hourly.precipitation {
-                GroupBox(label: Label("24-Hour Forecast", systemImage: "clock")) {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 16) {
-                            let currentHourIndex = findCurrentHourIndex(in: timeArray)
-                            let startIndex = currentHourIndex >= 0 ? currentHourIndex : 0
-                            let endIndex = min(startIndex + 24, timeArray.count)
-                            
+                let currentHourIndex = findCurrentHourIndex(in: timeArray)
+                let startIndex = currentHourIndex >= 0 ? currentHourIndex : 0
+                let endIndex = min(startIndex + 24, timeArray.count)
+
+                if settingsManager.settings.forecastDetailLayout == .headings {
+                    GroupBox(label: Label("24-Hour Forecast", systemImage: "clock")) {
+                        VStack(spacing: 0) {
                             ForEach(startIndex..<endIndex, id: \.self) { index in
-                                if let time = timeArray[index] {
-                                    HourlyForecastCard(
-                                        hourly: hourly,
-                                        index: index,
-                                        settingsManager: settingsManager
-                                    )
+                                HourlyHeadingRow(
+                                    hourly: hourly,
+                                    index: index,
+                                    settingsManager: settingsManager
+                                )
+                                if index < endIndex - 1 {
+                                    Divider()
                                 }
                             }
                         }
-                        .padding(.horizontal)
                         .padding(.vertical, 8)
                     }
+                    .padding(.horizontal)
+                } else {
+                    GroupBox(label: Label("24-Hour Forecast", systemImage: "clock")) {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 16) {
+                                ForEach(startIndex..<endIndex, id: \.self) { index in
+                                    if let time = timeArray[index] {
+                                        HourlyForecastCard(
+                                            hourly: hourly,
+                                            index: index,
+                                            settingsManager: settingsManager
+                                        )
+                                    }
+                                }
+                            }
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
+                        }
+                    }
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
             }
             
         case .dailyForecast:
             if let daily = weather.daily, daily.temperature2mMax.count > 1 {
-                GroupBox(label: Label("16-Day Forecast", systemImage: "calendar")) {
-                    VStack(spacing: 0) {
-                        DailyForecastSummaryView(daily: daily, settingsManager: settingsManager)
-                            .padding(.horizontal)
-                            .padding(.top, 4)
-                            .padding(.bottom, 8)
-                        Divider()
-                        ForEach(0..<min(16, daily.temperature2mMax.count), id: \.self) { index in
-                            NavigationLink(destination: DayDetailView(
-                                city: city,
-                                dayIndex: index,
-                                weather: weather,
-                                settingsManager: settingsManager
-                            )) {
-                                DailyForecastRow(
+                if settingsManager.settings.forecastDetailLayout == .headings {
+                    GroupBox(label: Label("16-Day Forecast", systemImage: "calendar")) {
+                        VStack(spacing: 0) {
+                            DailyForecastSummaryView(daily: daily, settingsManager: settingsManager)
+                                .padding(.horizontal)
+                                .padding(.top, 4)
+                                .padding(.bottom, 8)
+                            Divider()
+                            ForEach(0..<min(16, daily.temperature2mMax.count), id: \.self) { index in
+                                DailyHeadingBlock(
+                                    city: city,
+                                    weather: weather,
                                     daily: daily,
                                     index: index,
                                     settingsManager: settingsManager
                                 )
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityHint("Double tap to see detailed forecast for this day")
-
-                            if index < min(15, daily.temperature2mMax.count - 1) {
-                                Divider()
-                                    .padding(.leading)
+                                if index < min(15, daily.temperature2mMax.count - 1) {
+                                    Divider()
+                                }
                             }
                         }
+                        .padding(.vertical, 8)
                     }
-                    .padding(.vertical, 8)
+                    .padding(.horizontal)
+                } else {
+                    GroupBox(label: Label("16-Day Forecast", systemImage: "calendar")) {
+                        VStack(spacing: 0) {
+                            DailyForecastSummaryView(daily: daily, settingsManager: settingsManager)
+                                .padding(.horizontal)
+                                .padding(.top, 4)
+                                .padding(.bottom, 8)
+                            Divider()
+                            ForEach(0..<min(16, daily.temperature2mMax.count), id: \.self) { index in
+                                NavigationLink(destination: DayDetailView(
+                                    city: city,
+                                    dayIndex: index,
+                                    weather: weather,
+                                    settingsManager: settingsManager
+                                )) {
+                                    DailyForecastRow(
+                                        daily: daily,
+                                        index: index,
+                                        settingsManager: settingsManager
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityHint("Double tap to see detailed forecast for this day")
+
+                                if index < min(15, daily.temperature2mMax.count - 1) {
+                                    Divider()
+                                        .padding(.leading)
+                                }
+                            }
+                        }
+                        .padding(.vertical, 8)
+                    }
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
             }
             
         case .marineForecast:
@@ -1193,6 +1238,123 @@ struct HourlyForecastCard: View {
     }
 }
 
+// MARK: - Hourly Heading Row (headings layout mode)
+
+struct HourlyHeadingRow: View {
+    let hourly: WeatherData.HourlyWeather
+    let index: Int
+    @ObservedObject var settingsManager: SettingsManager
+
+    private var formattedTime: String {
+        guard let time = hourly.time?[index] else { return "--" }
+        return FormatHelper.formatTimeCompact(time)
+    }
+
+    private var weatherCodeEnum: WeatherCode? {
+        guard let code = hourly.weatherCode?[index] else { return nil }
+        return WeatherCode(rawValue: code)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(formattedTime)
+                .font(.headline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, 10)
+                .padding(.horizontal, 16)
+                .accessibilityAddTraits(.isHeader)
+                .accessibilityLabel("Time: \(formattedTime)")
+
+            ForEach(settingsManager.settings.hourlyFields.filter { $0.isEnabled }, id: \.id) { field in
+                if let (label, value) = fieldText(for: field.type) {
+                    Divider().padding(.leading, 16)
+                    DetailRow(label: label, value: value)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 6)
+                }
+            }
+        }
+    }
+
+    private func fieldText(for fieldType: HourlyFieldType) -> (String, String)? {
+        switch fieldType {
+        case .temperature:
+            if let temp = hourly.temperature2m?[index] {
+                return ("Temperature", formatTemperature(temp))
+            }
+        case .conditions:
+            if let code = weatherCodeEnum {
+                return ("Conditions", code.description)
+            }
+        case .precipitationProbability:
+            if let prob = hourly.precipitationProbability?[index], prob > 0 {
+                return ("Precipitation Probability", "\(prob)%")
+            }
+        case .precipitation:
+            if let snow = hourly.snowfall?[index], snow > 0 {
+                return ("Snowfall", formatSnowfall(snow))
+            } else if let precip = hourly.precipitation?[index], precip > 0 {
+                return ("Precipitation", formatPrecipitation(precip))
+            }
+        case .snowfall:
+            if let snow = hourly.snowfall?[index], snow > 0 {
+                return ("Snowfall", formatSnowfall(snow))
+            }
+        case .uvIndex:
+            if let uv = hourly.uvIndex?[index], uv > 0 {
+                let category = UVIndexCategory(uvIndex: uv)
+                return ("UV Index", "\(Int(uv.rounded())) – \(category.category)")
+            }
+        case .windSpeed:
+            if let speed = hourly.windSpeed10m?[index], speed > 0 {
+                return ("Wind Speed", formatWindSpeed(speed))
+            }
+        case .windGusts:
+            if let gusts = hourly.windgusts10m?[index], gusts > 0 {
+                return ("Wind Gusts", formatWindSpeed(gusts))
+            }
+        case .humidity:
+            if let humidity = hourly.relativeHumidity2m?[index] {
+                return ("Humidity", "\(humidity)%")
+            }
+        case .cloudCover:
+            if let cloud = hourly.cloudcover?[index] {
+                return ("Cloud Cover", "\(cloud)%")
+            }
+        case .dewPoint:
+            if let dew = hourly.dewpoint2m?[index] {
+                return ("Dew Point", formatTemperature(dew))
+            }
+        default:
+            break
+        }
+        return nil
+    }
+
+    private func formatTemperature(_ celsius: Double) -> String {
+        let temp = settingsManager.settings.temperatureUnit.convert(celsius)
+        let unit = settingsManager.settings.temperatureUnit == .fahrenheit ? "F" : "C"
+        return String(format: "%.0f°%@", temp, unit)
+    }
+
+    private func formatPrecipitation(_ mm: Double) -> String {
+        let precip = settingsManager.settings.precipitationUnit.convert(mm)
+        return String(format: "%.2f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
+    }
+
+    private func formatSnowfall(_ cm: Double) -> String {
+        switch settingsManager.settings.precipitationUnit {
+        case .inches: return String(format: "%.1f in", cm * 0.393701)
+        case .millimeters: return String(format: "%.1f cm", cm)
+        }
+    }
+
+    private func formatWindSpeed(_ kmh: Double) -> String {
+        let speed = settingsManager.settings.windSpeedUnit.convert(kmh)
+        return String(format: "%.0f %@", speed, settingsManager.settings.windSpeedUnit.rawValue)
+    }
+}
+
 // MARK: - 16-Day Forecast Summary
 
 struct DailyForecastSummaryView: View {
@@ -1781,6 +1943,166 @@ struct DailyForecastRow: View {
         } else {
             return "\(hours)h"
         }
+    }
+}
+
+// MARK: - Daily Heading Block (headings layout mode)
+
+struct DailyHeadingBlock: View {
+    let city: City
+    let weather: WeatherData
+    let daily: WeatherData.DailyWeather
+    let index: Int
+    @ObservedObject var settingsManager: SettingsManager
+
+    private var sunrise: String? { daily.sunrise?[index] }
+
+    private var dayName: String {
+        guard let s = sunrise, let date = DateParser.parse(s) else { return "Unknown Date" }
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MMM d"
+        let dateString = dateFormatter.string(from: date)
+        if index == 0 { return "Today, \(dateString)" }
+        if index == 1 { return "Tomorrow, \(dateString)" }
+        let dayFormatter = DateFormatter()
+        dayFormatter.dateFormat = "EEEE"
+        return "\(dayFormatter.string(from: date)), \(dateString)"
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            NavigationLink(destination: DayDetailView(
+                city: city,
+                dayIndex: index,
+                weather: weather,
+                settingsManager: settingsManager
+            )) {
+                HStack {
+                    Text(dayName)
+                        .font(.headline)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.vertical, 10)
+                .padding(.horizontal, 16)
+            }
+            .buttonStyle(.plain)
+            .accessibilityAddTraits(.isHeader)
+            .accessibilityHint("Double tap to see detailed forecast for this day")
+
+            ForEach(settingsManager.settings.dailyFields.filter { $0.isEnabled }, id: \.id) { field in
+                if let (label, value) = fieldText(for: field.type) {
+                    Divider().padding(.leading, 16)
+                    DetailRow(label: label, value: value)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 6)
+                }
+            }
+        }
+    }
+
+    private func fieldText(for fieldType: DailyFieldType) -> (String, String)? {
+        switch fieldType {
+        case .temperatureMax:
+            if let high = daily.temperature2mMax[index] {
+                return ("High", formatTemperature(high))
+            }
+        case .temperatureMin:
+            if let low = daily.temperature2mMin[index] {
+                return ("Low", formatTemperature(low))
+            }
+        case .conditions:
+            if let code = daily.weatherCode?[index], let wc = WeatherCode(rawValue: code) {
+                return ("Conditions", wc.description)
+            }
+        case .sunrise:
+            if let s = sunrise {
+                return ("Sunrise", FormatHelper.formatTime(s))
+            }
+        case .sunset:
+            if let s = daily.sunset?[index] {
+                return ("Sunset", FormatHelper.formatTime(s))
+            }
+        case .precipitationSum:
+            if let snow = daily.snowfallSum?[index], snow > 0 {
+                return ("Snowfall", formatSnowfall(snow))
+            } else if let precip = daily.precipitationSum?[index], precip > 0 {
+                return ("Precipitation", formatPrecipitation(precip))
+            }
+        case .precipitationProbability:
+            if let prob = daily.precipitationProbabilityMax?[index], prob > 0 {
+                return ("Precipitation Probability", "\(prob)%")
+            }
+        case .rainSum:
+            if let rain = daily.rainSum?[index], rain > 0 {
+                return ("Rain Total", formatPrecipitation(rain))
+            }
+        case .snowfallSum:
+            if let snow = daily.snowfallSum?[index], snow > 0 {
+                return ("Snowfall Total", formatSnowfall(snow))
+            }
+        case .windSpeedMax:
+            if let speed = daily.windSpeed10mMax?[index], speed > 0 {
+                return ("Max Wind Speed", formatWindSpeed(speed))
+            }
+        case .windDirectionDominant:
+            if let degrees = daily.winddirection10mDominant?[index] {
+                return ("Wind Direction", formatWindDirection(degrees))
+            }
+        case .uvIndexMax:
+            if let uv = daily.uvIndexMax?[index], uv > 0 {
+                let category = UVIndexCategory(uvIndex: uv)
+                return ("UV Index Max", "\(Int(uv.rounded())) – \(category.category)")
+            }
+        case .daylightDuration:
+            if let daylight = daily.daylightDuration?[index] {
+                return ("Daylight Duration", formatDuration(daylight))
+            }
+        case .sunshineDuration:
+            if let sunshine = daily.sunshineDuration?[index] {
+                return ("Sunshine Duration", formatDuration(sunshine))
+            }
+        default:
+            break
+        }
+        return nil
+    }
+
+    private func formatTemperature(_ celsius: Double) -> String {
+        let temp = settingsManager.settings.temperatureUnit.convert(celsius)
+        let unit = settingsManager.settings.temperatureUnit == .fahrenheit ? "F" : "C"
+        return String(format: "%.0f°%@", temp, unit)
+    }
+
+    private func formatPrecipitation(_ mm: Double) -> String {
+        let precip = settingsManager.settings.precipitationUnit.convert(mm)
+        return String(format: "%.1f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
+    }
+
+    private func formatSnowfall(_ cm: Double) -> String {
+        switch settingsManager.settings.precipitationUnit {
+        case .inches: return String(format: "%.1f in", cm * 0.393701)
+        case .millimeters: return String(format: "%.1f cm", cm)
+        }
+    }
+
+    private func formatWindSpeed(_ kmh: Double) -> String {
+        let speed = settingsManager.settings.windSpeedUnit.convert(kmh)
+        return String(format: "%.0f %@", speed, settingsManager.settings.windSpeedUnit.rawValue)
+    }
+
+    private func formatWindDirection(_ degrees: Int) -> String {
+        let directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+        let idx = Int((Double(degrees) / 45.0).rounded()) % 8
+        return "\(directions[idx]) (\(degrees)°)"
+    }
+
+    private func formatDuration(_ seconds: Double) -> String {
+        let hours = Int(seconds / 3600)
+        let minutes = Int((seconds.truncatingRemainder(dividingBy: 3600)) / 60)
+        return minutes > 0 ? "\(hours)h \(minutes)m" : "\(hours)h"
     }
 }
 

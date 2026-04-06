@@ -279,6 +279,24 @@ struct SettingsView: View {
                 // Current Weather Detail Sections
                 Section(header: Text("Current Weather Detail View"),
                        footer: Text("Toggle which sections appear in the current weather detail view. Use VoiceOver actions to reorder sections.")) {
+                    Picker(selection: $settingsManager.settings.forecastDetailLayout) {
+                        ForEach(ForecastDetailLayout.allCases, id: \.self) { layout in
+                            Text(layout.rawValue).tag(layout)
+                        }
+                    } label: {
+                        HStack {
+                            Text("Forecast Layout")
+                            Spacer()
+                            Text(settingsManager.settings.forecastDetailLayout.rawValue)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .onChange(of: settingsManager.settings.forecastDetailLayout) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Forecast layout, currently \(settingsManager.settings.forecastDetailLayout.rawValue)")
+                    .accessibilityHint("List shows the standard compact forecast. Headings shows each time period as a section with individual field rows.")
+
                     ForEach(settingsManager.settings.detailCategories.indices, id: \.self) { index in
                         let category = settingsManager.settings.detailCategories[index]
                         

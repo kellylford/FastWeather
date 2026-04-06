@@ -18,6 +18,11 @@ enum ViewMode: String, CaseIterable, Codable {
     case table = "Table"
 }
 
+enum ForecastDetailLayout: String, CaseIterable, Codable {
+    case list = "List"
+    case headings = "Headings"
+}
+
 enum WeatherFieldType: String, CaseIterable, Codable {
     case weatherAlerts = "Weather Alerts"
     case temperature = "Temperature"
@@ -349,6 +354,7 @@ struct AppSettings: Codable {
 
     var viewMode: ViewMode = .list
     var displayMode: DisplayMode = .condensed
+    var forecastDetailLayout: ForecastDetailLayout = .list
     var temperatureUnit: TemperatureUnit = TemperatureUnit.defaultUnit
     var windSpeedUnit: WindSpeedUnit = WindSpeedUnit.defaultUnit
     var precipitationUnit: PrecipitationUnit = PrecipitationUnit.defaultUnit
@@ -557,6 +563,7 @@ struct AppSettings: Codable {
         case _weatherAroundMeDistance = "weatherAroundMeDistance"
         case weatherFields, hourlyFields, dailyFields, marineFields, detailCategories
         case myDataFields
+        case forecastDetailLayout
         // Legacy properties
         case showTemperature, showConditions, showFeelsLike, showHumidity
         case showWindSpeed, showWindDirection, showHighTemp, showLowTemp
@@ -737,6 +744,7 @@ struct AppSettings: Codable {
         dailyShowPrecipitationProbability = try container.decodeIfPresent(Bool.self, forKey: .dailyShowPrecipitationProbability) ?? true
         dailyShowPrecipitationAmount = try container.decodeIfPresent(Bool.self, forKey: .dailyShowPrecipitationAmount) ?? true
         dailyShowWind = try container.decodeIfPresent(Bool.self, forKey: .dailyShowWind) ?? false
+        forecastDetailLayout = try container.decodeIfPresent(ForecastDetailLayout.self, forKey: .forecastDetailLayout) ?? .list
         
         _weatherAroundMeDistance = try container.decodeIfPresent(Double.self, forKey: ._weatherAroundMeDistance) ?? (DistanceUnit.defaultUnit == .miles ? 150 : 240)
         
@@ -997,6 +1005,7 @@ struct AppSettings: Codable {
         try container.encode(dailyShowPrecipitationProbability, forKey: .dailyShowPrecipitationProbability)
         try container.encode(dailyShowPrecipitationAmount, forKey: .dailyShowPrecipitationAmount)
         try container.encode(dailyShowWind, forKey: .dailyShowWind)
+        try container.encode(forecastDetailLayout, forKey: .forecastDetailLayout)
         
         try container.encode(_weatherAroundMeDistance, forKey: ._weatherAroundMeDistance)
         try container.encode(weatherFields, forKey: .weatherFields)
