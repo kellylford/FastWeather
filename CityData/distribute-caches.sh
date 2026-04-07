@@ -20,6 +20,11 @@ if [ ! -f "us-cities-cached.json" ]; then
     exit 1
 fi
 
+# Safety check: source us-cities must have >= cities as any destination it will overwrite
+echo "Verifying us-cities-cached.json is current..."
+python3 _check_us_cities.py || python _check_us_cities.py || exit 1
+echo ""
+
 echo "Distributing cached coordinate files..."
 echo ""
 

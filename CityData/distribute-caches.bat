@@ -22,6 +22,16 @@ if not exist "us-cities-cached.json" (
     exit /b 1
 )
 
+REM Safety check: source us-cities must have >= cities as any destination it will overwrite
+echo Verifying us-cities-cached.json is current...
+python _check_us_cities.py
+if errorlevel 1 (
+    echo.
+    pause
+    exit /b 1
+)
+echo.
+
 echo Distributing cached coordinate files...
 echo.
 

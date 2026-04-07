@@ -6659,6 +6659,706 @@
       "lon": -122.4146,
       "state": "California",
       "country": "United States"
+    },
+    {
+      "name": "Rohnert Park",
+      "state": "California",
+      "country": "United States",
+      "lat": 38.3396367,
+      "lon": -122.701098
+    },
+    {
+      "name": "Lompoc",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.6391501,
+      "lon": -120.4579009
+    },
+    {
+      "name": "San Gabriel",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0990995,
+      "lon": -118.1085554
+    },
+    {
+      "name": "Lincoln",
+      "state": "California",
+      "country": "United States",
+      "lat": 38.8915741,
+      "lon": -121.29318
+    },
+    {
+      "name": "Culver City",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0211224,
+      "lon": -118.396466
+    },
+    {
+      "name": "Adelanto",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.5838077,
+      "lon": -117.4082453
+    },
+    {
+      "name": "Calexico",
+      "state": "California",
+      "country": "United States",
+      "lat": 32.6713154,
+      "lon": -115.4927113
+    },
+    {
+      "name": "Brea",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.9170444,
+      "lon": -117.888855
+    },
+    {
+      "name": "Martinez",
+      "state": "California",
+      "country": "United States",
+      "lat": 38.0138934,
+      "lon": -122.1338674
+    },
+    {
+      "name": "La Quinta",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.677474,
+      "lon": -116.2958789
+    },
+    {
+      "name": "Bell",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.9747806,
+      "lon": -118.1866361
+    },
+    {
+      "name": "Pacifica",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.5980374,
+      "lon": -122.4995234
+    },
+    {
+      "name": "Monrovia",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1483499,
+      "lon": -118.0014517
+    },
+    {
+      "name": "Wildomar",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.5939372,
+      "lon": -117.2414989
+    },
+    {
+      "name": "Los Banos",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.0592253,
+      "lon": -120.8505342
+    },
+    {
+      "name": "San Dimas",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1065404,
+      "lon": -117.8069361
+    },
+    {
+      "name": "Hollister",
+      "state": "California",
+      "country": "United States",
+      "lat": 36.8524545,
+      "lon": -121.4016021
+    },
+    {
+      "name": "Moorpark",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.285558,
+      "lon": -118.8820414
+    },
+    {
+      "name": "Temple City",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1082994,
+      "lon": -118.0577568
+    },
+    {
+      "name": "Montclair",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0775104,
+      "lon": -117.6897776
+    },
+    {
+      "name": "Manhattan Beach",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.8872777,
+      "lon": -118.4104324
+    },
+    {
+      "name": "Claremont",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0966764,
+      "lon": -117.7197785
+    },
+    {
+      "name": "La Presa",
+      "state": "California",
+      "country": "United States",
+      "lat": 32.7081085,
+      "lon": -116.9972487
+    },
+    {
+      "name": "Beverly Hills",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0696501,
+      "lon": -118.3963062
+    },
+    {
+      "name": "San Juan Capistrano",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.5016932,
+      "lon": -117.6625509
+    },
+    {
+      "name": "Pleasant Hill",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.9479786,
+      "lon": -122.0607963
+    },
+    {
+      "name": "West Hollywood",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0923014,
+      "lon": -118.3692894
+    },
+    {
+      "name": "Menlo Park",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.4519671,
+      "lon": -122.177992
+    },
+    {
+      "name": "Dana Point",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.4669721,
+      "lon": -117.6981075
+    },
+    {
+      "name": "La Verne",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1008426,
+      "lon": -117.7678355
+    },
+    {
+      "name": "East Palo Alto",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.4688273,
+      "lon": -122.141075
+    },
+    {
+      "name": "Lawndale",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.8951219,
+      "lon": -118.3526323
+    },
+    {
+      "name": "Desert Hot Springs",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.961124,
+      "lon": -116.5016784
+    },
+    {
+      "name": "Fallbrook",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.3764196,
+      "lon": -117.2511466
+    },
+    {
+      "name": "Laguna Hills",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.5948758,
+      "lon": -117.6882067
+    },
+    {
+      "name": "Orcutt",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.8651757,
+      "lon": -120.4472231
+    },
+    {
+      "name": "Walnut",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0203253,
+      "lon": -117.8659441
+    },
+    {
+      "name": "Spring Valley",
+      "state": "California",
+      "country": "United States",
+      "lat": 32.7307741,
+      "lon": -116.97138
+    },
+    {
+      "name": "San Pablo",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.9621457,
+      "lon": -122.3455263
+    },
+    {
+      "name": "Foster City",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.5600336,
+      "lon": -122.2688522
+    },
+    {
+      "name": "Atascadero",
+      "state": "California",
+      "country": "United States",
+      "lat": 35.4894169,
+      "lon": -120.6707255
+    },
+    {
+      "name": "Los Gatos",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.226611,
+      "lon": -121.9746797
+    },
+    {
+      "name": "Saratoga",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.2638324,
+      "lon": -122.0230146
+    },
+    {
+      "name": "Los Altos",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.3790629,
+      "lon": -122.116578
+    },
+    {
+      "name": "Goleta",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.4358295,
+      "lon": -119.8276389
+    },
+    {
+      "name": "Paso Robles",
+      "state": "California",
+      "country": "United States",
+      "lat": 35.6262618,
+      "lon": -120.6901319
+    },
+    {
+      "name": "Suisun City",
+      "state": "California",
+      "country": "United States",
+      "lat": 38.2382474,
+      "lon": -122.040244
+    },
+    {
+      "name": "Banning",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.9255685,
+      "lon": -116.875289
+    },
+    {
+      "name": "Monterey",
+      "state": "California",
+      "country": "United States",
+      "lat": 36.600256,
+      "lon": -121.8946388
+    },
+    {
+      "name": "Maywood",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.9866807,
+      "lon": -118.185349
+    },
+    {
+      "name": "Santa Paula",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.3541659,
+      "lon": -119.0592705
+    },
+    {
+      "name": "Benicia",
+      "state": "California",
+      "country": "United States",
+      "lat": 38.049365,
+      "lon": -122.1585777
+    },
+    {
+      "name": "Twentynine Palms",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1356915,
+      "lon": -116.0543506
+    },
+    {
+      "name": "Ridgecrest",
+      "state": "California",
+      "country": "United States",
+      "lat": 35.6206924,
+      "lon": -117.672097
+    },
+    {
+      "name": "Lemon Grove",
+      "state": "California",
+      "country": "United States",
+      "lat": 32.7425516,
+      "lon": -117.0314172
+    },
+    {
+      "name": "Burlingame",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.5780965,
+      "lon": -122.3473099
+    },
+    {
+      "name": "Atwater",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.3477174,
+      "lon": -120.609084
+    },
+    {
+      "name": "Norco",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.9323307,
+      "lon": -117.5508901
+    },
+    {
+      "name": "San Carlos",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.504936,
+      "lon": -122.261823
+    },
+    {
+      "name": "Lafayette",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.8857582,
+      "lon": -122.1180201
+    },
+    {
+      "name": "Beaumont",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.9299925,
+      "lon": -116.9763092
+    },
+    {
+      "name": "Eureka",
+      "state": "California",
+      "country": "United States",
+      "lat": 40.8018746,
+      "lon": -124.1707558
+    },
+    {
+      "name": "Brawley",
+      "state": "California",
+      "country": "United States",
+      "lat": 32.9786566,
+      "lon": -115.530267
+    },
+    {
+      "name": "Hercules",
+      "state": "California",
+      "country": "United States",
+      "lat": 38.0171441,
+      "lon": -122.2885808
+    },
+    {
+      "name": "Ladera Ranch",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.5520801,
+      "lon": -117.6384556
+    },
+    {
+      "name": "Imperial Beach",
+      "state": "California",
+      "country": "United States",
+      "lat": 32.583893,
+      "lon": -117.1130487
+    },
+    {
+      "name": "Belmont",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.5164926,
+      "lon": -122.2941914
+    },
+    {
+      "name": "Soledad",
+      "state": "California",
+      "country": "United States",
+      "lat": 36.426921,
+      "lon": -121.3271861
+    },
+    {
+      "name": "South Pasadena",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1133062,
+      "lon": -118.1478291
+    },
+    {
+      "name": "Wasco",
+      "state": "California",
+      "country": "United States",
+      "lat": 35.5941238,
+      "lon": -119.3409457
+    },
+    {
+      "name": "El Cerrito",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.9154056,
+      "lon": -122.301411
+    },
+    {
+      "name": "Barstow",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.8986215,
+      "lon": -117.0244313
+    },
+    {
+      "name": "Windsor",
+      "state": "California",
+      "country": "United States",
+      "lat": 38.5471327,
+      "lon": -122.8163802
+    },
+    {
+      "name": "Cudahy",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.9620584,
+      "lon": -118.1835395
+    },
+    {
+      "name": "Mountain House",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.7832614,
+      "lon": -121.542726
+    },
+    {
+      "name": "Reedley",
+      "state": "California",
+      "country": "United States",
+      "lat": 36.5963906,
+      "lon": -119.4511877
+    },
+    {
+      "name": "Seal Beach",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.7423967,
+      "lon": -118.1055926
+    },
+    {
+      "name": "San Fernando",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.28497,
+      "lon": -118.437652
+    },
+    {
+      "name": "Sanger",
+      "state": "California",
+      "country": "United States",
+      "lat": 36.708006,
+      "lon": -119.5559652
+    },
+    {
+      "name": "Bloomington",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0701151,
+      "lon": -117.395582
+    },
+    {
+      "name": "South Lake Tahoe",
+      "state": "California",
+      "country": "United States",
+      "lat": 38.9319293,
+      "lon": -119.9780188
+    },
+    {
+      "name": "San Lorenzo",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.6810422,
+      "lon": -122.1244088
+    },
+    {
+      "name": "Corcoran",
+      "state": "California",
+      "country": "United States",
+      "lat": 36.0981045,
+      "lon": -119.5603728
+    },
+    {
+      "name": "Galt",
+      "state": "California",
+      "country": "United States",
+      "lat": 38.2546373,
+      "lon": -121.2999485
+    },
+    {
+      "name": "Loma Linda",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0537971,
+      "lon": -117.2610925
+    },
+    {
+      "name": "Calabasas",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1446643,
+      "lon": -118.644097
+    },
+    {
+      "name": "Isla Vista",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.4115125,
+      "lon": -119.8562131
+    },
+    {
+      "name": "Laguna Beach",
+      "state": "California",
+      "country": "United States",
+      "lat": 33.5426975,
+      "lon": -117.785366
+    },
+    {
+      "name": "Lemoore",
+      "state": "California",
+      "country": "United States",
+      "lat": 36.3006495,
+      "lon": -119.7827122
+    },
+    {
+      "name": "Selma",
+      "state": "California",
+      "country": "United States",
+      "lat": 36.5707838,
+      "lon": -119.6120765
+    },
+    {
+      "name": "Riverbank",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.7360396,
+      "lon": -120.9354895
+    },
+    {
+      "name": "Agoura Hills",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1481692,
+      "lon": -118.7655456
+    },
+    {
+      "name": "Winter Gardens",
+      "state": "California",
+      "country": "United States",
+      "lat": 32.8311613,
+      "lon": -116.9333599
+    },
+    {
+      "name": "Duarte",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1394513,
+      "lon": -117.9772873
+    },
+    {
+      "name": "Ashland",
+      "state": "California",
+      "country": "United States",
+      "lat": 37.6946528,
+      "lon": -122.1138531
+    },
+    {
+      "name": "Rancho San Diego",
+      "state": "California",
+      "country": "United States",
+      "lat": 32.7472748,
+      "lon": -116.9353032
+    },
+    {
+      "name": "Port Hueneme",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1477558,
+      "lon": -119.1951559
+    },
+    {
+      "name": "Yucca Valley",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.1236205,
+      "lon": -116.4139839
+    },
+    {
+      "name": "Linda",
+      "state": "California",
+      "country": "United States",
+      "lat": 39.1219439,
+      "lon": -121.566054
+    },
+    {
+      "name": "South El Monte",
+      "state": "California",
+      "country": "United States",
+      "lat": 34.0519548,
+      "lon": -118.0467339
     }
   ],
   "Colorado": [
