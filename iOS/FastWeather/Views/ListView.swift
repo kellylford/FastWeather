@@ -223,8 +223,17 @@ struct ListView: View {
             viewHistoricalWeather(for: city)
         }
         .accessibilityAction(named: "Glance Ahead") {
-            let summary = glanceAheadSummary(for: city)
-            UIAccessibility.post(notification: .announcement, argument: summary)
+            let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: 0)
+            let hasHourly = weatherService.weatherCache[cacheKey]?.hourly != nil
+            if hasHourly {
+                let summary = glanceAheadSummary(for: city)
+                UIAccessibility.post(notification: .announcement, argument: summary)
+            } else {
+                UIAccessibility.post(notification: .announcement, argument: "Loading forecast, please try again in a moment")
+                Task {
+                    await weatherService.fetchWeatherForDate(for: city, dateOffset: 0, includeHourly: true)
+                }
+            }
         }
         .contextMenu(menuItems: {
             contextMenuContent(for: city, at: index)
@@ -341,8 +350,15 @@ struct ListRowView: View {
         .task(id: "\(city.id)-\(dateOffset)") {
             // Fetch weather for this city at this date offset if not cached
             let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+            // Skip if already failed (don't loop on persistent errors)
+            guard !weatherService.failedCacheKeys.contains(cacheKey) else { return }
+
             if weatherService.weatherCache[cacheKey] == nil {
-                await weatherService.fetchWeatherForDate(for: city, dateOffset: dateOffset)
+                // Full fetch — includes hourly so Glance Ahead works in list view
+                await weatherService.fetchWeatherForDate(for: city, dateOffset: dateOffset, includeHourly: true)
+            } else if weatherService.weatherCache[cacheKey]?.hourly == nil {
+                // Light data cached but no hourly — upgrade to full fetch for Glance Ahead
+                await weatherService.fetchWeatherForDate(for: city, dateOffset: dateOffset, includeHourly: true)
             }
             
             // Load alerts (only for current date)

@@ -51,6 +51,7 @@
 		A1000WARMB2 /* RegionalWeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000WARM2 /* RegionalWeatherService.swift */; };
 		A6886D9C7A65040E1717E6A4 /* FormatHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6EEC9A0A5A7E9A8E6CDB3BB /* FormatHelperTests.swift */; };
 		AE03796A87F6E9395DD6C77C /* BrowseFavoritesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132665BE8B6FD8F918BD1E26 /* BrowseFavoritesService.swift */; };
+		AABCDEF02 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABCDEF01 /* Secrets.swift */; };
 		BF662C2E13A50213B31C9282 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63BC18B80FA54B507B3AD22C /* Foundation.framework */; };
 		E41FA69A048BFD0F634DB005 /* RadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8C597ECDBB8F82B9D13 /* RadarView.swift */; };
 		FCF060427E69A6D68459749C /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F83A2A75D10D105C7225AE79 /* LocationService.swift */; };
@@ -93,6 +94,7 @@
 		A10000006 /* Weather.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Weather.swift; sourceTree = "<group>"; };
 		A10000008 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		A1000000A /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
+		AABCDEF01 /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
 		A1000000C /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
 		A1000000E /* CityDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CityDataService.swift; sourceTree = "<group>"; };
 		A10000010 /* MyCitiesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyCitiesView.swift; sourceTree = "<group>"; };
@@ -250,6 +252,7 @@
 				2DEF54F1AE97F7891D18FB90 /* MoonCalculator.swift */,
 				2DEF54F1AE97F7891D18FB90 /* MoonCalculator.swift */,
 				132665BE8B6FD8F918BD1E26 /* BrowseFavoritesService.swift */,
+				AABCDEF01 /* Secrets.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -443,6 +446,7 @@
 				A1000DAYDVB1 /* DayDetailView.swift in Sources */,
 				79EF625047D4C75BD3B73614 /* BrowseFavorite.swift in Sources */,
 				AE03796A87F6E9395DD6C77C /* BrowseFavoritesService.swift in Sources */,
+				AABCDEF02 /* Secrets.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -529,7 +533,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEFINES_MODULE = YES;
 				ENABLE_APP_SANDBOX = YES;
@@ -618,7 +622,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = YES;
 				ENABLE_APP_SANDBOX = YES;

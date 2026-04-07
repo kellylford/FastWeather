@@ -175,7 +175,13 @@ struct TableView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.leading, Self.cityLeadingPad)
 
-                            if cachedWeather(for: city) == nil {
+                            let cacheKeyForCity = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+                            if weatherService.failedCacheKeys.contains(cacheKeyForCity) {
+                                Image(systemName: "exclamationmark.triangle")
+                                    .foregroundColor(.secondary)
+                                    .frame(width: colWidth * CGFloat(max(1, columns.count)))
+                                    .accessibilityLabel("Unable to load weather")
+                            } else if cachedWeather(for: city) == nil {
                                 ProgressView()
                                     .frame(width: colWidth * CGFloat(max(1, columns.count)))
                             } else {

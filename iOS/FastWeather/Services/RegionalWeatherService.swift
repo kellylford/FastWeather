@@ -152,14 +152,23 @@ class RegionalWeatherService {
             "timezone": "auto"
         ]
         
-        var components = URLComponents(string: "https://api.open-meteo.com/v1/forecast")!
-        components.queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
+        let baseHost = Secrets.openMeteoAPIKey != nil
+            ? "https://customer-api.open-meteo.com/v1/forecast"
+            : "https://api.open-meteo.com/v1/forecast"
+        var components = URLComponents(string: baseHost)!
+        var queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
+        if let key = Secrets.openMeteoAPIKey, !key.isEmpty {
+            queryItems.append(URLQueryItem(name: "apikey", value: key))
+        }
+        components.queryItems = queryItems
         
         guard let url = components.url else {
             throw URLError(.badURL)
         }
         
-        let (data, response) = try await URLSession.shared.data(from: url)
+        var request = URLRequest(url: url)
+        request.setValue("FastWeather/1.4 (weatherfast.online)", forHTTPHeaderField: "User-Agent")
+        let (data, response) = try await URLSession.shared.data(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse,
               httpResponse.statusCode == 200 else {

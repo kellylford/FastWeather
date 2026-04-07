@@ -39,6 +39,9 @@ city.json.backup
 *.log
 README.old.md
 
+# API keys — never commit the real Secrets.swift (use Secrets.swift.example as template)
+iOS/FastWeather/Services/Secrets.swift
+
 # Test files
 test_*.py
 iOS/FastWeather.xcodeproj/xcshareddata/xcschemes/FastWeather.xcscheme

@@ -38,6 +38,17 @@ struct FlatView: View {
             let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
             if let weather = weatherService.weatherCache[cacheKey] {
                 weatherDetailRows(for: weather)
+            } else if weatherService.failedCacheKeys.contains(cacheKey) {
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .foregroundColor(.secondary)
+                    Text("Unable to load weather. Pull to refresh.")
+                        .foregroundColor(.secondary)
+                        .font(.subheadline)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .listRowBackground(Color.clear)
+                .accessibilityLabel("Unable to load weather. Pull to refresh.")
             } else {
                 ProgressView("Loading...")
                     .frame(maxWidth: .infinity, alignment: .center)

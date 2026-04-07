@@ -32,20 +32,55 @@ class WeatherService: ObservableObject {
     @Published var browseWeatherCache: [String: WeatherData] = [:] // Cache for browse cities
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
+    /// Cache keys whose last fetch attempt failed (network error, timeout, bad response).
+    /// Views use this to show an error state instead of an infinite spinner.
+    @Published var failedCacheKeys: Set<WeatherCacheKey> = []
     
     // DISABLED: Persistent cache is too slow (8.9s to load from UserDefaults)
     // Only using in-memory cache for now
     // private let persistentCache = WeatherCache.shared
     
-    private let baseURL = "https://api.open-meteo.com/v1/forecast"
+    private var baseURL: String {
+        Secrets.openMeteoAPIKey != nil
+            ? "https://customer-api.open-meteo.com/v1/forecast"
+            : "https://api.open-meteo.com/v1/forecast"
+    }
+    // Historical API is NOT included in the Standard paid plan — always use free tier.
     private let historicalURL = "https://archive-api.open-meteo.com/v1/archive"
-    private let marineURL = "https://marine-api.open-meteo.com/v1/marine"
-    private let airQualityURL = "https://air-quality-api.open-meteo.com/v1/air-quality"
+    private var marineURL: String {
+        Secrets.openMeteoAPIKey != nil
+            ? "https://customer-marine-api.open-meteo.com/v1/marine"
+            : "https://marine-api.open-meteo.com/v1/marine"
+    }
+    private var airQualityURL: String {
+        Secrets.openMeteoAPIKey != nil
+            ? "https://customer-air-quality-api.open-meteo.com/v1/air-quality"
+            : "https://air-quality-api.open-meteo.com/v1/air-quality"
+    }
     private let userDefaultsKey = "SavedCities"
+    
+    /// Wraps a URL in a URLRequest with the required User-Agent header.
+    /// When an Open-Meteo API key is configured in Secrets.swift, appends it as &apikey=...
+    /// Timeout is 30s on paid key (larger 16-day responses), 15s on free tier.
+    private func apiRequest(for url: URL) -> URLRequest {
+        var finalURL = url
+        if let key = Secrets.openMeteoAPIKey, !key.isEmpty {
+            var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+            var items = components?.queryItems ?? []
+            items.append(URLQueryItem(name: "apikey", value: key))
+            components?.queryItems = items
+            finalURL = components?.url ?? url
+        }
+        let timeout: TimeInterval = Secrets.openMeteoAPIKey != nil ? 30 : 15
+        var request = URLRequest(url: finalURL, timeoutInterval: timeout)
+        request.setValue("FastWeather/1.4 (weatherfast.online)", forHTTPHeaderField: "User-Agent")
+        return request
+    }
     
     // Performance settings (matching Windows version)
     private let weatherCacheMinutes: TimeInterval = 10 * 60 // 10 minutes in seconds
-    private let maxConcurrentRequests = 5 // Limit parallel API calls
+    // Paid tier (dedicated servers) has no concurrent limit; free tier is 1-in-flight + 5 queued.
+    private let maxConcurrentRequests = Secrets.openMeteoAPIKey != nil ? 5 : 1
     
     // Cache timestamp tracking
     private var cacheTimestamps: [WeatherCacheKey: Date] = [:]
@@ -108,7 +143,7 @@ class WeatherService: ObservableObject {
         guard let url = components.url else { return nil }
         
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await URLSession.shared.data(for: apiRequest(for: url))
             let decoder = JSONDecoder()
             let response = try decoder.decode(MarineResponse.self, from: data)
             return response.current?.myDataValues
@@ -146,7 +181,7 @@ class WeatherService: ObservableObject {
         guard let url = components.url else { return nil }
         
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await URLSession.shared.data(for: apiRequest(for: url))
             let decoder = JSONDecoder()
             let response = try decoder.decode(AirQualityResponse.self, from: data)
             return response.current?.myDataValues
@@ -195,19 +230,29 @@ class WeatherService: ObservableObject {
         return Date().timeIntervalSince(timestamp) < weatherCacheMinutes
     }
     
-    // Fetch full weather data (16 days) for detail views
+    // Fetch light weather data (no hourly, 3 days) for list views
     func fetchWeather(for city: City) async {
-        // Default to today (dateOffset = 0) for backward compatibility
-        await fetchWeatherForDate(for: city, dateOffset: 0)
+        // Light fetch for list display — detail view will request full data on open
+        await fetchWeatherForDate(for: city, dateOffset: 0, includeHourly: false)
     }
     
-    // Fetch weather data for a specific date offset
-    func fetchWeatherForDate(for city: City, dateOffset: Int) async {
+    // Fetch weather data for a specific date offset.
+    // includeHourly: false → skip hourly, forecast_days=3 (fast; used by list/background refresh)
+    // includeHourly: true  → full hourly + 16-day forecast on paid key, 7-day on free tier
+    func fetchWeatherForDate(for city: City, dateOffset: Int, includeHourly: Bool = true) async {
         let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
         
         // Check in-memory cache
         if isCacheValid(timestamp: cacheTimestamps[cacheKey]) {
-            return
+            if !includeHourly {
+                // Light fetch: any valid cache entry is acceptable
+                return
+            }
+            // Full fetch: only reuse cache if it already has hourly data
+            if let cached = weatherCache[cacheKey], cached.hourly != nil {
+                return
+            }
+            // Cached data has no hourly — fall through to re-fetch with full params
         }
         
         // Calculate the target date
@@ -230,18 +275,24 @@ class WeatherService: ObservableObject {
         let baseCurrentParams = "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility,wind_gusts_10m,uv_index,dewpoint_2m"
         let currentParams = Self.appendMyDataParameters(to: baseCurrentParams)
         
-        let params = [
-            "latitude": String(city.latitude),
-            "longitude": String(city.longitude),
-            "current": currentParams,
-            "hourly": "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,windgusts_10m,uv_index,dewpoint_2m,snowfall",
-            "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,rain_sum,snowfall_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration,windspeed_10m_max,winddirection_10m_dominant",
-            "forecast_days": "16",
-            "timezone": "auto"
+        // Light fetch (list/background): minimal params to stay well within free-tier limits.
+        // Full fetch (detail view): includes hourly for charts and 7-day forecast.
+        var queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "latitude", value: String(city.latitude)),
+            URLQueryItem(name: "longitude", value: String(city.longitude)),
+            URLQueryItem(name: "current", value: currentParams),
+            URLQueryItem(name: "daily", value: includeHourly
+                ? "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,rain_sum,snowfall_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration,windspeed_10m_max,winddirection_10m_dominant"
+                : "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum"),
+            URLQueryItem(name: "forecast_days", value: includeHourly ? (Secrets.openMeteoAPIKey != nil ? "16" : "7") : "3"),
+            URLQueryItem(name: "timezone", value: "auto")
         ]
+        if includeHourly {
+            queryItems.append(URLQueryItem(name: "hourly", value: "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,windgusts_10m,uv_index,dewpoint_2m,snowfall"))
+        }
         
         var components = URLComponents(string: baseURL)!
-        components.queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
+        components.queryItems = queryItems
         
         guard let url = components.url else {
             await MainActor.run {
@@ -251,7 +302,7 @@ class WeatherService: ObservableObject {
         }
         
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await URLSession.shared.data(for: apiRequest(for: url))
             
             let decoder = JSONDecoder()
             let response = try decoder.decode(WeatherResponse.self, from: data)
@@ -396,10 +447,13 @@ class WeatherService: ObservableObject {
             await MainActor.run {
                 self.weatherCache[cacheKey] = finalWeatherData
                 self.cacheTimestamps[cacheKey] = Date()
+                self.failedCacheKeys.remove(cacheKey)
             }
         } catch {
+            print("❌ fetchWeatherForDate failed (dateOffset=\(dateOffset), includeHourly=\(includeHourly)): \(error.localizedDescription)")
             await MainActor.run {
                 self.errorMessage = "Failed to fetch weather: \(error.localizedDescription)"
+                self.failedCacheKeys.insert(cacheKey)
             }
         }
     }
@@ -507,7 +561,7 @@ class WeatherService: ObservableObject {
             throw URLError(.badURL)
         }
         
-        let (data, _) = try await URLSession.shared.data(from: url)
+        let (data, _) = try await URLSession.shared.data(for: apiRequest(for: url))
         let response = try JSONDecoder().decode(WeatherResponse.self, from: data)
         let weatherData = WeatherData(current: response.current, daily: response.daily, hourly: response.hourly)
         
@@ -539,7 +593,7 @@ class WeatherService: ObservableObject {
             throw URLError(.badURL)
         }
         
-        let (data, _) = try await URLSession.shared.data(from: url)
+        let (data, _) = try await URLSession.shared.data(for: apiRequest(for: url))
         let response = try JSONDecoder().decode(WeatherResponse.self, from: data)
         return WeatherData(current: response.current, daily: response.daily, hourly: response.hourly)
     }
@@ -593,10 +647,24 @@ class WeatherService: ObservableObject {
             isLoading = true
         }
         
+        // Fetch cities concurrently, capped by maxConcurrentRequests.
+        // On the paid tier (dedicated servers) this is 5; on free tier it stays 1.
         await withTaskGroup(of: Void.self) { group in
-            for city in savedCities {
-                group.addTask {
-                    await self.fetchWeather(for: city)
+            var inFlight = 0
+            var iterator = savedCities.makeIterator()
+            
+            while inFlight < maxConcurrentRequests, let city = iterator.next() {
+                let c = city
+                group.addTask { await self.fetchWeatherForDate(for: c, dateOffset: 0, includeHourly: false) }
+                inFlight += 1
+            }
+            
+            while await group.next() != nil {
+                inFlight -= 1
+                if let city = iterator.next() {
+                    let c = city
+                    group.addTask { await self.fetchWeatherForDate(for: c, dateOffset: 0, includeHourly: false) }
+                    inFlight += 1
                 }
             }
         }
@@ -638,7 +706,7 @@ class WeatherService: ObservableObject {
         }
         
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await URLSession.shared.data(for: apiRequest(for: url))
             let decoder = JSONDecoder()
             let response = try decoder.decode(MarineResponse.self, from: data)
             
@@ -727,7 +795,7 @@ class WeatherService: ObservableObject {
         
         print("📊 Fetching historical weather from \(startDate) to \(endDate) for \(city.name)")
         
-        let (data, _) = try await URLSession.shared.data(from: url)
+        let (data, _) = try await URLSession.shared.data(for: apiRequest(for: url))
         let response = try JSONDecoder().decode(HistoricalWeatherResponse.self, from: data)
         return response
     }
