@@ -4921,6 +4921,146 @@
       "country": "United Kingdom",
       "lat": 53.7623863,
       "lon": -0.3301214
+    },
+    {
+      "name": "Derry/Londonderry",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.9978678,
+      "lon": -7.3213056
+    },
+    {
+      "name": "Lisburn",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.5112856,
+      "lon": -6.046717
+    },
+    {
+      "name": "Newtownabbey",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.6778816,
+      "lon": -5.9249199
+    },
+    {
+      "name": "Bangor",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.662595,
+      "lon": -5.6679127
+    },
+    {
+      "name": "Newry",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.1775283,
+      "lon": -6.337506
+    },
+    {
+      "name": "Armagh",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.3161086,
+      "lon": -6.7189182
+    },
+    {
+      "name": "Ballymena",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.8662966,
+      "lon": -6.2760159
+    },
+    {
+      "name": "Antrim",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.715139,
+      "lon": -6.2192038
+    },
+    {
+      "name": "Carrickfergus",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.7136165,
+      "lon": -5.8073112
+    },
+    {
+      "name": "Coleraine",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 55.1315912,
+      "lon": -6.671861
+    },
+    {
+      "name": "Lurgan",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.460824,
+      "lon": -6.3292491
+    },
+    {
+      "name": "Portadown",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.4250835,
+      "lon": -6.4454404
+    },
+    {
+      "name": "Omagh",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.5992486,
+      "lon": -7.3029907
+    },
+    {
+      "name": "Enniskillen",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.3448171,
+      "lon": -7.638907
+    },
+    {
+      "name": "Craigavon",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.4507201,
+      "lon": -6.3921622
+    },
+    {
+      "name": "Dungannon",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.5039088,
+      "lon": -6.7703622
+    },
+    {
+      "name": "Strabane",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.826115,
+      "lon": -7.4627993
+    },
+    {
+      "name": "Larne",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.8508458,
+      "lon": -5.8183116
+    },
+    {
+      "name": "Downpatrick",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 54.3279335,
+      "lon": -5.71649
+    },
+    {
+      "name": "Ballymoney",
+      "state": "Northern Ireland / Tuaisceart Éireann",
+      "country": "United Kingdom",
+      "lat": 55.0702727,
+      "lon": -6.5172758
     }
   ],
   "Bangladesh": [
