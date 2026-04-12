@@ -760,6 +760,20 @@ struct CityDetailView: View {
         }
         .navigationTitle(city.displayName)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if let text = shareText {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    ShareLink(
+                        item: URL(string: "https://apps.apple.com/us/app/weather-fast/id6757891543")!,
+                        subject: Text("Weather Forecast – \(city.displayName)"),
+                        message: Text(text)
+                    ) {
+                        Label("Share", systemImage: "square.and.arrow.up")
+                    }
+                    .accessibilityLabel("Share weather forecast")
+                }
+            }
+        }
         .task {
             await loadCacheMetadata()
         }
@@ -839,7 +853,63 @@ struct CityDetailView: View {
         let unit = settingsManager.settings.temperatureUnit == .fahrenheit ? "F" : "C"
         return String(format: "%.0f°%@", temp, unit)
     }
-    
+
+    private var shareText: String? {
+        guard let weather = weather else { return nil }
+        let current = weather.current
+        let daily = weather.daily
+
+        let isFahrenheit = settingsManager.settings.temperatureUnit == .fahrenheit
+        let unit = isFahrenheit ? "F" : "C"
+
+        func fmt(_ celsius: Double) -> String {
+            let t = settingsManager.settings.temperatureUnit.convert(celsius)
+            return String(format: "%.0f°%@", t, unit)
+        }
+
+        // Header line: city + current conditions
+        var lines: [String] = []
+        var condParts: [String] = [WeatherCode(rawValue: current.weatherCode)?.description ?? ""]
+        condParts.append(fmt(current.temperature2m))
+        if let feels = current.apparentTemperature {
+            condParts.append("(Feels like \(fmt(feels)))")
+        }
+        lines.append("\(city.displayName) — \(condParts.filter { !$0.isEmpty }.joined(separator: ", "))")
+        lines.append("")
+
+        // Up to 3 days from daily forecast
+        if let daily = daily {
+            let calendar = Calendar.current
+            let displayFmt = DateFormatter()
+            displayFmt.dateFormat = "EEE, MMM d"
+            let shortFmt = DateFormatter()
+            shortFmt.dateFormat = "MMM d"
+
+            let count = min(3, daily.temperature2mMax.count)
+            for i in 0..<count {
+                let date = calendar.date(byAdding: .day, value: i, to: selectedDate) ?? selectedDate
+                let label = i == 0 ? "Today, \(shortFmt.string(from: date))" : displayFmt.string(from: date)
+
+                var parts: [String] = []
+                if let wc = daily.weatherCode?[i], let code = WeatherCode(rawValue: wc) {
+                    parts.append(code.description)
+                }
+                if let hi = daily.temperature2mMax[i] {
+                    parts.append("High \(fmt(hi))")
+                }
+                if let lo = daily.temperature2mMin[i] {
+                    parts.append("Low \(fmt(lo))")
+                }
+                if let prob = daily.precipitationProbabilityMax?[i], prob > 0 {
+                    parts.append("\(prob)% chance of precipitation")
+                }
+                lines.append("\(label): \(parts.joined(separator: ", "))")
+            }
+        }
+
+        return lines.joined(separator: "\n")
+    }
+
     private func formatWindSpeed(_ kmh: Double) -> String {
         let speed = settingsManager.settings.windSpeedUnit.convert(kmh)
         return String(format: "%.1f %@", speed, settingsManager.settings.windSpeedUnit.rawValue)

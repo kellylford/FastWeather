@@ -73,7 +73,7 @@ class WeatherService: ObservableObject {
         }
         let timeout: TimeInterval = Secrets.openMeteoAPIKey != nil ? 30 : 15
         var request = URLRequest(url: finalURL, timeoutInterval: timeout)
-        request.setValue("FastWeather/1.4 (weatherfast.online)", forHTTPHeaderField: "User-Agent")
+        request.setValue("FastWeather/1.5 (weatherfast.online)", forHTTPHeaderField: "User-Agent")
         return request
     }
     
@@ -795,7 +795,10 @@ class WeatherService: ObservableObject {
         
         print("📊 Fetching historical weather from \(startDate) to \(endDate) for \(city.name)")
         
-        let (data, _) = try await URLSession.shared.data(for: apiRequest(for: url))
+        // Historical archive API is always free tier — never send paid API key.
+        var request = URLRequest(url: url, timeoutInterval: 15)
+        request.setValue("FastWeather/1.5 (weatherfast.online)", forHTTPHeaderField: "User-Agent")
+        let (data, _) = try await URLSession.shared.data(for: request)
         let response = try JSONDecoder().decode(HistoricalWeatherResponse.self, from: data)
         return response
     }

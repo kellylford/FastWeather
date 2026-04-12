@@ -167,7 +167,7 @@ class RegionalWeatherService {
         }
         
         var request = URLRequest(url: url)
-        request.setValue("FastWeather/1.4 (weatherfast.online)", forHTTPHeaderField: "User-Agent")
+        request.setValue("FastWeather/1.5 (weatherfast.online)", forHTTPHeaderField: "User-Agent")
         let (data, response) = try await URLSession.shared.data(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse,

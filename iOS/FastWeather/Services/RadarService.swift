@@ -33,7 +33,7 @@ class RadarService {
         ]
         
         var radarRequest = URLRequest(url: components.url!)
-        radarRequest.setValue("FastWeather/1.4 (weatherfast.online)", forHTTPHeaderField: "User-Agent")
+        radarRequest.setValue("FastWeather/1.5 (weatherfast.online)", forHTTPHeaderField: "User-Agent")
         let (data, response) = try await URLSession.shared.data(for: radarRequest)
         
         guard let httpResponse = response as? HTTPURLResponse,
