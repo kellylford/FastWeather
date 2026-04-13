@@ -102,6 +102,14 @@ struct HistoricalWeatherView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
+                
+                if selectedDate == .today {
+                    Text("Today's data may be incomplete — archive updates with a delay")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .accessibilityLabel("Note: today's historical data may be incomplete. The archive updates with a delay.")
+                }
             }
             
             // Navigation buttons
