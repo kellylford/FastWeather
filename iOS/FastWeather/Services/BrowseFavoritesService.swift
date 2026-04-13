@@ -38,16 +38,20 @@ class BrowseFavoritesService: ObservableObject {
     }
 
     private func load() {
-        guard let data = UserDefaults.standard.data(forKey: userDefaultsKey),
-              let decoded = try? JSONDecoder().decode([BrowseFavorite].self, from: data) else {
-            return
+        guard let data = UserDefaults.standard.data(forKey: userDefaultsKey) else { return }
+        do {
+            favorites = try JSONDecoder().decode([BrowseFavorite].self, from: data)
+        } catch {
+            AppLogger.persistence.error("Failed to decode browse favorites — discarding: \(error)")
         }
-        favorites = decoded
     }
 
     private func save() {
-        if let encoded = try? JSONEncoder().encode(favorites) {
+        do {
+            let encoded = try JSONEncoder().encode(favorites)
             UserDefaults.standard.set(encoded, forKey: userDefaultsKey)
+        } catch {
+            AppLogger.persistence.error("Failed to encode browse favorites: \(error)")
         }
     }
 }

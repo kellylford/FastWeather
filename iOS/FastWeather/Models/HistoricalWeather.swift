@@ -7,6 +7,13 @@
 
 import Foundation
 
+// Error response returned by Open-Meteo APIs when a request fails
+// (e.g. { "error": true, "reason": "Only data until 2024-11-30 available" })
+struct OpenMeteoErrorResponse: Codable {
+    let error: Bool
+    let reason: String?
+}
+
 // Historical weather response from Open-Meteo Archive API
 struct HistoricalWeatherResponse: Codable {
     let daily: HistoricalDailyWeather
@@ -16,26 +23,27 @@ struct HistoricalWeatherResponse: Codable {
         let weatherCode: [Int?]
         let temperature2mMax: [Double?]
         let temperature2mMin: [Double?]
-        let apparentTemperatureMax: [Double?]
-        let apparentTemperatureMin: [Double?]
-        let sunrise: [String?]
-        let sunset: [String?]
         let precipitationSum: [Double?]
-        let rainSum: [Double?]
-        let snowfallSum: [Double?]
-        let precipitationHours: [Double?]
-        let windSpeed10mMax: [Double?]
+        // Optional: only present when a full-field request is made (e.g. DayDetailView)
+        let apparentTemperatureMax: [Double?]?
+        let apparentTemperatureMin: [Double?]?
+        let sunrise: [String?]?
+        let sunset: [String?]?
+        let rainSum: [Double?]?
+        let snowfallSum: [Double?]?
+        let precipitationHours: [Double?]?
+        let windSpeed10mMax: [Double?]?
         
         enum CodingKeys: String, CodingKey {
             case time
             case weatherCode = "weathercode"
             case temperature2mMax = "temperature_2m_max"
             case temperature2mMin = "temperature_2m_min"
+            case precipitationSum = "precipitation_sum"
             case apparentTemperatureMax = "apparent_temperature_max"
             case apparentTemperatureMin = "apparent_temperature_min"
             case sunrise
             case sunset
-            case precipitationSum = "precipitation_sum"
             case rainSum = "rain_sum"
             case snowfallSum = "snowfall_sum"
             case precipitationHours = "precipitation_hours"
@@ -44,7 +52,7 @@ struct HistoricalWeatherResponse: Codable {
     }
 }
 
-// Single historical day data
+// Single historical day data (only fields shown in HistoricalDayRow)
 struct HistoricalDay: Identifiable, Codable {
     let id: UUID
     let date: Date
@@ -52,35 +60,17 @@ struct HistoricalDay: Identifiable, Codable {
     let weatherCode: Int
     let tempMax: Double
     let tempMin: Double
-    let apparentTempMax: Double
-    let apparentTempMin: Double
-    let sunrise: String
-    let sunset: String
     let precipitationSum: Double
-    let rainSum: Double
-    let snowfallSum: Double
-    let precipitationHours: Double
-    let windSpeedMax: Double
     
     init(date: Date, year: Int, weatherCode: Int, tempMax: Double, tempMin: Double,
-         apparentTempMax: Double, apparentTempMin: Double, sunrise: String, sunset: String,
-         precipitationSum: Double, rainSum: Double, snowfallSum: Double,
-         precipitationHours: Double, windSpeedMax: Double) {
+         precipitationSum: Double) {
         self.id = UUID()
         self.date = date
         self.year = year
         self.weatherCode = weatherCode
         self.tempMax = tempMax
         self.tempMin = tempMin
-        self.apparentTempMax = apparentTempMax
-        self.apparentTempMin = apparentTempMin
-        self.sunrise = sunrise
-        self.sunset = sunset
         self.precipitationSum = precipitationSum
-        self.rainSum = rainSum
-        self.snowfallSum = snowfallSum
-        self.precipitationHours = precipitationHours
-        self.windSpeedMax = windSpeedMax
     }
     
     var weatherCodeEnum: WeatherCode? {
