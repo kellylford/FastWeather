@@ -906,7 +906,8 @@ class WeatherService: ObservableObject {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+        // No UTC override: parse in local timezone so stored dates display correctly
+        // (midnight UTC would appear as prev-day evening in US timezones)
         
         var historicalDays: [HistoricalDay] = []
         var failCount = 0

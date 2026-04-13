@@ -20,6 +20,7 @@ struct CityDetailView: View {
     @State private var showingRadar = false
     @State private var showingWeatherAroundMe = false
     @State private var selectedAlert: WeatherAlert?
+    @State private var activeAlerts: [WeatherAlert] = []
     @State private var showingRemoveConfirmation = false
     @State private var removalCityName = "" // Captured at trigger time to prevent dialog flashing
     @State private var isRefreshing = false
@@ -476,7 +477,7 @@ struct CityDetailView: View {
             
         case .weatherAlerts:
             // Weather alerts section (US only)
-            WeatherAlertsSection(city: city, selectedAlert: $selectedAlert)
+            WeatherAlertsSection(city: city, selectedAlert: $selectedAlert, alerts: $activeAlerts)
                 .onAppear {
                     print("🔶 WeatherAlerts category appeared for \(city.name)")
                 }
@@ -765,7 +766,7 @@ struct CityDetailView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     ShareLink(
                         item: URL(string: "https://apps.apple.com/us/app/weather-fast/id6757891543")!,
-                        subject: Text("Weather Forecast – \(city.displayName)"),
+                        subject: Text(shareSubject),
                         message: Text(text)
                     ) {
                         Label("Share", systemImage: "square.and.arrow.up")
@@ -854,6 +855,23 @@ struct CityDetailView: View {
         return String(format: "%.0f°%@", temp, unit)
     }
 
+    private var shareSubject: String {
+        guard let weather = weather else {
+            return "Weather Forecast – \(city.displayName)"
+        }
+        let current = weather.current
+        let isFahrenheit = settingsManager.settings.temperatureUnit == .fahrenheit
+        let unit = isFahrenheit ? "F" : "C"
+        let temp = settingsManager.settings.temperatureUnit.convert(current.temperature2m)
+        let tempStr = String(format: "%.0f°%@", temp, unit)
+        let condStr = WeatherCode(rawValue: current.weatherCode)?.description ?? ""
+        let alertPrefix = activeAlerts.isEmpty ? "" : "⚠️ "
+        if condStr.isEmpty {
+            return "\(alertPrefix)\(city.displayName) – \(tempStr)"
+        }
+        return "\(alertPrefix)\(city.displayName) – \(tempStr), \(condStr)"
+    }
+
     private var shareText: String? {
         guard let weather = weather else { return nil }
         let current = weather.current
@@ -875,6 +893,16 @@ struct CityDetailView: View {
             condParts.append("(Feels like \(fmt(feels)))")
         }
         lines.append("\(city.displayName) — \(condParts.filter { !$0.isEmpty }.joined(separator: ", "))")
+
+        // Active weather alerts — shown before forecast details
+        if !activeAlerts.isEmpty {
+            lines.append("")
+            lines.append("⚠️ Active Weather Alerts:")
+            for alert in activeAlerts {
+                lines.append("• \(alert.severity.rawValue): \(alert.event) — \(alert.headline)")
+            }
+        }
+
         lines.append("")
 
         // Up to 3 days from daily forecast
@@ -2180,8 +2208,8 @@ struct DailyHeadingBlock: View {
 struct WeatherAlertsSection: View {
     let city: City
     @Binding var selectedAlert: WeatherAlert?
+    @Binding var alerts: [WeatherAlert]
     @EnvironmentObject var weatherService: WeatherService
-    @State private var alerts: [WeatherAlert] = []
     @State private var isLoading = true
     @State private var hasLoaded = false  // Prevent re-fetching on every appear
     

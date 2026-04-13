@@ -29400,5 +29400,112 @@
       "lat": -17.4809495,
       "lon": 24.2944723
     }
+  ],
+  "Antarctica": [
+    {
+      "name": "McMurdo Station",
+      "state": "Ross Island",
+      "country": "Antarctica",
+      "lat": -77.85,
+      "lon": 166.67
+    },
+    {
+      "name": "Amundsen-Scott South Pole Station",
+      "state": "South Pole",
+      "country": "Antarctica",
+      "lat": -90.0,
+      "lon": 0.0
+    },
+    {
+      "name": "Palmer Station",
+      "state": "Anvers Island",
+      "country": "Antarctica",
+      "lat": -64.7741,
+      "lon": -64.0539
+    },
+    {
+      "name": "Rothera Research Station",
+      "state": "Adelaide Island",
+      "country": "Antarctica",
+      "lat": -67.5681,
+      "lon": -68.1266
+    },
+    {
+      "name": "Halley Research Station",
+      "state": "Brunt Ice Shelf",
+      "country": "Antarctica",
+      "lat": -75.52,
+      "lon": -25.5
+    },
+    {
+      "name": "Mawson Station",
+      "state": "Mac Robertson Land",
+      "country": "Antarctica",
+      "lat": -67.6027,
+      "lon": 62.8738
+    },
+    {
+      "name": "Davis Station",
+      "state": "Princess Elizabeth Land",
+      "country": "Antarctica",
+      "lat": -68.5766,
+      "lon": 77.9674
+    },
+    {
+      "name": "Casey Station",
+      "state": "Wilkes Land",
+      "country": "Antarctica",
+      "lat": -66.2822,
+      "lon": 110.5276
+    },
+    {
+      "name": "Dumont d'Urville Station",
+      "state": "Adelie Land",
+      "country": "Antarctica",
+      "lat": -66.6628,
+      "lon": 140.0014
+    },
+    {
+      "name": "Concordia Station",
+      "state": "Dome C",
+      "country": "Antarctica",
+      "lat": -75.1,
+      "lon": 123.35
+    },
+    {
+      "name": "Neumayer Station III",
+      "state": "Atka Bay",
+      "country": "Antarctica",
+      "lat": -70.6833,
+      "lon": -8.2667
+    },
+    {
+      "name": "Troll Station",
+      "state": "Queen Maud Land",
+      "country": "Antarctica",
+      "lat": -72.0117,
+      "lon": 2.535
+    },
+    {
+      "name": "Syowa Station",
+      "state": "East Ongul Island",
+      "country": "Antarctica",
+      "lat": -69.0067,
+      "lon": 39.59
+    },
+    {
+      "name": "Esperanza Base",
+      "state": "Hope Bay",
+      "country": "Antarctica",
+      "lat": -63.4,
+      "lon": -56.9983
+    },
+    {
+      "name": "Bellingshausen Station",
+      "state": "King George Island",
+      "country": "Antarctica",
+      "lat": -62.19,
+      "lon": -58.9658
+    }
   ]
 }

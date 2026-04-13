@@ -172,14 +172,18 @@ struct HistoricalWeatherView: View {
                                     .font(.caption)
                             }
                             .buttonStyle(BorderedProminentButtonStyle())
+                            .disabled(isBrowseDaysUnavailable)
                             .accessibilityLabel("Browse consecutive days starting from \(selectedDate.displayString)")
+                            .accessibilityHint(isBrowseDaysUnavailable ? "Not available for today. Select a past date first." : "")
                         } else {
                             Button(action: { switchToDailyBrowse() }) {
                                 Label("Browse Days", systemImage: "list.bullet.rectangle")
                                     .font(.caption)
                             }
                             .buttonStyle(BorderedButtonStyle())
+                            .disabled(isBrowseDaysUnavailable)
                             .accessibilityLabel("Browse consecutive days starting from \(selectedDate.displayString)")
+                            .accessibilityHint(isBrowseDaysUnavailable ? "Not available for today. Select a past date first." : "")
                         }
                         
                         if viewMode == .multiYear {
@@ -211,7 +215,8 @@ struct HistoricalWeatherView: View {
                 ForEach(Array(historicalData.enumerated()), id: \.element.id) { index, day in
                     HistoricalDayRow(
                         day: day,
-                        settingsManager: settingsManager
+                        settingsManager: settingsManager,
+                        onTap: viewMode == .multiYear ? { selectDate(from: day) } : nil
                     )
                     
                     if index < historicalData.count - 1 {
@@ -224,6 +229,12 @@ struct HistoricalWeatherView: View {
         .frame(maxHeight: 300)
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Historical weather data")
+    }
+    
+    private func selectDate(from day: HistoricalDay) {
+        selectedDate = HistoricalDate(from: day.date)
+        viewMode = .singleDay
+        loadHistoricalData()
     }
     
     // MARK: - Actions
@@ -248,7 +259,7 @@ struct HistoricalWeatherView: View {
                         let dateFormatter = DateFormatter()
                         dateFormatter.dateFormat = "yyyy-MM-dd"
                         dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-                        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+                        // No UTC override: use local timezone so display matches
                         
                         if let timeString = response.daily.time[0],
                            let date = dateFormatter.date(from: timeString),
@@ -282,7 +293,7 @@ struct HistoricalWeatherView: View {
                     let dateFormatter = DateFormatter()
                     dateFormatter.dateFormat = "yyyy-MM-dd"
                     dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-                    dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+                    // No UTC override: use local timezone so display matches
                     
                     // Get start date
                     guard let startDate = dateFormatter.date(from: selectedDate.dateString) else {
@@ -395,6 +406,13 @@ struct HistoricalWeatherView: View {
         selectedDate == .today
     }
     
+    // Browse Days requires a past date so a 30-day range ends before today
+    private var isBrowseDaysUnavailable: Bool {
+        guard let selectedAsDate = selectedDate.toDate(),
+              let todayDate = HistoricalDate.today.toDate() else { return true }
+        return selectedAsDate >= todayDate
+    }
+    
     private var previousButtonLabel: String {
         switch viewMode {
         case .dailyBrowse:
@@ -423,6 +441,7 @@ struct HistoricalWeatherView: View {
 struct HistoricalDayRow: View {
     let day: HistoricalDay
     @ObservedObject var settingsManager: SettingsManager
+    var onTap: (() -> Void)?
     
     private var dateLabel: String {
         let dateFormatter = DateFormatter()
@@ -491,10 +510,22 @@ struct HistoricalDayRow: View {
                     }
                 }
             }
+            
+            // Disclosure chevron shown when row is tappable
+            if onTap != nil {
+                Image(systemName: "chevron.right")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .accessibilityHidden(true)
+            }
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 4)
+        .contentShape(Rectangle())
+        .onTapGesture { onTap?() }
         .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(onTap != nil ? .isButton : [])
+        .accessibilityHint(onTap != nil ? "Tap to navigate to \(dateLabel) \(day.year)" : "")
     }
     
     private func formatTemperature(_ celsius: Double) -> String {
@@ -533,7 +564,7 @@ struct DatePickerSheet: View {
             Form {
                 Section {
                     Picker("Year", selection: $tempYear) {
-                        ForEach((1940...Calendar.current.component(.year, from: Date())).reversed(), id: \.self) { year in
+                        ForEach(1940...Calendar.current.component(.year, from: Date()), id: \.self) { year in
                             Text(String(year)).tag(year)
                         }
                     }
