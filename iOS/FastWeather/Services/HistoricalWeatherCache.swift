@@ -37,7 +37,8 @@ class HistoricalWeatherCache {
     
     private func cacheFile(for city: City, monthDay: String) -> URL {
         let cityDir = cityDirectory(for: city)
-        return cityDir.appendingPathComponent("\(monthDay).json")
+        // v2: dates stored as local-timezone timestamps (v1 used UTC midnight — off by one in US)
+        return cityDir.appendingPathComponent("v2_\(monthDay).json")
     }
     
     // Get cached historical data for a specific month-day (e.g., "01-19" for Jan 19)
