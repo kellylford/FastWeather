@@ -76,7 +76,7 @@ def main():
     cmd = [
         sys.executable, "-m", "PyInstaller",
         "--noconfirm", # Overwrite output directory
-        "--name=FastWeather",
+        "--name=WeatherFast",
         "--windowed",  # No console window
         "--onefile",   # Single executable file
         "--icon=NONE", # No icon (you can add one later)
@@ -105,7 +105,7 @@ def main():
     
     # Check output
     dist_dir = "dist"
-    exe_path = os.path.join(dist_dir, "FastWeather.exe")
+    exe_path = os.path.join(dist_dir, "WeatherFast.exe")
     
     if os.path.exists(exe_path):
         print(f"Executable location: {os.path.abspath(exe_path)}")
@@ -116,7 +116,7 @@ def main():
         print()
         
         print("To distribute:")
-        print(f"  Just share the 'FastWeather.exe' file.")
+        print(f"  Just share the 'WeatherFast.exe' file.")
         print()
     else:
         print("✗ Build output not found!")
