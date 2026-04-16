@@ -13,8 +13,14 @@ enum DisplayMode: String, CaseIterable, Codable {
 }
 
 enum ViewMode: String, CaseIterable, Codable {
-    case list = "List"
     case flat = "Flat"
+    case list = "List"
+    case table = "Table"
+}
+
+enum ForecastDetailLayout: String, CaseIterable, Codable {
+    case list = "List"
+    case headings = "Headings"
 }
 
 enum WeatherFieldType: String, CaseIterable, Codable {
@@ -198,6 +204,14 @@ enum TemperatureUnit: String, CaseIterable, Codable {
             return celsius
         }
     }
+    
+    static var defaultUnit: TemperatureUnit {
+        if Locale.current.measurementSystem == .us {
+            return .fahrenheit
+        } else {
+            return .celsius
+        }
+    }
 }
 
 enum WindSpeedUnit: String, CaseIterable, Codable {
@@ -212,6 +226,16 @@ enum WindSpeedUnit: String, CaseIterable, Codable {
             return kmh
         }
     }
+    
+    static var defaultUnit: WindSpeedUnit {
+        let system = Locale.current.measurementSystem
+        if system == .metric {
+            return .kmh
+        } else {
+            // .us and .uk both conventionally use mph
+            return .mph
+        }
+    }
 }
 
 enum PrecipitationUnit: String, CaseIterable, Codable {
@@ -224,6 +248,14 @@ enum PrecipitationUnit: String, CaseIterable, Codable {
             return mm * 0.0393701
         case .millimeters:
             return mm
+        }
+    }
+    
+    static var defaultUnit: PrecipitationUnit {
+        if Locale.current.measurementSystem == .us {
+            return .inches
+        } else {
+            return .millimeters
         }
     }
 }
@@ -241,6 +273,14 @@ enum PressureUnit: String, CaseIterable, Codable {
             return hPa * 0.02953
         case .mmHg:
             return hPa * 0.750062
+        }
+    }
+    
+    static var defaultUnit: PressureUnit {
+        if Locale.current.measurementSystem == .us {
+            return .inHg
+        } else {
+            return .hPa
         }
     }
 }
@@ -306,17 +346,22 @@ enum DistanceUnit: String, CaseIterable, Codable {
 
 struct AppSettings: Codable {
     // Settings schema version - increment when structure changes
-    static let currentVersion = 2  // Note: My Data fields handled via migration in init(from:)
-    var settingsVersion: Int = AppSettings.currentVersion
-    
+    // v3: Force wipe of v2 stored data — NSException crash caused by type mismatch in stored JSON
+    //     (e.g. a field stored as a number where decoder expects an array).
+    //     Bumping version triggers a one-time settings reset on all affected devices.
+    static let currentVersion = 3  // Note: My Data fields handled via migration in init(from:)
+    var settingsVersion: Int = AppSettings.currentVersion  // = 3
+
     var viewMode: ViewMode = .list
     var displayMode: DisplayMode = .condensed
-    var temperatureUnit: TemperatureUnit = .fahrenheit
-    var windSpeedUnit: WindSpeedUnit = .mph
-    var precipitationUnit: PrecipitationUnit = .inches
-    var pressureUnit: PressureUnit = .inHg
+    var forecastDetailLayout: ForecastDetailLayout = .list
+    var temperatureUnit: TemperatureUnit = TemperatureUnit.defaultUnit
+    var windSpeedUnit: WindSpeedUnit = WindSpeedUnit.defaultUnit
+    var precipitationUnit: PrecipitationUnit = PrecipitationUnit.defaultUnit
+    var pressureUnit: PressureUnit = PressureUnit.defaultUnit
     var distanceUnit: DistanceUnit = DistanceUnit.defaultUnit
     var historicalYearsBack: Int = 20
+    var glanceAheadHours: Int = 4
     
     // Granular UV Index display options (by section)
     var showUVIndexInCurrentConditions: Bool = true
@@ -497,7 +542,7 @@ struct AppSettings: Codable {
     // Custom CodingKeys to handle private _weatherAroundMeDistance property
     enum CodingKeys: String, CodingKey {
         case settingsVersion, viewMode, displayMode, temperatureUnit, windSpeedUnit
-        case precipitationUnit, pressureUnit, distanceUnit, historicalYearsBack
+        case precipitationUnit, pressureUnit, distanceUnit, historicalYearsBack, glanceAheadHours
         // Granular UV Index settings
         case showUVIndexInCurrentConditions, showUVIndexInTodaysForecast
         case showUVIndexInDailyForecast, showUVIndexInCityList
@@ -518,6 +563,7 @@ struct AppSettings: Codable {
         case _weatherAroundMeDistance = "weatherAroundMeDistance"
         case weatherFields, hourlyFields, dailyFields, marineFields, detailCategories
         case myDataFields
+        case forecastDetailLayout
         // Legacy properties
         case showTemperature, showConditions, showFeelsLike, showHumidity
         case showWindSpeed, showWindDirection, showHighTemp, showLowTemp
@@ -635,12 +681,13 @@ struct AppSettings: Codable {
         
         viewMode = try container.decodeIfPresent(ViewMode.self, forKey: .viewMode) ?? .list
         displayMode = try container.decodeIfPresent(DisplayMode.self, forKey: .displayMode) ?? .condensed
-        temperatureUnit = try container.decodeIfPresent(TemperatureUnit.self, forKey: .temperatureUnit) ?? .fahrenheit
-        windSpeedUnit = try container.decodeIfPresent(WindSpeedUnit.self, forKey: .windSpeedUnit) ?? .mph
-        precipitationUnit = try container.decodeIfPresent(PrecipitationUnit.self, forKey: .precipitationUnit) ?? .inches
-        pressureUnit = try container.decodeIfPresent(PressureUnit.self, forKey: .pressureUnit) ?? .inHg
+        temperatureUnit = try container.decodeIfPresent(TemperatureUnit.self, forKey: .temperatureUnit) ?? TemperatureUnit.defaultUnit
+        windSpeedUnit = try container.decodeIfPresent(WindSpeedUnit.self, forKey: .windSpeedUnit) ?? WindSpeedUnit.defaultUnit
+        precipitationUnit = try container.decodeIfPresent(PrecipitationUnit.self, forKey: .precipitationUnit) ?? PrecipitationUnit.defaultUnit
+        pressureUnit = try container.decodeIfPresent(PressureUnit.self, forKey: .pressureUnit) ?? PressureUnit.defaultUnit
         distanceUnit = try container.decodeIfPresent(DistanceUnit.self, forKey: .distanceUnit) ?? DistanceUnit.defaultUnit
         historicalYearsBack = try container.decodeIfPresent(Int.self, forKey: .historicalYearsBack) ?? 20
+        glanceAheadHours = try container.decodeIfPresent(Int.self, forKey: .glanceAheadHours) ?? 4
         
         // Granular UV Index settings (with migration from deprecated showUVIndex)
         if let deprecated = try? container.decode(Bool.self, forKey: .showUVIndex) {
@@ -697,6 +744,7 @@ struct AppSettings: Codable {
         dailyShowPrecipitationProbability = try container.decodeIfPresent(Bool.self, forKey: .dailyShowPrecipitationProbability) ?? true
         dailyShowPrecipitationAmount = try container.decodeIfPresent(Bool.self, forKey: .dailyShowPrecipitationAmount) ?? true
         dailyShowWind = try container.decodeIfPresent(Bool.self, forKey: .dailyShowWind) ?? false
+        forecastDetailLayout = try container.decodeIfPresent(ForecastDetailLayout.self, forKey: .forecastDetailLayout) ?? .list
         
         _weatherAroundMeDistance = try container.decodeIfPresent(Double.self, forKey: ._weatherAroundMeDistance) ?? (DistanceUnit.defaultUnit == .miles ? 150 : 240)
         
@@ -923,6 +971,7 @@ struct AppSettings: Codable {
         try container.encode(pressureUnit, forKey: .pressureUnit)
         try container.encode(distanceUnit, forKey: .distanceUnit)
         try container.encode(historicalYearsBack, forKey: .historicalYearsBack)
+        try container.encode(glanceAheadHours, forKey: .glanceAheadHours)
         
         // Granular settings
         try container.encode(showUVIndexInCurrentConditions, forKey: .showUVIndexInCurrentConditions)
@@ -956,6 +1005,7 @@ struct AppSettings: Codable {
         try container.encode(dailyShowPrecipitationProbability, forKey: .dailyShowPrecipitationProbability)
         try container.encode(dailyShowPrecipitationAmount, forKey: .dailyShowPrecipitationAmount)
         try container.encode(dailyShowWind, forKey: .dailyShowWind)
+        try container.encode(forecastDetailLayout, forKey: .forecastDetailLayout)
         
         try container.encode(_weatherAroundMeDistance, forKey: ._weatherAroundMeDistance)
         try container.encode(weatherFields, forKey: .weatherFields)

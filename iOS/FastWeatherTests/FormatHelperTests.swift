@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import FastWeather
+@testable import WeatherFast
 
 final class FormatHelperTests: XCTestCase {
     

@@ -25,7 +25,7 @@ class CityDataService: ObservableObject {
                 let data = try Data(contentsOf: url)
                 let decoded = try JSONDecoder().decode([String: [CityLocation]].self, from: data)
                 usCitiesByState = decoded
-                print("✅ Loaded \(usCitiesByState.keys.count) US states")
+
             } catch {
                 print("❌ Error loading US cities: \(error)")
                 errorMessage = "Failed to load US cities: \(error.localizedDescription)"
@@ -41,7 +41,7 @@ class CityDataService: ObservableObject {
                 let data = try Data(contentsOf: url)
                 let decoded = try JSONDecoder().decode([String: [CityLocation]].self, from: data)
                 internationalCitiesByCountry = decoded
-                print("✅ Loaded \(internationalCitiesByCountry.keys.count) countries")
+
             } catch {
                 print("❌ Error loading international cities: \(error)")
                 errorMessage = "Failed to load international cities: \(error.localizedDescription)"

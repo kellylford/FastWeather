@@ -11,6 +11,7 @@ struct SettingsView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @EnvironmentObject var weatherService: WeatherService
     @StateObject private var featureFlags = FeatureFlags.shared
+    @AppStorage("defaultBrowseSortOrder") private var defaultBrowseSortOrderRaw: String = "Name (A–Z)"
     @State private var showingResetAlert = false
     @State private var showingDeveloperSettings = false
     @State private var showingMyDataConfig = false
@@ -137,6 +138,27 @@ struct SettingsView: View {
                     .accessibilityHint("Sets the default radius when viewing weather conditions around a city")
                 }
                 
+                // Browse Cities section
+                Section(header: Text("Browse Cities")) {
+                    Picker(selection: Binding(
+                        get: { BrowseSortOrder(rawValue: defaultBrowseSortOrderRaw) ?? .nameAZ },
+                        set: { defaultBrowseSortOrderRaw = $0.rawValue }
+                    )) {
+                        ForEach(BrowseSortOrder.allCases) { order in
+                            Text(order.rawValue).tag(order)
+                        }
+                    } label: {
+                        HStack {
+                            Text("Default City Sort")
+                            Spacer()
+                            Text(BrowseSortOrder(rawValue: defaultBrowseSortOrderRaw)?.rawValue ?? "Name (A–Z)")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .accessibilityLabel("Default browse city sort order, currently \(BrowseSortOrder(rawValue: defaultBrowseSortOrderRaw)?.rawValue ?? "Name (A–Z)")")
+                    .accessibilityHint("Sets the initial sort order when opening a state or country's city list")
+                }
+                
                 // Features section
                 Section(header: Text("Features"),
                        footer: Text("Enable or disable app features.")) {
@@ -156,7 +178,7 @@ struct SettingsView: View {
                 // Display preferences section
                 Section(header: Text("Display Options")) {
                     Picker(selection: $settingsManager.settings.viewMode) {
-                        ForEach(ViewMode.allCases, id: \.self) { mode in
+                        ForEach(ViewMode.allCases.filter { $0 != .table || featureFlags.tableViewEnabled }, id: \.self) { mode in
                             Text(mode.rawValue).tag(mode)
                         }
                     } label: {
@@ -171,7 +193,7 @@ struct SettingsView: View {
                         settingsManager.saveSettings()
                     }
                     .accessibilityLabel("View mode, currently \(settingsManager.settings.viewMode.rawValue)")
-                    .accessibilityHint("Choose between List or Flat view")
+                    .accessibilityHint("Choose between Flat and List view. Table view can be enabled in Developer Settings.")
                     
                     Picker(selection: $settingsManager.settings.displayMode) {
                         ForEach(DisplayMode.allCases, id: \.self) { mode in
@@ -241,8 +263,40 @@ struct SettingsView: View {
                         }
                         .accessibilityLabel("Daily High and Low temperatures")
                         .accessibilityHint(settingsManager.settings.showDailyHighLowInCityList ? "Enabled, double tap to disable" : "Disabled, double tap to enable")
+
+                    Picker("Glance Ahead Time", selection: $settingsManager.settings.glanceAheadHours) {
+                        ForEach(1...8, id: \.self) { hours in
+                            Text("\(hours) \(hours == 1 ? "hour" : "hours")").tag(hours)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .onChange(of: settingsManager.settings.glanceAheadHours) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Glance Ahead Time, \(settingsManager.settings.glanceAheadHours) \(settingsManager.settings.glanceAheadHours == 1 ? "hour" : "hours")")
                 }
                 
+                // Hourly and Daily Display section
+                Section(header: Text("Hourly and Daily Display")) {
+                    Picker(selection: $settingsManager.settings.forecastDetailLayout) {
+                        ForEach(ForecastDetailLayout.allCases, id: \.self) { layout in
+                            Text(layout.rawValue).tag(layout)
+                        }
+                    } label: {
+                        HStack {
+                            Text("Forecast Layout")
+                            Spacer()
+                            Text(settingsManager.settings.forecastDetailLayout.rawValue)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .onChange(of: settingsManager.settings.forecastDetailLayout) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Forecast layout, currently \(settingsManager.settings.forecastDetailLayout.rawValue)")
+                    .accessibilityHint("List shows the standard compact forecast. Headings shows each time period as a section with individual field rows.")
+                }
+
                 // Current Weather Detail Sections
                 Section(header: Text("Current Weather Detail View"),
                        footer: Text("Toggle which sections appear in the current weather detail view. Use VoiceOver actions to reorder sections.")) {
@@ -333,7 +387,7 @@ struct SettingsView: View {
                         }
                     }
                     .accessibilityLabel("User Guide")
-                    .accessibilityHint("Learn how to use FastWeather features")
+                    .accessibilityHint("Learn how to use Weather Fast features")
                 }
                 
                 // About section

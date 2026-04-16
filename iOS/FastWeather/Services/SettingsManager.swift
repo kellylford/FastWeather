@@ -47,8 +47,11 @@ class SettingsManager: ObservableObject {
     }
     
     func saveSettings() {
-        if let encoded = try? JSONEncoder().encode(settings) {
+        do {
+            let encoded = try JSONEncoder().encode(settings)
             UserDefaults.standard.set(encoded, forKey: userDefaultsKey)
+        } catch {
+            AppLogger.persistence.error("Failed to save settings: \(error)")
         }
     }
     

@@ -25,27 +25,68 @@ struct WeatherCacheKey: Hashable {
     }
 }
 
+@MainActor
 class WeatherService: ObservableObject {
     @Published var savedCities: [City] = []
     @Published var weatherCache: [WeatherCacheKey: WeatherData] = [:]
-    @Published var marineCache: [WeatherCacheKey: MarineData] = [:]
+    @Published var marineCache:     [WeatherCacheKey: MarineData] = [:]
     @Published var browseWeatherCache: [String: WeatherData] = [:] // Cache for browse cities
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
+    /// Cache keys whose last fetch attempt failed (network error, timeout, bad response).
+    /// Views use this to show an error state instead of an infinite spinner.
+    @Published var failedCacheKeys: Set<WeatherCacheKey> = []
     
     // DISABLED: Persistent cache is too slow (8.9s to load from UserDefaults)
     // Only using in-memory cache for now
     // private let persistentCache = WeatherCache.shared
     
-    private let baseURL = "https://api.open-meteo.com/v1/forecast"
+    private var baseURL: String {
+        Secrets.openMeteoAPIKey != nil
+            ? "https://customer-api.open-meteo.com/v1/forecast"
+            : "https://api.open-meteo.com/v1/forecast"
+    }
+    // Historical API is NOT included in the Standard paid plan — always use free tier.
     private let historicalURL = "https://archive-api.open-meteo.com/v1/archive"
-    private let marineURL = "https://marine-api.open-meteo.com/v1/marine"
-    private let airQualityURL = "https://air-quality-api.open-meteo.com/v1/air-quality"
+    private var marineURL: String {
+        Secrets.openMeteoAPIKey != nil
+            ? "https://customer-marine-api.open-meteo.com/v1/marine"
+            : "https://marine-api.open-meteo.com/v1/marine"
+    }
+    private var airQualityURL: String {
+        Secrets.openMeteoAPIKey != nil
+            ? "https://customer-air-quality-api.open-meteo.com/v1/air-quality"
+            : "https://air-quality-api.open-meteo.com/v1/air-quality"
+    }
     private let userDefaultsKey = "SavedCities"
     
-    // Performance settings (matching Windows version)
-    private let weatherCacheMinutes: TimeInterval = 10 * 60 // 10 minutes in seconds
-    private let maxConcurrentRequests = 5 // Limit parallel API calls
+    /// Wraps a URL in a URLRequest with the required User-Agent header.
+    /// Appends the Open-Meteo API key when configured and applies a 15-second timeout
+    /// (suitable for current/forecast data; historical overrides this to 30s).
+    private func apiRequest(for url: URL, timeout: TimeInterval = 15) -> URLRequest {
+        var finalURL = url
+        if let key = Secrets.openMeteoAPIKey, !key.isEmpty {
+            var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+            var items = components?.queryItems ?? []
+            items.append(URLQueryItem(name: "apikey", value: key))
+            components?.queryItems = items
+            finalURL = components?.url ?? url
+        }
+        var request = URLRequest(url: finalURL, timeoutInterval: timeout)
+        request.setValue("FastWeather/1.5 (weatherfast.online)", forHTTPHeaderField: "User-Agent")
+        return request
+    }
+    
+    // Cache durations
+    // Current weather changes every ~10 min; future days change at most once per hour.
+    private let currentWeatherCacheDuration: TimeInterval = 10 * 60       // 10 minutes
+    private let forecastWeatherCacheDuration: TimeInterval = 60 * 60      // 1 hour
+    private let browseCacheDuration: TimeInterval = 10 * 60               // 10 minutes
+    // Maximum number of in-memory weather and marine cache entries (oldest evicted first).
+    private let maxWeatherCacheEntries = 50
+    private let maxBrowseCacheEntries  = 100
+    // Paid tier (dedicated servers) has no concurrent limit; free tier is 1-in-flight + 5 queued.
+    private let maxConcurrentRequests = Secrets.openMeteoAPIKey != nil ? 5 : 1
     
     // Cache timestamp tracking
     private var cacheTimestamps: [WeatherCacheKey: Date] = [:]
@@ -108,7 +149,7 @@ class WeatherService: ObservableObject {
         guard let url = components.url else { return nil }
         
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await URLSession.shared.data(for: apiRequest(for: url))
             let decoder = JSONDecoder()
             let response = try decoder.decode(MarineResponse.self, from: data)
             return response.current?.myDataValues
@@ -146,7 +187,7 @@ class WeatherService: ObservableObject {
         guard let url = components.url else { return nil }
         
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await URLSession.shared.data(for: apiRequest(for: url))
             let decoder = JSONDecoder()
             let response = try decoder.decode(AirQualityResponse.self, from: data)
             return response.current?.myDataValues
@@ -181,27 +222,81 @@ class WeatherService: ObservableObject {
         saveCities()
     }
     
+    /// Flush all in-memory weather cache entries so the next fetch is a live network call.
+    func clearWeatherCache() {
+        weatherCache = [:]
+        cacheTimestamps = [:]
+    }
+    
     // MARK: - Weather Fetching
     
     // Check if cached data is still valid
     private func isCacheValid(timestamp: Date?) -> Bool {
         guard let timestamp = timestamp else { return false }
-        return Date().timeIntervalSince(timestamp) < weatherCacheMinutes
+        return Date().timeIntervalSince(timestamp) < currentWeatherCacheDuration
     }
     
-    // Fetch full weather data (16 days) for detail views
+    /// Returns true when the cache entry for `key` is fresh enough to skip a new fetch.
+    /// Future offsets are cached for 1 hour; current (offset=0) for 10 minutes.
+    private func isCacheValid(for key: WeatherCacheKey) -> Bool {
+        guard let timestamp = cacheTimestamps[key] else { return false }
+        let duration = key.dateOffset == 0 ? currentWeatherCacheDuration : forecastWeatherCacheDuration
+        return Date().timeIntervalSince(timestamp) < duration
+    }
+    
+    // MARK: - LRU Cache Eviction
+    
+    /// Evicts the oldest entries from weatherCache and marineCache when they exceed
+    /// maxWeatherCacheEntries, keeping the most recently fetched data in memory.
+    private func trimWeatherCacheIfNeeded() {
+        guard weatherCache.count > maxWeatherCacheEntries else { return }
+        let evict = cacheTimestamps
+            .sorted { $0.value < $1.value }
+            .prefix(weatherCache.count - maxWeatherCacheEntries)
+            .map { $0.key }
+        for key in evict {
+            weatherCache.removeValue(forKey: key)
+            marineCache.removeValue(forKey: key)
+            cacheTimestamps.removeValue(forKey: key)
+            marineCacheTimestamps.removeValue(forKey: key)
+        }
+    }
+    
+    private func trimBrowseCacheIfNeeded() {
+        guard browseWeatherCache.count > maxBrowseCacheEntries else { return }
+        let evict = browseCacheTimestamps
+            .sorted { $0.value < $1.value }
+            .prefix(browseWeatherCache.count - maxBrowseCacheEntries)
+            .map { $0.key }
+        for key in evict {
+            browseWeatherCache.removeValue(forKey: key)
+            browseCacheTimestamps.removeValue(forKey: key)
+        }
+    }
+    
+    // Fetch light weather data (no hourly, 3 days) for list views
     func fetchWeather(for city: City) async {
-        // Default to today (dateOffset = 0) for backward compatibility
-        await fetchWeatherForDate(for: city, dateOffset: 0)
+        // Light fetch for list display — detail view will request full data on open
+        await fetchWeatherForDate(for: city, dateOffset: 0, includeHourly: false)
     }
     
-    // Fetch weather data for a specific date offset
-    func fetchWeatherForDate(for city: City, dateOffset: Int) async {
+    // Fetch weather data for a specific date offset.
+    // includeHourly: false → skip hourly, forecast_days=3 (fast; used by list/background refresh)
+    // includeHourly: true  → full hourly + 16-day forecast on paid key, 7-day on free tier
+    func fetchWeatherForDate(for city: City, dateOffset: Int, includeHourly: Bool = true) async {
         let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
         
         // Check in-memory cache
         if isCacheValid(timestamp: cacheTimestamps[cacheKey]) {
-            return
+            if !includeHourly {
+                // Light fetch: any valid cache entry is acceptable
+                return
+            }
+            // Full fetch: only reuse cache if it already has hourly data
+            if let cached = weatherCache[cacheKey], cached.hourly != nil {
+                return
+            }
+            // Cached data has no hourly — fall through to re-fetch with full params
         }
         
         // Calculate the target date
@@ -224,18 +319,24 @@ class WeatherService: ObservableObject {
         let baseCurrentParams = "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility,wind_gusts_10m,uv_index,dewpoint_2m"
         let currentParams = Self.appendMyDataParameters(to: baseCurrentParams)
         
-        let params = [
-            "latitude": String(city.latitude),
-            "longitude": String(city.longitude),
-            "current": currentParams,
-            "hourly": "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,windgusts_10m,uv_index,dewpoint_2m,snowfall",
-            "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,rain_sum,snowfall_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration,windspeed_10m_max,winddirection_10m_dominant",
-            "forecast_days": "16",
-            "timezone": "auto"
+        // Light fetch (list/background): minimal params to stay well within free-tier limits.
+        // Full fetch (detail view): includes hourly for charts and 7-day forecast.
+        var queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "latitude", value: String(city.latitude)),
+            URLQueryItem(name: "longitude", value: String(city.longitude)),
+            URLQueryItem(name: "current", value: currentParams),
+            URLQueryItem(name: "daily", value: includeHourly
+                ? "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,rain_sum,snowfall_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration,windspeed_10m_max,winddirection_10m_dominant"
+                : "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum"),
+            URLQueryItem(name: "forecast_days", value: includeHourly ? (Secrets.openMeteoAPIKey != nil ? "16" : "7") : "3"),
+            URLQueryItem(name: "timezone", value: "auto")
         ]
+        if includeHourly {
+            queryItems.append(URLQueryItem(name: "hourly", value: "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,windgusts_10m,uv_index,dewpoint_2m,snowfall"))
+        }
         
         var components = URLComponents(string: baseURL)!
-        components.queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
+        components.queryItems = queryItems
         
         guard let url = components.url else {
             await MainActor.run {
@@ -245,7 +346,7 @@ class WeatherService: ObservableObject {
         }
         
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await URLSession.shared.data(for: apiRequest(for: url))
             
             let decoder = JSONDecoder()
             let response = try decoder.decode(WeatherResponse.self, from: data)
@@ -343,13 +444,11 @@ class WeatherService: ObservableObject {
                 // Fetch marine My Data values if any marine parameters are selected
                 if let marineValues = await fetchMyDataMarineValues(for: city) {
                     mergedMyDataValues.merge(marineValues) { (_, new) in new }
-                    print("✅ Merged \(marineValues.count) marine My Data values")
                 }
                 
                 // Fetch air quality My Data values if any air quality parameters are selected
                 if let airQualityValues = await fetchMyDataAirQualityValues(for: city) {
                     mergedMyDataValues.merge(airQualityValues) { (_, new) in new }
-                    print("✅ Merged \(airQualityValues.count) air quality My Data values")
                 }
                 
                 // Update weatherData with merged My Data values if any were added
@@ -382,13 +481,24 @@ class WeatherService: ObservableObject {
                 }
             }
             
+            // Optionally overlay WeatherKit snow totals over the Open-Meteo values
+            #if canImport(WeatherKit)
+            if #available(iOS 16.0, *), FeatureFlags.shared.weatherKitSnowEnabled {
+                finalWeatherData = await applyWeatherKitSnowOverlay(for: city, dateOffset: dateOffset, into: finalWeatherData)
+            }
+            #endif
+            
             await MainActor.run {
                 self.weatherCache[cacheKey] = finalWeatherData
                 self.cacheTimestamps[cacheKey] = Date()
+                self.failedCacheKeys.remove(cacheKey)
+                self.trimWeatherCacheIfNeeded()
             }
         } catch {
+            print("❌ fetchWeatherForDate failed (dateOffset=\(dateOffset), includeHourly=\(includeHourly)): \(error.localizedDescription)")
             await MainActor.run {
                 self.errorMessage = "Failed to fetch weather: \(error.localizedDescription)"
+                self.failedCacheKeys.insert(cacheKey)
             }
         }
     }
@@ -415,7 +525,7 @@ class WeatherService: ObservableObject {
             
             // Create minimal current weather from daily data
             let avgTemp = ((daily.temperature2mMax[firstIndex] ?? 0) + (daily.temperature2mMin[firstIndex] ?? 0)) / 2
-            let avgApparentTemp = ((daily.apparentTemperatureMax[firstIndex] ?? 0) + (daily.apparentTemperatureMin[firstIndex] ?? 0)) / 2
+            let avgApparentTemp = ((daily.apparentTemperatureMax?[firstIndex] ?? 0) + (daily.apparentTemperatureMin?[firstIndex] ?? 0)) / 2
             
             let current = WeatherData.CurrentWeather(
                 temperature2m: avgTemp,
@@ -423,13 +533,13 @@ class WeatherService: ObservableObject {
                 apparentTemperature: avgApparentTemp,
                 isDay: 1,
                 precipitation: daily.precipitationSum[firstIndex] ?? 0,
-                rain: daily.rainSum[firstIndex] ?? 0,
+                rain: daily.rainSum?[firstIndex] ?? 0,
                 showers: nil,
-                snowfall: daily.snowfallSum[firstIndex] ?? 0,
+                snowfall: daily.snowfallSum?[firstIndex] ?? 0,
                 weatherCode: daily.weatherCode[firstIndex] ?? 0,
                 cloudCover: 0,
                 pressureMsl: nil,
-                windSpeed10m: daily.windSpeed10mMax[firstIndex] ?? 0,
+                windSpeed10m: daily.windSpeed10mMax?[firstIndex] ?? 0,
                 windDirection10m: nil,
                 visibility: nil,
                 windGusts10m: nil,
@@ -460,6 +570,7 @@ class WeatherService: ObservableObject {
             await MainActor.run {
                 self.weatherCache[cacheKey] = weatherData
                 self.cacheTimestamps[cacheKey] = Date()
+                self.trimWeatherCacheIfNeeded()
             }
         } catch {
             await MainActor.run {
@@ -496,7 +607,7 @@ class WeatherService: ObservableObject {
             throw URLError(.badURL)
         }
         
-        let (data, _) = try await URLSession.shared.data(from: url)
+        let (data, _) = try await URLSession.shared.data(for: apiRequest(for: url))
         let response = try JSONDecoder().decode(WeatherResponse.self, from: data)
         let weatherData = WeatherData(current: response.current, daily: response.daily, hourly: response.hourly)
         
@@ -504,6 +615,7 @@ class WeatherService: ObservableObject {
         await MainActor.run {
             browseWeatherCache[cacheKey] = weatherData
             browseCacheTimestamps[cacheKey] = Date()
+            trimBrowseCacheIfNeeded()
         }
         
         return weatherData
@@ -528,7 +640,7 @@ class WeatherService: ObservableObject {
             throw URLError(.badURL)
         }
         
-        let (data, _) = try await URLSession.shared.data(from: url)
+        let (data, _) = try await URLSession.shared.data(for: apiRequest(for: url))
         let response = try JSONDecoder().decode(WeatherResponse.self, from: data)
         return WeatherData(current: response.current, daily: response.daily, hourly: response.hourly)
     }
@@ -582,10 +694,24 @@ class WeatherService: ObservableObject {
             isLoading = true
         }
         
+        // Fetch cities concurrently, capped by maxConcurrentRequests.
+        // On the paid tier (dedicated servers) this is 5; on free tier it stays 1.
         await withTaskGroup(of: Void.self) { group in
-            for city in savedCities {
-                group.addTask {
-                    await self.fetchWeather(for: city)
+            var inFlight = 0
+            var iterator = savedCities.makeIterator()
+            
+            while inFlight < maxConcurrentRequests, let city = iterator.next() {
+                let c = city
+                group.addTask { await self.fetchWeatherForDate(for: c, dateOffset: 0, includeHourly: false) }
+                inFlight += 1
+            }
+            
+            while await group.next() != nil {
+                inFlight -= 1
+                if let city = iterator.next() {
+                    let c = city
+                    group.addTask { await self.fetchWeatherForDate(for: c, dateOffset: 0, includeHourly: false) }
+                    inFlight += 1
                 }
             }
         }
@@ -627,7 +753,7 @@ class WeatherService: ObservableObject {
         }
         
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await URLSession.shared.data(for: apiRequest(for: url))
             let decoder = JSONDecoder()
             let response = try decoder.decode(MarineResponse.self, from: data)
             
@@ -686,6 +812,7 @@ class WeatherService: ObservableObject {
             await MainActor.run {
                 self.marineCache[cacheKey] = marineData
                 self.marineCacheTimestamps[cacheKey] = Date()
+                self.trimWeatherCacheIfNeeded()
             }
         } catch {
             await MainActor.run {
@@ -697,13 +824,14 @@ class WeatherService: ObservableObject {
     // MARK: - Historical Weather
     
     // Fetch historical weather for a specific date range
-    func fetchHistoricalWeather(for city: City, startDate: String, endDate: String) async throws -> HistoricalWeatherResponse {
+    func fetchHistoricalWeather(for city: City, startDate: String, endDate: String,
+                                fields: String = "weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,precipitation_sum,rain_sum,snowfall_sum,precipitation_hours,windspeed_10m_max") async throws -> HistoricalWeatherResponse {
         let params = [
             "latitude": String(city.latitude),
             "longitude": String(city.longitude),
             "start_date": startDate,
             "end_date": endDate,
-            "daily": "weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,precipitation_sum,rain_sum,snowfall_sum,precipitation_hours,windspeed_10m_max",
+            "daily": fields,
             "timezone": "auto"
         ]
         
@@ -716,9 +844,31 @@ class WeatherService: ObservableObject {
         
         print("📊 Fetching historical weather from \(startDate) to \(endDate) for \(city.name)")
         
-        let (data, _) = try await URLSession.shared.data(from: url)
-        let response = try JSONDecoder().decode(HistoricalWeatherResponse.self, from: data)
-        return response
+        // Historical archive API is always free tier — never send paid API key.
+        var request = URLRequest(url: url, timeoutInterval: 30)
+        request.setValue("FastWeather/1.5 (weatherfast.online)", forHTTPHeaderField: "User-Agent")
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        // Surface HTTP-level errors (4xx/5xx) before attempting JSON decode.
+        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+            // Try to decode an Open-Meteo error body {"error":true,"reason":"..."}
+            if let errorBody = try? JSONDecoder().decode(OpenMeteoErrorResponse.self, from: data),
+               errorBody.error {
+                throw NSError(domain: "OpenMeteoArchive", code: httpResponse.statusCode,
+                              userInfo: [NSLocalizedDescriptionKey: errorBody.reason ?? "Unknown API error"])
+            }
+            throw URLError(.badServerResponse)
+        }
+        
+        do {
+            let weatherResponse = try JSONDecoder().decode(HistoricalWeatherResponse.self, from: data)
+            return weatherResponse
+        } catch {
+            // Log raw response snippet to help diagnose field-name changes in the API.
+            let preview = String(data: data.prefix(200), encoding: .utf8) ?? "<unreadable>"
+            print("❌ Failed to decode historical response for \(startDate): \(error)\nResponse preview: \(preview)")
+            throw error
+        }
     }
     
     // Fetch same day across multiple years (e.g., all January 19ths from 1940 to now)
@@ -730,111 +880,177 @@ class WeatherService: ObservableObject {
         // Check cache first - but only use it if it has enough years
         if let cached = HistoricalWeatherCache.shared.getCached(for: city, monthDay: cacheKey) {
             if cached.count >= yearsBack {
-                print("✅ Using cached historical data for \(city.name) on \(monthDay) ending \(actualEndYear) (\(cached.count) years cached, \(yearsBack) requested)")
+                print("📊 Cache hit: \(cached.count) years for \(cacheKey)")
                 // Return only the requested number of years (most recent ones)
                 return Array(cached.prefix(yearsBack))
             } else {
-                print("⚠️ Cache has only \(cached.count) years but \(yearsBack) requested - fetching fresh data")
+                print("⚠️ Cache has only \(cached.count) years but \(yearsBack) requested — fetching fresh data")
             }
         }
         
-        let startYear = actualEndYear - yearsBack
-        
         // Parse month and day from monthDay string (format: "MM-DD")
-        let components = monthDay.split(separator: "-")
-        guard components.count == 2,
-              let month = Int(components[0]),
-              let day = Int(components[1]) else {
+        let parts = monthDay.split(separator: "-")
+        guard parts.count == 2,
+              let month = Int(parts[0]),
+              let day = Int(parts[1]) else {
             throw URLError(.badURL)
         }
         
-        // Build start and end dates (one year at a time to avoid API limits)
-        var historicalDays: [HistoricalDay] = []
+        // startYear to actualEndYear gives yearsBack+1 candidates.
+        // actualEndYear itself may not yet be in the archive (~5-day lag), so if it
+        // fails we still collect exactly yearsBack results from the older years.
+        let startYear = actualEndYear - yearsBack
         
-        // Fetch in chunks of 10 years to avoid overwhelming the API
-        let chunkSize = 10
-        for yearChunkStart in stride(from: startYear, to: actualEndYear, by: chunkSize) {
-            let yearChunkEnd = min(yearChunkStart + chunkSize - 1, actualEndYear - 1)
+        // DateFormatter created once (not inside the loop) with explicit locale/timezone
+        // to avoid mis-parsing on non-English devices or around DST transitions.
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        // No UTC override: parse in local timezone so stored dates display correctly
+        // (midnight UTC would appear as prev-day evening in US timezones)
+        
+        var historicalDays: [HistoricalDay] = []
+        var failCount = 0
+        
+        // Fetch one year at a time: each request retrieves only a single day of data
+        // (~tiny JSON response). The old 10-year-range approach fetched ~3,650 rows per
+        // chunk and regularly hit the 15-second timeout on slower cellular connections,
+        // causing complete or partial data loss. Per-year requests are far more reliable;
+        // a failure for one year skips only that year, not 10.
+        // We run 5 years concurrently to keep total fetch time reasonable (max ~85 yrs).
+        let years = Array(startYear...actualEndYear)
+        let batchSize = 5
+        
+        for batchStart in stride(from: 0, to: years.count, by: batchSize) {
+            let batchEnd = min(batchStart + batchSize, years.count)
+            let batch = Array(years[batchStart..<batchEnd])
             
-            let startDate = String(format: "%04d-%02d-%02d", yearChunkStart, month, day)
-            let endDate = String(format: "%04d-%02d-%02d", yearChunkEnd, month, day)
-            
-            do {
-                let response = try await fetchHistoricalWeather(for: city, startDate: startDate, endDate: endDate)
-                
-                // Parse response into HistoricalDay objects, filtering for only the specific month-day
-                for (index, dateString) in response.daily.time.enumerated() {
-                    guard let dateString = dateString else { continue }
-                    
-                    let dateFormatter = DateFormatter()
-                    dateFormatter.dateFormat = "yyyy-MM-dd"
-                    
-                    guard let date = dateFormatter.date(from: dateString) else { continue }
-                    
-                    // Filter: only include dates that match the target month and day
-                    let dateMonth = calendar.component(.month, from: date)
-                    let dateDay = calendar.component(.day, from: date)
-                    
-                    guard dateMonth == month && dateDay == day else { continue }
-                    
-                    let year = calendar.component(.year, from: date)
-                    
-                    // Skip this day if any required data is nil
-                    guard let weatherCode = response.daily.weatherCode[index],
-                          let tempMax = response.daily.temperature2mMax[index],
-                          let tempMin = response.daily.temperature2mMin[index],
-                          let apparentTempMax = response.daily.apparentTemperatureMax[index],
-                          let apparentTempMin = response.daily.apparentTemperatureMin[index],
-                          let sunrise = response.daily.sunrise[index],
-                          let sunset = response.daily.sunset[index],
-                          let precipitationSum = response.daily.precipitationSum[index],
-                          let rainSum = response.daily.rainSum[index],
-                          let snowfallSum = response.daily.snowfallSum[index],
-                          let precipitationHours = response.daily.precipitationHours[index],
-                          let windSpeedMax = response.daily.windSpeed10mMax[index] else {
-                        continue
+            let batchResults: [HistoricalDay] = await withTaskGroup(of: HistoricalDay?.self) { group in
+                for year in batch {
+                    group.addTask { [self] in
+                        let dateString = String(format: "%04d-%02d-%02d", year, month, day)
+                        do {
+                            let response = try await self.fetchHistoricalWeather(
+                                for: city, startDate: dateString, endDate: dateString,
+                                fields: "weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum")
+                            
+                            guard !response.daily.time.isEmpty,
+                                  let timeString = response.daily.time[0],
+                                  let date = dateFormatter.date(from: timeString),
+                                  let weatherCode = response.daily.weatherCode[0],
+                                  let tempMax = response.daily.temperature2mMax[0],
+                                  let tempMin = response.daily.temperature2mMin[0],
+                                  let precipitationSum = response.daily.precipitationSum[0] else {
+                                print("⚠️ [\(year)] No data or nil field for \(dateString)")
+                                return nil
+                            }
+                            
+                            let resolvedYear = calendar.component(.year, from: date)
+                            return HistoricalDay(
+                                date: date,
+                                year: resolvedYear,
+                                weatherCode: weatherCode,
+                                tempMax: tempMax,
+                                tempMin: tempMin,
+                                precipitationSum: precipitationSum
+                            )
+                        } catch {
+                            print("⚠️ [\(year)] Failed to fetch \(dateString): \(error.localizedDescription)")
+                            return nil
+                        }
                     }
-                    
-                    let historicalDay = HistoricalDay(
-                        date: date,
-                        year: year,
-                        weatherCode: weatherCode,
-                        tempMax: tempMax,
-                        tempMin: tempMin,
-                        apparentTempMax: apparentTempMax,
-                        apparentTempMin: apparentTempMin,
-                        sunrise: sunrise,
-                        sunset: sunset,
-                        precipitationSum: precipitationSum,
-                        rainSum: rainSum,
-                        snowfallSum: snowfallSum,
-                        precipitationHours: precipitationHours,
-                        windSpeedMax: windSpeedMax
-                    )
-                    historicalDays.append(historicalDay)
                 }
                 
-                // Small delay between chunks to be respectful to API
-                try await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds
-            } catch {
-                print("⚠️ Error fetching historical chunk \(startDate) to \(endDate): \(error)")
-                // Continue with other chunks even if one fails
+                var results: [HistoricalDay] = []
+                for await result in group {
+                    if let day = result {
+                        results.append(day)
+                    } else {
+                        failCount += 1
+                    }
+                }
+                return results
             }
+            
+            historicalDays.append(contentsOf: batchResults)
+        }
+        
+        if failCount > 0 {
+            print("⚠️ \(failCount) year(s) failed to load for \(monthDay). Got \(historicalDays.count) of \(yearsBack) requested.")
         }
         
         // Sort by year descending (most recent first)
         historicalDays.sort { $0.year > $1.year }
         
-        // Cache the results with endYear in key
-        HistoricalWeatherCache.shared.cache(historicalDays, for: city, monthDay: cacheKey)
+        // Only cache if we received at least one year; avoids persisting transient network
+        // failures as empty cache entries that suppress future retries.
+        if !historicalDays.isEmpty {
+            HistoricalWeatherCache.shared.cache(historicalDays, for: city, monthDay: cacheKey)
+        }
         
-        print("✅ Fetched \(historicalDays.count) years of historical data for \(city.name) on \(monthDay) ending \(actualEndYear)")
         return historicalDays
     }
+    
+    // MARK: - WeatherKit Snow Override
+    
+    /// Replaces Open-Meteo snowfall_sum values with WeatherKit daily snowfallAmount.
+    /// Called only when the "WeatherKit Snow Totals" dev flag is enabled.
+    /// On any WeatherKit error the original weatherData is returned unchanged.
+    #if canImport(WeatherKit)
+    @available(iOS 16.0, *)
+    private func applyWeatherKitSnowOverlay(for city: City, dateOffset: Int, into weatherData: WeatherData) async -> WeatherData {
+        guard let daily = weatherData.daily else { return weatherData }
+        // WeatherKit provides at most 10 days; beyond that fall back silently
+        guard dateOffset < 10 else { return weatherData }
+        
+        let location = CLLocation(latitude: city.latitude, longitude: city.longitude)
+        do {
+            let dailyForecast = try await WeatherKit.WeatherService.shared.weather(for: location, including: .daily)
+            let forecasts = dailyForecast.forecast
+            
+            let newSnowfallSum: [Double?]
+            if dateOffset == 0 {
+                // Full array: overlay WK values for the first N days WK covers
+                var snow: [Double?] = daily.snowfallSum ?? Array(repeating: nil, count: daily.temperature2mMax.count)
+                for i in 0..<min(forecasts.count, snow.count) {
+                    snow[i] = forecasts[i].snowfallAmount.converted(to: .centimeters).value
+                }
+                newSnowfallSum = snow
+            } else {
+                // Single-day slice: replace with WK value for that specific day
+                guard dateOffset < forecasts.count else { return weatherData }
+                newSnowfallSum = [forecasts[dateOffset].snowfallAmount.converted(to: .centimeters).value]
+            }
+            
+            let newDaily = WeatherData.DailyWeather(
+                temperature2mMax: daily.temperature2mMax,
+                temperature2mMin: daily.temperature2mMin,
+                sunrise: daily.sunrise,
+                sunset: daily.sunset,
+                weatherCode: daily.weatherCode,
+                precipitationSum: daily.precipitationSum,
+                rainSum: daily.rainSum,
+                snowfallSum: newSnowfallSum,
+                precipitationProbabilityMax: daily.precipitationProbabilityMax,
+                uvIndexMax: daily.uvIndexMax,
+                daylightDuration: daily.daylightDuration,
+                sunshineDuration: daily.sunshineDuration,
+                windSpeed10mMax: daily.windSpeed10mMax,
+                winddirection10mDominant: daily.winddirection10mDominant
+            )
+            print("❄️ WK snow overlay applied for \(city.name) offset=\(dateOffset) days=\(forecasts.count)")
+            return WeatherData(current: weatherData.current, daily: newDaily, hourly: weatherData.hourly)
+        } catch {
+            print("⚠️ WK snow overlay failed for \(city.name): \(error.localizedDescription)")
+            return weatherData
+        }
+    }
+    #endif
     
     // MARK: - Weather Alerts (NWS & WeatherKit)
     
     private var alertsCache: [UUID: (alerts: [WeatherAlert], timestamp: Date)] = [:]
+    // alertsCache is @MainActor-isolated (WeatherService is @MainActor); no lock needed.
     private let alertsCacheMinutes: TimeInterval = 5
     
     /// Countries where WeatherKit alerts are known to work
@@ -906,7 +1122,7 @@ class WeatherService: ObservableObject {
         }
         
         var request = URLRequest(url: url)
-        request.setValue("FastWeather/1.0 iOS", forHTTPHeaderField: "User-Agent")
+        request.setValue("WeatherFast/1.0 iOS", forHTTPHeaderField: "User-Agent")
         
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
@@ -922,6 +1138,9 @@ class WeatherService: ObservableObject {
             let nwsResponse = try decoder.decode(NWSAlertsResponse.self, from: data)
             
             // Convert NWS features to WeatherAlert objects
+            // NWS dates are real ISO8601 with timezone — one formatter created once, outside the closure
+            // to avoid ICU internal-cache memory corruption when allocating per-iteration on a background thread
+            let nwsDateFormatter = ISO8601DateFormatter()
             let alerts = nwsResponse.features.compactMap { feature -> WeatherAlert? in
                 let props = feature.properties
                 
@@ -935,10 +1154,9 @@ class WeatherService: ObservableObject {
                 default: severity = .unknown
                 }
                 
-                // Parse onset and expires dates (ISO8601 format from NWS)
-                let dateFormatter = ISO8601DateFormatter()
-                let onset = props.onset.flatMap { dateFormatter.date(from: $0) } ?? Date()
-                let expires = props.expires.flatMap { dateFormatter.date(from: $0) } ?? Date().addingTimeInterval(86400)
+                // Parse onset and expires dates
+                let onset = props.onset.flatMap { nwsDateFormatter.date(from: $0) } ?? Date()
+                let expires = props.expires.flatMap { nwsDateFormatter.date(from: $0) } ?? Date().addingTimeInterval(86400)
                 
                 return WeatherAlert(
                     id: props.id,
@@ -1019,7 +1237,7 @@ class WeatherService: ObservableObject {
             // Cache results
             alertsCache[city.id] = (activeAlerts, Date())
             
-            print("✅ Fetched \(activeAlerts.count) WeatherKit alerts for \(city.name)")
+
             return activeAlerts
             
         } catch {
@@ -1080,8 +1298,11 @@ class WeatherService: ObservableObject {
     // MARK: - Persistence
     
     private func saveCities() {
-        if let encoded = try? JSONEncoder().encode(savedCities) {
+        do {
+            let encoded = try JSONEncoder().encode(savedCities)
             UserDefaults.standard.set(encoded, forKey: userDefaultsKey)
+        } catch {
+            AppLogger.service.error("Failed to save cities: \(error)")
         }
     }
     
@@ -1093,17 +1314,14 @@ class WeatherService: ObservableObject {
         
         // Check if migration already completed
         guard !UserDefaults.standard.bool(forKey: migrationKey) else {
-            print("✅ Country names already migrated")
             return
         }
         
-        print("🔄 Migrating country names to English...")
         var migratedCount = 0
         
         // Create backup before migration
         if let encoded = try? JSONEncoder().encode(savedCities) {
             UserDefaults.standard.set(encoded, forKey: "cities_backup_preMigration")
-            print("  Created backup of \(savedCities.count) cities")
         }
         
         // Migrate each city's country name
@@ -1125,7 +1343,6 @@ class WeatherService: ObservableObject {
                 )
                 updatedCities.append(updatedCity)
                 migratedCount += 1
-                print("  \(city.name): '\(oldCountry)' → '\(newCountry)'")
             } else {
                 updatedCities.append(city)
             }
@@ -1137,11 +1354,6 @@ class WeatherService: ObservableObject {
         // Save migrated cities if any changes made
         if migratedCount > 0 {
             saveCities()
-            print("✅ Migration complete: \(migratedCount) cities updated")
-            
-            // Note: VoiceOver announcement handled by view layer
-        } else {
-            print("✅ Migration complete: No cities needed updating")
         }
         
         // Mark migration as complete (even if no changes)
@@ -1151,14 +1363,21 @@ class WeatherService: ObservableObject {
     // MARK: - Persistence
     
     private func loadSavedCities() {
-        if let data = UserDefaults.standard.data(forKey: userDefaultsKey),
-           let cities = try? JSONDecoder().decode([City].self, from: data) {
-            savedCities = cities
-            
+        guard let data = UserDefaults.standard.data(forKey: userDefaultsKey) else {
+            // First launch — seed default cities
+            savedCities = [
+                City(name: "Madison", state: "Wisconsin", country: "United States", latitude: 43.074761, longitude: -89.3837613),
+                City(name: "San Diego", state: "California", country: "United States", latitude: 32.7174202, longitude: -117.162772)
+            ]
+            saveCities()
+            return
+        }
+        
+        do {
+            savedCities = try JSONDecoder().decode([City].self, from: data)
             // DON'T fetch weather during init - let the view trigger it after appearing
-            // This allows the UI to show immediately
-        } else {
-            // Default cities
+        } catch {
+            AppLogger.service.error("Failed to decode saved cities — resetting to defaults: \(error)")
             savedCities = [
                 City(name: "Madison", state: "Wisconsin", country: "United States", latitude: 43.074761, longitude: -89.3837613),
                 City(name: "San Diego", state: "California", country: "United States", latitude: 32.7174202, longitude: -117.162772)

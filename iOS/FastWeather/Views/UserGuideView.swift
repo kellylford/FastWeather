@@ -24,7 +24,7 @@ struct UserGuideView: View {
             VStack(alignment: .leading, spacing: 24) {
                 // Header
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Welcome to FastWeather")
+                    Text("Welcome to Weather Fast")
                         .font(.largeTitle)
                         .fontWeight(.bold)
                     
@@ -71,6 +71,23 @@ struct UserGuideView: View {
                     BulletPoint("Navigate through states/countries → cities")
                     BulletPoint("View weather without adding to your list")
                     BulletPoint("Activate the **+** (Add City) button to add interesting cities")
+                    
+                    Text("**Sorting Cities:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("Once inside a state or country's city list, the **sort button** (two arrows pointing up and down) in the top-right corner lets you change the order cities appear. VoiceOver announces this button as \"Sort cities. Current sort: [sort order name].\"")
+                        .padding(.bottom, 4)
+                    BulletPoint("**Name (A–Z)** — Default alphabetical order")
+                    BulletPoint("**Name (Z–A)** — Reverse alphabetical")
+                    BulletPoint("**North to South** — Cities ordered from highest to lowest latitude")
+                    BulletPoint("**South to North** — Cities ordered from lowest to highest latitude")
+                    BulletPoint("**East to West** — Cities ordered from highest to lowest longitude")
+                    BulletPoint("**West to East** — Cities ordered from lowest to highest longitude")
+                    Text("The active sort option is marked with a checkmark. Geographic sorts are useful for exploring cities along a coastline, mountain range, or river corridor. The sort resets to **Name (A–Z)** each time you open a new state or country.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.top, 4)
                 }
                 
                 // Weather in Time
@@ -278,6 +295,19 @@ struct UserGuideView: View {
                 ) {
                     Text("Visual icons used throughout the app with VoiceOver equivalents:")
                     
+                    Text("**App Icon:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("The Weather Fast app icon features a large \"WF\" monogram in white against a bright blue sky background, with decorative white clouds surrounding the text. The sunny atmosphere conveys clear, accessible weather information.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                    Text("VoiceOver: \"Weather Fast\"")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 8)
+                    
                     Text("**Tab Bar Icons:**")
                         .fontWeight(.semibold)
                         .padding(.top, 8)
@@ -288,14 +318,168 @@ struct UserGuideView: View {
                     Text("**Weather Condition Icons:**")
                         .fontWeight(.semibold)
                         .padding(.top, 8)
-                    BulletPoint("**Sun** - Clear sky (VoiceOver: condition name)")
-                    BulletPoint("**Cloud with sun** - Partly cloudy")
-                    BulletPoint("**Cloud** - Overcast")
-                    BulletPoint("**Cloud with rain** - Rain")
-                    BulletPoint("**Cloud with snow** - Snow")
-                    BulletPoint("**Cloud with lightning** - Thunderstorm")
-                    BulletPoint("**Fog cloud** - Fog or mist")
-                    Text("VoiceOver announces: \"Weather condition: [description]\"")
+                    
+                    // Clear / Mainly clear
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "sun.max.fill")
+                            .font(.title2)
+                            .foregroundColor(.yellow)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Clear sky / Mainly clear")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Clear sky\" or \"Mainly clear\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    // Partly cloudy
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "cloud.sun.fill")
+                            .font(.title2)
+                            .foregroundColor(.orange)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Partly cloudy")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Partly cloudy\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    // Overcast
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "cloud.fill")
+                            .font(.title2)
+                            .foregroundColor(.gray)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Overcast")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Overcast\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    // Fog / Rime fog
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "cloud.fog.fill")
+                            .font(.title2)
+                            .foregroundColor(.gray)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Fog / Depositing rime fog")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Fog\" or \"Depositing rime fog\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    // Drizzle
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "cloud.drizzle.fill")
+                            .font(.title2)
+                            .foregroundColor(.blue)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Light / Moderate / Dense drizzle")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Light drizzle\", \"Moderate drizzle\", or \"Dense drizzle\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    // Freezing drizzle / Freezing rain
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "cloud.sleet.fill")
+                            .font(.title2)
+                            .foregroundColor(.cyan)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Freezing drizzle / Freezing rain")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Light freezing drizzle\", \"Dense freezing drizzle\", \"Light freezing rain\", or \"Heavy freezing rain\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    // Rain
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "cloud.rain.fill")
+                            .font(.title2)
+                            .foregroundColor(.blue)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Slight / Moderate / Heavy rain")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Slight rain\", \"Moderate rain\", or \"Heavy rain\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    // Snow fall / Snow grains / Snow showers
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "cloud.snow.fill")
+                            .font(.title2)
+                            .foregroundColor(.cyan)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Snow fall / Snow grains / Snow showers")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Slight snow fall\", \"Moderate snow fall\", \"Heavy snow fall\", \"Snow grains\", \"Slight snow showers\", or \"Heavy snow showers\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    // Rain showers
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "cloud.heavyrain.fill")
+                            .font(.title2)
+                            .foregroundColor(.indigo)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Slight / Moderate / Violent rain showers")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Slight rain showers\", \"Moderate rain showers\", or \"Violent rain showers\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    // Thunderstorm
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "cloud.bolt.rain.fill")
+                            .font(.title2)
+                            .foregroundColor(.purple)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Thunderstorm / Thunderstorm with hail")
+                                .fontWeight(.semibold)
+                            Text("VoiceOver: \"Thunderstorm\", \"Thunderstorm with slight hail\", or \"Thunderstorm with heavy hail\"")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    Text("VoiceOver announces the exact weather condition by name.")
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .padding(.leading, 16)
@@ -342,7 +526,44 @@ struct UserGuideView: View {
                         .padding(.top, 8)
                     BulletPoint("**Warning triangle** - Error or unavailable (VoiceOver: describes issue)")
                     BulletPoint("**Checkmark** - Selected item (VoiceOver: \"Selected\")")
-                    BulletPoint("**Sort arrows** - Reorder indicator (VoiceOver: \"Reorder\" or drag hint)")
+                    BulletPoint("**Two arrows up and down** - Browse Cities sort button (VoiceOver: \"Sort cities. Current sort: [sort order name]\")")
+
+                    Text("**Decorative Illustrations:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("These large gray illustrations appear on the Browse Cities tab when no state or country has been selected yet. They are purely decorative and are hidden from VoiceOver — the text prompt beside them conveys the same meaning.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 4)
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "map")
+                            .font(.title2)
+                            .foregroundColor(.secondary)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Tri-fold paper map (U.S. States tab)")
+                                .fontWeight(.semibold)
+                            Text("A stylized folded road map outline with two vertical crease lines. Appears alongside \"Select a state to view cities\". Hidden from VoiceOver.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "globe")
+                            .font(.title2)
+                            .foregroundColor(.secondary)
+                            .frame(width: 32)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Globe (International tab)")
+                                .fontWeight(.semibold)
+                            Text("A sphere with horizontal and curved longitude lines suggesting the Earth. Appears alongside \"Select a country to view cities\". Hidden from VoiceOver.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
                     
                     Text("**Important:** All icons are decorative only. VoiceOver users receive full information through text labels and announcements. You never need to see icons to use the app.")
                         .font(.callout)
@@ -368,7 +589,7 @@ struct UserGuideView: View {
                     title: "Accessibility",
                     color: .teal
                 ) {
-                    Text("FastWeather is designed for VoiceOver users:")
+                    Text("Weather Fast is designed for VoiceOver users:")
                     BulletPoint("**Complete VoiceOver support** - All features accessible")
                     BulletPoint("**Descriptive labels** - Clear, context-aware announcements")
                     BulletPoint("**Logical navigation** - Efficient screen reader flow")
@@ -415,7 +636,7 @@ struct UserGuideView: View {
                     title: "Weather Data",
                     color: .cyan
                 ) {
-                    Text("FastWeather uses reliable, free data sources:")
+                    Text("Weather Fast uses reliable, free data sources:")
                     BulletPoint("**Open-Meteo** - Current and forecast weather")
                     BulletPoint("**Historical Archive** - Weather back to 1940")
                     BulletPoint("**NWS Alerts** - U.S. weather warnings (when available)")
@@ -433,7 +654,7 @@ struct UserGuideView: View {
                     Text("Need more help?")
                         .font(.headline)
                     
-                    Text("FastWeather is designed to be intuitive. Explore the app and discover features as you use it. Most actions are available through standard iOS gestures and VoiceOver commands.")
+                    Text("Weather Fast is designed to be intuitive. Explore the app and discover features as you use it. Most actions are available through standard iOS gestures and VoiceOver commands.")
                         .font(.body)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)

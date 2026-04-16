@@ -5,6 +5,7 @@
 //  Service to find cities in a specific direction from a center point
 //
 
+import CoreLocation
 import Foundation
 
 class DirectionalCityService {
@@ -76,10 +77,145 @@ class DirectionalCityService {
         }
         
         results.sort { $0.distanceMiles < $1.distanceMiles }
-        let final = Array(results.prefix(20))
+        let merged = await fillGaps(
+            existingCities: results,
+            centerCity: centerCity,
+            direction: direction,
+            maxDistance: maxDistance
+        )
+        let final = Array(merged.prefix(20))
         
         geocodeCache[cacheKey] = final
         return final
+    }
+    
+    // MARK: - Waypoint Gap Filling
+    
+    /// Fills gaps (>50mi) in the directional city list with synthetic weather waypoints.
+    private func fillGaps(
+        existingCities: [DirectionalCityInfo],
+        centerCity: City,
+        direction: CardinalDirection,
+        maxDistance: Double
+    ) async -> [DirectionalCityInfo] {
+        var waypoints: [DirectionalCityInfo] = []
+        
+        // Build the gap intervals to fill.
+        // If no real cities exist, fill the first 150 miles (or maxDistance, whichever is smaller).
+        // Otherwise check each consecutive pair (including from origin to first city) for gaps > 50mi.
+        var intervals: [(Double, Double)] = []
+        if existingCities.isEmpty {
+            intervals = [(0, min(maxDistance, 150.0))]
+        } else {
+            let checkPoints = [0.0] + existingCities.map(\.distanceMiles)
+            for i in 0..<(checkPoints.count - 1) {
+                let from = checkPoints[i]
+                let to = checkPoints[i + 1]
+                if to - from > 50 {
+                    intervals.append((from, to))
+                }
+            }
+        }
+        
+        for (from, to) in intervals {
+            var d = from + 15.0
+            while d < to {
+                // Don't place a waypoint within 10mi of any real city
+                let tooClose = existingCities.contains { abs($0.distanceMiles - d) < 10 }
+                if !tooClose {
+                    let (wLat, wLon) = destinationCoordinate(
+                        fromLat: centerCity.latitude,
+                        fromLon: centerCity.longitude,
+                        bearing: direction.bearing,
+                        distanceMiles: d
+                    )
+                    let geocodedName = await reverseGeocodeWaypoint(lat: wLat, lon: wLon)
+                    
+                    let waypointName: String
+                    let waypointState: String?
+                    if let name = geocodedName {
+                        let parts = name.components(separatedBy: ", ")
+                        waypointName = parts.first ?? name
+                        waypointState = parts.count > 1 ? parts[1] : nil
+                    } else {
+                        waypointName = "~\(Int(d)) mi \(direction.rawValue)"
+                        waypointState = nil
+                    }
+                    
+                    waypoints.append(DirectionalCityInfo(
+                        name: waypointName,
+                        state: waypointState,
+                        country: centerCity.country,
+                        latitude: wLat,
+                        longitude: wLon,
+                        distanceMiles: d,
+                        bearing: direction.bearing,
+                        isWaypoint: true
+                    ))
+                }
+                d += 15.0
+            }
+        }
+        
+        if waypoints.isEmpty { return existingCities }
+        var all = existingCities + waypoints
+        all.sort { $0.distanceMiles < $1.distanceMiles }
+        return all
+    }
+    
+    /// Computes a destination coordinate from an origin using flat-earth approximation.
+    /// Accurate enough for distances up to 350 miles (same formula as RegionalWeatherService).
+    private func destinationCoordinate(
+        fromLat: Double, fromLon: Double, bearing: Double, distanceMiles: Double
+    ) -> (lat: Double, lon: Double) {
+        let bearingRad = bearing * .pi / 180
+        let deltaLat = distanceMiles / 69.0 * cos(bearingRad)
+        let deltaLon = distanceMiles / 69.0 * sin(bearingRad) / cos(fromLat * .pi / 180)
+        return (lat: fromLat + deltaLat, lon: fromLon + deltaLon)
+    }
+    
+    /// Reverse-geocodes a coordinate using CLGeocoder with a persistent UserDefaults cache.
+    /// Returns "Locality, AdminArea" if resolved, or nil for water/uninhabited areas.
+    private func reverseGeocodeWaypoint(lat: Double, lon: Double) async -> String? {
+        let cacheKey = String(format: "%.2f,%.2f", lat, lon)
+        let udKey = "DirectionalWaypointLocationCache"
+        
+        if let existing = UserDefaults.standard.dictionary(forKey: udKey) as? [String: String],
+           let cached = existing[cacheKey] {
+            return cached.isEmpty ? nil : cached
+        }
+        
+        let location = CLLocation(latitude: lat, longitude: lon)
+        do {
+            let placemarks = try await CLGeocoder().reverseGeocodeLocation(location)
+            let pm = placemarks.first
+            var name: String?
+            if let locality = pm?.locality {
+                if let area = pm?.administrativeArea {
+                    name = "\(locality), \(area)"
+                } else {
+                    name = locality
+                }
+            } else if let subLocality = pm?.subLocality {
+                if let area = pm?.administrativeArea {
+                    name = "\(subLocality), \(area)"
+                } else {
+                    name = subLocality
+                }
+            } else if let area = pm?.administrativeArea {
+                name = area
+            }
+            
+            // Cache result (empty string = nil, so we don't retry unresolvable coords)
+            var dict = UserDefaults.standard.dictionary(forKey: udKey) as? [String: String] ?? [:]
+            dict[cacheKey] = name ?? ""
+            UserDefaults.standard.set(dict, forKey: udKey)
+            
+            return name
+        } catch {
+            print("⚠️ DirectionalCityService: reverseGeocode failed for (\(lat), \(lon)): \(error)")
+            return nil
+        }
     }
     
     // MARK: - Geometry helpers
@@ -166,6 +302,24 @@ public struct DirectionalCityInfo: Identifiable {
     public let longitude: Double
     public let distanceMiles: Double
     public let bearing: Double
+    /// True for synthetic weather waypoints generated to fill directional gaps; false for cache-sourced cities.
+    public let isWaypoint: Bool
+    
+    public init(
+        name: String, state: String?, country: String,
+        latitude: Double, longitude: Double,
+        distanceMiles: Double, bearing: Double,
+        isWaypoint: Bool = false
+    ) {
+        self.name = name
+        self.state = state
+        self.country = country
+        self.latitude = latitude
+        self.longitude = longitude
+        self.distanceMiles = distanceMiles
+        self.bearing = bearing
+        self.isWaypoint = isWaypoint
+    }
     
     public var displayName: String {
         var parts = [name]

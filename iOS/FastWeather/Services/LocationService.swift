@@ -23,7 +23,8 @@ class LocationService: NSObject, ObservableObject {
     // MARK: - Private Properties
     
     private let locationManager = CLLocationManager()
-    nonisolated(unsafe) private var locationContinuation: CheckedContinuation<CLLocation, Error>?
+    // Main-actor isolated — only ever read/written on the main actor (see delegate methods below).
+    private var locationContinuation: CheckedContinuation<CLLocation, Error>?
     
     // MARK: - Singleton
     
@@ -63,6 +64,12 @@ class LocationService: NSObject, ObservableObject {
             }
         }
         
+        // Guard against a second request while one is already in-flight.
+        // Two concurrent callers would overwrite each other's continuation, causing a crash.
+        guard locationContinuation == nil else {
+            throw LocationError.requestInProgress
+        }
+        
         isLocating = true
         locationError = nil
         
@@ -70,7 +77,9 @@ class LocationService: NSObject, ObservableObject {
             isLocating = false
         }
         
-        // Request single location update
+        // Request single location update.
+        // The continuation is stored on the main actor; delegate callbacks
+        // dispatch back to @MainActor before consuming it.
         return try await withCheckedThrowingContinuation { continuation in
             self.locationContinuation = continuation
             self.locationManager.requestLocation()
@@ -133,9 +142,11 @@ extension LocationService: CLLocationManagerDelegate {
         
         Task { @MainActor in
             currentLocation = location
+            // Resume and clear the continuation on the main actor so that reads
+            // and writes to locationContinuation are always serialized.
+            locationContinuation?.resume(returning: location)
+            locationContinuation = nil
         }
-        locationContinuation?.resume(returning: location)
-        locationContinuation = nil
     }
     
     nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
@@ -155,9 +166,9 @@ extension LocationService: CLLocationManagerDelegate {
         
         Task { @MainActor in
             self.locationError = errorMessage
+            locationContinuation?.resume(throwing: LocationError.locationUnavailable(errorMessage))
+            locationContinuation = nil
         }
-        locationContinuation?.resume(throwing: LocationError.locationUnavailable(errorMessage))
-        locationContinuation = nil
     }
 }
 
@@ -167,6 +178,7 @@ enum LocationError: LocalizedError {
     case permissionDenied
     case locationUnavailable(String)
     case geocodingFailed
+    case requestInProgress
     
     var errorDescription: String? {
         switch self {
@@ -176,17 +188,21 @@ enum LocationError: LocalizedError {
             return message
         case .geocodingFailed:
             return "Unable to determine city name for your location. Please try searching manually."
+        case .requestInProgress:
+            return "A location request is already in progress. Please wait."
         }
     }
     
     var recoverySuggestion: String? {
         switch self {
         case .permissionDenied:
-            return "Go to Settings > Privacy > Location Services and enable location for Fast Weather."
+            return "Go to Settings > Privacy > Location Services and enable location for Weather Fast."
         case .locationUnavailable:
             return "Make sure Location Services are enabled and you have a good signal. Try again in a moment."
         case .geocodingFailed:
             return "You can still add cities by searching for them manually."
+        case .requestInProgress:
+            return nil
         }
     }
 }

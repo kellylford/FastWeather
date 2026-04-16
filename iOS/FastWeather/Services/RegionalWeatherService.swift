@@ -14,7 +14,7 @@ class RegionalWeatherService {
     
     // Cache for reverse geocoded location names (key: "lat,lon", value: city name)
     private var locationNameCache: [String: String] = [:]
-    private let cacheQueue = DispatchQueue(label: "com.fastweather.locationcache")
+    private let cacheQueue = DispatchQueue(label: "com.weatherfast.locationcache")
     
     // Actor to serialize geocoding requests to respect rate limits
     private actor GeocodingCoordinator {
@@ -152,14 +152,23 @@ class RegionalWeatherService {
             "timezone": "auto"
         ]
         
-        var components = URLComponents(string: "https://api.open-meteo.com/v1/forecast")!
-        components.queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
+        let baseHost = Secrets.openMeteoAPIKey != nil
+            ? "https://customer-api.open-meteo.com/v1/forecast"
+            : "https://api.open-meteo.com/v1/forecast"
+        var components = URLComponents(string: baseHost)!
+        var queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
+        if let key = Secrets.openMeteoAPIKey, !key.isEmpty {
+            queryItems.append(URLQueryItem(name: "apikey", value: key))
+        }
+        components.queryItems = queryItems
         
         guard let url = components.url else {
             throw URLError(.badURL)
         }
         
-        let (data, response) = try await URLSession.shared.data(from: url)
+        var request = URLRequest(url: url)
+        request.setValue("FastWeather/1.5 (weatherfast.online)", forHTTPHeaderField: "User-Agent")
+        let (data, response) = try await URLSession.shared.data(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse,
               httpResponse.statusCode == 200 else {
@@ -189,7 +198,6 @@ class RegionalWeatherService {
                 )
                 locationName = name
                 setCachedLocationName(name, latitude: location.lat, longitude: location.lon)
-                print("✅ Reverse geocoded \(location.direction): \(name)")
             } catch {
                 print("⚠️ Failed to reverse geocode \(location.direction): \(error.localizedDescription)")
                 locationName = nil
@@ -237,7 +245,6 @@ class RegionalWeatherService {
         }
         
         let locationName = parts.isEmpty ? "Unknown location" : parts.joined(separator: ", ")
-        print("✅ CLGeocoder result: \(locationName)")
         
         return locationName
     }

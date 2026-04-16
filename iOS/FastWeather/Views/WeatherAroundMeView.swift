@@ -13,6 +13,7 @@ struct WeatherAroundMeView: View {
     let city: City
     let defaultDistance: Double
     @EnvironmentObject var settingsManager: SettingsManager
+    @EnvironmentObject var weatherService: WeatherService
     @State private var regionalWeather: RegionalWeatherData?
     @State private var isLoading = true
     @State private var errorMessage: String?
@@ -163,14 +164,14 @@ struct WeatherAroundMeView: View {
             // Your Location
             currentLocationCard(regional.center)
             
+            // Regional Summary
+            regionalSummaryCard(regional)
+            
             // Directional Weather Cards
             directionalWeatherSection(regional)
             
             // Directional Explorer
             directionalExplorerSection()
-            
-            // Regional Summary
-            regionalSummaryCard(regional)
             
             // Data Attribution
             Text("Weather data by Open-Meteo.com")
@@ -230,49 +231,77 @@ struct WeatherAroundMeView: View {
     private func directionalWeatherRow(_ location: DirectionalLocation) -> some View {
         let actualDistance = calculateDistance(from: city, to: location)
         
-        return HStack {
-            // Direction icon and label
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 8) {
-                    Image(systemName: directionIcon(location.direction))
-                        .font(.title3)
-                        .foregroundColor(.accentColor)
-                        .frame(width: 30)
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(location.direction)
-                            .font(.headline)
+        return NavigationLink(destination: AroundMeCityDetailView(city: cityFromDirectional(location))) {
+            HStack {
+                // Direction icon and label
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 8) {
+                        Image(systemName: directionIcon(location.direction))
+                            .font(.title3)
+                            .foregroundColor(.accentColor)
+                            .frame(width: 30)
+                            .accessibilityHidden(true)
                         
-                        if let locationName = location.locationName {
-                            Text("\(locationName) (\(settingsManager.settings.distanceUnit.format(Double(actualDistance))))")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        } else {
-                            Text(settingsManager.settings.distanceUnit.format(Double(actualDistance)))
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(location.direction)
+                                .font(.headline)
+                            
+                            if let locationName = location.locationName {
+                                Text("\(locationName) (\(settingsManager.settings.distanceUnit.format(Double(actualDistance))))")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            } else {
+                                Text(settingsManager.settings.distanceUnit.format(Double(actualDistance)))
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
                         }
+                    }
+                    
+                    if let condition = location.condition {
+                        Text(condition)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
                 
-                if let condition = location.condition {
-                    Text(condition)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                Spacer()
+                
+                // Temperature
+                if let temp = location.temperature {
+                    Text(formatTemperature(temp))
+                        .font(.title3.weight(.semibold))
                 }
             }
-            
-            Spacer()
-            
-            // Temperature
-            if let temp = location.temperature {
-                Text(formatTemperature(temp))
-                    .font(.title3.weight(.semibold))
-            }
+            .padding(.vertical, 4)
         }
-        .padding(.vertical, 4)
-        .accessibilityElement(children: .combine)
+        .buttonStyle(.plain)
         .accessibilityLabel(directionalAccessibilityLabel(location))
+        .accessibilityHint("Double tap to view full weather detail for this location")
+    }
+    
+    // MARK: - City Construction Helpers
+    
+    /// Construct a City from a DirectionalLocation (surrounding areas overview row)
+    private func cityFromDirectional(_ location: DirectionalLocation) -> City {
+        City(
+            name: location.locationName ?? "\(location.direction) of \(city.name)",
+            state: nil,
+            country: city.country,  // inherit center city's country for displayName formatting
+            latitude: location.latitude,
+            longitude: location.longitude
+        )
+    }
+    
+    /// Construct a City from a DirectionalCityInfo (directional explorer stepper)
+    private func cityFromDirectionalInfo(_ info: DirectionalCityInfo) -> City {
+        City(
+            name: info.name,
+            state: info.state,
+            country: info.country,
+            latitude: info.latitude,
+            longitude: info.longitude
+        )
     }
     
     // MARK: - Directional Explorer Section
@@ -295,6 +324,7 @@ struct WeatherAroundMeView: View {
                 .accessibilityLabel("Select direction to explore")
                 .accessibilityValue(selectedDirection.rawValue)
                 .onChange(of: selectedDirection) {
+                    UIAccessibility.post(notification: .announcement, argument: selectedDirection.rawValue)
                     loadCitiesInDirection()
                 }
                 
@@ -367,7 +397,7 @@ struct WeatherAroundMeView: View {
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("City explorer")
                 .accessibilityValue(cityExplorerAccessibilityLabel(currentCity))
-                .accessibilityHint("Swipe up for farther cities, swipe down for closer cities")
+                .accessibilityHint("Swipe up for farther cities, swipe down for closer cities. Activate to view full weather detail.")
                 .accessibilityAdjustableAction { direction in
                     switch direction {
                     case .increment:
@@ -393,6 +423,15 @@ struct WeatherAroundMeView: View {
                         await prefetchWeatherData()
                     }
                 }
+                
+                // View full detail for this city
+                NavigationLink(destination: AroundMeCityDetailView(city: cityFromDirectionalInfo(currentCity))) {
+                    Label("View Full Detail", systemImage: "info.circle")
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 6)
+                }
+                .buttonStyle(.bordered)
             }
             
             // Navigation buttons (visual alternative)
@@ -459,14 +498,7 @@ struct WeatherAroundMeView: View {
         errorMessage = nil
         
         do {
-            print("🔄 Loading regional weather for \(city.name) at \(settingsManager.settings.distanceUnit.format(distanceMiles))...")
             let data = try await RegionalWeatherService.shared.fetchRegionalWeather(for: city, distanceMiles: distanceMiles)
-            
-            print("✅ Received regional weather data:")
-            print("   Center: \(data.center.direction) - locationName: \(data.center.locationName ?? "nil")")
-            for direction in data.directions {
-                print("   \(direction.direction): locationName = \(direction.locationName ?? "nil")")
-            }
             
             await MainActor.run {
                 self.regionalWeather = data
@@ -660,7 +692,12 @@ struct WeatherAroundMeView: View {
     }
     
     private func cityExplorerAccessibilityLabel(_ cityInfo: DirectionalCityInfo) -> String {
-        var label = "\(cityInfo.displayName(relativeTo: city.country)), "
+        // Waypoints with a real geocoded name are announced as cities.
+        // Only fallback distance labels (e.g. "~30 mi South") use "Weather point".
+        let isDistanceFallback = cityInfo.isWaypoint && cityInfo.name.hasPrefix("~")
+        var label = isDistanceFallback
+            ? "Weather point: \(cityInfo.displayName(relativeTo: city.country)), "
+            : "\(cityInfo.displayName(relativeTo: city.country)), "
         if let weather = directionalWeatherData[cityInfo.id] {
             label += "\(formatTemperature(weather.temp)), \(weather.condition), "
         }
@@ -685,6 +722,25 @@ struct DirectionalLocation {
     let locationName: String?
 }
 
+/// Destination view for Weather Around Me city rows.
+/// Mirrors BrowseCityDetailDestination — fetches full weather on appear so
+/// CityDetailView can display all sections including the Add button.
+private struct AroundMeCityDetailView: View {
+    @State private var city: City
+    @EnvironmentObject var weatherService: WeatherService
+    
+    init(city: City) {
+        _city = State(initialValue: city)
+    }
+    
+    var body: some View {
+        CityDetailView(city: city)
+            .task {
+                await weatherService.fetchWeatherForDate(for: city, dateOffset: 0)
+            }
+    }
+}
+
 #Preview {
     NavigationView {
         WeatherAroundMeView(city: City(
@@ -696,5 +752,6 @@ struct DirectionalLocation {
             longitude: -89.4012
         ))
         .environmentObject(SettingsManager())
+        .environmentObject(WeatherService())
     }
 }

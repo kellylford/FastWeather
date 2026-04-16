@@ -10,6 +10,7 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
+    @Environment(\.scenePhase) private var scenePhase
     @State private var selectedTab = 0
     @State private var hasStartedWeatherFetch = false
     
@@ -48,6 +49,15 @@ struct ContentView: View {
             guard !hasStartedWeatherFetch else { return }
             hasStartedWeatherFetch = true
             await weatherService.refreshAllWeather()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            // Refresh when returning to foreground, but only after the initial load
+            // has already run. The 10-minute in-memory cache means brief background
+            // trips are free — fetchWeatherForDate returns early if data is still fresh.
+            guard newPhase == .active, hasStartedWeatherFetch else { return }
+            Task {
+                await weatherService.refreshAllWeather()
+            }
         }
     }
 }

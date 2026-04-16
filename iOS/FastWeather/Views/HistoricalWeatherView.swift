@@ -102,6 +102,14 @@ struct HistoricalWeatherView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
+                
+                if selectedDate == .today {
+                    Text("Today's data may be incomplete — archive updates with a delay")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .accessibilityLabel("Note: today's historical data may be incomplete. The archive updates with a delay.")
+                }
             }
             
             // Navigation buttons
@@ -172,14 +180,18 @@ struct HistoricalWeatherView: View {
                                     .font(.caption)
                             }
                             .buttonStyle(BorderedProminentButtonStyle())
+                            .disabled(isBrowseDaysUnavailable)
                             .accessibilityLabel("Browse consecutive days starting from \(selectedDate.displayString)")
+                            .accessibilityHint(isBrowseDaysUnavailable ? "Not available for today. Select a past date first." : "")
                         } else {
                             Button(action: { switchToDailyBrowse() }) {
                                 Label("Browse Days", systemImage: "list.bullet.rectangle")
                                     .font(.caption)
                             }
                             .buttonStyle(BorderedButtonStyle())
+                            .disabled(isBrowseDaysUnavailable)
                             .accessibilityLabel("Browse consecutive days starting from \(selectedDate.displayString)")
+                            .accessibilityHint(isBrowseDaysUnavailable ? "Not available for today. Select a past date first." : "")
                         }
                         
                         if viewMode == .multiYear {
@@ -211,7 +223,8 @@ struct HistoricalWeatherView: View {
                 ForEach(Array(historicalData.enumerated()), id: \.element.id) { index, day in
                     HistoricalDayRow(
                         day: day,
-                        settingsManager: settingsManager
+                        settingsManager: settingsManager,
+                        onTap: viewMode == .multiYear ? { selectDate(from: day) } : nil
                     )
                     
                     if index < historicalData.count - 1 {
@@ -224,6 +237,12 @@ struct HistoricalWeatherView: View {
         .frame(maxHeight: 300)
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Historical weather data")
+    }
+    
+    private func selectDate(from day: HistoricalDay) {
+        selectedDate = HistoricalDate(from: day.date)
+        viewMode = .singleDay
+        loadHistoricalData()
     }
     
     // MARK: - Actions
@@ -239,42 +258,30 @@ struct HistoricalWeatherView: View {
                 if viewMode == .singleDay {
                     // Fetch just the specific date
                     let dateString = selectedDate.dateString
-                    let response = try await weatherService.fetchHistoricalWeather(for: city, startDate: dateString, endDate: dateString)
+                    let response = try await weatherService.fetchHistoricalWeather(
+                        for: city, startDate: dateString, endDate: dateString,
+                        fields: "weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum")
                     
                     // Parse single day
                     if !response.daily.time.isEmpty {
                         let dateFormatter = DateFormatter()
                         dateFormatter.dateFormat = "yyyy-MM-dd"
+                        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+                        // No UTC override: use local timezone so display matches
                         
                         if let timeString = response.daily.time[0],
                            let date = dateFormatter.date(from: timeString),
                            let weatherCode = response.daily.weatherCode[0],
                            let tempMax = response.daily.temperature2mMax[0],
                            let tempMin = response.daily.temperature2mMin[0],
-                           let apparentTempMax = response.daily.apparentTemperatureMax[0],
-                           let apparentTempMin = response.daily.apparentTemperatureMin[0],
-                           let sunrise = response.daily.sunrise[0],
-                           let sunset = response.daily.sunset[0],
-                           let precipitationSum = response.daily.precipitationSum[0],
-                           let rainSum = response.daily.rainSum[0],
-                           let snowfallSum = response.daily.snowfallSum[0],
-                           let precipitationHours = response.daily.precipitationHours[0],
-                           let windSpeedMax = response.daily.windSpeed10mMax[0] {
+                           let precipitationSum = response.daily.precipitationSum[0] {
                             let historicalDay = HistoricalDay(
                                 date: date,
                                 year: selectedDate.year,
                                 weatherCode: weatherCode,
                                 tempMax: tempMax,
                                 tempMin: tempMin,
-                                apparentTempMax: apparentTempMax,
-                                apparentTempMin: apparentTempMin,
-                                sunrise: sunrise,
-                                sunset: sunset,
-                                precipitationSum: precipitationSum,
-                                rainSum: rainSum,
-                                snowfallSum: snowfallSum,
-                                precipitationHours: precipitationHours,
-                                windSpeedMax: windSpeedMax
+                                precipitationSum: precipitationSum
                             )
                             data = [historicalDay]
                         } else {
@@ -293,6 +300,8 @@ struct HistoricalWeatherView: View {
                     let calendar = Calendar.current
                     let dateFormatter = DateFormatter()
                     dateFormatter.dateFormat = "yyyy-MM-dd"
+                    dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+                    // No UTC override: use local timezone so display matches
                     
                     // Get start date
                     guard let startDate = dateFormatter.date(from: selectedDate.dateString) else {
@@ -310,7 +319,9 @@ struct HistoricalWeatherView: View {
                     let endString = dateFormatter.string(from: endDate)
                     
                     // Fetch the date range
-                    let response = try await weatherService.fetchHistoricalWeather(for: city, startDate: startString, endDate: endString)
+                    let response = try await weatherService.fetchHistoricalWeather(
+                        for: city, startDate: startString, endDate: endString,
+                        fields: "weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum")
                     
                     // Parse all days in the range
                     var parsedDays: [HistoricalDay] = []
@@ -320,15 +331,7 @@ struct HistoricalWeatherView: View {
                               let weatherCode = response.daily.weatherCode[index],
                               let tempMax = response.daily.temperature2mMax[index],
                               let tempMin = response.daily.temperature2mMin[index],
-                              let apparentTempMax = response.daily.apparentTemperatureMax[index],
-                              let apparentTempMin = response.daily.apparentTemperatureMin[index],
-                              let sunrise = response.daily.sunrise[index],
-                              let sunset = response.daily.sunset[index],
-                              let precipitationSum = response.daily.precipitationSum[index],
-                              let rainSum = response.daily.rainSum[index],
-                              let snowfallSum = response.daily.snowfallSum[index],
-                              let precipitationHours = response.daily.precipitationHours[index],
-                              let windSpeedMax = response.daily.windSpeed10mMax[index] else {
+                              let precipitationSum = response.daily.precipitationSum[index] else {
                             continue
                         }
                         
@@ -339,15 +342,7 @@ struct HistoricalWeatherView: View {
                             weatherCode: weatherCode,
                             tempMax: tempMax,
                             tempMin: tempMin,
-                            apparentTempMax: apparentTempMax,
-                            apparentTempMin: apparentTempMin,
-                            sunrise: sunrise,
-                            sunset: sunset,
-                            precipitationSum: precipitationSum,
-                            rainSum: rainSum,
-                            snowfallSum: snowfallSum,
-                            precipitationHours: precipitationHours,
-                            windSpeedMax: windSpeedMax
+                            precipitationSum: precipitationSum
                         )
                         parsedDays.append(historicalDay)
                     }
@@ -419,6 +414,13 @@ struct HistoricalWeatherView: View {
         selectedDate == .today
     }
     
+    // Browse Days requires a past date so a 30-day range ends before today
+    private var isBrowseDaysUnavailable: Bool {
+        guard let selectedAsDate = selectedDate.toDate(),
+              let todayDate = HistoricalDate.today.toDate() else { return true }
+        return selectedAsDate >= todayDate
+    }
+    
     private var previousButtonLabel: String {
         switch viewMode {
         case .dailyBrowse:
@@ -447,6 +449,7 @@ struct HistoricalWeatherView: View {
 struct HistoricalDayRow: View {
     let day: HistoricalDay
     @ObservedObject var settingsManager: SettingsManager
+    var onTap: (() -> Void)?
     
     private var dateLabel: String {
         let dateFormatter = DateFormatter()
@@ -515,10 +518,22 @@ struct HistoricalDayRow: View {
                     }
                 }
             }
+            
+            // Disclosure chevron shown when row is tappable
+            if onTap != nil {
+                Image(systemName: "chevron.right")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .accessibilityHidden(true)
+            }
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 4)
+        .contentShape(Rectangle())
+        .onTapGesture { onTap?() }
         .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(onTap != nil ? .isButton : [])
+        .accessibilityHint(onTap != nil ? "Tap to navigate to \(dateLabel) \(day.year)" : "")
     }
     
     private func formatTemperature(_ celsius: Double) -> String {
@@ -557,7 +572,7 @@ struct DatePickerSheet: View {
             Form {
                 Section {
                     Picker("Year", selection: $tempYear) {
-                        ForEach((1940...Calendar.current.component(.year, from: Date())).reversed(), id: \.self) { year in
+                        ForEach(1940...Calendar.current.component(.year, from: Date()), id: \.self) { year in
                             Text(String(year)).tag(year)
                         }
                     }

@@ -64,16 +64,22 @@ struct MyCitiesView: View {
             EmptyStateView()
         } else {
             switch settingsManager.settings.viewMode {
+            case .flat:
+                FlatView(
+                    selectedCityForHistory: $selectedCityForHistory,
+                    selectedCityForDetail: $selectedCityForDetail,
+                    dateOffset: dateOffset,
+                    selectedDate: selectedDate
+                )
             case .list:
                 ListView(
                     selectedCityForHistory: $selectedCityForHistory,
                     dateOffset: dateOffset,
                     selectedDate: selectedDate
                 )
-            case .flat:
-                FlatView(
+            case .table:
+                TableView(
                     selectedCityForHistory: $selectedCityForHistory,
-                    selectedCityForDetail: $selectedCityForDetail,
                     dateOffset: dateOffset,
                     selectedDate: selectedDate
                 )
@@ -84,7 +90,7 @@ struct MyCitiesView: View {
     var body: some View {
         NavigationStack {
             mainContent
-                .navigationTitle("Fast Weather")
+                .navigationTitle("Weather Fast")
                 .navigationDestination(item: $selectedCityForHistory) { city in
                     HistoricalWeatherView(city: city, autoLoadToday: settingsManager.settings.viewMode == .list)
                         .navigationTitle("Historical Weather")
