@@ -1,7 +1,7 @@
 # Security & Web Hygiene Checklist
 
 **Last Updated:** January 30, 2026  
-**Domain:** fastweather.online
+**Domain:** weatherfast.online
 
 ## ✅ Implemented Security Measures
 
@@ -45,7 +45,7 @@
 ### Domain & Hosting
 - [ ] **HSTS Preload Submission**
   - Visit https://hstspreload.org/
-  - Submit fastweather.online for Chrome's HSTS preload list
+  - Submit weatherfast.online for Chrome's HSTS preload list
   - Ensures HTTPS from first visit for all users
 
 - [ ] **SSL Certificate Monitoring**
@@ -79,7 +79,7 @@
   <?xml version="1.0" encoding="UTF-8"?>
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-      <loc>https://fastweather.online/</loc>
+      <loc>https://weatherfast.online/</loc>
       <changefreq>weekly</changefreq>
       <priority>1.0</priority>
     </url>
@@ -131,7 +131,7 @@
 
 ### Manual Testing Checklist
 - [ ] Test geolocation on fresh browser (incognito)
-- [ ] Verify HTTPS redirect: visit http://fastweather.online
+- [ ] Verify HTTPS redirect: visit http://weatherfast.online
 - [ ] Check all external API calls use HTTPS
 - [ ] Test offline functionality (disconnect network)
 - [ ] Verify service worker updates properly
@@ -177,13 +177,13 @@ Run these commands to verify your setup:
 
 ```bash
 # Check HTTPS redirect
-curl -I http://fastweather.online | grep -i location
+curl -I http://weatherfast.online | grep -i location
 
 # Check security headers
-curl -I https://fastweather.online | grep -i "strict-transport\|content-security\|x-frame"
+curl -I https://weatherfast.online | grep -i "strict-transport\|content-security\|x-frame"
 
 # Test CSP
-curl -I https://fastweather.online | grep -i content-security-policy
+curl -I https://weatherfast.online | grep -i content-security-policy
 ```
 
 Expected results:
@@ -199,17 +199,17 @@ Add these to `index.html` `<head>` for better sharing:
 ```html
 <!-- Open Graph (Facebook, LinkedIn) -->
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://fastweather.online/">
+<meta property="og:url" content="https://weatherfast.online/">
 <meta property="og:title" content="FastWeather - Accessible Weather App">
 <meta property="og:description" content="Fast, accessible weather information with detailed forecasts">
-<meta property="og:image" content="https://fastweather.online/WeatherIcon-512.png">
+<meta property="og:image" content="https://weatherfast.online/WeatherIcon-512.png">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary">
-<meta name="twitter:url" content="https://fastweather.online/">
+<meta name="twitter:url" content="https://weatherfast.online/">
 <meta name="twitter:title" content="FastWeather - Accessible Weather App">
 <meta name="twitter:description" content="Fast, accessible weather information">
-<meta name="twitter:image" content="https://fastweather.online/WeatherIcon-192.png">
+<meta name="twitter:image" content="https://weatherfast.online/WeatherIcon-192.png">
 ```
 
 ## 🔗 Useful Resources
