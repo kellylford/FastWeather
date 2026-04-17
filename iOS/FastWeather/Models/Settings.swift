@@ -497,6 +497,7 @@ struct AppSettings: Codable {
     var weatherAroundMeArcWidth: ArcWidth = .standard
     var weatherAroundMeCorridorWidth: CorridorWidth = .twenty
     var showWeatherAroundMeOffsetDistance: Bool = true
+    var showWeatherAroundMeBearing: Bool = false
     var showWeatherAroundMeMovement: Bool = true
     var showWeatherAroundMePressureTrends: Bool = false
     var showWeatherAroundMeAlerts: Bool = true
@@ -640,7 +641,7 @@ struct AppSettings: Codable {
         case _weatherAroundMeDistance = "weatherAroundMeDistance"
         // Weather Around Me exploration settings
         case weatherAroundMeExplorationMode, weatherAroundMeArcWidth, weatherAroundMeCorridorWidth
-        case showWeatherAroundMeOffsetDistance, showWeatherAroundMeMovement, showWeatherAroundMePressureTrends, showWeatherAroundMeAlerts
+        case showWeatherAroundMeOffsetDistance, showWeatherAroundMeBearing, showWeatherAroundMeMovement, showWeatherAroundMePressureTrends, showWeatherAroundMeAlerts
         case weatherFields, hourlyFields, dailyFields, marineFields, detailCategories
         case myDataFields
         case forecastDetailLayout

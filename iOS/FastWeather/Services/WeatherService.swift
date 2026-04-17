@@ -593,11 +593,11 @@ class WeatherService: ObservableObject {
             return cached
         }
         
-        // Minimal params matching Windows "basic" mode
+        // Minimal params matching Windows "basic" mode, plus wind/pressure for Weather Around Me
         let params = [
             "latitude": String(latitude),
             "longitude": String(longitude),
-            "current": "temperature_2m,weather_code,cloud_cover,is_day,uv_index",
+            "current": "temperature_2m,weather_code,cloud_cover,is_day,uv_index,wind_speed_10m,wind_direction_10m,pressure_msl",
             "hourly": "cloud_cover",
             "daily": "temperature_2m_max,temperature_2m_min",
             "forecast_days": "1",

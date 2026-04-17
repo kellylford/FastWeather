@@ -790,6 +790,11 @@ struct WeatherAroundMeView: View {
         // Add distance from origin
         label += "\(formatDistanceFromMiles(cityInfo.distanceMiles))"
         
+        // Add bearing if enabled
+        if settingsManager.settings.showWeatherAroundMeBearing {
+            label += ", \(Int(cityInfo.bearing.rounded())) degrees"
+        }
+        
         // Add perpendicular offset if enabled
         if settingsManager.settings.showWeatherAroundMeOffsetDistance {
             label += ", \(cityInfo.offsetDescription(distanceUnit: settingsManager.settings.distanceUnit))"
@@ -938,8 +943,11 @@ struct WeatherAroundMeSettingsSheet: View {
                 }
                 
                 Section {
-                    Toggle("Show Perpendicular Distance", isOn: $settingsManager.settings.showWeatherAroundMeOffsetDistance)
+                    Toggle("Show Distance from Center Line", isOn: $settingsManager.settings.showWeatherAroundMeOffsetDistance)
                         .accessibilityHint("Show how far east or west cities are from the center line")
+                    
+                    Toggle("Show Bearing", isOn: $settingsManager.settings.showWeatherAroundMeBearing)
+                        .accessibilityHint("Show compass bearing for each city (e.g., '145 degrees')")
                     
                     Toggle("Show Weather Movement", isOn: $settingsManager.settings.showWeatherAroundMeMovement)
                         .accessibilityHint("Announce if weather is approaching, moving away, or parallel")

@@ -172,12 +172,19 @@ struct SettingsView: View {
                         .accessibilityHint(settingsManager.settings.weatherAroundMeCorridorWidth.description)
                     }
                     
-                    Toggle("Show Offset Distance", isOn: $settingsManager.settings.showWeatherAroundMeOffsetDistance)
+                    Toggle("Show Distance from Center Line", isOn: $settingsManager.settings.showWeatherAroundMeOffsetDistance)
                         .onChange(of: settingsManager.settings.showWeatherAroundMeOffsetDistance) {
                             settingsManager.saveSettings()
                         }
-                        .accessibilityLabel("Show offset distance")
+                        .accessibilityLabel("Show distance from center line")
                         .accessibilityHint("Display distance from center line for each city (e.g., '5 miles west of center line')")
+                    
+                    Toggle("Show Bearing", isOn: $settingsManager.settings.showWeatherAroundMeBearing)
+                        .onChange(of: settingsManager.settings.showWeatherAroundMeBearing) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Show bearing")
+                        .accessibilityHint("Display compass bearing for each city (e.g., '145 degrees')")
                     
                     Toggle("Show Weather Movement", isOn: $settingsManager.settings.showWeatherAroundMeMovement)
                         .onChange(of: settingsManager.settings.showWeatherAroundMeMovement) {
