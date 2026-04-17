@@ -29,6 +29,7 @@ struct WeatherAroundMeView: View {
     @State private var alertMessage = ""
     @State private var directionalWeatherData: [UUID: (temp: Double, condition: String, windDirection: Double, windSpeed: Double, pressure: Double, alerts: [WeatherAlert])] = [:]
     @State private var isLoadingCities = false
+    @State private var showingSettings = false
     // Shared WeatherService instance so batchFetchWeatherBasic cache is reused across all city fetches
     @State private var directionalWeatherService = WeatherService()
     
@@ -81,13 +82,37 @@ struct WeatherAroundMeView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
-                    Task { await loadRegionalWeather() }
-                }) {
-                    Label("Refresh", systemImage: "arrow.clockwise")
+                HStack(spacing: 16) {
+                    Button(action: {
+                        showingSettings = true
+                    }) {
+                        Label("Settings", systemImage: "gearshape")
+                    }
+                    .accessibilityLabel("Weather Around Me Settings")
+                    
+                    Button(action: {
+                        Task { await loadRegionalWeather() }
+                    }) {
+                        Label("Refresh", systemImage: "arrow.clockwise")
+                    }
+                    .accessibilityLabel("Refresh regional weather data")
                 }
-                .accessibilityLabel("Refresh regional weather data")
             }
+        }
+        .sheet(isPresented: $showingSettings) {
+            WeatherAroundMeSettingsSheet()
+                .environmentObject(settingsManager)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
+        .onChange(of: settingsManager.settings.weatherAroundMeExplorationMode) {
+            loadCitiesInDirection()
+        }
+        .onChange(of: settingsManager.settings.weatherAroundMeArcWidth) {
+            loadCitiesInDirection()
+        }
+        .onChange(of: settingsManager.settings.weatherAroundMeCorridorWidth) {
+            loadCitiesInDirection()
         }
         .task {
             await loadRegionalWeather()
@@ -859,6 +884,87 @@ private struct AroundMeCityDetailView: View {
             .task {
                 await weatherService.fetchWeatherForDate(for: city, dateOffset: 0)
             }
+    }
+}
+
+// MARK: - Settings Sheet
+
+struct WeatherAroundMeSettingsSheet: View {
+    @EnvironmentObject var settingsManager: SettingsManager
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                Section {
+                    Picker("Exploration Mode", selection: $settingsManager.settings.weatherAroundMeExplorationMode) {
+                        Text(ExplorationMode.arc.rawValue).tag(ExplorationMode.arc)
+                        Text(ExplorationMode.straightLine.rawValue).tag(ExplorationMode.straightLine)
+                    }
+                    .accessibilityHint(settingsManager.settings.weatherAroundMeExplorationMode.description)
+                } header: {
+                    Text("Search Pattern")
+                } footer: {
+                    Text(settingsManager.settings.weatherAroundMeExplorationMode.description)
+                }
+                
+                if settingsManager.settings.weatherAroundMeExplorationMode == .arc {
+                    Section {
+                        Picker("Arc Width", selection: $settingsManager.settings.weatherAroundMeArcWidth) {
+                            Text(ArcWidth.narrow.displayName).tag(ArcWidth.narrow)
+                            Text(ArcWidth.standard.displayName).tag(ArcWidth.standard)
+                            Text(ArcWidth.medium.displayName).tag(ArcWidth.medium)
+                            Text(ArcWidth.wide.displayName).tag(ArcWidth.wide)
+                        }
+                        .accessibilityHint(settingsManager.settings.weatherAroundMeArcWidth.description)
+                    } header: {
+                        Text("Arc Width")
+                    } footer: {
+                        Text(settingsManager.settings.weatherAroundMeArcWidth.description)
+                    }
+                } else {
+                    Section {
+                        Picker("Corridor Width", selection: $settingsManager.settings.weatherAroundMeCorridorWidth) {
+                            Text("\(Int(CorridorWidth.ten.rawValue)) miles").tag(CorridorWidth.ten)
+                            Text("\(Int(CorridorWidth.twenty.rawValue)) miles").tag(CorridorWidth.twenty)
+                            Text("\(Int(CorridorWidth.thirty.rawValue)) miles").tag(CorridorWidth.thirty)
+                            Text("\(Int(CorridorWidth.fifty.rawValue)) miles").tag(CorridorWidth.fifty)
+                        }
+                    } header: {
+                        Text("Corridor Width")
+                    } footer: {
+                        Text("Width of the straight-line corridor (±\(Int(settingsManager.settings.weatherAroundMeCorridorWidth.rawValue / 2)) miles from center line)")
+                    }
+                }
+                
+                Section {
+                    Toggle("Show Perpendicular Distance", isOn: $settingsManager.settings.showWeatherAroundMeOffsetDistance)
+                        .accessibilityHint("Show how far east or west cities are from the center line")
+                    
+                    Toggle("Show Weather Movement", isOn: $settingsManager.settings.showWeatherAroundMeMovement)
+                        .accessibilityHint("Announce if weather is approaching, moving away, or parallel")
+                    
+                    Toggle("Show Pressure Trends", isOn: $settingsManager.settings.showWeatherAroundMePressureTrends)
+                        .accessibilityHint("Compare pressure between consecutive cities")
+                    
+                    Toggle("Show Weather Alerts", isOn: $settingsManager.settings.showWeatherAroundMeAlerts)
+                        .accessibilityHint("Announce severe weather alerts for each city")
+                } header: {
+                    Text("Information Display")
+                } footer: {
+                    Text("Control which information is announced when stepping through cities")
+                }
+            }
+            .navigationTitle("Weather Around Me")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
     }
 }
 

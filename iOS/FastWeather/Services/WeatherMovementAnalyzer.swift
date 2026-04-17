@@ -107,7 +107,7 @@ struct WeatherMovementAnalyzer {
         
         switch movement {
         case .calm:
-            return "Calm\(locationStr)"
+            return "Winds \(speedStr)\(locationStr)"
         case .approaching:
             return "Approaching\(locationStr) at \(speedStr)"
         case .receding:
