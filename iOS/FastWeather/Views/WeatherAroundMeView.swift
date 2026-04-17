@@ -89,6 +89,18 @@ struct WeatherAroundMeView: View {
                         Label("Settings", systemImage: "gearshape")
                     }
                     .accessibilityLabel("Weather Around Me Settings")
+                    .accessibilityValue(currentExplorationModeDescription())
+                    .accessibilityHint("Opens settings sheet. Swipe up or down to cycle through exploration modes.")
+                    .accessibilityAdjustableAction { direction in
+                        switch direction {
+                        case .increment:
+                            cycleExplorationMode(forward: true)
+                        case .decrement:
+                            cycleExplorationMode(forward: false)
+                        @unknown default:
+                            break
+                        }
+                    }
                     
                     Button(action: {
                         Task { await loadRegionalWeather() }
@@ -854,6 +866,73 @@ struct WeatherAroundMeView: View {
         label += ", \(currentCityIndex + 1) of \(citiesInDirection.count)"
         
         return label
+    }
+    
+    // MARK: - VoiceOver Exploration Mode Cycling
+    
+    /// Returns a description of the current exploration mode for VoiceOver
+    private func currentExplorationModeDescription() -> String {
+        if settingsManager.settings.weatherAroundMeExplorationMode == .arc {
+            return "Arc mode, \(settingsManager.settings.weatherAroundMeArcWidth.displayName)"
+        } else {
+            return "Corridor mode, \(Int(settingsManager.settings.weatherAroundMeCorridorWidth.rawValue)) miles"
+        }
+    }
+    
+    /// Cycles through exploration mode combinations in a fixed order
+    /// Order: Corridor 10→20→30→50, then Arc Narrow→Standard→Medium→Wide, then wraps
+    private func cycleExplorationMode(forward: Bool) {
+        let allModes: [(ExplorationMode, ArcWidth?, CorridorWidth?)] = [
+            (.straightLine, nil, .ten),
+            (.straightLine, nil, .twenty),
+            (.straightLine, nil, .thirty),
+            (.straightLine, nil, .fifty),
+            (.arc, .narrow, nil),
+            (.arc, .standard, nil),
+            (.arc, .medium, nil),
+            (.arc, .wide, nil)
+        ]
+        
+        // Find current index
+        let currentIndex: Int
+        if settingsManager.settings.weatherAroundMeExplorationMode == .straightLine {
+            switch settingsManager.settings.weatherAroundMeCorridorWidth {
+            case .ten: currentIndex = 0
+            case .twenty: currentIndex = 1
+            case .thirty: currentIndex = 2
+            case .fifty: currentIndex = 3
+            }
+        } else {
+            switch settingsManager.settings.weatherAroundMeArcWidth {
+            case .narrow: currentIndex = 4
+            case .standard: currentIndex = 5
+            case .medium: currentIndex = 6
+            case .wide: currentIndex = 7
+            }
+        }
+        
+        // Calculate next index with wrapping
+        let nextIndex: Int
+        if forward {
+            nextIndex = (currentIndex + 1) % allModes.count
+        } else {
+            nextIndex = (currentIndex - 1 + allModes.count) % allModes.count
+        }
+        
+        // Apply new settings
+        let (mode, arcWidth, corridorWidth) = allModes[nextIndex]
+        settingsManager.settings.weatherAroundMeExplorationMode = mode
+        if let arc = arcWidth {
+            settingsManager.settings.weatherAroundMeArcWidth = arc
+        }
+        if let corridor = corridorWidth {
+            settingsManager.settings.weatherAroundMeCorridorWidth = corridor
+        }
+        settingsManager.saveSettings()
+        
+        // Announce the change
+        let announcement = currentExplorationModeDescription()
+        UIAccessibility.post(notification: .announcement, argument: announcement)
     }
 }
 
