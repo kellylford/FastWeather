@@ -332,7 +332,7 @@ class WeatherService: ObservableObject {
             URLQueryItem(name: "daily", value: includeHourly
                 ? "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,rain_sum,snowfall_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_direction_10m_dominant"
                 : "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum"),
-            URLQueryItem(name: "forecast_days", value: includeHourly ? (Secrets.openMeteoAPIKey != nil ? "16" : "7") : "3"),
+            URLQueryItem(name: "forecast_days", value: includeHourly ? "16" : "3"),
             URLQueryItem(name: "timezone", value: "auto")
         ]
         if includeHourly {

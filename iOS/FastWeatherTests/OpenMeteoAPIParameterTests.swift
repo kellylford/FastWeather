@@ -252,4 +252,52 @@ final class OpenMeteoAPIParameterTests: XCTestCase {
         let hasCachedData = await MainActor.run { !service.weatherCache.isEmpty }
         XCTAssertTrue(hasCachedData, "Should have cached weather data after successful fetch")
     }
+    
+    // MARK: - Forecast Days Tests
+    
+    /// Test that forecast_days parameter uses correct values (16 days for hourly, not 7)
+    /// Per Open-Meteo documentation, free tier supports up to 16 forecast days
+    func testForecastDaysUsesCorrectValues() async throws {
+        // Create a test city using proper initializer
+        let testCity = City(id: UUID(), name: "New York", state: "New York", country: "United States",
+                           latitude: 40.7128, longitude: -74.0060)
+        
+        // Create service instance
+        let service = await MainActor.run { WeatherService() }
+        
+        // We can't easily inspect the URL that gets built internally, but we can verify
+        // the expected behavior by checking the method signature and ensuring it doesn't
+        // incorrectly cap at 7 days for free tier.
+        
+        // The fix should be: includeHourly ? "16" : "3"
+        // NOT: includeHourly ? (Secrets.openMeteoAPIKey != nil ? "16" : "7") : "3"
+        
+        // This test verifies the behavior by actually calling the API and checking
+        // that we get back appropriate forecast data
+        await MainActor.run {
+            Task {
+                await service.fetchWeatherForDate(for: testCity, dateOffset: 0, includeHourly: true)
+            }
+        }
+        
+        // Give it time to complete
+        try await Task.sleep(nanoseconds: 3_000_000_000) // 3 seconds
+        
+        // After fetch, check that we have weather data using correct cache key
+        let cacheKey = WeatherCacheKey(cityId: testCity.id, dateOffset: 0)
+        let weatherData = await MainActor.run { service.weatherCache[cacheKey] }
+        XCTAssertNotNil(weatherData, "Should have weather data after fetch")
+        
+        // Verify we have daily data (the array should exist)
+        XCTAssertNotNil(weatherData?.daily, "Should have daily forecast data")
+        
+        // If daily data exists, verify we got more than 7 days (up to 16)
+        if let daily = weatherData?.daily {
+            let dayCount = daily.temperature2mMax.count
+            XCTAssertGreaterThan(dayCount, 7, 
+                "Should fetch more than 7 days on free tier (up to 16 days available)")
+            XCTAssertLessThanOrEqual(dayCount, 16, 
+                "Should not exceed 16 days forecast")
+        }
+    }
 }
