@@ -43,55 +43,23 @@ The most critical fixes are:
 
 ---
 
-## 1.1 CRITICAL — Deprecated API Parameter Names
+## 1.1 CRITICAL — Deprecated API Parameter Names ✅ **FIXED**
 
-**Files:** `Services/WeatherService.swift`, `Models/Weather.swift`, `Models/HistoricalWeather.swift`
+**Files:** `Services/WeatherService.swift`, `Models/Weather.swift`, `Models/HistoricalWeather.swift`  
+**Fixed in:** Commit 1d63d2b (April 17, 2026)  
+**Tests:** `FastWeatherTests/OpenMeteoAPIParameterTests.swift` (9 tests, all passing)
 
-The Open-Meteo API transitioned from concatenated names to underscore-separated names. The app uses the old aliases in multiple locations. While backward-compatible aliases exist today, Open-Meteo has stated intent to remove them. When they are removed, the affected fields silently return `nil` (Swift's `decodeIfPresent` returns nil for missing keys, no error thrown).
+~~The Open-Meteo API transitioned from concatenated names to underscore-separated names. The app uses the old aliases in multiple locations. While backward-compatible aliases exist today, Open-Meteo has stated intent to remove them. When they are removed, the affected fields silently return `nil` (Swift's `decodeIfPresent` returns nil for missing keys, no error thrown).~~
 
-**Hourly request string** (`fetchWeatherForDate` line ~335, `fetchWeatherBasic` line ~599):
+**RESOLUTION:** All API parameter names and CodingKeys updated to use correct underscore-separated format:
+- ✅ `windgusts_10m` → `wind_gusts_10m`
+- ✅ `dewpoint_2m` → `dew_point_2m`
+- ✅ `cloudcover` → `cloud_cover`
+- ✅ `windspeed_10m_max` → `wind_speed_10m_max`
+- ✅ `winddirection_10m_dominant` → `wind_direction_10m_dominant`
+- ✅ `weathercode` → `weather_code` (historical)
 
-| Current (broken) | Correct |
-|---|---|
-| `windgusts_10m` | `wind_gusts_10m` |
-| `dewpoint_2m` | `dew_point_2m` |
-| `cloudcover` | `cloud_cover` |
-
-**Daily request string** (`fetchWeatherForDate` line ~329, `fetchWeatherFull` line ~632):
-
-| Current (broken) | Correct |
-|---|---|
-| `windspeed_10m_max` | `wind_speed_10m_max` |
-| `winddirection_10m_dominant` | `wind_direction_10m_dominant` |
-
-**Historical fetch default `fields` parameter** (`fetchHistoricalWeather`):
-
-| Current (broken) | Correct |
-|---|---|
-| `weathercode` | `weather_code` |
-| `windspeed_10m_max` | `wind_speed_10m_max` |
-
-**CodingKeys that must change to match** (in `Models/Weather.swift` and `Models/HistoricalWeather.swift`):
-
-```swift
-// DailyWeather.CodingKeys — fix both request and decoder
-case windSpeed10mMax = "windspeed_10m_max"              // → "wind_speed_10m_max"
-case winddirection10mDominant = "winddirection_10m_dominant"  // → "wind_direction_10m_dominant"
-
-// HourlyWeather.CodingKeys
-case cloudcover                        // → case cloudCover = "cloud_cover"
-case windgusts10m = "windgusts_10m"   // → case windGusts10m = "wind_gusts_10m"
-case dewpoint2m = "dewpoint_2m"       // → case dewPoint2m = "dew_point_2m"
-
-// CurrentWeather.CodingKeys
-case dewpoint2m = "dewpoint_2m"       // → case dewPoint2m = "dew_point_2m"
-
-// HistoricalWeather.swift
-case weatherCode = "weathercode"      // → case weatherCode = "weather_code"
-case windSpeed10mMax = "windspeed_10m_max"  // → "wind_speed_10m_max"
-```
-
-Note: The request and decoder must be updated together. If only the request is fixed, the decoder stops finding the field. If only the decoder is fixed, the request sends an unrecognized parameter. Both must change in the same commit.
+All struct properties renamed to match CodingKeys, all references updated throughout codebase, comprehensive test suite added with live API integration test. Verified working with paid API tier.
 
 ---
 
