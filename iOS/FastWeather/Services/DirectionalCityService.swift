@@ -83,13 +83,17 @@ class DirectionalCityService {
             let normalizedDiff = normalizeBearingDifference(bearingDiff)
             let perpendicularOffset = dist * sin(normalizedDiff * .pi / 180.0)
             
+            // Calculate along-track distance (positive = ahead, negative = behind)
+            let alongTrackDistance = dist * cos(normalizedDiff * .pi / 180.0)
+            
             // Check if city is within the search area based on exploration mode
             let isInSearchArea: Bool
             if explorationMode == .arc {
                 isInSearchArea = isInCone(cityBearing: bearing, targetBearing: direction.bearing, coneDegrees: arcWidth.halfAngleDegrees)
             } else {
                 // Straight line corridor mode: check if perpendicular distance is within corridor width
-                isInSearchArea = abs(perpendicularOffset) <= (corridorWidth.rawValue / 2.0)
+                // AND city is ahead of us (not behind)
+                isInSearchArea = alongTrackDistance > 0 && abs(perpendicularOffset) <= (corridorWidth.rawValue / 2.0)
             }
             
             guard isInSearchArea else { continue }

@@ -192,6 +192,13 @@ struct SettingsView: View {
                         }
                         .accessibilityLabel("Show pressure trends")
                         .accessibilityHint("Display pressure changes along the path to identify weather systems")
+                    
+                    Toggle("Show Weather Alerts", isOn: $settingsManager.settings.showWeatherAroundMeAlerts)
+                        .onChange(of: settingsManager.settings.showWeatherAroundMeAlerts) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Show weather alerts")
+                        .accessibilityHint("Announce severe weather alerts for each city (e.g., 'Alert: Tornado Warning')")
                 }
                 
                 // Browse Cities section

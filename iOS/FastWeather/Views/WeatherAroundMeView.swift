@@ -27,7 +27,7 @@ struct WeatherAroundMeView: View {
     @State private var showingAllCities = false
     @State private var alertTitle = ""
     @State private var alertMessage = ""
-    @State private var directionalWeatherData: [UUID: (temp: Double, condition: String, windDirection: Double, windSpeed: Double)] = [:]
+    @State private var directionalWeatherData: [UUID: (temp: Double, condition: String, windDirection: Double, windSpeed: Double, pressure: Double, alerts: [WeatherAlert])] = [:]
     @State private var isLoadingCities = false
     // Shared WeatherService instance so batchFetchWeatherBasic cache is reused across all city fetches
     @State private var directionalWeatherService = WeatherService()
@@ -576,20 +576,37 @@ struct WeatherAroundMeView: View {
     private func loadWeatherForCity(_ cityInfo: DirectionalCityInfo) async {
         guard directionalWeatherData[cityInfo.id] == nil else { return }
         do {
-            let weather = try await directionalWeatherService.fetchWeatherBasic(
+            // Fetch weather and alerts concurrently
+            let tempCity = City(
+                name: cityInfo.name,
+                state: cityInfo.state,
+                country: cityInfo.country,
                 latitude: cityInfo.latitude,
                 longitude: cityInfo.longitude
             )
+            
+            async let weatherTask = directionalWeatherService.fetchWeatherBasic(
+                latitude: cityInfo.latitude,
+                longitude: cityInfo.longitude
+            )
+            async let alertsTask = weatherService.fetchNWSAlerts(for: tempCity)
+            
+            let (weather, alerts) = try await (weatherTask, alertsTask)
+            
             let temp = weather.current.temperature2m
             let condition = weather.current.weatherCodeEnum?.description ?? "Unknown"
             let windDir = Double(weather.current.windDirection10m ?? 0)
             let windSpd = weather.current.windSpeed10m ?? 0
+            let press = weather.current.pressureMsl ?? 1013.25
+            
             await MainActor.run {
                 directionalWeatherData[cityInfo.id] = (
                     temp: temp,
                     condition: condition,
                     windDirection: windDir,
-                    windSpeed: windSpd
+                    windSpeed: windSpd,
+                    pressure: press,
+                    alerts: alerts
                 )
             }
         } catch {
@@ -605,6 +622,31 @@ struct WeatherAroundMeView: View {
         let locations = pending.map { (latitude: $0.latitude, longitude: $0.longitude) }
         let weatherBatch = await directionalWeatherService.batchFetchWeatherBasic(for: locations)
         
+        // Fetch alerts for all cities concurrently
+        let alertsTasks = pending.map { cityInfo -> (UUID, Task<[WeatherAlert], Error>) in
+            let tempCity = City(
+                name: cityInfo.name,
+                state: cityInfo.state,
+                country: cityInfo.country,
+                latitude: cityInfo.latitude,
+                longitude: cityInfo.longitude
+            )
+            let task = Task {
+                try await weatherService.fetchNWSAlerts(for: tempCity)
+            }
+            return (cityInfo.id, task)
+        }
+        
+        // Collect alerts results
+        var alertsMap: [UUID: [WeatherAlert]] = [:]
+        for (id, task) in alertsTasks {
+            do {
+                alertsMap[id] = try await task.value
+            } catch {
+                alertsMap[id] = []
+            }
+        }
+        
         await MainActor.run {
             for cityInfo in pending {
                 let key = "\(cityInfo.latitude),\(cityInfo.longitude)"
@@ -613,11 +655,15 @@ struct WeatherAroundMeView: View {
                     let condition = weather.current.weatherCodeEnum?.description ?? "Unknown"
                     let windDir = Double(weather.current.windDirection10m ?? 0)
                     let windSpd = weather.current.windSpeed10m ?? 0
+                    let press = weather.current.pressureMsl ?? 1013.25
+                    let alerts = alertsMap[cityInfo.id] ?? []
                     directionalWeatherData[cityInfo.id] = (
                         temp: temp,
                         condition: condition,
                         windDirection: windDir,
-                        windSpeed: windSpd
+                        windSpeed: windSpd,
+                        pressure: press,
+                        alerts: alerts
                     )
                 }
             }
@@ -728,6 +774,19 @@ struct WeatherAroundMeView: View {
         if let weather = directionalWeatherData[cityInfo.id] {
             label += ", \(formatTemperature(weather.temp)), \(weather.condition)"
             
+            // Add weather alerts if enabled
+            if settingsManager.settings.showWeatherAroundMeAlerts, !weather.alerts.isEmpty {
+                let highestSeverityAlert = weather.alerts.min(by: { $0.severity.sortOrder < $1.severity.sortOrder })
+                if let alert = highestSeverityAlert {
+                    label += ", "
+                    if weather.alerts.count == 1 {
+                        label += "Alert: \(alert.event)"
+                    } else {
+                        label += "Alerts: \(alert.event) and \(weather.alerts.count - 1) more"
+                    }
+                }
+            }
+            
             // Add weather movement if enabled
             if settingsManager.settings.showWeatherAroundMeMovement {
                 let movement = WeatherMovementAnalyzer.movementDescription(
@@ -738,6 +797,26 @@ struct WeatherAroundMeView: View {
                     locationName: nil // Don't repeat city name
                 )
                 label += ", \(movement)"
+            }
+            
+            // Add pressure trend if enabled
+            if settingsManager.settings.showWeatherAroundMePressureTrends {
+                // Compare to previous city in list (or skip if first city)
+                if currentCityIndex > 0, currentCityIndex < citiesInDirection.count {
+                    let previousCity = citiesInDirection[currentCityIndex - 1]
+                    if let previousWeather = directionalWeatherData[previousCity.id] {
+                        let pressureDiff = weather.pressure - previousWeather.pressure
+                        let pressureTrend: String
+                        if abs(pressureDiff) < 1.0 {
+                            pressureTrend = "Pressure steady"
+                        } else if pressureDiff > 0 {
+                            pressureTrend = "Pressure rising \(String(format: "%.1f", abs(pressureDiff))) hPa"
+                        } else {
+                            pressureTrend = "Pressure falling \(String(format: "%.1f", abs(pressureDiff))) hPa"
+                        }
+                        label += ", \(pressureTrend)"
+                    }
+                }
             }
         }
         

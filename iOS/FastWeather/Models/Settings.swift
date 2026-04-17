@@ -499,6 +499,7 @@ struct AppSettings: Codable {
     var showWeatherAroundMeOffsetDistance: Bool = true
     var showWeatherAroundMeMovement: Bool = true
     var showWeatherAroundMePressureTrends: Bool = false
+    var showWeatherAroundMeAlerts: Bool = true
     
     // Ordered weather fields with enable/disable state (City List)
     var weatherFields: [WeatherField] = [
@@ -639,7 +640,7 @@ struct AppSettings: Codable {
         case _weatherAroundMeDistance = "weatherAroundMeDistance"
         // Weather Around Me exploration settings
         case weatherAroundMeExplorationMode, weatherAroundMeArcWidth, weatherAroundMeCorridorWidth
-        case showWeatherAroundMeOffsetDistance, showWeatherAroundMeMovement, showWeatherAroundMePressureTrends
+        case showWeatherAroundMeOffsetDistance, showWeatherAroundMeMovement, showWeatherAroundMePressureTrends, showWeatherAroundMeAlerts
         case weatherFields, hourlyFields, dailyFields, marineFields, detailCategories
         case myDataFields
         case forecastDetailLayout
