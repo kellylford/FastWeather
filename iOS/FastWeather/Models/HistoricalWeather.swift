@@ -36,7 +36,7 @@ struct HistoricalWeatherResponse: Codable {
         
         enum CodingKeys: String, CodingKey {
             case time
-            case weatherCode = "weathercode"
+            case weatherCode = "weather_code"
             case temperature2mMax = "temperature_2m_max"
             case temperature2mMin = "temperature_2m_min"
             case precipitationSum = "precipitation_sum"
@@ -47,7 +47,7 @@ struct HistoricalWeatherResponse: Codable {
             case rainSum = "rain_sum"
             case snowfallSum = "snowfall_sum"
             case precipitationHours = "precipitation_hours"
-            case windSpeed10mMax = "windspeed_10m_max"
+            case windSpeed10mMax = "wind_speed_10m_max"
         }
     }
 }

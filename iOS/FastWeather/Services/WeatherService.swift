@@ -320,7 +320,7 @@ class WeatherService: ObservableObject {
         
         // For today and future dates, use forecast API
         // Build current parameters including any My Data selections
-        let baseCurrentParams = "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility,wind_gusts_10m,uv_index,dewpoint_2m"
+        let baseCurrentParams = "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility,wind_gusts_10m,uv_index,dew_point_2m"
         let currentParams = Self.appendMyDataParameters(to: baseCurrentParams)
         
         // Light fetch (list/background): minimal params to stay well within free-tier limits.
@@ -330,13 +330,13 @@ class WeatherService: ObservableObject {
             URLQueryItem(name: "longitude", value: String(city.longitude)),
             URLQueryItem(name: "current", value: currentParams),
             URLQueryItem(name: "daily", value: includeHourly
-                ? "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,rain_sum,snowfall_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration,windspeed_10m_max,winddirection_10m_dominant"
+                ? "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,rain_sum,snowfall_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_direction_10m_dominant"
                 : "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum"),
             URLQueryItem(name: "forecast_days", value: includeHourly ? (Secrets.openMeteoAPIKey != nil ? "16" : "7") : "3"),
             URLQueryItem(name: "timezone", value: "auto")
         ]
         if includeHourly {
-            queryItems.append(URLQueryItem(name: "hourly", value: "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,windgusts_10m,uv_index,dewpoint_2m,snowfall"))
+            queryItems.append(URLQueryItem(name: "hourly", value: "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,uv_index,dew_point_2m,snowfall,cloud_cover"))
         }
         
         var components = URLComponents(string: baseURL)!
@@ -407,7 +407,7 @@ class WeatherService: ObservableObject {
                     daylightDuration: daily.daylightDuration.map { [$0[dateOffset]].compactMap { $0 } },
                     sunshineDuration: daily.sunshineDuration.map { [$0[dateOffset]].compactMap { $0 } },
                     windSpeed10mMax: daily.windSpeed10mMax.map { [$0[dateOffset]].compactMap { $0 } },
-                    winddirection10mDominant: daily.winddirection10mDominant.map { [$0[dateOffset]].compactMap { $0 } }
+                    windDirectionDominant: daily.windDirectionDominant.map { [$0[dateOffset]].compactMap { $0 } }
                 )
                 
                 // Extract hourly data for that specific day (24 hours starting at midnight of target date)
@@ -426,11 +426,11 @@ class WeatherService: ObservableObject {
                             precipitation: hourly.precipitation.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
                             relativeHumidity2m: hourly.relativeHumidity2m.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
                             windSpeed10m: hourly.windSpeed10m.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
-                            cloudcover: hourly.cloudcover.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                            cloudCover: hourly.cloudCover.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
                             precipitationProbability: hourly.precipitationProbability.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
                             uvIndex: hourly.uvIndex.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
-                            windgusts10m: hourly.windgusts10m.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
-                            dewpoint2m: hourly.dewpoint2m.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                            windGusts10m: hourly.windGusts10m.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
+                            dewPoint2m: hourly.dewPoint2m.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) },
                             snowfall: hourly.snowfall.map { Array($0[hourlyStartIdx..<hourlyEndIdx]) }
                         )
                     }
@@ -566,7 +566,7 @@ class WeatherService: ObservableObject {
                 daylightDuration: nil,
                 sunshineDuration: nil,
                 windSpeed10mMax: daily.windSpeed10mMax,
-                winddirection10mDominant: nil
+                windDirectionDominant: nil
             )
             
             let weatherData = WeatherData(current: current, daily: dailyWeather, hourly: nil)
@@ -598,7 +598,7 @@ class WeatherService: ObservableObject {
             "latitude": String(latitude),
             "longitude": String(longitude),
             "current": "temperature_2m,weather_code,cloud_cover,is_day,uv_index",
-            "hourly": "cloudcover",
+            "hourly": "cloud_cover",
             "daily": "temperature_2m_max,temperature_2m_min",
             "forecast_days": "1",
             "timezone": "auto"
@@ -630,9 +630,9 @@ class WeatherService: ObservableObject {
         let params = [
             "latitude": String(latitude),
             "longitude": String(longitude),
-            "current": "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility,wind_gusts_10m,uv_index,dewpoint_2m",
-            "hourly": "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,windgusts_10m,uv_index,dewpoint_2m,snowfall",
-            "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,rain_sum,snowfall_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration,windspeed_10m_max,winddirection_10m_dominant",
+            "current": "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,visibility,wind_gusts_10m,uv_index,dew_point_2m",
+            "hourly": "temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,uv_index,dew_point_2m,snowfall,cloud_cover",
+            "daily": "temperature_2m_max,temperature_2m_min,sunrise,sunset,weather_code,precipitation_sum,rain_sum,snowfall_sum,precipitation_probability_max,uv_index_max,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_direction_10m_dominant",
             "forecast_days": "16",
             "timezone": "auto"
         ]
@@ -830,7 +830,7 @@ class WeatherService: ObservableObject {
     
     // Fetch historical weather for a specific date range
     func fetchHistoricalWeather(for city: City, startDate: String, endDate: String,
-                                fields: String = "weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,precipitation_sum,rain_sum,snowfall_sum,precipitation_hours,windspeed_10m_max") async throws -> HistoricalWeatherResponse {
+                                fields: String = "weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,precipitation_sum,rain_sum,snowfall_sum,precipitation_hours,wind_speed_10m_max") async throws -> HistoricalWeatherResponse {
         let params = [
             "latitude": String(city.latitude),
             "longitude": String(city.longitude),
@@ -1041,7 +1041,7 @@ class WeatherService: ObservableObject {
                 daylightDuration: daily.daylightDuration,
                 sunshineDuration: daily.sunshineDuration,
                 windSpeed10mMax: daily.windSpeed10mMax,
-                winddirection10mDominant: daily.winddirection10mDominant
+                windDirectionDominant: daily.windDirectionDominant
             )
             print("❄️ WK snow overlay applied for \(city.name) offset=\(dateOffset) days=\(forecasts.count)")
             return WeatherData(current: weatherData.current, daily: newDaily, hourly: weatherData.hourly)

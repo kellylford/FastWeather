@@ -199,7 +199,7 @@ struct CityDetailView: View {
                                     Text("Winds up to \(formatWindSpeed(windMax))")
                                         .font(.subheadline)
                                         .fixedSize(horizontal: false, vertical: true)
-                                    if let windDir = daily.winddirection10mDominant?[0] {
+                                    if let windDir = daily.windDirectionDominant?[0] {
                                         Text("From \(degreesToCardinalLong(windDir))")
                                             .font(.caption)
                                             .foregroundColor(.secondary)
@@ -213,7 +213,7 @@ struct CityDetailView: View {
                             .accessibilityElement(children: .ignore)
                             .accessibilityLabel({
                                 var label = "Winds up to \(formatWindSpeed(windMax))"
-                                if let windDir = daily.winddirection10mDominant?[0] {
+                                if let windDir = daily.windDirectionDominant?[0] {
                                     label += ", From \(degreesToCardinalLong(windDir))"
                                 }
                                 return label
@@ -1198,7 +1198,7 @@ struct HourlyForecastCard: View {
             }
             
         case .windGusts:
-            if let windGusts = hourly.windgusts10m?[index], windGusts > 0 {
+            if let windGusts = hourly.windGusts10m?[index], windGusts > 0 {
                 return AnyView(HStack(spacing: 2) {
                     Image(systemName: "wind")
                         .font(.caption2)
@@ -1294,7 +1294,7 @@ struct HourlyForecastCard: View {
             }
             
         case .windGusts:
-            if let windGusts = hourly.windgusts10m?[index], windGusts > 0 {
+            if let windGusts = hourly.windGusts10m?[index], windGusts > 0 {
                 return "gusts \(formatWindSpeed(windGusts))"
             }
             
@@ -1408,7 +1408,7 @@ struct HourlyHeadingRow: View {
                 return ("Wind Speed", formatWindSpeed(speed))
             }
         case .windGusts:
-            if let gusts = hourly.windgusts10m?[index], gusts > 0 {
+            if let gusts = hourly.windGusts10m?[index], gusts > 0 {
                 return ("Wind Gusts", formatWindSpeed(gusts))
             }
         case .humidity:
@@ -1416,11 +1416,11 @@ struct HourlyHeadingRow: View {
                 return ("Humidity", "\(humidity)%")
             }
         case .cloudCover:
-            if let cloud = hourly.cloudcover?[index] {
+            if let cloud = hourly.cloudCover?[index] {
                 return ("Cloud Cover", "\(cloud)%")
             }
         case .dewPoint:
-            if let dew = hourly.dewpoint2m?[index] {
+            if let dew = hourly.dewPoint2m?[index] {
                 return ("Dew Point", formatTemperature(dew))
             }
         default:
@@ -2146,7 +2146,7 @@ struct DailyHeadingBlock: View {
                 return ("Max Wind Speed", formatWindSpeed(speed))
             }
         case .windDirectionDominant:
-            if let degrees = daily.winddirection10mDominant?[index] {
+            if let degrees = daily.windDirectionDominant?[index] {
                 return ("Wind Direction", formatWindDirection(degrees))
             }
         case .uvIndexMax:

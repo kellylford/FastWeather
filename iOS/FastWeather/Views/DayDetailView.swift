@@ -39,11 +39,11 @@ struct DayDetailView: View {
             precipitation: slice(hourly.precipitation),
             relativeHumidity2m: slice(hourly.relativeHumidity2m),
             windSpeed10m: slice(hourly.windSpeed10m),
-            cloudcover: slice(hourly.cloudcover),
+            cloudCover: slice(hourly.cloudCover),
             precipitationProbability: slice(hourly.precipitationProbability),
             uvIndex: slice(hourly.uvIndex),
-            windgusts10m: slice(hourly.windgusts10m),
-            dewpoint2m: slice(hourly.dewpoint2m),
+            windGusts10m: slice(hourly.windGusts10m),
+            dewPoint2m: slice(hourly.dewPoint2m),
             snowfall: slice(hourly.snowfall)
         )
     }
@@ -271,7 +271,7 @@ struct DayDetailView: View {
     @ViewBuilder
     private var windAndUVSection: some View {
         let wind = daily?.windSpeed10mMax?[dayIndex]
-        let windDir = daily?.winddirection10mDominant?[dayIndex]
+        let windDir = daily?.windDirectionDominant?[dayIndex]
         let uv = daily?.uvIndexMax?[dayIndex]
 
         if wind != nil || uv != nil {

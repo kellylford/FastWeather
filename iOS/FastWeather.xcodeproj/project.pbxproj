@@ -17,9 +17,6 @@
 		6B0A5D23AB1E6BAB93B5BCED /* MoonCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DEF54F1AE97F7891D18FB90 /* MoonCalculator.swift */; };
 		6CA5EB93D785DE05210F375A /* DeveloperSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F0E524751DEEAE77391AD2 /* DeveloperSettingsView.swift */; };
 		6F460C5A4802F9FDD2625094 /* ServicePersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378A45EA047D556C10D957F1 /* ServicePersistenceTests.swift */; };
-		BB100001A1 /* HistoricalDateParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB100001A0 /* HistoricalDateParsingTests.swift */; };
-		BB100002A1 /* ViewConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB100002A0 /* ViewConfigurationTests.swift */; };
-		BB100003A1 /* UnitConversionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB100003A0 /* UnitConversionTests.swift */; };
 		79EF625047D4C75BD3B73614 /* BrowseFavorite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 541AC6972702454065BAC379 /* BrowseFavorite.swift */; };
 		7B789880182BB3780DACFD9E /* DateParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84585CC21719C6078A0B9F83 /* DateParserTests.swift */; };
 		90B76CB12EE73F0BF533980A /* HistoricalWeatherCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808AC3615E6E747E006B95C9 /* HistoricalWeatherCache.swift */; };
@@ -57,6 +54,10 @@
 		A6886D9C7A65040E1717E6A4 /* FormatHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6EEC9A0A5A7E9A8E6CDB3BB /* FormatHelperTests.swift */; };
 		AABCDEF02 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABCDEF01 /* Secrets.swift */; };
 		AE03796A87F6E9395DD6C77C /* BrowseFavoritesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132665BE8B6FD8F918BD1E26 /* BrowseFavoritesService.swift */; };
+		B1D8458D8AB3552F7551C408 /* OpenMeteoAPIParameterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7B6A9FB3E7C71BD604A655F /* OpenMeteoAPIParameterTests.swift */; };
+		BB100001A1 /* HistoricalDateParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB100001A0 /* HistoricalDateParsingTests.swift */; };
+		BB100002A1 /* ViewConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB100002A0 /* ViewConfigurationTests.swift */; };
+		BB100003A1 /* UnitConversionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB100003A0 /* UnitConversionTests.swift */; };
 		BF662C2E13A50213B31C9282 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63BC18B80FA54B507B3AD22C /* Foundation.framework */; };
 		E41FA69A048BFD0F634DB005 /* RadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8C597ECDBB8F82B9D13 /* RadarView.swift */; };
 		E4F1B4B29C76E05475F84205 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 582B5A12CF76291E75D023B0 /* AppLogger.swift */; };
@@ -82,9 +83,6 @@
 		2DEF54F1AE97F7891D18FB90 /* MoonCalculator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MoonCalculator.swift; sourceTree = "<group>"; };
 		343FB8C597ECDBB8F82B9D13 /* RadarView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RadarView.swift; sourceTree = "<group>"; };
 		378A45EA047D556C10D957F1 /* ServicePersistenceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ServicePersistenceTests.swift; path = FastWeatherTests/ServicePersistenceTests.swift; sourceTree = "<group>"; };
-		BB100001A0 /* HistoricalDateParsingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HistoricalDateParsingTests.swift; path = FastWeatherTests/HistoricalDateParsingTests.swift; sourceTree = "<group>"; };
-		BB100002A0 /* ViewConfigurationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ViewConfigurationTests.swift; path = FastWeatherTests/ViewConfigurationTests.swift; sourceTree = "<group>"; };
-		BB100003A0 /* UnitConversionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = UnitConversionTests.swift; path = FastWeatherTests/UnitConversionTests.swift; sourceTree = "<group>"; };
 		3B7B06EFA7D170A6D9BA8847 /* WeatherHelpers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeatherHelpers.swift; sourceTree = "<group>"; };
 		486EDF8DF974A3A8043714DD /* FeatureFlags.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeatureFlags.swift; sourceTree = "<group>"; };
 		541AC6972702454065BAC379 /* BrowseFavorite.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowseFavorite.swift; sourceTree = "<group>"; };
@@ -134,8 +132,12 @@
 		A5456D76628AB29EB3D6E266 /* WeatherCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeatherCache.swift; sourceTree = "<group>"; };
 		A5F0E524751DEEAE77391AD2 /* DeveloperSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeveloperSettingsView.swift; sourceTree = "<group>"; };
 		A6EEC9A0A5A7E9A8E6CDB3BB /* FormatHelperTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FormatHelperTests.swift; path = FastWeatherTests/FormatHelperTests.swift; sourceTree = "<group>"; };
+		A7B6A9FB3E7C71BD604A655F /* OpenMeteoAPIParameterTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OpenMeteoAPIParameterTests.swift; path = FastWeatherTests/OpenMeteoAPIParameterTests.swift; sourceTree = "<group>"; };
 		AABCDEF01 /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
 		B505151E924798A11141FE82 /* FeatureFlags.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeatureFlags.swift; sourceTree = "<group>"; };
+		BB100001A0 /* HistoricalDateParsingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HistoricalDateParsingTests.swift; path = FastWeatherTests/HistoricalDateParsingTests.swift; sourceTree = "<group>"; };
+		BB100002A0 /* ViewConfigurationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ViewConfigurationTests.swift; path = FastWeatherTests/ViewConfigurationTests.swift; sourceTree = "<group>"; };
+		BB100003A0 /* UnitConversionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = UnitConversionTests.swift; path = FastWeatherTests/UnitConversionTests.swift; sourceTree = "<group>"; };
 		CD557832C1BCA3C9AA2DF4EF /* BrowseModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowseModels.swift; sourceTree = "<group>"; };
 		F83A2A75D10D105C7225AE79 /* LocationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -169,6 +171,7 @@
 				BB100001A0 /* HistoricalDateParsingTests.swift */,
 				BB100002A0 /* ViewConfigurationTests.swift */,
 				BB100003A0 /* UnitConversionTests.swift */,
+				A7B6A9FB3E7C71BD604A655F /* OpenMeteoAPIParameterTests.swift */,
 			);
 			name = FastWeatherTests;
 			sourceTree = SOURCE_ROOT;
@@ -418,6 +421,7 @@
 				BB100001A1 /* HistoricalDateParsingTests.swift in Sources */,
 				BB100002A1 /* ViewConfigurationTests.swift in Sources */,
 				BB100003A1 /* UnitConversionTests.swift in Sources */,
+				B1D8458D8AB3552F7551C408 /* OpenMeteoAPIParameterTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
