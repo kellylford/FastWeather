@@ -63,23 +63,19 @@ All struct properties renamed to match CodingKeys, all references updated throug
 
 ---
 
-## 1.2 CRITICAL — Free Tier Unnecessarily Capped at 7-Day Forecast
+## 1.2 CRITICAL — Free Tier Unnecessarily Capped at 7-Day Forecast ✅ **FIXED**
 
-**File:** `Services/WeatherService.swift` (line ~331)
+**File:** `Services/WeatherService.swift` (line ~331)  
+**Fixed in:** Commit 68b7677 (April 17, 2026)  
+**Tests:** `FastWeatherTests/OpenMeteoAPIParameterTests.swift::testForecastDaysUsesCorrectValues`
 
-```swift
-// Current — WRONG
-URLQueryItem(name: "forecast_days", value: includeHourly
-    ? (Secrets.openMeteoAPIKey != nil ? "16" : "7")
-    : "3"),
-```
+~~According to the current Open-Meteo documentation, **up to 16 forecast days are available on the free tier**. There is no paid-only restriction on `forecast_days`. The code mistakenly limits free users to 7 days. Notably, `fetchWeatherFull` (used by the city browse view) already correctly hardcodes `"16"` without a key check — this inconsistency shows the intent is 16 days.~~
 
-According to the current Open-Meteo documentation, **up to 16 forecast days are available on the free tier**. There is no paid-only restriction on `forecast_days`. The code mistakenly limits free users to 7 days. Notably, `fetchWeatherFull` (used by the city browse view) already correctly hardcodes `"16"` without a key check — this inconsistency shows the intent is 16 days.
+**RESOLUTION:** Removed incorrect API key check from `forecast_days` parameter:
+- ❌ **Before:** `value: includeHourly ? (Secrets.openMeteoAPIKey != nil ? "16" : "7") : "3"`
+- ✅ **After:** `value: includeHourly ? "16" : "3"`
 
-```swift
-// Fixed
-URLQueryItem(name: "forecast_days", value: includeHourly ? "16" : "3"),
-```
+Free tier users now correctly receive up to 16 days of forecast data. Test validates API returns >7 days (up to 16) without requiring paid API key.
 
 ---
 
