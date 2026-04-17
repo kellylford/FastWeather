@@ -278,6 +278,134 @@ struct UserGuideView: View {
                     BulletPoint("**Medium (45°)** - Broad search, 78 miles wide at 100 miles")
                     BulletPoint("**Wide (90°)** - Maximum coverage, 141 miles wide at 100 miles")
                     
+                    Text("**Arc Width at Different Distances:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("The arc expands as you go farther from your starting city. Here's how wide each arc setting is at different distances:")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 4)
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 12) {
+                            Text("Distance")
+                                .fontWeight(.semibold)
+                                .frame(width: 70, alignment: .leading)
+                            Text("Narrow")
+                                .fontWeight(.semibold)
+                                .frame(width: 60, alignment: .trailing)
+                            Text("Standard")
+                                .fontWeight(.semibold)
+                                .frame(width: 70, alignment: .trailing)
+                            Text("Medium")
+                                .fontWeight(.semibold)
+                                .frame(width: 70, alignment: .trailing)
+                            Text("Wide")
+                                .fontWeight(.semibold)
+                                .frame(width: 70, alignment: .trailing)
+                        }
+                        .font(.caption)
+                        .padding(.bottom, 4)
+                        
+                        Divider()
+                        
+                        HStack(spacing: 12) {
+                            Text("50 mi")
+                                .frame(width: 70, alignment: .leading)
+                            Text("9 mi")
+                                .frame(width: 60, alignment: .trailing)
+                            Text("20 mi")
+                                .frame(width: 70, alignment: .trailing)
+                            Text("38 mi")
+                                .frame(width: 70, alignment: .trailing)
+                            Text("71 mi")
+                                .frame(width: 70, alignment: .trailing)
+                        }
+                        .font(.caption)
+                        
+                        HStack(spacing: 12) {
+                            Text("100 mi")
+                                .frame(width: 70, alignment: .leading)
+                            Text("17 mi")
+                                .frame(width: 60, alignment: .trailing)
+                            Text("39 mi")
+                                .frame(width: 70, alignment: .trailing)
+                            Text("77 mi")
+                                .frame(width: 70, alignment: .trailing)
+                            Text("141 mi")
+                                .frame(width: 70, alignment: .trailing)
+                        }
+                        .font(.caption)
+                        
+                        HStack(spacing: 12) {
+                            Text("150 mi")
+                                .frame(width: 70, alignment: .leading)
+                            Text("26 mi")
+                                .frame(width: 60, alignment: .trailing)
+                            Text("59 mi")
+                                .frame(width: 70, alignment: .trailing)
+                            Text("115 mi")
+                                .frame(width: 70, alignment: .trailing)
+                            Text("212 mi")
+                                .frame(width: 70, alignment: .trailing)
+                        }
+                        .font(.caption)
+                        
+                        HStack(spacing: 12) {
+                            Text("200 mi")
+                                .frame(width: 70, alignment: .leading)
+                            Text("35 mi")
+                                .frame(width: 60, alignment: .trailing)
+                            Text("78 mi")
+                                .frame(width: 70, alignment: .trailing)
+                            Text("153 mi")
+                                .frame(width: 70, alignment: .trailing)
+                            Text("283 mi")
+                                .frame(width: 70, alignment: .trailing)
+                        }
+                        .font(.caption)
+                        
+                        HStack(spacing: 12) {
+                            Text("250 mi")
+                                .frame(width: 70, alignment: .leading)
+                            Text("44 mi")
+                                .frame(width: 60, alignment: .trailing)
+                            Text("98 mi")
+                                .frame(width: 70, alignment: .trailing)
+                            Text("191 mi")
+                                .frame(width: 70, alignment: .trailing)
+                            Text("354 mi")
+                                .frame(width: 70, alignment: .trailing)
+                        }
+                        .font(.caption)
+                        
+                        HStack(spacing: 12) {
+                            Text("300 mi")
+                                .frame(width: 70, alignment: .leading)
+                            Text("52 mi")
+                                .frame(width: 60, alignment: .trailing)
+                            Text("117 mi")
+                                .frame(width: 70, alignment: .trailing)
+                            Text("230 mi")
+                                .frame(width: 70, alignment: .trailing)
+                            Text("424 mi")
+                                .frame(width: 70, alignment: .trailing)
+                        }
+                        .font(.caption)
+                    }
+                    .padding(.leading, 16)
+                    .padding(.trailing, 16)
+                    .padding(.top, 4)
+                    .padding(.bottom, 8)
+                    
+                    Text("For example, using Standard arc at 150 miles means cities must be within a 59-mile-wide fan shape at that distance to appear in your search.")
+                        .font(.callout)
+                        .italic()
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 4)
+                    
                     Text("**Corridor Widths** (when using Straight Line Corridor mode):")
                         .fontWeight(.semibold)
                         .padding(.top, 8)
