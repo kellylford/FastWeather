@@ -33,6 +33,8 @@ class WeatherService: ObservableObject {
     @Published var browseWeatherCache: [String: WeatherData] = [:] // Cache for browse cities
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
+    /// Incremented every time refreshAllWeather() runs, triggering alert re-fetch in views
+    @Published var alertsRefreshID: Int = 0
     /// Cache keys whose last fetch attempt failed (network error, timeout, bad response).
     /// Views use this to show an error state instead of an infinite spinner.
     @Published var failedCacheKeys: Set<WeatherCacheKey> = []
@@ -214,6 +216,7 @@ class WeatherService: ObservableObject {
         // Remove all cached weather data for this city (all date offsets)
         weatherCache = weatherCache.filter { $0.key.cityId != city.id }
         cacheTimestamps = cacheTimestamps.filter { $0.key.cityId != city.id }
+        alertsCache.removeValue(forKey: city.id)
         saveCities()
     }
     
@@ -226,6 +229,7 @@ class WeatherService: ObservableObject {
     func clearWeatherCache() {
         weatherCache = [:]
         cacheTimestamps = [:]
+        alertsCache = [:]
     }
     
     // MARK: - Weather Fetching
@@ -692,6 +696,7 @@ class WeatherService: ObservableObject {
     func refreshAllWeather() async {
         await MainActor.run {
             isLoading = true
+            alertsRefreshID += 1
         }
         
         // Fetch cities concurrently, capped by maxConcurrentRequests.
@@ -1088,11 +1093,12 @@ class WeatherService: ObservableObject {
     /// - International: Apple WeatherKit (when feature flag enabled AND country supported)
     /// - Returns: Array of active weather alerts (empty if no alerts or service unavailable)
     func fetchNWSAlerts(for city: City) async throws -> [WeatherAlert] {
-        // Check cache first
+        // Check cache first, filtering out expired alerts
         if let cached = alertsCache[city.id] {
             let age = Date().timeIntervalSince(cached.timestamp)
             if age < alertsCacheMinutes * 60 {
-                return cached.alerts
+                let activeAlerts = cached.alerts.filter { !$0.isExpired }
+                return activeAlerts
             }
         }
         
