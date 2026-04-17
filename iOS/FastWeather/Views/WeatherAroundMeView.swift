@@ -27,7 +27,7 @@ struct WeatherAroundMeView: View {
     @State private var showingAllCities = false
     @State private var alertTitle = ""
     @State private var alertMessage = ""
-    @State private var directionalWeatherData: [UUID: (temp: Double, condition: String)] = [:]
+    @State private var directionalWeatherData: [UUID: (temp: Double, condition: String, windDirection: Double, windSpeed: Double)] = [:]
     @State private var isLoadingCities = false
     // Shared WeatherService instance so batchFetchWeatherBasic cache is reused across all city fetches
     @State private var directionalWeatherService = WeatherService()
@@ -558,7 +558,10 @@ struct WeatherAroundMeView: View {
             citiesInDirection = await DirectionalCityService.shared.findCities(
                 from: city,
                 direction: selectedDirection,
-                maxDistance: distanceMiles
+                maxDistance: distanceMiles,
+                explorationMode: settingsManager.settings.weatherAroundMeExplorationMode,
+                arcWidth: settingsManager.settings.weatherAroundMeArcWidth,
+                corridorWidth: settingsManager.settings.weatherAroundMeCorridorWidth
             )
             currentCityIndex = 0
             isLoadingCities = false
@@ -579,8 +582,15 @@ struct WeatherAroundMeView: View {
             )
             let temp = weather.current.temperature2m
             let condition = weather.current.weatherCodeEnum?.description ?? "Unknown"
+            let windDir = Double(weather.current.windDirection10m ?? 0)
+            let windSpd = weather.current.windSpeed10m ?? 0
             await MainActor.run {
-                directionalWeatherData[cityInfo.id] = (temp: temp, condition: condition)
+                directionalWeatherData[cityInfo.id] = (
+                    temp: temp,
+                    condition: condition,
+                    windDirection: windDir,
+                    windSpeed: windSpd
+                )
             }
         } catch {
             print("⚠️ Failed to load weather for \(cityInfo.name): \(error)")
@@ -601,7 +611,14 @@ struct WeatherAroundMeView: View {
                 if let weather = weatherBatch[key] {
                     let temp = weather.current.temperature2m
                     let condition = weather.current.weatherCodeEnum?.description ?? "Unknown"
-                    directionalWeatherData[cityInfo.id] = (temp: temp, condition: condition)
+                    let windDir = Double(weather.current.windDirection10m ?? 0)
+                    let windSpd = weather.current.windSpeed10m ?? 0
+                    directionalWeatherData[cityInfo.id] = (
+                        temp: temp,
+                        condition: condition,
+                        windDirection: windDir,
+                        windSpeed: windSpd
+                    )
                 }
             }
         }
@@ -698,10 +715,35 @@ struct WeatherAroundMeView: View {
         var label = isDistanceFallback
             ? "Weather point: \(cityInfo.displayName(relativeTo: city.country)), "
             : "\(cityInfo.displayName(relativeTo: city.country)), "
-        if let weather = directionalWeatherData[cityInfo.id] {
-            label += "\(formatTemperature(weather.temp)), \(weather.condition), "
+        
+        // Add distance from origin
+        label += "\(formatDistanceFromMiles(cityInfo.distanceMiles))"
+        
+        // Add perpendicular offset if enabled
+        if settingsManager.settings.showWeatherAroundMeOffsetDistance {
+            label += ", \(cityInfo.offsetDescription(distanceUnit: settingsManager.settings.distanceUnit))"
         }
-        label += "\(formatDistanceFromMiles(cityInfo.distanceMiles)), \(currentCityIndex + 1) of \(citiesInDirection.count)"
+        
+        // Add weather data if available
+        if let weather = directionalWeatherData[cityInfo.id] {
+            label += ", \(formatTemperature(weather.temp)), \(weather.condition)"
+            
+            // Add weather movement if enabled
+            if settingsManager.settings.showWeatherAroundMeMovement {
+                let movement = WeatherMovementAnalyzer.movementDescription(
+                    windDirection: weather.windDirection,
+                    windSpeed: weather.windSpeed,
+                    windSpeedUnit: settingsManager.settings.windSpeedUnit,
+                    bearingToLocation: cityInfo.bearing,
+                    locationName: nil // Don't repeat city name
+                )
+                label += ", \(movement)"
+            }
+        }
+        
+        // Add position in list
+        label += ", \(currentCityIndex + 1) of \(citiesInDirection.count)"
+        
         return label
     }
 }

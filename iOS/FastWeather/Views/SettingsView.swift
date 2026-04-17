@@ -136,6 +136,62 @@ struct SettingsView: View {
                     }
                     .accessibilityLabel("Default distance for Weather Around Me, currently \(settingsManager.settings.distanceUnit.format(settingsManager.settings.weatherAroundMeDistance))")
                     .accessibilityHint("Sets the default radius when viewing weather conditions around a city")
+                    
+                    Picker("Exploration Mode", selection: $settingsManager.settings.weatherAroundMeExplorationMode) {
+                        ForEach(ExplorationMode.allCases, id: \.self) { mode in
+                            Text(mode.rawValue).tag(mode)
+                        }
+                    }
+                    .onChange(of: settingsManager.settings.weatherAroundMeExplorationMode) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Exploration mode, currently \(settingsManager.settings.weatherAroundMeExplorationMode.rawValue)")
+                    .accessibilityHint(settingsManager.settings.weatherAroundMeExplorationMode.description)
+                    
+                    if settingsManager.settings.weatherAroundMeExplorationMode == .arc {
+                        Picker("Arc Width", selection: $settingsManager.settings.weatherAroundMeArcWidth) {
+                            ForEach(ArcWidth.allCases, id: \.self) { width in
+                                Text(width.displayName).tag(width)
+                            }
+                        }
+                        .onChange(of: settingsManager.settings.weatherAroundMeArcWidth) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Arc width, currently \(settingsManager.settings.weatherAroundMeArcWidth.displayName)")
+                        .accessibilityHint(settingsManager.settings.weatherAroundMeArcWidth.description)
+                    } else {
+                        Picker("Corridor Width", selection: $settingsManager.settings.weatherAroundMeCorridorWidth) {
+                            ForEach(CorridorWidth.allCases, id: \.self) { width in
+                                Text(width.displayName).tag(width)
+                            }
+                        }
+                        .onChange(of: settingsManager.settings.weatherAroundMeCorridorWidth) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Corridor width, currently \(settingsManager.settings.weatherAroundMeCorridorWidth.displayName)")
+                        .accessibilityHint(settingsManager.settings.weatherAroundMeCorridorWidth.description)
+                    }
+                    
+                    Toggle("Show Offset Distance", isOn: $settingsManager.settings.showWeatherAroundMeOffsetDistance)
+                        .onChange(of: settingsManager.settings.showWeatherAroundMeOffsetDistance) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Show offset distance")
+                        .accessibilityHint("Display distance from center line for each city (e.g., '5 miles west of center line')")
+                    
+                    Toggle("Show Weather Movement", isOn: $settingsManager.settings.showWeatherAroundMeMovement)
+                        .onChange(of: settingsManager.settings.showWeatherAroundMeMovement) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Show weather movement")
+                        .accessibilityHint("Indicate if weather is approaching, moving away, or moving parallel")
+                    
+                    Toggle("Show Pressure Trends", isOn: $settingsManager.settings.showWeatherAroundMePressureTrends)
+                        .onChange(of: settingsManager.settings.showWeatherAroundMePressureTrends) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Show pressure trends")
+                        .accessibilityHint("Display pressure changes along the path to identify weather systems")
                 }
                 
                 // Browse Cities section

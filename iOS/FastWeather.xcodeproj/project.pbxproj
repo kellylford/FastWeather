@@ -20,6 +20,7 @@
 		79EF625047D4C75BD3B73614 /* BrowseFavorite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 541AC6972702454065BAC379 /* BrowseFavorite.swift */; };
 		7B789880182BB3780DACFD9E /* DateParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84585CC21719C6078A0B9F83 /* DateParserTests.swift */; };
 		90B76CB12EE73F0BF533980A /* HistoricalWeatherCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808AC3615E6E747E006B95C9 /* HistoricalWeatherCache.swift */; };
+		936F0EBB42AF986505E6F18D /* WeatherMovementAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FACFB641A124BC50AA47A82 /* WeatherMovementAnalyzer.swift */; };
 		A10000001 /* WeatherFastApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000 /* WeatherFastApp.swift */; };
 		A10000003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000002 /* ContentView.swift */; };
 		A10000005 /* City.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000004 /* City.swift */; };
@@ -81,6 +82,7 @@
 		132665BE8B6FD8F918BD1E26 /* BrowseFavoritesService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowseFavoritesService.swift; sourceTree = "<group>"; };
 		1402523D7CA83670A0D6BAF8 /* FastWeatherTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FastWeatherTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2DEF54F1AE97F7891D18FB90 /* MoonCalculator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MoonCalculator.swift; sourceTree = "<group>"; };
+		2FACFB641A124BC50AA47A82 /* WeatherMovementAnalyzer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeatherMovementAnalyzer.swift; sourceTree = "<group>"; };
 		343FB8C597ECDBB8F82B9D13 /* RadarView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RadarView.swift; sourceTree = "<group>"; };
 		378A45EA047D556C10D957F1 /* ServicePersistenceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ServicePersistenceTests.swift; path = FastWeatherTests/ServicePersistenceTests.swift; sourceTree = "<group>"; };
 		3B7B06EFA7D170A6D9BA8847 /* WeatherHelpers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeatherHelpers.swift; sourceTree = "<group>"; };
@@ -272,6 +274,7 @@
 				2DEF54F1AE97F7891D18FB90 /* MoonCalculator.swift */,
 				132665BE8B6FD8F918BD1E26 /* BrowseFavoritesService.swift */,
 				AABCDEF01 /* Secrets.swift */,
+				2FACFB641A124BC50AA47A82 /* WeatherMovementAnalyzer.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -473,6 +476,7 @@
 				AABCDEF02 /* Secrets.swift in Sources */,
 				4D0C3D7F2B79D81702BFFF57 /* BrowseModels.swift in Sources */,
 				E4F1B4B29C76E05475F84205 /* AppLogger.swift in Sources */,
+				936F0EBB42AF986505E6F18D /* WeatherMovementAnalyzer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -7,6 +7,74 @@
 
 import Foundation
 
+// MARK: - Weather Around Me Settings
+
+enum ExplorationMode: String, CaseIterable, Codable {
+    case arc = "Arc"
+    case straightLine = "Straight Line Corridor"
+    
+    var description: String {
+        switch self {
+        case .arc:
+            return "Fan-shaped search expanding outward"
+        case .straightLine:
+            return "Fixed-width corridor along center line"
+        }
+    }
+}
+
+enum ArcWidth: Double, CaseIterable, Codable {
+    case narrow = 10.0       // ±5° (10° total)
+    case standard = 22.5     // ±11.25° (22.5° total)
+    case medium = 45.0       // ±22.5° (45° total, previous default)
+    case wide = 90.0         // ±45° (90° total)
+    
+    var displayName: String {
+        switch self {
+        case .narrow: return "Narrow (10°)"
+        case .standard: return "Standard (22.5°)"
+        case .medium: return "Medium (45°)"
+        case .wide: return "Wide (90°)"
+        }
+    }
+    
+    var description: String {
+        switch self {
+        case .narrow: return "Precise tracking - 17 mi wide at 100 mi"
+        case .standard: return "Balanced coverage - 39 mi wide at 100 mi"
+        case .medium: return "Broad search - 78 mi wide at 100 mi"
+        case .wide: return "Maximum coverage - 141 mi wide at 100 mi"
+        }
+    }
+    
+    /// Half-angle in degrees (±angle from center line)
+    var halfAngleDegrees: Double {
+        return rawValue / 2.0
+    }
+}
+
+enum CorridorWidth: Double, CaseIterable, Codable {
+    case ten = 10.0
+    case twenty = 20.0
+    case thirty = 30.0
+    case fifty = 50.0
+    
+    var displayName: String {
+        return "\(Int(rawValue)) miles"
+    }
+    
+    var description: String {
+        switch self {
+        case .ten: return "±5 miles from center line"
+        case .twenty: return "±10 miles from center line"
+        case .thirty: return "±15 miles from center line"
+        case .fifty: return "±25 miles from center line"
+        }
+    }
+}
+
+// MARK: - Display Settings
+
 enum DisplayMode: String, CaseIterable, Codable {
     case condensed = "Condensed"
     case details = "Details"
@@ -285,7 +353,7 @@ enum PressureUnit: String, CaseIterable, Codable {
     }
 }
 
-enum DistanceUnit: String, CaseIterable, Codable {
+public enum DistanceUnit: String, CaseIterable, Codable {
     case miles = "mi"
     case kilometers = "km"
     
@@ -424,6 +492,14 @@ struct AppSettings: Codable {
         }
     }
     
+    // Weather Around Me exploration settings
+    var weatherAroundMeExplorationMode: ExplorationMode = .arc
+    var weatherAroundMeArcWidth: ArcWidth = .standard
+    var weatherAroundMeCorridorWidth: CorridorWidth = .twenty
+    var showWeatherAroundMeOffsetDistance: Bool = true
+    var showWeatherAroundMeMovement: Bool = true
+    var showWeatherAroundMePressureTrends: Bool = false
+    
     // Ordered weather fields with enable/disable state (City List)
     var weatherFields: [WeatherField] = [
         WeatherField(type: .weatherAlerts, isEnabled: true),
@@ -561,6 +637,9 @@ struct AppSettings: Codable {
         case hourlyShowTemperature, hourlyShowConditions, hourlyShowPrecipitationProbability, hourlyShowWind
         case dailyShowHighLow, dailyShowConditions, dailyShowPrecipitationProbability, dailyShowPrecipitationAmount, dailyShowWind
         case _weatherAroundMeDistance = "weatherAroundMeDistance"
+        // Weather Around Me exploration settings
+        case weatherAroundMeExplorationMode, weatherAroundMeArcWidth, weatherAroundMeCorridorWidth
+        case showWeatherAroundMeOffsetDistance, showWeatherAroundMeMovement, showWeatherAroundMePressureTrends
         case weatherFields, hourlyFields, dailyFields, marineFields, detailCategories
         case myDataFields
         case forecastDetailLayout

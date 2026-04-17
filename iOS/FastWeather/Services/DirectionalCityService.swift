@@ -34,10 +34,24 @@ class DirectionalCityService {
         return all
     }
     
-    /// Find cities within a ±22.5° cone in the given direction using the bundled city cache.
+    /// Find cities within a cone or corridor in the given direction using the bundled city cache.
     /// Returns immediately (no network calls) with results sorted by distance.
-    func findCities(from centerCity: City, direction: CardinalDirection, maxDistance: Double = 300) async -> [DirectionalCityInfo] {
-        let cacheKey = "\(centerCity.id)-\(direction.rawValue)-\(Int(maxDistance))"
+    /// - Parameters:
+    ///   - centerCity: The origin city
+    ///   - direction: Cardinal direction to search
+    ///   - maxDistance: Maximum distance in miles (default 300)
+    ///   - explorationMode: Arc or straight line corridor (default .arc)
+    ///   - arcWidth: Width of arc in degrees (default .standard = 22.5°)
+    ///   - corridorWidth: Width of corridor in miles (default 20)
+    func findCities(
+        from centerCity: City,
+        direction: CardinalDirection,
+        maxDistance: Double = 300,
+        explorationMode: ExplorationMode = .arc,
+        arcWidth: ArcWidth = .standard,
+        corridorWidth: CorridorWidth = .twenty
+    ) async -> [DirectionalCityInfo] {
+        let cacheKey = "\(centerCity.id)-\(direction.rawValue)-\(Int(maxDistance))-\(explorationMode.rawValue)-\(arcWidth.rawValue)-\(corridorWidth.rawValue)"
         
         if let cached = geocodeCache[cacheKey] {
             return cached
@@ -63,7 +77,22 @@ class DirectionalCityService {
                 fromLat: centerCity.latitude, fromLon: centerCity.longitude,
                 toLat: cityLocation.latitude, toLon: cityLocation.longitude
             )
-            guard isInCone(cityBearing: bearing, targetBearing: direction.bearing) else { continue }
+            
+            // Calculate perpendicular offset from center line
+            let bearingDiff = bearing - direction.bearing
+            let normalizedDiff = normalizeBearingDifference(bearingDiff)
+            let perpendicularOffset = dist * sin(normalizedDiff * .pi / 180.0)
+            
+            // Check if city is within the search area based on exploration mode
+            let isInSearchArea: Bool
+            if explorationMode == .arc {
+                isInSearchArea = isInCone(cityBearing: bearing, targetBearing: direction.bearing, coneDegrees: arcWidth.halfAngleDegrees)
+            } else {
+                // Straight line corridor mode: check if perpendicular distance is within corridor width
+                isInSearchArea = abs(perpendicularOffset) <= (corridorWidth.rawValue / 2.0)
+            }
+            
+            guard isInSearchArea else { continue }
             
             results.append(DirectionalCityInfo(
                 name: cityLocation.name,
@@ -72,7 +101,8 @@ class DirectionalCityService {
                 latitude: cityLocation.latitude,
                 longitude: cityLocation.longitude,
                 distanceMiles: dist,
-                bearing: bearing
+                bearing: bearing,
+                perpendicularOffsetMiles: perpendicularOffset
             ))
         }
         
@@ -251,6 +281,19 @@ class DirectionalCityService {
         let diff = abs((cityBearing - targetBearing + 180).truncatingRemainder(dividingBy: 360) - 180)
         return diff <= coneDegrees
     }
+    
+    /// Normalizes bearing difference to range [-180, 180] for perpendicular offset calculation
+    /// - Parameter diff: Raw bearing difference (can be any value)
+    /// - Returns: Normalized difference in range [-180, 180]
+    private func normalizeBearingDifference(_ diff: Double) -> Double {
+        var normalized = diff.truncatingRemainder(dividingBy: 360)
+        if normalized > 180 {
+            normalized -= 360
+        } else if normalized < -180 {
+            normalized += 360
+        }
+        return normalized
+    }
 }
 
 
@@ -302,6 +345,8 @@ public struct DirectionalCityInfo: Identifiable {
     public let longitude: Double
     public let distanceMiles: Double
     public let bearing: Double
+    /// Perpendicular distance from center line in miles (positive = right/east, negative = left/west)
+    public let perpendicularOffsetMiles: Double
     /// True for synthetic weather waypoints generated to fill directional gaps; false for cache-sourced cities.
     public let isWaypoint: Bool
     
@@ -309,6 +354,7 @@ public struct DirectionalCityInfo: Identifiable {
         name: String, state: String?, country: String,
         latitude: Double, longitude: Double,
         distanceMiles: Double, bearing: Double,
+        perpendicularOffsetMiles: Double = 0,
         isWaypoint: Bool = false
     ) {
         self.name = name
@@ -318,6 +364,7 @@ public struct DirectionalCityInfo: Identifiable {
         self.longitude = longitude
         self.distanceMiles = distanceMiles
         self.bearing = bearing
+        self.perpendicularOffsetMiles = perpendicularOffsetMiles
         self.isWaypoint = isWaypoint
     }
     
@@ -333,5 +380,27 @@ public struct DirectionalCityInfo: Identifiable {
         if let state = state { parts.append(state) }
         if country != homeCountry { parts.append(country) }
         return parts.joined(separator: ", ")
+    }
+    
+    /// Formatted offset description for accessibility
+    /// Example: "5 miles west of center line" or "On center line"
+    public func offsetDescription(distanceUnit: DistanceUnit) -> String {
+        let absOffset = abs(perpendicularOffsetMiles)
+        
+        if absOffset < 1.0 {
+            return "On center line"
+        }
+        
+        let direction = perpendicularOffsetMiles > 0 ? "east" : "west"
+        let distance: String
+        
+        if distanceUnit == .miles {
+            distance = String(format: "%.0f miles", absOffset)
+        } else {
+            let km = absOffset * 1.60934
+            distance = String(format: "%.0f km", km)
+        }
+        
+        return "\(distance) \(direction) of center line"
     }
 }
