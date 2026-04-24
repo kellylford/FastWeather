@@ -31,7 +31,7 @@ class RadarService {
     /// available and falling back to Open-Meteo NWP for unsupported regions.
     func fetchPrecipitationNowcast(for city: City) async throws -> RadarData {
         #if canImport(WeatherKit)
-        if #available(iOS 16.0, *) {
+        if #available(iOS 16.0, *), FeatureFlags.shared.weatherKitNowcastEnabled {
             let country = city.country
             if weatherKitMinuteForecastCountries.contains(country) {
                 debugLog("🌧 Using WeatherKit path for \(city.name) (\(country))")
