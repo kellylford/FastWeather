@@ -121,7 +121,7 @@ class FeatureFlags: ObservableObject {
         myDataEnabled = true  // Default: enabled
         tableViewEnabled = false  // Default: disabled
         weatherKitSnowEnabled = true  // Default: enabled
-        print("🔧 Feature flags reset to defaults")
+        debugLog("🔧 Feature flags reset to defaults")
     }
     
     /// Enable all features (for testing)
@@ -133,7 +133,7 @@ class FeatureFlags: ObservableObject {
         myDataEnabled = true
         tableViewEnabled = true
         weatherKitSnowEnabled = true
-        print("🔧 All features enabled")
+        debugLog("🔧 All features enabled")
     }
     
     /// Disable all features (for release)
@@ -145,7 +145,7 @@ class FeatureFlags: ObservableObject {
         myDataEnabled = false
         tableViewEnabled = false
         weatherKitSnowEnabled = false
-        print("🔧 All features disabled")
+        debugLog("🔧 All features disabled")
     }
 }
 

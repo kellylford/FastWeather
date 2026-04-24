@@ -510,7 +510,7 @@ struct SettingsView: View {
             .onChange(of: showingResetAlert) { oldValue, newValue in
                 // Flash detection: Alert should never go from true to true
                 if oldValue == true && newValue == true {
-                    print("⚠️ ALERT FLASH DETECTED in SettingsView reset alert!")
+                    debugLog("⚠️ ALERT FLASH DETECTED in SettingsView reset alert!")
                 }
             }
             .sheet(isPresented: $showingDeveloperSettings) {

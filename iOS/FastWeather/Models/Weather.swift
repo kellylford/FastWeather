@@ -105,6 +105,14 @@ struct WeatherData: Codable {
     let current: CurrentWeather
     let daily: DailyWeather?
     let hourly: HourlyWeather?
+    /// UTC offset from the Open-Meteo response (seconds). Nil for historical/browse paths.
+    let utcOffsetSeconds: Int?
+
+    /// City-local timezone derived from the API response offset.
+    /// Defaults to UTC when offset is unavailable (historical path has no hourly data anyway).
+    var timeZone: TimeZone {
+        TimeZone(secondsFromGMT: utcOffsetSeconds ?? 0) ?? .current
+    }
     
     struct CurrentWeather: Codable {
         let temperature2m: Double
@@ -268,6 +276,8 @@ struct WeatherData: Codable {
         let sunshineDuration: [Double?]?
         let windSpeed10mMax: [Double?]?
         let windDirectionDominant: [Int?]?
+        let apparentTemperatureMax: [Double?]?
+        let apparentTemperatureMin: [Double?]?
         
         enum CodingKeys: String, CodingKey {
             case temperature2mMax = "temperature_2m_max"
@@ -284,6 +294,8 @@ struct WeatherData: Codable {
             case sunshineDuration = "sunshine_duration"
             case windSpeed10mMax = "wind_speed_10m_max"
             case windDirectionDominant = "wind_direction_10m_dominant"
+            case apparentTemperatureMax = "apparent_temperature_max"
+            case apparentTemperatureMin = "apparent_temperature_min"
         }
     }
     
@@ -323,6 +335,12 @@ struct WeatherResponse: Codable {
     let current: WeatherData.CurrentWeather
     let daily: WeatherData.DailyWeather?
     let hourly: WeatherData.HourlyWeather?
+    let utcOffsetSeconds: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case current, daily, hourly
+        case utcOffsetSeconds = "utc_offset_seconds"
+    }
 }
 
 // MARK: - Marine Weather Models

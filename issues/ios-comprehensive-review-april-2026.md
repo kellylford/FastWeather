@@ -79,186 +79,171 @@ Free tier users now correctly receive up to 16 days of forecast data. Test valid
 
 ---
 
-## 1.3 HIGH — Timezone Parsing Bug for International Cities
+## 1.3 HIGH — Timezone Parsing Bug for International Cities ✅ **FIXED**
 
-**File:** `Services/SettingsManager.swift` (DateParser, line ~110)
+**Files:** `Models/Weather.swift`, `Services/WeatherService.swift`, `Services/SettingsManager.swift`, `Views/ListView.swift`, `Views/CityDetailView.swift`  
+**Fixed in:** April 24, 2026
 
-All API calls use `timezone=auto`. When fetching Tokyo weather, Open-Meteo returns timestamps in JST (e.g., `"2026-04-15T15:00"` = 3 PM local). `DateParser.parse()` creates a `DateFormatter` with no timezone set, so it uses the device's local timezone. A user in New York (UTC-4) would parse `"2026-04-15T15:00"` as 3 PM EDT — a 13-hour error.
+~~All API calls use `timezone=auto`. When fetching Tokyo weather, Open-Meteo returns timestamps in JST (e.g., `"2026-04-15T15:00"` = 3 PM local). `DateParser.parse()` creates a `DateFormatter` with no timezone set, so it uses the device's local timezone. A user in New York (UTC-4) would parse `"2026-04-15T15:00"` as 3 PM EDT — a 13-hour error.~~
 
-This corrupts:
-- `ListView.glanceAheadSummary` — the "next N hours" window uses device-timezone vs city-timezone hour comparisons
-- `DayDetailView.hourlyForecastSection` — all 24 hourly entries display with incorrect relative time context
+**Pre-fix analysis clarified the actual impact:**
+- **Display of times** (sunrise/sunset, hourly labels via `FormatHelper.formatTime`) — actually correct due to cancelling errors: the timestamp is parsed in device timezone and formatted back in device timezone, so the raw string's hour is always displayed correctly. No change needed here.
+- **`glanceAheadSummary`** and **`findCurrentHourIndex`** — genuinely broken: comparing device-timezone current hour against city-local timestamp hours puts the hourly window at the wrong position for international cities.
 
-**Root cause:** `WeatherResponse` does not decode `utc_offset_seconds` or `timezone` from the API response, even though every forecast response includes them:
+**RESOLUTION:**
 
-```json
-{
-  "utc_offset_seconds": 32400,
-  "timezone": "Asia/Tokyo",
-  "timezone_abbreviation": "JST",
-  ...
-}
-```
+1. **`WeatherResponse`** (`Models/Weather.swift`): Added `utcOffsetSeconds: Int?` with `CodingKey "utc_offset_seconds"`. Only `utcOffsetSeconds` is decoded — it's sufficient for constructing a `TimeZone`. `timezone` (IANA string) was not added; `TimeZone(secondsFromGMT:)` is more reliable than `TimeZone(identifier:)` for IANA names.
 
-**Fix:** Add these fields to `WeatherResponse` and pass the timezone to `DateParser.parse()`:
+2. **`WeatherData`** (`Models/Weather.swift`): Added `utcOffsetSeconds: Int?` stored field and a computed `timeZone: TimeZone` property (`TimeZone(secondsFromGMT: utcOffsetSeconds ?? 0)`). Defaults to UTC when offset is unavailable (historical path, which has no hourly data anyway).
 
-```swift
-struct WeatherResponse: Codable {
-    let current: WeatherData.CurrentWeather
-    let daily: WeatherData.DailyWeather?
-    let hourly: WeatherData.HourlyWeather?
-    let utcOffsetSeconds: Int?          // ADD
-    let timezone: String?               // ADD
-    let timezoneAbbreviation: String?   // ADD
-    let elevation: Double?              // ADD (useful for display)
-    
-    enum CodingKeys: String, CodingKey {
-        case current, daily, hourly
-        case utcOffsetSeconds = "utc_offset_seconds"
-        case timezone
-        case timezoneAbbreviation = "timezone_abbreviation"
-        case elevation
-    }
-}
-```
+3. **`WeatherService`** (`Services/WeatherService.swift`): All 7 `WeatherData(current:daily:hourly:)` call sites updated to pass `utcOffsetSeconds`. Primary fetch paths pass `response.utcOffsetSeconds`; the historical archive path passes `nil`; the My Data merge and WeatherKit snow overlay paths propagate `weatherData.utcOffsetSeconds`.
+
+4. **`DateParser`** (`Services/SettingsManager.swift`): Added `static func parse(_ isoString: String, in timeZone: TimeZone) -> Date?` overload. Creates a one-off formatter with the given timezone so the returned `Date` represents the correct absolute UTC moment for the city's local time string.
+
+5. **`glanceAheadSummary`** (`Views/ListView.swift`): Replaced hour-component comparison (`calendar.component(.hour, from:) >= currentHour`) with absolute date comparison (`date >= now`), using `DateParser.parse(_:in: weather.timeZone)`. Works correctly for any city regardless of timezone offset.
+
+6. **`findCurrentHourIndex`** (`Views/CityDetailView.swift`): Both instances (in `CityDetailView` and `MarineForecastSection`) updated with the same absolute date comparison. `CityDetailView` uses `weather?.timeZone`; `MarineForecastSection` looks up the timezone from `weatherService.weatherCache`.
+
+`** BUILD SUCCEEDED **`
 
 ---
 
-## 1.4 HIGH — `DateParser.parse()` Missing POSIX Locale
+## 1.4 HIGH — `DateParser.parse()` Missing POSIX Locale ✅ **FIXED**
 
-**File:** `Services/SettingsManager.swift` (line ~112)
+**File:** `Services/SettingsManager.swift`  
+**Fixed in:** April 24, 2026 (combined with 1.5)
 
-```swift
-let primaryFormatter = DateFormatter()
-primaryFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm"
-// Missing: primaryFormatter.locale = Locale(identifier: "en_US_POSIX")
-```
+~~On devices with a non-Gregorian calendar locale (Arabic, Hebrew, Thai Buddhist, Ethiopian Ge'ez), `DateFormatter` may use the locale's calendar system when parsing numeric year/month/day fields, causing silent parse failures. Setting `Locale(identifier: "en_US_POSIX")` is the Apple-documented standard safeguard when parsing fixed-format date strings.~~
 
-On devices with a non-Gregorian calendar locale (Arabic, Hebrew, Thai Buddhist, Ethiopian Ge'ez), `DateFormatter` may use the locale's calendar system when parsing numeric year/month/day fields, causing silent parse failures. Setting `Locale(identifier: "en_US_POSIX")` is the Apple-documented standard safeguard when parsing fixed-format date strings.
+**RESOLUTION:** Fixed as part of 1.5 — see below.
 
 ---
 
-## 1.5 HIGH — `DateParser.parse()` Allocates New Formatters Per Call
+## 1.5 HIGH — `DateParser.parse()` Allocates New Formatters Per Call ✅ **FIXED**
 
-**File:** `Services/SettingsManager.swift`
+**File:** `Services/SettingsManager.swift`  
+**Fixed in:** April 24, 2026
 
-`DateParser.parse()` creates two `DateFormatter` instances on every invocation. A full 16-day hourly fetch returns 384 time strings. That's 768 `DateFormatter` allocations — an expensive operation — per single fetch. The fix is a static cached formatter:
+~~`DateParser.parse()` creates two `DateFormatter` instances on every invocation. A full 16-day hourly fetch returns 384 time strings. That's 768 `DateFormatter` allocations — an expensive operation — per single fetch.~~
 
-```swift
-struct DateParser {
-    private static let openMeteoFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "yyyy-MM-dd'T'HH:mm"
-        f.locale = Locale(identifier: "en_US_POSIX")
-        return f
-    }()
-    
-    static func parse(_ isoString: String) -> Date? {
-        openMeteoFormatter.date(from: isoString)
-    }
-}
-```
-
-> **Warning:** `DateFormatter` is not thread-safe. If `DateParser.parse()` is ever called from concurrent background tasks, a static shared instance without synchronization causes data races. Consider an `actor`-isolated formatter or thread-local storage.
+**RESOLUTION:** 1.4 and 1.5 fixed together. All four formatters (`DateFormatter` primary + three `ISO8601DateFormatter` fallbacks) are now static lazy-initialized constants. The primary formatter also received `locale = Locale(identifier: "en_US_POSIX")`. Thread-safety is not a concern here — `WeatherService` is `@MainActor` and all `FormatHelper` calls in views run on the main thread, so there is no concurrent access to the shared instances. `** BUILD SUCCEEDED **`
 
 ---
 
-## 1.6 HIGH — Synthetic `apparentTemperature` for Future Days is Wrong
+## 1.6 HIGH — Synthetic `apparentTemperature` for Future Days is Wrong ✅ **FIXED**
 
-**File:** `Services/WeatherService.swift` (lines ~375–389)
+**Files:** `Services/WeatherService.swift`, `Models/Weather.swift`  
+**Fixed in:** April 24, 2026
 
-When `dateOffset > 0`, a synthetic `CurrentWeather` is built from daily data:
+~~When `dateOffset > 0`, a synthetic `CurrentWeather` is built from daily data:~~
 
-```swift
-let avgTemp = ((daily.temperature2mMax[dateOffset] ?? 0) + (daily.temperature2mMin[dateOffset] ?? 0)) / 2
-let current = WeatherData.CurrentWeather(
-    ...
-    apparentTemperature: avgTemp,   // ← WRONG: this is mean temp, not feels-like
-    ...
-)
-```
+~~```swift~~
+~~let avgTemp = ((daily.temperature2mMax[dateOffset] ?? 0) + (daily.temperature2mMin[dateOffset] ?? 0)) / 2~~
+~~let current = WeatherData.CurrentWeather(~~
+~~    ...~~
+~~    apparentTemperature: avgTemp,   // ← WRONG: this is mean temp, not feels-like~~
+~~    ...~~
+~~)~~
+~~```~~
 
-This sets "Feels Like" to the mean of max/min temperature. For a cold windy day, real feels-like might be 45°F while the mean is 55°F. The UI would display "Feels Like: 55°F" — meaningfully incorrect.
+~~This sets "Feels Like" to the mean of max/min temperature. For a cold windy day, real feels-like might be 45°F while the mean is 55°F. The UI would display "Feels Like: 55°F" — meaningfully incorrect.~~
 
-**Immediate fix:** Set `apparentTemperature: nil` and guard against nil in the display.  
-**Complete fix:** Add `apparent_temperature_max` and `apparent_temperature_min` to the daily request and compute a proper average.
+~~**Immediate fix:** Set `apparentTemperature: nil` and guard against nil in the display.~~  
+~~**Complete fix:** Add `apparent_temperature_max` and `apparent_temperature_min` to the daily request and compute a proper average.~~
 
----
+**RESOLUTION:** Complete fix implemented. The immediate/nil approach was rejected — hiding "Feels Like" entirely is worse UX than showing a slightly wrong number.
 
-## 1.7 HIGH — Forecast API Fetches Don't Decode Open-Meteo Error Responses
-
-**Files:** `Services/WeatherService.swift` — `fetchWeatherForDate`, `fetchWeatherBasic`, `fetchWeatherFull`
-
-When the API returns a 400 error (e.g., invalid parameter name such as `windgusts_10m`), the body is:
-
-```json
-{"error": true, "reason": "Cannot initialize WeatherVariable from invalid String value windgusts_10m for key hourly"}
-```
-
-Attempting to decode this as `WeatherResponse` throws a generic `DecodingError`. The user sees "The data couldn't be read because it isn't in the correct format" instead of the actual API error reason. This makes diagnosing the deprecated parameter name issues (§1.1) much harder.
-
-`fetchHistoricalWeather` already handles this correctly and its pattern should be applied to all forecast API calls:
-
-```swift
-if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
-    if let errorBody = try? JSONDecoder().decode(OpenMeteoErrorResponse.self, from: data),
-       errorBody.error {
-        throw NSError(domain: "OpenMeteo", code: httpResponse.statusCode,
-                      userInfo: [NSLocalizedDescriptionKey: errorBody.reason ?? "Unknown API error"])
-    }
-    throw URLError(.badServerResponse)
-}
-```
+- ✅ Added `apparentTemperatureMax`/`apparentTemperatureMin` as optional fields to `WeatherData.DailyWeather` in `Weather.swift` with correct `CodingKeys` (`"apparent_temperature_max"`, `"apparent_temperature_min"`)
+- ✅ Added `apparent_temperature_max,apparent_temperature_min` to the full daily parameter string in `fetchWeatherForDate`
+- ✅ Replaced `apparentTemperature: avgTemp` with a proper average of the new fields, returning `nil` (not a wrong value) only if the API omits both fields
+- ✅ Forwarded the new fields through `singleDayDaily` and the WeatherKit snow overlay `DailyWeather` reconstruction
+- ✅ `BUILD SUCCEEDED`
 
 ---
 
-## 1.8 MEDIUM — `past_days` Not Used; Archive API Called for Recent Past Dates
+## 1.7 HIGH — Forecast API Fetches Don't Decode Open-Meteo Error Responses ✅ **FIXED**
 
-**File:** `Services/WeatherService.swift` (lines ~305–315)
+**Files:** `Services/WeatherService.swift` — `fetchWeatherForDate`, `fetchWeatherBasic`, `fetchWeatherFull`, `fetchMarineData`, `fetchMyDataMarineValues`, `fetchMyDataAirQualityValues`  
+**Fixed in:** April 24, 2026
 
-```swift
-if dateOffset < 0 {
-    await fetchHistoricalWeatherForCity(city: city, targetDate: targetDate, cacheKey: cacheKey)
-    return
-}
-```
+~~When the API returns a 400 error (e.g., invalid parameter name such as `windgusts_10m`), the body is:~~
 
-For `dateOffset = -1` (yesterday), the app uses the archive API, which has a ~5-day data lag. The forecast API supports `past_days=1` through `past_days=92` with **no data lag** and returns full hourly data. The archive API path only returns daily data, so past-day detail views have no hourly charts.
+~~```json~~
+~~{"error": true, "reason": "Cannot initialize WeatherVariable from invalid String value windgusts_10m for key hourly"}~~
+~~```~~
 
-**Fix:** For `dateOffset` between -1 and -92, use the forecast API with `past_days`. Reserve the archive API for `dateOffset < -92`.
+~~Attempting to decode this as `WeatherResponse` throws a generic `DecodingError`. The user sees "The data couldn't be read because it isn't in the correct format" instead of the actual API error reason. This makes diagnosing the deprecated parameter name issues (§1.1) much harder.~~
 
----
+~~`fetchHistoricalWeather` already handles this correctly and its pattern should be applied to all forecast API calls.~~
 
-## 1.9 MEDIUM — `RegionalWeatherService` Bypasses Centralized URL Builder
+**RESOLUTION:** Added a private `apiData(for:timeout:)` helper to `WeatherService` that wraps `apiRequest(for:)`, checks the HTTP status, decodes the Open-Meteo error body on non-200 responses, and throws a descriptive `NSError` before any attempt to decode `WeatherResponse`. All six call sites that previously used `let (data, _) = try await URLSession.shared.data(for: apiRequest(for: url))` now use `let data = try await apiData(for: url)`:
 
-**File:** `Services/RegionalWeatherService.swift` (lines ~148–162, ~167)
+- ✅ `fetchWeatherForDate`
+- ✅ `fetchWeatherBasic`
+- ✅ `fetchWeatherFull`
+- ✅ `fetchMarineData`
+- ✅ `fetchMyDataMarineValues`
+- ✅ `fetchMyDataAirQualityValues`
 
-`RegionalWeatherService` manually builds URLs, duplicates the User-Agent header, and issues 9 concurrent requests simultaneously — bypassing `WeatherService.apiRequest(for:)` and the `maxConcurrentRequests` limit. On the free tier, 9 simultaneous requests will trigger HTTP 429 (rate limit) responses. Additionally, the service hardcodes `"temperature_unit": "celsius"` regardless of user preference.
-
-**Fixes needed:**
-1. Route through `WeatherService.apiRequest(for:)` or extract it into a shared utility
-2. Throttle regional requests to respect `maxConcurrentRequests`
-3. Remove hardcoded `"celsius"` — API default is Celsius; client-side conversion handles the rest
+The existing `fetchHistoricalWeather` was left unchanged (it builds its own `URLRequest` directly, bypasses `apiRequest`, and already had the check). `** BUILD SUCCEEDED **`
 
 ---
 
-## 1.10 MEDIUM — `fetchWeatherBasic` Requests Unused Hourly Data
+## 1.8 MEDIUM — `past_days` Not Used; Archive API Called for Recent Past Dates ✅ **FIXED**
 
-**File:** `Services/WeatherService.swift` (line ~600)
+**Files:** `Services/WeatherService.swift`  
+**Fixed in:** April 24, 2026
 
-```swift
-"hourly": "cloudcover",   // also deprecated name
-```
+~~For `dateOffset = -1` (yesterday), the app uses the archive API, which has a ~5-day data lag. The forecast API supports `past_days=1` through `past_days=92` with **no data lag** and returns full hourly data. The archive API path only returns daily data, so past-day detail views have no hourly charts.~~
 
-The basic/browse fetch is used in city-list views that display no hourly charts. Requesting hourly data here wastes bandwidth and compounds the deprecated name issue. Removing `hourly` from the basic fetch reduces payload size.
+**RESOLUTION:**
+
+- ✅ The `dateOffset < 0` branch now checks the range: for `dateOffset >= -92`, it calls the new `fetchPastWeatherForCity`; for `dateOffset < -92`, it continues to call `fetchHistoricalWeatherForCity` (archive API)
+- ✅ Added `fetchPastWeatherForCity(city:dateOffset:cacheKey:)` — always requests full hourly (`temperature_2m,weather_code,precipitation,precipitation_probability,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,uv_index,dew_point_2m,snowfall,cloud_cover`) and full daily params with `past_days=abs(dateOffset)` and `forecast_days=1`
+- ✅ With `past_days=N, forecast_days=1`, the response arrays start from the target past day (index 0). The target daily row and the first 24 hourly entries are extracted using `targetIndex = 0` — the same day-extraction logic as the `dateOffset > 0` path
+- ✅ Synthetic `current` built from daily max/min (same pattern as the future-date path); `utcOffsetSeconds` passed through so `timeZone` works correctly
+- ✅ On failure, falls back to `fetchHistoricalWeatherForCity` (archive API) so the user still sees daily data if the forecast API is unavailable
+- ✅ `** BUILD SUCCEEDED **`
 
 ---
 
-## 1.11 MEDIUM — `fetchWeatherFull` Bypasses Cache
+## 1.9 MEDIUM — `RegionalWeatherService` Bypasses Centralized URL Builder ✅ **PARTIALLY FIXED**
 
-**File:** `Services/WeatherService.swift` (line ~620)
+**Files:** `Services/RegionalWeatherService.swift`  
+**Fixed in:** April 24, 2026
 
-`fetchWeatherFull` never reads or writes `weatherCache`. Any caller always makes a live network request even if the same city was recently cached by `fetchWeatherForDate`. Consider routing through the cache layer.
+~~`RegionalWeatherService` manually builds URLs, duplicates the User-Agent header, and issues 9 concurrent requests simultaneously — bypassing `WeatherService.apiRequest(for:)` and the `maxConcurrentRequests` limit. On the free tier, 9 simultaneous requests will trigger HTTP 429 (rate limit) responses. Additionally, the service hardcodes `"temperature_unit": "celsius"` regardless of user preference.~~
+
+**Pre-fix analysis clarified which claims were accurate:**
+
+- **Concurrent 429 risk** — overstated. Open-Meteo free tier enforces a daily request quota (10,000 req/day), not a concurrent connection limit. 9 simultaneous forecast requests are unlikely to cause 429 in practice.
+- **User-Agent duplication** — `RegionalWeatherService` already used `"FastWeather/1.5 (weatherfast.online)"`, which matches `WeatherService` exactly. No change needed.
+- **Cross-service routing** — introducing a dependency on `WeatherService.apiRequest(for:)` from `RegionalWeatherService` would create a circular or tight coupling between two services that currently have no relationship. Deferred.
+- **Hardcoded `"temperature_unit": "celsius"`** — this is the one real issue. `BasicWeatherResponse` only decodes `temperature_2m`, used for a relative regional comparison — not user-facing unit display. But the parameter is unnecessary: the API default is already Celsius and client-side conversion is not applied here anyway.
+
+**RESOLUTION:** Removed `"temperature_unit": "celsius"` from the `params` dict in `fetchWeatherForLocation`. The API returns Celsius by default; the temperature value is used only internally for regional comparison and is not converted or displayed with units. `** BUILD SUCCEEDED **`
+
+---
+
+## 1.10 MEDIUM — `fetchWeatherBasic` Requests Unused Hourly Data ✅ **FIXED**
+
+**File:** `Services/WeatherService.swift`  
+**Fixed in:** April 24, 2026
+
+~~The basic/browse fetch is used in city-list views that display no hourly charts. Requesting hourly data here wastes bandwidth and compounds the deprecated name issue. Removing `hourly` from the basic fetch reduces payload size.~~
+
+**RESOLUTION:** Removed `"hourly": "cloud_cover"` from `fetchWeatherBasic`. Browse and Weather Around Me views display only current conditions; no caller ever reads `weather.hourly` from a basic-fetch result. The deprecated-name note in the original report was already stale (item 1.1 had corrected `cloudcover` → `cloud_cover`). `** BUILD SUCCEEDED **`
+
+---
+
+## 1.11 MEDIUM — `fetchWeatherFull` Bypasses Cache ✅ **FIXED**
+
+**File:** `Services/WeatherService.swift`  
+**Fixed in:** April 24, 2026
+
+~~`fetchWeatherFull` never reads or writes `weatherCache`. Any caller always makes a live network request even if the same city was recently cached by `fetchWeatherForDate`. Consider routing through the cache layer.~~
+
+**RESOLUTION:** Added a dedicated `browseWeatherFullCache: [String: WeatherData]` and `browseFullCacheTimestamps: [String: Date]` to `WeatherService`. `fetchWeatherFull` now checks the cache first (same `isCacheValid` TTL check as `fetchWeatherBasic`) and writes through on a miss. A companion `trimBrowseFullCacheIfNeeded()` evicts the oldest entries when the dict exceeds `maxBrowseCacheEntries` (100). A separate cache is used rather than sharing `browseWeatherCache` because the two fetches return different payload shapes (1-day current-only vs. 16-day full hourly+daily) and merging them would create stale-data risks when a basic entry is served where full data is expected. `** BUILD SUCCEEDED **`
 
 ---
 
@@ -334,6 +319,51 @@ Historical data is cached indefinitely by month-day key. If a same-day history e
 - `HistoricalWeatherCache` perpetual cache policy correct (historical data doesn't change)
 - `FormatHelper.formatTime()` and `formatTimeCompact()` routing through `DateParser` — correct
 - `DailyForecastSummaryView` natural-language summary is a strength
+
+---
+
+## 1.19 — Expected Precipitation: WeatherKit Integration ✅ **FIXED**
+
+**Files:** `Services/RadarService.swift`, `Views/RadarView.swift`  
+**Fixed in:** April 24, 2026  
+**Context:** Observed failure: app showed "clear, nearest precip 105 miles away" during an active thunderstorm (Madison, WI, ~1 AM). Root cause: Open-Meteo `minutely_15` is NWP model output — cannot detect storms that formed after the last model initialization run.
+
+### What changed
+
+`RadarService` now uses WeatherKit's `.minute` forecast (radar-blended, 1-minute resolution, 60-minute window) as the primary data source for "Expected Precipitation" in supported countries, with Open-Meteo NWP as the fallback.
+
+**Supported WeatherKit countries:** United States, Canada, United Kingdom, Ireland, Australia, New Zealand.
+
+For these cities:
+- `fetchPrecipitationNowcast(for:)` calls `WeatherKit.WeatherService.shared.weather(for:including:.current,.minute)`
+- `currentWeather.precipitationIntensity` (radar-derived) is used for the "at your location" status — directly fixes the "clear during storm" problem
+- `Forecast<MinuteWeather>` (60 entries × 1 minute) replaces `minutely_15` (4 entries × 15 minutes) for the timeline and chart
+- If WeatherKit returns `nil` for `.minute` (location outside WK coverage) or throws, the fallback to Open-Meteo NWP runs automatically
+
+For all other countries: Open-Meteo NWP path unchanged.
+
+**`RadarView` changes:**
+- Timeline label: "1-Hour Forecast" (WeatherKit) vs "2-Hour Forecast" (Open-Meteo)
+- Timeline intervals: Now, 5, 10, 15, 20, 30, 45, 60 min (WeatherKit) vs 15-min intervals (Open-Meteo)
+- Precipitation chart: New smooth area + line chart using actual `precipitationMmPerHr` values from `ChartPoint`. WeatherKit shows 60 1-minute bars; Open-Meteo maps its 7 coarse intervals. Y-axis hidden to avoid false precision; x-axis shows 0/15/30/45/60 markers.
+- Audio graph: VoiceOver `.accessibilityRepresentation` now uses sparse points (0, 5, 10, 15, 20, 30, 45, 60 min) for manageable exploration
+- Attribution: Apple Weather mark (light/dark variant) with link to legal attribution page when WeatherKit is active; "Precipitation nowcast data by Open-Meteo.com" otherwise. Required by WeatherKit terms.
+
+**New data model additions (RadarService.swift):**
+- `ChartPoint` — per-minute chart entry with `minute: Int`, `precipitationMmPerHr: Double`, `condition: String`
+- `RadarData.chartData: [ChartPoint]?` — nil for Open-Meteo, 60-entry array for WeatherKit
+- `RadarData.dataSource: RadarDataSource` — `.weatherKit` or `.openMeteo`
+- `TimelinePoint.precipitationMmPerHr: Double` — now stored on timeline points for chart fallback
+
+**Data models moved:** `RadarData`, `NearestPrecipitation`, `DirectionalSector`, `TimelinePoint` were defined in `RadarView.swift`; moved to `RadarService.swift` where they originate.
+
+`** BUILD SUCCEEDED **`
+
+### Previous code bugs fixed (also this session)
+
+1. **Paid-tier API endpoint ignored.** `RadarService` hardcoded the free-tier URL, bypassing `Secrets.openMeteoAPIKey`. Fixed.
+2. **Fixed 15 mph storm speed assumption.** Added `wind_speed_10m` to hourly request; `findNearestPrecipitation` now uses actual wind speed (km/h → mph, 5 mph floor).
+3. **Inline `DateFormatter` without POSIX locale.** Replaced both inline formatters with `DateParser.parse()`.
 
 ---
 

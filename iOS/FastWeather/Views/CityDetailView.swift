@@ -479,7 +479,7 @@ struct CityDetailView: View {
             // Weather alerts section (US only)
             WeatherAlertsSection(city: city, selectedAlert: $selectedAlert, alerts: $activeAlerts)
                 .onAppear {
-                    print("🔶 WeatherAlerts category appeared for \(city.name)")
+                    debugLog("🔶 WeatherAlerts category appeared for \(city.name)")
                 }
             
         case .location:
@@ -627,7 +627,7 @@ struct CityDetailView: View {
     }
     
     var body: some View {
-        let _ = print("🟢 CityDetailView body called for \(city.name), selectedAlert: \(selectedAlert?.event ?? "nil")")
+        let _ = debugLog("🟢 CityDetailView body called for \(city.name), selectedAlert: \(selectedAlert?.event ?? "nil")")
         ScrollView {
             VStack(spacing: 24) {
                 if let weather = weather {
@@ -745,7 +745,7 @@ struct CityDetailView: View {
                     .accessibilityHint("Opens menu with options to refresh weather, view historical weather, precipitation forecast, weather around me, and remove city")
                     
                     // Dynamically render detail sections based on settings order
-                    let _ = print("📊 Detail categories: \(settingsManager.settings.detailCategories.map { "\($0.category)=\($0.isEnabled)" }.joined(separator: ", "))")
+                    let _ = debugLog("📊 Detail categories: \(settingsManager.settings.detailCategories.map { "\($0.category)=\($0.isEnabled)" }.joined(separator: ", "))")
                     ForEach(settingsManager.settings.detailCategories) { categoryField in
                         if categoryField.isEnabled {
                             detailSection(for: categoryField.category, weather: weather)
@@ -844,7 +844,7 @@ struct CityDetailView: View {
         .onChange(of: showingRemoveConfirmation) { oldValue, newValue in
             // Flash detection: Alert should never go from true to true
             if oldValue == true && newValue == true {
-                print("⚠️ ALERT FLASH DETECTED in CityDetailView confirmation dialog!")
+                debugLog("⚠️ ALERT FLASH DETECTED in CityDetailView confirmation dialog!")
             }
         }
     }
@@ -1015,20 +1015,14 @@ struct CityDetailView: View {
     
     private func findCurrentHourIndex(in times: [String?]) -> Int {
         let now = Date()
-        let calendar = Calendar.current
-        let currentHour = calendar.component(.hour, from: now)
-        
-        // Parse each time and find the one matching or after current hour
+        let cityTimeZone = weather?.timeZone ?? .current
         for (index, timeString) in times.enumerated() {
-            guard let timeString = timeString else { continue }
-            if let time = DateParser.parse(timeString) {
-                let hour = calendar.component(.hour, from: time)
-                if hour >= currentHour {
-                    return index
-                }
+            guard let timeString = timeString,
+                  let time = DateParser.parse(timeString, in: cityTimeZone) else { continue }
+            if time >= now {
+                return index
             }
         }
-        
         return 0 // Fallback to start if not found
     }
 }
@@ -1649,7 +1643,7 @@ struct DailyForecastRow: View {
     
     private var dayName: String {
         guard let sunrise = sunrise, let date = DateParser.parse(sunrise) else {
-            print("⚠️ DailyForecastRow: Failed to parse sunrise '\(sunrise ?? "nil")' for day \(index)")
+            debugLog("⚠️ DailyForecastRow: Failed to parse sunrise '\(sunrise ?? "nil")' for day \(index)")
             return "Unknown Date"
         }
         
@@ -2229,7 +2223,7 @@ struct WeatherAlertsSection: View {
                 } else {
                     ForEach(alerts) { alert in
                         Button(action: {
-                            print("🔔 Alert button tapped: \(alert.event)")
+                            debugLog("🔔 Alert button tapped: \(alert.event)")
                             selectedAlert = alert
                         }) {
                             HStack {
@@ -2314,20 +2308,16 @@ struct MarineForecastSection: View {
     // Find index of current hour (or next available hour) in time array
     private func findCurrentHourIndex(in times: [String?]) -> Int {
         let now = Date()
-        let calendar = Calendar.current
-        let currentHour = calendar.component(.hour, from: now)
-        
-        // Parse each time and find the one matching or after current hour
+        let cityTimeZone = weatherService.weatherCache[
+            WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+        ]?.timeZone ?? .current
         for (index, timeString) in times.enumerated() {
-            guard let timeString = timeString else { continue }
-            if let time = DateParser.parse(timeString) {
-                let hour = calendar.component(.hour, from: time)
-                if hour >= currentHour {
-                    return index
-                }
+            guard let timeString = timeString,
+                  let time = DateParser.parse(timeString, in: cityTimeZone) else { continue }
+            if time >= now {
+                return index
             }
         }
-        
         return 0 // Fallback to start if not found
     }
     

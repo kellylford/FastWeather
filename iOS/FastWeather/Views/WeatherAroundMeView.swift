@@ -505,7 +505,7 @@ struct WeatherAroundMeView: View {
         .onChange(of: showingAllCities) { oldValue, newValue in
             // Flash detection: Alert should never go from true to true
             if oldValue == true && newValue == true {
-                print("⚠️ ALERT FLASH DETECTED in WeatherAroundMeView cities alert!")
+                debugLog("⚠️ ALERT FLASH DETECTED in WeatherAroundMeView cities alert!")
             }
         }
     }
@@ -647,7 +647,7 @@ struct WeatherAroundMeView: View {
                 )
             }
         } catch {
-            print("⚠️ Failed to load weather for \(cityInfo.name): \(error)")
+            debugLog("⚠️ Failed to load weather for \(cityInfo.name): \(error)")
         }
     }
     

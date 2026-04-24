@@ -27,7 +27,7 @@ class DirectionalCityService {
                let decoded = try? JSONDecoder().decode([String: [CityLocation]].self, from: data) {
                 all.append(contentsOf: decoded.values.flatMap { $0 })
             } else {
-                print("⚠️ DirectionalCityService: could not load \(resource).json")
+                debugLog("⚠️ DirectionalCityService: could not load \(resource).json")
             }
         }
         _allCachedCities = all
@@ -247,7 +247,7 @@ class DirectionalCityService {
             
             return name
         } catch {
-            print("⚠️ DirectionalCityService: reverseGeocode failed for (\(lat), \(lon)): \(error)")
+            debugLog("⚠️ DirectionalCityService: reverseGeocode failed for (\(lat), \(lon)): \(error)")
             return nil
         }
     }
