@@ -1,161 +1,246 @@
 # FastWeather User Guide
 
-FastWeather is a lightweight, accessible, and customizable weather application designed for speed and ease of use. It provides current conditions, hourly forecasts, and daily outlooks for cities around the world without requiring an API key or complex setup.
+FastWeather is a lightweight, accessible, and customizable weather app for iPhone and iPad. It provides current conditions, hourly forecasts, and daily outlooks for cities around the world without requiring an API key or account.
+
+An in-app version of this guide is available under **Settings → User Guide**.
+
+---
 
 ## Getting Started
 
-### Installation
-FastWeather is a portable application, meaning it does not require a traditional installation process.
+### Adding Cities
+1. Open the **My Cities** tab and tap **+** (Add City).
+2. Type a city name (e.g., "Madison, WI" or "London, UK").
+3. Select from the search results. The city is added to your list immediately.
 
-1.  **Download**: Download the `FastWeather.exe` file.
-2.  **Run**: Open the file to start the application.
-    *   *Note: Windows may ask for permission to run the file since it is not signed by a major publisher. You can safely allow it to run.*
+Alternatively, use the **Browse** tab to explore cities by U.S. state or international country and add ones you find interesting.
 
 ### Default Cities
-When you run FastWeather for the first time, it comes pre-loaded with a diverse set of default cities (e.g., Madison, San Diego, London) to help you get started immediately. You can remove these or add your own at any time.
+The first time you launch, a set of default cities is pre-loaded. You can remove or reorder these at any time.
 
 ### Data Storage
-FastWeather stores your city list and configuration settings in your user profile directory (typically `%AppData%\FastWeather` on Windows). This ensures your preferences are remembered even if you move the executable file.
-
-### Advanced Configuration
-You can specify a custom city list file by running the application from the command line with the `-c` flag:
-`FastWeather.exe -c "C:\path\to\my_cities.json"`
+Your city list and settings are stored on-device via iOS standard storage. They persist across app updates and device restarts. To clear everything, go to **Settings → Data Management**.
 
 ---
 
-## Using FastWeather
+## The Three Tabs
 
-### Main Screen
-The main screen is divided into two sections: **Add New City** and **Your Cities**.
+### My Cities
+Your saved city list. Each city shows current temperature, conditions, and (optionally) additional fields you configure.
 
-#### Adding a City
-1.  Type the name of a city (e.g., "Madison, WI" or "London, UK") or a zip code into the text box at the top.
-2.  Press **Enter** or activate the **Add City** button.
-3.  If multiple locations match your search, a dialog will appear asking you to select the correct one.
-4.  The city will be added to your list.
+- **Tap** a city to open its full detail view
+- **Pull down** to refresh all cities
+- **Swipe left** on a city row to delete it (List view), or use the **VoiceOver actions menu**
+- **Drag** the reorder handle to rearrange cities (List/Table view)
+- **Long-press** or use the Actions menu (Flat view) for Move Up/Down/Top/Bottom and Remove
 
-#### Interesting Cities to Try
+Three view modes are available in **Settings → Display Options**:
+- **List** — Compact rows, swipe-to-delete, drag-to-reorder
+- **Table** — Accessible data table with configurable columns; supports VoiceOver table navigation rotor
+- **Flat** — Cards grouped per city with an Actions menu
 
-FastWeather works with weather data from anywhere on Earth! Here are some fascinating locations you can add to explore extreme weather conditions:
+### Browse Cities
+Explore the full directory of cities without adding them to your list.
 
-**Extreme Cold:**
-- **McMurdo Station, Antarctica** - Largest Antarctic research station (currently -4.8°C with regular snowfall)
-- **Amundsen-Scott South Pole Station, Antarctica** - Geographic South Pole (extreme cold year-round)
-- **Mount Everest Base Camp, Nepal** - Highest weather station area on Earth (currently -33°C!)
+- Browse by **U.S. States** or **International** countries
+- Tap a state or country to see its city list with live weather
+- Tap a city to view its weather; tap **+** to add it to My Cities
+- Sort cities within a state/country by name, geographic order (N→S, S→N, E→W, W→E), or temperature
 
-**Extreme Heat:**
-- **Death Valley, California** - Hottest place on Earth (record: 56.7°C / 134°F in 1913)
-- **Mecca, Saudi Arabia** - One of the hottest pilgrimage sites (summer highs often exceed 45°C)
+### Settings
+All preferences are here. Changes save immediately — there is no Save or Apply button.
 
-**Unique Climates:**
-- **Atacama Desert, Chile** - Driest non-polar place on Earth (some areas have never recorded rain)
-- **Bikini Atoll, Marshall Islands** - Remote tropical island and historic nuclear test site
-- **Pitcairn Island** - Most remote inhabited island in the world (Pacific Ocean)
-- **Vostok Station, Antarctica** - Russian station, coldest temperature ever recorded (-89.2°C in 1983)
-
-These locations are excellent for testing the app's display of extreme temperatures, low precipitation, or heavy snowfall. Simply type the location name (e.g., "Death Valley, California" or "McMurdo Station, Antarctica") and add it to your list!
-
-#### Managing Your Cities
-*   **View Weather**: Select a city and press **Enter** (or activate **Full Weather**) to view the detailed report.
-*   **Reorder**: Use the **Move Up** (Alt+U) and **Move Down** (Alt+D) buttons to change the order of your cities.
-*   **Remove**: Select a city and press **Delete** (or activate **Remove**) to delete it from your list.
-*   **Refresh**: Press **F5** (or activate **Refresh**) to update the temperature and conditions for the selected city.
-
-### Full Weather View
-This view provides a comprehensive weather report, including:
-*   **Current Conditions**: Temperature, Feels Like, Conditions, Humidity, Wind (with gusts), UV Index, Dew Point (comfort level), Pressure, Cloud Cover, Visibility
-*   **Hourly Forecast**: 24-hour outlook with temperature, conditions, rain chance, UV Index, wind, humidity, and more
-*   **Daily Forecast**: 16-day outlook with highs, lows, rain chance, UV Index, sunrise/sunset, and daylight duration
-
-**Understanding the UV Index:**
-*   **0-2 (Low)**: Minimal sun protection needed
-*   **3-5 (Moderate)**: Use SPF 30+ sunscreen
-*   **6-7 (High)**: Use SPF 30+ sunscreen and seek shade
-*   **8-10 (Very High)**: Use SPF 50+ sunscreen, avoid midday sun
-*   **11+ (Extreme)**: Take all precautions, stay indoors if possible
-
-Press **Esc** or activate **<- Back** to return to the city list.
+Key sections:
+- **Units** — °F/°C, mph/km/h, in/mm, inHg/hPa, mi/km
+- **Display Options** — View mode (List/Table/Flat), List Content Display
+- **City List View** — Toggle and reorder weather fields; Glance Ahead time (1–8 hours)
+- **Current Weather Detail View** — Toggle and reorder detail sections (Today's Forecast, Current Conditions, 24-Hour Forecast, 16-Day Forecast, Marine Forecast, Weather Alerts, Location, Astronomy)
+- **Features** — Toggle Expected Precipitation, Weather Around Me, International Weather Alerts
+- **Weather Around Me** — Distance, exploration mode, arc/corridor width, display toggles
+- **Data Management** — Clear All Cities, Reset Settings to Default
 
 ---
 
-## Customization
+## City Detail View
 
-You can customize exactly what data is displayed throughout the application.
+Tap any city to see its full weather report. Sections are collapsible and can be reordered in Settings.
 
-1.  From the **Full Weather** view (or main screen in web version), activate the **Configure** button.
-2.  A dialog will appear with multiple tabs:
-    *   **Current Weather**: Temperature, Feels Like, Humidity, Wind Speed/Direction, Wind Gusts, UV Index, Dew Point, Pressure, Visibility, Precipitation, Cloud Cover
-    *   **Hourly Forecast**: Temperature, Feels Like, Humidity, Precipitation, Rain Chance (%), UV Index, Wind Speed, Wind Gusts, Dew Point, Cloud Cover
-    *   **Daily Forecast**: High/Low Temps, Sunrise/Sunset, Total Precipitation, Rain Chance (%), UV Index (Max), Daylight Duration, Sunshine Duration, Max Wind Speed
-    *   **City List**: Choose which fields appear in your city list view and their display order
-    *   **Units**: Select Fahrenheit/Celsius, mph/km/h, inches/mm, inHg/hPa, miles/km
-3.  Check or uncheck the boxes to show or hide specific details.
-4.  Activate **Apply** to preview changes or **Save & Close** to save. Your preferences are saved automatically for future sessions.
+### Today's Forecast
+Conditions icon, temperature range, precipitation alert (if >20% chance), UV warning (if ≥6), wind alert, sunrise/sunset times, daylight and sunshine duration.
 
-### New Features Explained
+### Current Conditions
+Temperature, Feels Like, Humidity, Wind (speed, direction, gusts), UV Index (daytime only), Dew Point, Pressure, Visibility, Cloud Cover, current precipitation rate (if active).
 
-**UV Index**: Color-coded indicator showing sun exposure risk. Low (green), Moderate (yellow), High (orange), Very High (red), Extreme (purple). Higher numbers mean stronger sun protection needed.
+**UV Index levels:**
+- 0–2 Low — minimal protection needed
+- 3–5 Moderate — SPF 30+ sunscreen
+- 6–7 High — SPF 30+, seek shade
+- 8–10 Very High — SPF 50+, avoid midday sun
+- 11+ Extreme — stay indoors if possible
 
-**Wind Gusts**: Shows peak wind speeds in addition to sustained wind speed. Important for outdoor activities and driving safety.
+**Dew Point comfort levels:**
+- Below 55°F (13°C) — Dry
+- 55–60°F (13–16°C) — Comfortable
+- 60–65°F (16–18°C) — Slightly humid
+- 65–70°F (18–21°C) — Muggy/Uncomfortable
+- Above 70°F (21°C) — Oppressive
 
-**Rain Chance (%)**: Probability of precipitation occurring. Higher percentages mean rain is more likely. Helps you decide whether to bring an umbrella.
+### 24-Hour Forecast
+Hourly cards (horizontal scroll) or headings layout. Configurable fields include temperature, conditions, precipitation, rain chance, UV Index, wind, humidity, and more.
 
-**Dew Point**: Indicates how humid/muggy it feels. Shows comfort level: Dry, Comfortable, Slightly humid, Muggy/Uncomfortable, or Oppressive.
+### 16-Day Forecast
+Daily rows showing high/low, conditions, precipitation, sunrise/sunset, daylight/sunshine duration, UV Index. Tap any day row (cards layout) to open a full Day Detail view with that day's hourly breakdown.
 
-**Daylight Duration**: Total hours of daylight from sunrise to sunset. Useful for planning outdoor activities and understanding seasonal changes.
+### Marine Forecast
+Available for coastal locations. Includes sea level height (tidal), wave height/direction/period, sea surface temperature, swell conditions, and ocean current velocity. Enable and customize in **Settings → Marine Forecast**.
 
-**Sunshine Duration**: Expected hours of actual sunshine (vs. cloudy periods). Lower than daylight duration indicates cloudy conditions.
+### Weather Alerts
+Active NWS alerts for U.S. cities. International alert support available via Settings → Features → International Weather Alerts.
+
+### Astronomy
+Moon phase name, illumination percentage, moonrise, and moonset.
 
 ---
 
-## Accessibility & Keyboard Shortcuts
+## Weather in Time
 
-FastWeather is designed to be fully accessible with screen readers and keyboard navigation.
+View weather for all your cities on a different day — up to 7 days in the past or future.
 
-### Navigation
-*   **Tab**: Move focus between controls.
-*   **Arrow Keys**: Navigate within the city list or weather report.
-*   **Enter**: Activate buttons or view the selected city's weather.
+- **VoiceOver:** Focus the date display at the top of My Cities, then swipe up for the next day or down for the previous day
+- **Alternative:** Use the left/right arrow buttons in the toolbar
+- Tap **Return to Today** (calendar icon in toolbar) to snap back to the current date
+- The app does not automatically revert to today when backgrounded — check the date display if conditions look unexpected
 
-### Keyboard Shortcuts
-| Action | Shortcut |
+---
+
+## Weather Around Me
+
+See weather in cities surrounding any city in your list, useful for tracking approaching weather systems and building a spatial picture of regional conditions.
+
+Access via the **Actions menu** on any city (three-dot button) → **Weather Around Me**.
+
+### What You'll See
+- Weather in 8 compass directions (N, NE, E, SE, S, SW, W, NW)
+- Distance, bearing, and offset from center line for each city
+- Wind movement analysis (approaching / moving away / parallel)
+- Pressure trends between consecutive cities
+
+### Exploring a Direction
+Tap any direction to see cities along that path. Swipe up for cities farther away, swipe down for closer cities. Tap **List All** to see all cities at once.
+
+### VoiceOver Example Announcement
+> "Milwaukee, Wisconsin, 80 miles, 5 degrees, 3 miles east of center line, 72°F, Overcast, Alert: Tornado Warning, Approaching at 15 mph, Pressure steady, 2 of 15"
+
+### Exploration Modes
+Configure in **Settings → Weather Around Me** or tap the gear icon inside Weather Around Me:
+
+**Arc Mode** (default) — fan-shaped search that expands outward.
+| Arc Width | Width at 100 mi |
 | :--- | :--- |
-| **Refresh Weather** | `F5` or `Ctrl + R` |
-| **View Full Report** | `Alt + F` or `Enter` (on list) |
-| **Configure Display** | `Alt + C` |
-| **New City Field** | `Alt + N` |
-| **Remove City** | `Delete` |
-| **Move City Up** | `Alt + U` |
-| **Move City Down** | `Alt + D` |
-| **Go Back / Close** | `Esc` |
+| Narrow (10°) | 17 mi |
+| Standard (22.5°) | 39 mi |
+| Medium (45°) | 77 mi |
+| Wide (90°) | 141 mi |
+
+**Straight Line Corridor** — fixed-width band along the center line.
+| Corridor Width | Coverage |
+| :--- | :--- |
+| 10 miles | ±5 mi from center |
+| 20 miles | ±10 mi from center (default) |
+| 30 miles | ±15 mi from center |
+| 50 miles | ±25 mi from center |
+
+**VoiceOver Quick Cycle:** Focus the gear icon and swipe up/down to cycle through all mode combinations without opening Settings.
 
 ---
 
-## Troubleshooting
+## Historical Weather
 
-**The hourly forecast seems to start at the wrong time.**
-The app calculates the hourly forecast based on your computer's current time. Ensure your system clock is set correctly.
+Access from the **Actions menu** on any city → **View Historical Weather**. Data is available back to 1940 for most locations.
 
+Modes:
+- **Single Day** — pick a specific date
+- **Multi-Year** — compare the same date across multiple years
+- **Daily Browse** — scroll through a month view
 
-**What's the difference between Daylight and Sunshine Duration?**
-Daylight Duration is the total time from sunrise to sunset. Sunshine Duration is the expected hours of actual direct sunshine. If sunshine duration is much lower than daylight, expect cloudy conditions.
+---
+
+## Expected Precipitation
+
+A precipitation forecast timeline showing intensity over the coming hours. Enable in **Settings → Features**. Access via the Actions menu on any city.
+
+The timeline is a visual chart for sighted users. VoiceOver users can explore the same data through the audio graph below it, which provides tones representing intensity and individual data points accessible by swiping.
+
+---
+
+## Weather Icons
+
+Icons change between day and night for the two clearest conditions:
+
+| Condition | Day | Night |
+| :--- | :--- | :--- |
+| Clear sky / Mainly clear | ☀️ Sun | 🌙 Moon with stars |
+| Partly cloudy | 🌤 Cloud with sun | ☁️🌙 Cloud with moon |
+| Overcast | ☁️ Cloud | ☁️ Cloud |
+| Fog / Depositing rime fog | Fog cloud | Fog cloud |
+| Drizzle (light/moderate/dense) | Drizzle cloud | Drizzle cloud |
+| Freezing drizzle / Freezing rain | Sleet cloud | Sleet cloud |
+| Slight / Moderate / Heavy rain | Rain cloud | Rain cloud |
+| Snow fall / Snow grains / Snow showers | Snow cloud | Snow cloud |
+| Rain showers (slight/moderate/violent) | Heavy rain cloud | Heavy rain cloud |
+| Thunderstorm / with hail | Lightning cloud | Lightning cloud |
+
+VoiceOver always announces the exact condition by name (e.g., "Conditions: Clear sky"). The icon is decorative and hidden from VoiceOver.
+
+---
+
+## Accessibility
+
+FastWeather is designed primarily for VoiceOver users.
+
+- All features are accessible without seeing the screen
+- Descriptive, context-aware VoiceOver labels throughout
+- Weather icons are decorative — conditions are always announced by name
+- Dynamic Type supported — text scales with your system font size setting
+- High contrast — readable in all lighting conditions
+- VoiceOver custom actions for city reordering (Move Up, Move Down, Move to Top, Move to Bottom)
+- VoiceOver table rotor navigation in Table view
 
 **Why doesn't the UV Index show at night?**
-UV Index measures ultraviolet radiation from the sun, so it's only displayed during daylight hours. At night, the UV Index is zero.
+UV radiation only exists during daylight hours. The field is hidden automatically when the API reports nighttime (`is_day = 0`).
 
-**What does "Muggy/Uncomfortable" dew point mean?**
-Dew point measures moisture in the air. When the dew point is above 65°F (18°C), the air feels sticky and uncomfortable. Above 70°F (21°C) is oppressive. Below 60°F (15°C) feels comfortable.
-**I want to reset everything to default.**
-If you need to clear all your data and settings, you can run the application from a command prompt with the reset flag:
-`FastWeather.exe --reset`
-This will delete your saved cities and configuration file.
+**What's the difference between Daylight Duration and Sunshine Duration?**
+Daylight Duration is the total time from sunrise to sunset. Sunshine Duration is expected hours of actual direct sunlight. If sunshine duration is much lower than daylight, expect mostly cloudy skies.
 
-**Where does the weather data come from?**
-Weather data is provided by [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0). Geocoding is provided by [OpenStreetMap](https://www.openstreetmap.org/).
+**The hourly forecast seems to start at the wrong time.**
+The forecast is based on your device's current time and the city's local time zone. Ensure your device clock is correct.
+
+**I want to reset everything.**
+Go to **Settings → Data Management** and use **Clear All Cities** and/or **Reset Settings to Default**.
+
+---
+
+## Keyboard Shortcuts (iPad with external keyboard)
+
+| Action | Shortcut |
+| :--- | :--- |
+| Add new city | `⌘⇧N` |
+
+More shortcuts will be added in future updates.
+
+---
+
+## Data Sources
+
+- **[Open-Meteo](https://open-meteo.com/)** (CC BY 4.0) — current conditions, hourly, daily, and historical forecast data
+- **[OpenStreetMap Nominatim](https://nominatim.org/)** — city geocoding
+- **National Weather Service** — U.S. weather alerts
+
+No API key required. No account required. No data tracking.
 
 ---
 
 ## Reporting Issues
 
-If you encounter any bugs or have suggestions for improvements, please report them on our GitHub Issues page:
 [https://github.com/kellylford/FastWeather/issues](https://github.com/kellylford/FastWeather/issues)
+

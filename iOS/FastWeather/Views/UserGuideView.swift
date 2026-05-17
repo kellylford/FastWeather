@@ -565,14 +565,23 @@ struct UserGuideView: View {
                     
                     // Clear / Mainly clear
                     HStack(alignment: .top, spacing: 12) {
-                        Image(systemName: "sun.max.fill")
-                            .font(.title2)
-                            .foregroundColor(.yellow)
-                            .frame(width: 32)
-                            .accessibilityHidden(true)
+                        HStack(spacing: 4) {
+                            Image(systemName: "sun.max.fill")
+                                .font(.title2)
+                                .foregroundColor(.yellow)
+                                .accessibilityHidden(true)
+                            Image(systemName: "moon.stars.fill")
+                                .font(.title2)
+                                .foregroundColor(.indigo)
+                                .accessibilityHidden(true)
+                        }
+                        .frame(width: 64)
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Clear sky / Mainly clear")
                                 .fontWeight(.semibold)
+                            Text("Sun during the day; moon with stars at night")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
                             Text("VoiceOver: \"Clear sky\" or \"Mainly clear\"")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
@@ -581,14 +590,23 @@ struct UserGuideView: View {
                     
                     // Partly cloudy
                     HStack(alignment: .top, spacing: 12) {
-                        Image(systemName: "cloud.sun.fill")
-                            .font(.title2)
-                            .foregroundColor(.orange)
-                            .frame(width: 32)
-                            .accessibilityHidden(true)
+                        HStack(spacing: 4) {
+                            Image(systemName: "cloud.sun.fill")
+                                .font(.title2)
+                                .foregroundColor(.orange)
+                                .accessibilityHidden(true)
+                            Image(systemName: "cloud.moon.fill")
+                                .font(.title2)
+                                .foregroundColor(.indigo)
+                                .accessibilityHidden(true)
+                        }
+                        .frame(width: 64)
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Partly cloudy")
                                 .fontWeight(.semibold)
+                            Text("Cloud with sun during the day; cloud with moon at night")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
                             Text("VoiceOver: \"Partly cloudy\"")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
