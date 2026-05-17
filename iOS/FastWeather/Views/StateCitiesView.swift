@@ -57,7 +57,22 @@ struct StateCitiesView: View {
         } else {
             base = cities.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
         }
-        return base.sorted(by: sortComparator)
+        switch sortOrder {
+        case .tempHighLow:
+            return base.sorted { a, b in
+                let ta = weatherData[a.cacheKey]?.current.temperature2m ?? -.infinity
+                let tb = weatherData[b.cacheKey]?.current.temperature2m ?? -.infinity
+                return ta > tb
+            }
+        case .tempLowHigh:
+            return base.sorted { a, b in
+                let ta = weatherData[a.cacheKey]?.current.temperature2m ?? .infinity
+                let tb = weatherData[b.cacheKey]?.current.temperature2m ?? .infinity
+                return ta < tb
+            }
+        default:
+            return base.sorted(by: sortComparator)
+        }
     }
 
     private func sortComparator(_ a: CityLocation, _ b: CityLocation) -> Bool {
@@ -66,8 +81,9 @@ struct StateCitiesView: View {
         case .nameZA:    return a.name.localizedCompare(b.name) == .orderedDescending
         case .northSouth: return geographySort(a, b, primary: \.latitude,  primaryDescending: true,  secondary: \.longitude, secondaryDescending: false)
         case .southNorth: return geographySort(a, b, primary: \.latitude,  primaryDescending: false, secondary: \.longitude, secondaryDescending: false)
-        case .eastWest:  return geographySort(a, b, primary: \.longitude, primaryDescending: true,  secondary: \.latitude,  secondaryDescending: true)
-        case .westEast:  return geographySort(a, b, primary: \.longitude, primaryDescending: false, secondary: \.latitude,  secondaryDescending: true)
+        case .eastWest:   return geographySort(a, b, primary: \.longitude, primaryDescending: true,  secondary: \.latitude,  secondaryDescending: true)
+        case .westEast:   return geographySort(a, b, primary: \.longitude, primaryDescending: false, secondary: \.latitude,  secondaryDescending: true)
+        case .tempHighLow, .tempLowHigh: return a.name.localizedCompare(b.name) == .orderedAscending
         }
     }
 
@@ -139,6 +155,15 @@ struct StateCitiesView: View {
                     }
                 }
             }
+            Section("Temperature") {
+                ForEach([BrowseSortOrder.tempHighLow, .tempLowHigh]) { option in
+                    Button {
+                        sortOrder = option
+                    } label: {
+                        Label(option.rawValue, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
+                    }
+                }
+            }
         } label: {
             Label("Sort", systemImage: "arrow.up.arrow.down")
         }
@@ -192,17 +217,33 @@ struct CountryCitiesView: View {
         } else {
             base = cities.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
         }
-        return base.sorted(by: sortComparator)
+        switch sortOrder {
+        case .tempHighLow:
+            return base.sorted { a, b in
+                let ta = weatherData[a.cacheKey]?.current.temperature2m ?? -.infinity
+                let tb = weatherData[b.cacheKey]?.current.temperature2m ?? -.infinity
+                return ta > tb
+            }
+        case .tempLowHigh:
+            return base.sorted { a, b in
+                let ta = weatherData[a.cacheKey]?.current.temperature2m ?? .infinity
+                let tb = weatherData[b.cacheKey]?.current.temperature2m ?? .infinity
+                return ta < tb
+            }
+        default:
+            return base.sorted(by: sortComparator)
+        }
     }
 
     private func sortComparator(_ a: CityLocation, _ b: CityLocation) -> Bool {
         switch sortOrder {
-        case .nameAZ:    return a.name.localizedCompare(b.name) == .orderedAscending
-        case .nameZA:    return a.name.localizedCompare(b.name) == .orderedDescending
+        case .nameAZ:     return a.name.localizedCompare(b.name) == .orderedAscending
+        case .nameZA:     return a.name.localizedCompare(b.name) == .orderedDescending
         case .northSouth: return geographySort(a, b, primary: \.latitude,  primaryDescending: true,  secondary: \.longitude, secondaryDescending: false)
         case .southNorth: return geographySort(a, b, primary: \.latitude,  primaryDescending: false, secondary: \.longitude, secondaryDescending: false)
-        case .eastWest:  return geographySort(a, b, primary: \.longitude, primaryDescending: true,  secondary: \.latitude,  secondaryDescending: true)
-        case .westEast:  return geographySort(a, b, primary: \.longitude, primaryDescending: false, secondary: \.latitude,  secondaryDescending: true)
+        case .eastWest:   return geographySort(a, b, primary: \.longitude, primaryDescending: true,  secondary: \.latitude,  secondaryDescending: true)
+        case .westEast:   return geographySort(a, b, primary: \.longitude, primaryDescending: false, secondary: \.latitude,  secondaryDescending: true)
+        case .tempHighLow, .tempLowHigh: return a.name.localizedCompare(b.name) == .orderedAscending
         }
     }
 
@@ -267,6 +308,15 @@ struct CountryCitiesView: View {
             }
             Section("Geographic") {
                 ForEach([BrowseSortOrder.northSouth, .southNorth, .eastWest, .westEast]) { option in
+                    Button {
+                        sortOrder = option
+                    } label: {
+                        Label(option.rawValue, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
+                    }
+                }
+            }
+            Section("Temperature") {
+                ForEach([BrowseSortOrder.tempHighLow, .tempLowHigh]) { option in
                     Button {
                         sortOrder = option
                     } label: {

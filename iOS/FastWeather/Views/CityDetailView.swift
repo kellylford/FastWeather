@@ -141,6 +141,13 @@ struct CityDetailView: View {
                                                 .fixedSize(horizontal: false, vertical: true)
                                         }
                                     }
+                                    // Precipitation timing derived from hourly data
+                                    if let timingText = precipitationTimingText(from: weather) {
+                                        Text(timingText)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
                                 }
                             }
                             .padding(8)
@@ -157,6 +164,9 @@ struct CityDetailView: View {
                                     } else if let precipSum = daily.precipitationSum?[0], precipSum > 0 {
                                         label += ", \(formatPrecipitation(precipSum)) expected"
                                     }
+                                }
+                                if let timingText = precipitationTimingText(from: weather) {
+                                    label += ", \(timingText)"
                                 }
                                 return label
                             }())
@@ -1013,6 +1023,76 @@ struct CityDetailView: View {
         return MyDataFormatHelper.format(parameter: parameter, value: value, settings: settingsManager.settings)
     }
     
+    private func precipitationTimingText(from weather: WeatherData) -> String? {
+        guard let hourly = weather.hourly,
+              let timeArray = hourly.time else { return nil }
+
+        let cityTimeZone = weather.timeZone
+        var cityCalendar = Calendar.current
+        cityCalendar.timeZone = cityTimeZone
+
+        let currentIndex = findCurrentHourIndex(in: timeArray)
+        let probThreshold = 40       // percent
+        let amountThreshold = 1.0    // mm — catches high-amount hours even when PoP is below threshold
+
+        // Collect indices of rainy hours remaining today (in city-local time)
+        var rainyIndices: [Int] = []
+        for i in currentIndex..<min(currentIndex + 24, timeArray.count) {
+            guard let timeStr = timeArray[i],
+                  let hourDate = DateParser.parse(timeStr, in: cityTimeZone) else { continue }
+            guard cityCalendar.isDateInToday(hourDate) else { break }
+            let prob = (hourly.precipitationProbability.flatMap { arr in i < arr.count ? arr[i] : nil } ?? nil) ?? 0
+            let amount = (hourly.precipitation.flatMap { arr in i < arr.count ? arr[i] : nil } ?? nil) ?? 0.0
+            if prob >= probThreshold || amount >= amountThreshold {
+                rainyIndices.append(i)
+            }
+        }
+
+        guard !rainyIndices.isEmpty else { return nil }
+
+        // Determine precipitation type label for natural VoiceOver reading
+        let precipType: String
+        if let snow = weather.daily?.snowfallSum?[0], snow > 0 {
+            precipType = "Snow"
+        } else if let rain = weather.daily?.rainSum?[0], rain > 0 {
+            precipType = "Rain"
+        } else {
+            precipType = "Precipitation"
+        }
+
+        if rainyIndices.count >= 8 {
+            return "\(precipType) expected throughout the day"
+        }
+
+        // Build contiguous windows (allow 1-hour gap to merge nearby showers)
+        var windows: [(start: Int, end: Int)] = []
+        var windowStart = rainyIndices[0]
+        var windowEnd = rainyIndices[0]
+        for i in 1..<rainyIndices.count {
+            if rainyIndices[i] <= rainyIndices[i - 1] + 2 {
+                windowEnd = rainyIndices[i]
+            } else {
+                windows.append((windowStart, windowEnd))
+                windowStart = rainyIndices[i]
+                windowEnd = rainyIndices[i]
+            }
+        }
+        windows.append((windowStart, windowEnd))
+
+        func timeLabel(_ index: Int) -> String {
+            guard index < timeArray.count, let s = timeArray[index] else { return "" }
+            return FormatHelper.formatTimeCompact(s)
+        }
+
+        let parts = windows.prefix(2).map { w -> String in
+            return w.start == w.end
+                ? "around \(timeLabel(w.start))"
+                : "\(timeLabel(w.start))–\(timeLabel(w.end))"
+        }
+        let suffix = windows.count > 2 ? " and later" : ""
+        return "\(precipType) most likely " + parts.joined(separator: " and ") + suffix
+    }
+
     private func findCurrentHourIndex(in times: [String?]) -> Int {
         let now = Date()
         let cityTimeZone = weather?.timeZone ?? .current
