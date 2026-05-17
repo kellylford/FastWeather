@@ -55,7 +55,7 @@ class HistoricalWeatherCache {
 
             return cached
         } catch {
-            print("❌ Error loading cached historical data: \(error)")
+            debugLog("❌ Error loading cached historical data: \(error)")
             return nil
         }
     }
@@ -69,7 +69,7 @@ class HistoricalWeatherCache {
             try encoded.write(to: file)
 
         } catch {
-            print("❌ Error caching historical data: \(error)")
+            debugLog("❌ Error caching historical data: \(error)")
         }
     }
     

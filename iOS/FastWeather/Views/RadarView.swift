@@ -8,14 +8,27 @@
 
 import SwiftUI
 import Charts
+#if canImport(WeatherKit)
+import WeatherKit
+#endif
+
+/// Holds WeatherKit attribution URLs for display.
+struct WeatherAttributionData {
+    let legalPageURL: URL
+    let markLightURL: URL
+    let markDarkURL: URL
+    let serviceName: String
+}
 
 struct RadarView: View {
     let city: City
     @EnvironmentObject var settingsManager: SettingsManager
+    @Environment(\.colorScheme) var colorScheme
     @State private var radarData: RadarData?
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var lastUpdated: Date?
+    @State private var weatherKitAttribution: WeatherAttributionData?
     
     var body: some View {
         ScrollView {
@@ -124,9 +137,7 @@ struct RadarView: View {
             radarMapView(radar)
             
             // Data Attribution
-            Text("Precipitation nowcast data by Open-Meteo.com")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            attributionView
                 .padding(.top)
         }
     }
@@ -164,7 +175,8 @@ struct RadarView: View {
     
     // MARK: - Timeline View
     private func radarTimelineView(_ radar: RadarData) -> some View {
-        GroupBox(label: Label("2-Hour Timeline", systemImage: "clock")) {
+        let title = radar.dataSource == .weatherKit ? "1-Hour Forecast" : "2-Hour Forecast"
+        return GroupBox(label: Label(title, systemImage: "clock")) {
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(radar.timeline, id: \.time) { timepoint in
                     HStack {
@@ -189,75 +201,89 @@ struct RadarView: View {
     
     // MARK: - Radar Map View (Visual)
     private func radarMapView(_ radar: RadarData) -> some View {
-        GroupBox(label: Label("Precipitation Graph", systemImage: "chart.line.uptrend.xyaxis")) {
+        // Use WeatherKit 60-minute data when available, otherwise map the 7 coarse intervals.
+        let displayData: [ChartPoint]
+        if let wkData = radar.chartData {
+            displayData = wkData
+        } else {
+            let intervals = [0, 15, 30, 45, 60, 90, 120]
+            displayData = radar.timeline.enumerated().map { (i, tp) in
+                ChartPoint(
+                    minute: i < intervals.count ? intervals[i] : i * 15,
+                    precipitationMmPerHr: tp.precipitationMmPerHr,
+                    condition: tp.condition
+                )
+            }
+        }
+
+        let isMinuteData = radar.chartData != nil
+        let maxIntensity = displayData.map { $0.precipitationMmPerHr }.max() ?? 0
+        let yMax = max(2.0, maxIntensity * 1.3)
+        let axisValues = isMinuteData ? [0, 15, 30, 45, 60] : displayData.map { $0.minute }
+        let title = isMinuteData ? "Next 60 Minutes" : "Next 2 Hours"
+        // Accessibility uses a sparser set of points so VoiceOver has a manageable number.
+        let accessibilityPoints = isMinuteData
+            ? displayData.filter { [0, 5, 10, 15, 20, 30, 45, 60].contains($0.minute) }
+            : displayData
+
+        return GroupBox(label: Label("Precipitation Graph", systemImage: "chart.line.uptrend.xyaxis")) {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Next 2 Hours")
+                Text(title)
                     .font(.subheadline.bold())
-                
-                // Simple visual representation of precipitation intensity over time
-                HStack(alignment: .bottom, spacing: 4) {
-                    ForEach(Array(radar.timeline.enumerated()), id: \.offset) { index, point in
-                        VStack(spacing: 4) {
-                            Rectangle()
-                                .fill(precipitationColor(for: point.condition))
-                                .frame(width: 40, height: precipitationHeight(for: point.condition))
-                            
-                            Text(point.time)
-                                .font(.caption2)
-                                .lineLimit(1)
-                                .truncationMode(.middle)
-                                .minimumScaleFactor(0.5)
+
+                Chart(displayData, id: \.minute) { point in
+                    AreaMark(
+                        x: .value("Minute", point.minute),
+                        y: .value("mm/hr", max(0, point.precipitationMmPerHr))
+                    )
+                    .foregroundStyle(LinearGradient(
+                        colors: [.blue.opacity(0.55), .blue.opacity(0.08)],
+                        startPoint: .top, endPoint: .bottom
+                    ))
+                    .interpolationMethod(.catmullRom)
+
+                    LineMark(
+                        x: .value("Minute", point.minute),
+                        y: .value("mm/hr", max(0, point.precipitationMmPerHr))
+                    )
+                    .foregroundStyle(.blue)
+                    .interpolationMethod(.catmullRom)
+                }
+                .chartXAxis {
+                    AxisMarks(values: axisValues) { value in
+                        if let minute = value.as(Int.self) {
+                            AxisValueLabel {
+                                Text(minute == 0 ? "Now" : "\(minute)")
+                                    .font(.caption2)
+                            }
                         }
+                        AxisGridLine()
                     }
                 }
-                .frame(height: 150)
+                .chartYAxis(.hidden)
+                .chartYScale(domain: 0...yMax)
+                .frame(height: 100)
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Precipitation graph showing next 2 hours. Swipe up or down with VoiceOver to hear the chart as audio tones.")
+                .accessibilityLabel("Precipitation chart showing \(title.lowercased()). Swipe up or down with VoiceOver to hear the chart as audio tones.")
             }
             .padding(.vertical, 8)
         }
         .accessibilityRepresentation {
-            // Audio Graph representation with descriptive labels instead of numbers
-            Chart(radar.timeline, id: \.time) { point in
+            Chart(accessibilityPoints, id: \.minute) { point in
                 BarMark(
-                    x: .value("Time", point.time),
-                    y: .value("Intensity", precipitationValue(for: point.condition))
+                    x: .value("Time", point.minute == 0 ? "Now" : "\(point.minute) min"),
+                    y: .value("Intensity", max(0, point.precipitationMmPerHr))
                 )
-                .accessibilityLabel(point.time)
+                .accessibilityLabel(point.minute == 0 ? "Now" : "\(point.minute) minutes")
                 .accessibilityValue(point.condition)
             }
-            .accessibilityLabel("Precipitation intensity over next 2 hours. Swipe to explore individual time points.")
+            .accessibilityLabel(isMinuteData
+                ? "Minute-by-minute precipitation for the next hour. Swipe to explore time points."
+                : "Precipitation intensity over next 2 hours. Swipe to explore individual time points."
+            )
         }
     }
-    
-    private func precipitationColor(for condition: String) -> Color {
-        if condition.contains("Clear") || condition.contains("No data") {
-            return .gray.opacity(0.2)
-        } else if condition.contains("Light") {
-            return .blue.opacity(0.5)
-        } else if condition.contains("Moderate") {
-            return .blue.opacity(0.7)
-        } else if condition.contains("Heavy") {
-            return .blue
-        } else {
-            return .blue.opacity(0.3)
-        }
-    }
-    
-    private func precipitationHeight(for condition: String) -> CGFloat {
-        if condition.contains("Clear") || condition.contains("No data") {
-            return 10
-        } else if condition.contains("Light") {
-            return 50
-        } else if condition.contains("Moderate") {
-            return 100
-        } else if condition.contains("Heavy") {
-            return 140
-        } else {
-            return 30
-        }
-    }
-    
+
     // MARK: - Data Loading
     private func loadRadarData() async {
         isLoading = true
@@ -265,11 +291,25 @@ struct RadarView: View {
         
         do {
             let data = try await RadarService.shared.fetchPrecipitationNowcast(for: city)
-            
+
+            var attribution: WeatherAttributionData? = nil
+            #if canImport(WeatherKit)
+            if #available(iOS 16.0, *), data.dataSource == .weatherKit {
+                let wkAttr = try await WeatherKit.WeatherService.shared.attribution
+                attribution = WeatherAttributionData(
+                    legalPageURL: wkAttr.legalPageURL,
+                    markLightURL: wkAttr.combinedMarkLightURL,
+                    markDarkURL: wkAttr.combinedMarkDarkURL,
+                    serviceName: wkAttr.serviceName
+                )
+            }
+            #endif
+
             await MainActor.run {
                 self.radarData = data
                 self.lastUpdated = Date()
                 self.isLoading = false
+                self.weatherKitAttribution = attribution
             }
         } catch {
             await MainActor.run {
@@ -293,21 +333,6 @@ struct RadarView: View {
             let formatter = DateFormatter()
             formatter.timeStyle = .short
             return "at \(formatter.string(from: date))"
-        }
-    }
-    
-    // MARK: - Helper for Chart Data
-    private func precipitationValue(for condition: String) -> Double {
-        if condition.contains("Clear") || condition.contains("No data") {
-            return 0
-        } else if condition.contains("Light") {
-            return 3
-        } else if condition.contains("Moderate") {
-            return 6
-        } else if condition.contains("Heavy") {
-            return 9
-        } else {
-            return 1
         }
     }
     
@@ -346,36 +371,37 @@ struct RadarView: View {
         let speed = settingsManager.settings.windSpeedUnit.convert(kmh)
         return "\(Int(speed)) \(settingsManager.settings.windSpeedUnit.rawValue)"
     }
+
+    // MARK: - Attribution View
+
+    /// Shows the Apple Weather mark + legal link when using WeatherKit,
+    /// or the Open-Meteo credit otherwise. Apple requires displaying the mark
+    /// and linking to the legal attribution page.
+    @ViewBuilder
+    private var attributionView: some View {
+        if let attribution = weatherKitAttribution {
+            Link(destination: attribution.legalPageURL) {
+                AsyncImage(url: colorScheme == .dark ? attribution.markDarkURL : attribution.markLightURL) { image in
+                    image
+                        .resizable()
+                        .scaledToFit()
+                } placeholder: {
+                    Text(attribution.serviceName)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .frame(height: 14)
+            }
+            .accessibilityLabel("\(attribution.serviceName) weather data provider")
+        } else {
+            Text("Precipitation nowcast data by Open-Meteo.com")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+    }
 }
 
-// MARK: - Data Models
-
-struct RadarData {
-    let currentStatus: String
-    let nearestPrecipitation: NearestPrecipitation?
-    let directionalSectors: [DirectionalSector]
-    let timeline: [TimelinePoint]
-}
-
-struct NearestPrecipitation {
-    let distanceMiles: Int
-    let direction: String
-    let type: String
-    let intensity: String
-    let movementDirection: String
-    let speedMph: Int
-    let arrivalEstimate: String?
-}
-
-struct DirectionalSector: Equatable {
-    let direction: String
-    let status: String
-}
-
-struct TimelinePoint: Equatable {
-    let time: String
-    let condition: String
-}
+// Data models are defined in RadarService.swift
 
 #Preview {
     NavigationView {

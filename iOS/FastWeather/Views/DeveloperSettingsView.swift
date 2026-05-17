@@ -36,6 +36,10 @@ struct DeveloperSettingsView: View {
                             Task { await weatherService.refreshAllWeather() }
                         }
 
+                    Toggle("WeatherKit Expected Precipitation", isOn: $featureFlags.weatherKitNowcastEnabled)
+                        .accessibilityLabel("WeatherKit Expected Precipitation feature toggle")
+                        .accessibilityHint(featureFlags.weatherKitNowcastEnabled ? "WeatherKit nowcast is enabled. Expected Precipitation uses radar-quality minute-by-minute data from Apple WeatherKit for supported countries." : "WeatherKit nowcast is disabled. Expected Precipitation uses Open-Meteo NWP for all cities, restoring the older experience.")
+
                     Toggle("Enable Table View", isOn: $featureFlags.tableViewEnabled)
                         .accessibilityLabel("Enable Table View feature toggle")
                         .accessibilityHint(featureFlags.tableViewEnabled ? "Table view is enabled. Table option will appear in the View Mode picker in Settings." : "Table view is disabled. Table option will not appear in the View Mode picker in Settings.")

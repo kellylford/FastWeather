@@ -39,11 +39,11 @@ struct DayDetailView: View {
             precipitation: slice(hourly.precipitation),
             relativeHumidity2m: slice(hourly.relativeHumidity2m),
             windSpeed10m: slice(hourly.windSpeed10m),
-            cloudcover: slice(hourly.cloudcover),
+            cloudCover: slice(hourly.cloudCover),
             precipitationProbability: slice(hourly.precipitationProbability),
             uvIndex: slice(hourly.uvIndex),
-            windgusts10m: slice(hourly.windgusts10m),
-            dewpoint2m: slice(hourly.dewpoint2m),
+            windGusts10m: slice(hourly.windGusts10m),
+            dewPoint2m: slice(hourly.dewPoint2m),
             snowfall: slice(hourly.snowfall)
         )
     }
@@ -166,6 +166,19 @@ struct DayDetailView: View {
                 Spacer()
             }
             .padding(.vertical, 4)
+            if let timingText = precipitationTimingText() {
+                Divider()
+                HStack(spacing: 6) {
+                    Image(systemName: "drop.fill")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                        .accessibilityHidden(true)
+                    Text(timingText)
+                        .font(.subheadline)
+                        .foregroundColor(.blue)
+                }
+                .padding(.bottom, 2)
+            }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(conditionsAccessibilityLabel)
@@ -182,7 +195,76 @@ struct DayDetailView: View {
         if let low = daily?.temperature2mMin[dayIndex] {
             parts.append("Low: \(formatTemperature(low))")
         }
+        if let timingText = precipitationTimingText() {
+            parts.append(timingText)
+        }
         return parts.joined(separator: ", ")
+    }
+
+    // MARK: - Precipitation timing
+
+    /// Returns a human-readable timing summary for precipitation on this day,
+    /// e.g. "Most likely 2 PM–5 PM" or "Expected throughout the day".
+    private func precipitationTimingText() -> String? {
+        guard let slice = hourlySlice,
+              let timeArray = slice.time else { return nil }
+
+        let probThreshold = 40
+        let amountThreshold = 1.0  // mm
+
+        var rainyIndices: [Int] = []
+        for i in 0..<timeArray.count {
+            guard timeArray[i] != nil else { continue }
+            let prob = (slice.precipitationProbability.flatMap { arr in i < arr.count ? arr[i] : nil } ?? nil) ?? 0
+            let amount = (slice.precipitation.flatMap { arr in i < arr.count ? arr[i] : nil } ?? nil) ?? 0.0
+            if prob >= probThreshold || amount >= amountThreshold {
+                rainyIndices.append(i)
+            }
+        }
+
+        guard !rainyIndices.isEmpty else { return nil }
+
+        // Determine precipitation type label for natural VoiceOver reading
+        let precipType: String
+        if let snow = daily?.snowfallSum?[dayIndex], snow > 0 {
+            precipType = "Snow"
+        } else if let rain = daily?.rainSum?[dayIndex], rain > 0 {
+            precipType = "Rain"
+        } else {
+            precipType = "Precipitation"
+        }
+
+        if rainyIndices.count >= 8 {
+            return "\(precipType) expected throughout the day"
+        }
+
+        // Build contiguous windows (allow 1-hour gap to merge nearby showers)
+        var windows: [(start: Int, end: Int)] = []
+        var windowStart = rainyIndices[0]
+        var windowEnd = rainyIndices[0]
+        for i in 1..<rainyIndices.count {
+            if rainyIndices[i] <= rainyIndices[i - 1] + 2 {
+                windowEnd = rainyIndices[i]
+            } else {
+                windows.append((windowStart, windowEnd))
+                windowStart = rainyIndices[i]
+                windowEnd = rainyIndices[i]
+            }
+        }
+        windows.append((windowStart, windowEnd))
+
+        func timeLabel(_ index: Int) -> String {
+            guard index < timeArray.count, let s = timeArray[index] else { return "" }
+            return FormatHelper.formatTimeCompact(s)
+        }
+
+        let parts = windows.prefix(2).map { w -> String in
+            return w.start == w.end
+                ? "around \(timeLabel(w.start))"
+                : "\(timeLabel(w.start))\u{2013}\(timeLabel(w.end))"
+        }
+        let suffix = windows.count > 2 ? " and later" : ""
+        return "\(precipType) most likely " + parts.joined(separator: " and ") + suffix
     }
 
     // MARK: - 24-Hour Forecast
@@ -271,7 +353,7 @@ struct DayDetailView: View {
     @ViewBuilder
     private var windAndUVSection: some View {
         let wind = daily?.windSpeed10mMax?[dayIndex]
-        let windDir = daily?.winddirection10mDominant?[dayIndex]
+        let windDir = daily?.windDirectionDominant?[dayIndex]
         let uv = daily?.uvIndexMax?[dayIndex]
 
         if wind != nil || uv != nil {

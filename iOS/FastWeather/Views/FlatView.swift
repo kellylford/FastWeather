@@ -20,9 +20,8 @@ struct FlatView: View {
     
     var body: some View {
         List {
-            ForEach(weatherService.savedCities.indices, id: \.self) { index in
-                let city = weatherService.savedCities[index]
-                citySection(for: city, at: index)
+            ForEach(weatherService.savedCities) { city in
+                citySection(for: city)
             }
         }
         .listStyle(.grouped)
@@ -32,7 +31,8 @@ struct FlatView: View {
     }
     
     @ViewBuilder
-    private func citySection(for city: City, at index: Int) -> some View {
+    private func citySection(for city: City) -> some View {
+        let index = weatherService.savedCities.firstIndex(where: { $0.id == city.id }) ?? 0
         Section {
             // Weather detail rows
             let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
@@ -358,7 +358,6 @@ struct CitySectionHeader: View {
     let onAlertTap: (WeatherAlert) -> Void
     
     @State private var alerts: [WeatherAlert] = []
-    @State private var hasLoadedAlerts = false
     
     private var weather: WeatherData? {
         let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
@@ -423,12 +422,18 @@ struct CitySectionHeader: View {
                 // Clear alerts when viewing past/future days
                 if dateOffset != 0 {
                     alerts = []
-                    hasLoadedAlerts = false
                     return
                 }
                 
-                guard !hasLoadedAlerts else { return }
-                hasLoadedAlerts = true
+                do {
+                    alerts = try await weatherService.fetchNWSAlerts(for: city)
+                } catch {
+                    // Silently fail - alerts are optional
+                }
+            }
+            .task(id: weatherService.alertsRefreshID) {
+                // Re-fetch alerts when alertsRefreshID changes (on refresh)
+                guard dateOffset == 0 else { return }
                 
                 do {
                     alerts = try await weatherService.fetchNWSAlerts(for: city)

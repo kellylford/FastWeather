@@ -73,13 +73,13 @@ class WeatherCache: ObservableObject {
         
         // Check if cache is too old (>24 hours)
         if cached.age > maxCacheAge {
-            print("🗑️ Cache expired for city \(cityId) (age: \(cached.ageDescription))")
+            debugLog("🗑️ Cache expired for city \(cityId) (age: \(cached.ageDescription))")
             cache.removeValue(forKey: cityId)
             saveCache()
             return nil
         }
         
-        print("📦 Using cached data for city \(cityId) (age: \(cached.ageDescription))")
+        debugLog("📦 Using cached data for city \(cityId) (age: \(cached.ageDescription))")
         return cached
     }
     
@@ -91,7 +91,7 @@ class WeatherCache: ObservableObject {
         let cached = CachedWeather(weather: weather, timestamp: Date(), cityId: cityId)
         cache[cityId] = cached
         saveCache()
-        print("💾 Cached weather for city \(cityId)")
+        debugLog("💾 Cached weather for city \(cityId)")
     }
     
     /// Clear cached data for a specific city
@@ -99,7 +99,7 @@ class WeatherCache: ObservableObject {
     func clear(for cityId: UUID) {
         cache.removeValue(forKey: cityId)
         saveCache()
-        print("🗑️ Cleared cache for city \(cityId)")
+        debugLog("🗑️ Cleared cache for city \(cityId)")
     }
     
     /// Clear all cached data
@@ -123,11 +123,11 @@ class WeatherCache: ObservableObject {
     
     private func loadCacheFromDisk() {
         let startTime = Date()
-        print("📦 [CACHE] Loading weather cache from disk...")
+        debugLog("📦 [CACHE] Loading weather cache from disk...")
         hasLoadedFromDisk = true
         
         guard let data = UserDefaults.standard.data(forKey: userDefaultsKey) else {
-            print("📦 [CACHE] No cached weather data found (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s)")
+            debugLog("📦 [CACHE] No cached weather data found (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s)")
             return
         }
         
@@ -143,9 +143,9 @@ class WeatherCache: ObservableObject {
             // Remove expired entries
             removeExpired()
             
-            print("📦 [CACHE] Loaded \(cache.count) cached weather \(cache.count == 1 ? "entry" : "entries") (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s)")
+            debugLog("📦 [CACHE] Loaded \(cache.count) cached weather \(cache.count == 1 ? "entry" : "entries") (\(String(format: "%.3f", Date().timeIntervalSince(startTime)))s)")
         } catch {
-            print("⚠️ [CACHE] Failed to load weather cache: \(error.localizedDescription)")
+            debugLog("⚠️ [CACHE] Failed to load weather cache: \(error.localizedDescription)")
             cache.removeAll()
         }
     }
@@ -160,9 +160,9 @@ class WeatherCache: ObservableObject {
             let data = try encoder.encode(cachedArray)
             
             UserDefaults.standard.set(data, forKey: userDefaultsKey)
-            print("💾 Saved \(cache.count) weather cache \(cache.count == 1 ? "entry" : "entries")")
+            debugLog("💾 Saved \(cache.count) weather cache \(cache.count == 1 ? "entry" : "entries")")
         } catch {
-            print("⚠️ Failed to save weather cache: \(error.localizedDescription)")
+            debugLog("⚠️ Failed to save weather cache: \(error.localizedDescription)")
         }
     }
 }

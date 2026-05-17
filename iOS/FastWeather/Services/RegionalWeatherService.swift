@@ -65,7 +65,7 @@ class RegionalWeatherService {
             cacheQueue.sync {
                 locationNameCache = cache
             }
-            print("📍 Loaded \(cache.count) cached location names")
+            debugLog("📍 Loaded \(cache.count) cached location names")
         }
     }
     
@@ -148,7 +148,6 @@ class RegionalWeatherService {
             "latitude": String(location.lat),
             "longitude": String(location.lon),
             "current": "temperature_2m,weather_code",
-            "temperature_unit": "celsius",
             "timezone": "auto"
         ]
         
@@ -187,7 +186,7 @@ class RegionalWeatherService {
         
         if let cached = getCachedLocationName(latitude: location.lat, longitude: location.lon) {
             locationName = cached
-            print("💾 Using cached location for \(location.direction): \(cached)")
+            debugLog("💾 Using cached location for \(location.direction): \(cached)")
         } else {
             // Not in cache - fetch via reverse geocoding using serialized coordinator
             do {
@@ -199,7 +198,7 @@ class RegionalWeatherService {
                 locationName = name
                 setCachedLocationName(name, latitude: location.lat, longitude: location.lon)
             } catch {
-                print("⚠️ Failed to reverse geocode \(location.direction): \(error.localizedDescription)")
+                debugLog("⚠️ Failed to reverse geocode \(location.direction): \(error.localizedDescription)")
                 locationName = nil
             }
         }
@@ -213,13 +212,13 @@ class RegionalWeatherService {
             locationName: locationName
         )
         
-        print("🏁 Returning DirectionalLocation for \(location.direction): locationName = '\(result.locationName ?? "nil")'")
+        debugLog("🏁 Returning DirectionalLocation for \(location.direction): locationName = '\(result.locationName ?? "nil")'")
         return result
     }
     
     /// Reverse geocode coordinates to get location name using Apple's CLGeocoder
     private func reverseGeocode(latitude: Double, longitude: Double) async throws -> String {
-        print("🌍 Geocoding with CLGeocoder: \(latitude), \(longitude)")
+        debugLog("🌍 Geocoding with CLGeocoder: \(latitude), \(longitude)")
         
         let geocoder = CLGeocoder()
         let location = CLLocation(latitude: latitude, longitude: longitude)
@@ -227,7 +226,7 @@ class RegionalWeatherService {
         let placemarks = try await geocoder.reverseGeocodeLocation(location)
         
         guard let placemark = placemarks.first else {
-            print("⚠️ No placemarks found")
+            debugLog("⚠️ No placemarks found")
             throw URLError(.cannotFindHost)
         }
         

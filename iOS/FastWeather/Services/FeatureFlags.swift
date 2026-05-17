@@ -72,6 +72,15 @@ class FeatureFlags: ObservableObject {
             UserDefaults.standard.set(weatherKitSnowEnabled, forKey: "feature_weatherkit_snow_enabled")
         }
     }
+
+    /// Use WeatherKit radar-quality minute-by-minute nowcast for Expected Precipitation.
+    /// On by default. When disabled, all cities fall back to Open-Meteo NWP regardless
+    /// of country — restoring the pre-WeatherKit nowcast experience.
+    @Published var weatherKitNowcastEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(weatherKitNowcastEnabled, forKey: "feature_weatherkit_nowcast_enabled")
+        }
+    }
     
     // MARK: - Initialization
     
@@ -84,6 +93,7 @@ class FeatureFlags: ObservableObject {
         self.myDataEnabled = UserDefaults.standard.bool(forKey: "feature_my_data_enabled")
         self.tableViewEnabled = UserDefaults.standard.bool(forKey: "feature_table_view_enabled")
         self.weatherKitSnowEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_snow_enabled")
+        self.weatherKitNowcastEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_nowcast_enabled")
         
         // Default values (if first launch or not set)
         // All features enabled by default for production
@@ -108,6 +118,9 @@ class FeatureFlags: ObservableObject {
         if !UserDefaults.standard.contains(key: "feature_weatherkit_snow_enabled") {
             self.weatherKitSnowEnabled = true  // On by default
         }
+        if !UserDefaults.standard.contains(key: "feature_weatherkit_nowcast_enabled") {
+            self.weatherKitNowcastEnabled = true  // On by default
+        }
     }
     
     // MARK: - Helper Methods
@@ -121,7 +134,8 @@ class FeatureFlags: ObservableObject {
         myDataEnabled = true  // Default: enabled
         tableViewEnabled = false  // Default: disabled
         weatherKitSnowEnabled = true  // Default: enabled
-        print("🔧 Feature flags reset to defaults")
+        weatherKitNowcastEnabled = true  // Default: enabled
+        debugLog("🔧 Feature flags reset to defaults")
     }
     
     /// Enable all features (for testing)
@@ -133,7 +147,8 @@ class FeatureFlags: ObservableObject {
         myDataEnabled = true
         tableViewEnabled = true
         weatherKitSnowEnabled = true
-        print("🔧 All features enabled")
+        weatherKitNowcastEnabled = true
+        debugLog("🔧 All features enabled")
     }
     
     /// Disable all features (for release)
@@ -145,7 +160,8 @@ class FeatureFlags: ObservableObject {
         myDataEnabled = false
         tableViewEnabled = false
         weatherKitSnowEnabled = false
-        print("🔧 All features disabled")
+        weatherKitNowcastEnabled = false
+        debugLog("🔧 All features disabled")
     }
 }
 

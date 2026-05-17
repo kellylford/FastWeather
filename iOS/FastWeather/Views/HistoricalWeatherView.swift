@@ -353,7 +353,7 @@ struct HistoricalWeatherView: View {
                     historicalData = data
                     isLoading = false
                     let unit = viewMode == .singleDay ? "day" : (viewMode == .multiYear ? "years" : "days")
-                    print("📊 Loaded \(data.count) \(unit) of historical data")
+                    debugLog("📊 Loaded \(data.count) \(unit) of historical data")
                 }
             } catch {
                 await MainActor.run {

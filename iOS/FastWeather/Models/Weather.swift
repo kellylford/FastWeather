@@ -72,11 +72,15 @@ enum WeatherCode: Int, Codable {
     }
     
     var systemImageName: String {
+        return systemImageName(isDay: true)
+    }
+
+    func systemImageName(isDay: Bool) -> String {
         switch self {
         case .clearSky, .mainlyClear:
-            return "sun.max.fill"
+            return isDay ? "sun.max.fill" : "moon.stars.fill"
         case .partlyCloudy:
-            return "cloud.sun.fill"
+            return isDay ? "cloud.sun.fill" : "cloud.moon.fill"
         case .overcast:
             return "cloud.fill"
         case .fog, .depositingRimeFog:
@@ -105,6 +109,14 @@ struct WeatherData: Codable {
     let current: CurrentWeather
     let daily: DailyWeather?
     let hourly: HourlyWeather?
+    /// UTC offset from the Open-Meteo response (seconds). Nil for historical/browse paths.
+    let utcOffsetSeconds: Int?
+
+    /// City-local timezone derived from the API response offset.
+    /// Defaults to UTC when offset is unavailable (historical path has no hourly data anyway).
+    var timeZone: TimeZone {
+        TimeZone(secondsFromGMT: utcOffsetSeconds ?? 0) ?? .current
+    }
     
     struct CurrentWeather: Codable {
         let temperature2m: Double
@@ -153,7 +165,7 @@ struct WeatherData: Codable {
             case visibility
             case windGusts10m = "wind_gusts_10m"
             case uvIndex = "uv_index"
-            case dewpoint2m = "dewpoint_2m"
+            case dewPoint2m = "dew_point_2m"
             case myDataValues
         }
         
@@ -183,7 +195,7 @@ struct WeatherData: Codable {
             visibility = try container.decodeIfPresent(Double.self, forKey: .visibility)
             windGusts10m = try container.decodeIfPresent(Double.self, forKey: .windGusts10m)
             uvIndex = try container.decodeIfPresent(Double.self, forKey: .uvIndex)
-            dewpoint2m = try container.decodeIfPresent(Double.self, forKey: .dewpoint2m)
+            dewpoint2m = try container.decodeIfPresent(Double.self, forKey: .dewPoint2m)
             
             // Sweep any extra numeric keys into myDataValues
             let dynamicContainer = try decoder.container(keyedBy: DynamicCodingKey.self)
@@ -217,7 +229,7 @@ struct WeatherData: Codable {
             try container.encodeIfPresent(visibility, forKey: .visibility)
             try container.encodeIfPresent(windGusts10m, forKey: .windGusts10m)
             try container.encodeIfPresent(uvIndex, forKey: .uvIndex)
-            try container.encodeIfPresent(dewpoint2m, forKey: .dewpoint2m)
+            try container.encodeIfPresent(dewpoint2m, forKey: .dewPoint2m)
             try container.encodeIfPresent(myDataValues, forKey: .myDataValues)
         }
         
@@ -267,7 +279,9 @@ struct WeatherData: Codable {
         let daylightDuration: [Double?]?
         let sunshineDuration: [Double?]?
         let windSpeed10mMax: [Double?]?
-        let winddirection10mDominant: [Int?]?
+        let windDirectionDominant: [Int?]?
+        let apparentTemperatureMax: [Double?]?
+        let apparentTemperatureMin: [Double?]?
         
         enum CodingKeys: String, CodingKey {
             case temperature2mMax = "temperature_2m_max"
@@ -282,8 +296,10 @@ struct WeatherData: Codable {
             case uvIndexMax = "uv_index_max"
             case daylightDuration = "daylight_duration"
             case sunshineDuration = "sunshine_duration"
-            case windSpeed10mMax = "windspeed_10m_max"
-            case winddirection10mDominant = "winddirection_10m_dominant"
+            case windSpeed10mMax = "wind_speed_10m_max"
+            case windDirectionDominant = "wind_direction_10m_dominant"
+            case apparentTemperatureMax = "apparent_temperature_max"
+            case apparentTemperatureMin = "apparent_temperature_min"
         }
     }
     
@@ -294,11 +310,11 @@ struct WeatherData: Codable {
         let precipitation: [Double?]?  // Total precipitation (rain+showers+snow water equiv) in mm
         let relativeHumidity2m: [Int?]?  // Optional for basic mode (not requested)
         let windSpeed10m: [Double?]?  // Optional for basic mode (not requested)
-        let cloudcover: [Int?]?  // Used in basic mode
+        let cloudCover: [Int?]?  // Used in basic mode
         let precipitationProbability: [Int?]?
         let uvIndex: [Double?]?
-        let windgusts10m: [Double?]?
-        let dewpoint2m: [Double?]?
+        let windGusts10m: [Double?]?
+        let dewPoint2m: [Double?]?
         let snowfall: [Double?]?  // Hourly snowfall in cm
         
         enum CodingKeys: String, CodingKey {
@@ -308,11 +324,11 @@ struct WeatherData: Codable {
             case precipitation
             case relativeHumidity2m = "relative_humidity_2m"
             case windSpeed10m = "wind_speed_10m"
-            case cloudcover
+            case cloudCover = "cloud_cover"
             case precipitationProbability = "precipitation_probability"
             case uvIndex = "uv_index"
-            case windgusts10m = "windgusts_10m"
-            case dewpoint2m = "dewpoint_2m"
+            case windGusts10m = "wind_gusts_10m"
+            case dewPoint2m = "dew_point_2m"
             case snowfall
         }
     }
@@ -323,6 +339,12 @@ struct WeatherResponse: Codable {
     let current: WeatherData.CurrentWeather
     let daily: WeatherData.DailyWeather?
     let hourly: WeatherData.HourlyWeather?
+    let utcOffsetSeconds: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case current, daily, hourly
+        case utcOffsetSeconds = "utc_offset_seconds"
+    }
 }
 
 // MARK: - Marine Weather Models

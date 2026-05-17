@@ -136,6 +136,76 @@ struct SettingsView: View {
                     }
                     .accessibilityLabel("Default distance for Weather Around Me, currently \(settingsManager.settings.distanceUnit.format(settingsManager.settings.weatherAroundMeDistance))")
                     .accessibilityHint("Sets the default radius when viewing weather conditions around a city")
+                    
+                    Picker("Exploration Mode", selection: $settingsManager.settings.weatherAroundMeExplorationMode) {
+                        ForEach(ExplorationMode.allCases, id: \.self) { mode in
+                            Text(mode.rawValue).tag(mode)
+                        }
+                    }
+                    .onChange(of: settingsManager.settings.weatherAroundMeExplorationMode) {
+                        settingsManager.saveSettings()
+                    }
+                    .accessibilityLabel("Exploration mode, currently \(settingsManager.settings.weatherAroundMeExplorationMode.rawValue)")
+                    .accessibilityHint(settingsManager.settings.weatherAroundMeExplorationMode.description)
+                    
+                    if settingsManager.settings.weatherAroundMeExplorationMode == .arc {
+                        Picker("Arc Width", selection: $settingsManager.settings.weatherAroundMeArcWidth) {
+                            ForEach(ArcWidth.allCases, id: \.self) { width in
+                                Text(width.displayName).tag(width)
+                            }
+                        }
+                        .onChange(of: settingsManager.settings.weatherAroundMeArcWidth) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Arc width, currently \(settingsManager.settings.weatherAroundMeArcWidth.displayName)")
+                        .accessibilityHint(settingsManager.settings.weatherAroundMeArcWidth.description)
+                    } else {
+                        Picker("Corridor Width", selection: $settingsManager.settings.weatherAroundMeCorridorWidth) {
+                            ForEach(CorridorWidth.allCases, id: \.self) { width in
+                                Text(width.displayName).tag(width)
+                            }
+                        }
+                        .onChange(of: settingsManager.settings.weatherAroundMeCorridorWidth) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Corridor width, currently \(settingsManager.settings.weatherAroundMeCorridorWidth.displayName)")
+                        .accessibilityHint(settingsManager.settings.weatherAroundMeCorridorWidth.description)
+                    }
+                    
+                    Toggle("Show Distance from Center Line", isOn: $settingsManager.settings.showWeatherAroundMeOffsetDistance)
+                        .onChange(of: settingsManager.settings.showWeatherAroundMeOffsetDistance) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Show distance from center line")
+                        .accessibilityHint("Display distance from center line for each city (e.g., '5 miles west of center line')")
+                    
+                    Toggle("Show Bearing", isOn: $settingsManager.settings.showWeatherAroundMeBearing)
+                        .onChange(of: settingsManager.settings.showWeatherAroundMeBearing) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Show bearing")
+                        .accessibilityHint("Display compass bearing for each city (e.g., '145 degrees')")
+                    
+                    Toggle("Show Weather Movement", isOn: $settingsManager.settings.showWeatherAroundMeMovement)
+                        .onChange(of: settingsManager.settings.showWeatherAroundMeMovement) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Show weather movement")
+                        .accessibilityHint("Indicate if weather is approaching, moving away, or moving parallel")
+                    
+                    Toggle("Show Pressure Trends", isOn: $settingsManager.settings.showWeatherAroundMePressureTrends)
+                        .onChange(of: settingsManager.settings.showWeatherAroundMePressureTrends) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Show pressure trends")
+                        .accessibilityHint("Display pressure changes along the path to identify weather systems")
+                    
+                    Toggle("Show Weather Alerts", isOn: $settingsManager.settings.showWeatherAroundMeAlerts)
+                        .onChange(of: settingsManager.settings.showWeatherAroundMeAlerts) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Show weather alerts")
+                        .accessibilityHint("Announce severe weather alerts for each city (e.g., 'Alert: Tornado Warning')")
                 }
                 
                 // Browse Cities section
@@ -440,7 +510,7 @@ struct SettingsView: View {
             .onChange(of: showingResetAlert) { oldValue, newValue in
                 // Flash detection: Alert should never go from true to true
                 if oldValue == true && newValue == true {
-                    print("⚠️ ALERT FLASH DETECTED in SettingsView reset alert!")
+                    debugLog("⚠️ ALERT FLASH DETECTED in SettingsView reset alert!")
                 }
             }
             .sheet(isPresented: $showingDeveloperSettings) {

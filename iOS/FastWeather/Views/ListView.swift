@@ -20,9 +20,8 @@ struct ListView: View {
     
     var body: some View {
         List {
-            ForEach(weatherService.savedCities.indices, id: \.self) { index in
-                let city = weatherService.savedCities[index]
-                cityRow(for: city, at: index)
+            ForEach(weatherService.savedCities) { city in
+                cityRow(for: city)
             }
             .onMove(perform: weatherService.moveCity)
             .onDelete(perform: deleteCities)
@@ -121,14 +120,15 @@ struct ListView: View {
             return "Forecast not yet loaded"
         }
 
-        // Find the first hourly index at or after the current hour
-        let calendar = Calendar.current
-        let currentHour = calendar.component(.hour, from: Date())
+        // Find the first hourly index whose timestamp is at or after the current moment,
+        // using the city's timezone so the comparison is correct for international cities.
+        let now = Date()
+        let cityTimeZone = weather.timeZone
         var startIndex = 0
         for (i, timeString) in times.enumerated() {
-            guard let ts = timeString, let date = DateParser.parse(ts) else { continue }
-            let hour = calendar.component(.hour, from: date)
-            if hour >= currentHour {
+            guard let ts = timeString,
+                  let date = DateParser.parse(ts, in: cityTimeZone) else { continue }
+            if date >= now {
                 startIndex = i
                 break
             }
@@ -193,8 +193,9 @@ struct ListView: View {
     }
 
     @ViewBuilder
-    private func cityRow(for city: City, at index: Int) -> some View {
-        NavigationLink(destination: CityDetailView(city: city, dateOffset: dateOffset, selectedDate: selectedDate)) {
+    private func cityRow(for city: City) -> some View {
+        let index = weatherService.savedCities.firstIndex(where: { $0.id == city.id }) ?? 0
+        return NavigationLink(destination: CityDetailView(city: city, dateOffset: dateOffset, selectedDate: selectedDate)) {
             ListRowView(city: city, dateOffset: dateOffset, onAlertTap: { alert in
                 // Create stable AlertSheetItem to prevent re-presentation loop
                 alertSheetItem = AlertSheetItem(city: city, alert: alert)
@@ -202,11 +203,6 @@ struct ListView: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(editMode?.wrappedValue.isEditing == true ? [.allowsDirectInteraction] : [])
-        .accessibilityAction(named: "Remove") {
-            withAnimation {
-                weatherService.removeCity(city)
-            }
-        }
         .accessibilityAction(named: "Move Up") {
             moveCityUp(at: index)
         }
@@ -263,7 +259,6 @@ struct ListRowView: View {
     let onAlertTap: (WeatherAlert) -> Void
     
     @State private var alerts: [WeatherAlert] = []
-    @State private var hasLoadedAlerts = false
     
     private var weather: WeatherData? {
         let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
@@ -365,12 +360,18 @@ struct ListRowView: View {
             // Clear alerts when viewing past/future days
             if dateOffset != 0 {
                 alerts = []
-                hasLoadedAlerts = false
                 return
             }
             
-            guard !hasLoadedAlerts else { return }
-            hasLoadedAlerts = true
+            do {
+                alerts = try await weatherService.fetchNWSAlerts(for: city)
+            } catch {
+                // Silently fail - alerts are optional
+            }
+        }
+        .task(id: weatherService.alertsRefreshID) {
+            // Re-fetch alerts when alertsRefreshID changes (on refresh)
+            guard dateOffset == 0 else { return }
             
             do {
                 alerts = try await weatherService.fetchNWSAlerts(for: city)

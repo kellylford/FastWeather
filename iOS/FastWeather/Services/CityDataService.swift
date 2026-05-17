@@ -27,11 +27,11 @@ class CityDataService: ObservableObject {
                 usCitiesByState = decoded
 
             } catch {
-                print("❌ Error loading US cities: \(error)")
+                debugLog("❌ Error loading US cities: \(error)")
                 errorMessage = "Failed to load US cities: \(error.localizedDescription)"
             }
         } else {
-            print("❌ Could not find us-cities-cached.json in bundle")
+            debugLog("❌ Could not find us-cities-cached.json in bundle")
             errorMessage = "Could not find US cities data file"
         }
         
@@ -43,11 +43,11 @@ class CityDataService: ObservableObject {
                 internationalCitiesByCountry = decoded
 
             } catch {
-                print("❌ Error loading international cities: \(error)")
+                debugLog("❌ Error loading international cities: \(error)")
                 errorMessage = "Failed to load international cities: \(error.localizedDescription)"
             }
         } else {
-            print("❌ Could not find international-cities-cached.json in bundle")
+            debugLog("❌ Could not find international-cities-cached.json in bundle")
             errorMessage = "Could not find international cities data file"
         }
     }

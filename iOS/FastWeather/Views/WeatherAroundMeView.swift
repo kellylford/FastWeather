@@ -27,8 +27,9 @@ struct WeatherAroundMeView: View {
     @State private var showingAllCities = false
     @State private var alertTitle = ""
     @State private var alertMessage = ""
-    @State private var directionalWeatherData: [UUID: (temp: Double, condition: String)] = [:]
+    @State private var directionalWeatherData: [UUID: (temp: Double, condition: String, windDirection: Double, windSpeed: Double, pressure: Double, alerts: [WeatherAlert])] = [:]
     @State private var isLoadingCities = false
+    @State private var showingSettings = false
     // Shared WeatherService instance so batchFetchWeatherBasic cache is reused across all city fetches
     @State private var directionalWeatherService = WeatherService()
     
@@ -81,13 +82,49 @@ struct WeatherAroundMeView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
-                    Task { await loadRegionalWeather() }
-                }) {
-                    Label("Refresh", systemImage: "arrow.clockwise")
+                HStack(spacing: 16) {
+                    Button(action: {
+                        showingSettings = true
+                    }) {
+                        Label("Settings", systemImage: "gearshape")
+                    }
+                    .accessibilityLabel("Weather Around Me Settings")
+                    .accessibilityValue(currentExplorationModeDescription())
+                    .accessibilityHint("Opens settings sheet. Swipe up or down to cycle through exploration modes.")
+                    .accessibilityAdjustableAction { direction in
+                        switch direction {
+                        case .increment:
+                            cycleExplorationMode(forward: true)
+                        case .decrement:
+                            cycleExplorationMode(forward: false)
+                        @unknown default:
+                            break
+                        }
+                    }
+                    
+                    Button(action: {
+                        Task { await loadRegionalWeather() }
+                    }) {
+                        Label("Refresh", systemImage: "arrow.clockwise")
+                    }
+                    .accessibilityLabel("Refresh regional weather data")
                 }
-                .accessibilityLabel("Refresh regional weather data")
             }
+        }
+        .sheet(isPresented: $showingSettings) {
+            WeatherAroundMeSettingsSheet()
+                .environmentObject(settingsManager)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
+        .onChange(of: settingsManager.settings.weatherAroundMeExplorationMode) {
+            loadCitiesInDirection()
+        }
+        .onChange(of: settingsManager.settings.weatherAroundMeArcWidth) {
+            loadCitiesInDirection()
+        }
+        .onChange(of: settingsManager.settings.weatherAroundMeCorridorWidth) {
+            loadCitiesInDirection()
         }
         .task {
             await loadRegionalWeather()
@@ -468,7 +505,7 @@ struct WeatherAroundMeView: View {
         .onChange(of: showingAllCities) { oldValue, newValue in
             // Flash detection: Alert should never go from true to true
             if oldValue == true && newValue == true {
-                print("⚠️ ALERT FLASH DETECTED in WeatherAroundMeView cities alert!")
+                debugLog("⚠️ ALERT FLASH DETECTED in WeatherAroundMeView cities alert!")
             }
         }
     }
@@ -558,7 +595,10 @@ struct WeatherAroundMeView: View {
             citiesInDirection = await DirectionalCityService.shared.findCities(
                 from: city,
                 direction: selectedDirection,
-                maxDistance: distanceMiles
+                maxDistance: distanceMiles,
+                explorationMode: settingsManager.settings.weatherAroundMeExplorationMode,
+                arcWidth: settingsManager.settings.weatherAroundMeArcWidth,
+                corridorWidth: settingsManager.settings.weatherAroundMeCorridorWidth
             )
             currentCityIndex = 0
             isLoadingCities = false
@@ -573,17 +613,41 @@ struct WeatherAroundMeView: View {
     private func loadWeatherForCity(_ cityInfo: DirectionalCityInfo) async {
         guard directionalWeatherData[cityInfo.id] == nil else { return }
         do {
-            let weather = try await directionalWeatherService.fetchWeatherBasic(
+            // Fetch weather and alerts concurrently
+            let tempCity = City(
+                name: cityInfo.name,
+                state: cityInfo.state,
+                country: cityInfo.country,
                 latitude: cityInfo.latitude,
                 longitude: cityInfo.longitude
             )
+            
+            async let weatherTask = directionalWeatherService.fetchWeatherBasic(
+                latitude: cityInfo.latitude,
+                longitude: cityInfo.longitude
+            )
+            async let alertsTask = weatherService.fetchNWSAlerts(for: tempCity)
+            
+            let (weather, alerts) = try await (weatherTask, alertsTask)
+            
             let temp = weather.current.temperature2m
             let condition = weather.current.weatherCodeEnum?.description ?? "Unknown"
+            let windDir = Double(weather.current.windDirection10m ?? 0)
+            let windSpd = weather.current.windSpeed10m ?? 0
+            let press = weather.current.pressureMsl ?? 1013.25
+            
             await MainActor.run {
-                directionalWeatherData[cityInfo.id] = (temp: temp, condition: condition)
+                directionalWeatherData[cityInfo.id] = (
+                    temp: temp,
+                    condition: condition,
+                    windDirection: windDir,
+                    windSpeed: windSpd,
+                    pressure: press,
+                    alerts: alerts
+                )
             }
         } catch {
-            print("⚠️ Failed to load weather for \(cityInfo.name): \(error)")
+            debugLog("⚠️ Failed to load weather for \(cityInfo.name): \(error)")
         }
     }
     
@@ -595,13 +659,49 @@ struct WeatherAroundMeView: View {
         let locations = pending.map { (latitude: $0.latitude, longitude: $0.longitude) }
         let weatherBatch = await directionalWeatherService.batchFetchWeatherBasic(for: locations)
         
+        // Fetch alerts for all cities concurrently
+        let alertsTasks = pending.map { cityInfo -> (UUID, Task<[WeatherAlert], Error>) in
+            let tempCity = City(
+                name: cityInfo.name,
+                state: cityInfo.state,
+                country: cityInfo.country,
+                latitude: cityInfo.latitude,
+                longitude: cityInfo.longitude
+            )
+            let task = Task {
+                try await weatherService.fetchNWSAlerts(for: tempCity)
+            }
+            return (cityInfo.id, task)
+        }
+        
+        // Collect alerts results
+        var alertsMap: [UUID: [WeatherAlert]] = [:]
+        for (id, task) in alertsTasks {
+            do {
+                alertsMap[id] = try await task.value
+            } catch {
+                alertsMap[id] = []
+            }
+        }
+        
         await MainActor.run {
             for cityInfo in pending {
                 let key = "\(cityInfo.latitude),\(cityInfo.longitude)"
                 if let weather = weatherBatch[key] {
                     let temp = weather.current.temperature2m
                     let condition = weather.current.weatherCodeEnum?.description ?? "Unknown"
-                    directionalWeatherData[cityInfo.id] = (temp: temp, condition: condition)
+                    let windDir = Double(weather.current.windDirection10m ?? 0)
+                    let windSpd = weather.current.windSpeed10m ?? 0
+                    let press = weather.current.pressureMsl ?? 1013.25
+                    let alerts = alertsMap[cityInfo.id] ?? []
+                    directionalWeatherData[cityInfo.id] = (
+                        temp: temp,
+                        condition: condition,
+                        windDirection: windDir,
+                        windSpeed: windSpd,
+                        pressure: press,
+                        alerts: alerts
+                    )
                 }
             }
         }
@@ -698,11 +798,141 @@ struct WeatherAroundMeView: View {
         var label = isDistanceFallback
             ? "Weather point: \(cityInfo.displayName(relativeTo: city.country)), "
             : "\(cityInfo.displayName(relativeTo: city.country)), "
-        if let weather = directionalWeatherData[cityInfo.id] {
-            label += "\(formatTemperature(weather.temp)), \(weather.condition), "
+        
+        // Add distance from origin
+        label += "\(formatDistanceFromMiles(cityInfo.distanceMiles))"
+        
+        // Add bearing if enabled
+        if settingsManager.settings.showWeatherAroundMeBearing {
+            label += ", \(Int(cityInfo.bearing.rounded())) degrees"
         }
-        label += "\(formatDistanceFromMiles(cityInfo.distanceMiles)), \(currentCityIndex + 1) of \(citiesInDirection.count)"
+        
+        // Add perpendicular offset if enabled
+        if settingsManager.settings.showWeatherAroundMeOffsetDistance {
+            label += ", \(cityInfo.offsetDescription(distanceUnit: settingsManager.settings.distanceUnit))"
+        }
+        
+        // Add weather data if available
+        if let weather = directionalWeatherData[cityInfo.id] {
+            label += ", \(formatTemperature(weather.temp)), \(weather.condition)"
+            
+            // Add weather alerts if enabled
+            if settingsManager.settings.showWeatherAroundMeAlerts, !weather.alerts.isEmpty {
+                let highestSeverityAlert = weather.alerts.min(by: { $0.severity.sortOrder < $1.severity.sortOrder })
+                if let alert = highestSeverityAlert {
+                    label += ", "
+                    if weather.alerts.count == 1 {
+                        label += "Alert: \(alert.event)"
+                    } else {
+                        label += "Alerts: \(alert.event) and \(weather.alerts.count - 1) more"
+                    }
+                }
+            }
+            
+            // Add weather movement if enabled
+            if settingsManager.settings.showWeatherAroundMeMovement {
+                let movement = WeatherMovementAnalyzer.movementDescription(
+                    windDirection: weather.windDirection,
+                    windSpeed: weather.windSpeed,
+                    windSpeedUnit: settingsManager.settings.windSpeedUnit,
+                    bearingToLocation: cityInfo.bearing,
+                    locationName: nil // Don't repeat city name
+                )
+                label += ", \(movement)"
+            }
+            
+            // Add pressure trend if enabled
+            if settingsManager.settings.showWeatherAroundMePressureTrends {
+                // Compare to previous city in list (or skip if first city)
+                if currentCityIndex > 0, currentCityIndex < citiesInDirection.count {
+                    let previousCity = citiesInDirection[currentCityIndex - 1]
+                    if let previousWeather = directionalWeatherData[previousCity.id] {
+                        let pressureDiff = weather.pressure - previousWeather.pressure
+                        let pressureTrend: String
+                        if abs(pressureDiff) < 1.0 {
+                            pressureTrend = "Pressure steady"
+                        } else if pressureDiff > 0 {
+                            pressureTrend = "Pressure rising \(String(format: "%.1f", abs(pressureDiff))) hPa"
+                        } else {
+                            pressureTrend = "Pressure falling \(String(format: "%.1f", abs(pressureDiff))) hPa"
+                        }
+                        label += ", \(pressureTrend)"
+                    }
+                }
+            }
+        }
+        
+        // Add position in list
+        label += ", \(currentCityIndex + 1) of \(citiesInDirection.count)"
+        
         return label
+    }
+    
+    // MARK: - VoiceOver Exploration Mode Cycling
+    
+    /// Returns a description of the current exploration mode for VoiceOver
+    private func currentExplorationModeDescription() -> String {
+        if settingsManager.settings.weatherAroundMeExplorationMode == .arc {
+            return "Arc mode, \(settingsManager.settings.weatherAroundMeArcWidth.displayName)"
+        } else {
+            return "Corridor mode, \(Int(settingsManager.settings.weatherAroundMeCorridorWidth.rawValue)) miles"
+        }
+    }
+    
+    /// Cycles through exploration mode combinations in a fixed order
+    /// Order: Corridor 10→20→30→50, then Arc Narrow→Standard→Medium→Wide, then wraps
+    private func cycleExplorationMode(forward: Bool) {
+        let allModes: [(ExplorationMode, ArcWidth?, CorridorWidth?)] = [
+            (.straightLine, nil, .ten),
+            (.straightLine, nil, .twenty),
+            (.straightLine, nil, .thirty),
+            (.straightLine, nil, .fifty),
+            (.arc, .narrow, nil),
+            (.arc, .standard, nil),
+            (.arc, .medium, nil),
+            (.arc, .wide, nil)
+        ]
+        
+        // Find current index
+        let currentIndex: Int
+        if settingsManager.settings.weatherAroundMeExplorationMode == .straightLine {
+            switch settingsManager.settings.weatherAroundMeCorridorWidth {
+            case .ten: currentIndex = 0
+            case .twenty: currentIndex = 1
+            case .thirty: currentIndex = 2
+            case .fifty: currentIndex = 3
+            }
+        } else {
+            switch settingsManager.settings.weatherAroundMeArcWidth {
+            case .narrow: currentIndex = 4
+            case .standard: currentIndex = 5
+            case .medium: currentIndex = 6
+            case .wide: currentIndex = 7
+            }
+        }
+        
+        // Calculate next index with wrapping
+        let nextIndex: Int
+        if forward {
+            nextIndex = (currentIndex + 1) % allModes.count
+        } else {
+            nextIndex = (currentIndex - 1 + allModes.count) % allModes.count
+        }
+        
+        // Apply new settings
+        let (mode, arcWidth, corridorWidth) = allModes[nextIndex]
+        settingsManager.settings.weatherAroundMeExplorationMode = mode
+        if let arc = arcWidth {
+            settingsManager.settings.weatherAroundMeArcWidth = arc
+        }
+        if let corridor = corridorWidth {
+            settingsManager.settings.weatherAroundMeCorridorWidth = corridor
+        }
+        settingsManager.saveSettings()
+        
+        // Announce the change
+        let announcement = currentExplorationModeDescription()
+        UIAccessibility.post(notification: .announcement, argument: announcement)
     }
 }
 
@@ -738,6 +968,90 @@ private struct AroundMeCityDetailView: View {
             .task {
                 await weatherService.fetchWeatherForDate(for: city, dateOffset: 0)
             }
+    }
+}
+
+// MARK: - Settings Sheet
+
+struct WeatherAroundMeSettingsSheet: View {
+    @EnvironmentObject var settingsManager: SettingsManager
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                Section {
+                    Picker("Exploration Mode", selection: $settingsManager.settings.weatherAroundMeExplorationMode) {
+                        Text(ExplorationMode.arc.rawValue).tag(ExplorationMode.arc)
+                        Text(ExplorationMode.straightLine.rawValue).tag(ExplorationMode.straightLine)
+                    }
+                    .accessibilityHint(settingsManager.settings.weatherAroundMeExplorationMode.description)
+                } header: {
+                    Text("Search Pattern")
+                } footer: {
+                    Text(settingsManager.settings.weatherAroundMeExplorationMode.description)
+                }
+                
+                if settingsManager.settings.weatherAroundMeExplorationMode == .arc {
+                    Section {
+                        Picker("Arc Width", selection: $settingsManager.settings.weatherAroundMeArcWidth) {
+                            Text(ArcWidth.narrow.displayName).tag(ArcWidth.narrow)
+                            Text(ArcWidth.standard.displayName).tag(ArcWidth.standard)
+                            Text(ArcWidth.medium.displayName).tag(ArcWidth.medium)
+                            Text(ArcWidth.wide.displayName).tag(ArcWidth.wide)
+                        }
+                        .accessibilityHint(settingsManager.settings.weatherAroundMeArcWidth.description)
+                    } header: {
+                        Text("Arc Width")
+                    } footer: {
+                        Text(settingsManager.settings.weatherAroundMeArcWidth.description)
+                    }
+                } else {
+                    Section {
+                        Picker("Corridor Width", selection: $settingsManager.settings.weatherAroundMeCorridorWidth) {
+                            Text("\(Int(CorridorWidth.ten.rawValue)) miles").tag(CorridorWidth.ten)
+                            Text("\(Int(CorridorWidth.twenty.rawValue)) miles").tag(CorridorWidth.twenty)
+                            Text("\(Int(CorridorWidth.thirty.rawValue)) miles").tag(CorridorWidth.thirty)
+                            Text("\(Int(CorridorWidth.fifty.rawValue)) miles").tag(CorridorWidth.fifty)
+                        }
+                    } header: {
+                        Text("Corridor Width")
+                    } footer: {
+                        Text("Width of the straight-line corridor (±\(Int(settingsManager.settings.weatherAroundMeCorridorWidth.rawValue / 2)) miles from center line)")
+                    }
+                }
+                
+                Section {
+                    Toggle("Show Distance from Center Line", isOn: $settingsManager.settings.showWeatherAroundMeOffsetDistance)
+                        .accessibilityHint("Show how far east or west cities are from the center line")
+                    
+                    Toggle("Show Bearing", isOn: $settingsManager.settings.showWeatherAroundMeBearing)
+                        .accessibilityHint("Show compass bearing for each city (e.g., '145 degrees')")
+                    
+                    Toggle("Show Weather Movement", isOn: $settingsManager.settings.showWeatherAroundMeMovement)
+                        .accessibilityHint("Announce if weather is approaching, moving away, or parallel")
+                    
+                    Toggle("Show Pressure Trends", isOn: $settingsManager.settings.showWeatherAroundMePressureTrends)
+                        .accessibilityHint("Compare pressure between consecutive cities")
+                    
+                    Toggle("Show Weather Alerts", isOn: $settingsManager.settings.showWeatherAroundMeAlerts)
+                        .accessibilityHint("Announce severe weather alerts for each city")
+                } header: {
+                    Text("Information Display")
+                } footer: {
+                    Text("Control which information is announced when stepping through cities")
+                }
+            }
+            .navigationTitle("Weather Around Me")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
     }
 }
 

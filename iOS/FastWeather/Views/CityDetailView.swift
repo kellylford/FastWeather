@@ -141,6 +141,13 @@ struct CityDetailView: View {
                                                 .fixedSize(horizontal: false, vertical: true)
                                         }
                                     }
+                                    // Precipitation timing derived from hourly data
+                                    if let timingText = precipitationTimingText(from: weather) {
+                                        Text(timingText)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
                                 }
                             }
                             .padding(8)
@@ -157,6 +164,9 @@ struct CityDetailView: View {
                                     } else if let precipSum = daily.precipitationSum?[0], precipSum > 0 {
                                         label += ", \(formatPrecipitation(precipSum)) expected"
                                     }
+                                }
+                                if let timingText = precipitationTimingText(from: weather) {
+                                    label += ", \(timingText)"
                                 }
                                 return label
                             }())
@@ -199,7 +209,7 @@ struct CityDetailView: View {
                                     Text("Winds up to \(formatWindSpeed(windMax))")
                                         .font(.subheadline)
                                         .fixedSize(horizontal: false, vertical: true)
-                                    if let windDir = daily.winddirection10mDominant?[0] {
+                                    if let windDir = daily.windDirectionDominant?[0] {
                                         Text("From \(degreesToCardinalLong(windDir))")
                                             .font(.caption)
                                             .foregroundColor(.secondary)
@@ -213,7 +223,7 @@ struct CityDetailView: View {
                             .accessibilityElement(children: .ignore)
                             .accessibilityLabel({
                                 var label = "Winds up to \(formatWindSpeed(windMax))"
-                                if let windDir = daily.winddirection10mDominant?[0] {
+                                if let windDir = daily.windDirectionDominant?[0] {
                                     label += ", From \(degreesToCardinalLong(windDir))"
                                 }
                                 return label
@@ -479,7 +489,7 @@ struct CityDetailView: View {
             // Weather alerts section (US only)
             WeatherAlertsSection(city: city, selectedAlert: $selectedAlert, alerts: $activeAlerts)
                 .onAppear {
-                    print("🔶 WeatherAlerts category appeared for \(city.name)")
+                    debugLog("🔶 WeatherAlerts category appeared for \(city.name)")
                 }
             
         case .location:
@@ -627,7 +637,7 @@ struct CityDetailView: View {
     }
     
     var body: some View {
-        let _ = print("🟢 CityDetailView body called for \(city.name), selectedAlert: \(selectedAlert?.event ?? "nil")")
+        let _ = debugLog("🟢 CityDetailView body called for \(city.name), selectedAlert: \(selectedAlert?.event ?? "nil")")
         ScrollView {
             VStack(spacing: 24) {
                 if let weather = weather {
@@ -656,7 +666,7 @@ struct CityDetailView: View {
                         
                         // Temperature and condition
                         if let weatherCode = weather.current.weatherCodeEnum {
-                            Image(systemName: weatherCode.systemImageName)
+                            Image(systemName: weatherCode.systemImageName(isDay: (weather.current.isDay ?? 1) == 1))
                                 .font(.system(size: 60))
                                 .foregroundColor(.blue)
                                 .accessibilityHidden(true)
@@ -745,7 +755,7 @@ struct CityDetailView: View {
                     .accessibilityHint("Opens menu with options to refresh weather, view historical weather, precipitation forecast, weather around me, and remove city")
                     
                     // Dynamically render detail sections based on settings order
-                    let _ = print("📊 Detail categories: \(settingsManager.settings.detailCategories.map { "\($0.category)=\($0.isEnabled)" }.joined(separator: ", "))")
+                    let _ = debugLog("📊 Detail categories: \(settingsManager.settings.detailCategories.map { "\($0.category)=\($0.isEnabled)" }.joined(separator: ", "))")
                     ForEach(settingsManager.settings.detailCategories) { categoryField in
                         if categoryField.isEnabled {
                             detailSection(for: categoryField.category, weather: weather)
@@ -844,7 +854,7 @@ struct CityDetailView: View {
         .onChange(of: showingRemoveConfirmation) { oldValue, newValue in
             // Flash detection: Alert should never go from true to true
             if oldValue == true && newValue == true {
-                print("⚠️ ALERT FLASH DETECTED in CityDetailView confirmation dialog!")
+                debugLog("⚠️ ALERT FLASH DETECTED in CityDetailView confirmation dialog!")
             }
         }
     }
@@ -1013,22 +1023,86 @@ struct CityDetailView: View {
         return MyDataFormatHelper.format(parameter: parameter, value: value, settings: settingsManager.settings)
     }
     
-    private func findCurrentHourIndex(in times: [String?]) -> Int {
-        let now = Date()
-        let calendar = Calendar.current
-        let currentHour = calendar.component(.hour, from: now)
-        
-        // Parse each time and find the one matching or after current hour
-        for (index, timeString) in times.enumerated() {
-            guard let timeString = timeString else { continue }
-            if let time = DateParser.parse(timeString) {
-                let hour = calendar.component(.hour, from: time)
-                if hour >= currentHour {
-                    return index
-                }
+    private func precipitationTimingText(from weather: WeatherData) -> String? {
+        guard let hourly = weather.hourly,
+              let timeArray = hourly.time else { return nil }
+
+        let cityTimeZone = weather.timeZone
+        var cityCalendar = Calendar.current
+        cityCalendar.timeZone = cityTimeZone
+
+        let currentIndex = findCurrentHourIndex(in: timeArray)
+        let probThreshold = 40       // percent
+        let amountThreshold = 1.0    // mm — catches high-amount hours even when PoP is below threshold
+
+        // Collect indices of rainy hours remaining today (in city-local time)
+        var rainyIndices: [Int] = []
+        for i in currentIndex..<min(currentIndex + 24, timeArray.count) {
+            guard let timeStr = timeArray[i],
+                  let hourDate = DateParser.parse(timeStr, in: cityTimeZone) else { continue }
+            guard cityCalendar.isDateInToday(hourDate) else { break }
+            let prob = (hourly.precipitationProbability.flatMap { arr in i < arr.count ? arr[i] : nil } ?? nil) ?? 0
+            let amount = (hourly.precipitation.flatMap { arr in i < arr.count ? arr[i] : nil } ?? nil) ?? 0.0
+            if prob >= probThreshold || amount >= amountThreshold {
+                rainyIndices.append(i)
             }
         }
-        
+
+        guard !rainyIndices.isEmpty else { return nil }
+
+        // Determine precipitation type label for natural VoiceOver reading
+        let precipType: String
+        if let snow = weather.daily?.snowfallSum?[0], snow > 0 {
+            precipType = "Snow"
+        } else if let rain = weather.daily?.rainSum?[0], rain > 0 {
+            precipType = "Rain"
+        } else {
+            precipType = "Precipitation"
+        }
+
+        if rainyIndices.count >= 8 {
+            return "\(precipType) expected throughout the day"
+        }
+
+        // Build contiguous windows (allow 1-hour gap to merge nearby showers)
+        var windows: [(start: Int, end: Int)] = []
+        var windowStart = rainyIndices[0]
+        var windowEnd = rainyIndices[0]
+        for i in 1..<rainyIndices.count {
+            if rainyIndices[i] <= rainyIndices[i - 1] + 2 {
+                windowEnd = rainyIndices[i]
+            } else {
+                windows.append((windowStart, windowEnd))
+                windowStart = rainyIndices[i]
+                windowEnd = rainyIndices[i]
+            }
+        }
+        windows.append((windowStart, windowEnd))
+
+        func timeLabel(_ index: Int) -> String {
+            guard index < timeArray.count, let s = timeArray[index] else { return "" }
+            return FormatHelper.formatTimeCompact(s)
+        }
+
+        let parts = windows.prefix(2).map { w -> String in
+            return w.start == w.end
+                ? "around \(timeLabel(w.start))"
+                : "\(timeLabel(w.start))–\(timeLabel(w.end))"
+        }
+        let suffix = windows.count > 2 ? " and later" : ""
+        return "\(precipType) most likely " + parts.joined(separator: " and ") + suffix
+    }
+
+    private func findCurrentHourIndex(in times: [String?]) -> Int {
+        let now = Date()
+        let cityTimeZone = weather?.timeZone ?? .current
+        for (index, timeString) in times.enumerated() {
+            guard let timeString = timeString,
+                  let time = DateParser.parse(timeString, in: cityTimeZone) else { continue }
+            if time >= now {
+                return index
+            }
+        }
         return 0 // Fallback to start if not found
     }
 }
@@ -1086,7 +1160,15 @@ struct HourlyForecastCard: View {
         guard let code = hourly.weatherCode?[index] else { return nil }
         return WeatherCode(rawValue: code)
     }
-    
+
+    private var isDayTime: Bool {
+        guard let t = time,
+              let tIdx = t.firstIndex(of: "T") else { return true }
+        let hourStr = String(t[t.index(after: tIdx)...].prefix(2))
+        let hour = Int(hourStr) ?? 12
+        return hour >= 6 && hour < 20
+    }
+
     var body: some View {
         VStack(spacing: 8) {
             Text(formattedTime)
@@ -1120,7 +1202,7 @@ struct HourlyForecastCard: View {
             
         case .conditions:
             if let weatherCode = weatherCodeEnum {
-                return AnyView(Image(systemName: weatherCode.systemImageName)
+                return AnyView(Image(systemName: weatherCode.systemImageName(isDay: isDayTime))
                     .font(.title3)
                     .foregroundColor(.blue)
                     .frame(height: 30))
@@ -1198,7 +1280,7 @@ struct HourlyForecastCard: View {
             }
             
         case .windGusts:
-            if let windGusts = hourly.windgusts10m?[index], windGusts > 0 {
+            if let windGusts = hourly.windGusts10m?[index], windGusts > 0 {
                 return AnyView(HStack(spacing: 2) {
                     Image(systemName: "wind")
                         .font(.caption2)
@@ -1294,7 +1376,7 @@ struct HourlyForecastCard: View {
             }
             
         case .windGusts:
-            if let windGusts = hourly.windgusts10m?[index], windGusts > 0 {
+            if let windGusts = hourly.windGusts10m?[index], windGusts > 0 {
                 return "gusts \(formatWindSpeed(windGusts))"
             }
             
@@ -1408,7 +1490,7 @@ struct HourlyHeadingRow: View {
                 return ("Wind Speed", formatWindSpeed(speed))
             }
         case .windGusts:
-            if let gusts = hourly.windgusts10m?[index], gusts > 0 {
+            if let gusts = hourly.windGusts10m?[index], gusts > 0 {
                 return ("Wind Gusts", formatWindSpeed(gusts))
             }
         case .humidity:
@@ -1416,11 +1498,11 @@ struct HourlyHeadingRow: View {
                 return ("Humidity", "\(humidity)%")
             }
         case .cloudCover:
-            if let cloud = hourly.cloudcover?[index] {
+            if let cloud = hourly.cloudCover?[index] {
                 return ("Cloud Cover", "\(cloud)%")
             }
         case .dewPoint:
-            if let dew = hourly.dewpoint2m?[index] {
+            if let dew = hourly.dewPoint2m?[index] {
                 return ("Dew Point", formatTemperature(dew))
             }
         default:
@@ -1649,7 +1731,7 @@ struct DailyForecastRow: View {
     
     private var dayName: String {
         guard let sunrise = sunrise, let date = DateParser.parse(sunrise) else {
-            print("⚠️ DailyForecastRow: Failed to parse sunrise '\(sunrise ?? "nil")' for day \(index)")
+            debugLog("⚠️ DailyForecastRow: Failed to parse sunrise '\(sunrise ?? "nil")' for day \(index)")
             return "Unknown Date"
         }
         
@@ -2146,7 +2228,7 @@ struct DailyHeadingBlock: View {
                 return ("Max Wind Speed", formatWindSpeed(speed))
             }
         case .windDirectionDominant:
-            if let degrees = daily.winddirection10mDominant?[index] {
+            if let degrees = daily.windDirectionDominant?[index] {
                 return ("Wind Direction", formatWindDirection(degrees))
             }
         case .uvIndexMax:
@@ -2229,7 +2311,7 @@ struct WeatherAlertsSection: View {
                 } else {
                     ForEach(alerts) { alert in
                         Button(action: {
-                            print("🔔 Alert button tapped: \(alert.event)")
+                            debugLog("🔔 Alert button tapped: \(alert.event)")
                             selectedAlert = alert
                         }) {
                             HStack {
@@ -2314,20 +2396,16 @@ struct MarineForecastSection: View {
     // Find index of current hour (or next available hour) in time array
     private func findCurrentHourIndex(in times: [String?]) -> Int {
         let now = Date()
-        let calendar = Calendar.current
-        let currentHour = calendar.component(.hour, from: now)
-        
-        // Parse each time and find the one matching or after current hour
+        let cityTimeZone = weatherService.weatherCache[
+            WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+        ]?.timeZone ?? .current
         for (index, timeString) in times.enumerated() {
-            guard let timeString = timeString else { continue }
-            if let time = DateParser.parse(timeString) {
-                let hour = calendar.component(.hour, from: time)
-                if hour >= currentHour {
-                    return index
-                }
+            guard let timeString = timeString,
+                  let time = DateParser.parse(timeString, in: cityTimeZone) else { continue }
+            if time >= now {
+                return index
             }
         }
-        
         return 0 // Fallback to start if not found
     }
     
