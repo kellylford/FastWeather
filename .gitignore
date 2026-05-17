@@ -38,6 +38,7 @@ Thumbs.db
 city.json.backup
 *.log
 README.old.md
+iOS/FastWeather/Services/Secrets.swift
 
 # Test files
 test_*.py
