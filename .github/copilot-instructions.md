@@ -69,7 +69,6 @@
 
 FastWeather is a **multi-platform weather application** with implementations for:
 - **Python/wxPython** (Windows desktop): [fastweather.py](../fastweather.py)
-- **SwiftUI macOS**: [FastWeatherMac/](../FastWeatherMac/)
 - **SwiftUI iOS**: [iOS/](../iOS/)
 - **Web/PWA** (JavaScript): [webapp/](../webapp/)
 
@@ -97,7 +96,7 @@ All platforms implement the same API integration pattern:
 - **WMO Weather Codes**: Standard mapping (0=clear, 1=mainly clear, 61=slight rain, etc.)
 - **Unit conversions**: KMH_TO_MPH=0.621371, MM_TO_INCHES=0.0393701, HPA_TO_INHG=0.02953
 
-Examples: [fastweather.py#L25-L26](../fastweather.py#L25-L26), [WeatherService.swift](../FastWeatherMac/FastWeatherMac/Services/WeatherService.swift#L14-L15), [app.js#L11-L13](../webapp/app.js#L11-L13)
+Examples: [fastweather.py#L25-L26](../fastweather.py#L25-L26), [WeatherService.swift](../iOS/FastWeather/Services/WeatherService.swift), [app.js#L11-L13](../webapp/app.js#L11-L13)
 
 ### City Data Cache System
 **Web/iOS** use pre-geocoded city coordinate caches to avoid slow Nominatim API calls:
@@ -108,13 +107,13 @@ Examples: [fastweather.py#L25-L26](../fastweather.py#L25-L26), [WeatherService.s
 
 ### Platform-Specific Data Models
 
-**Swift platforms** use nearly identical models:
+**Swift (iOS)** uses these models:
 ```swift
 struct City: Identifiable, Codable { id: UUID, name, displayName, latitude, longitude, state?, country? }
 struct WeatherResponse: Codable { current, hourly?, daily? }
 enum WeatherCode: Int { case clear = 0, rainSlight = 61, ... }
 ```
-See: [FastWeatherMac/Models/WeatherModels.swift](../FastWeatherMac/FastWeatherMac/Models/WeatherModels.swift#L11-L29)
+See: [iOS/Models/Weather.swift](../iOS/FastWeather/Models/Weather.swift)
 
 **Web** uses plain JavaScript objects with identical structure stored in `localStorage` as JSON.
 
@@ -207,13 +206,6 @@ python fastweather.py              # Run from source
 python build.py                     # Build .exe with PyInstaller
 ```
 
-### macOS
-```bash
-cd FastWeatherMac
-open FastWeatherMac.xcodeproj      # Or use .command scripts
-# Build and Launch FastWeather.command - automated build/run script
-```
-
 ### iOS
 ```bash
 cd iOS
@@ -231,11 +223,11 @@ python build-city-cache.py          # Build city coordinate cache (run once)
 
 ## Key Conventions & Patterns
 
-### Three View Modes (Web/iOS/Mac)
+### Three View Modes (Web/iOS)
 All visual platforms support **Flat** (cards), **Table** (compact), and **List** (minimal) views:
 - User preference stored in `localStorage` (web) or `UserDefaults` (Swift)
 - Each view mode must maintain accessibility (different markup/labels per mode)
-- Example: [ContentView.swift](../FastWeatherMac/FastWeatherMac/Views/ContentView.swift), [app.js#L365-L390](../webapp/app.js#L365-L390)
+- Example: [iOS/Views/ContentView.swift](../iOS/FastWeather/Views/ContentView.swift), [app.js#L365-L390](../webapp/app.js#L365-L390)
 
 ### City Management
 - **Add**: Search geocoder → display results → user selects → add to persistent list

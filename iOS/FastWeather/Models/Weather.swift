@@ -72,11 +72,15 @@ enum WeatherCode: Int, Codable {
     }
     
     var systemImageName: String {
+        return systemImageName(isDay: true)
+    }
+
+    func systemImageName(isDay: Bool) -> String {
         switch self {
         case .clearSky, .mainlyClear:
-            return "sun.max.fill"
+            return isDay ? "sun.max.fill" : "moon.stars.fill"
         case .partlyCloudy:
-            return "cloud.sun.fill"
+            return isDay ? "cloud.sun.fill" : "cloud.moon.fill"
         case .overcast:
             return "cloud.fill"
         case .fog, .depositingRimeFog:

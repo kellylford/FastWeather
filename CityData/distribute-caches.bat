@@ -36,7 +36,7 @@ echo Distributing cached coordinate files...
 echo.
 
 REM Copy to root (for Windows .exe bundle)
-echo [1/4] Copying to root directory...
+echo [1/3] Copying to root directory...
 copy /Y international-cities-cached.json ..\
 copy /Y us-cities-cached.json ..\
 if errorlevel 1 (
@@ -47,24 +47,8 @@ if errorlevel 1 (
 )
 echo.
 
-REM Copy to macOS
-echo [2/4] Copying to macOS (FastWeatherMac\)...
-if not exist "..\FastWeatherMac\" (
-    echo   SKIPPED: FastWeatherMac directory not found
-) else (
-    copy /Y international-cities-cached.json ..\FastWeatherMac\
-    copy /Y us-cities-cached.json ..\FastWeatherMac\
-    if errorlevel 1 (
-        echo   WARNING: Failed to copy to FastWeatherMac
-    ) else (
-        echo   Done: ..\FastWeatherMac\international-cities-cached.json
-        echo   Done: ..\FastWeatherMac\us-cities-cached.json
-    )
-)
-echo.
-
 REM Copy to iOS
-echo [3/4] Copying to iOS (iOS\FastWeather\Resources\)...
+echo [2/3] Copying to iOS (iOS\FastWeather\Resources\)...
 if not exist "..\iOS\FastWeather\Resources\" (
     echo   SKIPPED: iOS Resources directory not found
     echo   You may need to add these files manually via Xcode
@@ -81,7 +65,7 @@ if not exist "..\iOS\FastWeather\Resources\" (
 echo.
 
 REM Copy to webapp (source location)
-echo [4/4] Copying to Web/PWA (webapp\)...
+echo [3/3] Copying to Web/PWA (webapp\)...
 if not exist "..\webapp\" (
     echo   SKIPPED: webapp directory not found
 ) else (
@@ -104,7 +88,6 @@ echo Next steps:
 echo 1. Test each platform with Browse Cities feature
 echo 2. Rebuild distribution packages if needed:
 echo    - Windows: python build.py
-echo    - macOS: cd FastWeatherMac ^&^& ./create-dmg.sh
 echo    - Web/PWA: No rebuild needed (static files)
 echo.
 pause

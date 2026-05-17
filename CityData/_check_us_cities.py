@@ -22,7 +22,6 @@ if src_count is None:
 
 dests = [
     ('../us-cities-cached.json', 'root'),
-    ('../FastWeatherMac/us-cities-cached.json', 'FastWeatherMac'),
     ('../iOS/FastWeather/Resources/us-cities-cached.json', 'iOS'),
     ('../webapp/us-cities-cached.json', 'webapp'),
 ]

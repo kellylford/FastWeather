@@ -362,7 +362,7 @@ struct CityLocationRowOptimized: View {
                 if let weatherData = weatherData {
                     HStack(spacing: 8) {
                         if let weatherCode = weatherData.current.weatherCodeEnum {
-                            Image(systemName: weatherCode.systemImageName)
+                            Image(systemName: weatherCode.systemImageName(isDay: (weatherData.current.isDay ?? 1) == 1))
                                 .foregroundColor(.blue)
                         }
                         Text(formatTemperature(weatherData.current.temperature2m))
@@ -461,7 +461,7 @@ struct CityLocationRow: View {
                 } else if let weatherData = weatherData {
                     HStack(spacing: 8) {
                         if let weatherCode = weatherData.current.weatherCodeEnum {
-                            Image(systemName: weatherCode.systemImageName)
+                            Image(systemName: weatherCode.systemImageName(isDay: (weatherData.current.isDay ?? 1) == 1))
                                 .foregroundColor(.blue)
                         }
                         Text(formatTemperature(weatherData.current.temperature2m))
@@ -574,7 +574,7 @@ struct CityLocationDetailView: View {
                     VStack(spacing: 16) {
                         // Temperature and condition
                         if let weatherCode = weather.current.weatherCodeEnum {
-                            Image(systemName: weatherCode.systemImageName)
+                            Image(systemName: weatherCode.systemImageName(isDay: (weather.current.isDay ?? 1) == 1))
                                 .font(.system(size: 80))
                                 .foregroundColor(.blue)
                                 .accessibilityHidden(true)

@@ -666,7 +666,7 @@ struct CityDetailView: View {
                         
                         // Temperature and condition
                         if let weatherCode = weather.current.weatherCodeEnum {
-                            Image(systemName: weatherCode.systemImageName)
+                            Image(systemName: weatherCode.systemImageName(isDay: (weather.current.isDay ?? 1) == 1))
                                 .font(.system(size: 60))
                                 .foregroundColor(.blue)
                                 .accessibilityHidden(true)
@@ -1160,7 +1160,15 @@ struct HourlyForecastCard: View {
         guard let code = hourly.weatherCode?[index] else { return nil }
         return WeatherCode(rawValue: code)
     }
-    
+
+    private var isDayTime: Bool {
+        guard let t = time,
+              let tIdx = t.firstIndex(of: "T") else { return true }
+        let hourStr = String(t[t.index(after: tIdx)...].prefix(2))
+        let hour = Int(hourStr) ?? 12
+        return hour >= 6 && hour < 20
+    }
+
     var body: some View {
         VStack(spacing: 8) {
             Text(formattedTime)
@@ -1194,7 +1202,7 @@ struct HourlyForecastCard: View {
             
         case .conditions:
             if let weatherCode = weatherCodeEnum {
-                return AnyView(Image(systemName: weatherCode.systemImageName)
+                return AnyView(Image(systemName: weatherCode.systemImageName(isDay: isDayTime))
                     .font(.title3)
                     .foregroundColor(.blue)
                     .frame(height: 30))
