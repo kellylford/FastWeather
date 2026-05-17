@@ -13,7 +13,7 @@ A fast weather application that provides current conditions and detailed forecas
 
 ## Documentation
 
-For detailed instructions on how to use the application, please see the [User Guide](USER_GUIDE.md).
+For detailed instructions on how to use the iOS app, please see the [User Guide](iOS/USER_GUIDE.md).
 
 ## Installation
 
