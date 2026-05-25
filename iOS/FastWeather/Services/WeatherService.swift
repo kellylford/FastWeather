@@ -62,6 +62,9 @@ class WeatherService: ObservableObject {
             : "https://air-quality-api.open-meteo.com/v1/air-quality"
     }
     private let userDefaultsKey = "SavedCities"
+    private var sharedDefaults: UserDefaults {
+        UserDefaults(suiteName: AppGroup.suiteName) ?? .standard
+    }
     
     /// Wraps a URL in a URLRequest with the required User-Agent header.
     /// Appends the Open-Meteo API key when configured and applies a 15-second timeout
@@ -1500,7 +1503,7 @@ class WeatherService: ObservableObject {
     private func saveCities() {
         do {
             let encoded = try JSONEncoder().encode(savedCities)
-            UserDefaults.standard.set(encoded, forKey: userDefaultsKey)
+            sharedDefaults.set(encoded, forKey: userDefaultsKey)
         } catch {
             AppLogger.service.error("Failed to save cities: \(error)")
         }
@@ -1562,8 +1565,19 @@ class WeatherService: ObservableObject {
     
     // MARK: - Persistence
     
+    private func migrateToAppGroupIfNeeded() {
+        let migrationKey = "appGroupMigration_v1"
+        guard !UserDefaults.standard.bool(forKey: migrationKey) else { return }
+        if let data = UserDefaults.standard.data(forKey: userDefaultsKey),
+           sharedDefaults.data(forKey: userDefaultsKey) == nil {
+            sharedDefaults.set(data, forKey: userDefaultsKey)
+        }
+        UserDefaults.standard.set(true, forKey: migrationKey)
+    }
+
     private func loadSavedCities() {
-        guard let data = UserDefaults.standard.data(forKey: userDefaultsKey) else {
+        migrateToAppGroupIfNeeded()
+        guard let data = sharedDefaults.data(forKey: userDefaultsKey) else {
             // First launch — seed default cities
             savedCities = [
                 City(name: "Madison", state: "Wisconsin", country: "United States", latitude: 43.074761, longitude: -89.3837613),

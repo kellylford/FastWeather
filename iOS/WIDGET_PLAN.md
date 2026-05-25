@@ -1,7 +1,7 @@
 # FastWeather iOS Widget — Implementation Plan
 
 **Status:** Draft / Future Consideration  
-**Date:** April 14, 2026  
+**Updated:** May 25, 2026 (originally April 14, 2026)  
 **Scope:** Add a WidgetKit extension to the iOS FastWeather app showing current weather for saved cities.
 
 ---
@@ -39,15 +39,17 @@ The widget runs in a separate process and cannot access the main app's `UserDefa
    - `Models/City.swift`
    - `Models/Weather.swift` (WeatherData, WeatherCode)
    - `Models/Settings.swift` (unit enums)
-   - `Services/SettingsManager.swift` (for `DateParser` and `FormatHelper` only)
+   - `Services/SettingsManager.swift` (for `DateParser` and `FormatHelper` only — the widget does not need the persistence layer)
 
    All of these are pure `Codable` value types — safe to compile into both targets.
+
+   **Note on AppLogger:** `AppLogger` uses `Bundle.main.bundleIdentifier` as its OSLog subsystem. In the widget extension, `Bundle.main` resolves to the widget bundle, not the app bundle, so `AppLogger` won't match any app-level log streams. Use `os.Logger` directly in widget code rather than importing `AppLogger`.
 
 ---
 
 ## Phase 3 — Lightweight Fetch Layer
 
-7. **Create `WidgetWeatherFetcher.swift`** — a simple `async` function (not `@MainActor`, no `ObservableObject`) that fetches current + today's forecast for one city. Mirrors the `fetchWeatherBasic` pattern in `WeatherService.swift`. Same Open-Meteo URL construction, query parameters, and `User-Agent` header (`FastWeather/1.5 (weatherfast.online)`).
+7. **Create `WidgetWeatherFetcher.swift`** — a simple `async` function (not `@MainActor`, no `ObservableObject`) that fetches current + today's forecast for one city. Mirrors the `fetchWeatherBasic` pattern in `WeatherService.swift`. Same Open-Meteo URL construction, query parameters, and `User-Agent` header (`FastWeather/1.5.2 (weatherfast.online)`).
 8. **Create `FastWeatherEntry`** — a `TimelineEntry` struct containing:
    - `city: City`
    - `weather: WeatherData?`
@@ -124,5 +126,5 @@ All widget views must use `.accessibilityElement(children: .ignore)` with explic
 ## Open Questions
 
 1. **Per-widget city picker:** Should the MVP support picking which city shows per widget, or is "first city in your list" acceptable to start?
-2. **Paid API key:** If `Secrets.swift` needs to be shared with the widget to use the paid Open-Meteo endpoint, that's a small extra step. Free endpoint is fine for MVP.
-3. **Lock Screen widget:** Should a small Lock Screen widget (`accessoryRectangular`, `accessoryCircular`) be in scope for MVP or a follow-up?
+2. ~~**Paid API key:**~~ **Resolved.** `Secrets.swift` is gitignored and must be created locally per developer. To share the paid key with the widget target, add `Secrets.swift` to the widget's compile membership — same file, no duplication. Free endpoint is a fine starting point for MVP; the key can be wired in later.
+3. **Lock Screen widget:** Should a small Lock Screen widget (`accessoryRectangular`, `accessoryCircular`) be in scope for MVP or a follow-up? Lock Screen widgets use the same `TimelineProvider` and only require an additional view/configuration — relatively low incremental effort if added alongside the home screen widget.

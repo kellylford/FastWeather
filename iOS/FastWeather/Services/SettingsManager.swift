@@ -19,12 +19,28 @@ func debugLog(_ message: @autoclosure () -> String) {
 
 class SettingsManager: ObservableObject {
     @Published var settings: AppSettings
-    
-    private let userDefaultsKey = "AppSettings"
-    
+
+    private static let userDefaultsKey = "AppSettings"
+    private static var sharedDefaults: UserDefaults {
+        UserDefaults(suiteName: AppGroup.suiteName) ?? .standard
+    }
+
+    private static func migrateToAppGroupIfNeeded() {
+        let migrationKey = "settingsAppGroupMigration_v1"
+        guard !UserDefaults.standard.bool(forKey: migrationKey) else { return }
+        if let data = UserDefaults.standard.data(forKey: userDefaultsKey),
+           sharedDefaults.data(forKey: userDefaultsKey) == nil {
+            sharedDefaults.set(data, forKey: userDefaultsKey)
+        }
+        UserDefaults.standard.set(true, forKey: migrationKey)
+    }
+
     init() {
+        Self.migrateToAppGroupIfNeeded()
+        let sharedDefaults = Self.sharedDefaults
+        let userDefaultsKey = Self.userDefaultsKey
         // Check settings version first to avoid decoding crashes from structure changes
-        if let data = UserDefaults.standard.data(forKey: userDefaultsKey) {
+        if let data = sharedDefaults.data(forKey: userDefaultsKey) {
             // Try to extract just the version number without fully decoding
             if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                let savedVersion = json["settingsVersion"] as? Int {
@@ -32,12 +48,12 @@ class SettingsManager: ObservableObject {
                     // Version mismatch - clear old data to prevent decoding crashes
                     debugLog("⚠️ Settings version mismatch (saved: v\(savedVersion), current: v\(AppSettings.currentVersion))")
                     debugLog("🔄 Clearing old settings and resetting to defaults")
-                    UserDefaults.standard.removeObject(forKey: userDefaultsKey)
+                    sharedDefaults.removeObject(forKey: userDefaultsKey)
                     self.settings = AppSettings()
                     return
                 }
             }
-            
+
             // Version matches or couldn't determine - try to decode
             do {
                 self.settings = try JSONDecoder().decode(AppSettings.self, from: data)
@@ -46,7 +62,7 @@ class SettingsManager: ObservableObject {
                 // Clear corrupted data and use defaults
                 debugLog("⚠️ Failed to decode settings (structure changed): \(error)")
                 debugLog("🔄 Resetting to default settings")
-                UserDefaults.standard.removeObject(forKey: userDefaultsKey)
+                sharedDefaults.removeObject(forKey: userDefaultsKey)
                 self.settings = AppSettings()
             }
         } else {
@@ -58,7 +74,7 @@ class SettingsManager: ObservableObject {
     func saveSettings() {
         do {
             let encoded = try JSONEncoder().encode(settings)
-            UserDefaults.standard.set(encoded, forKey: userDefaultsKey)
+            Self.sharedDefaults.set(encoded, forKey: Self.userDefaultsKey)
         } catch {
             AppLogger.persistence.error("Failed to save settings: \(error)")
         }

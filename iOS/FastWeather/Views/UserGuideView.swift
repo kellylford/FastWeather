@@ -531,6 +531,97 @@ struct UserGuideView: View {
                     BulletPoint("**Detail Categories** - Customize detail view")
                 }
                 
+                // Widgets
+                GuideSection(
+                    icon: "square.grid.2x2.fill",
+                    title: "Home Screen & Lock Screen Widgets",
+                    color: .blue
+                ) {
+                    Text("Weather Fast widgets give you a quick look at conditions without opening the app. Each placed widget is independent, so you can show a different city on each one.")
+                        .padding(.bottom, 4)
+
+                    Text("**Available sizes:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("**Small** — City name, condition icon, current temperature, and today's high/low")
+                    BulletPoint("**Medium** — Adds precipitation probability alongside the current conditions")
+                    BulletPoint("**Large** — Full current conditions at the top, plus a 5-day forecast below")
+                    BulletPoint("**Lock screen circular** — Condition icon and temperature in a compact badge")
+                    BulletPoint("**Lock screen rectangular** — City, condition icon, temperature, and high/low in a single bar")
+
+                    Text("**Adding a home screen widget:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("Long-press any empty area of the home screen to enter edit mode")
+                    BulletPoint("Tap the **+** button in the top-left corner to open the widget gallery")
+                    BulletPoint("Search for **Weather Fast** or scroll to find it")
+                    BulletPoint("Swipe through the size options to choose small, medium, or large")
+                    BulletPoint("Tap **Add Widget**, then drag it to the position you want")
+
+                    Text("**Adding a lock screen widget:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("Long-press the lock screen and tap **Customize**")
+                    BulletPoint("Tap the lock screen face, then tap a widget slot")
+                    BulletPoint("Select **Weather Fast** from the widget list")
+                    BulletPoint("The circular badge fits the small round slot; the bar fits the wider rectangular slot")
+
+                    Text("**Choosing which city to show:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("Widgets default to the first city in your list. To change it:")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 4)
+                    BulletPoint("Long-press the widget and tap **Edit Widget**")
+                    BulletPoint("Tap the **City** row to open the picker")
+                    BulletPoint("Select any city from your saved cities list")
+                    BulletPoint("Placing multiple widgets lets you track several cities at a glance simultaneously")
+
+                    Text("**Update frequency:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("Widgets refresh approximately every 30 minutes. iOS adjusts the exact timing based on battery and how often you check a given widget — one you glance at frequently updates more reliably than one you rarely visit.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 4)
+
+                    Text("**What VoiceOver reads:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("Each widget is announced as a single element. The label includes everything you need without having to open the app:")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 4)
+                    BulletPoint("**Small and lock screen:** \"[City], [temperature], [condition], High [H], Low [L]\"")
+                    BulletPoint("**Medium:** adds the precipitation percentage at the end")
+                    BulletPoint("**Large:** adds each forecast day — \"[Day]: H [high] L [low]\" — after the current conditions summary")
+                    BulletPoint("Precipitation probability for a forecast day is included when it is 20% or higher")
+
+                    Text("**Adding or editing a widget with VoiceOver:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("Focus on any empty home screen area and open the VoiceOver actions menu (swipe up or down with one finger until you hear the action you want). Choose **Edit Home Screen**, then navigate to the **+** button to open the widget gallery. To edit a widget you've already placed, focus on it and open the actions menu — **Edit Widget** appears as an option there.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 4)
+
+                    Text("**If the widget shows \"--°\" or a warning triangle:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("A network error occurred during the last refresh — the widget retries automatically on the next update cycle")
+                    BulletPoint("If it persists, open the app and confirm your internet connection, then wait for the next cycle")
+
+                    Text("**If the widget shows \"Add a city in the app\":**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("Open Weather Fast and add at least one city — the widget populates on the next refresh")
+                }
+
                 // Icons & Graphics
                 GuideSection(
                     icon: "photo.fill",
@@ -890,6 +981,7 @@ struct UserGuideView: View {
                     BulletPoint("**Pull to refresh** works on all city lists")
                     BulletPoint("**Swipe actions** or **VoiceOver actions menu** available in List view")
                     BulletPoint("**Historical years** can be configured in Settings")
+                    BulletPoint("**Place multiple widgets** — one per city — to compare conditions at a glance without opening the app")
                 }
                 
                 // Data Sources
