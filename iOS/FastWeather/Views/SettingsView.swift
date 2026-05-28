@@ -547,10 +547,13 @@ struct SettingsView: View {
                     iCloudSyncService.shared.pushCities(weatherService.savedCities)
                     iCloudSyncService.shared.pushSettings(settingsManager.settings)
                 }
+                Button("Don't Sync", role: .cancel) {
+                    iCloudSyncEnabled = false
+                }
             } message: {
                 let cityWord = cloudCityCount == 1 ? "city" : "cities"
                 let localWord = weatherService.savedCities.count == 1 ? "city" : "cities"
-                Text("iCloud has \(cloudCityCount) saved \(cityWord). This device has \(weatherService.savedCities.count) saved \(localWord). Which list would you like to use?\n\nSettings will follow the same choice.")
+                Text("iCloud has \(cloudCityCount) saved \(cityWord). This device has \(weatherService.savedCities.count) saved \(localWord). Which list would you like to use?\n\nSettings will follow the same choice. Choose \"Don't Sync\" to leave iCloud sync off and keep both lists unchanged.")
             }
             .alert("Clear All Cities", isPresented: $showingResetAlert) {
                 Button("Cancel", role: .cancel) { }
