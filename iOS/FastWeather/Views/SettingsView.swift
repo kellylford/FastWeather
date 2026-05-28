@@ -14,6 +14,8 @@ struct SettingsView: View {
     @AppStorage("defaultBrowseSortOrder") private var defaultBrowseSortOrderRaw: String = "Name (A–Z)"
     @AppStorage(iCloudSyncService.enabledKey) private var iCloudSyncEnabled: Bool = false
     @State private var showingResetAlert = false
+    @State private var showingICloudConflictAlert = false
+    @State private var cloudCityCount = 0
     @State private var showingDeveloperSettings = false
     @State private var showingMyDataConfig = false
     
@@ -455,21 +457,26 @@ struct SettingsView: View {
                 ) {
                     Toggle("Sync with iCloud", isOn: $iCloudSyncEnabled)
                         .onChange(of: iCloudSyncEnabled) { _, newValue in
-                            if newValue {
-                                // Trigger a fresh download from iCloud first
-                                iCloudSyncService.shared.synchronize()
-                                // If iCloud already has data (downloaded in a prior session or by another device),
-                                // pull it so this device doesn't overwrite it. Otherwise push local state.
-                                if iCloudSyncService.shared.hasCloudCities() {
-                                    weatherService.applyRemoteCities()
-                                } else {
-                                    iCloudSyncService.shared.pushCities(weatherService.savedCities)
-                                }
+                            guard newValue else { return }
+                            iCloudSyncService.shared.synchronize()
+                            let localCount = weatherService.savedCities.count
+                            let remoteCount = iCloudSyncService.shared.pullCities()?.count ?? 0
+                            if remoteCount > 0 && localCount > 0 {
+                                // Both sides have cities — ask the user which list wins
+                                cloudCityCount = remoteCount
+                                showingICloudConflictAlert = true
+                            } else if remoteCount > 0 {
+                                // No local cities to lose — silently pull everything from iCloud
+                                weatherService.applyRemoteCities()
                                 if iCloudSyncService.shared.hasCloudSettings() {
                                     settingsManager.applyRemoteSettings()
                                 } else {
                                     iCloudSyncService.shared.pushSettings(settingsManager.settings)
                                 }
+                            } else {
+                                // iCloud is empty — push this device's data up
+                                iCloudSyncService.shared.pushCities(weatherService.savedCities)
+                                iCloudSyncService.shared.pushSettings(settingsManager.settings)
                             }
                         }
                         .accessibilityLabel("Sync with iCloud")
@@ -526,6 +533,24 @@ struct SettingsView: View {
                 EditButton()
                     .accessibilityLabel("Edit weather fields order")
                     .accessibilityHint("Tap to enable reordering of weather fields")
+            }
+            .alert("iCloud Has a Saved City List", isPresented: $showingICloudConflictAlert) {
+                Button("Use iCloud List") {
+                    weatherService.applyRemoteCities()
+                    if iCloudSyncService.shared.hasCloudSettings() {
+                        settingsManager.applyRemoteSettings()
+                    } else {
+                        iCloudSyncService.shared.pushSettings(settingsManager.settings)
+                    }
+                }
+                Button("Keep My List") {
+                    iCloudSyncService.shared.pushCities(weatherService.savedCities)
+                    iCloudSyncService.shared.pushSettings(settingsManager.settings)
+                }
+            } message: {
+                let cityWord = cloudCityCount == 1 ? "city" : "cities"
+                let localWord = weatherService.savedCities.count == 1 ? "city" : "cities"
+                Text("iCloud has \(cloudCityCount) saved \(cityWord). This device has \(weatherService.savedCities.count) saved \(localWord). Which list would you like to use?\n\nSettings will follow the same choice.")
             }
             .alert("Clear All Cities", isPresented: $showingResetAlert) {
                 Button("Cancel", role: .cancel) { }
