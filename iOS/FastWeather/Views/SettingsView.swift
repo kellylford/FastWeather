@@ -12,6 +12,7 @@ struct SettingsView: View {
     @EnvironmentObject var weatherService: WeatherService
     @StateObject private var featureFlags = FeatureFlags.shared
     @AppStorage("defaultBrowseSortOrder") private var defaultBrowseSortOrderRaw: String = "Name (A–Z)"
+    @AppStorage(iCloudSyncService.enabledKey) private var iCloudSyncEnabled: Bool = false
     @State private var showingResetAlert = false
     @State private var showingDeveloperSettings = false
     @State private var showingMyDataConfig = false
@@ -447,6 +448,34 @@ struct SettingsView: View {
                     .accessibilityLabel("Reset all settings to default values")
                 }
                 
+                // iCloud Sync section
+                Section(
+                    header: Text("iCloud"),
+                    footer: Text("When enabled, your settings and saved cities sync across all your devices signed in to the same Apple ID. Feature flags and Developer Settings are not synced.")
+                ) {
+                    Toggle("Sync with iCloud", isOn: $iCloudSyncEnabled)
+                        .onChange(of: iCloudSyncEnabled) { _, newValue in
+                            if newValue {
+                                // Trigger a fresh download from iCloud first
+                                iCloudSyncService.shared.synchronize()
+                                // If iCloud already has data (downloaded in a prior session or by another device),
+                                // pull it so this device doesn't overwrite it. Otherwise push local state.
+                                if iCloudSyncService.shared.hasCloudCities() {
+                                    weatherService.applyRemoteCities()
+                                } else {
+                                    iCloudSyncService.shared.pushCities(weatherService.savedCities)
+                                }
+                                if iCloudSyncService.shared.hasCloudSettings() {
+                                    settingsManager.applyRemoteSettings()
+                                } else {
+                                    iCloudSyncService.shared.pushSettings(settingsManager.settings)
+                                }
+                            }
+                        }
+                        .accessibilityLabel("Sync with iCloud")
+                        .accessibilityHint("When enabled, your settings and saved cities sync across all your devices")
+                }
+
                 // User Guide section
                 Section {
                     NavigationLink(destination: UserGuideView()) {

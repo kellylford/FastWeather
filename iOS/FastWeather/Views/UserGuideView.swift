@@ -531,6 +531,92 @@ struct UserGuideView: View {
                     BulletPoint("**Detail Categories** - Customize detail view")
                 }
                 
+                // iCloud Sync
+                GuideSection(
+                    icon: "icloud.fill",
+                    title: "iCloud Sync",
+                    color: .blue
+                ) {
+                    Text("iCloud Sync keeps your saved cities and settings in step across all your iPhones and iPads signed in to the same Apple ID. It's opt-in — nothing moves until you turn it on.")
+                        .padding(.bottom, 4)
+
+                    Text("**What syncs:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("All saved cities in your My Cities list")
+                    BulletPoint("All settings — units, view mode, display fields, detail categories, and every toggle in Settings")
+                    BulletPoint("Weather Around Me preferences")
+                    BulletPoint("My Data custom fields")
+
+                    Text("**What doesn't sync:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("Feature flags and Developer Settings — these stay local to each device")
+                    BulletPoint("The iCloud Sync toggle itself — you turn it on per device")
+                    BulletPoint("Cached weather data — each device fetches its own fresh data")
+
+                    Text("**Turning sync on for the first time:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("Go to **Settings → iCloud → Sync with iCloud** and flip the toggle.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 4)
+                    Text("What happens at that moment depends on whether iCloud already has data from another device:")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 4)
+                    BulletPoint("**iCloud is empty** (this is the first device you're enabling) — your local cities and settings are uploaded to iCloud")
+                    BulletPoint("**iCloud already has data** (another device enabled sync first) — iCloud's data is downloaded and replaces your local data on this device")
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(alignment: .top, spacing: 6) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                                .accessibilityHidden(true)
+                            Text("**Important: Enable sync on your most complete device first**")
+                                .fontWeight(.semibold)
+                        }
+                        Text("Whichever device enables sync first wins. For example, if you've built up 20 saved cities on your iPhone and you add Weather Fast to a new iPad that only has a couple of default cities, enable sync on the iPhone first. That uploads your 20 cities. When you then enable sync on the iPad, it downloads those 20 cities. If you enable on the iPad first, its 2 cities get uploaded, and your iPhone would pull those 2 cities down when you enable it there — replacing your 20.")
+                            .font(.callout)
+                    }
+                    .foregroundColor(.primary)
+                    .padding(12)
+                    .background(Color.orange.opacity(0.12))
+                    .cornerRadius(8)
+                    .padding(.top, 8)
+                    .accessibilityElement(children: .combine)
+
+                    Text("**Ongoing sync — last change wins:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("Once sync is running on both devices, changes flow automatically whenever the app comes to the foreground. If you change a setting on your iPhone, it shows up on your iPad the next time you open Weather Fast there. If you make conflicting changes on two devices before either one syncs, the last one to come online wins.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 4)
+
+                    Text("**Resetting settings or clearing all cities:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("These are deliberate actions, so they propagate. If you tap \"Reset Settings to Defaults\" or \"Clear All Cities\" while sync is on, those changes sync to your other devices. If you only want to reset one device, turn sync off first, make the change, then decide whether to turn sync back on.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 4)
+
+                    Text("**Turning sync off:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("Flip the toggle back off in Settings → iCloud. Your local data stays exactly as it is — nothing is deleted. iCloud retains a copy of the last synced state, but this device will no longer push or pull changes. Your other devices continue syncing with each other if their toggles remain on.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 4)
+                }
+
                 // Widgets
                 GuideSection(
                     icon: "square.grid.2x2.fill",

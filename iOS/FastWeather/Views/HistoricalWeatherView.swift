@@ -260,7 +260,7 @@ struct HistoricalWeatherView: View {
                     let dateString = selectedDate.dateString
                     let response = try await weatherService.fetchHistoricalWeather(
                         for: city, startDate: dateString, endDate: dateString,
-                        fields: "weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum")
+                        fields: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum")
                     
                     // Parse single day
                     if !response.daily.time.isEmpty {
@@ -321,7 +321,7 @@ struct HistoricalWeatherView: View {
                     // Fetch the date range
                     let response = try await weatherService.fetchHistoricalWeather(
                         for: city, startDate: startString, endDate: endString,
-                        fields: "weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum")
+                        fields: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum")
                     
                     // Parse all days in the range
                     var parsedDays: [HistoricalDay] = []

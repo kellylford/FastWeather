@@ -74,6 +74,7 @@
 		E4F1B4B29C76E05475F84205 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 582B5A12CF76291E75D023B0 /* AppLogger.swift */; };
 		FCF060427E69A6D68459749C /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F83A2A75D10D105C7225AE79 /* LocationService.swift */; };
 		FFDCDC0E6C3FE2E629DA343D /* CountryNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91C990465E49C005E87F407B /* CountryNames.swift */; };
+		ICLOUD0001B /* iCloudSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ICLOUD0001 /* iCloudSyncService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -183,6 +184,7 @@
 		BB100003A0 /* UnitConversionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = UnitConversionTests.swift; path = FastWeatherTests/UnitConversionTests.swift; sourceTree = "<group>"; };
 		CD557832C1BCA3C9AA2DF4EF /* BrowseModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowseModels.swift; sourceTree = "<group>"; };
 		F83A2A75D10D105C7225AE79 /* LocationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
+		ICLOUD0001 /* iCloudSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iCloudSyncService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -342,6 +344,7 @@
 				AABCDEF01 /* Secrets.swift */,
 				2FACFB641A124BC50AA47A82 /* WeatherMovementAnalyzer.swift */,
 				80554E71E10D5B842963E4AF /* AppGroup.swift */,
+				ICLOUD0001 /* iCloudSyncService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -585,6 +588,7 @@
 				E4F1B4B29C76E05475F84205 /* AppLogger.swift in Sources */,
 				936F0EBB42AF986505E6F18D /* WeatherMovementAnalyzer.swift in Sources */,
 				712DFE4BE25CBCDDED5D6DF3 /* AppGroup.swift in Sources */,
+				ICLOUD0001B /* iCloudSyncService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -677,7 +681,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEFINES_MODULE = YES;
 				ENABLE_APP_SANDBOX = YES;
@@ -712,7 +716,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5.2;
+				MARKETING_VERSION = 1.5.4;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -766,7 +770,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = YES;
 				ENABLE_APP_SANDBOX = YES;
@@ -795,7 +799,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5.2;
+				MARKETING_VERSION = 1.5.4;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.weatherfast.app;
@@ -937,7 +941,7 @@
 				CODE_SIGN_ENTITLEMENTS = FastWeatherWidget/FastWeatherWidget.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = P887QF74N8;
 				ENABLE_APP_SANDBOX = NO;
@@ -947,9 +951,10 @@
 					"$(inherited)",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.5.2;
+				MARKETING_VERSION = 1.5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.weatherfast.app.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
@@ -966,7 +971,7 @@
 				CODE_SIGN_ENTITLEMENTS = FastWeatherWidget/FastWeatherWidget.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = P887QF74N8;
 				ENABLE_APP_SANDBOX = NO;
@@ -976,9 +981,10 @@
 					"$(inherited)",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.5.2;
+				MARKETING_VERSION = 1.5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.weatherfast.app.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;

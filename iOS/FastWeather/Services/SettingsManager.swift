@@ -69,20 +69,48 @@ class SettingsManager: ObservableObject {
             // No saved settings - use defaults
             self.settings = AppSettings()
         }
+
+        observeCloudSettingsChanges()
     }
     
     func saveSettings() {
         do {
             let encoded = try JSONEncoder().encode(settings)
             Self.sharedDefaults.set(encoded, forKey: Self.userDefaultsKey)
+            iCloudSyncService.shared.pushSettings(settings)
         } catch {
             AppLogger.persistence.error("Failed to save settings: \(error)")
         }
     }
-    
+
     func resetToDefaults() {
         settings = AppSettings()
         saveSettings()
+    }
+
+    // MARK: - iCloud Sync
+
+    private func observeCloudSettingsChanges() {
+        NotificationCenter.default.addObserver(
+            forName: .iCloudSettingsDidChangeExternally,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.applyRemoteSettings()
+        }
+    }
+
+    func applyRemoteSettings() {
+        guard let remote = iCloudSyncService.shared.pullSettings(),
+              remote.settingsVersion == AppSettings.currentVersion else { return }
+        settings = remote
+        do {
+            let encoded = try JSONEncoder().encode(remote)
+            Self.sharedDefaults.set(encoded, forKey: Self.userDefaultsKey)
+            debugLog("iCloud: applied remote settings")
+        } catch {
+            AppLogger.persistence.error("Failed to save remote settings locally: \(error)")
+        }
     }
 }
 

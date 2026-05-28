@@ -121,6 +121,7 @@ class WeatherService: ObservableObject {
     init() {
         loadSavedCities()
         migrateCountryNamesIfNeeded()
+        observeCloudCityChanges()
     }
     
     // MARK: - My Data Dynamic Parameters
@@ -1132,7 +1133,7 @@ class WeatherService: ObservableObject {
                         do {
                             let response = try await self.fetchHistoricalWeather(
                                 for: city, startDate: dateString, endDate: dateString,
-                                fields: "weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum")
+                                fields: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum")
                             
                             guard !response.daily.time.isEmpty,
                                   let timeString = response.daily.time[0],
@@ -1504,8 +1505,33 @@ class WeatherService: ObservableObject {
         do {
             let encoded = try JSONEncoder().encode(savedCities)
             sharedDefaults.set(encoded, forKey: userDefaultsKey)
+            iCloudSyncService.shared.pushCities(savedCities)
         } catch {
             AppLogger.service.error("Failed to save cities: \(error)")
+        }
+    }
+
+    // MARK: - iCloud Sync
+
+    private func observeCloudCityChanges() {
+        NotificationCenter.default.addObserver(
+            forName: .iCloudCitiesDidChangeExternally,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.applyRemoteCities()
+        }
+    }
+
+    func applyRemoteCities() {
+        guard let remoteCities = iCloudSyncService.shared.pullCities() else { return }
+        savedCities = remoteCities
+        do {
+            let encoded = try JSONEncoder().encode(remoteCities)
+            sharedDefaults.set(encoded, forKey: userDefaultsKey)
+            AppLogger.service.debug("iCloud: applied \(remoteCities.count) cities")
+        } catch {
+            AppLogger.service.error("Failed to save remote cities locally: \(error)")
         }
     }
     
