@@ -455,18 +455,23 @@ struct SettingsView: View {
                     header: Text("iCloud"),
                     footer: Text("When enabled, your settings and saved cities sync across all your devices signed in to the same Apple ID. Feature flags and Developer Settings are not synced.")
                 ) {
-                    Toggle("Sync with iCloud", isOn: $iCloudSyncEnabled)
-                        .onChange(of: iCloudSyncEnabled) { _, newValue in
-                            guard newValue else { return }
+                    Toggle("Sync with iCloud", isOn: Binding(
+                        get: { iCloudSyncEnabled },
+                        set: { newValue in
+                            guard newValue else {
+                                iCloudSyncEnabled = false
+                                return
+                            }
                             iCloudSyncService.shared.synchronize()
                             let localCount = weatherService.savedCities.count
                             let remoteCount = iCloudSyncService.shared.pullCities()?.count ?? 0
                             if remoteCount > 0 && localCount > 0 {
-                                // Both sides have cities — ask the user which list wins
+                                // Both sides have cities — show dialog before committing the toggle
                                 cloudCityCount = remoteCount
                                 showingICloudConflictAlert = true
                             } else if remoteCount > 0 {
-                                // No local cities to lose — silently pull everything from iCloud
+                                // No local cities to lose — enable and pull silently
+                                iCloudSyncEnabled = true
                                 weatherService.applyRemoteCities()
                                 if iCloudSyncService.shared.hasCloudSettings() {
                                     settingsManager.applyRemoteSettings()
@@ -474,11 +479,13 @@ struct SettingsView: View {
                                     iCloudSyncService.shared.pushSettings(settingsManager.settings)
                                 }
                             } else {
-                                // iCloud is empty — push this device's data up
+                                // iCloud is empty — enable and push this device's data up
+                                iCloudSyncEnabled = true
                                 iCloudSyncService.shared.pushCities(weatherService.savedCities)
                                 iCloudSyncService.shared.pushSettings(settingsManager.settings)
                             }
                         }
+                    ))
                         .accessibilityLabel("Sync with iCloud")
                         .accessibilityHint("When enabled, your settings and saved cities sync across all your devices")
                 }
@@ -536,6 +543,7 @@ struct SettingsView: View {
             }
             .alert("iCloud Has a Saved City List", isPresented: $showingICloudConflictAlert) {
                 Button("Use iCloud List") {
+                    iCloudSyncEnabled = true
                     weatherService.applyRemoteCities()
                     if iCloudSyncService.shared.hasCloudSettings() {
                         settingsManager.applyRemoteSettings()
@@ -544,12 +552,11 @@ struct SettingsView: View {
                     }
                 }
                 Button("Keep My List") {
+                    iCloudSyncEnabled = true
                     iCloudSyncService.shared.pushCities(weatherService.savedCities)
                     iCloudSyncService.shared.pushSettings(settingsManager.settings)
                 }
-                Button("Don't Sync", role: .cancel) {
-                    iCloudSyncEnabled = false
-                }
+                Button("Don't Sync", role: .cancel) { }
             } message: {
                 let cityWord = cloudCityCount == 1 ? "city" : "cities"
                 let localWord = weatherService.savedCities.count == 1 ? "city" : "cities"
