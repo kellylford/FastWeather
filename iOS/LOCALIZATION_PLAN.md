@@ -220,7 +220,55 @@ The reverse-lookup portion (mapping native-language city/country names back to a
 
 ---
 
-## Step 7: Add Language Support in Xcode
+## Step 7: UI Layout and Text Clipping
+
+This is the most under-appreciated part of localization and a known risk given that the app already experienced screen clipping on different iPhone sizes in English. Some languages — German especially, but also Finnish, Dutch, and Russian — produce strings 30–50% longer than their English equivalents on average. A label that fits neatly in English can overflow or clip badly in another language.
+
+**The additional challenge here:** Visual layout issues cannot be caught by VoiceOver or by building and running the app normally. They require someone to look at the screen. The strategy below is designed to catch as many problems as possible through code and automated tooling, minimizing the need for constant visual checks.
+
+### Design defensively in SwiftUI (do this during Step 3)
+
+As strings are extracted from views, simultaneously audit each label for layout assumptions that will break with longer text. Look for and fix:
+
+```swift
+// Fragile — fixed width will clip German strings
+Text(field.localizedLabel)
+    .frame(width: 120)
+
+// Better — let it grow, truncate gracefully
+Text(field.localizedLabel)
+    .lineLimit(1)
+    .minimumScaleFactor(0.8)   // shrinks font up to 20% before truncating
+
+// Or allow wrapping where layout permits
+Text(field.localizedLabel)
+    .lineLimit(nil)
+    .fixedSize(horizontal: false, vertical: true)
+```
+
+For weather field labels in lists and grids, prefer flexible layouts (`HStack` with `Spacer()`) over any hardcoded widths. This can be verified in code without visual inspection.
+
+### Pseudo-localization testing (catch problems without real translations)
+
+Xcode has a built-in pseudo-localization feature that replaces all localized strings with longer, accented versions — for example, "Wind Speed" becomes `[Ŵîñð Šþééð~~]`. The bracketing and extra characters simulate longer strings and make truncation immediately obvious.
+
+To enable it: In Xcode, Edit Scheme → Run → Options → App Language → set to "Double-Length Pseudolanguage."
+
+Running the simulator in this mode and taking screenshots is something AI can assist with directly — screenshots can be reviewed to spot clipping without requiring visual inspection on your part. This should be done after Step 3 (string extraction) and repeated after any significant UI change.
+
+### Real-language visual sign-off
+
+Pseudo-localization catches structural problems, but a real language needs a real visual check before shipping. Options:
+
+- **Ask your translator to do a visual review.** Most professional translators or localization vendors will do a basic UI check as part of their work if you ask. Send them a TestFlight build.
+- **Beta testers in the target language.** A native speaker who can look at the screen is the best possible test. Even one person is enough to catch obvious clipping.
+- **AI-assisted simulator screenshots.** For languages you want to verify before finding a translator, I can help run the simulator with a specific locale and review screenshots for obvious layout issues.
+
+The goal is to not ship a language to the App Store without at least one human looking at the actual screen. This is the one part of the process that genuinely cannot be automated away.
+
+---
+
+## Step 8: Add Language Support in Xcode
 
 Once the string catalog is stable and fully populated with English values:
 
@@ -270,11 +318,12 @@ The steps above are listed by topic, but the recommended execution order is:
 2. **Step 2** — Migrate enums to `Int` raw values, including the `UserDefaults` migration; test thoroughly on a device with real saved settings before proceeding
 3. **Step 5** — Fix date/time formatting (touches centralized code, easier to do before view extraction)
 4. **Step 6** — Replace CountryNames utility
-5. **Step 3** — Extract view strings (largest task; do it last so the catalog structure is settled)
+5. **Step 3** — Extract view strings; simultaneously audit each view for fixed-width layout assumptions (Step 7 defensive coding)
 6. **Step 4** — Add InfoPlist.xcstrings
-7. **Step 8** — Update tests
-8. **Step 7** — Add language support in Xcode
-9. **Step 9** — Export for translators
+7. **Step 9** — Update tests
+8. **Step 7 (pseudo-localization)** — Run simulator in Double-Length Pseudolanguage mode, review screenshots for clipping
+9. **Step 8** — Add language support in Xcode
+10. **Step 10** — Export for translators; request visual sign-off from translator or beta tester
 
 ---
 
@@ -285,14 +334,16 @@ The steps above are listed by topic, but the recommended execution order is:
 | Create string catalog | Trivial |
 | Migrate 5 enums to `Int` raw values + `localizedLabel` | Medium |
 | Write and test UserDefaults migration | Medium–Large (high risk, must be thorough) |
-| Extract ~350 hardcoded strings from Views | Large |
+| Extract ~350 hardcoded strings from Views + layout audit | Large |
 | Fix date/time formatting to be locale-aware | Small–Medium |
 | Localize direction/category computed strings | Small |
 | Replace CountryNames with Locale API | Small |
 | Localize Info.plist permission strings | Small |
 | Update test suite for locale-pinning | Medium |
+| Pseudo-localization testing + screenshot review | Medium |
 | Add language support in Xcode | Trivial |
 | Export .xcloc for translators | Trivial |
+| Sighted visual sign-off per language (requires human) | External |
 
 ---
 
