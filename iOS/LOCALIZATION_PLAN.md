@@ -6,6 +6,8 @@ This document covers the technical infrastructure work required to make WeatherF
 
 The app is currently English-only with all user-facing strings hardcoded directly in Swift source files. There is no localization infrastructure in place. The good news: the app uses pure SwiftUI (no storyboards or XIBs), has centralized formatting utilities, and Xcode's `SWIFT_EMIT_LOC_STRINGS` build setting is already enabled — meaning the foundation is clean and the work is well-scoped.
 
+**Decision: Do it right.** Rather than patching localization on top of the existing structure, this plan takes a clean approach — migrating the settings enums to `Int` raw values, removing the storage/display coupling that caused the problem in the first place, and building with `String(localized:)` as the standard going forward. The user base is small enough that the one-time migration cost is low and the payoff compounds with every future feature.
+
 ---
 
 ## Current State
@@ -15,7 +17,7 @@ The app is currently English-only with all user-facing strings hardcoded directl
 | Localizable.strings / .xcstrings files | None |
 | Language folders (.lproj) | None |
 | Hardcoded UI strings in Views | ~350+ across 19 view files |
-| Enum raw value labels (settings fields) | 80+ cases |
+| Enum raw value labels (settings fields) | 80+ cases, `String` raw values used for both storage and display |
 | Info.plist permission strings | 2 strings, not localized |
 | Date/time formatting | Centralized but hardcoded to 12-hour AM/PM |
 | Unit symbol labels | Hardcoded in 5 unit enums |
@@ -26,205 +28,277 @@ The app is currently English-only with all user-facing strings hardcoded directl
 
 ---
 
-## Step 1: Choose a String Catalog Strategy
+## Step 1: Set Up the String Catalog
 
-Apple offers two mechanisms for localization. Choose one before starting any extraction work.
+Before touching any source code, create the localization infrastructure that everything else will feed into.
 
-**Option A — Xcode String Catalogs (.xcstrings)** *(recommended)*
-Introduced in Xcode 15. A single `.xcstrings` file per target replaces all `.strings` files. Xcode manages it through a GUI, tracks which strings are untranslated, and auto-extracts strings from `Text("...")` calls at build time (because `SWIFT_EMIT_LOC_STRINGS` is already on). This is the modern Apple-preferred path and requires the least manual file management.
+Use **Xcode String Catalogs (.xcstrings)** — the modern Apple standard introduced in Xcode 15. A single `Localizable.xcstrings` file lives in the project and Xcode manages it through a GUI. It tracks which strings are translated, which are stale, and which are missing. Because `SWIFT_EMIT_LOC_STRINGS` is already enabled in the build settings, Xcode will auto-detect bare `Text("literal")` calls and offer to add them to the catalog.
 
-**Option B — Traditional Localizable.strings files**
-One `.strings` file per language in separate `.lproj` folders. More portable, easier to send to external translators as plain text. More manual to manage.
+**To create it:** In Xcode, File → New → File → String Catalog. Name it `Localizable`. Add it to the FastWeather target.
 
-The rest of this plan assumes Option A (String Catalogs), but the extraction work in Steps 2–5 is identical either way.
+At this point the catalog is empty. The following steps populate it.
 
----
-
-## Step 2: Extract Hardcoded Strings from Views
-
-This is the largest body of work. Every `Text("...")` call and string literal used for user-visible content must be replaced with a localizable call.
-
-**SwiftUI pattern — before:**
-```swift
-Text("Add City")
-```
-
-**SwiftUI pattern — after:**
-```swift
-Text("add_city_button", bundle: .main)
-// or simply:
-Text("Add City")  // Xcode auto-extracts this if SWIFT_EMIT_LOC_STRINGS = YES
-```
-
-With String Catalogs and `SWIFT_EMIT_LOC_STRINGS = YES`, Xcode can auto-extract bare `Text("literal")` calls, so many strings in the Views may require little or no source change — they just need entries added to the catalog. However, any string built with interpolation or constructed programmatically requires explicit `String(localized:)` calls.
-
-**Strings that need manual `String(localized:)` wrapping:**
-- Formatted strings: `"Wind: \(speed) mph"` — split into a format key: `String(localized: "wind_label \(speed) mph")`
-- Strings passed as arguments: `Label(title, systemImage: icon)` where `title` is a computed string
-- Strings in `accessibilityLabel()` and `accessibilityHint()` modifiers
-- Alert titles and messages
-- Error message strings in Services and ViewModels
-
-**Files with the most hardcoded strings (prioritize these):**
-- `SettingsView.swift` — section headers, picker labels, toggle labels
-- `CitySearchView.swift` — search prompts, placeholder text, error messages
-- `WeatherDetailView.swift` — field labels, category headers
-- `MainWeatherView.swift` — all primary weather display labels
-- `WeatherAlertView.swift` — alert UI labels
+Also enable the **"Use Compiler to Extract Swift Strings"** build warning (in Build Settings, search "localization"). This flags any new `Text("literal")` or `String(...)` that bypasses the localization system, so the problem doesn't re-accumulate over time.
 
 ---
 
-## Step 3: Localize Enum Raw Values (Settings Field Labels)
+## Step 2: Migrate Settings Enums from String to Int Raw Values
 
-The app defines ~80 user-facing field names as Swift enum `rawValue` strings. These power the settings screens where users choose which weather fields to display.
+This is the most structurally important change and should be done before any string extraction, because it changes how display labels are generated throughout the app.
 
-**Examples:**
+**The problem with the current design:**
+
+The five settings enums use `String` raw values that serve double duty — they're both the storage key (saved to `UserDefaults`) and the display label shown in the UI. This meant the English label and the storage key were the same thing, making it impossible to translate the label without breaking saved preferences.
+
 ```swift
+// Current — storage key and display label are the same string
 enum WeatherFieldType: String {
     case temperature = "Temperature"
     case windSpeed   = "Wind Speed"
-    case humidity    = "Humidity"
-    // ... 24+ more
 }
+
+// Saved to UserDefaults as the string "Wind Speed"
+// Displayed in UI via .rawValue → "Wind Speed"
 ```
 
-Because raw values are baked into the binary as Swift constants, they cannot be looked up in a string catalog at runtime. Each enum must be extended with a computed `localizedLabel` property:
+**The fix — separate storage from display:**
+
+Switch to `Int` raw values (stable, never user-visible) and add a `localizedLabel` computed property that looks up the translated string at runtime:
 
 ```swift
-var localizedLabel: String {
-    String(localized: "field_\(rawValue.lowercased().replacingOccurrences(of: " ", with: "_"))")
+enum WeatherFieldType: Int, Codable {
+    case temperature = 1
+    case windSpeed   = 2
+    case dewPoint    = 3
+    // ... assign a stable Int to every case
+
+    var localizedLabel: String {
+        switch self {
+        case .temperature: String(localized: "field.temperature")
+        case .windSpeed:   String(localized: "field.wind_speed")
+        case .dewPoint:    String(localized: "field.dew_point")
+        }
+    }
 }
 ```
 
-Every call site that currently uses `.rawValue` for display must switch to `.localizedLabel`. The raw values themselves should stay as-is — they serve as stable keys for stored user preferences and should never change.
+The `Int` is what gets saved to `UserDefaults`. It never changes. The `localizedLabel` returns whatever the string catalog says for the current language. Adding a new language in the future requires no code changes to the enum.
 
-**Enums to update:**
+**Enums to migrate:**
 - `WeatherFieldType` (~27 cases)
 - `HourlyFieldType` (~17 cases)
 - `DailyFieldType` (~19 cases)
 - `MarineFieldType` (~14 cases)
 - `DetailCategory` (~10 cases)
 
+**UserDefaults migration — the one tricky part:**
+
+Existing users have their field selections saved as English strings (`"Wind Speed"`, `"Temperature"`, etc.). When the app updates and the enum switches to `Int` raw values, those saved strings will fail to decode.
+
+A one-time migration must run at first launch after the update:
+
+```swift
+// Run once on first launch after update
+func migrateSettingsIfNeeded() {
+    guard !UserDefaults.standard.bool(forKey: "didMigrateEnumsToInt") else { return }
+
+    // Read old string-keyed values, map to new Int-keyed equivalents, re-save
+    // Mark migration complete
+    UserDefaults.standard.set(true, forKey: "didMigrateEnumsToInt")
+}
+```
+
+This migration needs to be written and tested before the update ships. It is the highest-risk piece of this entire plan — if it's wrong, users lose their saved field configurations. Test it thoroughly with a device that has real saved settings.
+
+**After migration:** Every call site that used `.rawValue` for display switches to `.localizedLabel`. Every call site that used `.rawValue` for storage (encoding/decoding) switches to the `Int` value automatically via `Codable`.
+
+---
+
+## Step 3: Extract Hardcoded Strings from Views
+
+With the enum work done, this is the largest remaining body of work — extracting ~350 hardcoded English strings from 19 view files into the string catalog.
+
+**Simple `Text()` calls** — Xcode auto-extracts these when `SWIFT_EMIT_LOC_STRINGS` is on. Many view strings may require no source change, just adding them to the catalog and providing translations.
+
+**Strings requiring manual `String(localized:)` wrapping:**
+
+Any string that is constructed programmatically rather than written as a bare literal needs explicit wrapping:
+
+```swift
+// Interpolated strings
+// Before:
+Text("Wind: \(speed) mph")
+
+// After — use a format specifier so translators can reorder words:
+Text("wind_with_speed \(speed)", tableName: nil)
+// Catalog entry: "wind_with_speed %@" → "Wind: %@ mph" (en) / "Vent : %@ km/h" (fr)
+```
+
+```swift
+// Strings passed as arguments
+// Before:
+.accessibilityLabel("Location unit, currently \(settingsManager.settings.distanceUnit.rawValue)")
+
+// After:
+.accessibilityLabel(String(localized: "accessibility.distance_unit \(unit.localizedLabel)"))
+```
+
+**Files with the most hardcoded strings (tackle these first):**
+- `SettingsView.swift` — section headers, picker labels, toggle labels
+- `CitySearchView.swift` — search prompts, placeholder text, error messages
+- `WeatherDetailView.swift` — field labels, category headers
+- `MainWeatherView.swift` — primary weather display labels
+- `WeatherAlertView.swift` — alert UI labels
+
 ---
 
 ## Step 4: Localize Info.plist Permission Strings
 
-iOS displays these strings in the system permission dialogs. They must be translated or users in other locales will see English text in an otherwise-localized app.
+iOS shows these strings in the system permission dialogs before the user has even opened the app fully. If untranslated, users in other locales see English text at a critical trust moment.
 
 **Strings to localize:**
 - `NSLocationWhenInUseUsageDescription` — "Weather Fast uses your location to show weather for your current area."
 - `NSLocationAlwaysUsageDescription` — similar
-- `CFBundleDisplayName` — "Weather Fast" (may need translation in some markets)
+- `CFBundleDisplayName` — "Weather Fast" (may need adaptation in some markets)
 
-**How:** Create a `InfoPlist.xcstrings` file (or `InfoPlist.strings` in each `.lproj` folder) and add entries for each key. Xcode will pick these up automatically at build time.
+**How:** Create an `InfoPlist.xcstrings` file (separate from `Localizable.xcstrings`) and add entries for each key. Xcode picks these up automatically at build time.
 
 ---
 
-## Step 5: Localize Date, Time, and Unit Formatting
+## Step 5: Fix Date, Time, and Unit Formatting
 
 ### Date and Time
 
-The `FormatHelper` struct in `SettingsManager.swift` currently hardcodes 12-hour AM/PM formatting:
+`FormatHelper` in `SettingsManager.swift` hardcodes 12-hour AM/PM:
 
 ```swift
-// Current — always 12-hour
+// Current — always 12-hour regardless of locale
 formatter.dateFormat = "h:mm a"
 ```
 
-**Fix:** Replace with locale-aware formatting using `DateFormatter` with a locale:
+Replace with locale-aware formatting:
 
 ```swift
 formatter.locale = Locale.current
 formatter.dateStyle = .none
-formatter.timeStyle = .short   // respects 12h/24h user preference
+formatter.timeStyle = .short   // automatically 12h or 24h per user's system setting
 ```
 
-Similarly, the date format `"MMMM d, yyyy"` in `HistoricalWeather.swift` should use `DateFormatter.dateStyle = .long` instead so it formats correctly per locale (e.g., "28 May 2026" in UK English).
+The date format `"MMMM d, yyyy"` in `HistoricalWeather.swift` should similarly use `DateFormatter.dateStyle = .long` so it produces "28 May 2026" in UK English, "28. Mai 2026" in German, etc.
 
-### Unit Symbols
+### Unit Display Names
 
-Unit symbol strings like `"°F"`, `"mph"`, `"in"`, `"mi"` are generally universal, but display names like `"Fahrenheit"` and `"Celsius"` in the settings pickers need to go through the string catalog.
+Unit symbol abbreviations (`"°F"`, `"mph"`, `"in"`, `"mi"`) are internationally understood and do not need translation. However, full display names shown in the settings pickers (`"Fahrenheit"`, `"Celsius"`, `"Miles per hour"`) do need to go through the string catalog.
 
-The unit enums already default based on `Locale.current.measurementSystem`, which is good — this behavior should be preserved and tested across locales.
+The unit enums already default to the appropriate system based on `Locale.current.measurementSystem` — that behavior is correct and should be preserved.
 
-### Cardinal Directions
+### Cardinal Directions and Weather Categories
 
-Wind direction labels like `"North"`, `"Northeast"`, `"SSW"` are currently hardcoded strings. These need localization entries. Abbreviated directions (N, NE, S) may be universal, but full names must be translated.
+These are computed strings currently returned as hardcoded English:
 
-### Category Labels
+- Wind directions: `"North"`, `"Northeast"`, `"SSW"`, etc.
+- UV Index categories: `"Low"`, `"Moderate"`, `"High"`, `"Very High"`, `"Extreme"`
+- Dew point comfort levels: `"Dry"`, `"Comfortable"`, `"Muggy/Uncomfortable"`, `"Oppressive"`
 
-UV Index categories (`"Low"`, `"Moderate"`, `"High"`, etc.) and dew point comfort levels (`"Dry"`, `"Comfortable"`, `"Muggy/Uncomfortable"`) are computed strings that need to go through `String(localized:)`.
+Each needs a `String(localized:)` call with a stable key. Abbreviated directions (`N`, `NE`, `S`) are universal and can remain as-is.
 
 ---
 
-## Step 6: Country Names Utility
+## Step 6: Replace Country Names Utility with Apple's Locale API
 
-`Utilities/CountryNames.swift` contains a hardcoded dictionary mapping ISO country codes to English names. It also maps alternate native-language names (e.g., `"Deutschland"`) back to English.
-
-For localized country display, Apple's `Locale` API can handle this without a custom dictionary:
+`Utilities/CountryNames.swift` is a large hardcoded dictionary mapping ISO country codes to English names. Apple's `Locale` API does this natively and in the user's language:
 
 ```swift
-Locale.current.localizedString(forRegionCode: "DE") // → "Germany" in en, "Allemagne" in fr
+// Before — always English
+CountryNames.name(for: "DE")  // → "Germany"
+
+// After — respects current locale
+Locale.current.localizedString(forRegionCode: "DE")  // → "Germany" / "Allemagne" / "Deutschland"
 ```
 
-The custom mapping can largely be replaced with this built-in API. The reverse-lookup (native names → ISO code) used for search normalization can remain in English since it is used for API queries, not display.
+The reverse-lookup portion (mapping native-language city/country names back to an ISO code for API queries) is an internal operation the user never sees — that can stay in English.
 
 ---
 
-## Step 7: Add Language Support in Xcode Project
+## Step 7: Add Language Support in Xcode
 
-Once strings are extracted, language support must be explicitly added in Xcode:
+Once the string catalog is stable and fully populated with English values:
 
 1. Open `FastWeather.xcodeproj`
 2. Select the project in the navigator → Info tab
-3. Under "Localizations," click `+` to add each target language
-4. Xcode will create the necessary `.lproj` folders and populate the String Catalog with untranslated entries
+3. Under "Localizations," click `+` and add each target language
+4. Xcode populates the catalog with untranslated entries for that language
 
-Languages should be added one at a time after the string catalog is stable, not before.
+Add languages only after the catalog is stable. Adding a language before all strings are extracted means the catalog will need re-exporting after each new string is added.
 
 ---
 
-## Step 8: Update Tests
+## Step 8: Update the Test Suite
 
-All tests in `FastWeatherTests/` that assert on formatted output use hardcoded English expectations. These will need updating once formatting is locale-aware:
+All formatting tests currently assert hardcoded English output. Once formatting is locale-aware, tests must be pinned to an explicit locale so they don't behave differently on different machines:
 
-- `FormatHelperTests.swift` — 48 test cases asserting AM/PM time strings
+```swift
+// Before — depends on whatever locale the machine has
+XCTAssertEqual(FormatHelper.formatTime("2026-05-28T06:50"), "6:50 AM")
+
+// After — pinned to en_US, always predictable
+let result = FormatHelper.formatTime("2026-05-28T06:50", locale: Locale(identifier: "en_US"))
+XCTAssertEqual(result, "6:50 AM")
+```
+
+Add a second locale (e.g., `"de_DE"`) test pass to verify that locale-aware formatting actually changes output as expected.
+
+**Test files to update:**
+- `FormatHelperTests.swift` — 48 test cases
 - `DateParserTests.swift`
 - `HistoricalDateParsingTests.swift`
 - `UnitConversionTests.swift`
 
-**Strategy:** Pin tests to `Locale(identifier: "en_US")` explicitly so they continue to test English formatting correctly, rather than depending on the machine's locale. Add separate test cases for a second locale (e.g., `"de_DE"`) to verify locale-aware behavior.
+---
+
+## Step 9: Export for Translators
+
+Once the catalog is complete and all English values are confirmed correct, Xcode can export `.xcloc` packages — one per language — via File → Export Localizations. This is the standard format for translation vendors and freelance translators. When translations come back, they are imported via File → Import Localizations and Xcode merges them into the catalog.
 
 ---
 
-## Step 9: Prepare Translation Export
+## Recommended Order of Work
 
-Once the String Catalog is populated with all keys and English values, Xcode can export an `.xcloc` package (File → Export Localizations). This is the standard format for sending to translation vendors or working with professional translators. Each language gets its own `.xcloc` file containing the strings and context.
+The steps above are listed by topic, but the recommended execution order is:
 
-When translations are returned, they are imported back via File → Import Localizations.
+1. **Step 1** — Create the string catalog first so there's somewhere to put strings as you go
+2. **Step 2** — Migrate enums to `Int` raw values, including the `UserDefaults` migration; test thoroughly on a device with real saved settings before proceeding
+3. **Step 5** — Fix date/time formatting (touches centralized code, easier to do before view extraction)
+4. **Step 6** — Replace CountryNames utility
+5. **Step 3** — Extract view strings (largest task; do it last so the catalog structure is settled)
+6. **Step 4** — Add InfoPlist.xcstrings
+7. **Step 8** — Update tests
+8. **Step 7** — Add language support in Xcode
+9. **Step 9** — Export for translators
 
 ---
 
 ## Scope Summary
 
-| Task | Effort Estimate |
+| Task | Effort |
 |---|---|
-| Choose string catalog strategy | Trivial |
+| Create string catalog | Trivial |
+| Migrate 5 enums to `Int` raw values + `localizedLabel` | Medium |
+| Write and test UserDefaults migration | Medium–Large (high risk, must be thorough) |
 | Extract ~350 hardcoded strings from Views | Large |
-| Add `localizedLabel` to ~80 enum cases | Medium |
-| Localize Info.plist permission strings | Small |
 | Fix date/time formatting to be locale-aware | Small–Medium |
-| Localize category/direction label strings | Small |
-| Replace CountryNames utility with Locale API | Small |
-| Add language support in Xcode project | Trivial |
+| Localize direction/category computed strings | Small |
+| Replace CountryNames with Locale API | Small |
+| Localize Info.plist permission strings | Small |
 | Update test suite for locale-pinning | Medium |
-| Export .xcloc for translators | Trivial (after above) |
+| Add language support in Xcode | Trivial |
+| Export .xcloc for translators | Trivial |
 
 ---
 
 ## What This Plan Does Not Cover
 
-- **Finding and paying translators.** Once the `.xcloc` export is ready, you will need translators for each target language. Translation vendors (e.g., Lokalise, Phrase, Crowdin) can manage this workflow. Freelancers on platforms like Upwork or Gengo are another option.
+- **Finding and paying translators.** Once the `.xcloc` export is ready, you will need translators for each target language. Translation vendors (Lokalise, Phrase, Crowdin) can manage this workflow end-to-end. Freelancers on Upwork or Gengo are a lower-cost option.
 - **App Store listing translations.** The App Store description, keywords, and screenshots are localized separately through App Store Connect and are not part of the Xcode project.
-- **Right-to-left language support (Arabic, Hebrew).** SwiftUI handles RTL layout automatically in most cases, but some custom layout code may need review.
-- **Language-specific weather terminology.** Some weather terms (e.g., wind direction names, cloud cover descriptions) may not have obvious direct translations and will need translator judgment.
+- **Right-to-left language support (Arabic, Hebrew).** SwiftUI handles RTL layout automatically in most cases, but some custom layout code may need review if those languages are targeted.
+- **Language-specific weather terminology.** Some weather terms (dew point comfort levels, UV index descriptions) don't have universally agreed translations and will need translator judgment.
