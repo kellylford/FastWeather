@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreLocation
+import MapKit
 
 struct AddCitySearchView: View {
     @Environment(\.dismiss) var dismiss
@@ -239,56 +240,99 @@ struct AddCitySearchView: View {
         }
     }
     
+    // ZIP codes → CLGeocoder (returns precise area centroid)
+    // Everything else → MKLocalSearch (full Apple Maps POI database: universities, airports, etc.)
     private func searchCity(query: String) async throws -> [GeocodingResult] {
-        let geocoder = CLGeocoder()
-        let placemarks = try await geocoder.geocodeAddressString(query)
+        let trimmed = query.trimmingCharacters(in: .whitespaces)
+        if trimmed.range(of: "^\\d{5}$", options: .regularExpression) != nil {
+            return try await searchWithGeocoder(query: trimmed)
+        }
+        return try await searchWithLocalSearch(query: trimmed)
+    }
 
-        return placemarks.compactMap { placemark -> GeocodingResult? in
-            guard let location = placemark.location else { return nil }
-
-            let nativeCountry = placemark.country
-            let normalizedCountry = CountryNames.normalize(nativeCountry, isoCode: placemark.isoCountryCode)
-
-            let locality = placemark.locality
-            let adminArea = placemark.administrativeArea
-            let placemarkName = placemark.name
-            let thoroughfare = placemark.thoroughfare
-
-            // Determine the primary name to show and store.
-            // City struct is unchanged — both old and new app versions decode each other's synced
-            // cities correctly. This flag only affects how *new* search results are labelled.
-            let specificName: String?
-            if featureFlags.specificPlaceNamesEnabled,
-               let name = placemarkName, let city = locality, name != city {
-                if name == thoroughfare {
-                    // Street name only — combine with city for clarity
-                    specificName = "\(name), \(city)"
-                } else if name.range(of: "^\\d", options: .regularExpression) != nil {
-                    // Full address (starts with house number) — use street name, drop number
-                    specificName = thoroughfare.map { "\($0), \(city)" } ?? "\(name), \(city)"
+    private func searchWithLocalSearch(query: String) async throws -> [GeocodingResult] {
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = query
+        let search = MKLocalSearch(request: request)
+        let response: MKLocalSearch.Response = try await withCheckedThrowingContinuation { continuation in
+            search.start { response, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else if let response {
+                    continuation.resume(returning: response)
                 } else {
-                    // Named place: airport, university, landmark, neighbourhood
-                    specificName = name
+                    continuation.resume(throwing: NSError(domain: "MKLocalSearch", code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: "No results"]))
                 }
-            } else {
-                specificName = nil
             }
-
-            let primaryName = specificName ?? locality ?? placemarkName ?? "Unknown"
-
-            var displayParts: [String] = [primaryName]
-            if specificName != nil, let city = locality { displayParts.append(city) }
-            if let area = adminArea { displayParts.append(area) }
-            if let country = normalizedCountry { displayParts.append(country) }
-
-            return GeocodingResult(
-                id: UUID(),
-                displayName: displayParts.joined(separator: ", "),
-                latitude: location.coordinate.latitude,
-                longitude: location.coordinate.longitude,
-                name: primaryName
+        }
+        return response.mapItems.compactMap { item in
+            buildResult(
+                itemName: item.name,
+                locality: item.placemark.locality,
+                adminArea: item.placemark.administrativeArea,
+                thoroughfare: item.placemark.thoroughfare,
+                country: item.placemark.country,
+                isoCode: item.placemark.isoCountryCode,
+                location: item.placemark.location
             )
         }
+    }
+
+    private func searchWithGeocoder(query: String) async throws -> [GeocodingResult] {
+        let geocoder = CLGeocoder()
+        let placemarks = try await geocoder.geocodeAddressString(query)
+        return placemarks.compactMap { placemark in
+            buildResult(
+                itemName: placemark.name,
+                locality: placemark.locality,
+                adminArea: placemark.administrativeArea,
+                thoroughfare: placemark.thoroughfare,
+                country: placemark.country,
+                isoCode: placemark.isoCountryCode,
+                location: placemark.location
+            )
+        }
+    }
+
+    // Shared naming logic for both search paths.
+    // City struct is unchanged — both old and new app versions decode each other's synced
+    // cities correctly. This flag only affects how new search results are labelled.
+    private func buildResult(itemName: String?, locality: String?, adminArea: String?,
+                             thoroughfare: String?, country: String?, isoCode: String?,
+                             location: CLLocation?) -> GeocodingResult? {
+        guard let location else { return nil }
+
+        let normalizedCountry = CountryNames.normalize(country, isoCode: isoCode)
+
+        let specificName: String?
+        if featureFlags.specificPlaceNamesEnabled,
+           let name = itemName, let city = locality, name != city {
+            if name == thoroughfare {
+                specificName = "\(name), \(city)"
+            } else if name.range(of: "^\\d", options: .regularExpression) != nil {
+                specificName = thoroughfare.map { "\($0), \(city)" } ?? "\(name), \(city)"
+            } else {
+                specificName = name
+            }
+        } else {
+            specificName = nil
+        }
+
+        let primaryName = specificName ?? locality ?? itemName ?? "Unknown"
+
+        var displayParts: [String] = [primaryName]
+        if specificName != nil, let city = locality { displayParts.append(city) }
+        if let area = adminArea { displayParts.append(area) }
+        if let c = normalizedCountry { displayParts.append(c) }
+
+        return GeocodingResult(
+            id: UUID(),
+            displayName: displayParts.joined(separator: ", "),
+            latitude: location.coordinate.latitude,
+            longitude: location.coordinate.longitude,
+            name: primaryName
+        )
     }
     
     private func addCity(_ result: GeocodingResult) {
