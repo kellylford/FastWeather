@@ -12,7 +12,7 @@ jobs:
     runs-on: macos-15
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Create Secrets.swift
         run: |
@@ -24,6 +24,7 @@ jobs:
 
       - name: Build and Test
         run: |
+          set -o pipefail
           xcodebuild test \
             -project iOS/FastWeather.xcodeproj \
             -scheme FastWeather \
@@ -31,30 +32,31 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
-            | xcpretty || xcodebuild test \
-              -project iOS/FastWeather.xcodeproj \
-              -scheme FastWeather \
-              -destination 'platform=iOS Simulator,name=iPhone 16' \
-              CODE_SIGN_IDENTITY="" \
-              CODE_SIGNING_REQUIRED=NO \
-              CODE_SIGNING_ALLOWED=NO
+            | xcpretty
 
   webapp-tests:
     name: Webapp Tests
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: "20"
+          node-version: "22"
 
       - name: Install dependencies
         working-directory: webapp
         run: npm install
 
-      - name: Run tests
+      - name: Run tests with coverage
         working-directory: webapp
-        run: npm test -- --ci --forceExit
+        run: npm run test:coverage -- --ci --forceExit
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: webapp/coverage/
