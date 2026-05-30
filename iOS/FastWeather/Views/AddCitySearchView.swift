@@ -314,12 +314,7 @@ struct AddCitySearchView: View {
         if let zipRange = cityName.range(of: "\\d{5},?\\s*", options: .regularExpression) {
             cityName = cityName.replacingCharacters(in: zipRange, with: "").trimmingCharacters(in: .whitespaces)
         }
-        
-        // Remove "County" suffix if present
-        if cityName.hasSuffix(" County") {
-            cityName = String(cityName.dropLast(7)).trimmingCharacters(in: .whitespaces)
-        }
-        
+
         // Extract state and country intelligently
         var state: String? = nil
         var country = "Unknown"
