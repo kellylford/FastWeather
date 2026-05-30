@@ -178,7 +178,7 @@ struct ListView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(city.displayName)
                 .font(.headline)
-                .lineLimit(1)
+                .lineLimit(2)
             Text("Next 4 Hours")
                 .font(.caption)
                 .foregroundColor(.secondary)
@@ -275,7 +275,7 @@ struct ListRowView: View {
                 Text(city.displayName)
                     .font(.body)
                     .fontWeight(.medium)
-                    .lineLimit(1)
+                    .lineLimit(2)
                     .truncationMode(.tail)
                 
                 if let weather = weather {

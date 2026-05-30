@@ -81,6 +81,15 @@ class FeatureFlags: ObservableObject {
             UserDefaults.standard.set(weatherKitNowcastEnabled, forKey: "feature_weatherkit_nowcast_enabled")
         }
     }
+
+    /// Show specific place names (airports, universities, streets) instead of just the city name.
+    /// On by default. When disabled, all searches fall back to the locality-only label ("Madison, WI")
+    /// regardless of what was searched. Does not affect cities already saved.
+    @Published var specificPlaceNamesEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(specificPlaceNamesEnabled, forKey: "feature_specific_place_names_enabled")
+        }
+    }
     
     // MARK: - Initialization
     
@@ -94,7 +103,8 @@ class FeatureFlags: ObservableObject {
         self.tableViewEnabled = UserDefaults.standard.bool(forKey: "feature_table_view_enabled")
         self.weatherKitSnowEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_snow_enabled")
         self.weatherKitNowcastEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_nowcast_enabled")
-        
+        self.specificPlaceNamesEnabled = UserDefaults.standard.bool(forKey: "feature_specific_place_names_enabled")
+
         // Default values (if first launch or not set)
         // All features enabled by default for production
         if !UserDefaults.standard.contains(key: "feature_radar_enabled") {
@@ -121,6 +131,9 @@ class FeatureFlags: ObservableObject {
         if !UserDefaults.standard.contains(key: "feature_weatherkit_nowcast_enabled") {
             self.weatherKitNowcastEnabled = true  // On by default
         }
+        if !UserDefaults.standard.contains(key: "feature_specific_place_names_enabled") {
+            self.specificPlaceNamesEnabled = true  // On by default
+        }
     }
     
     // MARK: - Helper Methods
@@ -130,11 +143,12 @@ class FeatureFlags: ObservableObject {
         radarEnabled = true
         weatherAroundMeEnabled = true
         userGuideEnabled = true
-        weatherKitAlertsEnabled = true  // Default: enabled
-        myDataEnabled = true  // Default: enabled
-        tableViewEnabled = false  // Default: disabled
-        weatherKitSnowEnabled = true  // Default: enabled
-        weatherKitNowcastEnabled = true  // Default: enabled
+        weatherKitAlertsEnabled = true
+        myDataEnabled = true
+        tableViewEnabled = false
+        weatherKitSnowEnabled = true
+        weatherKitNowcastEnabled = true
+        specificPlaceNamesEnabled = true
         debugLog("🔧 Feature flags reset to defaults")
     }
     
@@ -148,10 +162,10 @@ class FeatureFlags: ObservableObject {
         tableViewEnabled = true
         weatherKitSnowEnabled = true
         weatherKitNowcastEnabled = true
+        specificPlaceNamesEnabled = true
         debugLog("🔧 All features enabled")
     }
-    
-    /// Disable all features (for release)
+
     func disableAll() {
         radarEnabled = false
         weatherAroundMeEnabled = false
@@ -161,6 +175,7 @@ class FeatureFlags: ObservableObject {
         tableViewEnabled = false
         weatherKitSnowEnabled = false
         weatherKitNowcastEnabled = false
+        specificPlaceNamesEnabled = false
         debugLog("🔧 All features disabled")
     }
 }

@@ -12,6 +12,7 @@ struct AddCitySearchView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var weatherService: WeatherService
     @StateObject private var locationService = LocationService.shared
+    @StateObject private var featureFlags = FeatureFlags.shared
     var initialSearchText: String = ""
     @State private var searchText = ""
     @State private var searchResults: [GeocodingResult] = []
@@ -240,39 +241,52 @@ struct AddCitySearchView: View {
     
     private func searchCity(query: String) async throws -> [GeocodingResult] {
         let geocoder = CLGeocoder()
-        
-        // Use CLGeocoder to search for locations
         let placemarks = try await geocoder.geocodeAddressString(query)
-        
+
         return placemarks.compactMap { placemark -> GeocodingResult? in
             guard let location = placemark.location else { return nil }
-            
-            // Normalize country name to English
+
             let nativeCountry = placemark.country
             let normalizedCountry = CountryNames.normalize(nativeCountry, isoCode: placemark.isoCountryCode)
-            
-            // Build display name from placemark components
-            var displayParts: [String] = []
-            
-            if let locality = placemark.locality {
-                displayParts.append(locality)
+
+            let locality = placemark.locality
+            let adminArea = placemark.administrativeArea
+            let placemarkName = placemark.name
+            let thoroughfare = placemark.thoroughfare
+
+            // Determine the primary name to show and store.
+            // City struct is unchanged — both old and new app versions decode each other's synced
+            // cities correctly. This flag only affects how *new* search results are labelled.
+            let specificName: String?
+            if featureFlags.specificPlaceNamesEnabled,
+               let name = placemarkName, let city = locality, name != city {
+                if name == thoroughfare {
+                    // Street name only — combine with city for clarity
+                    specificName = "\(name), \(city)"
+                } else if name.range(of: "^\\d", options: .regularExpression) != nil {
+                    // Full address (starts with house number) — use street name, drop number
+                    specificName = thoroughfare.map { "\($0), \(city)" } ?? "\(name), \(city)"
+                } else {
+                    // Named place: airport, university, landmark, neighbourhood
+                    specificName = name
+                }
+            } else {
+                specificName = nil
             }
-            if let administrativeArea = placemark.administrativeArea {
-                displayParts.append(administrativeArea)
-            }
-            if let country = normalizedCountry {
-                displayParts.append(country)
-            }
-            
-            let displayName = displayParts.isEmpty ? "Unknown Location" : displayParts.joined(separator: ", ")
-            let cityName = placemark.locality ?? placemark.name ?? displayName.components(separatedBy: ", ").first ?? "Unknown"
-            
+
+            let primaryName = specificName ?? locality ?? placemarkName ?? "Unknown"
+
+            var displayParts: [String] = [primaryName]
+            if specificName != nil, let city = locality { displayParts.append(city) }
+            if let area = adminArea { displayParts.append(area) }
+            if let country = normalizedCountry { displayParts.append(country) }
+
             return GeocodingResult(
                 id: UUID(),
-                displayName: displayName,
+                displayName: displayParts.joined(separator: ", "),
                 latitude: location.coordinate.latitude,
                 longitude: location.coordinate.longitude,
-                name: cityName
+                name: primaryName
             )
         }
     }

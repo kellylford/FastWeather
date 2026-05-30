@@ -18,8 +18,11 @@ struct DeveloperSettingsView: View {
         NavigationView {
             Form {
                 Section(header: Text("Feature Flags")) {
-                    
-                    
+
+                    Toggle("Specific Place Names", isOn: $featureFlags.specificPlaceNamesEnabled)
+                        .accessibilityLabel("Specific Place Names feature toggle")
+                        .accessibilityHint(featureFlags.specificPlaceNamesEnabled ? "Specific place names are enabled. Searching for an airport or university shows its full name instead of just the city." : "Specific place names are disabled. All searches label the result by city name only.")
+
                     Toggle("WeatherKit International Alerts", isOn: $featureFlags.weatherKitAlertsEnabled)
                         .accessibilityLabel("WeatherKit International Alerts feature toggle")
                         .accessibilityHint(featureFlags.weatherKitAlertsEnabled ? "WeatherKit alerts for international cities are currently enabled. US cities use NWS." : "WeatherKit alerts are currently disabled. Only US cities will show alerts via NWS.")

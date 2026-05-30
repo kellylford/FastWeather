@@ -374,7 +374,7 @@ struct CitySectionHeader: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(city.displayName)
                         .font(.headline)
-                        .lineLimit(1)
+                        .lineLimit(2)
                         .truncationMode(.tail)
                     
                     // UV Index badge (only during daytime)
