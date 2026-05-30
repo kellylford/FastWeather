@@ -149,6 +149,7 @@ export const mockConfig = {
     distance: 'mi'
   },
   defaultView: 'flat',
+  currentConditionsView: 'flat',
   listViewStyle: 'detailed',
   hourlyDetailView: 'flat',
   dailyDetailView: 'flat'

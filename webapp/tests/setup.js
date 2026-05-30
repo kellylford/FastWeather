@@ -41,6 +41,9 @@ beforeEach(() => {
   fetch.mockClear();
 });
 
+// Mock scrollIntoView — not implemented by jsdom
+HTMLElement.prototype.scrollIntoView = jest.fn();
+
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
   constructor() {}
