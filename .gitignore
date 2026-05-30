@@ -50,8 +50,8 @@ package-lock.json
 
 # Web test files
 webapp/test-role-fix.html
-/.github/agents
-/.github
-.github/copilot-instructions.md
+
+# .github — only exclude internal/tool-specific files, not the whole directory
+.github/agents/
 .github/copilot-instructions.md
 list.txt

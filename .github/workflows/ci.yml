@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ios-tests:
+    name: iOS Tests
+    runs-on: macos-15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create Secrets.swift
+        run: |
+          cat > iOS/FastWeather/Services/Secrets.swift << 'EOF'
+          enum Secrets {
+              static let openMeteoAPIKey: String? = nil
+          }
+          EOF
+
+      - name: Build and Test
+        run: |
+          xcodebuild test \
+            -project iOS/FastWeather.xcodeproj \
+            -scheme FastWeather \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcpretty || xcodebuild test \
+              -project iOS/FastWeather.xcodeproj \
+              -scheme FastWeather \
+              -destination 'platform=iOS Simulator,name=iPhone 16' \
+              CODE_SIGN_IDENTITY="" \
+              CODE_SIGNING_REQUIRED=NO \
+              CODE_SIGNING_ALLOWED=NO
+
+  webapp-tests:
+    name: Webapp Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        working-directory: webapp
+        run: npm install
+
+      - name: Run tests
+        working-directory: webapp
+        run: npm test -- --ci --forceExit
