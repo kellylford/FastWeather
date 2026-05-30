@@ -524,7 +524,7 @@ struct UserGuideView: View {
                     color: .gray
                 ) {
                     Text("Customize your experience:")
-                    BulletPoint("**Units** - °F/°C, mph/km/h, inches/mm")
+                    BulletPoint("**Units** - °F/°C, mph/km/h/m/s, inches/mm, hPa/inHg/mmHg")
                     BulletPoint("**View Mode** - List or Flat cards")
                     BulletPoint("**Display Mode** - Condensed or Expanded")
                     BulletPoint("**Weather Fields** - Show/hide and reorder")

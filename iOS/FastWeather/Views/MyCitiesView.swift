@@ -119,6 +119,9 @@ struct MyCitiesView: View {
                 .accessibilityAction(named: "Next Day") {
                     navigateToNextDay()
                 }
+                .accessibilityAction(named: "Return to Today") {
+                    navigateToToday()
+                }
                 .gesture(swipeGesture)
         }
     }

@@ -285,24 +285,31 @@ enum TemperatureUnit: String, CaseIterable, Codable {
 enum WindSpeedUnit: String, CaseIterable, Codable {
     case mph = "mph"
     case kmh = "km/h"
-    
+    case ms  = "m/s"
+
     func convert(_ kmh: Double) -> Double {
         switch self {
-        case .mph:
-            return kmh * 0.621371
-        case .kmh:
-            return kmh
+        case .mph: return kmh * 0.621371
+        case .kmh: return kmh
+        case .ms:  return kmh / 3.6
         }
     }
-    
+
     static var defaultUnit: WindSpeedUnit {
-        let system = Locale.current.measurementSystem
-        if system == .metric {
-            return .kmh
-        } else {
-            // .us and .uk both conventionally use mph
+        let msRegions: Set<String> = [
+            "NO", "SE", "FI", "IS",        // Nordic
+            "RU", "UA", "BY", "KZ",        // Russia / CIS
+            "EE", "LV", "LT",              // Baltic
+            "JP", "KR", "CN",              // East Asia
+            "IL"                           // Israel
+        ]
+        if let region = Locale.current.region?.identifier, msRegions.contains(region) {
+            return .ms
+        }
+        if Locale.current.measurementSystem == .us {
             return .mph
         }
+        return .kmh
     }
 }
 
@@ -345,11 +352,17 @@ enum PressureUnit: String, CaseIterable, Codable {
     }
     
     static var defaultUnit: PressureUnit {
+        let mmHgRegions: Set<String> = [
+            "RU", "UA", "BY", "KZ",        // Russia / CIS
+            "EE", "LV", "LT"               // Baltic
+        ]
+        if let region = Locale.current.region?.identifier, mmHgRegions.contains(region) {
+            return .mmHg
+        }
         if Locale.current.measurementSystem == .us {
             return .inHg
-        } else {
-            return .hPa
         }
+        return .hPa
     }
 }
 
