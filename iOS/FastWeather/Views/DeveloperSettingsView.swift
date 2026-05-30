@@ -91,7 +91,7 @@ struct DeveloperSettingsView: View {
                             .foregroundColor(.green)
                     }
                     
-                    Text("Available in Add City screen. Press \"Use My Current Location\" button to automatically add your current city.")
+                    Text("Available in Add Location screen. Press \"Use My Current Location\" button to automatically add your current location.")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }

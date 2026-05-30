@@ -27,7 +27,7 @@ struct AddCitySearchView: View {
             VStack(spacing: 0) {
                 // Search box and button
                 VStack(spacing: 12) {
-                    Text("Enter a city name or zip code")
+                    Text("Enter a city, ZIP code, street address, or location name")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -51,7 +51,7 @@ struct AddCitySearchView: View {
                     .buttonStyle(.borderedProminent)
                     .disabled(isGettingLocation || isSearching)
                     .accessibilityLabel("Use my current location")
-                    .accessibilityHint("Automatically detects your city using GPS. Requires location permission.")
+                    .accessibilityHint("Automatically detects your location using GPS. Requires location permission.")
                     
                     // Divider with "OR"
                     HStack {
@@ -72,7 +72,7 @@ struct AddCitySearchView: View {
                     .accessibilityHidden(true)
                     
                     HStack(spacing: 12) {
-                        TextField("City name or zip code", text: $searchText)
+                        TextField("City, ZIP code, address, or place name", text: $searchText)
                             .textFieldStyle(.roundedBorder)
                             .autocapitalization(.none)
                             .disableAutocorrection(true)
@@ -80,8 +80,8 @@ struct AddCitySearchView: View {
                             .onSubmit {
                                 performSearch()
                             }
-                            .accessibilityLabel("City search field")
-                            .accessibilityHint("Enter a city name or zip code to search")
+                            .accessibilityLabel("Location search field")
+                            .accessibilityHint("Enter a city, ZIP code, street address, or location name")
                         
                         Button(action: {
                             performSearch()
@@ -96,10 +96,10 @@ struct AddCitySearchView: View {
                         .buttonStyle(.borderedProminent)
                         .disabled(searchText.isEmpty || isSearching)
                         .accessibilityLabel("Search")
-                        .accessibilityHint("Search for the city you entered")
+                        .accessibilityHint("Search for the location you entered")
                     }
                     
-                    Text("Examples: \"San Diego, CA\" or \"53703\"")
+                    Text("Examples: \"San Diego, CA\", \"53703\", or \"University of Wisconsin\"")
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -168,7 +168,7 @@ struct AddCitySearchView: View {
                 
                 Spacer()
             }
-            .navigationTitle("Add City")
+            .navigationTitle("Add Location")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

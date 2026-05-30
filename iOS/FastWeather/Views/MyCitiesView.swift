@@ -230,10 +230,10 @@ struct MyCitiesView: View {
             Button {
                 showingAddCity = true
             } label: {
-                Label("Add City", systemImage: "plus")
+                Label("Add Location", systemImage: "plus")
             }
-            .accessibilityLabel("Add City")
-            .accessibilityHint("Opens search to add a new city")
+            .accessibilityLabel("Add Location")
+            .accessibilityHint("Opens search to add a new location")
             .keyboardShortcut("n", modifiers: [.command, .shift])
         }
     }

@@ -41,8 +41,8 @@ struct UserGuideView: View {
                     color: .green
                 ) {
                     Text("Add cities to track their weather:")
-                    BulletPoint("Activate the **+** (Add City) button on the My Cities tab")
-                    BulletPoint("Enter a city name or ZIP code")
+                    BulletPoint("Activate the **+** (Add Location) button on the My Cities tab")
+                    BulletPoint("Enter a city, ZIP code, street address, or location name")
                     BulletPoint("Select from search results")
                     BulletPoint("Or browse cities by state/country")
                 }
@@ -70,7 +70,7 @@ struct UserGuideView: View {
                     BulletPoint("Browse by **U.S. States** or **International** countries")
                     BulletPoint("Navigate through states/countries → cities")
                     BulletPoint("View weather without adding to your list")
-                    BulletPoint("Activate the **+** (Add City) button to add interesting cities")
+                    BulletPoint("Activate the **+** (Add Location) button to add interesting locations")
                     
                     Text("**Sorting Cities:**")
                         .fontWeight(.semibold)
@@ -951,7 +951,7 @@ struct UserGuideView: View {
                     Text("**Action & Navigation Icons:**")
                         .fontWeight(.semibold)
                         .padding(.top, 8)
-                    BulletPoint("**Plus circle** - Add city (VoiceOver: \"Add City\")")
+                    BulletPoint("**Plus circle** - Add location (VoiceOver: \"Add Location\")")
                     BulletPoint("**Circular arrows** - Refresh (VoiceOver: \"Refresh\" or \"Refresh weather\")")
                     BulletPoint("**Three dots circle** - Actions menu (VoiceOver: \"Actions\")")
                     BulletPoint("**Chevron right** - Navigate forward (VoiceOver: included in item name)")
