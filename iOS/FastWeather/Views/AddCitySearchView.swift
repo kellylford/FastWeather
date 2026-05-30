@@ -150,6 +150,7 @@ struct AddCitySearchView: View {
                         Image(systemName: "magnifyingglass")
                             .font(.system(size: 48))
                             .foregroundColor(.secondary)
+                            .accessibilityHidden(true)
                         Text("No results found")
                             .foregroundColor(.secondary)
                     }
@@ -159,7 +160,8 @@ struct AddCitySearchView: View {
                         Image(systemName: "map")
                             .font(.system(size: 64))
                             .foregroundColor(.secondary)
-                        Text("Search for a city by name or zip code")
+                            .accessibilityHidden(true)
+                        Text("Search for a city, ZIP code, street address, or location name")
                             .foregroundColor(.secondary)
                     }
                     .padding()
@@ -309,11 +311,15 @@ struct AddCitySearchView: View {
         if featureFlags.specificPlaceNamesEnabled,
            let name = itemName, let city = locality, name != city {
             if name == thoroughfare {
+                // Street name — combine with city ("Williamson St, Madison")
                 specificName = "\(name), \(city)"
             } else if name.range(of: "^\\d", options: .regularExpression) != nil {
+                // Full address starting with house number — use street + city, drop number
                 specificName = thoroughfare.map { "\($0), \(city)" } ?? "\(name), \(city)"
             } else {
-                specificName = name
+                // Named place (airport, university, landmark) — include city so
+                // "Memorial Union" stores as "Memorial Union, Madison" not just "Memorial Union"
+                specificName = "\(name), \(city)"
             }
         } else {
             specificName = nil
@@ -321,8 +327,9 @@ struct AddCitySearchView: View {
 
         let primaryName = specificName ?? locality ?? itemName ?? "Unknown"
 
+        // City is already embedded in specificName for all three cases above,
+        // so only append state and country.
         var displayParts: [String] = [primaryName]
-        if specificName != nil, let city = locality { displayParts.append(city) }
         if let area = adminArea { displayParts.append(area) }
         if let c = normalizedCountry { displayParts.append(c) }
 
