@@ -10,11 +10,17 @@ import SwiftUI
 struct MyCitiesView: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
+    @EnvironmentObject var myLocationService: MyLocationService
+    @StateObject private var featureFlags = FeatureFlags.shared
     @State private var showingSettings = false
     @State private var showingAddCity = false
     @State private var selectedCityForHistory: City?
     @State private var selectedCityForDetail: City?
     @State private var hasLoadedInitialWeather = false
+
+    private var showMyLocation: Bool {
+        featureFlags.myLocationEnabled && settingsManager.settings.myLocationEnabled
+    }
     
     // Date navigation state
     @State private var dateOffset: Int = 0  // 0 = today, +1 = tomorrow, -1 = yesterday
@@ -60,7 +66,7 @@ struct MyCitiesView: View {
     
     @ViewBuilder
     private var mainContent: some View {
-        if weatherService.savedCities.isEmpty {
+        if weatherService.savedCities.isEmpty && !showMyLocation {
             EmptyStateView()
         } else {
             switch settingsManager.settings.viewMode {
@@ -69,13 +75,15 @@ struct MyCitiesView: View {
                     selectedCityForHistory: $selectedCityForHistory,
                     selectedCityForDetail: $selectedCityForDetail,
                     dateOffset: dateOffset,
-                    selectedDate: selectedDate
+                    selectedDate: selectedDate,
+                    showMyLocation: showMyLocation
                 )
             case .list:
                 ListView(
                     selectedCityForHistory: $selectedCityForHistory,
                     dateOffset: dateOffset,
-                    selectedDate: selectedDate
+                    selectedDate: selectedDate,
+                    showMyLocation: showMyLocation
                 )
             case .table:
                 TableView(
@@ -108,6 +116,20 @@ struct MyCitiesView: View {
                 .refreshable {
                     await refreshAllCities()
                 }
+                .onAppear {
+                    if showMyLocation {
+                        myLocationService.requestPermissionIfNeeded()
+                        if myLocationService.locationCity == nil {
+                            Task { await myLocationService.refresh() }
+                        }
+                    }
+                }
+                .onChange(of: settingsManager.settings.myLocationEnabled) { _, isEnabled in
+                    if isEnabled {
+                        myLocationService.requestPermissionIfNeeded()
+                        Task { await myLocationService.refreshIfStale() }
+                    }
+                }
                 .onChange(of: dateOffset) { oldValue, newValue in
                     Task {
                         await refreshAllCities()
@@ -129,9 +151,11 @@ struct MyCitiesView: View {
     // MARK: - Helper Methods
     
     private func refreshAllCities() async {
+        async let locationRefresh: () = showMyLocation ? myLocationService.refresh() : ()
         for city in weatherService.savedCities {
             await weatherService.fetchWeatherForDate(for: city, dateOffset: dateOffset)
         }
+        await locationRefresh
     }
     
     private func navigateToPreviousDay() {

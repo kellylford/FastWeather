@@ -226,12 +226,15 @@ class WeatherService: ObservableObject {
     // MARK: - City Management
     
     func addCity(_ city: City) {
-        if !savedCities.contains(where: { $0.id == city.id }) {
-            savedCities.append(city)
-            saveCities()
-            Task {
-                await fetchWeather(for: city)
-            }
+        let alreadySaved = savedCities.contains {
+            $0.id == city.id ||
+            $0.displayName.lowercased() == city.displayName.lowercased()
+        }
+        guard !alreadySaved else { return }
+        savedCities.append(city)
+        saveCities()
+        Task {
+            await fetchWeather(for: city)
         }
     }
     

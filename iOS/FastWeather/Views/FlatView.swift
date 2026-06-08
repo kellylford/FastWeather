@@ -10,24 +10,203 @@ import SwiftUI
 struct FlatView: View {
     @EnvironmentObject var weatherService: WeatherService
     @EnvironmentObject var settingsManager: SettingsManager
+    @EnvironmentObject var myLocationService: MyLocationService
     @Binding var selectedCityForHistory: City?
     @Binding var selectedCityForDetail: City?
     @State private var alertSheetItem: AlertSheetItem?  // Stable sheet item to prevent re-presentation loop
-    
+
     // Date navigation parameters
     let dateOffset: Int
     let selectedDate: Date
-    
+
+    // Whether to show the My Location section (feature flag + user setting combined by caller)
+    let showMyLocation: Bool
+
     var body: some View {
         List {
+            if showMyLocation && settingsManager.settings.myLocationPosition == .beforeCityList {
+                myLocationFlatSection()
+            }
             ForEach(weatherService.savedCities) { city in
                 citySection(for: city)
+            }
+            if showMyLocation && settingsManager.settings.myLocationPosition == .afterCityList {
+                myLocationFlatSection()
             }
         }
         .listStyle(.grouped)
         .sheet(item: $alertSheetItem) { item in
             AlertDetailView(alert: item.alert)
         }
+    }
+
+    // MARK: - My Location Flat Section
+
+    @ViewBuilder
+    private func myLocationFlatSection() -> some View {
+        switch myLocationState() {
+        case .permissionNotDetermined:
+            Section {
+                Button {
+                    myLocationService.requestPermissionIfNeeded()
+                } label: {
+                    Label("Enable Location Access", systemImage: "location.slash")
+                        .foregroundColor(.accentColor)
+                }
+                .accessibilityLabel("Enable Location Access")
+                .accessibilityHint("Requests permission to use your current location for weather.")
+            }
+
+        case .permissionDenied:
+            Section {
+                Button {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                } label: {
+                    Label("Open Settings to Enable Location", systemImage: "location.slash.fill")
+                        .foregroundColor(.secondary)
+                }
+                .accessibilityLabel("Open Settings to Enable Location")
+                .accessibilityHint("Location access is denied. Opens Settings so you can enable it.")
+            }
+
+        case .loading:
+            Section {
+                HStack(spacing: 12) {
+                    ProgressView()
+                    Text("Locating…")
+                        .foregroundColor(.secondary)
+                }
+                .accessibilityLabel("Locating your current position")
+            }
+
+        case .error(let message):
+            Section {
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .foregroundColor(.secondary)
+                        .accessibilityHidden(true)
+                    Text(message)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .accessibilityLabel("Location error: \(message)")
+            }
+
+        case .loaded(let city):
+            myLocationCitySection(for: city)
+        }
+    }
+
+    @ViewBuilder
+    private func myLocationCitySection(for city: City) -> some View {
+        Section {
+            let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+            if let weather = weatherService.weatherCache[cacheKey] {
+                weatherDetailRows(for: weather)
+            } else if weatherService.failedCacheKeys.contains(cacheKey) {
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .foregroundColor(.secondary)
+                    Text("Unable to load weather. Pull to refresh.")
+                        .foregroundColor(.secondary)
+                        .font(.subheadline)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .listRowBackground(Color.clear)
+                .accessibilityLabel("Unable to load weather. Pull to refresh.")
+            } else {
+                ProgressView("Loading...")
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .listRowBackground(Color.clear)
+            }
+
+            myLocationActionsMenu(for: city)
+        } header: {
+            myLocationCitySectionHeader(for: city)
+        }
+    }
+
+    @ViewBuilder
+    private func myLocationCitySectionHeader(for city: City) -> some View {
+        CitySectionHeader(city: city, dateOffset: dateOffset, onAlertTap: { alert in
+            alertSheetItem = AlertSheetItem(city: city, alert: alert)
+        }, locationBadge: true)
+    }
+
+    @ViewBuilder
+    private func myLocationActionsMenu(for city: City) -> some View {
+        Menu {
+            Button(action: {
+                selectedCityForDetail = city
+            }) {
+                Label("Full Details", systemImage: "info.circle")
+            }
+
+            Button(action: {
+                selectedCityForHistory = city
+            }) {
+                Label("Historical Weather", systemImage: "calendar")
+            }
+
+            Divider()
+
+            Button(action: {
+                myLocationService.addToMyCityList(weatherService: weatherService)
+            }) {
+                Label("Add to My City List", systemImage: "plus.circle")
+            }
+
+            Button(action: {
+                Task { await myLocationService.refresh() }
+            }) {
+                Label("Refresh My Location", systemImage: "arrow.clockwise")
+            }
+        } label: {
+            HStack {
+                Spacer()
+                Text("Actions")
+                    .foregroundColor(.accentColor)
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Spacer()
+            }
+        }
+        .listRowBackground(Color(.secondarySystemGroupedBackground))
+        .accessibilityLabel("Actions for My Location: \(city.displayName)")
+    }
+
+    // MARK: - My Location State
+
+    private enum MyLocationState {
+        case permissionNotDetermined
+        case permissionDenied
+        case loading
+        case error(String)
+        case loaded(City)
+    }
+
+    private func myLocationState() -> MyLocationState {
+        switch myLocationService.permissionStatus {
+        case .notDetermined:
+            return .permissionNotDetermined
+        case .denied, .restricted:
+            return .permissionDenied
+        default:
+            break
+        }
+        if myLocationService.isLoading && myLocationService.locationCity == nil {
+            return .loading
+        }
+        if let city = myLocationService.locationCity {
+            return .loaded(city)
+        }
+        if let error = myLocationService.errorMessage {
+            return .error(error)
+        }
+        return .loading
     }
     
     @ViewBuilder
@@ -356,6 +535,7 @@ struct CitySectionHeader: View {
     let city: City
     let dateOffset: Int
     let onAlertTap: (WeatherAlert) -> Void
+    var locationBadge: Bool = false
     
     @State private var alerts: [WeatherAlert] = []
     
@@ -372,10 +552,18 @@ struct CitySectionHeader: View {
         if let weather = weather {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(city.displayName)
-                        .font(.headline)
-                        .lineLimit(2)
-                        .truncationMode(.tail)
+                    HStack(spacing: 4) {
+                        if locationBadge {
+                            Image(systemName: "location.fill")
+                                .font(.caption)
+                                .foregroundColor(.accentColor)
+                                .accessibilityHidden(true)
+                        }
+                        Text(city.displayName)
+                            .font(.headline)
+                            .lineLimit(2)
+                            .truncationMode(.tail)
+                    }
                     
                     // UV Index badge (only during daytime)
                     if settingsManager.settings.showUVIndexInCityList,
@@ -477,8 +665,10 @@ struct CitySectionHeader: View {
         selectedCityForHistory: .constant(nil),
         selectedCityForDetail: .constant(nil),
         dateOffset: 0,
-        selectedDate: Date()
+        selectedDate: Date(),
+        showMyLocation: false
     )
         .environmentObject(WeatherService())
         .environmentObject(SettingsManager())
+        .environmentObject(MyLocationService.shared)
 }

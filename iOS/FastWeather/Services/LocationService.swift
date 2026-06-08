@@ -126,6 +126,45 @@ class LocationService: NSObject, ObservableObject {
             longitude: location.coordinate.longitude
         )
     }
+
+    /// Reverse geocodes coordinates to a City using sub-locality for more specific display names.
+    /// Returns names like "Mission District, San Francisco" when sub-locality data is available,
+    /// falling back to locality + state/country otherwise.
+    func reverseGeocodeDetailed(latitude: Double, longitude: Double) async throws -> City {
+        let location = CLLocation(latitude: latitude, longitude: longitude)
+        let geocoder = CLGeocoder()
+
+        let placemarks = try await geocoder.reverseGeocodeLocation(location)
+
+        guard let placemark = placemarks.first else {
+            throw LocationError.geocodingFailed
+        }
+
+        let subLocality = placemark.subLocality
+        let locality    = placemark.locality
+        let adminArea   = placemark.administrativeArea
+        let country     = placemark.country ?? "Unknown"
+
+        let cityName: String
+        let cityState: String?
+
+        if let sub = subLocality, !sub.isEmpty, let loc = locality, !loc.isEmpty {
+            // e.g. "Mission District, San Francisco" — omit state to avoid over-qualification
+            cityName  = "\(sub), \(loc)"
+            cityState = nil
+        } else {
+            cityName  = locality ?? placemark.name ?? "Current Location"
+            cityState = adminArea
+        }
+
+        return City(
+            name: cityName,
+            state: cityState,
+            country: country,
+            latitude: latitude,
+            longitude: longitude
+        )
+    }
 }
 
 // MARK: - CLLocationManagerDelegate

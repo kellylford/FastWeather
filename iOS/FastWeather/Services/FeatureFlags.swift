@@ -90,6 +90,15 @@ class FeatureFlags: ObservableObject {
             UserDefaults.standard.set(specificPlaceNamesEnabled, forKey: "feature_specific_place_names_enabled")
         }
     }
+
+    /// Enable/disable the My Location section on the city list.
+    /// On by default. When disabled, the entire My Location feature is hidden regardless of the
+    /// user-facing setting in Settings > My Location.
+    @Published var myLocationEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(myLocationEnabled, forKey: "feature_my_location_enabled")
+        }
+    }
     
     // MARK: - Initialization
     
@@ -104,6 +113,7 @@ class FeatureFlags: ObservableObject {
         self.weatherKitSnowEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_snow_enabled")
         self.weatherKitNowcastEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_nowcast_enabled")
         self.specificPlaceNamesEnabled = UserDefaults.standard.bool(forKey: "feature_specific_place_names_enabled")
+        self.myLocationEnabled = UserDefaults.standard.bool(forKey: "feature_my_location_enabled")
 
         // Default values (if first launch or not set)
         // All features enabled by default for production
@@ -134,6 +144,9 @@ class FeatureFlags: ObservableObject {
         if !UserDefaults.standard.contains(key: "feature_specific_place_names_enabled") {
             self.specificPlaceNamesEnabled = true  // On by default
         }
+        if !UserDefaults.standard.contains(key: "feature_my_location_enabled") {
+            self.myLocationEnabled = true  // On by default
+        }
     }
     
     // MARK: - Helper Methods
@@ -149,6 +162,7 @@ class FeatureFlags: ObservableObject {
         weatherKitSnowEnabled = true
         weatherKitNowcastEnabled = true
         specificPlaceNamesEnabled = true
+        myLocationEnabled = true
         debugLog("🔧 Feature flags reset to defaults")
     }
     
@@ -163,6 +177,7 @@ class FeatureFlags: ObservableObject {
         weatherKitSnowEnabled = true
         weatherKitNowcastEnabled = true
         specificPlaceNamesEnabled = true
+        myLocationEnabled = true
         debugLog("🔧 All features enabled")
     }
 
@@ -176,6 +191,7 @@ class FeatureFlags: ObservableObject {
         weatherKitSnowEnabled = false
         weatherKitNowcastEnabled = false
         specificPlaceNamesEnabled = false
+        myLocationEnabled = false
         debugLog("🔧 All features disabled")
     }
 }

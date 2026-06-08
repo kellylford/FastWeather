@@ -31,6 +31,29 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             Form {
+                // My Location section (first, per user preference)
+                Section(header: Text("My Location")) {
+                    Toggle("Show My Location", isOn: $settingsManager.settings.myLocationEnabled)
+                        .onChange(of: settingsManager.settings.myLocationEnabled) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("Show My Location, currently \(settingsManager.settings.myLocationEnabled ? "on" : "off")")
+                        .accessibilityHint("When on, your current GPS location appears as a separate section above or below your city list.")
+
+                    if settingsManager.settings.myLocationEnabled {
+                        Picker("Position", selection: $settingsManager.settings.myLocationPosition) {
+                            ForEach(MyLocationPosition.allCases, id: \.self) { position in
+                                Text(position.rawValue).tag(position)
+                            }
+                        }
+                        .onChange(of: settingsManager.settings.myLocationPosition) {
+                            settingsManager.saveSettings()
+                        }
+                        .accessibilityLabel("My Location position, currently \(settingsManager.settings.myLocationPosition.rawValue)")
+                        .accessibilityHint("Controls whether My Location appears before or after your saved city list.")
+                    }
+                }
+
                 // Units section
                 Section(header: Text("Units")) {
                     Picker(selection: $settingsManager.settings.temperatureUnit) {

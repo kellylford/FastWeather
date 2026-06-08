@@ -22,9 +22,15 @@ struct FastWeatherApp: App {
             ContentView()
                 .environmentObject(weatherService)
                 .environmentObject(settingsManager)
+                .environmentObject(MyLocationService.shared)
                 .onChange(of: scenePhase) { _, newPhase in
                     if newPhase == .active {
                         iCloudSyncService.shared.synchronize()
+                        // Refresh My Location if stale (mirrors the app's staleness-based refresh pattern)
+                        let featureFlags = FeatureFlags.shared
+                        if featureFlags.myLocationEnabled && settingsManager.settings.myLocationEnabled {
+                            Task { await MyLocationService.shared.refreshIfStale() }
+                        }
                     }
                 }
         }

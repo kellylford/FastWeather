@@ -7,6 +7,13 @@
 
 import Foundation
 
+// MARK: - My Location Settings
+
+enum MyLocationPosition: String, CaseIterable, Codable {
+    case beforeCityList = "Before City List"
+    case afterCityList  = "After City List"
+}
+
 // MARK: - Weather Around Me Settings
 
 enum ExplorationMode: String, CaseIterable, Codable {
@@ -433,6 +440,9 @@ struct AppSettings: Codable {
     static let currentVersion = 3  // Note: My Data fields handled via migration in init(from:)
     var settingsVersion: Int = AppSettings.currentVersion  // = 3
 
+    var myLocationEnabled: Bool = true
+    var myLocationPosition: MyLocationPosition = .beforeCityList
+
     var viewMode: ViewMode = .list
     var displayMode: DisplayMode = .condensed
     var forecastDetailLayout: ForecastDetailLayout = .list
@@ -632,6 +642,7 @@ struct AppSettings: Codable {
     
     // Custom CodingKeys to handle private _weatherAroundMeDistance property
     enum CodingKeys: String, CodingKey {
+        case myLocationEnabled, myLocationPosition
         case settingsVersion, viewMode, displayMode, temperatureUnit, windSpeedUnit
         case precipitationUnit, pressureUnit, distanceUnit, historicalYearsBack, glanceAheadHours
         // Granular UV Index settings
@@ -773,6 +784,9 @@ struct AppSettings: Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
+        myLocationEnabled = try container.decodeIfPresent(Bool.self, forKey: .myLocationEnabled) ?? true
+        myLocationPosition = try container.decodeIfPresent(MyLocationPosition.self, forKey: .myLocationPosition) ?? .beforeCityList
+
         viewMode = try container.decodeIfPresent(ViewMode.self, forKey: .viewMode) ?? .list
         displayMode = try container.decodeIfPresent(DisplayMode.self, forKey: .displayMode) ?? .condensed
         temperatureUnit = try container.decodeIfPresent(TemperatureUnit.self, forKey: .temperatureUnit) ?? TemperatureUnit.defaultUnit
@@ -1057,6 +1071,9 @@ struct AppSettings: Codable {
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
+        try container.encode(myLocationEnabled, forKey: .myLocationEnabled)
+        try container.encode(myLocationPosition, forKey: .myLocationPosition)
+
         try container.encode(viewMode, forKey: .viewMode)
         try container.encode(displayMode, forKey: .displayMode)
         try container.encode(temperatureUnit, forKey: .temperatureUnit)

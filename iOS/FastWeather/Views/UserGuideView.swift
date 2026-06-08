@@ -58,6 +58,86 @@ struct UserGuideView: View {
                     BulletPoint("**Activate** a city to see detailed weather")
                     BulletPoint("**Pull down** to refresh all cities")
                     BulletPoint("Change view: **List** or **Flat** cards")
+                    BulletPoint("A **My Location** section at the top (or bottom) shows weather for where you are right now")
+                }
+
+                // My Location
+                GuideSection(
+                    icon: "location.fill",
+                    title: "My Location",
+                    color: .accentColor
+                ) {
+                    Text("My Location shows live weather for wherever you are right now, updating automatically as you travel — without permanently adding a city to your list.")
+                        .padding(.bottom, 4)
+
+                    Text("**How it works:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("On first launch, Weather Fast asks for location permission")
+                    BulletPoint("Your current position is reverse-geocoded to a specific place name — including neighborhood when available (e.g., \"Midtown, New York\" instead of just \"New York\")")
+                    BulletPoint("Weather is fetched for your exact GPS coordinates, so the forecast reflects where you actually are")
+                    BulletPoint("The location refreshes automatically when the app returns to the foreground after 15 minutes or more away")
+                    BulletPoint("**Pull to refresh** also updates your location along with all saved cities")
+
+                    Text("**Press and hold / Actions menu:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    BulletPoint("**Add to My City List** — permanently saves your current location as a city")
+                    BulletPoint("**Refresh My Location** — forces an immediate location update")
+                    BulletPoint("**View Historical Weather** — opens historical data for your current position")
+
+                    Text("**VoiceOver actions:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("The My Location row supports the same VoiceOver custom actions as saved cities. Open the actions rotor (swipe up or down with one finger) to find:")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 4)
+                    BulletPoint("**Add to My City List** — posts a confirmation announcement when added")
+                    BulletPoint("**Refresh My Location** — announces \"Refreshing location\"")
+                    BulletPoint("**View Historical Weather** — opens the historical weather sheet")
+                    BulletPoint("**Glance Ahead** — reads out the next few hours of forecast")
+
+                    Text("**Settings:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("Control My Location in **Settings → My Location** (the first settings group):")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 4)
+                    BulletPoint("**Show My Location** toggle — turns the section on or off entirely")
+                    BulletPoint("**Position** — choose whether My Location appears **Before City List** (default) or **After City List**")
+
+                    Text("**If location permission is denied:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("The My Location section shows an \"Open Settings to Enable Location\" button. Tapping it takes you directly to the Location Services settings for Weather Fast.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 4)
+
+                    Text("**My Location and iCloud Sync:**")
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                    Text("Your location data is always device-specific and never syncs to your other devices. If you have an iPhone in New York and an iPad in Chicago, each shows weather for where it actually is. Your iPhone will not send its New York position to your iPad.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 4)
+                    Text("The My Location settings (the toggle and the Before/After position) do sync — so your preference for whether the feature is on and where it appears will be consistent across devices.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 16)
+                        .padding(.bottom, 4)
+
+                    Text("**Note:** My Location never appears in your saved city list unless you explicitly choose \"Add to My City List\". It will not show up in iCloud sync, widgets, or Weather in Time comparisons unless added.")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 4)
+                        .padding(.leading, 16)
                 }
                 
                 // Browse Cities Tab
@@ -524,6 +604,7 @@ struct UserGuideView: View {
                     color: .gray
                 ) {
                     Text("Customize your experience:")
+                    BulletPoint("**My Location** - Toggle on/off and choose position (Before or After city list)")
                     BulletPoint("**Units** - °F/°C, mph/km/h/m/s, inches/mm, hPa/inHg/mmHg")
                     BulletPoint("**View Mode** - List or Flat cards")
                     BulletPoint("**Display Mode** - Condensed or Expanded")
@@ -554,6 +635,7 @@ struct UserGuideView: View {
                     BulletPoint("Feature flags and Developer Settings — these stay local to each device")
                     BulletPoint("The iCloud Sync toggle itself — you turn it on per device")
                     BulletPoint("Cached weather data — each device fetches its own fresh data")
+                    BulletPoint("My Location position data — each device independently detects where it is, so your iPhone in New York and your iPad in Chicago each show their own location")
 
                     Text("**Turning sync on for the first time:**")
                         .fontWeight(.semibold)
@@ -951,6 +1033,7 @@ struct UserGuideView: View {
                     Text("**Action & Navigation Icons:**")
                         .fontWeight(.semibold)
                         .padding(.top, 8)
+                    BulletPoint("**Filled location pin** - My Location section header and row badge (VoiceOver: hidden, context provided by section label \"My Location\")")
                     BulletPoint("**Plus circle** - Add location (VoiceOver: \"Add Location\")")
                     BulletPoint("**Circular arrows** - Refresh (VoiceOver: \"Refresh\" or \"Refresh weather\")")
                     BulletPoint("**Three dots circle** - Actions menu (VoiceOver: \"Actions\")")

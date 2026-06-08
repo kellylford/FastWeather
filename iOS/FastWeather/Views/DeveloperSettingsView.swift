@@ -19,6 +19,10 @@ struct DeveloperSettingsView: View {
             Form {
                 Section(header: Text("Feature Flags")) {
 
+                    Toggle("My Location Section", isOn: $featureFlags.myLocationEnabled)
+                        .accessibilityLabel("My Location feature toggle")
+                        .accessibilityHint(featureFlags.myLocationEnabled ? "My Location is enabled. A My Location section appears on the city list when the user setting is also on." : "My Location is disabled globally. The My Location section will not appear regardless of user settings.")
+
                     Toggle("Specific Place Names", isOn: $featureFlags.specificPlaceNamesEnabled)
                         .accessibilityLabel("Specific Place Names feature toggle")
                         .accessibilityHint(featureFlags.specificPlaceNamesEnabled ? "Specific place names are enabled. Searching for an airport or university shows its full name instead of just the city." : "Specific place names are disabled. All searches label the result by city name only.")

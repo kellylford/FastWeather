@@ -72,6 +72,7 @@
 		CE046B003A58C6559345F3A6 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E5E353DA647F3B0B2671055 /* SwiftUI.framework */; };
 		E41FA69A048BFD0F634DB005 /* RadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8C597ECDBB8F82B9D13 /* RadarView.swift */; };
 		E4F1B4B29C76E05475F84205 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 582B5A12CF76291E75D023B0 /* AppLogger.swift */; };
+		A1MYLOC002 /* MyLocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1MYLOC001 /* MyLocationService.swift */; };
 		FCF060427E69A6D68459749C /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F83A2A75D10D105C7225AE79 /* LocationService.swift */; };
 		FFDCDC0E6C3FE2E629DA343D /* CountryNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91C990465E49C005E87F407B /* CountryNames.swift */; };
 		ICLOUD0001B /* iCloudSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ICLOUD0001 /* iCloudSyncService.swift */; };
@@ -183,6 +184,7 @@
 		BB100002A0 /* ViewConfigurationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ViewConfigurationTests.swift; path = FastWeatherTests/ViewConfigurationTests.swift; sourceTree = "<group>"; };
 		BB100003A0 /* UnitConversionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = UnitConversionTests.swift; path = FastWeatherTests/UnitConversionTests.swift; sourceTree = "<group>"; };
 		CD557832C1BCA3C9AA2DF4EF /* BrowseModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowseModels.swift; sourceTree = "<group>"; };
+		A1MYLOC001 /* MyLocationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MyLocationService.swift; sourceTree = "<group>"; };
 		F83A2A75D10D105C7225AE79 /* LocationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		ICLOUD0001 /* iCloudSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iCloudSyncService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -336,6 +338,7 @@
 				A1000WARM2 /* RegionalWeatherService.swift */,
 				1311D88F8BCB7E6528F708FD /* DirectionalCityService.swift */,
 				F83A2A75D10D105C7225AE79 /* LocationService.swift */,
+				A1MYLOC001 /* MyLocationService.swift */,
 				3B7B06EFA7D170A6D9BA8847 /* WeatherHelpers.swift */,
 				A5456D76628AB29EB3D6E266 /* WeatherCache.swift */,
 				808AC3615E6E747E006B95C9 /* HistoricalWeatherCache.swift */,
@@ -573,6 +576,7 @@
 				1EA38206A8F8117706BC1BE1 /* UserGuideView.swift in Sources */,
 				0B20A334AA1FE3314940526C /* DirectionalCityService.swift in Sources */,
 				FCF060427E69A6D68459749C /* LocationService.swift in Sources */,
+				A1MYLOC002 /* MyLocationService.swift in Sources */,
 				21615169040A120F379786F1 /* WeatherHelpers.swift in Sources */,
 				4B07E53F90DD3EA9329F2D45 /* WeatherCache.swift in Sources */,
 				90B76CB12EE73F0BF533980A /* HistoricalWeatherCache.swift in Sources */,
@@ -681,7 +685,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEFINES_MODULE = YES;
 				ENABLE_APP_SANDBOX = YES;
@@ -716,7 +720,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5.4;
+				MARKETING_VERSION = 1.5.5;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -770,7 +774,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = YES;
 				ENABLE_APP_SANDBOX = YES;
@@ -799,7 +803,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5.4;
+				MARKETING_VERSION = 1.5.5;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.weatherfast.app;
@@ -941,7 +945,7 @@
 				CODE_SIGN_ENTITLEMENTS = FastWeatherWidget/FastWeatherWidget.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = P887QF74N8;
 				ENABLE_APP_SANDBOX = NO;
@@ -951,7 +955,7 @@
 					"$(inherited)",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.5.4;
+				MARKETING_VERSION = 1.5.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.weatherfast.app.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -971,7 +975,7 @@
 				CODE_SIGN_ENTITLEMENTS = FastWeatherWidget/FastWeatherWidget.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = P887QF74N8;
 				ENABLE_APP_SANDBOX = NO;
@@ -981,7 +985,7 @@
 					"$(inherited)",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.5.4;
+				MARKETING_VERSION = 1.5.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.weatherfast.app.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
