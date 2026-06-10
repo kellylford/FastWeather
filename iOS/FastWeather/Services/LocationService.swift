@@ -121,7 +121,7 @@ class LocationService: NSObject, ObservableObject {
     /// - Throws: LocationError if location cannot be determined
     func getCurrentLocationAsCity() async throws -> City {
         let location = try await getCurrentLocation()
-        return try await reverseGeocode(
+        return try await reverseGeocodeDetailed(
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude
         )
