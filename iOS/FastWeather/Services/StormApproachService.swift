@@ -140,6 +140,11 @@ struct StormApproach {
     let hereIntensity: PrecipIntensity
     /// Estimated field motion. Nil when it can't be reliably determined (e.g. stationary or too sparse).
     let motion: StormMotion?
+    /// True when the location's weather code reports a thunderstorm even though no
+    /// measurable precipitation is present — scattered/dry convection. Lets the
+    /// narration acknowledge the storm instead of flatly reporting "nothing",
+    /// which would contradict the main screen's condition.
+    let thunderstormInArea: Bool
     /// Minutes until precipitation reaches the user. Nil when raining now or not approaching.
     let arrivalMinutes: Int?
     /// Impact on nearby saved cities ("your places"), nearest first.
@@ -322,6 +327,11 @@ final class StormApproachService {
             situation = .clear
         }
 
+        // Convective awareness: thunderstorm weather code at the location with no
+        // measurable precipitation (matches the main screen's Open-Meteo source).
+        let centreCode = sampleForecasts.first?.current?.weatherCode ?? -1
+        let thunderstormInArea = [95, 96, 99].contains(centreCode)
+
         // --- Part C: saved-city impacts ("your places") ---
         let impacts: [CityImpact] = zip(cityPoints, cityForecasts).map { point, forecast in
             classifyCity(point: point, forecast: forecast, motion: motion, nowEpoch: nowEpoch)
@@ -339,6 +349,7 @@ final class StormApproachService {
             nearestIntensity: nearest.map { PrecipIntensity(mmPerHour: $0.mm * 4) } ?? .none,
             hereIntensity: hereIntensity,
             motion: motion,
+            thunderstormInArea: thunderstormInArea,
             arrivalMinutes: arrivalMinutes,
             cityImpacts: impacts,
             placeImpacts: placeImpacts,
@@ -457,7 +468,7 @@ final class StormApproachService {
             URLQueryItem(name: "latitude", value: coords.map { String($0.0) }.joined(separator: ",")),
             URLQueryItem(name: "longitude", value: coords.map { String($0.1) }.joined(separator: ",")),
             URLQueryItem(name: "minutely_15", value: "precipitation"),
-            URLQueryItem(name: "current", value: "precipitation"),
+            URLQueryItem(name: "current", value: "precipitation,weather_code"),
             URLQueryItem(name: "timeformat", value: "unixtime"),
             URLQueryItem(name: "timezone", value: "GMT"),
             URLQueryItem(name: "forecast_days", value: "2")
@@ -515,6 +526,7 @@ private struct PointForecast: Codable {
 private struct PointCurrent: Codable {
     let time: Int
     let precipitation: Double?
+    let weatherCode: Int?
 }
 
 private struct PointMinutely: Codable {
@@ -614,12 +626,23 @@ extension StormApproach {
             var s = "\(capFirst(nearestIntensity.adjective)) precipitation to the \(dir)"
             if let d = nearestDistanceKm { s += ", about \(formatDistance(d, distanceUnit)) away" }
             s += ", but it is not heading your way right now."
+            if thunderstormInArea { s += " " + thunderstormNote }
             return s
 
         case .clear:
+            if thunderstormInArea { return thunderstormNote }
             return "No precipitation within \(formatDistance(ringRadiusKm, distanceUnit)) of you," +
                    " now or in the next 2 hours."
         }
+    }
+
+    /// Reconciles a thunderstorm weather code with zero measurable precipitation —
+    /// the scattered-/dry-convection case that otherwise looks like the app
+    /// contradicting itself.
+    private var thunderstormNote: String {
+        "Thunderstorms are in your area's forecast, but no measurable rain is" +
+        " reaching your location or nearby towns right now. Scattered storms can do this —" +
+        " conditions may change quickly."
     }
 
     /// Lines for nearby bundled towns the storm is over or heading for (named
