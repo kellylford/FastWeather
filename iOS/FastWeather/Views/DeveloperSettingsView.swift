@@ -65,7 +65,7 @@ struct DeveloperSettingsView: View {
 
                     Toggle("Weather Radar Map", isOn: $featureFlags.weatherRadarMapEnabled)
                         .accessibilityLabel("Weather Radar Map feature toggle")
-                        .accessibilityHint(featureFlags.weatherRadarMapEnabled ? "Radar map is enabled. Weather Around Me offers a free RainViewer radar map you can have VoiceOver or on-device AI describe." : "Radar map is disabled and the radar map button is hidden in Weather Around Me.")
+                        .accessibilityHint(featureFlags.weatherRadarMapEnabled ? "Radar map is enabled. Weather Around Me offers a free NWS NEXRAD radar map, United States coverage, that you can have VoiceOver or on-device AI describe." : "Radar map is disabled and the radar map button is hidden in Weather Around Me.")
 
                     Toggle("Enable Table View", isOn: $featureFlags.tableViewEnabled)
                         .accessibilityLabel("Enable Table View feature toggle")

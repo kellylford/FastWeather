@@ -41,7 +41,8 @@ Notes: a new multi-coordinate Open-Meteo call (one request, `timeformat=unixtime
 4. **Precipitation type per town** — use each sampled point's `weather_code` to say "**snow** over Springfield" vs. rain, and extend the thunderstorm-with-zero-rain reconciliation to towns, not just the centre.
 
 ### Radar integration (flag `weatherRadarMapEnabled`, default ON)
-- **Free RainViewer radar tiles on a MapKit overlay.** `api.rainviewer.com/public/weather-maps.json` → latest observed frame → `MKTileOverlay` (NEXRAD colour scheme) over an `MKMapView` centred on the location, with a pin at the city. RainViewer attribution shown. This is genuinely free for reasonable use.
+- **Free, public-domain NWS NEXRAD radar tiles on a MapKit overlay.** NOAA/NWS NEXRAD base-reflectivity composite (N0Q) served as web-mercator XYZ tiles by the Iowa Environmental Mesonet (`mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/{z}/{x}/{y}.png`) → `MKTileOverlay` over an `MKMapView` centred on the location, pin at the city, attribution shown. **US (CONUS) coverage only**; outside the US the overlay is empty and a note says so.
+- **Why NEXRAD/IEM and not RainViewer:** RainViewer's free public API is **personal/educational use only** — not licensed for a published app — so it was swapped out. NOAA NEXRAD is public domain. (RainViewer max zoom was 7, requiring a zoom cap; IEM serves higher zooms.)
 - **Why it matters for a blind developer/user:** it puts a *real radar image* in the app that **VoiceOver image recognition / on-device AI (iOS 26/27 image descriptions)** can describe in ~2 seconds — and it doubles as the **ground-truth check** for our text narration (does "moving northeast" match what the image shows?). We don't build the AI; we just present an image the OS can read.
 
 ### Still open / future

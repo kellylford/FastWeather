@@ -139,8 +139,9 @@ class FeatureFlags: ObservableObject {
         }
     }
 
-    /// Free RainViewer radar map (MapKit tile overlay) inside Weather Around Me. Provides an actual
-    /// radar image that VoiceOver image recognition / on-device AI can describe. On by default.
+    /// Free public-domain NWS NEXRAD radar map (MapKit tile overlay, US coverage) inside Weather
+    /// Around Me. Provides an actual radar image that VoiceOver image recognition / on-device AI
+    /// can describe. On by default.
     @Published var weatherRadarMapEnabled: Bool {
         didSet {
             UserDefaults.standard.set(weatherRadarMapEnabled, forKey: "feature_weather_radar_map_enabled")
