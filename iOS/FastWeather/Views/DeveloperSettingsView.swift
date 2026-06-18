@@ -55,6 +55,10 @@ struct DeveloperSettingsView: View {
                         .accessibilityLabel("Storm Approach feature toggle")
                         .accessibilityHint(featureFlags.stormApproachEnabled ? "Storm Approach is enabled. Weather Around Me shows, at the top, which direction precipitation is coming from, its motion, arrival time, nearby towns it is over or heading for, and the effect on your saved cities." : "Storm Approach is disabled. Weather Around Me shows only the regional temperature and condition comparison, as before.")
 
+                    Toggle("Nowcast Refinements", isOn: $featureFlags.nowcastRefinementsEnabled)
+                        .accessibilityLabel("Nowcast Refinements feature toggle")
+                        .accessibilityHint(featureFlags.nowcastRefinementsEnabled ? "Refinements are enabled. The Expected Precipitation feature is renamed Next Hour and shows only timing, a tappable Next Hour summary appears on the city screen, and the older wind-based direction block is hidden because Weather Around Me now does direction better." : "Refinements are disabled. Everything behaves exactly as before: the feature is called Expected Precipitation and shows its original summary, with no Next Hour line on the city screen.")
+
                     Toggle("Enable Table View", isOn: $featureFlags.tableViewEnabled)
                         .accessibilityLabel("Enable Table View feature toggle")
                         .accessibilityHint(featureFlags.tableViewEnabled ? "Table view is enabled. Table option will appear in the View Mode picker in Settings." : "Table view is disabled. Table option will not appear in the View Mode picker in Settings.")

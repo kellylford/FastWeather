@@ -24,6 +24,8 @@ Notes: a new multi-coordinate Open-Meteo call (one request, `timeformat=unixtime
 
 **Convective awareness:** when the location's Open-Meteo `weather_code` reports a thunderstorm (95/96/99) but quantitative precipitation is 0 (scattered/dry convection — e.g. Aventura FL), Storm Approach surfaces a reconciling note instead of a flat "no precipitation", so it agrees with the main screen's condition rather than contradicting it.
 
+**Nowcast IA refinements** (flag `nowcastRefinementsEnabled`, **default OFF** — with it off the app is byte-for-byte the prior behavior): (1) the precipitation feature is renamed **"Next Hour"** (Actions-menu button + screen title) to signal *timing* vs. Weather Around Me's *spatial* picture; (2) that screen becomes purely temporal — the older wind-inferred "nearest precipitation" block is hidden, since Storm Approach does direction better; (3) a tappable **Next Hour one-liner** appears on the main city detail screen (today only), opening the full timing screen. The main Settings toggle and User Guide text keep the "Expected Precipitation" wording for now.
+
 ---
 
 ## Why this document exists

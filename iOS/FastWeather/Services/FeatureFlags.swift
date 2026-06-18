@@ -118,6 +118,17 @@ class FeatureFlags: ObservableObject {
         }
     }
 
+    /// Nowcast information-architecture refinements. OFF by default so users see no change.
+    /// When on: the precipitation screen is renamed "Next Hour" and becomes purely temporal
+    /// (the older wind-inferred "nearest precipitation" block is hidden, since Storm Approach in
+    /// Weather Around Me does direction better), and a tappable Next Hour one-liner appears on the
+    /// main city detail screen.
+    @Published var nowcastRefinementsEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(nowcastRefinementsEnabled, forKey: "feature_nowcast_refinements_enabled")
+        }
+    }
+
     // MARK: - Initialization
     
     private init() {
@@ -134,6 +145,7 @@ class FeatureFlags: ObservableObject {
         self.myLocationEnabled = UserDefaults.standard.bool(forKey: "feature_my_location_enabled")
         self.nextHourNarrationEnabled = UserDefaults.standard.bool(forKey: "feature_next_hour_narration_enabled")
         self.stormApproachEnabled = UserDefaults.standard.bool(forKey: "feature_storm_approach_enabled")
+        self.nowcastRefinementsEnabled = UserDefaults.standard.bool(forKey: "feature_nowcast_refinements_enabled")
 
         // Default values (if first launch or not set)
         // All features enabled by default for production
@@ -191,6 +203,7 @@ class FeatureFlags: ObservableObject {
         myLocationEnabled = true
         nextHourNarrationEnabled = true
         stormApproachEnabled = true
+        nowcastRefinementsEnabled = false
         debugLog("🔧 Feature flags reset to defaults")
     }
     
@@ -208,6 +221,7 @@ class FeatureFlags: ObservableObject {
         myLocationEnabled = true
         nextHourNarrationEnabled = true
         stormApproachEnabled = true
+        nowcastRefinementsEnabled = true
         debugLog("🔧 All features enabled")
     }
 
@@ -224,6 +238,7 @@ class FeatureFlags: ObservableObject {
         myLocationEnabled = false
         nextHourNarrationEnabled = false
         stormApproachEnabled = false
+        nowcastRefinementsEnabled = false
         debugLog("🔧 All features disabled")
     }
 }

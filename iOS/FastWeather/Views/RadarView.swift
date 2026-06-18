@@ -43,7 +43,7 @@ struct RadarView: View {
             }
             .padding()
         }
-        .navigationTitle("Expected Precipitation")
+        .navigationTitle(FeatureFlags.shared.nowcastRefinementsEnabled ? "Next Hour" : "Expected Precipitation")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -132,8 +132,11 @@ struct RadarView: View {
                 nextHourCard(summary)
             }
 
-            // Summary Card - Most important info first for accessibility
-            radarSummaryCard(radar)
+            // Summary Card - Most important info first for accessibility.
+            // When refinements are on this screen is purely temporal, so the older
+            // wind-inferred "nearest precipitation" block is hidden (Weather Around
+            // Me's Storm Approach does direction better).
+            radarSummaryCard(radar, showNearest: !FeatureFlags.shared.nowcastRefinementsEnabled)
 
             // Timeline View
             radarTimelineView(radar)
@@ -160,13 +163,13 @@ struct RadarView: View {
     }
 
     // MARK: - Precipitation Summary Card
-    private func radarSummaryCard(_ radar: RadarData) -> some View {
+    private func radarSummaryCard(_ radar: RadarData, showNearest: Bool) -> some View {
         GroupBox(label: Label("Precipitation Summary", systemImage: "cloud.rain")) {
             VStack(alignment: .leading, spacing: 12) {
                 Text(radar.currentStatus)
                     .font(.headline)
 
-                if let nearest = radar.nearestPrecipitation {
+                if showNearest, let nearest = radar.nearestPrecipitation {
                     Divider()
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Nearest Precipitation:")
@@ -187,7 +190,7 @@ struct RadarView: View {
             .padding(.vertical, 8)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(radarSummaryAccessibilityLabel(radar))
+        .accessibilityLabel(radarSummaryAccessibilityLabel(radar, showNearest: showNearest))
     }
     
     // MARK: - Timeline View
@@ -354,10 +357,10 @@ struct RadarView: View {
     }
     
     // MARK: - Accessibility Labels
-    private func radarSummaryAccessibilityLabel(_ radar: RadarData) -> String {
+    private func radarSummaryAccessibilityLabel(_ radar: RadarData, showNearest: Bool) -> String {
         var label = "Precipitation Summary. \(radar.currentStatus)."
 
-        if let nearest = radar.nearestPrecipitation {
+        if showNearest, let nearest = radar.nearestPrecipitation {
             label += " Nearest precipitation: \(nearest.type), \(formatDistance(nearest.distanceMiles)) to the \(nearest.direction), "
             label += "moving \(nearest.movementDirection) at \(formatSpeed(nearest.speedMph))."
             if let arrival = nearest.arrivalEstimate {
