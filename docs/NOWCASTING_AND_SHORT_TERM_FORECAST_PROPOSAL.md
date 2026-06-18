@@ -18,7 +18,11 @@ All four shipping items are behind feature flags (Settings → Developer Setting
 | Gap 1 — nearby-town layer (radar-like) | ✅ Implemented | `StormApproachService.nearbyPlaces` / `classifyPlace` — names bundled towns the storm is over/heading for (no reverse geocoding), within ~50 mi, in addition to saved cities |
 | Part D — sonification | ⛔ Deferred by design | — |
 
-Notes: a new multi-coordinate Open-Meteo call (one request, `timeformat=unixtime`, `timezone=GMT`) samples 8 bearings × 2 radii (30/60 km) + nearby saved cities. When Storm Approach is on, it supersedes the old wind-inferred "nearest precipitation" block in the summary card to avoid a contradictory second direction estimate. Distances/speeds respect the user's unit settings. Builds clean for the iOS Simulator; XCTest suite not yet run.
+Notes: a new multi-coordinate Open-Meteo call (one request, `timeformat=unixtime`, `timezone=GMT`) samples 8 bearings × 2 radii (30/60 km) + nearby saved cities + nearby bundled towns. Distances/speeds respect the user's unit settings. Builds clean for the iOS Simulator; XCTest suite not yet run.
+
+**Home of Storm Approach:** merged into the **Weather Around Me** feature (top section), not Expected Precipitation — one unified "around me" surface. The `stormApproachEnabled` flag gates the whole section; turned off, Weather Around Me reverts to exactly its prior temperature/condition comparison. The Next Hour narration remains in Expected Precipitation (gated by `nextHourNarrationEnabled`).
+
+**Convective awareness:** when the location's Open-Meteo `weather_code` reports a thunderstorm (95/96/99) but quantitative precipitation is 0 (scattered/dry convection — e.g. Aventura FL), Storm Approach surfaces a reconciling note instead of a flat "no precipitation", so it agrees with the main screen's condition rather than contradicting it.
 
 ---
 

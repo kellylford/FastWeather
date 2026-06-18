@@ -807,7 +807,7 @@ struct CityDetailView: View {
         }
         .sheet(isPresented: $showingRadar) {
             NavigationView {
-                RadarView(city: city, savedCities: weatherService.savedCities)
+                RadarView(city: city)
                     .environmentObject(settingsManager)
                     .toolbar {
                         ToolbarItem(placement: .navigationBarTrailing) {

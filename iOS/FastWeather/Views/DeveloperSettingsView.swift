@@ -53,7 +53,7 @@ struct DeveloperSettingsView: View {
 
                     Toggle("Storm Approach", isOn: $featureFlags.stormApproachEnabled)
                         .accessibilityLabel("Storm Approach feature toggle")
-                        .accessibilityHint(featureFlags.stormApproachEnabled ? "Storm Approach is enabled. Expected Precipitation reports which direction precipitation is coming from, its motion, arrival time, and effect on nearby saved cities." : "Storm Approach is disabled. The directional precipitation card is hidden.")
+                        .accessibilityHint(featureFlags.stormApproachEnabled ? "Storm Approach is enabled. Weather Around Me shows, at the top, which direction precipitation is coming from, its motion, arrival time, nearby towns it is over or heading for, and the effect on your saved cities." : "Storm Approach is disabled. Weather Around Me shows only the regional temperature and condition comparison, as before.")
 
                     Toggle("Enable Table View", isOn: $featureFlags.tableViewEnabled)
                         .accessibilityLabel("Enable Table View feature toggle")
