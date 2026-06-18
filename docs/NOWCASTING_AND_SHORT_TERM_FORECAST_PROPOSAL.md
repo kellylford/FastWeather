@@ -28,6 +28,28 @@ Notes: a new multi-coordinate Open-Meteo call (one request, `timeformat=unixtime
 
 ---
 
+## Weather Around Me — accuracy roadmap & radar integration
+
+### What is already trustworthy vs. shaky
+- **Arrival time ("reaching you in ~20 min") is the strongest number** — it comes from *your own point's* `minutely_15` forecast onset (native NOAA HRRR in the US). Keep relying on this for "when".
+- **Direction/motion is the shaky part.** Two weak methods existed: the original Weather Around Me inferred approach/recession from **surface wind** at remote cities (storms don't move with surface wind); the first Storm Approach used **precipitation-weighted centroid tracking** across two forecast frames (better, but conflates storm *growth/decay* with *motion*).
+
+### Accuracy improvements (flag `weatherAroundMeImprovementsEnabled`, default ON)
+1. **Steering-wind storm motion (primary fix).** Estimate motion from the **mid-level steering flow** — the vector mean of the 850/700/500 hPa winds at the location (Open-Meteo pressure-level wind variables, paid tier) — which is how storm motion is actually estimated. Use the centroid drift only as a **cross-check**.
+2. **Confidence + honest hedging.** Compare the steering vector against the centroid drift: close agreement → high confidence, state it plainly; disagreement or sparse field → lower confidence, hedge ("generally from the southwest", "roughly 20–30 minutes", "track is unclear"). Never state a crisp vector the data can't support — over-precision destroys trust for a user who can't glance at radar to cross-check.
+3. **Denser sampling grid** — 16 bearings × 3 radii instead of 8 × 2, so a lone cell between spokes isn't missed or mislocated. Just more coordinates in the same single multi-coordinate call (cheap on paid tier).
+4. **Precipitation type per town** — use each sampled point's `weather_code` to say "**snow** over Springfield" vs. rain, and extend the thunderstorm-with-zero-rain reconciliation to towns, not just the centre.
+
+### Radar integration (flag `weatherRadarMapEnabled`, default ON)
+- **Free RainViewer radar tiles on a MapKit overlay.** `api.rainviewer.com/public/weather-maps.json` → latest observed frame → `MKTileOverlay` (NEXRAD colour scheme) over an `MKMapView` centred on the location, with a pin at the city. RainViewer attribution shown. This is genuinely free for reasonable use.
+- **Why it matters for a blind developer/user:** it puts a *real radar image* in the app that **VoiceOver image recognition / on-device AI (iOS 26/27 image descriptions)** can describe in ~2 seconds — and it doubles as the **ground-truth check** for our text narration (does "moving northeast" match what the image shows?). We don't build the AI; we just present an image the OS can read.
+
+### Still open / future
+- **Observed-radar nowcast** (NOAA MRMS, or RainViewer's nowcast frames) as a data source rather than only model fields, to validate/replace the steering-wind motion estimate.
+- Decide whether the older Weather Around Me machinery (regional summary, 8-direction cards, directional explorer + pressure trends) stays, gets demoted, or is retired now that Storm Approach is the primary "around me" content.
+
+---
+
 ## Why this document exists
 
 FastWeather is excellent at accessibility and solid at the basics ("what's happening today and over the next several days"). Two gaps remain:

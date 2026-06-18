@@ -59,6 +59,14 @@ struct DeveloperSettingsView: View {
                         .accessibilityLabel("Nowcast Refinements feature toggle")
                         .accessibilityHint(featureFlags.nowcastRefinementsEnabled ? "Refinements are enabled. The Expected Precipitation feature is renamed Next Hour and shows only timing, a tappable Next Hour summary appears on the city screen, and the older wind-based direction block is hidden because Weather Around Me now does direction better." : "Refinements are disabled. Everything behaves exactly as before: the feature is called Expected Precipitation and shows its original summary, with no Next Hour line on the city screen.")
 
+                    Toggle("Weather Around Me Improvements", isOn: $featureFlags.weatherAroundMeImprovementsEnabled)
+                        .accessibilityLabel("Weather Around Me Improvements feature toggle")
+                        .accessibilityHint(featureFlags.weatherAroundMeImprovementsEnabled ? "Improvements are enabled. Storm Approach uses mid-level steering winds for storm motion, reports a confidence level and hedges its wording, samples a denser ring of points, and labels rain or snow per nearby town." : "Improvements are disabled. Storm Approach uses its original coarser estimate.")
+
+                    Toggle("Weather Radar Map", isOn: $featureFlags.weatherRadarMapEnabled)
+                        .accessibilityLabel("Weather Radar Map feature toggle")
+                        .accessibilityHint(featureFlags.weatherRadarMapEnabled ? "Radar map is enabled. Weather Around Me offers a free RainViewer radar map you can have VoiceOver or on-device AI describe." : "Radar map is disabled and the radar map button is hidden in Weather Around Me.")
+
                     Toggle("Enable Table View", isOn: $featureFlags.tableViewEnabled)
                         .accessibilityLabel("Enable Table View feature toggle")
                         .accessibilityHint(featureFlags.tableViewEnabled ? "Table view is enabled. Table option will appear in the View Mode picker in Settings." : "Table view is disabled. Table option will not appear in the View Mode picker in Settings.")

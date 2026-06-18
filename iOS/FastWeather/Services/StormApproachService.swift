@@ -83,6 +83,24 @@ struct StormMotion: Equatable {
     let speedKmh: Double
 }
 
+/// Confidence in the estimated storm motion (improvements feature). Drives how
+/// much the narration hedges. Legacy (improvements off) always reports `.high`
+/// so wording is unchanged.
+enum MotionConfidence { case high, medium, low }
+
+/// Precipitation type at a sampled location, derived from its weather code.
+enum PrecipType {
+    case rain, snow, mixed, unknown
+    var noun: String {
+        switch self {
+        case .rain:    return "rain"
+        case .snow:    return "snow"
+        case .mixed:   return "wintry mix"
+        case .unknown: return "precipitation"
+        }
+    }
+}
+
 /// Impact classification for a nearby saved city ("your places").
 struct CityImpact: Identifiable, Equatable {
     enum Trend: Equatable {
@@ -113,6 +131,7 @@ struct PlaceImpact: Identifiable, Equatable {
     let intensity: PrecipIntensity
     let distanceKm: Double
     let bearing: Double
+    let precipType: PrecipType
 
     static func == (lhs: PlaceImpact, rhs: PlaceImpact) -> Bool {
         lhs.name == rhs.name && lhs.trend == rhs.trend &&
@@ -140,6 +159,10 @@ struct StormApproach {
     let hereIntensity: PrecipIntensity
     /// Estimated field motion. Nil when it can't be reliably determined (e.g. stationary or too sparse).
     let motion: StormMotion?
+    /// Confidence in `motion` (improvements feature). Legacy reports `.high`.
+    let motionConfidence: MotionConfidence
+    /// Whether the accuracy improvements produced this result (drives narration hedging/typing).
+    let improved: Bool
     /// True when the location's weather code reports a thunderstorm even though no
     /// measurable precipitation is present — scattered/dry convection. Lets the
     /// narration acknowledge the storm instead of flatly reporting "nothing",
@@ -161,10 +184,19 @@ final class StormApproachService {
     static let shared = StormApproachService()
     private init() {}
 
-    // Sampling geometry. Two rings give a coarse but real precipitation field
-    // around the user while keeping the request small (8 bearings × 2 radii + centre).
-    private let bearings: [Double] = [0, 45, 90, 135, 180, 225, 270, 315]
-    private let radiiKm: [Double] = [30, 60]
+    /// Whether the Weather Around Me accuracy improvements are active.
+    private var improvementsOn: Bool { FeatureFlags.shared.weatherAroundMeImprovementsEnabled }
+
+    // Sampling geometry. With improvements on, a denser ring (16 bearings × 3 radii)
+    // so a lone cell between spokes isn't missed; otherwise the original 8 × 2.
+    private var bearings: [Double] {
+        improvementsOn
+            ? stride(from: 0.0, to: 360.0, by: 22.5).map { $0 }
+            : [0, 45, 90, 135, 180, 225, 270, 315]
+    }
+    private var radiiKm: [Double] {
+        improvementsOn ? [20, 40, 70] : [30, 60]
+    }
 
     private let activeThresholdMm = 0.1   // 15-minute precipitation sum considered "active"
     private let horizonSteps = 8          // 8 × 15 min = 2-hour look-ahead
@@ -225,10 +257,16 @@ final class StormApproachService {
         let cityForecasts = Array(forecasts[sampleEnd..<cityEnd])
         let placeForecasts = Array(forecasts[cityEnd..<forecasts.count])
 
+        // 5. Mid-level steering wind for a physically-grounded motion estimate (improvements only).
+        let steering = improvementsOn
+            ? await fetchSteeringWind(lat: city.latitude, lon: city.longitude)
+            : nil
+
         return analyse(city: city,
                        samples: samples, sampleForecasts: sampleForecasts,
                        cityPoints: cityPoints, cityForecasts: cityForecasts,
-                       placePoints: placePoints, placeForecasts: placeForecasts)
+                       placePoints: placePoints, placeForecasts: placeForecasts,
+                       steering: steering)
     }
 
     // MARK: - Nearby bundled towns
@@ -279,7 +317,8 @@ final class StormApproachService {
     private func analyse(city: City,
                          samples: [SamplePoint], sampleForecasts: [PointForecast],
                          cityPoints: [CityPoint], cityForecasts: [PointForecast],
-                         placePoints: [CityPoint], placeForecasts: [PointForecast]) -> StormApproach {
+                         placePoints: [CityPoint], placeForecasts: [PointForecast],
+                         steering: StormMotion?) -> StormApproach {
         let nowEpoch = Date().timeIntervalSince1970
 
         // Per-sample series starting at "now" (index 0 == current 15-min step).
@@ -312,8 +351,33 @@ final class StormApproachService {
             }
         }
 
-        // --- B2: estimate field motion by tracking the precipitation-weighted centroid. ---
-        let motion = estimateMotion(samples: samples, series: series)
+        // --- B2: storm motion. With improvements, prefer the mid-level steering wind
+        // (physically how storm motion is estimated) and use the centroid drift only as a
+        // confidence cross-check. Legacy uses the centroid alone and never hedges. ---
+        let centroid = estimateMotion(samples: samples, series: series)
+        let improved = improvementsOn
+        let motion: StormMotion?
+        let motionConfidence: MotionConfidence
+        if improved {
+            if let steering = steering {
+                motion = steering
+                if let c = centroid {
+                    let diff = GeoMath.angularDifference(steering.towardBearing, c.towardBearing)
+                    motionConfidence = diff < 45 ? .high : (diff < 90 ? .medium : .low)
+                } else {
+                    motionConfidence = .medium   // steering only, no cross-check
+                }
+            } else if let c = centroid {
+                motion = c
+                motionConfidence = .low          // no steering available
+            } else {
+                motion = nil
+                motionConfidence = .low
+            }
+        } else {
+            motion = centroid
+            motionConfidence = .high             // legacy: do not hedge
+        }
 
         // --- Situation classification ---
         let situation: StormApproach.Situation
@@ -349,6 +413,8 @@ final class StormApproachService {
             nearestIntensity: nearest.map { PrecipIntensity(mmPerHour: $0.mm * 4) } ?? .none,
             hereIntensity: hereIntensity,
             motion: motion,
+            motionConfidence: motionConfidence,
+            improved: improved,
             thunderstormInArea: thunderstormInArea,
             arrivalMinutes: arrivalMinutes,
             cityImpacts: impacts,
@@ -360,21 +426,34 @@ final class StormApproachService {
     private func classifyPlace(point: CityPoint, forecast: PointForecast,
                                motion: StormMotion?, nowEpoch: TimeInterval) -> PlaceImpact {
         let serie = extractSeries(from: forecast, nowEpoch: nowEpoch)
+        let type = precipType(forCode: forecast.current?.weatherCode)
         let nowMm = serie.first ?? 0
         if nowMm >= activeThresholdMm {
             return PlaceImpact(name: point.city.name, trend: .rainingNow, arrivalMinutes: nil,
                                intensity: PrecipIntensity(mmPerHour: nowMm * 4),
-                               distanceKm: point.distanceKm, bearing: point.bearing)
+                               distanceKm: point.distanceKm, bearing: point.bearing, precipType: type)
         }
         for step in 1...horizonSteps where step < serie.count {
             if serie[step] >= activeThresholdMm {
                 return PlaceImpact(name: point.city.name, trend: .arriving, arrivalMinutes: step * 15,
                                    intensity: PrecipIntensity(mmPerHour: serie[step] * 4),
-                                   distanceKm: point.distanceKm, bearing: point.bearing)
+                                   distanceKm: point.distanceKm, bearing: point.bearing, precipType: type)
             }
         }
         return PlaceImpact(name: point.city.name, trend: .clear, arrivalMinutes: nil,
-                           intensity: .none, distanceKm: point.distanceKm, bearing: point.bearing)
+                           intensity: .none, distanceKm: point.distanceKm, bearing: point.bearing,
+                           precipType: .unknown)
+    }
+
+    /// Map an Open-Meteo WMO weather code to a coarse precipitation type.
+    private func precipType(forCode code: Int?) -> PrecipType {
+        guard let code = code else { return .unknown }
+        switch code {
+        case 71, 73, 75, 77, 85, 86:                 return .snow
+        case 56, 57, 66, 67:                         return .mixed   // freezing drizzle / rain
+        case 51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99: return .rain
+        default:                                     return .unknown
+        }
     }
 
     /// Centroid-tracking motion estimate. Compares the precipitation-weighted
@@ -497,6 +576,65 @@ final class StormApproachService {
         let single = try decoder.decode(PointForecast.self, from: data)
         return [single]
     }
+
+    /// Mid-level steering wind: the vector mean of the 850/700/500 hPa winds at the
+    /// location, which approximates how fast and in which direction storms move.
+    /// Best-effort — returns nil on any failure (the caller falls back to the centroid).
+    private func fetchSteeringWind(lat: Double, lon: Double) async -> StormMotion? {
+        let baseURL = Secrets.openMeteoAPIKey != nil
+            ? "https://customer-api.open-meteo.com/v1/forecast"
+            : "https://api.open-meteo.com/v1/forecast"
+        var components = URLComponents(string: baseURL)!
+        var queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "latitude", value: String(lat)),
+            URLQueryItem(name: "longitude", value: String(lon)),
+            URLQueryItem(name: "hourly", value: "wind_speed_850hPa,wind_direction_850hPa,wind_speed_700hPa,wind_direction_700hPa,wind_speed_500hPa,wind_direction_500hPa"),
+            URLQueryItem(name: "timeformat", value: "unixtime"),
+            URLQueryItem(name: "timezone", value: "GMT"),
+            URLQueryItem(name: "forecast_days", value: "1")
+        ]
+        if let key = Secrets.openMeteoAPIKey, !key.isEmpty {
+            queryItems.append(URLQueryItem(name: "apikey", value: key))
+        }
+        components.queryItems = queryItems
+        guard let url = components.url else { return nil }
+
+        var request = URLRequest(url: url)
+        request.setValue("FastWeather/1.5 (weatherfast.online)", forHTTPHeaderField: "User-Agent")
+        guard let (data, response) = try? await URLSession.shared.data(for: request),
+              let http = response as? HTTPURLResponse, http.statusCode == 200 else { return nil }
+
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        guard let result = try? decoder.decode(SteeringResponse.self, from: data),
+              let hourly = result.hourly, let times = hourly.time, !times.isEmpty else { return nil }
+
+        let now = Date().timeIntervalSince1970
+        let idx = (times.firstIndex(where: { Double($0) >= now }).map { max(0, $0 - 1) }) ?? 0
+
+        let levels: [([Double?]?, [Double?]?)] = [
+            (hourly.windSpeed850hPa, hourly.windDirection850hPa),
+            (hourly.windSpeed700hPa, hourly.windDirection700hPa),
+            (hourly.windSpeed500hPa, hourly.windDirection500hPa)
+        ]
+        var sumE = 0.0, sumN = 0.0, count = 0
+        for (speeds, dirs) in levels {
+            guard let speeds = speeds, let dirs = dirs,
+                  idx < speeds.count, idx < dirs.count,
+                  let speed = speeds[idx], let dir = dirs[idx] else { continue }
+            // Winds are reported as the direction they come FROM; storms move TOWARD dir+180.
+            let towardRad = (dir + 180).truncatingRemainder(dividingBy: 360) * .pi / 180
+            sumE += speed * sin(towardRad)
+            sumN += speed * cos(towardRad)
+            count += 1
+        }
+        guard count > 0 else { return nil }
+        let meanE = sumE / Double(count), meanN = sumN / Double(count)
+        let speed = (meanE * meanE + meanN * meanN).squareRoot()
+        guard speed >= 1 else { return nil }   // essentially calm aloft → no clear steering
+        let toward = GeoMath.normalizeDegrees(atan2(meanE, meanN) * 180 / .pi)
+        return StormMotion(towardBearing: toward, speedKmh: speed)
+    }
 }
 
 // MARK: - Sampling Types
@@ -532,6 +670,20 @@ private struct PointCurrent: Codable {
 private struct PointMinutely: Codable {
     let time: [Int]
     let precipitation: [Double?]
+}
+
+private struct SteeringResponse: Codable {
+    let hourly: SteeringHourly?
+}
+
+private struct SteeringHourly: Codable {
+    let time: [Int]?
+    let windSpeed850hPa: [Double?]?
+    let windDirection850hPa: [Double?]?
+    let windSpeed700hPa: [Double?]?
+    let windDirection700hPa: [Double?]?
+    let windSpeed500hPa: [Double?]?
+    let windDirection500hPa: [Double?]?
 }
 
 // MARK: - Geo Math
@@ -600,6 +752,12 @@ extension StormApproach {
     /// One concise, plain-language headline for the storm-approach card.
     /// Works equally for VoiceOver and sighted readers; unit-aware.
     func headline(distanceUnit: DistanceUnit, speedUnit: WindSpeedUnit) -> String {
+        improved
+            ? improvedHeadline(distanceUnit: distanceUnit, speedUnit: speedUnit)
+            : legacyHeadline(distanceUnit: distanceUnit, speedUnit: speedUnit)
+    }
+
+    private func legacyHeadline(distanceUnit: DistanceUnit, speedUnit: WindSpeedUnit) -> String {
         switch situation {
         case .rainingHere:
             var s = "\(capFirst(hereIntensity.adjective)) precipitation at your location now."
@@ -636,6 +794,50 @@ extension StormApproach {
         }
     }
 
+    /// Improved headline: location stays crisp (it's measured), but the *motion*
+    /// phrasing hedges by confidence — never stating a precise vector the data
+    /// can't support.
+    private func improvedHeadline(distanceUnit: DistanceUnit, speedUnit: WindSpeedUnit) -> String {
+        switch situation {
+        case .rainingHere:
+            var s = "\(capFirst(hereIntensity.adjective)) precipitation at your location now."
+            if let motion = motion { s += " The band is \(motionVerb(motion, speedUnit))." }
+            return s
+
+        case .approaching:
+            let dir = fromBearing.map { GeoMath.cardinalName($0).lowercased() } ?? "nearby"
+            var s = "\(capFirst(nearestIntensity.adjective)) precipitation to the \(dir)"
+            if let d = nearestDistanceKm { s += ", about \(formatDistance(d, distanceUnit)) away" }
+            if let a = arrivalMinutes { s += ", reaching you in \(minutesPhrase(a))" }
+            s += "."
+            if let motion = motion { s += " \(capFirst(motionVerb(motion, speedUnit)))." }
+            return s
+
+        case .nearbyNotApproaching:
+            let dir = fromBearing.map { GeoMath.cardinalName($0).lowercased() } ?? "nearby"
+            var s = "\(capFirst(nearestIntensity.adjective)) precipitation to the \(dir)"
+            if let d = nearestDistanceKm { s += ", about \(formatDistance(d, distanceUnit)) away" }
+            s += ", but it is not heading your way right now."
+            if thunderstormInArea { s += " " + thunderstormNote }
+            return s
+
+        case .clear:
+            if thunderstormInArea { return thunderstormNote }
+            return "No precipitation within \(formatDistance(ringRadiusKm, distanceUnit)) of you," +
+                   " now or in the next 2 hours."
+        }
+    }
+
+    /// Motion phrasing hedged by confidence (improved mode).
+    private func motionVerb(_ motion: StormMotion, _ speedUnit: WindSpeedUnit) -> String {
+        let dir = GeoMath.cardinalName(motion.towardBearing).lowercased()
+        switch motionConfidence {
+        case .high:   return "moving \(dir) at about \(formatSpeed(motion.speedKmh, speedUnit))"
+        case .medium: return "moving generally \(dir)"
+        case .low:    return "moving \(dir), though its track is uncertain"
+        }
+    }
+
     /// Reconciles a thunderstorm weather code with zero measurable precipitation —
     /// the scattered-/dry-convection case that otherwise looks like the app
     /// contradicting itself.
@@ -655,15 +857,20 @@ extension StormApproach {
             .map { impact in
                 let dir = GeoMath.cardinalName(impact.bearing).lowercased()
                 let dist = formatDistance(impact.distanceKm, distanceUnit)
+                // Improved mode names the precipitation type (rain/snow); legacy says
+                // the generic "precipitation".
+                let noun = improved ? impact.precipType.noun : "precipitation"
                 switch impact.trend {
                 case .rainingNow:
                     let lead = impact.intensity >= .moderate
-                        ? "\(capFirst(impact.intensity.adjective)) precipitation"
-                        : "Precipitation"
+                        ? "\(capFirst(impact.intensity.adjective)) \(noun)"
+                        : capFirst(noun)
                     return "\(lead) over \(impact.name), \(dist) \(dir)."
                 case .arriving:
                     let when = impact.arrivalMinutes.map { minutesPhrase($0) } ?? "soon"
-                    return "Reaching \(impact.name) in \(when), \(dist) \(dir)."
+                    return improved
+                        ? "\(capFirst(noun)) reaching \(impact.name) in \(when), \(dist) \(dir)."
+                        : "Reaching \(impact.name) in \(when), \(dist) \(dir)."
                 default:
                     return ""
                 }

@@ -129,6 +129,24 @@ class FeatureFlags: ObservableObject {
         }
     }
 
+    /// Weather Around Me accuracy improvements. When on, Storm Approach uses mid-level steering
+    /// winds (not surface wind or pure centroid) for storm motion, reports a confidence level and
+    /// hedges its wording accordingly, samples a denser ring, and labels precipitation type
+    /// (rain/snow) per nearby town. When off, Storm Approach behaves as originally shipped.
+    @Published var weatherAroundMeImprovementsEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(weatherAroundMeImprovementsEnabled, forKey: "feature_wam_improvements_enabled")
+        }
+    }
+
+    /// Free RainViewer radar map (MapKit tile overlay) inside Weather Around Me. Provides an actual
+    /// radar image that VoiceOver image recognition / on-device AI can describe. On by default.
+    @Published var weatherRadarMapEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(weatherRadarMapEnabled, forKey: "feature_weather_radar_map_enabled")
+        }
+    }
+
     // MARK: - Initialization
     
     private init() {
@@ -146,6 +164,8 @@ class FeatureFlags: ObservableObject {
         self.nextHourNarrationEnabled = UserDefaults.standard.bool(forKey: "feature_next_hour_narration_enabled")
         self.stormApproachEnabled = UserDefaults.standard.bool(forKey: "feature_storm_approach_enabled")
         self.nowcastRefinementsEnabled = UserDefaults.standard.bool(forKey: "feature_nowcast_refinements_enabled")
+        self.weatherAroundMeImprovementsEnabled = UserDefaults.standard.bool(forKey: "feature_wam_improvements_enabled")
+        self.weatherRadarMapEnabled = UserDefaults.standard.bool(forKey: "feature_weather_radar_map_enabled")
 
         // Default values (if first launch or not set)
         // All features enabled by default for production
@@ -185,6 +205,12 @@ class FeatureFlags: ObservableObject {
         if !UserDefaults.standard.contains(key: "feature_storm_approach_enabled") {
             self.stormApproachEnabled = true  // On by default
         }
+        if !UserDefaults.standard.contains(key: "feature_wam_improvements_enabled") {
+            self.weatherAroundMeImprovementsEnabled = true  // On by default
+        }
+        if !UserDefaults.standard.contains(key: "feature_weather_radar_map_enabled") {
+            self.weatherRadarMapEnabled = true  // On by default
+        }
     }
     
     // MARK: - Helper Methods
@@ -204,6 +230,8 @@ class FeatureFlags: ObservableObject {
         nextHourNarrationEnabled = true
         stormApproachEnabled = true
         nowcastRefinementsEnabled = false
+        weatherAroundMeImprovementsEnabled = true
+        weatherRadarMapEnabled = true
         debugLog("🔧 Feature flags reset to defaults")
     }
     
@@ -222,6 +250,8 @@ class FeatureFlags: ObservableObject {
         nextHourNarrationEnabled = true
         stormApproachEnabled = true
         nowcastRefinementsEnabled = true
+        weatherAroundMeImprovementsEnabled = true
+        weatherRadarMapEnabled = true
         debugLog("🔧 All features enabled")
     }
 
@@ -239,6 +269,8 @@ class FeatureFlags: ObservableObject {
         nextHourNarrationEnabled = false
         stormApproachEnabled = false
         nowcastRefinementsEnabled = false
+        weatherAroundMeImprovementsEnabled = false
+        weatherRadarMapEnabled = false
         debugLog("🔧 All features disabled")
     }
 }
