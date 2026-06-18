@@ -16,6 +16,7 @@
 		4B07E53F90DD3EA9329F2D45 /* WeatherCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5456D76628AB29EB3D6E266 /* WeatherCache.swift */; };
 		4D0C3D7F2B79D81702BFFF57 /* BrowseModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD557832C1BCA3C9AA2DF4EF /* BrowseModels.swift */; };
 		62CB858A1D1017158A62BC44 /* RadarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EED081CD8BA9AD9146E4318 /* RadarService.swift */; };
+		A100STORMB1 /* StormApproachService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100STORMF1 /* StormApproachService.swift */; };
 		6B0A5D23AB1E6BAB93B5BCED /* MoonCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DEF54F1AE97F7891D18FB90 /* MoonCalculator.swift */; };
 		6CA5EB93D785DE05210F375A /* DeveloperSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F0E524751DEEAE77391AD2 /* DeveloperSettingsView.swift */; };
 		6F460C5A4802F9FDD2625094 /* ServicePersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378A45EA047D556C10D957F1 /* ServicePersistenceTests.swift */; };
@@ -112,6 +113,7 @@
 /* Begin PBXFileReference section */
 		095B302C4BF1267E4CB60AE1 /* FastWeatherWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FastWeatherWidget.swift; sourceTree = "<group>"; };
 		0EED081CD8BA9AD9146E4318 /* RadarService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RadarService.swift; sourceTree = "<group>"; };
+		A100STORMF1 /* StormApproachService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StormApproachService.swift; sourceTree = "<group>"; };
 		1311D88F8BCB7E6528F708FD /* DirectionalCityService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DirectionalCityService.swift; sourceTree = "<group>"; };
 		132665BE8B6FD8F918BD1E26 /* BrowseFavoritesService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowseFavoritesService.swift; sourceTree = "<group>"; };
 		1402523D7CA83670A0D6BAF8 /* FastWeatherTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FastWeatherTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -333,6 +335,7 @@
 				A1000000E /* CityDataService.swift */,
 				486EDF8DF974A3A8043714DD /* FeatureFlags.swift */,
 				0EED081CD8BA9AD9146E4318 /* RadarService.swift */,
+				A100STORMF1 /* StormApproachService.swift */,
 				B505151E924798A11141FE82 /* FeatureFlags.swift */,
 				9DCDC584E3856802D5BBA5B7 /* RadarService.swift */,
 				A1000WARM2 /* RegionalWeatherService.swift */,
@@ -571,6 +574,7 @@
 				A1000ALERTB2 /* AlertDetailView.swift in Sources */,
 				4A6D0D115A976039A83A189E /* FeatureFlags.swift in Sources */,
 				62CB858A1D1017158A62BC44 /* RadarService.swift in Sources */,
+				A100STORMB1 /* StormApproachService.swift in Sources */,
 				E41FA69A048BFD0F634DB005 /* RadarView.swift in Sources */,
 				6CA5EB93D785DE05210F375A /* DeveloperSettingsView.swift in Sources */,
 				1EA38206A8F8117706BC1BE1 /* UserGuideView.swift in Sources */,

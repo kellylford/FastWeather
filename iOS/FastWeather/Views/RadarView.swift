@@ -22,9 +22,13 @@ struct WeatherAttributionData {
 
 struct RadarView: View {
     let city: City
+    /// Saved cities used for the Storm Approach "nearby cities" impact (Part C).
+    /// Defaults to empty so previews and other callers work without it.
+    var savedCities: [City] = []
     @EnvironmentObject var settingsManager: SettingsManager
     @Environment(\.colorScheme) var colorScheme
     @State private var radarData: RadarData?
+    @State private var stormApproach: StormApproach?
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var lastUpdated: Date?
@@ -127,9 +131,22 @@ struct RadarView: View {
                 .accessibilityLabel("Data last updated \(formatLastUpdated(lastUpdated))")
             }
             
-            // Summary Card - Most important info first for accessibility
-            radarSummaryCard(radar)
-            
+            // Gap 2: concise plain-language nowcast, read first for accessibility.
+            if FeatureFlags.shared.nextHourNarrationEnabled, let summary = radar.nextHourSummary {
+                nextHourCard(summary)
+            }
+
+            // Gap 1: accessible radar replacement — direction, motion, arrival, saved cities.
+            if FeatureFlags.shared.stormApproachEnabled, let storm = stormApproach {
+                stormApproachCard(storm)
+            }
+
+            // Summary Card. When Storm Approach is shown it supersedes the older
+            // wind-inferred "nearest precipitation" block, so hide that to avoid
+            // a contradictory second direction estimate.
+            let showNearest = !(FeatureFlags.shared.stormApproachEnabled && stormApproach != nil)
+            radarSummaryCard(radar, showNearest: showNearest)
+
             // Timeline View
             radarTimelineView(radar)
             
@@ -142,14 +159,66 @@ struct RadarView: View {
         }
     }
     
+    // MARK: - Next Hour Card (Gap 2)
+    private func nextHourCard(_ summary: String) -> some View {
+        GroupBox(label: Label("Next Hour", systemImage: "cloud.rain")) {
+            Text(summary)
+                .font(.headline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, 8)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Next hour. \(summary)")
+    }
+
+    // MARK: - Storm Approach Card (Gap 1)
+    private func stormApproachCard(_ storm: StormApproach) -> some View {
+        let distanceUnit = settingsManager.settings.distanceUnit
+        let speedUnit = settingsManager.settings.windSpeedUnit
+        let headline = storm.headline(distanceUnit: distanceUnit, speedUnit: speedUnit)
+        let cityLines = storm.cityLines()
+        return GroupBox(label: Label("Storm Approach", systemImage: "location.north.line")) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(headline)
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                if !cityLines.isEmpty {
+                    Divider()
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Nearby saved cities:")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        ForEach(cityLines, id: \.self) { line in
+                            Text(line)
+                                .font(.subheadline)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                }
+            }
+            .padding(.vertical, 8)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(stormApproachAccessibilityLabel(headline: headline, cityLines: cityLines))
+    }
+
+    private func stormApproachAccessibilityLabel(headline: String, cityLines: [String]) -> String {
+        var label = "Storm approach. \(headline)"
+        if !cityLines.isEmpty {
+            label += " Nearby saved cities. " + cityLines.joined(separator: " ")
+        }
+        return label
+    }
+
     // MARK: - Precipitation Summary Card
-    private func radarSummaryCard(_ radar: RadarData) -> some View {
+    private func radarSummaryCard(_ radar: RadarData, showNearest: Bool) -> some View {
         GroupBox(label: Label("Precipitation Summary", systemImage: "cloud.rain")) {
             VStack(alignment: .leading, spacing: 12) {
                 Text(radar.currentStatus)
                     .font(.headline)
-                
-                if let nearest = radar.nearestPrecipitation {
+
+                if showNearest, let nearest = radar.nearestPrecipitation {
                     Divider()
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Nearest Precipitation:")
@@ -170,7 +239,7 @@ struct RadarView: View {
             .padding(.vertical, 8)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(radarSummaryAccessibilityLabel(radar))
+        .accessibilityLabel(radarSummaryAccessibilityLabel(radar, showNearest: showNearest))
     }
     
     // MARK: - Timeline View
@@ -288,9 +357,18 @@ struct RadarView: View {
     private func loadRadarData() async {
         isLoading = true
         errorMessage = nil
-        
+        stormApproach = nil
+
         do {
             let data = try await RadarService.shared.fetchPrecipitationNowcast(for: city)
+
+            // Storm Approach is best-effort: a failure here must not break the
+            // main precipitation view, so swallow its errors and just omit the card.
+            var storm: StormApproach? = nil
+            if FeatureFlags.shared.stormApproachEnabled {
+                storm = try? await StormApproachService.shared.fetchStormApproach(
+                    for: city, nearbySavedCities: savedCities)
+            }
 
             var attribution: WeatherAttributionData? = nil
             #if canImport(WeatherKit)
@@ -307,6 +385,7 @@ struct RadarView: View {
 
             await MainActor.run {
                 self.radarData = data
+                self.stormApproach = storm
                 self.lastUpdated = Date()
                 self.isLoading = false
                 self.weatherKitAttribution = attribution
@@ -337,10 +416,10 @@ struct RadarView: View {
     }
     
     // MARK: - Accessibility Labels
-    private func radarSummaryAccessibilityLabel(_ radar: RadarData) -> String {
+    private func radarSummaryAccessibilityLabel(_ radar: RadarData, showNearest: Bool) -> String {
         var label = "Precipitation Summary. \(radar.currentStatus)."
-        
-        if let nearest = radar.nearestPrecipitation {
+
+        if showNearest, let nearest = radar.nearestPrecipitation {
             label += " Nearest precipitation: \(nearest.type), \(formatDistance(nearest.distanceMiles)) to the \(nearest.direction), "
             label += "moving \(nearest.movementDirection) at \(formatSpeed(nearest.speedMph))."
             if let arrival = nearest.arrivalEstimate {

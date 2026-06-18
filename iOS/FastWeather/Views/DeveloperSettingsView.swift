@@ -47,6 +47,14 @@ struct DeveloperSettingsView: View {
                         .accessibilityLabel("WeatherKit Expected Precipitation feature toggle")
                         .accessibilityHint(featureFlags.weatherKitNowcastEnabled ? "WeatherKit nowcast is enabled. Expected Precipitation uses radar-quality minute-by-minute data from Apple WeatherKit for supported countries." : "WeatherKit nowcast is disabled. Expected Precipitation uses Open-Meteo NWP for all cities, restoring the older experience.")
 
+                    Toggle("Next Hour Narration", isOn: $featureFlags.nextHourNarrationEnabled)
+                        .accessibilityLabel("Next Hour Narration feature toggle")
+                        .accessibilityHint(featureFlags.nextHourNarrationEnabled ? "Next Hour narration is enabled. Expected Precipitation shows a one-sentence summary such as rain starting in about 11 minutes, lasting about 35 minutes." : "Next Hour narration is disabled. Expected Precipitation shows only the timeline and graph.")
+
+                    Toggle("Storm Approach", isOn: $featureFlags.stormApproachEnabled)
+                        .accessibilityLabel("Storm Approach feature toggle")
+                        .accessibilityHint(featureFlags.stormApproachEnabled ? "Storm Approach is enabled. Expected Precipitation reports which direction precipitation is coming from, its motion, arrival time, and effect on nearby saved cities." : "Storm Approach is disabled. The directional precipitation card is hidden.")
+
                     Toggle("Enable Table View", isOn: $featureFlags.tableViewEnabled)
                         .accessibilityLabel("Enable Table View feature toggle")
                         .accessibilityHint(featureFlags.tableViewEnabled ? "Table view is enabled. Table option will appear in the View Mode picker in Settings." : "Table view is disabled. Table option will not appear in the View Mode picker in Settings.")

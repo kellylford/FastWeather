@@ -1,9 +1,23 @@
 # Nowcasting & Short-Term Forecast Improvement Proposal
 
-**Status:** Research + proposal for review (not yet implemented)
-**Date:** 2026-06-17
+**Status:** Implemented on branch `docs/nowcasting-proposal` (everything except sonification, Part D). Awaiting hands-on testing.
+**Date:** 2026-06-17 (implemented 2026-06-18)
 **Author:** Research synthesis (deep web research + codebase audit)
 **Scope:** iOS (`iOS/`) primarily, since WeatherKit is iOS-only. Concepts (ring sampling, narration) port to web/Windows where data allows.
+
+## Implementation status (iOS)
+
+All four shipping items are behind feature flags (Settings → Developer Settings), both **on by default** so they're visible for testing. Sonification (Part D) was intentionally **not** built — keeping the app blind-*friendly*, not blind-*only*; every new output is plain text/standard SwiftUI that sighted users see too.
+
+| Item | Status | Key files |
+|---|---|---|
+| Gap 2 — "Next Hour" narration | ✅ Implemented | `Services/RadarService.swift` (`buildNextHourSummary`), surfaced in `Views/RadarView.swift` (`nextHourCard`). Flag: `nextHourNarrationEnabled` |
+| Gap 1 / B1 — real ring sampling | ✅ Implemented | `Services/StormApproachService.swift` (multi-coordinate Open-Meteo call). Flag: `stormApproachEnabled` |
+| Gap 1 / B2 — true storm motion | ✅ Implemented | `StormApproachService.estimateMotion` (centroid tracking across forecast frames) — replaces wind-direction guess |
+| Gap 1 / Part C — saved-city impact | ✅ Implemented | `StormApproachService.classifyCity`; `RadarView.stormApproachCard` |
+| Part D — sonification | ⛔ Deferred by design | — |
+
+Notes: a new multi-coordinate Open-Meteo call (one request, `timeformat=unixtime`, `timezone=GMT`) samples 8 bearings × 2 radii (30/60 km) + nearby saved cities. When Storm Approach is on, it supersedes the old wind-inferred "nearest precipitation" block in the summary card to avoid a contradictory second direction estimate. Distances/speeds respect the user's unit settings. Builds clean for the iOS Simulator; XCTest suite not yet run.
 
 ---
 

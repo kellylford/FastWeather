@@ -99,7 +99,25 @@ class FeatureFlags: ObservableObject {
             UserDefaults.standard.set(myLocationEnabled, forKey: "feature_my_location_enabled")
         }
     }
-    
+
+    /// Show a concise "Next Hour" precipitation narration at the top of Expected Precipitation.
+    /// On by default. Plain-language summary ("Rain starting in about 11 minutes, lasting about
+    /// 35 minutes") derived from the same minute-by-minute data already fetched.
+    @Published var nextHourNarrationEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(nextHourNarrationEnabled, forKey: "feature_next_hour_narration_enabled")
+        }
+    }
+
+    /// Show the "Storm Approach" card — accessible radar replacement that samples a ring of
+    /// surrounding points to report which direction precipitation is coming from, its estimated
+    /// motion, arrival time, and impact on nearby saved cities. On by default.
+    @Published var stormApproachEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(stormApproachEnabled, forKey: "feature_storm_approach_enabled")
+        }
+    }
+
     // MARK: - Initialization
     
     private init() {
@@ -114,6 +132,8 @@ class FeatureFlags: ObservableObject {
         self.weatherKitNowcastEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_nowcast_enabled")
         self.specificPlaceNamesEnabled = UserDefaults.standard.bool(forKey: "feature_specific_place_names_enabled")
         self.myLocationEnabled = UserDefaults.standard.bool(forKey: "feature_my_location_enabled")
+        self.nextHourNarrationEnabled = UserDefaults.standard.bool(forKey: "feature_next_hour_narration_enabled")
+        self.stormApproachEnabled = UserDefaults.standard.bool(forKey: "feature_storm_approach_enabled")
 
         // Default values (if first launch or not set)
         // All features enabled by default for production
@@ -147,6 +167,12 @@ class FeatureFlags: ObservableObject {
         if !UserDefaults.standard.contains(key: "feature_my_location_enabled") {
             self.myLocationEnabled = true  // On by default
         }
+        if !UserDefaults.standard.contains(key: "feature_next_hour_narration_enabled") {
+            self.nextHourNarrationEnabled = true  // On by default
+        }
+        if !UserDefaults.standard.contains(key: "feature_storm_approach_enabled") {
+            self.stormApproachEnabled = true  // On by default
+        }
     }
     
     // MARK: - Helper Methods
@@ -163,6 +189,8 @@ class FeatureFlags: ObservableObject {
         weatherKitNowcastEnabled = true
         specificPlaceNamesEnabled = true
         myLocationEnabled = true
+        nextHourNarrationEnabled = true
+        stormApproachEnabled = true
         debugLog("🔧 Feature flags reset to defaults")
     }
     
@@ -178,6 +206,8 @@ class FeatureFlags: ObservableObject {
         weatherKitNowcastEnabled = true
         specificPlaceNamesEnabled = true
         myLocationEnabled = true
+        nextHourNarrationEnabled = true
+        stormApproachEnabled = true
         debugLog("🔧 All features enabled")
     }
 
@@ -192,6 +222,8 @@ class FeatureFlags: ObservableObject {
         weatherKitNowcastEnabled = false
         specificPlaceNamesEnabled = false
         myLocationEnabled = false
+        nextHourNarrationEnabled = false
+        stormApproachEnabled = false
         debugLog("🔧 All features disabled")
     }
 }

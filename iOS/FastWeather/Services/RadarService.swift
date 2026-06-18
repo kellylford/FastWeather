@@ -189,13 +189,23 @@ class RadarService {
                              precipitationMmPerHr: currentMmPerHr)]
             : timeline
 
+        // Gap 2: concise relative-phrased nowcast from the per-minute data.
+        let summarySamples: [(minutes: Int, mmPerHr: Double, active: Bool)] =
+            allMinutes.prefix(61).enumerated().map { (i, minute) in
+                let mm = precipMmPerHour(minute.precipitationIntensity)
+                let active = i == 0 ? effectiveIsPrecip : (minute.precipitation != .none)
+                return (minutes: i, mmPerHr: mm, active: active)
+            }
+        let nextHourSummary = buildNextHourSummary(samples: summarySamples, windowMinutes: 60)
+
         return RadarData(
             currentStatus: effectiveStatus,
             nearestPrecipitation: nearest,
             directionalSectors: directionalSectors,
             timeline: timelineResult,
             chartData: chartData.isEmpty ? nil : chartData,
-            dataSource: .weatherKit
+            dataSource: .weatherKit,
+            nextHourSummary: nextHourSummary
         )
     }
 
@@ -321,13 +331,43 @@ class RadarService {
         
         // Determine nearest precipitation
         let nearestPrecip = findNearestPrecipitation(from: forecast.minutely15, forecast.hourly)
-        
+
+        // Gap 2: concise relative-phrased nowcast from the 15-minute data.
+        let nextHourSummary = buildNextHourSummaryFromMinutely15(forecast.minutely15)
+
         return RadarData(
             currentStatus: currentStatus,
             nearestPrecipitation: nearestPrecip,
             directionalSectors: directionalSectors,
-            timeline: timeline
+            timeline: timeline,
+            nextHourSummary: nextHourSummary
         )
+    }
+
+    /// Builds the Next Hour summary from Open-Meteo 15-minute data, starting at
+    /// the current step and looking 2 hours ahead.
+    private func buildNextHourSummaryFromMinutely15(_ minutely: Minutely15Data?) -> String? {
+        guard let minutely = minutely,
+              let times = minutely.time,
+              let precipitation = minutely.precipitation else { return nil }
+
+        let now = Date()
+        var currentIndex = 0
+        for (index, timeString) in times.enumerated() {
+            if let timeDate = DateParser.parse(timeString), timeDate > now {
+                currentIndex = max(0, index - 1)   // step containing "now"
+                break
+            }
+        }
+
+        var samples: [(minutes: Int, mmPerHr: Double, active: Bool)] = []
+        for step in 0...8 {   // 0 … 120 minutes
+            let index = currentIndex + step
+            guard index < precipitation.count else { break }
+            let mm15 = precipitation[index] ?? 0
+            samples.append((minutes: step * 15, mmPerHr: mm15 * 4, active: mm15 >= 0.1))
+        }
+        return buildNextHourSummary(samples: samples, windowMinutes: 120)
     }
     
     // MARK: - Helper Methods
@@ -485,6 +525,59 @@ class RadarService {
         return nil
     }
     
+    // MARK: - Next Hour Narration (Gap 2)
+
+    /// Builds a concise, relative-phrased nowcast sentence from a precipitation
+    /// series. Each sample is (minutesFromNow, mm/hr rate, isActive). Resolution
+    /// can be per-minute (WeatherKit) or 15-minute (Open-Meteo). Returns nil when
+    /// there isn't enough data to say anything useful.
+    private func buildNextHourSummary(
+        samples: [(minutes: Int, mmPerHr: Double, active: Bool)],
+        windowMinutes: Int
+    ) -> String? {
+        guard samples.count > 1 else { return nil }
+        let windowLabel = windowMinutes <= 60 ? "hour" : "\(windowMinutes / 60) hours"
+
+        func minutesPhrase(_ m: Int) -> String {
+            if m <= 0 { return "now" }
+            if m < 60 { return "about \(m) minutes" }
+            let h = m / 60, mm = m % 60
+            let hStr = "\(h) hour\(h == 1 ? "" : "s")"
+            return mm == 0 ? "about \(hStr)" : "about \(hStr) \(mm) minutes"
+        }
+
+        let nowActive = samples.first?.active ?? false
+
+        if nowActive {
+            if let end = samples.first(where: { $0.minutes > 0 && !$0.active }) {
+                return "Precipitation now, easing off in \(minutesPhrase(end.minutes))."
+            }
+            return "Precipitation now, continuing through the next \(windowLabel)."
+        }
+
+        guard let onset = samples.first(where: { $0.active }) else {
+            return "No precipitation expected in the next \(windowLabel)."
+        }
+        let onsetMin = onset.minutes
+        let afterOnset = samples.filter { $0.minutes >= onsetMin }
+        let endMin = afterOnset.first(where: { !$0.active })?.minutes
+        let activeStretch = afterOnset.prefix(while: { $0.active })
+        let peak = activeStretch.max(by: { $0.mmPerHr < $1.mmPerHr })
+        let peakIntensity = peak.map { PrecipIntensity(mmPerHour: $0.mmPerHr) } ?? .none
+
+        var s = "Precipitation starting in \(minutesPhrase(onsetMin))"
+        if let endMin = endMin {
+            s += ", lasting about \(endMin - onsetMin) minutes"
+        } else {
+            s += ", continuing through the next \(windowLabel)"
+        }
+        s += "."
+        if peakIntensity >= .moderate, let peak = peak, peak.minutes != onsetMin {
+            s += " Heaviest \(minutesPhrase(peak.minutes)) from now."
+        }
+        return s
+    }
+
     private func formatPrecipitationIntensity(_ mm: Double) -> String {
         switch mm {
         case 0..<0.1:
@@ -573,6 +666,9 @@ struct RadarData {
     /// Full per-minute chart data from WeatherKit (60 entries). Nil for Open-Meteo.
     var chartData: [ChartPoint]? = nil
     var dataSource: RadarDataSource = .openMeteo
+    /// One-sentence relative-phrased nowcast ("Rain starting in about 11 minutes,
+    /// lasting about 35 minutes"). Nil when no detailed minute data is available.
+    var nextHourSummary: String? = nil
 }
 
 struct NearestPrecipitation {
