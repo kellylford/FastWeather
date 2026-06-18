@@ -176,6 +176,7 @@ struct RadarView: View {
         let distanceUnit = settingsManager.settings.distanceUnit
         let speedUnit = settingsManager.settings.windSpeedUnit
         let headline = storm.headline(distanceUnit: distanceUnit, speedUnit: speedUnit)
+        let placeLines = storm.placeLines(distanceUnit: distanceUnit)
         let cityLines = storm.cityLines()
         return GroupBox(label: Label("Storm Approach", systemImage: "location.north.line")) {
             VStack(alignment: .leading, spacing: 12) {
@@ -183,30 +184,45 @@ struct RadarView: View {
                     .font(.headline)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
+                if !placeLines.isEmpty {
+                    Divider()
+                    stormSection(title: "Nearby towns:", lines: placeLines)
+                }
+
                 if !cityLines.isEmpty {
                     Divider()
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Nearby saved cities:")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        ForEach(cityLines, id: \.self) { line in
-                            Text(line)
-                                .font(.subheadline)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                    }
+                    stormSection(title: "Your saved cities:", lines: cityLines)
                 }
             }
             .padding(.vertical, 8)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(stormApproachAccessibilityLabel(headline: headline, cityLines: cityLines))
+        .accessibilityLabel(stormApproachAccessibilityLabel(
+            headline: headline, placeLines: placeLines, cityLines: cityLines))
     }
 
-    private func stormApproachAccessibilityLabel(headline: String, cityLines: [String]) -> String {
+    private func stormSection(title: String, lines: [String]) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+            ForEach(lines, id: \.self) { line in
+                Text(line)
+                    .font(.subheadline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+
+    private func stormApproachAccessibilityLabel(headline: String,
+                                                 placeLines: [String],
+                                                 cityLines: [String]) -> String {
         var label = "Storm approach. \(headline)"
+        if !placeLines.isEmpty {
+            label += " Nearby towns. " + placeLines.joined(separator: " ")
+        }
         if !cityLines.isEmpty {
-            label += " Nearby saved cities. " + cityLines.joined(separator: " ")
+            label += " Your saved cities. " + cityLines.joined(separator: " ")
         }
         return label
     }

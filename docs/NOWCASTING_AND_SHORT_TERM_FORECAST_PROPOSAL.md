@@ -15,6 +15,7 @@ All four shipping items are behind feature flags (Settings → Developer Setting
 | Gap 1 / B1 — real ring sampling | ✅ Implemented | `Services/StormApproachService.swift` (multi-coordinate Open-Meteo call). Flag: `stormApproachEnabled` |
 | Gap 1 / B2 — true storm motion | ✅ Implemented | `StormApproachService.estimateMotion` (centroid tracking across forecast frames) — replaces wind-direction guess |
 | Gap 1 / Part C — saved-city impact | ✅ Implemented | `StormApproachService.classifyCity`; `RadarView.stormApproachCard` |
+| Gap 1 — nearby-town layer (radar-like) | ✅ Implemented | `StormApproachService.nearbyPlaces` / `classifyPlace` — names bundled towns the storm is over/heading for (no reverse geocoding), within ~50 mi, in addition to saved cities |
 | Part D — sonification | ⛔ Deferred by design | — |
 
 Notes: a new multi-coordinate Open-Meteo call (one request, `timeformat=unixtime`, `timezone=GMT`) samples 8 bearings × 2 radii (30/60 km) + nearby saved cities. When Storm Approach is on, it supersedes the old wind-inferred "nearest precipitation" block in the summary card to avoid a contradictory second direction estimate. Distances/speeds respect the user's unit settings. Builds clean for the iOS Simulator; XCTest suite not yet run.

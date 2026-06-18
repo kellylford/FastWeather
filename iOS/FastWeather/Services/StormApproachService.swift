@@ -83,7 +83,7 @@ struct StormMotion: Equatable {
     let speedKmh: Double
 }
 
-/// Impact classification for a nearby saved city.
+/// Impact classification for a nearby saved city ("your places").
 struct CityImpact: Identifiable, Equatable {
     enum Trend: Equatable {
         case rainingNow
@@ -99,6 +99,23 @@ struct CityImpact: Identifiable, Equatable {
 
     static func == (lhs: CityImpact, rhs: CityImpact) -> Bool {
         lhs.cityName == rhs.cityName && lhs.trend == rhs.trend &&
+        lhs.arrivalMinutes == rhs.arrivalMinutes && lhs.intensity == rhs.intensity
+    }
+}
+
+/// Impact classification for a nearby bundled town (the "radar-like" named layer).
+/// Carries distance and bearing so the narration can place it ("12 mi west").
+struct PlaceImpact: Identifiable, Equatable {
+    let id = UUID()
+    let name: String
+    let trend: CityImpact.Trend
+    let arrivalMinutes: Int?
+    let intensity: PrecipIntensity
+    let distanceKm: Double
+    let bearing: Double
+
+    static func == (lhs: PlaceImpact, rhs: PlaceImpact) -> Bool {
+        lhs.name == rhs.name && lhs.trend == rhs.trend &&
         lhs.arrivalMinutes == rhs.arrivalMinutes && lhs.intensity == rhs.intensity
     }
 }
@@ -125,8 +142,10 @@ struct StormApproach {
     let motion: StormMotion?
     /// Minutes until precipitation reaches the user. Nil when raining now or not approaching.
     let arrivalMinutes: Int?
-    /// Impact on nearby saved cities, nearest first.
+    /// Impact on nearby saved cities ("your places"), nearest first.
     let cityImpacts: [CityImpact]
+    /// Impact on nearby bundled towns (the named radar-like layer), nearest first.
+    let placeImpacts: [PlaceImpact]
     /// Radius (km) of the outermost sampling ring — the area this summary covers.
     let ringRadiusKm: Double
 }
@@ -146,6 +165,13 @@ final class StormApproachService {
     private let horizonSteps = 8          // 8 × 15 min = 2-hour look-ahead
     private let maxCityKm = 250.0         // only classify saved cities within this range
     private let maxCities = 5
+    private let placeRadiusKm = 80.0      // bundled towns within ~50 mi
+    private let maxPlaces = 12            // candidates sampled (only active/arriving are narrated)
+
+    // Bundled city list, loaded once and cached for the app's lifetime. Used to
+    // name nearby towns the storm is over / heading for, without reverse geocoding.
+    private var bundledPlacesCache: [CityLocation]?
+    private let bundledLoadLock = NSLock()
 
     /// Fetch and analyse the precipitation field around `city`.
     /// - Parameter nearbySavedCities: saved cities to classify for impact (Part C);
@@ -175,27 +201,80 @@ final class StormApproachService {
         .prefix(maxCities)
         .map { $0 }
 
-        // 3. One multi-coordinate request for all points (same timestamp everywhere).
-        let coords = samples.map { ($0.lat, $0.lon) } + cityPoints.map { ($0.city.latitude, $0.city.longitude) }
+        // 3. Nearby bundled towns (named radar-like layer), excluding saved ones to avoid duplication.
+        let placePoints = nearbyPlaces(around: city, excluding: nearbySavedCities)
+
+        // 4. One multi-coordinate request for every point (same timestamp everywhere).
+        let coords = samples.map { ($0.lat, $0.lon) }
+                   + cityPoints.map { ($0.city.latitude, $0.city.longitude) }
+                   + placePoints.map { ($0.city.latitude, $0.city.longitude) }
         let forecasts = try await fetchForecasts(coords: coords)
         guard forecasts.count == coords.count else {
             debugLog("⚠️ StormApproach: expected \(coords.count) forecasts, got \(forecasts.count)")
             throw RadarError.invalidData
         }
 
-        let sampleForecasts = Array(forecasts.prefix(samples.count))
-        let cityForecasts = Array(forecasts.suffix(cityPoints.count))
+        let sampleEnd = samples.count
+        let cityEnd = sampleEnd + cityPoints.count
+        let sampleForecasts = Array(forecasts[0..<sampleEnd])
+        let cityForecasts = Array(forecasts[sampleEnd..<cityEnd])
+        let placeForecasts = Array(forecasts[cityEnd..<forecasts.count])
 
         return analyse(city: city,
                        samples: samples, sampleForecasts: sampleForecasts,
-                       cityPoints: cityPoints, cityForecasts: cityForecasts)
+                       cityPoints: cityPoints, cityForecasts: cityForecasts,
+                       placePoints: placePoints, placeForecasts: placeForecasts)
+    }
+
+    // MARK: - Nearby bundled towns
+
+    /// All bundled cities, loaded once and cached.
+    private func bundledPlaces() -> [CityLocation] {
+        bundledLoadLock.lock()
+        defer { bundledLoadLock.unlock() }
+        if let cached = bundledPlacesCache { return cached }
+        var all: [CityLocation] = []
+        for resource in ["us-cities-cached", "international-cities-cached"] {
+            if let url = Bundle.main.url(forResource: resource, withExtension: "json"),
+               let data = try? Data(contentsOf: url),
+               let decoded = try? JSONDecoder().decode([String: [CityLocation]].self, from: data) {
+                for arr in decoded.values { all.append(contentsOf: arr) }
+            }
+        }
+        bundledPlacesCache = all
+        debugLog("📍 StormApproach loaded \(all.count) bundled places")
+        return all
+    }
+
+    /// Nearest bundled towns within `placeRadiusKm`, excluding the centre and any saved cities.
+    private func nearbyPlaces(around city: City, excluding saved: [City]) -> [CityPoint] {
+        let latWindow = placeRadiusKm / 111.0
+        let lonWindow = placeRadiusKm / (111.0 * max(0.2, cos(city.latitude * .pi / 180)))
+        let savedKeys = Set(saved.map { coordKey($0.latitude, $0.longitude) })
+
+        var result: [CityPoint] = []
+        for place in bundledPlaces() {
+            guard abs(place.latitude - city.latitude) <= latWindow,
+                  abs(place.longitude - city.longitude) <= lonWindow else { continue }
+            let d = GeoMath.haversineKm(city.latitude, city.longitude, place.latitude, place.longitude)
+            guard d > 1.0, d <= placeRadiusKm else { continue }
+            guard !savedKeys.contains(coordKey(place.latitude, place.longitude)) else { continue }
+            let bearing = GeoMath.bearingDeg(city.latitude, city.longitude, place.latitude, place.longitude)
+            result.append(CityPoint(city: place.toCity(), distanceKm: d, bearing: bearing))
+        }
+        return Array(result.sorted { $0.distanceKm < $1.distanceKm }.prefix(maxPlaces))
+    }
+
+    private func coordKey(_ lat: Double, _ lon: Double) -> String {
+        String(format: "%.2f,%.2f", lat, lon)
     }
 
     // MARK: - Analysis
 
     private func analyse(city: City,
                          samples: [SamplePoint], sampleForecasts: [PointForecast],
-                         cityPoints: [CityPoint], cityForecasts: [PointForecast]) -> StormApproach {
+                         cityPoints: [CityPoint], cityForecasts: [PointForecast],
+                         placePoints: [CityPoint], placeForecasts: [PointForecast]) -> StormApproach {
         let nowEpoch = Date().timeIntervalSince1970
 
         // Per-sample series starting at "now" (index 0 == current 15-min step).
@@ -243,9 +322,14 @@ final class StormApproachService {
             situation = .clear
         }
 
-        // --- Part C: saved-city impacts ---
+        // --- Part C: saved-city impacts ("your places") ---
         let impacts: [CityImpact] = zip(cityPoints, cityForecasts).map { point, forecast in
             classifyCity(point: point, forecast: forecast, motion: motion, nowEpoch: nowEpoch)
+        }
+
+        // --- Nearby bundled towns (named radar-like layer) ---
+        let placeImpacts: [PlaceImpact] = zip(placePoints, placeForecasts).map { point, forecast in
+            classifyPlace(point: point, forecast: forecast, motion: motion, nowEpoch: nowEpoch)
         }
 
         return StormApproach(
@@ -257,8 +341,29 @@ final class StormApproachService {
             motion: motion,
             arrivalMinutes: arrivalMinutes,
             cityImpacts: impacts,
+            placeImpacts: placeImpacts,
             ringRadiusKm: radiiKm.max() ?? 60
         )
+    }
+
+    private func classifyPlace(point: CityPoint, forecast: PointForecast,
+                               motion: StormMotion?, nowEpoch: TimeInterval) -> PlaceImpact {
+        let serie = extractSeries(from: forecast, nowEpoch: nowEpoch)
+        let nowMm = serie.first ?? 0
+        if nowMm >= activeThresholdMm {
+            return PlaceImpact(name: point.city.name, trend: .rainingNow, arrivalMinutes: nil,
+                               intensity: PrecipIntensity(mmPerHour: nowMm * 4),
+                               distanceKm: point.distanceKm, bearing: point.bearing)
+        }
+        for step in 1...horizonSteps where step < serie.count {
+            if serie[step] >= activeThresholdMm {
+                return PlaceImpact(name: point.city.name, trend: .arriving, arrivalMinutes: step * 15,
+                                   intensity: PrecipIntensity(mmPerHour: serie[step] * 4),
+                                   distanceKm: point.distanceKm, bearing: point.bearing)
+            }
+        }
+        return PlaceImpact(name: point.city.name, trend: .clear, arrivalMinutes: nil,
+                           intensity: .none, distanceKm: point.distanceKm, bearing: point.bearing)
     }
 
     /// Centroid-tracking motion estimate. Compares the precipitation-weighted
@@ -515,6 +620,32 @@ extension StormApproach {
             return "No precipitation within \(formatDistance(ringRadiusKm, distanceUnit)) of you," +
                    " now or in the next 2 hours."
         }
+    }
+
+    /// Lines for nearby bundled towns the storm is over or heading for (named
+    /// radar-like layer). Only towns with active or arriving precipitation are
+    /// listed — dry towns are omitted to keep it concise. Nearest first.
+    func placeLines(distanceUnit: DistanceUnit) -> [String] {
+        placeImpacts
+            .filter { $0.trend == .rainingNow || $0.trend == .arriving }
+            .prefix(5)
+            .map { impact in
+                let dir = GeoMath.cardinalName(impact.bearing).lowercased()
+                let dist = formatDistance(impact.distanceKm, distanceUnit)
+                switch impact.trend {
+                case .rainingNow:
+                    let lead = impact.intensity >= .moderate
+                        ? "\(capFirst(impact.intensity.adjective)) precipitation"
+                        : "Precipitation"
+                    return "\(lead) over \(impact.name), \(dist) \(dir)."
+                case .arriving:
+                    let when = impact.arrivalMinutes.map { minutesPhrase($0) } ?? "soon"
+                    return "Reaching \(impact.name) in \(when), \(dist) \(dir)."
+                default:
+                    return ""
+                }
+            }
+            .filter { !$0.isEmpty }
     }
 
     /// One line per nearby saved city (Part C). Empty when there are none.
