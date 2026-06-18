@@ -36,8 +36,10 @@ final class RainViewerService {
         guard let frame = maps.radar?.past?.last ?? maps.radar?.nowcast?.first else { return nil }
 
         // {host}{path}/{size}/{z}/{x}/{y}/{color}/{smooth}_{snow}.png
-        // color 6 = NEXRAD (the familiar green/yellow/red US radar palette), size 256.
-        let template = "\(maps.host)\(frame.path)/256/{z}/{x}/{y}/6/1_1.png"
+        // color 6 = NEXRAD (the familiar green/yellow/red US radar palette).
+        // 512px tiles keep detail at RainViewer's max zoom of 7 (see RadarTileMapView,
+        // which caps maximumZ at 7 to avoid the "Zoom Level Not Supported" placeholder).
+        let template = "\(maps.host)\(frame.path)/512/{z}/{x}/{y}/6/1_1.png"
 
         let formatter = DateFormatter()
         formatter.timeStyle = .short

@@ -58,6 +58,12 @@ struct RadarTileMapView: UIViewRepresentable {
             guard let template = template else { return }
             let tile = MKTileOverlay(urlTemplate: template)
             tile.canReplaceMapContent = false
+            // RainViewer serves radar tiles only up to zoom 7; requesting higher returns a
+            // "Zoom Level Not Supported" placeholder. Cap maximumZ so MapKit upscales the
+            // z7 tiles instead. 512px tiles preserve detail at the cap.
+            tile.tileSize = CGSize(width: 512, height: 512)
+            tile.minimumZ = 1
+            tile.maximumZ = 7
             map.addOverlay(tile, level: .aboveLabels)
             overlay = tile
         }
