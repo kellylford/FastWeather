@@ -16,6 +16,7 @@ struct WeatherAroundMeView: View {
     @EnvironmentObject var weatherService: WeatherService
     @State private var regionalWeather: RegionalWeatherData?
     @State private var stormApproach: StormApproach?
+    @State private var showingRadarMap = false
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var lastUpdated: Date?
@@ -118,6 +119,16 @@ struct WeatherAroundMeView: View {
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $showingRadarMap) {
+            NavigationView {
+                RadarMapSheet(city: city)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button("Done") { showingRadarMap = false }
+                        }
+                    }
+            }
+        }
         .onChange(of: settingsManager.settings.weatherAroundMeExplorationMode) {
             loadCitiesInDirection()
         }
@@ -202,6 +213,20 @@ struct WeatherAroundMeView: View {
             // Storm picture first — the radar-replacement "what's coming at me".
             if FeatureFlags.shared.stormApproachEnabled, let storm = stormApproach {
                 stormApproachCard(storm)
+            }
+
+            // Free radar map you can have VoiceOver / on-device AI describe.
+            if FeatureFlags.shared.weatherRadarMapEnabled {
+                Button(action: { showingRadarMap = true }) {
+                    Label("Open Radar Map", systemImage: "map")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color(uiColor: .secondarySystemGroupedBackground))
+                        .cornerRadius(12)
+                }
+                .accessibilityLabel("Open radar map")
+                .accessibilityHint("Opens a weather radar map for \(city.name) that you can have VoiceOver image recognition or on-device AI describe.")
             }
 
             // Your Location
