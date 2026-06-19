@@ -21,6 +21,9 @@ struct WeatherAroundMeView: View {
     @State private var errorMessage: String?
     @State private var lastUpdated: Date?
     @State private var distanceMiles: Double
+    // Cross-validation between Storm Approach (numeric) and AI radar description
+    @State private var radarDescription: String?
+    @State private var crossValidation: CrossValidationResult?
     
     // Directional Explorer state
     @State private var selectedDirection: CardinalDirection = .north
@@ -215,6 +218,13 @@ struct WeatherAroundMeView: View {
                 stormApproachCard(storm)
             }
 
+            // Cross-validation card: compares Storm Approach's numeric motion
+            // estimate with the AI radar description's text-based estimate.
+            // Appears only when both are available and the AI mentioned movement.
+            if let cv = crossValidation, cv.sourcesUsed.count == 2 {
+                crossValidationCard(cv)
+            }
+
             // Free radar map you can have VoiceOver / on-device AI describe.
             if FeatureFlags.shared.weatherRadarMapEnabled {
                 Button(action: { showingRadarMap = true }) {
@@ -288,6 +298,58 @@ struct WeatherAroundMeView: View {
                 Text(line)
                     .font(.subheadline)
                     .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+
+    // MARK: - Cross-Validation Card
+
+    /// Shows the cross-validated motion estimate when both Storm Approach
+    /// (numeric) and the AI radar description (text) are available.
+    private func crossValidationCard(_ cv: CrossValidationResult) -> some View {
+        GroupBox(label: Label("Motion Cross-Check", systemImage: "arrow.triangle.branch")) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(cv.narration)
+                    .font(.subheadline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                if let agree = cv.sourcesAgree {
+                    HStack(spacing: 4) {
+                        Image(systemName: agree ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                            .foregroundColor(agree ? .green : .orange)
+                        Text(agree ? "Sources agree" : "Sources differ")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .padding(.vertical, 8)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Motion cross-check. \(cv.narration) \(cv.sourcesAgree == true ? "Sources agree." : (cv.sourcesAgree == false ? "Sources differ." : ""))")
+    }
+
+    /// Fetch an AI radar description and cross-validate it with Storm Approach.
+    /// Best-effort: failures are swallowed (the cross-validation card just won't appear).
+    private func fetchRadarDescriptionAndCrossValidate() async {
+        guard FeatureFlags.shared.weatherRadarMapEnabled,
+              FeatureFlags.shared.stormApproachEnabled,
+              stormApproach != nil else { return }
+
+        let result = await RadarDescriptionService.shared.describeRadar(for: city)
+
+        await MainActor.run {
+            switch result {
+            case .success(let description, _, _, _):
+                radarDescription = description
+                crossValidation = RadarCrossValidation.validate(
+                    stormApproach: stormApproach,
+                    aiDescription: description
+                )
+            case .noCoverage, .error:
+                // Don't show the card if we can't get a description
+                radarDescription = nil
+                crossValidation = nil
             }
         }
     }
@@ -638,6 +700,12 @@ struct WeatherAroundMeView: View {
                 self.stormApproach = storm
                 self.lastUpdated = Date()
                 self.isLoading = false
+            }
+
+            // Best-effort: fetch AI radar description and cross-validate with Storm Approach.
+            // Runs after the main UI loads so it doesn't block the regional weather display.
+            if storm != nil {
+                await fetchRadarDescriptionAndCrossValidate()
             }
         } catch {
             await MainActor.run {
