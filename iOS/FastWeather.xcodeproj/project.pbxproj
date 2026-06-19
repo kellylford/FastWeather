@@ -18,6 +18,7 @@
 		62CB858A1D1017158A62BC44 /* RadarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EED081CD8BA9AD9146E4318 /* RadarService.swift */; };
 		A100STORMB1 /* StormApproachService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100STORMF1 /* StormApproachService.swift */; };
 		A100RAINB1 /* RadarTileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100RAINF1 /* RadarTileService.swift */; };
+			A200RDRB1 /* RadarDescriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200RDRF1 /* RadarDescriptionService.swift */; };
 		A100RMAPB1 /* RadarMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100RMAPF1 /* RadarMapView.swift */; };
 		6B0A5D23AB1E6BAB93B5BCED /* MoonCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DEF54F1AE97F7891D18FB90 /* MoonCalculator.swift */; };
 		6CA5EB93D785DE05210F375A /* DeveloperSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F0E524751DEEAE77391AD2 /* DeveloperSettingsView.swift */; };
@@ -117,6 +118,7 @@
 		0EED081CD8BA9AD9146E4318 /* RadarService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RadarService.swift; sourceTree = "<group>"; };
 		A100STORMF1 /* StormApproachService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StormApproachService.swift; sourceTree = "<group>"; };
 		A100RAINF1 /* RadarTileService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RadarTileService.swift; sourceTree = "<group>"; };
+			A200RDRF1 /* RadarDescriptionService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RadarDescriptionService.swift; sourceTree = "<group>"; };
 		A100RMAPF1 /* RadarMapView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RadarMapView.swift; sourceTree = "<group>"; };
 		1311D88F8BCB7E6528F708FD /* DirectionalCityService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DirectionalCityService.swift; sourceTree = "<group>"; };
 		132665BE8B6FD8F918BD1E26 /* BrowseFavoritesService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowseFavoritesService.swift; sourceTree = "<group>"; };
@@ -342,6 +344,7 @@
 				0EED081CD8BA9AD9146E4318 /* RadarService.swift */,
 				A100STORMF1 /* StormApproachService.swift */,
 				A100RAINF1 /* RadarTileService.swift */,
+					A200RDRF1 /* RadarDescriptionService.swift */,
 				B505151E924798A11141FE82 /* FeatureFlags.swift */,
 				9DCDC584E3856802D5BBA5B7 /* RadarService.swift */,
 				A1000WARM2 /* RegionalWeatherService.swift */,
@@ -582,6 +585,7 @@
 				62CB858A1D1017158A62BC44 /* RadarService.swift in Sources */,
 				A100STORMB1 /* StormApproachService.swift in Sources */,
 				A100RAINB1 /* RadarTileService.swift in Sources */,
+					A200RDRB1 /* RadarDescriptionService.swift in Sources */,
 				A100RMAPB1 /* RadarMapView.swift in Sources */,
 				E41FA69A048BFD0F634DB005 /* RadarView.swift in Sources */,
 				6CA5EB93D785DE05210F375A /* DeveloperSettingsView.swift in Sources */,

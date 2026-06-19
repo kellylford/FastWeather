@@ -206,6 +206,9 @@ class FeatureFlags: ObservableObject {
         if !UserDefaults.standard.contains(key: "feature_storm_approach_enabled") {
             self.stormApproachEnabled = true  // On by default
         }
+        if !UserDefaults.standard.contains(key: "feature_nowcast_refinements_enabled") {
+            self.nowcastRefinementsEnabled = true  // On by default — Storm Approach does direction better
+        }
         if !UserDefaults.standard.contains(key: "feature_wam_improvements_enabled") {
             self.weatherAroundMeImprovementsEnabled = true  // On by default
         }
@@ -230,7 +233,7 @@ class FeatureFlags: ObservableObject {
         myLocationEnabled = true
         nextHourNarrationEnabled = true
         stormApproachEnabled = true
-        nowcastRefinementsEnabled = false
+        nowcastRefinementsEnabled = true
         weatherAroundMeImprovementsEnabled = true
         weatherRadarMapEnabled = true
         debugLog("🔧 Feature flags reset to defaults")
