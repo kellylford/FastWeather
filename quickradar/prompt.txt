@@ -1,0 +1,24 @@
+# QuickRadar configuration file
+# =================================
+# Lines starting with # are comments and are ignored.
+# The script reads zipcode, model, and prompt from this file.
+# Command-line arguments (--zipcode, --model) override the values here.
+#
+# zipcode:  the US zipcode to process
+# model:    the Ollama vision model to use
+# prompt:   everything after the "prompt:" line (until end of file)
+#           is sent to the model as the radar description prompt.
+
+zipcode: 98052
+
+model: gemma4:31b-cloud
+
+prompt:
+You are looking at a weather radar image. I know this so don't repeat it. Please provide a detailed, objective description suitable for someone who cannot see the image (for example, a screen-reader user). Describe:
+  - The overall coverage area and what region the radar appears to show.
+  - The presence and location of any precipitation, and its intensity (light, moderate, heavy).
+  - The colors or color bands visible and what they typically indicate on a radar (e.g. green=light, yellow=moderate, red=heavy).
+  - Any storm cells, lines of storms, or areas of rotation if discernible.
+  - The general shape and movement of precipitation features if you can infer it.
+  - Whether the image appears mostly clear or active.
+Be specific and factual. Do not speculate beyond what is visible in the image. If something is unclear, say so.

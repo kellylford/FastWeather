@@ -1,0 +1,15 @@
+# QuickRadar experiment data (generated outputs)
+# These are reproducible by running the scripts — no need to version-control
+# the raw radar images and report files.
+data/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Test images from development
+test_*.gif
+test_*.png
