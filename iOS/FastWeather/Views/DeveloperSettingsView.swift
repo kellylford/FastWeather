@@ -78,6 +78,41 @@ struct DeveloperSettingsView: View {
                             }
                         }
                 }
+
+                // MARK: - AI Radar Description (iOS 27+ Foundation Models)
+                Section(header: Text("AI Radar Description (iOS 27+)"),
+                        footer: Text("These features use Apple's Foundation Models framework to send the NWS radar image directly to the on-device model with a custom prompt — the same approach the QuickRadar experiment proved works, but entirely on-device. Requires iOS 27 or later and Apple Intelligence. When off, the app shows the radar image with an accessibility label and lets VoiceOver describe it natively.")) {
+
+                    Toggle("Foundation Models Radar", isOn: $featureFlags.foundationModelsRadarEnabled)
+                        .accessibilityLabel("Foundation Models Radar feature toggle")
+                        .accessibilityHint(featureFlags.foundationModelsRadarEnabled ? "Foundation Models radar description is enabled. The radar image is sent to Apple's on-device Language Model with a custom radar prompt — the model sees the image and describes precipitation, intensity, storm structure, and warnings. Requires iOS 27 and Apple Intelligence." : "Foundation Models radar description is disabled. The app shows the radar image with an accessibility label and lets VoiceOver describe it natively, as shipped.")
+
+                    if featureFlags.foundationModelsRadarEnabled {
+                        Toggle("Structured Output (@Generable)", isOn: $featureFlags.radarStructuredOutputEnabled)
+                            .accessibilityLabel("Structured Output feature toggle")
+                            .accessibilityHint(featureFlags.radarStructuredOutputEnabled ? "Structured output is enabled. The model returns a typed RadarAnalysis with precipitation, intensity, direction, and warnings fields instead of free text. Cross-validation uses the typed direction field." : "Structured output is disabled. The model returns free text and cross-validation parses direction from it.")
+
+                        Toggle("Two-Frame Movement", isOn: $featureFlags.radarTwoFrameMovementEnabled)
+                            .accessibilityLabel("Two-Frame Movement feature toggle")
+                            .accessibilityHint(featureFlags.radarTwoFrameMovementEnabled ? "Two-frame movement is enabled. The app downloads two radar frames about an hour apart and asks the model to infer storm movement — a third independent motion estimate to cross-validate against Storm Approach." : "Two-frame movement is disabled. Only single-frame radar descriptions are used.")
+
+                        Picker("Model Path", selection: $featureFlags.radarModelPath) {
+                            Text("Auto").tag("auto")
+                            Text("On-Device").tag("on-device")
+                            Text("Private Cloud").tag("cloud")
+                        }
+                        .accessibilityLabel("Model path")
+                        .accessibilityHint("Controls which AI model processes the radar image. Auto tries on-device first and falls back to cloud. On-Device runs on the Neural Engine, private and free. Private Cloud uses Apple's larger cloud model, privacy-preserving.")
+
+                        Picker("Detail Level", selection: $featureFlags.radarDescriptionDetailLevel) {
+                            Text("Brief").tag("brief")
+                            Text("Standard").tag("standard")
+                            Text("Detailed").tag("detailed")
+                        }
+                        .accessibilityLabel("Radar description detail level")
+                        .accessibilityHint("Controls how detailed the radar description prompt is. Brief is one sentence, Standard is the QuickRadar prompt, Detailed is a full meteorological analysis.")
+                    }
+                }
                 
                 // My Data configuration
                 if featureFlags.myDataEnabled {

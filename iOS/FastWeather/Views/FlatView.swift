@@ -14,6 +14,7 @@ struct FlatView: View {
     @Binding var selectedCityForHistory: City?
     @Binding var selectedCityForDetail: City?
     @State private var alertSheetItem: AlertSheetItem?  // Stable sheet item to prevent re-presentation loop
+    @State private var radarCity: City?  // City selected for direct radar map access
 
     // Date navigation parameters
     let dateOffset: Int
@@ -37,6 +38,18 @@ struct FlatView: View {
         .listStyle(.grouped)
         .sheet(item: $alertSheetItem) { item in
             AlertDetailView(alert: item.alert)
+        }
+        .sheet(item: $radarCity) { city in
+            NavigationView {
+                RadarMapSheet(city: city)
+                    .environmentObject(settingsManager)
+                    .environmentObject(weatherService)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button("Done") { radarCity = nil }
+                        }
+                    }
+            }
         }
     }
 
@@ -125,6 +138,10 @@ struct FlatView: View {
             myLocationActionsMenu(for: city)
         } header: {
             myLocationCitySectionHeader(for: city)
+                .accessibilityAction(named: "Open Radar Map") {
+                    radarCity = city
+                    UIAccessibility.post(notification: .announcement, argument: "Opening radar map for \(city.displayName)")
+                }
         }
     }
 
@@ -240,6 +257,10 @@ struct FlatView: View {
             CitySectionHeader(city: city, dateOffset: dateOffset, onAlertTap: { alert in
                 alertSheetItem = AlertSheetItem(city: city, alert: alert)
             })
+            .accessibilityAction(named: "Open Radar Map") {
+                radarCity = city
+                UIAccessibility.post(notification: .announcement, argument: "Opening radar map for \(city.displayName)")
+            }
         }
     }
     
@@ -279,6 +300,14 @@ struct FlatView: View {
                 viewHistoricalWeather(for: city)
             }) {
                 Label("Historical Weather", systemImage: "calendar")
+            }
+            
+            if FeatureFlags.shared.weatherRadarMapEnabled {
+                Button(action: {
+                    radarCity = city
+                }) {
+                    Label("Radar Map", systemImage: "map")
+                }
             }
             
             Divider()

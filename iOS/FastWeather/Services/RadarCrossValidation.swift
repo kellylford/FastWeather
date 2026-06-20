@@ -48,6 +48,25 @@ struct CrossValidationResult {
 
 enum RadarCrossValidation {
 
+    /// Cross-validate Storm Approach's motion estimate against a structured
+    /// RadarAnalysis (iOS 26+ @Generable output). Uses the typed `direction`
+    /// field instead of regex-parsing free text.
+    static func validate(stormApproach: StormApproach?,
+                        analysis: RadarAnalysis) -> CrossValidationResult {
+        var stormBearing: Double?
+        var stormSpeed: Double?
+        if let storm = stormApproach, let motion = storm.motion {
+            stormBearing = motion.towardBearing
+            stormSpeed = motion.speedKmh
+        }
+        return validate(stormApproach: stormApproach,
+                        stormBearing: stormBearing,
+                        stormSpeed: stormSpeed,
+                        aiBearing: analysis.directionBearing,
+                        aiDescription: analysis.description,
+                        hasStructuredDirection: analysis.directionBearing != nil)
+    }
+
     /// Cross-validate Storm Approach's motion estimate against an AI radar description.
     ///
     /// - Parameters:
@@ -57,7 +76,6 @@ enum RadarCrossValidation {
     static func validate(stormApproach: StormApproach?,
                         aiDescription: String?) -> CrossValidationResult {
 
-        var sources: [CrossValidationResult.Source] = []
         var stormBearing: Double?
         var stormSpeed: Double?
         var aiBearing: Double?
@@ -66,16 +84,34 @@ enum RadarCrossValidation {
         if let storm = stormApproach, let motion = storm.motion {
             stormBearing = motion.towardBearing
             stormSpeed = motion.speedKmh
-            sources.append(.stormApproach)
         }
 
-        // Extract AI description's text-based direction
+        // Extract AI description's text-based direction (regex parse)
         if let desc = aiDescription, !desc.isEmpty {
-            if let bearing = parseDirection(from: desc) {
-                aiBearing = bearing
-                sources.append(.aiDescription)
-            }
+            aiBearing = parseDirection(from: desc)
         }
+
+        return validate(stormApproach: stormApproach,
+                        stormBearing: stormBearing,
+                        stormSpeed: stormSpeed,
+                        aiBearing: aiBearing,
+                        aiDescription: aiDescription,
+                        hasStructuredDirection: false)
+    }
+
+    /// Shared internal cross-validation implementation.
+    private static func validate(
+        stormApproach: StormApproach?,
+        stormBearing: Double?,
+        stormSpeed: Double?,
+        aiBearing: Double?,
+        aiDescription: String?,
+        hasStructuredDirection: Bool
+    ) -> CrossValidationResult {
+
+        var sources: [CrossValidationResult.Source] = []
+        if stormBearing != nil { sources.append(.stormApproach) }
+        if aiBearing != nil { sources.append(.aiDescription) }
 
         // Cross-validate
         let resultBearing: Double?
@@ -203,7 +239,7 @@ enum RadarCrossValidation {
         ]
 
         // Look for "moving [direction]" or "toward the [direction]" or
-        "movement toward [direction]" patterns first (most reliable),
+        // "movement toward [direction]" patterns first (most reliable),
         // then fall back to any mention of a direction word.
         let movementPatterns = [
             "moving ", "toward the ", "toward ", "movement toward ",

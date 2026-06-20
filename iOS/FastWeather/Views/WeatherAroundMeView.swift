@@ -331,10 +331,39 @@ struct WeatherAroundMeView: View {
 
     /// Fetch an AI radar description and cross-validate it with Storm Approach.
     /// Best-effort: failures are swallowed (the cross-validation card just won't appear).
+    ///
+    /// When Foundation Models is available, calls it directly to get a
+    /// structured RadarAnalysis (typed direction field) for more reliable
+    /// cross-validation. Otherwise falls back to the legacy free-text path.
     private func fetchRadarDescriptionAndCrossValidate() async {
         guard FeatureFlags.shared.weatherRadarMapEnabled,
               FeatureFlags.shared.stormApproachEnabled,
               stormApproach != nil else { return }
+
+        if RadarFoundationModelsService.shared.isAvailable {
+            let fmResult = await RadarFoundationModelsService.shared.describeRadar(for: city)
+            await MainActor.run {
+                switch fmResult {
+                case .text(let description, _, _, _):
+                    radarDescription = description
+                    crossValidation = RadarCrossValidation.validate(
+                        stormApproach: stormApproach,
+                        aiDescription: description
+                    )
+                case .structured(let analysis, _, _, _),
+                     .movement(let analysis, _, _, _, _):
+                    radarDescription = analysis.description
+                    crossValidation = RadarCrossValidation.validate(
+                        stormApproach: stormApproach,
+                        analysis: analysis
+                    )
+                case .noCoverage, .unavailable, .error:
+                    radarDescription = nil
+                    crossValidation = nil
+                }
+            }
+            return
+        }
 
         let result = await RadarDescriptionService.shared.describeRadar(for: city)
 

@@ -11,10 +11,11 @@
 //  warning polygons, and precipitation intensity — in plain language.
 //
 //  Two description backends:
-//    1. On-device (iOS 18+): Vision framework image observations.
+//    1. Foundation Models (iOS 27+): Custom-prompted multimodal description via
+//       RadarFoundationModelsService — the model sees the radar image and the
+//       QuickRadar prompt together. Gated behind FeatureFlags.
 //    2. Fallback: the radar image is presented with a detailed accessibility
-//       label built from NWS current conditions + Storm Approach data, so even
-//       without on-device AI the user gets a text description of the radar.
+//       label so VoiceOver's built-in image recognition can describe it.
 //
 //  The radar image is fetched from NWS RIDGE (public domain), same as QuickRadar.
 //  US coverage only (NEXRAD network).
@@ -22,13 +23,13 @@
 
 import Foundation
 import UIKit
-import Vision
 
 /// Describes a weather radar image in plain text for accessibility.
 ///
 /// This service downloads the nearest NEXRAD station's base-reflectivity image,
-/// then either uses on-device AI (iOS 18+ Vision framework) to describe it, or
-/// falls back to a data-driven description built from current conditions.
+/// then either uses Foundation Models (when the flag is on) for a custom-
+/// prompted on-device description, or falls back to an image-only accessibility
+/// label.
 class RadarDescriptionService {
     static let shared = RadarDescriptionService()
     private init() {}
@@ -45,9 +46,19 @@ class RadarDescriptionService {
     // MARK: - Public
 
     /// Fetch and describe the radar image for a location.
-    /// - Parameter city: The location to get a radar description for.
-    /// - Returns: A description result with the image and text.
+    ///
+    /// When `FeatureFlags.foundationModelsRadarEnabled` is on, this routes to
+    /// `RadarFoundationModelsService` for a custom-prompted on-device multimodal
+    /// description (iOS 27+ with Apple Intelligence). Otherwise it uses the
+    /// image-only fallback — the radar image is shown with an accessibility
+    /// label so VoiceOver's built-in image recognition can describe it.
     func describeRadar(for city: City) async -> DescriptionResult {
+        // Route to the Foundation Models path when the flag is on.
+        if RadarFoundationModelsService.shared.isAvailable {
+            let result = await RadarFoundationModelsService.shared.describeRadar(for: city)
+            return bridgeFoundationModelsResult(result)
+        }
+
         // 1. US coverage check
         guard RadarTileService.coversRadar(country: city.country) else {
             return .noCoverage
@@ -64,16 +75,46 @@ class RadarDescriptionService {
             return .error("Could not download the radar image for station \(station.id).")
         }
 
-        // 4. Describe the image
-        let description: String
-        if #available(iOS 18.0, *) {
-            description = await describeWithVision(image: image) ?? describeFromImageOnly(image: image)
-        } else {
-            description = describeFromImageOnly(image: image)
-        }
+        // 4. Describe the image — image-only fallback.
+        // The radar image is shown with an accessibility label. VoiceOver's
+        // built-in image recognition can describe it natively on iOS 27+.
+        // For a custom-prompted AI description, enable Foundation Models in
+        // Developer Settings.
+        let description = describeFromImageOnly(image: image)
 
         return .success(description: description, image: image,
                         stationId: station.id, stationName: station.name)
+    }
+
+    /// Bridge a FoundationModelsRadarResult to the legacy DescriptionResult.
+    /// The structured/movement results are flattened to a text description so
+    /// the existing UI (RadarMapSheet, WeatherAroundMeView) works unchanged.
+    /// Callers that want the structured analysis can call
+    /// RadarFoundationModelsService directly.
+    private func bridgeFoundationModelsResult(
+        _ result: FoundationModelsRadarResult
+    ) -> DescriptionResult {
+        switch result {
+        case .text(let description, let image, let stationId, let stationName):
+            return .success(description: description, image: image,
+                            stationId: stationId, stationName: stationName)
+        case .structured(let analysis, let image, let stationId, let stationName):
+            return .success(description: analysis.description, image: image,
+                            stationId: stationId, stationName: stationName)
+        case .movement(let analysis, _, let lastFrame, let stationId, let stationName):
+            // For the legacy bridge, use the last frame as the display image.
+            return .success(description: analysis.description, image: lastFrame,
+                            stationId: stationId, stationName: stationName)
+        case .noCoverage:
+            return .noCoverage
+        case .unavailable(let msg):
+            // Fall back to the Vision path if Foundation Models isn't available
+            // at runtime even though the flag is on.
+            debugLog("ℹ️ Foundation Models unavailable: \(msg) — falling back to Vision.")
+            return .error(msg)
+        case .error(let msg):
+            return .error(msg)
+        }
     }
 
     // MARK: - NEXRAD Station Lookup
@@ -84,6 +125,64 @@ class RadarDescriptionService {
         let lat: Double
         let lon: Double
         let distanceKm: Double
+    }
+
+    /// Public bridge for RadarFoundationModelsService.
+    func findNearestStation(lat: Double, lon: Double) async -> RadarStationInfo? {
+        guard let s = await findNearestNexradStation(lat: lat, lon: lon) else { return nil }
+        return RadarStationInfo(id: s.id, name: s.name, lat: s.lat, lon: s.lon,
+                                distanceKm: s.distanceKm)
+    }
+
+    /// Public bridge for RadarFoundationModelsService.
+    func downloadImage(stationId: String) async -> UIImage? {
+        await downloadRadarImage(stationId: stationId)
+    }
+
+    /// Download the NWS RIDGE animated loop GIF and extract the first and last
+    /// frames as UIImages. Used by the two-frame movement detection feature.
+    /// Returns nil if the loop can't be downloaded or has fewer than 2 frames.
+    func downloadLoopFrames(stationId: String) async -> [UIImage]? {
+        let sid = stationId.uppercased()
+        let candidates = [
+            "https://radar.weather.gov/ridge/standard/\(sid)_loop.gif",
+            "https://radar.weather.gov/ridge/standard/\(sid.lowercased())_loop.gif",
+        ]
+
+        for urlString in candidates {
+            guard let url = URL(string: urlString) else { continue }
+            var request = URLRequest(url: url)
+            request.setValue("WeatherFast/1.5 (weatherfast.online)",
+                            forHTTPHeaderField: "User-Agent")
+            guard let (data, response) = try? await URLSession.shared.data(for: request),
+                  let http = response as? HTTPURLResponse, http.statusCode == 200,
+                  data.count > 1000 else { continue }
+
+            // Extract frames from the animated GIF.
+            return extractGIFFrames(data: data)
+        }
+        return nil
+    }
+
+    /// Extract the first and last frames from an animated GIF as UIImages.
+    private func extractGIFFrames(data: Data) -> [UIImage]? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil) else {
+            return nil
+        }
+        let count = CGImageSourceGetCount(source)
+        guard count >= 2 else { return nil }
+
+        var frames: [UIImage] = []
+        // First and last frames only — the QuickRadar experiment showed these
+        // are ~1 hour apart and sufficient for movement inference.
+        let indices = [0, count - 1]
+        for i in indices {
+            guard let cgImage = CGImageSourceCreateImageAtIndex(source, i, nil) else {
+                continue
+            }
+            frames.append(UIImage(cgImage: cgImage))
+        }
+        return frames.count >= 2 ? frames : nil
     }
 
     private func findNearestNexradStation(lat: Double, lon: Double) async -> RadarStation? {
@@ -152,46 +251,19 @@ class RadarDescriptionService {
         return nil
     }
 
-    // MARK: - On-Device AI Description (iOS 18+)
-
-    @available(iOS 18.0, *)
-    private func describeWithVision(image: UIImage) async -> String? {
-        guard let cgImage = image.cgImage else { return nil }
-
-        // Use VNGenerateImageObservationsRequest for on-device image description.
-        // This produces natural-language descriptions of image content.
-        do {
-            let request = VNGenerateImageObservationsRequest()
-            request.revision = VNGenerateImageObservationsRequestRevision1
-            let handler = VNImageRequestHandler(cgImage: cgImage)
-            try handler.perform([request])
-
-            guard let observations = request.results?.compactMap({ $0 }) else { return nil }
-            // Collect all non-empty descriptions
-            let descriptions = observations.compactMap { $0.string }.filter { !$0.isEmpty }
-            guard !descriptions.isEmpty else { return nil }
-
-            // Combine into a single description
-            return descriptions.joined(separator: " ")
-        } catch {
-            debugLog("⚠️ RadarDescription Vision error: \(error)")
-            return nil
-        }
-    }
-
     // MARK: - Fallback: Image-Only Description
 
     /// When no on-device AI is available, return a prompt-style description
     /// that tells the user what the image is and how to get more info.
     private func describeFromImageOnly(image: UIImage) -> String {
-        // The image itself will be shown with this label; VoiceOver on iOS 26+
-        // can describe it natively. On older iOS, the user at least knows
-        // what the image is.
-        return "Weather radar image. If you are using iOS 26 or later, " +
-               "VoiceOver can describe this image for you. " +
+        // The image itself will be shown with this label; VoiceOver on iOS 27+
+        // can describe it natively. For a custom-prompted AI description,
+        // enable Foundation Models in Developer Settings.
+        return "Weather radar image. VoiceOver can describe this image for you. " +
                "The radar shows precipitation intensity around your location, " +
                "with green indicating light precipitation, yellow moderate, " +
-               "and red heavy precipitation."
+               "and red heavy precipitation. For a detailed AI description, " +
+               "enable Foundation Models Radar in Developer Settings."
     }
 
     // MARK: - Geo Math

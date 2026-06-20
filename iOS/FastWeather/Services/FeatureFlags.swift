@@ -148,6 +148,62 @@ class FeatureFlags: ObservableObject {
         }
     }
 
+    // MARK: - AI Radar Description (iOS 27+ Foundation Models)
+
+    /// Use Apple's Foundation Models framework (LanguageModelSession + custom prompt + Attachment)
+    /// to send the NWS radar image directly to the on-device model with the custom QuickRadar
+    /// prompt. The model sees the image and describes precipitation, intensity, storm structure,
+    /// and warning polygons — the same quality as the QuickRadar experiment, but on-device.
+    /// Requires iOS 27.0+ and Apple Intelligence. OFF by default so the shipped behavior
+    /// (image-only accessibility label) is unchanged until you turn this on in Developer Settings.
+    @Published var foundationModelsRadarEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(foundationModelsRadarEnabled, forKey: "feature_foundation_models_radar_enabled")
+        }
+    }
+
+    // MARK: - AI Radar Description sub-features
+
+    /// Use @Generable structured output for the radar description so the model returns a typed
+    /// RadarAnalysis (hasPrecipitation, intensity, direction, hasWarnings, description) instead
+    /// of free text. Eliminates regex direction parsing in cross-validation. Requires iOS 27+
+    /// and foundationModelsRadarEnabled. OFF by default.
+    @Published var radarStructuredOutputEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(radarStructuredOutputEnabled, forKey: "feature_radar_structured_output_enabled")
+        }
+    }
+
+    /// On-device two-frame movement detection. Downloads the NWS RIDGE animated loop, extracts
+    /// the first and last frames, and sends both to LanguageModelSession with a comparison prompt
+    /// to infer storm motion. A third independent motion estimate to cross-validate against Storm
+    /// Approach. Requires iOS 27+ and foundationModelsRadarEnabled. OFF by default.
+    @Published var radarTwoFrameMovementEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(radarTwoFrameMovementEnabled, forKey: "feature_radar_two_frame_movement_enabled")
+        }
+    }
+
+    /// Which model to use for the radar description.
+    /// "on-device" = SystemLanguageModel (runs on the Neural Engine, private, free)
+    /// "cloud" = PrivateCloudComputeLanguageModel (larger model, Apple's cloud, privacy-preserving)
+    /// "auto" = tries on-device first, falls back to cloud if vision isn't supported
+    /// Defaults to "auto". Only applies when foundationModelsRadarEnabled is on.
+    @Published var radarModelPath: String {
+        didSet {
+            UserDefaults.standard.set(radarModelPath, forKey: "feature_radar_model_path")
+        }
+    }
+
+    /// Detail level for the radar description prompt. "brief" = one sentence, "standard" = the
+    /// QuickRadar prompt, "detailed" = full meteorological analysis. Defaults to "standard".
+    /// Only applies when foundationModelsRadarEnabled is on.
+    @Published var radarDescriptionDetailLevel: String {
+        didSet {
+            UserDefaults.standard.set(radarDescriptionDetailLevel, forKey: "feature_radar_description_detail_level")
+        }
+    }
+
     // MARK: - Initialization
     
     private init() {
@@ -167,6 +223,11 @@ class FeatureFlags: ObservableObject {
         self.nowcastRefinementsEnabled = UserDefaults.standard.bool(forKey: "feature_nowcast_refinements_enabled")
         self.weatherAroundMeImprovementsEnabled = UserDefaults.standard.bool(forKey: "feature_wam_improvements_enabled")
         self.weatherRadarMapEnabled = UserDefaults.standard.bool(forKey: "feature_weather_radar_map_enabled")
+        self.foundationModelsRadarEnabled = UserDefaults.standard.bool(forKey: "feature_foundation_models_radar_enabled")
+        self.radarStructuredOutputEnabled = UserDefaults.standard.bool(forKey: "feature_radar_structured_output_enabled")
+        self.radarTwoFrameMovementEnabled = UserDefaults.standard.bool(forKey: "feature_radar_two_frame_movement_enabled")
+        self.radarModelPath = UserDefaults.standard.string(forKey: "feature_radar_model_path") ?? "auto"
+        self.radarDescriptionDetailLevel = UserDefaults.standard.string(forKey: "feature_radar_description_detail_level") ?? "standard"
 
         // Default values (if first launch or not set)
         // All features enabled by default for production
@@ -215,6 +276,23 @@ class FeatureFlags: ObservableObject {
         if !UserDefaults.standard.contains(key: "feature_weather_radar_map_enabled") {
             self.weatherRadarMapEnabled = true  // On by default
         }
+        // AI radar description features — OFF by default so the shipped behavior
+        // (image-only accessibility label) is unchanged until toggled in Developer Settings.
+        if !UserDefaults.standard.contains(key: "feature_foundation_models_radar_enabled") {
+            self.foundationModelsRadarEnabled = false
+        }
+        if !UserDefaults.standard.contains(key: "feature_radar_structured_output_enabled") {
+            self.radarStructuredOutputEnabled = false
+        }
+        if !UserDefaults.standard.contains(key: "feature_radar_two_frame_movement_enabled") {
+            self.radarTwoFrameMovementEnabled = false
+        }
+        if !UserDefaults.standard.contains(key: "feature_radar_cloud_model_enabled") {
+            self.radarModelPath = "auto"
+        }
+        if !UserDefaults.standard.contains(key: "feature_radar_description_detail_level") {
+            self.radarDescriptionDetailLevel = "standard"
+        }
     }
     
     // MARK: - Helper Methods
@@ -236,6 +314,12 @@ class FeatureFlags: ObservableObject {
         nowcastRefinementsEnabled = true
         weatherAroundMeImprovementsEnabled = true
         weatherRadarMapEnabled = true
+        // AI radar description features default OFF (shipped behavior = Vision fallback)
+        foundationModelsRadarEnabled = false
+        radarStructuredOutputEnabled = false
+        radarTwoFrameMovementEnabled = false
+        radarModelPath = "auto"
+        radarDescriptionDetailLevel = "standard"
         debugLog("🔧 Feature flags reset to defaults")
     }
     
@@ -256,6 +340,11 @@ class FeatureFlags: ObservableObject {
         nowcastRefinementsEnabled = true
         weatherAroundMeImprovementsEnabled = true
         weatherRadarMapEnabled = true
+        foundationModelsRadarEnabled = true
+        radarStructuredOutputEnabled = true
+        radarTwoFrameMovementEnabled = true
+        radarModelPath = "auto"
+        radarDescriptionDetailLevel = "standard"
         debugLog("🔧 All features enabled")
     }
 
@@ -275,6 +364,11 @@ class FeatureFlags: ObservableObject {
         nowcastRefinementsEnabled = false
         weatherAroundMeImprovementsEnabled = false
         weatherRadarMapEnabled = false
+        foundationModelsRadarEnabled = false
+        radarStructuredOutputEnabled = false
+        radarTwoFrameMovementEnabled = false
+        radarModelPath = "auto"
+        radarDescriptionDetailLevel = "standard"
         debugLog("🔧 All features disabled")
     }
 }

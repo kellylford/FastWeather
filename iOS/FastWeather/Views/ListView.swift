@@ -14,6 +14,7 @@ struct ListView: View {
     @Environment(\.editMode) var editMode
     @Binding var selectedCityForHistory: City?
     @State private var alertSheetItem: AlertSheetItem?  // Stable sheet item to prevent re-presentation loop
+    @State private var radarCity: City?  // City selected for direct radar map access
 
     // Date navigation parameters
     let dateOffset: Int
@@ -39,6 +40,18 @@ struct ListView: View {
         .listStyle(.plain)
         .sheet(item: $alertSheetItem) { item in
             AlertDetailView(alert: item.alert)
+        }
+        .sheet(item: $radarCity) { city in
+            NavigationView {
+                RadarMapSheet(city: city)
+                    .environmentObject(settingsManager)
+                    .environmentObject(weatherService)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button("Done") { radarCity = nil }
+                        }
+                    }
+            }
         }
     }
 
@@ -113,6 +126,10 @@ struct ListView: View {
         .accessibilityAction(named: "View Historical Weather") {
             selectedCityForHistory = city
             UIAccessibility.post(notification: .announcement, argument: "Opening historical weather for \(city.displayName)")
+        }
+        .accessibilityAction(named: "Open Radar Map") {
+            radarCity = city
+            UIAccessibility.post(notification: .announcement, argument: "Opening radar map for \(city.displayName)")
         }
         .accessibilityAction(named: "Glance Ahead") {
             let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: 0)
@@ -398,6 +415,10 @@ struct ListView: View {
         }
         .accessibilityAction(named: "View Historical Weather") {
             viewHistoricalWeather(for: city)
+        }
+        .accessibilityAction(named: "Open Radar Map") {
+            radarCity = city
+            UIAccessibility.post(notification: .announcement, argument: "Opening radar map for \(city.displayName)")
         }
         .accessibilityAction(named: "Glance Ahead") {
             let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: 0)
