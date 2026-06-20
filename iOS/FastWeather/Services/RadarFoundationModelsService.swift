@@ -26,17 +26,17 @@ import Foundation
 import UIKit
 import FoundationModels
 
-/// The detail level for the radar description prompt.
+/// The prompt mode for the radar description.
 enum RadarDetailLevel: String, CaseIterable {
-    case brief
-    case standard
-    case detailed
+    case interpret
+    case describe
+    case combined
 
     var label: String {
         switch self {
-        case .brief:    return "Brief"
-        case .standard: return "Standard"
-        case .detailed: return "Detailed"
+        case .interpret: return "Interpret"
+        case .describe:  return "Describe"
+        case .combined:  return "Combined"
         }
     }
 }
@@ -102,12 +102,15 @@ final class RadarFoundationModelsService {
             return .error("Could not find a nearby NEXRAD radar station.")
         }
 
-        // Two-frame movement path (skipped when using a custom prompt —
-        // custom prompt is always single-frame)
-        if customPrompt == nil, FeatureFlags.shared.radarTwoFrameMovementEnabled {
+        let detail = RadarDetailLevel(
+            rawValue: FeatureFlags.shared.radarDescriptionDetailLevel) ?? .interpret
+
+        // Interpret mode always uses two frames — motion is the essence of radar
+        // for an accessibility user who just wants to know what's coming.
+        // Describe/Combined use two frames only when the explicit flag is on.
+        // Custom prompt is always single-frame.
+        if customPrompt == nil, detail == .interpret || FeatureFlags.shared.radarTwoFrameMovementEnabled {
             let result = await describeMovement(city: city, station: station)
-            // If movement fails, fall back to single-frame rather than showing
-            // an error — the user still gets a radar description.
             if case .error(let msg) = result {
                 debugLog("📡 Movement failed (\(msg)), falling back to single-frame")
                 // Fall through to single-frame below
@@ -116,7 +119,7 @@ final class RadarFoundationModelsService {
             }
         }
 
-        // Single-frame path
+        // Single-frame path (Describe / Combined modes, or interpret fallback)
         guard let image = await RadarDescriptionService.shared.downloadImage(
             stationId: station.id) else {
             return .error("Could not download the radar image for station \(station.id).")
@@ -127,10 +130,15 @@ final class RadarFoundationModelsService {
         }
 
         let useStructured = customPrompt == nil && FeatureFlags.shared.radarStructuredOutputEnabled
-        let detail = RadarDetailLevel(
-            rawValue: FeatureFlags.shared.radarDescriptionDetailLevel) ?? .standard
+        // Direction the city lies relative to the radar station (which is the
+        // image center). Lets the prompt tell the model where to look.
+        let cityDir = Self.compassDirection(fromLat: station.lat, fromLon: station.lon,
+                                            toLat: city.latitude, toLon: city.longitude)
         // Use custom prompt if provided, otherwise the built-in prompt
-        let prompt = customPrompt ?? Self.prompt(for: detail, structured: useStructured, cityName: city.name)
+        let prompt = customPrompt ?? Self.prompt(for: detail, structured: useStructured,
+                                                 cityName: city.name,
+                                                 stationName: station.name,
+                                                 cityDirection: cityDir)
 
         do {
             let session = makeSession()
@@ -236,9 +244,14 @@ final class RadarFoundationModelsService {
         }
 
         let detail = RadarDetailLevel(
-            rawValue: FeatureFlags.shared.radarDescriptionDetailLevel) ?? .standard
+            rawValue: FeatureFlags.shared.radarDescriptionDetailLevel) ?? .interpret
         let useStructured = FeatureFlags.shared.radarStructuredOutputEnabled
-        let prompt = Self.movementPrompt(for: detail, structured: useStructured, cityName: city.name)
+        let cityDir = Self.compassDirection(fromLat: station.lat, fromLon: station.lon,
+                                            toLat: city.latitude, toLon: city.longitude)
+        let prompt = Self.movementPrompt(for: detail, structured: useStructured,
+                                         cityName: city.name,
+                                         stationName: station.name,
+                                         cityDirection: cityDir)
 
         do {
             let session = makeSession()
@@ -253,6 +266,12 @@ final class RadarFoundationModelsService {
                     lastAttachment
                 }
                 let analysis = response.content.toRadarAnalysis()
+                // Interpret mode: plain text result — the user doesn't need to know
+                // two frames were used, they just get the interpretation.
+                if detail == .interpret {
+                    return .text(description: analysis.description, image: lastFrame,
+                                 stationId: station.id, stationName: station.name)
+                }
                 return .movement(analysis, firstFrame: firstFrame, lastFrame: lastFrame,
                                  stationId: station.id, stationName: station.name)
             } else {
@@ -260,6 +279,10 @@ final class RadarFoundationModelsService {
                     prompt
                     firstAttachment
                     lastAttachment
+                }
+                if detail == .interpret {
+                    return .text(description: response.content, image: lastFrame,
+                                 stationId: station.id, stationName: station.name)
                 }
                 let analysis = RadarAnalysis(
                     hasPrecipitation: true, intensity: "unknown",
@@ -332,42 +355,116 @@ final class RadarFoundationModelsService {
     /// Returns the prompt that would be used for the current detail level setting.
     func currentDefaultPrompt(for cityName: String) -> String {
         let detail = RadarDetailLevel(
-            rawValue: FeatureFlags.shared.radarDescriptionDetailLevel) ?? .standard
+            rawValue: FeatureFlags.shared.radarDescriptionDetailLevel) ?? .interpret
         return Self.prompt(for: detail, structured: false, cityName: cityName)
     }
 
-    /// The custom radar description prompt, adapted from QuickRadar's prompt.txt.
-    /// The `structured` variant adds instructions to fill the typed fields.
-    /// `cityName` is included so the model can reference the user's location by name.
-    static func prompt(for level: RadarDetailLevel, structured: Bool, cityName: String) -> String {
+    /// Compass direction (8-point) FROM one coordinate TO another — e.g. the
+    /// direction the city lies relative to the radar station.
+    static func compassDirection(fromLat: Double, fromLon: Double,
+                                 toLat: Double, toLon: Double) -> String {
+        let dLon = (toLon - fromLon) * .pi / 180
+        let lat1 = fromLat * .pi / 180
+        let lat2 = toLat * .pi / 180
+        let y = sin(dLon) * cos(lat2)
+        let x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon)
+        var deg = atan2(y, x) * 180 / .pi
+        if deg < 0 { deg += 360 }
+        let points = ["north", "northeast", "east", "southeast",
+                      "south", "southwest", "west", "northwest"]
+        let idx = Int((deg + 22.5) / 45) % 8
+        return points[idx]
+    }
+
+    /// Builds the "where is the city in this image" preamble. NWS RIDGE single-
+    /// station images are centered on the RADAR STATION, not the user's city, so
+    /// the model must locate the city by its on-map label, not assume center.
+    static func cityLocator(cityName: String, stationName: String?,
+                            cityDirection: String?, plural: Bool) -> String {
+        let imageRef = plural ? "Both images are" : "This image is"
+        if let station = stationName {
+            let offset = cityDirection.map { " toward the \($0) of the image center" } ?? ""
+            return """
+            LOCATING \(cityName) IN THE IMAGE: \(imageRef) from the \(station) radar station and centered on that station's location — NOT on \(cityName). \(cityName) is labeled by name on the map, located\(offset). To assess \(cityName), FIND the "\(cityName)" label on the map and judge precipitation by what is immediately around that label. Do NOT assume the center of the image is \(cityName) — it is not.
+            """
+        } else {
+            return """
+            LOCATING \(cityName) IN THE IMAGE: \(cityName) is labeled by name on the map. \(imageRef) likely centered on a radar station rather than \(cityName) itself, so FIND the "\(cityName)" label and judge precipitation by what is immediately around that label. Do NOT assume the center of the image is \(cityName).
+            """
+        }
+    }
+
+    /// Radar description prompt for the selected mode.
+    /// - interpret: plain-language impact for someone in cityName — no jargon
+    /// - describe: objective, technical description of what is visible — no advice
+    /// - combined: description first, then plain-language interpretation
+    static func prompt(for level: RadarDetailLevel, structured: Bool, cityName: String,
+                       stationName: String? = nil, cityDirection: String? = nil) -> String {
+        let locator = cityLocator(cityName: cityName, stationName: stationName,
+                                  cityDirection: cityDirection, plural: false)
         let base: String
         switch level {
-        case .brief:
+        case .interpret:
             base = """
-            You are looking at a weather radar image for \(cityName). The center of the image is \(cityName). Describe precipitation relative to \(cityName) — for example "light rain northwest of \(cityName)" not "precipitation in the northwest quadrant." In one or two sentences, describe whether precipitation is visible, its intensity (light, moderate, heavy), and its direction relative to \(cityName). Be factual and concise.
+            You are interpreting a weather radar image for \(cityName).
+
+            \(locator)
+
+            IMPORTANT — things in this image that are NOT precipitation or warnings:
+            • TOP OF IMAGE: A legend strip showing colored boxes labeled TORNADO (red), SEVERE THUNDERSTORM (orange), FLASH FLOOD (green), SPECIAL MARINE (yellow), SNOW SQUALL (pink). These are labels describing what warning polygons look like — they are NOT active warnings. Ignore them.
+            • BOTTOM OF IMAGE: A color scale bar (dBZ range). This is a reference scale, not precipitation.
+            • RED/BROWN LINES throughout the map: County and state border lines. These are NOT warnings.
+            • TEAL/CYAN AREAS: Bodies of water (e.g., Lake Michigan). Not precipitation.
+            • If the map area is white or blank, there is no precipitation.
+
+            An ACTIVE WARNING POLYGON looks like: a large, thick colored outline (red, orange, or yellow) drawn directly over the map geography, enclosing a county-sized area. It is clearly separate from the thin county border grid.
+
+            In 2–3 sentences, tell me in plain language:
+            - Is precipitation (shown as green, yellow, red, or purple in the map area) currently over \(cityName) or approaching? If so, from which direction?
+            - How intense is it — light, moderate, or heavy?
+            - Are there any active warning polygons (thick colored outlines enclosing map areas, NOT the top legend boxes)?
+            Focus on what this means for someone in \(cityName). No technical jargon. If the map area is mostly white/blank, say there is no precipitation.
             """
-        case .standard:
+        case .describe:
             base = """
-            You are looking at a weather radar image for \(cityName). The center of the image is \(cityName). I know this is a radar image so don't repeat it. Please provide a detailed, objective description suitable for someone who cannot see the image (for example, a screen-reader user). Describe:
-              - The overall coverage area and what region the radar appears to show.
-              - The presence and location of any precipitation, and its intensity (light, moderate, heavy). Always describe location relative to \(cityName) — for example "light rain northwest of \(cityName)" or "scattered showers off the coast to the west of \(cityName)." Do NOT use terms like "quadrant" or "sector" — use compass directions relative to \(cityName).
-              - The colors or color bands visible and what they typically indicate on a radar (e.g. green=light, yellow=moderate, red=heavy).
-              - Any storm cells, lines of storms, or areas of rotation if discernible. Describe their location relative to \(cityName).
-              - The general shape and movement of precipitation features if you can infer it.
-              - Whether the image appears mostly clear or active. If precipitation is visible but not over \(cityName) itself, say so clearly — for example "precipitation is visible to the northwest but \(cityName) itself appears clear."
-            Be specific and factual. Do not speculate beyond what is visible in the image. If something is unclear, say so.
+            You are looking at a weather radar image for \(cityName).
+
+            \(locator)
+
+            IMPORTANT — things in this image that are NOT precipitation or warnings:
+            • TOP OF IMAGE: A legend strip showing warning type icons (TORNADO, SEVERE THUNDERSTORM, FLASH FLOOD, etc.). These are reference labels — NOT active warnings on the map.
+            • BOTTOM OF IMAGE: A color scale bar (dBZ). Reference only — not precipitation.
+            • RED/BROWN LINES throughout the map: County and state borders, always present. NOT warnings.
+            • TEAL/CYAN AREAS: Bodies of water such as Lake Michigan. Not precipitation.
+            • If the map area is white or uniformly blank, there is no precipitation.
+
+            Provide an objective, factual description of what is visible in the MAP AREA ONLY:
+            - Precipitation: its presence (or absence), location (compass directions relative to \(cityName)), and intensity. Color key: green = light rain, yellow = moderate, red = heavy, purple = extreme. White/blank = none.
+            - Storm structure: any distinct cells, squall lines, or clusters, and their location relative to \(cityName).
+            - Active warning polygons: these appear as THICK colored outlines enclosing county-sized geographic areas, distinctly separate from the thin county/state border grid. Only report if you see one that is clearly an overlay on the map — not the top legend.
+            - Whether \(cityName) itself appears to be under precipitation or clear.
+            Describe only what is in the map area. Do not interpret or offer advice.
             """
-        case .detailed:
+        case .combined:
             base = """
-            You are looking at a weather radar image for \(cityName). The center of the image is \(cityName). Provide a full meteorological analysis suitable for a screen-reader user. Describe:
-              - The coverage area and region.
-              - Precipitation presence, location, and intensity (light, moderate, heavy, very heavy). Always describe location relative to \(cityName) — for example "heavy rain 50 miles north of \(cityName)" not "precipitation in the northern quadrant."
-              - The color bands and their meaning (green=light, yellow=moderate, red=heavy, purple/extreme).
-              - Storm structure: cells, squall lines, clusters, hook echoes, or rotation if discernible. Describe their location relative to \(cityName).
-              - Any NWS warning polygons (colored outlines) and what they indicate, including their location relative to \(cityName).
-              - The shape, organization, and inferred movement of precipitation features.
-              - Whether \(cityName) itself is clear or experiencing precipitation. If precipitation is nearby but not over \(cityName), state this clearly.
-            Be specific and factual. Do not speculate beyond what is visible. If something is unclear, say so.
+            You are looking at a weather radar image for \(cityName).
+
+            \(locator)
+
+            IMPORTANT — things in this image that are NOT precipitation or warnings:
+            • TOP: A legend strip with colored boxes for TORNADO, SEVERE THUNDERSTORM, FLASH FLOOD, etc. Reference only — not active.
+            • BOTTOM: A color scale bar. Reference only.
+            • RED/BROWN LINES across the map: County and state borders. Not warnings.
+            • TEAL/CYAN AREAS: Bodies of water. Not precipitation.
+            • White/blank map area = no precipitation.
+
+            Active warnings are THICK colored polygon outlines drawn directly over map geography — clearly separate from the thin county border grid. The top legend boxes are not warnings.
+
+            Provide a two-part response:
+
+            Part 1 — Description: Describe what is visible in the map area: precipitation location and intensity (green=light, yellow=moderate, red=heavy, purple=extreme; white/blank=none) relative to \(cityName); any storm cells or squall lines; any active warning polygons (thick outlines over the map — not the legend); whether \(cityName) is under precipitation or clear.
+
+            Part 2 — Interpretation: In plain language, state what this means for someone in \(cityName) — whether precipitation is approaching or receding, how intense, and whether any active map warnings affect \(cityName).
             """
         }
 
@@ -377,34 +474,71 @@ final class RadarFoundationModelsService {
         return base
     }
 
-    /// The two-frame movement comparison prompt.
-    static func movementPrompt(for level: RadarDetailLevel, structured: Bool, cityName: String) -> String {
+    /// Two-frame movement comparison prompt for the selected mode.
+    static func movementPrompt(for level: RadarDetailLevel, structured: Bool, cityName: String,
+                               stationName: String? = nil, cityDirection: String? = nil) -> String {
+        let locator = cityLocator(cityName: cityName, stationName: stationName,
+                                  cityDirection: cityDirection, plural: true)
         let base: String
         switch level {
-        case .brief:
+        case .interpret:
             base = """
-            You are looking at two weather radar images for \(cityName), taken about an hour apart. The first image is earlier, the second is later. The center of both images is \(cityName). In one or two sentences, describe whether the precipitation has moved relative to \(cityName), in which direction, and whether it has intensified or weakened.
+            You are looking at two weather radar images for \(cityName), taken about an hour apart. The first image is earlier, the second is later.
+
+            \(locator)
+
+            IMPORTANT — things in both images that are NOT precipitation or warnings:
+            • TOP OF IMAGE: A legend strip showing colored boxes for TORNADO, SEVERE THUNDERSTORM, FLASH FLOOD, etc. Reference labels — not active warnings.
+            • BOTTOM: Color scale bar. Reference only.
+            • RED/BROWN LINES: County and state borders, identical in both frames. Not warnings.
+            • TEAL/CYAN AREAS: Bodies of water (e.g., Lake Michigan). Not precipitation.
+            • White/blank map area = no precipitation.
+
+            Focus on what CHANGED in the colored precipitation areas (green, yellow, red, purple) between the two frames. In 2–3 sentences: Is the precipitation moving toward \(cityName) or away from it? Has it gotten stronger or weaker? What should someone in \(cityName) expect in the coming hour? If both frames show no precipitation (white/blank map), say so clearly.
             """
-        case .standard:
+        case .describe:
             base = """
-            You are looking at two weather radar images for \(cityName), taken about an hour apart. The first image is earlier, the second is later. The center of both images is \(cityName). Describe for a screen-reader user:
-              - Whether the precipitation has moved relative to \(cityName), and in which compass direction. For example "the rain northwest of \(cityName) has moved closer" or "the showers off the coast have moved inland toward \(cityName)."
-              - Whether it has intensified, weakened, or stayed about the same.
-              - Whether the coverage area has grown, shrunk, or stayed the same.
-              - Any storm cells or lines and how they have changed. Describe their location relative to \(cityName).
-              - Whether the weather is approaching \(cityName) or moving away from \(cityName).
-            Be specific and factual. If movement is unclear, say so.
+            You are comparing two weather radar images for \(cityName), taken about an hour apart. The first image is earlier, the second is later.
+
+            \(locator)
+
+            IMPORTANT — things present in both images that are NOT precipitation or warnings:
+            • TOP: Legend strip with TORNADO, SEVERE THUNDERSTORM, FLASH FLOOD labels — reference, not active.
+            • BOTTOM: Color scale bar — reference only.
+            • RED/BROWN LINES: County and state borders — always present, NOT warnings.
+            • TEAL/CYAN AREAS: Bodies of water — not precipitation.
+            • White/blank map area = no precipitation.
+
+            Active warnings are THICK colored polygon outlines drawn over map geography — clearly separate from the thin county border grid.
+
+            Describe the changes between the two MAP AREAS objectively:
+            - How colored precipitation areas (green=light, yellow=moderate, red=heavy, purple=extreme) moved relative to \(cityName). If no precipitation in either frame, say so.
+            - Whether intensity changed (color band shifts).
+            - How the coverage area changed.
+            - Any changes in storm structure (cells, squall lines, rotation).
+            - Any changes in active warning polygons (thick map overlays, not the top legend).
+            Describe only what changed between the frames. Do not speculate or offer advice.
             """
-        case .detailed:
+        case .combined:
             base = """
-            You are looking at two weather radar images for \(cityName), taken about an hour apart. The first image is earlier, the second is later. The center of both images is \(cityName). Provide a full meteorological analysis of the changes for a screen-reader user:
-              - Movement direction relative to \(cityName) and inferred speed if discernible.
-              - Intensification or weakening of cells, with specific color-band changes.
-              - Growth or shrinkage of the coverage area.
-              - Changes in storm structure (squall lines, clusters, hook echoes, rotation). Describe locations relative to \(cityName).
-              - Any warning polygons and whether they have expanded or contracted.
-              - Whether the weather is approaching \(cityName) or receding from \(cityName).
-            Be specific and factual. Do not speculate beyond what is visible.
+            You are comparing two weather radar images for \(cityName), taken about an hour apart. The first image is earlier, the second is later.
+
+            \(locator)
+
+            IMPORTANT — NOT precipitation or warnings:
+            • TOP: Legend boxes (TORNADO, SEVERE THUNDERSTORM, etc.) — reference labels, not active.
+            • BOTTOM: Color scale bar — reference only.
+            • RED/BROWN LINES: County/state borders, always present. Not warnings.
+            • TEAL/CYAN: Bodies of water. Not precipitation.
+            • White/blank = no precipitation.
+
+            Active warnings = THICK colored polygon outlines over map geography, distinct from the thin county grid.
+
+            Provide a two-part response:
+
+            Part 1 — Changes: Describe what changed in the map area between the two frames: how colored precipitation areas moved (compass direction relative to \(cityName)), intensity changes (green=light, yellow=moderate, red=heavy), coverage area, storm structure, changes in active map warning polygons. If both frames show no precipitation (white/blank), say so.
+
+            Part 2 — Meaning: In plain language, state what these changes mean for \(cityName) — is weather approaching or receding, getting stronger or weaker, and what should someone in \(cityName) expect in the coming hour?
             """
         }
 
@@ -424,4 +558,214 @@ struct RadarStationInfo {
     let lat: Double
     let lon: Double
     let distanceKm: Double
+}
+
+// MARK: - RadarAILogger
+
+/// Logs AI radar description results alongside live NWS ground-truth data.
+///
+/// Each call fetches current NWS conditions and active alerts for the city,
+/// then writes one JSON line to Documents/radar_ai_log.jsonl. With
+/// UIFileSharingEnabled in Info.plist, the file is visible in:
+///   - Files.app on the device (On My iPhone > Weather Fast)
+///   - Finder on Mac when the device is connected via USB
+///
+/// Every entry is also printed to the debug console with a [RADAR_LOG] prefix
+/// so it can be captured via `xcrun devicectl device process launch --console`.
+final class RadarAILogger {
+    static let shared = RadarAILogger()
+    private init() {}
+
+    private var documentsURL: URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    }
+
+    private var logFileURL: URL {
+        documentsURL.appendingPathComponent("radar_ai_log.jsonl")
+    }
+
+    /// Subfolder that holds the saved radar PNGs referenced by the log.
+    private var imagesDirURL: URL {
+        documentsURL.appendingPathComponent("radar_images", isDirectory: true)
+    }
+
+    /// Save a UIImage as a PNG in radar_images/ and return its filename (not full
+    /// path) for storage in the JSON entry. Returns nil if encoding/writing fails.
+    private func saveImage(_ image: UIImage, name: String) -> String? {
+        guard let data = image.pngData() else { return nil }
+        try? FileManager.default.createDirectory(at: imagesDirURL,
+                                                 withIntermediateDirectories: true)
+        let fileURL = imagesDirURL.appendingPathComponent(name)
+        do {
+            try data.write(to: fileURL)
+            return "radar_images/\(name)"
+        } catch {
+            debugLog("[RADAR_LOG] Failed to save image \(name): \(error)")
+            return nil
+        }
+    }
+
+    /// Capture an AI radar result with live NWS ground truth.
+    /// Asynchronous — fetches NWS data before writing.
+    /// The optional voiceover* parameters carry the user-pasted VoiceOver image
+    /// descriptions so the on-device Foundation Models output can be compared
+    /// against Apple's built-in VoiceOver image description on the same image.
+    func log(
+        city: City,
+        stationId: String,
+        stationName: String,
+        promptMode: String,
+        aiDescription: String,
+        analysis: RadarAnalysis?,
+        radarImage: UIImage? = nil,
+        firstFrame: UIImage? = nil,
+        lastFrame: UIImage? = nil,
+        voiceoverDesc1: String? = nil,
+        voiceoverLabel1: String? = nil,
+        voiceoverDesc2: String? = nil,
+        voiceoverLabel2: String? = nil
+    ) async {
+        let (obsStation, conditions, tempC, windDirDeg, windSpeedKmh) =
+            await fetchNWSObservation(lat: city.latitude, lon: city.longitude)
+        let alerts = await fetchNWSAlerts(lat: city.latitude, lon: city.longitude)
+
+        let warningMismatch = (analysis?.hasWarnings == true) && alerts.isEmpty
+
+        let now = Date()
+        // Filesystem-safe stamp for image filenames, e.g. 20260620T194320Z.
+        let stampFormatter = DateFormatter()
+        stampFormatter.dateFormat = "yyyyMMdd'T'HHmmss'Z'"
+        stampFormatter.timeZone = TimeZone(identifier: "UTC")
+        let stamp = stampFormatter.string(from: now)
+        let citySlug = city.name
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .joined(separator: "-")
+
+        var fields: [String: Any] = [
+            "timestamp":       ISO8601DateFormatter().string(from: now),
+            "city":            city.name,
+            "cityLat":         city.latitude,
+            "cityLon":         city.longitude,
+            "stationId":       stationId,
+            "stationName":     stationName,
+            "promptMode":      promptMode,
+            "aiDescription":   aiDescription,
+            "nwsAlerts":       alerts,
+            "warningMismatch": warningMismatch,
+        ]
+        if let v = analysis?.hasWarnings  { fields["aiHasWarnings"] = v }
+        if let v = analysis?.intensity    { fields["aiIntensity"]   = v }
+        if let v = analysis?.direction    { fields["aiDirection"]   = v }
+        if let v = obsStation             { fields["nwsObsStation"] = v }
+        if let v = conditions             { fields["nwsConditions"] = v }
+        if let v = tempC                  { fields["nwsTempC"]      = v }
+        if let v = windDirDeg             { fields["nwsWindDirDeg"] = v }
+        if let v = windSpeedKmh           { fields["nwsWindSpeedKmh"] = v }
+        if let v = voiceoverDesc1         { fields["voiceoverDesc1"]  = v }
+        if let v = voiceoverLabel1        { fields["voiceoverLabel1"] = v }
+        if let v = voiceoverDesc2         { fields["voiceoverDesc2"]  = v }
+        if let v = voiceoverLabel2        { fields["voiceoverLabel2"] = v }
+
+        // Save the actual image(s) so each entry is independently auditable —
+        // radar updates every few minutes, so the described frame can't be
+        // reliably re-fetched later. Filenames are referenced in the JSON.
+        if let first = firstFrame, let last = lastFrame {
+            if let f = saveImage(first, name: "\(stamp)_\(citySlug)_earlier.png") {
+                fields["firstFrameFile"] = f
+            }
+            if let f = saveImage(last, name: "\(stamp)_\(citySlug)_later.png") {
+                fields["lastFrameFile"] = f
+            }
+        } else if let image = radarImage {
+            if let f = saveImage(image, name: "\(stamp)_\(citySlug)_radar.png") {
+                fields["imageFile"] = f
+            }
+        }
+
+        guard let data = try? JSONSerialization.data(withJSONObject: fields, options: .sortedKeys),
+              let line = String(data: data, encoding: .utf8) else { return }
+
+        debugLog("[RADAR_LOG] \(line)")
+        AppLogger.service.info("[RADAR_LOG] city=\(city.name) mode=\(promptMode) mismatch=\(warningMismatch) alerts=\(alerts.count)")
+
+        let fileData = Data((line + "\n").utf8)
+        if FileManager.default.fileExists(atPath: logFileURL.path) {
+            if let handle = try? FileHandle(forWritingTo: logFileURL) {
+                handle.seekToEndOfFile()
+                handle.write(fileData)
+                try? handle.close()
+            }
+        } else {
+            try? fileData.write(to: logFileURL)
+        }
+    }
+
+    // MARK: - NWS fetching
+
+    private func fetchNWSObservation(
+        lat: Double, lon: Double
+    ) async -> (station: String?, conditions: String?, tempC: Double?, windDirDeg: Double?, windSpeedKmh: Double?) {
+        let coord = "\(String(format: "%.4f", lat)),\(String(format: "%.4f", lon))"
+        guard let pointsURL = URL(string: "https://api.weather.gov/points/\(coord)") else {
+            return (nil, nil, nil, nil, nil)
+        }
+        var req = URLRequest(url: pointsURL)
+        req.setValue("WeatherFast/1.5 (weatherfast.online)", forHTTPHeaderField: "User-Agent")
+        guard let (pd, pr) = try? await URLSession.shared.data(for: req),
+              (pr as? HTTPURLResponse)?.statusCode == 200,
+              let pj = try? JSONSerialization.jsonObject(with: pd) as? [String: Any],
+              let props = pj["properties"] as? [String: Any],
+              let stationsStr = props["observationStations"] as? String,
+              let stationsURL = URL(string: stationsStr) else {
+            return (nil, nil, nil, nil, nil)
+        }
+
+        var sreq = URLRequest(url: stationsURL)
+        sreq.setValue("WeatherFast/1.5 (weatherfast.online)", forHTTPHeaderField: "User-Agent")
+        guard let (sd, sr) = try? await URLSession.shared.data(for: sreq),
+              (sr as? HTTPURLResponse)?.statusCode == 200,
+              let sj = try? JSONSerialization.jsonObject(with: sd) as? [String: Any],
+              let features = sj["features"] as? [[String: Any]],
+              let firstStation = features.first,
+              let sp = firstStation["properties"] as? [String: Any],
+              let stationId = sp["stationIdentifier"] as? String else {
+            return (nil, nil, nil, nil, nil)
+        }
+
+        guard let obsURL = URL(string: "https://api.weather.gov/stations/\(stationId)/observations/latest") else {
+            return (stationId, nil, nil, nil, nil)
+        }
+        var oreq = URLRequest(url: obsURL)
+        oreq.setValue("WeatherFast/1.5 (weatherfast.online)", forHTTPHeaderField: "User-Agent")
+        guard let (od, or2) = try? await URLSession.shared.data(for: oreq),
+              (or2 as? HTTPURLResponse)?.statusCode == 200,
+              let oj = try? JSONSerialization.jsonObject(with: od) as? [String: Any],
+              let op = oj["properties"] as? [String: Any] else {
+            return (stationId, nil, nil, nil, nil)
+        }
+
+        let conditions = op["textDescription"] as? String
+        let tempC      = (op["temperature"]    as? [String: Any])?["value"] as? Double
+        let windDirDeg = (op["windDirection"]   as? [String: Any])?["value"] as? Double
+        let windSpeed  = (op["windSpeed"]       as? [String: Any])?["value"] as? Double
+        return (stationId, conditions, tempC, windDirDeg, windSpeed)
+    }
+
+    private func fetchNWSAlerts(lat: Double, lon: Double) async -> [String] {
+        let coord = "\(String(format: "%.4f", lat)),\(String(format: "%.4f", lon))"
+        guard let url = URL(string: "https://api.weather.gov/alerts/active?point=\(coord)") else {
+            return []
+        }
+        var req = URLRequest(url: url)
+        req.setValue("WeatherFast/1.5 (weatherfast.online)", forHTTPHeaderField: "User-Agent")
+        guard let (data, resp) = try? await URLSession.shared.data(for: req),
+              (resp as? HTTPURLResponse)?.statusCode == 200,
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let features = json["features"] as? [[String: Any]] else {
+            return []
+        }
+        return features.compactMap {
+            ($0["properties"] as? [String: Any])?["event"] as? String
+        }
+    }
 }

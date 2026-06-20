@@ -56,6 +56,10 @@
 	<string>Weather Fast uses your location to show weather for your current area.</string>
 	<key>NSLocationUsageDescription</key>
 	<string>Weather Fast can use your location to automatically add your current city to the weather list.</string>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

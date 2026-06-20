@@ -291,7 +291,7 @@ class FeatureFlags: ObservableObject {
             self.radarModelPath = "auto"
         }
         if !UserDefaults.standard.contains(key: "feature_radar_description_detail_level") {
-            self.radarDescriptionDetailLevel = "standard"
+            self.radarDescriptionDetailLevel = "interpret"
         }
     }
     
@@ -319,7 +319,7 @@ class FeatureFlags: ObservableObject {
         radarStructuredOutputEnabled = false
         radarTwoFrameMovementEnabled = false
         radarModelPath = "auto"
-        radarDescriptionDetailLevel = "standard"
+        radarDescriptionDetailLevel = "interpret"
         debugLog("🔧 Feature flags reset to defaults")
     }
     
@@ -344,7 +344,7 @@ class FeatureFlags: ObservableObject {
         radarStructuredOutputEnabled = true
         radarTwoFrameMovementEnabled = true
         radarModelPath = "auto"
-        radarDescriptionDetailLevel = "standard"
+        radarDescriptionDetailLevel = "interpret"
         debugLog("🔧 All features enabled")
     }
 

@@ -104,13 +104,13 @@ struct DeveloperSettingsView: View {
                         .accessibilityLabel("Model path")
                         .accessibilityHint("Controls which AI model processes the radar image. Auto tries on-device first and falls back to cloud. On-Device runs on the Neural Engine, private and free. Private Cloud uses Apple's larger cloud model, privacy-preserving.")
 
-                        Picker("Detail Level", selection: $featureFlags.radarDescriptionDetailLevel) {
-                            Text("Brief").tag("brief")
-                            Text("Standard").tag("standard")
-                            Text("Detailed").tag("detailed")
+                        Picker("Prompt Mode", selection: $featureFlags.radarDescriptionDetailLevel) {
+                            Text("Interpret").tag("interpret")
+                            Text("Describe").tag("describe")
+                            Text("Combined").tag("combined")
                         }
-                        .accessibilityLabel("Radar description detail level")
-                        .accessibilityHint("Controls how detailed the radar description prompt is. Brief is one sentence, Standard is the QuickRadar prompt, Detailed is a full meteorological analysis.")
+                        .accessibilityLabel("Radar prompt mode")
+                        .accessibilityHint("Interpret: plain language impact — what does this mean for me, no jargon. Describe: objective technical description of what is visible, including color bands, storm structure, and warning polygons, with no advice. Combined: description first, then plain language interpretation.")
                     }
                 }
                 

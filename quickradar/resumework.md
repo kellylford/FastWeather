@@ -2,7 +2,7 @@
 
 **Purpose:** Load this file into a new GitHub Copilot Chat session on your Mac to get the AI agent current on everything we've done and what's next. Just open this file, start a chat, and say "read this file and continue."
 
-**Last updated:** 2026-06-19 (end of iOS 27 Foundation Models session)
+**Last updated:** 2026-06-20 (logging + ground-truth comparison session — KEY FINDING: VoiceOver beats Foundation Models on radar images; see "Comparison Findings" section)
 
 ---
 
@@ -46,6 +46,158 @@ The iOS 27 Foundation Models radar description is **fully implemented and commit
 11. **Updated `WeatherAroundMeView.swift`** — uses structured analysis for cross-validation when available.
 
 12. **Refined prompts** — city name included in prompt, no "quadrant" language, user-centered compass directions, distinguishes "at your location" vs "nearby."
+
+### VoiceOver Image Accessibility Lessons (June 20, 2026)
+
+Hard-won from debugging VoiceOver not finding radar images on the radar map screen:
+
+**1. `.accessibilityElement(children: .contain)` on a container breaks normal swipe navigation.**
+When a `VStack` or other container has `.accessibilityElement(children: .contain)`, VoiceOver treats the entire container as a "group" element. Users must perform an extra gesture to enter the group before they can swipe through its children. This broke ALL element navigation in `RadarMapSheet` — not just the images, but the description cards and buttons too. **Fix: remove this modifier entirely.** Without it, SwiftUI's default traversal lets VoiceOver swipe through all children naturally.
+
+**2. `Image(uiImage:)` with `.accessibilityLabel()` alone is NOT guaranteed to be a VoiceOver element.**
+Adding a label to a SwiftUI Image does not always make it an accessibility element. You need `.accessibilityElement(children: .ignore)` first to explicitly declare it as one, then add the label and trait:
+```swift
+Image(uiImage: image)
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel("NWS radar image")
+    .accessibilityAddTraits(.isImage)
+```
+
+**3. `.accessibilityAddTraits(.isImage)` enables iOS 27 VoiceOver image description.**
+With the `.isImage` trait set and the element properly declared, iOS 27's expanded VoiceOver image description feature can be triggered on the element (two-finger tap-and-hold). This lets you compare Apple's built-in image description against our Foundation Models prompt output on the same radar image.
+
+**4. The `.accessibilityElement(children: .ignore)` + `.accessibilityAddTraits(.isImage)` pattern must NOT be used inside a container that has `.accessibilityElement(children: .contain)`.** The two fight each other. Remove `.contain` from the parent first.
+
+---
+
+### Radar AI Logging System (June 20, 2026)
+
+A `RadarAILogger` class was added to `RadarFoundationModelsService.swift`. It:
+1. Fetches live NWS conditions (temperature, wind, sky) and active alerts at the moment a description is logged
+2. Writes a JSON line to `Documents/radar_ai_log.jsonl` in the app container
+3. Prints each entry to the debug console with `[RADAR_LOG]` prefix
+
+**Accessing the log file:**
+- **Files.app on iPhone**: `UIFileSharingEnabled` was added to `Info.plist`. Open Files.app → On My iPhone → Weather Fast → `radar_ai_log.jsonl`
+- **Finder on Mac (USB)**: Connect phone, open Finder, select the phone, go to Files → Weather Fast
+- **Console capture**: Launch with `--console` flag; every log entry prints with `[RADAR_LOG]` prefix
+- **Pull with devicectl**: `xcrun devicectl device copy files --from-device "Kelly Ford" --source "Documents/radar_ai_log.jsonl" --destination /tmp/`
+
+**Log entry fields:**
+- `timestamp`, `city`, `cityLat`, `cityLon`, `stationId`, `stationName`, `promptMode`
+- `aiDescription`, `aiHasWarnings`, `aiIntensity`, `aiDirection` (from structured output when available)
+- `nwsObsStation`, `nwsConditions`, `nwsTempC`, `nwsWindDirDeg`, `nwsWindSpeedKmh`
+- `nwsAlerts` (list of active NWS alert event names, e.g. ["Severe Thunderstorm Warning"])
+- `warningMismatch` (true when AI claims warnings but NWS has none — the key QA field)
+
+**Usage**: After tapping "Describe Radar" and a description appears, tap "Log Result with NWS Ground Truth". The button fetches NWS data live (takes ~2-3 seconds), writes the entry, then shows "Logged at HH:mm".
+
+---
+
+### Radar AI Hallucination Root Cause (June 20, 2026)
+
+A QuickRadar experiment on the Mac (using `llava:latest` with the KMKX radar image for Madison, WI) identified the root cause of the on-device model claiming severe thunderstorm warnings on a clear day:
+
+**The NWS RIDGE radar image contains a legend at the top** showing colored boxes labeled:
+- TORNADO (red box), SEVERE THUNDERSTORM (orange box), FLASH FLOOD (green box), SPECIAL MARINE (yellow box), SNOW SQUALL (pink box)
+
+These are reference labels showing what warning polygon colors look like. They are NOT active warnings. However, vision models see colored boxes in the image and report "warnings visible."
+
+**Secondary source of confusion:** The red/brown county and state border lines that cover the entire map look exactly like warning polygons to a model without meteorological visual training. County borders are county-sized colored line boxes drawn on the map — visually identical to what an actual warning polygon would look like.
+
+**NWS ground truth at time of test (2026-06-20 08:50 CDT):**
+- KMSN (Madison): Clear, 62.6°F, NNW winds 9.2 mph, CLR at 12,500 ft, no precipitation
+- The radar map was completely blank (white) — zero precipitation anywhere in the image
+- Sunny forecast, no active alerts
+
+**`llava:latest` with old prompt** claimed: precipitation approaching from west-northwest, no warnings (different wrong answer from on-device model's thunderstorm claim)
+**`llava:latest` with updated prompt** still hallucinated warning polygons (confusing county borders for warning outlines)
+**Foundation Models on-device** claimed: severe thunderstorm warning (confusing legend boxes for active warnings)
+
+**What makes Foundation Models different from llava:** The on-device model is much stronger at visual reasoning and correctly reads the legend colors — but it interprets the legend AS the warning. The new prompts explicitly tell the model the legend is reference-only, white/blank = no precipitation, and red grid lines are county borders.
+
+**Updated prompts (all three modes, both single-frame and two-frame variants) now include:**
+```
+IMPORTANT — things in this image that are NOT precipitation or warnings:
+• TOP OF IMAGE: A legend strip showing colored boxes labeled TORNADO (red),
+  SEVERE THUNDERSTORM (orange), FLASH FLOOD (green), SPECIAL MARINE (yellow),
+  SNOW SQUALL (pink). These are labels — NOT active warnings. Ignore them.
+• BOTTOM OF IMAGE: A color scale bar (dBZ). Reference only.
+• RED/BROWN LINES throughout the map: County and state border lines. NOT warnings.
+• TEAL/CYAN AREAS: Bodies of water (e.g., Lake Michigan). Not precipitation.
+• White/blank map area = no precipitation.
+```
+
+The key remaining open question: whether the Foundation Models are capable enough to reliably follow this guidance. The Log Result button will capture the evidence.
+
+---
+
+### Comparison Findings — VoiceOver vs Foundation Models (June 20, 2026, Session 2)
+
+**THIS IS THE MOST IMPORTANT SECTION. Read it before doing any more prompt work.**
+
+We built the logging system (below), captured real on-device results with saved images, and compared three voices on the *same* radar frame: Apple VoiceOver, our Foundation Models prompt, and NWS ground truth. The verdict is consistent and stark.
+
+**Apple's built-in VoiceOver image description is dramatically more accurate than our Foundation Models prompt on these NWS radar images.**
+
+Logged evidence (4 entries in `radar_ai_log.jsonl`; images in `radar_images/`):
+
+| Entry | Scene (ground truth) | VoiceOver | Foundation Models |
+|-------|----------------------|-----------|-------------------|
+| Fond du Lac, combined | (logged before VO capture) | — | No false warning ✓ |
+| Aventura, combined | Mostly clear, no radar polygons | "none currently highlighted on the map" ✓ | "No active warnings" ✓ |
+| Madison, combined (19:50) | **Madison clear**; precip 150mi NE near Green Bay | "just north of Green Bay" / "near Sturgeon Bay" ✓ | "moderate precipitation near the **eastern side of Madison**" ✗ |
+| Madison, combined (20:00) | **Madison clear**; precip far NE near Sturgeon Bay | "Madison… is clear of precipitation" / "none currently active on the map" ✓✓ | "precipitation near Madison… **severe thunderstorm warning active**" ✗✗ (warningMismatch=True) |
+
+**Two distinct FM failure modes, both reproduced:**
+1. **Mislocation** — FM plants precipitation "at the city" even when the actual cell is 150 miles away. It anchors weather to the user's location regardless of where it really is.
+2. **Warning hallucination** — FM reports a "severe thunderstorm warning (thick yellow polygon)" on a clear day with zero NWS alerts. The "yellow polygon" wording tracks the SEVERE THUNDERSTORM legend color → it is reading the legend and confabulating.
+
+**Prompt fixes attempted this session — NONE closed the gap:**
+- **Legend fix**: prompts now explicitly say the top legend strip is reference-only, white/blank = no precip, red lines = county borders, teal = water. → FM *still* hallucinated a warning in the 20:00 Madison entry.
+- **Station-locator fix** (the "center is the radar station, not your city" fix): NWS RIDGE single-station images are centered on the RADAR STATION (KMKX = Milwaukee), not the user's city. The old prompt falsely claimed "the center of the image is [city]." We replaced it with a computed locator: `cityLocator()` + `compassDirection()` in `RadarFoundationModelsService.swift` tell the model e.g. "centered on the Milwaukee radar station; Madison is labeled on the map, toward the **west** of center; find its label." → FM *still* mislocated precipitation to Madison AND hallucinated the warning. The fix did not work; the 20:00 entry (worst result) was logged AFTER it.
+
+**Interpretation:** FM output reads like generic weather confabulation ("moderate precipitation near [city], moving northwest, warning active"), while VoiceOver gives specific, correct geography ("Door Peninsula," "out over Lake Michigan," names Madison as clear). VoiceOver is genuinely seeing the image; FM appears to barely be.
+
+**Two leading hypotheses for WHY FM underperforms (untested — start here next time):**
+1. **Model capability** — the on-device model on this iOS 27 beta can't do fine-grained spatial reasoning on a dense radar map and falls back on weather priors.
+2. **Image fidelity / downsampling** — `Attachment(cgImage)` may downsample before the model sees it. A heavy downsample would destroy the small NE precipitation cluster while the high-contrast legend bar survives — which fits the pattern exactly (invents precip = lost detail; sees "warnings" = legend survives). **Worth investigating:** does Attachment have a resolution cap? Try cropping the image to just the map area (drop legend + scale bar) before sending, and/or upscaling/centering on the city.
+
+**Strategic recommendation for next session:**
+Prompt engineering has not made the FM path reliable. The thing the user actually wants — accurate plain-language radar description — **Apple VoiceOver already does well today on the same image.** Strongly consider pivoting the feature to lean on VoiceOver's native image description (the image is already marked `.isImage` and reachable) rather than the custom FM prompt, at least until the on-device model matures. Decision deferred — discuss with Kelly before more FM prompt work. Do NOT keep iterating prompts without first testing the downsampling hypothesis; if Attachment is the bottleneck, no prompt will fix it.
+
+---
+
+### Radar AI Logging System (June 20, 2026)
+
+A `RadarAILogger` class (in `RadarFoundationModelsService.swift`) captures every "Log Result" tap. It:
+1. Fetches live NWS conditions (temp, wind, sky) and active alerts at log time
+2. Saves the actual radar image(s) as PNG to `Documents/radar_images/` (timestamped, e.g. `20260620T200042Z_Venus-Way--Madison_later.png`)
+3. Writes one JSON line to `Documents/radar_ai_log.jsonl` referencing the image filenames
+4. Prints each entry to console with `[RADAR_LOG]` prefix
+
+**Why images are saved:** radar updates every few minutes, so a described frame can't be reliably re-fetched later. Saving the PNG makes each entry independently auditable — you can look at the exact frame the AI/VoiceOver described and judge who was right. This is what made the comparison findings above possible.
+
+**UI (RadarMapView.swift):** After a description appears, a "Log for Comparison" card shows below the images with two TextEditors to paste VoiceOver descriptions (labels adapt: "Earlier/Later frame" in movement mode, "Radar image"/"Radar map" in single mode), then the "Log Result with NWS Ground Truth" button. In movement mode the redundant standalone radar image is hidden so VoiceOver finds exactly two images matching the two paste boxes. Paste fields + logged-status auto-clear on each new Describe.
+
+**No public API for VoiceOver's description:** Confirmed Apple exposes no public API to invoke VoiceOver's image-description model and get the text back (it's in the private accessibility stack). Vision framework only offers OCR/saliency/classification, not captioning. Hence the manual paste-in workflow. Kelly confirmed VoiceOver's description CAN be copied to the clipboard, so paste-in works.
+
+**Pulling the data from the Mac (no phone interaction needed beyond the tap):**
+```bash
+# JSONL
+xcrun devicectl device copy from --device "Kelly Ford" \
+  --domain-type appDataContainer --domain-identifier com.weatherfast.app --user mobile \
+  --source Documents/radar_ai_log.jsonl --destination /tmp/radarlog/radar_ai_log.jsonl
+# Images folder
+xcrun devicectl device copy from --device "Kelly Ford" \
+  --domain-type appDataContainer --domain-identifier com.weatherfast.app --user mobile \
+  --source Documents/radar_images --destination /tmp/radarlog/radar_images
+```
+Also visible on-device in Files.app → On My iPhone → Weather Fast (UIFileSharingEnabled in Info.plist).
+
+**Log entry fields:** timestamp, city, cityLat/Lon, stationId, stationName, promptMode, aiDescription, aiHasWarnings, aiIntensity, aiDirection, nwsObsStation, nwsConditions, nwsTempC, nwsWindDirDeg, nwsWindSpeedKmh, nwsAlerts (list), warningMismatch (AI claims warning but NWS has none — the key QA flag), voiceoverDesc1/Label1, voiceoverDesc2/Label2, imageFile OR firstFrameFile+lastFrameFile.
+
+---
 
 ### Known Issues
 

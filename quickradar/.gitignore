@@ -13,3 +13,6 @@ venv/
 # Test images from development
 test_*.gif
 test_*.png
+# Radar experiment output snapshots (regenerable via quickradar.py)
+radar_*.gif
+radar_*.png
