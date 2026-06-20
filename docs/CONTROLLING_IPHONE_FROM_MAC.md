@@ -432,146 +432,129 @@ This appendix captures the complete help output from `devicectl` as of Xcode 27 
 
 ### Top-Level Commands
 
-```
-devicectl
-├── device          Commands to interact with devices
-├── diagnose        Gather diagnostic information for debugging or filing bug reports
-├── list            List things that devicectl knows about
-└── manage          Commands to change state between the system and devices
-```
+- **devicectl**
+  - `device` — Commands to interact with devices
+  - `diagnose` — Gather diagnostic information for debugging or filing bug reports
+  - `list` — List things that devicectl knows about
+  - `manage` — Commands to change state between the system and devices
 
 ### `devicectl device` — Interact with a Device
 
-```
-device
-├── appResize       Manage resizable app sessions (observe, set, start)
-├── capture         Capture the device's screen
-│   ├── screenshot      Capture a screenshot from the device
-│   └── screen-record   Record the device's screen
-├── copy            Copy files
-│   ├── to             Copy a file or directory to the device
-│   └── from           Receive a file from the remote device
-├── info            Commands that provide information about a specific device
-│   ├── appIcon        Request app icon generation from this device
-│   ├── appResize      Get the current resizable app session state
-│   ├── appearance     Get Device UI Appearance Information
-│   ├── apps           List apps installed on the device
-│   ├── authListing    Get the device's AuthListing identifiers
-│   ├── ddiServices    Get information on the developer disk image services
-│   ├── details        Get information about the current device
-│   ├── displays       Get the device's current display information
-│   ├── files         List files on the device
-│   ├── lockState     Get the current locked state of the device
-│   └── processes     List currently running processes on the device
-├── install         Install content onto a device
-│   └── app            Installs an app
-├── notification    Post and observe Darwin notifications on a device
-│   ├── post           Post a Darwin notification to a device
-│   └── observe       Observe a Darwin notification on a device
-├── orientation     Control device orientation
-│   ├── get            Get Device Orientation
-│   ├── rotate         Rotate Device Orientation
-│   └── set            Set Device Orientation
-├── pairings        Manage watch and phone pairings
-│   ├── list           List paired devices
-│   ├── pair           Create a new watch and phone pair
-│   ├── set-active     Make the watch and phone pairing active
-│   └── unpair         Unpair a paired watch and phone
-├── pasteboard      Interact with the device pasteboard
-│   ├── copy           Copy data to the device pasteboard
-│   ├── paste          Paste device pasteboard contents to stdout
-│   ├── info           Show information about the device pasteboard
-│   ├── monitor        Monitor device pasteboard for changes
-│   ├── transfer       Transfer pasteboard contents between host and device
-│   └── sync-with-host Bidirectional pasteboard sync between host and device
-├── process         Interact with processes on devices
-│   ├── awaitTermination   Waits for the termination of a remote process
-│   ├── launch             Launch a remote application
-│   ├── openURL            Open a URL on the device
-│   ├── resume             Resume a process on a device
-│   ├── sendMemoryWarning  Sends a memory pressure warning to a process
-│   ├── signal             Send a signal to a process on a device
-│   ├── suspend            Suspend a process on a device
-│   └── terminate          Terminate a process on a device
-├── profile         Manage profiles on a device
-│   ├── install         Install one or more profiles on a device
-│   ├── list            List profiles installed on a device
-│   ├── remove          Remove one or more profiles from a device
-│   └── validate        Validate one or more profiles without installing
-├── reboot          Reboot a device
-├── rename          Rename a device
-├── settings        Customize device settings
-│   ├── appearance      Set device user interface appearance
-│   ├── biometrics     Query or control biometric settings
-│   └── reset          Reset a device's content and settings
-├── simulate        Simulate device behaviors
-│   ├── biometrics      Simulate biometric authentication events
-│   ├── location        Simulate device location
-│   └── statusBar       Simulate device status bar appearance
-├── sysdiagnose     Gather a sysdiagnose for a device
-└── uninstall       Uninstall content from a device
-    └── app            Uninstalls an app
-```
+- **device**
+  - `appResize` — Manage resizable app sessions
+    - `observe` — Observe the device's resizability state
+    - `set` — Adjust the geometry of an active resizable app session
+    - `start` — Start a resizable app session
+  - `capture` — Capture the device's screen
+    - `screenshot` — Capture a screenshot from the device
+    - `screen-record` — Record the device's screen
+  - `copy` — Copy files
+    - `to` — Copy a file or directory to the device
+    - `from` — Receive a file from the remote device
+  - `info` — Commands that provide information about a specific device
+    - `appIcon` — Request app icon generation from this device
+    - `appResize` — Get the current resizable app session state
+    - `appearance` — Get Device UI Appearance Information
+    - `apps` — List apps installed on the device
+    - `authListing` — Get the device's AuthListing identifiers
+    - `ddiServices` — Get information on the developer disk image services
+    - `details` — Get information about the current device
+    - `displays` — Get the device's current display information
+    - `files` — List files on the device
+    - `lockState` — Get the current locked state of the device
+    - `processes` — List currently running processes on the device
+  - `install` — Install content onto a device
+    - `app` — Installs an app
+  - `notification` — Post and observe Darwin notifications on a device
+    - `post` — Post a Darwin notification to a device
+    - `observe` — Observe a Darwin notification on a device
+  - `orientation` — Control device orientation
+    - `get` — Get Device Orientation
+    - `rotate` — Rotate Device Orientation
+    - `set` — Set Device Orientation
+  - `pairings` — Manage watch and phone pairings
+    - `list` — List paired devices
+    - `pair` — Create a new watch and phone pair
+    - `set-active` — Make the watch and phone pairing active
+    - `unpair` — Unpair a paired watch and phone
+  - `pasteboard` — Interact with the device pasteboard
+    - `copy` — Copy data to the device pasteboard
+    - `paste` — Paste device pasteboard contents to stdout
+    - `info` — Show information about the device pasteboard
+    - `monitor` — Monitor device pasteboard for changes
+    - `transfer` — Transfer pasteboard contents between host and device
+    - `sync-with-host` — Bidirectional pasteboard sync between host and device
+  - `process` — Interact with processes on devices
+    - `awaitTermination` — Waits for the termination of a remote process
+    - `launch` — Launch a remote application
+    - `openURL` — Open a URL on the device
+    - `resume` — Resume a process on a device
+    - `sendMemoryWarning` — Sends a memory pressure warning to a process
+    - `signal` — Send a signal to a process on a device
+    - `suspend` — Suspend a process on a device
+    - `terminate` — Terminate a process on a device
+  - `profile` — Manage profiles on a device
+    - `install` — Install one or more profiles on a device
+    - `list` — List profiles installed on a device
+    - `remove` — Remove one or more profiles from a device
+    - `validate` — Validate one or more profiles without installing
+  - `reboot` — Reboot a device
+  - `rename` — Rename a device
+  - `settings` — Customize device settings
+    - `appearance` — Set device user interface appearance
+    - `biometrics` — Query or control biometric settings
+    - `reset` — Reset a device's content and settings
+  - `simulate` — Simulate device behaviors
+    - `biometrics` — Simulate biometric authentication events
+    - `location` — Simulate device location
+    - `statusBar` — Simulate device status bar appearance
+  - `sysdiagnose` — Gather a sysdiagnose for a device
+  - `uninstall` — Uninstall content from a device
+    - `app` — Uninstalls an app
 
 ### `devicectl list` — List Things devicectl Knows About
 
-```
-list
-├── devices         Lists devices that CoreDevice knows about
-├── plugins         List loaded plugin information for devicectl and CoreDeviceService
-└── preferredDDI    List the DDI that CoreDevice will use for a given platform
-```
+- **list**
+  - `devices` — Lists devices that CoreDevice knows about
+  - `plugins` — List loaded plugin information for devicectl and CoreDeviceService
+  - `preferredDDI` — List the DDI that CoreDevice will use for a given platform
 
 ### `devicectl manage` — Change State Between System and Devices
 
-```
-manage
-├── ddis              Commands used to manage the set of developer disk images
-├── loggingProfile    Commands used to manage the Core Device logging profile
-├── pair              Pair with a given device
-└── unpair            Unpair a manually paired device
-```
+- **manage**
+  - `ddis` — Commands used to manage the set of developer disk images
+  - `loggingProfile` — Commands used to manage the Core Device logging profile
+  - `pair` — Pair with a given device
+  - `unpair` — Unpair a manually paired device
 
 ### `devicectl device process launch` — Detailed Options
 
-```
-USAGE: devicectl device process launch [<options>] --device <id> <bundle-id> [<args>]
-
-OPTIONS:
-  --device <id>           Device identifier (name, UDID, UUID, ECID, serial, DNS)
-  <bundle-id>             Bundle identifier or path to the app
-  --terminate-existing    Kill any running instance before launching
-  --console               Attach to console and wait for exit (captures print() output)
-  --start-stopped         Launch in suspended state (for debugger attach)
-  --activate/--no-activate  Launch in foreground (default: --activate)
-  --display <id>          Launch on a specific display
-  --environment-variables <json>  JSON dict of env vars
-  --working-directory <dir>  Initial working directory
-  --arch <arch>           Architecture slice to prefer
-  --payload-url <url>     URL to pass to the app for it to open
-  --user <user>           User ID or name to run as
-```
+- `--device <id>` — Device identifier (name, UDID, UUID, ECID, serial, DNS)
+- `<bundle-id>` — Bundle identifier or path to the app
+- `--terminate-existing` — Kill any running instance before launching
+- `--console` — Attach to console and wait for exit (captures print() output)
+- `--start-stopped` — Launch in suspended state (for debugger attach)
+- `--activate` / `--no-activate` — Launch in foreground (default: --activate)
+- `--display <id>` — Launch on a specific display
+- `--environment-variables <json>` — JSON dict of env vars
+- `--working-directory <dir>` — Initial working directory
+- `--arch <arch>` — Architecture slice to prefer
+- `--payload-url <url>` — URL to pass to the app for it to open
+- `--user <user>` — User ID or name to run as
 
 ### `devicectl device reboot` — Detailed Options
 
-```
-USAGE: devicectl device reboot --device <id> [--style <style>] [--wait-for-device]
-
-OPTIONS:
-  --device <id>           Device identifier
-  --style <style>          'full' (default) or 'userspace'
-  --wait-for-device        Wait for device to become available (USB only)
-```
+- `--device <id>` — Device identifier
+- `--style <style>` — `full` (default) or `userspace`
+- `--wait-for-device` — Wait for device to become available (USB only)
 
 ### Global Options (All Commands)
 
-```
-  -v, --verbose            More logging output
-  -q, --quiet              Only errors
-  -t, --timeout <seconds>  Command timeout
-  -j, --json-output <path>  Write JSON results to file (for scripting)
-  -l, --log-output <path>   Write all logging to file
-```
+- `-v`, `--verbose` — More logging output
+- `-q`, `--quiet` — Only errors
+- `-t`, `--timeout <seconds>` — Command timeout
+- `-j`, `--json-output <path>` — Write JSON results to file (for scripting)
+- `-l`, `--log-output <path>` — Write all logging to file
 
 ### Device Identification
 
