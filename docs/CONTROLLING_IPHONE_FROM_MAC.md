@@ -51,19 +51,19 @@ The output includes the device name, identifier (UUID), and state (available, sh
 
 ```bash
 # Get full info about a specific device
-DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device info details --device "Kelly Ford"
+DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device info details --device "My iPhone"
 ```
 
 You can identify the device by:
-- Name: `--device "Kelly Ford"`
-- UUID: `--device EB74EBE4-9CDA-5D8F-8AFD-6F554257397F`
-- UDID: `--device 00008130-000A11502811401C`
+- Name: `--device "My iPhone"`
+- UUID: `--device A1B2C3D4-E5F6-7890-ABCD-EF1234567890`
+- UDID: `--device 00008110-00A1234567890A`
 
 ### Checking If a Device Is Ready
 
 ```bash
 # Get detailed diagnostics
-DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device info details --device "Kelly Ford" --show diagnostics
+DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device info details --device "My iPhone" --show diagnostics
 ```
 
 This shows:
@@ -85,7 +85,7 @@ DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcodebuild \
   -project MyProject.xcodeproj \
   -scheme MyScheme \
   -configuration Debug \
-  -destination 'id=00008130-000A11502811401C' \
+  -destination 'id=00008110-00A1234567890A' \
   build
 ```
 
@@ -103,7 +103,7 @@ DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl li
 Or get it from device details:
 
 ```bash
-DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device info details --device "Kelly Ford" --show diagnostics
+DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device info details --device "My iPhone" --show diagnostics
 ```
 
 Look for the `UDID` field in the output.
@@ -116,7 +116,7 @@ DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcodebuild \
   -project MyProject.xcodeproj \
   -scheme MyScheme \
   -configuration Debug \
-  -destination 'id=00008130-000A11502811401C' \
+  -destination 'id=00008110-00A1234567890A' \
   build 2>&1 | grep -E "error:|BUILD SUCCEEDED|BUILD FAILED"
 ```
 
@@ -130,7 +130,7 @@ This filters the output to just errors and the final result — much easier to s
 
 ```bash
 DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device install app \
-  --device "Kelly Ford" \
+  --device "My iPhone" \
   "/Users/you/Library/Developer/Xcode/DerivedData/MyProject-abc123/Build/Products/Debug-iphoneos/MyApp.app"
 ```
 
@@ -145,7 +145,7 @@ find ~/Library/Developer/Xcode/DerivedData/MyProject-* -name "MyApp.app" -path "
 
 ```bash
 DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device process launch \
-  --device "Kelly Ford" \
+  --device "My iPhone" \
   com.yourcompany.yourapp
 ```
 
@@ -160,7 +160,7 @@ defaults read "/path/to/MyApp.app/Info.plist" CFBundleIdentifier
 
 ```bash
 DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device process launch \
-  --device "Kelly Ford" \
+  --device "My iPhone" \
   --terminate-existing \
   --console \
   com.yourcompany.yourapp
@@ -174,7 +174,7 @@ Flags:
 
 ```bash
 DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device process launch \
-  --device "Kelly Ford" \
+  --device "My iPhone" \
   --terminate-existing \
   --console \
   com.yourcompany.yourapp 2>&1 | tee /tmp/app_logs.txt &
@@ -199,7 +199,7 @@ The `--console` flag (above) captures `print()` output. For `os.Logger` output (
 
 ```bash
 DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device info processes \
-  --device "Kelly Ford"
+  --device "My iPhone"
 ```
 
 This shows all running processes with their PIDs — useful for checking if a daemon or service is active.
@@ -225,7 +225,7 @@ tail -20 /tmp/app_logs.txt
 
 ```bash
 DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device reboot \
-  --device "Kelly Ford"
+  --device "My iPhone"
 ```
 
 This is useful when:
@@ -240,8 +240,8 @@ The phone takes about 30-60 seconds to reboot. Wait for it to come back before t
 ## Taking Screenshots
 
 ```bash
-DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device capture \
-  --device "Kelly Ford" \
+DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device capture screenshot \
+  --device "My iPhone" \
   /tmp/screenshot.png
 ```
 
@@ -249,6 +249,126 @@ This captures the current screen of your phone. You can then:
 - Open it in Preview (`open /tmp/screenshot.png`)
 - Use VoiceOver to read it if it contains text
 - Send it to an AI model for analysis
+
+### Screen Recording
+
+```bash
+DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device capture screen-record \
+  --device "My iPhone" \
+  /tmp/recording.mp4
+```
+
+Records a video of the device screen. Useful for capturing interactions, reproducing bugs, or sharing with sighted colleagues.
+
+---
+
+## Interacting with the App Without Touching the Phone
+
+`devicectl` doesn't have a "tap this button" command — it's not a remote control tool. But there are several ways to interact with your app from the Mac:
+
+### Open a URL (Deep Linking)
+
+```bash
+DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device process openURL \
+  --device "My iPhone" \
+  "myapp://city/madison"
+```
+
+If your app registers custom URL schemes, you can deep-link directly to a specific screen. This is the closest thing to "navigating to a screen" without touching the phone.
+
+### Inject Text via Pasteboard
+
+```bash
+# Copy text to the device clipboard
+DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device pasteboard copy \
+  --device "My iPhone" \
+  "text to paste"
+
+# Read text from the device clipboard
+DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device pasteboard paste \
+  --device "My iPhone"
+```
+
+If your app has a text field focused, the pasted text will appear there. This is useful for testing search inputs or form fields.
+
+### Launch with Arguments
+
+```bash
+DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device process launch \
+  --device "My iPhone" \
+  --terminate-existing \
+  com.yourcompany.yourapp \
+  --debug-mode --city=madison
+```
+
+Your app can read command-line arguments via `ProcessInfo.processInfo.arguments` and configure itself accordingly — useful for testing specific configurations without navigating the UI.
+
+### Launch with Environment Variables
+
+```bash
+DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device process launch \
+  --device "My iPhone" \
+  --terminate-existing \
+  --environment-variables '{"TEST_MODE": "true", "DEFAULT_CITY": "Madison"}' \
+  com.yourcompany.yourapp
+```
+
+Your app can read these via `ProcessInfo.processInfo.environment`. Great for feature flags, test configurations, or forcing specific behavior.
+
+### UI Testing with XCUITest
+
+For actual button-tapping and UI interaction automation, use Xcode's UI testing framework. This runs on the device and can tap buttons, swipe, type text, and verify UI state:
+
+```bash
+# Run UI tests on the device
+DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcodebuild test \
+  -project MyProject.xcodeproj \
+  -scheme MyScheme \
+  -destination 'id=00008110-00A1234567890A' \
+  -only-testing:MyAppUITests
+```
+
+XCUITest tests are written in Swift and can:
+- Tap buttons by accessibility label: `app.buttons["Describe Radar"].tap()`
+- Type text: `app.textFields["Search"].typeText("Madison")`
+- Swipe and scroll: `app.swipeUp()`
+- Verify elements exist: `XCTAssertTrue(app.staticTexts["72°F"].exists)`
+- Take screenshots: `XCTAttachment(screenshot: app.screenshot())`
+
+This is the real "automated button tapping" — it's a full UI automation framework, not a remote control. The tests run on the device, so they interact with the actual UI.
+
+### Simulate Location
+
+```bash
+DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device simulate location \
+  --device "My iPhone" \
+  --lat 43.0731 --lon -89.4012
+```
+
+Sets the device's GPS to a specific latitude/longitude. Useful for testing location-based features without actually traveling.
+
+### Send Memory Warnings
+
+```bash
+# Find your app's PID first
+DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device info processes \
+  --device "My iPhone" | grep "yourapp"
+
+# Send a memory warning to test how your app handles low memory
+DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device process sendMemoryWarning \
+  --device "My iPhone" \
+  --pid 1234
+```
+
+### Post Darwin Notifications
+
+```bash
+DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer xcrun devicectl device notification post \
+  --device "My iPhone" \
+  com.yourcompany.test.notification
+```
+
+Triggers a Darwin notification on the device — useful for testing notification handlers without going through the UI.
 
 ---
 
@@ -261,7 +381,7 @@ Here's a script that does everything in one shot:
 # Build, install, and launch — all in one command
 # Usage: ./deploy.sh
 
-DEVICE="Kelly Ford"
+DEVICE="My iPhone"
 BUNDLE_ID="com.yourcompany.yourapp"
 PROJECT="MyProject.xcodeproj"
 SCHEME="MyScheme"
@@ -271,7 +391,7 @@ export DEVELOPER_DIR="$XCODE_DIR"
 
 echo "Building..."
 xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration Debug \
-  -destination "id=00008130-000A11502811401C" build 2>&1 | \
+  -destination "id=00008110-00A1234567890A" build 2>&1 | \
   grep -E "error:|BUILD SUCCEEDED|BUILD FAILED"
 
 if [ $? -ne 0 ]; then
@@ -333,7 +453,7 @@ Then all subsequent `xcrun` and `xcodebuild` commands use that Xcode version.
 
 ### Use Device Name Instead of UDID
 
-`--device "Kelly Ford"` is easier to remember and type than `--device 00008130-000A11502811401C`. Both work.
+`--device "My iPhone"` is easier to remember and type than `--device 00008110-00A1234567890A`. Both work.
 
 ### Keep the Phone on Wi-Fi
 
@@ -344,7 +464,7 @@ Once paired over USB, the phone works over Wi-Fi. No cable needed for builds, in
 If the phone is in a bad state (app won't launch, logs won't capture, model manager fails):
 
 ```bash
-xcrun devicectl device reboot --device "Kelly Ford"
+xcrun devicectl device reboot --device "My iPhone"
 ```
 
 Wait 60 seconds, then try again.
@@ -563,12 +683,12 @@ This appendix captures the complete help output from `devicectl` as of Xcode 27 
 ### Device Identification
 
 All `--device` flags accept any of:
-- **Name:** `--device "Kelly Ford"`
-- **UDID:** `--device 00008130-000A11502811401C`
-- **UUID:** `--device EB74EBE4-9CDA-5D8F-8AFD-6F554257397F`
-- **ECID:** `--device 2833785734381596`
-- **Serial number:** `--device DQT4C9KHKG`
-- **DNS name:** `--device Kelly-Ford.coredevice.local`
+- **Name:** `--device "My iPhone"`
+- **UDID:** `--device 00008110-00A1234567890A`
+- **UUID:** `--device A1B2C3D4-E5F6-7890-ABCD-EF1234567890`
+- **ECID:** `--device 1234567890123456`
+- **Serial number:** `--device AB123CD4567`
+- **DNS name:** `--device My-iPhone.coredevice.local`
 
 ---
 
