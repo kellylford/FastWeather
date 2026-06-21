@@ -14,16 +14,21 @@ When you run this, it:
      present (not just looking at NWS text conditions).
   4. Saves "interesting" images (has echoes OR has active alerts) to a
      permanent archive at archive/ with full NWS metadata JSON.
-  5. Prints a capture summary showing what was saved and why.
+  5. Runs a cloud vision model against each saved image and stores the
+     description in the JSON metadata (so each entry has a high-quality
+     baseline description alongside the ground truth).
+  6. Prints a capture summary showing what was saved and why.
 
 After running, you have a growing archive of radar images spanning the
 full range of conditions (clear, light, moderate, heavy, warnings) that
 you can use as a fixed test bed for model comparison.
 
 Usage:
-    python build_radar_archive.py               # full run
+    python build_radar_archive.py               # full run (with cloud descriptions)
     python build_radar_archive.py --all         # save all images, not just interesting ones
     python build_radar_archive.py --no-alerts   # skip NWS alert hunting, just do geo sweep
+    python build_radar_archive.py --no-cloud    # skip cloud model descriptions (faster)
+    python build_radar_archive.py --cloud-model gemma4:31b-cloud  # use a different cloud model
     python build_radar_archive.py --label       # after capture, print images needing VoiceOver labels
 
 The archive layout:
@@ -36,6 +41,7 @@ The archive layout:
 """
 
 import argparse
+import base64
 import io
 import json
 import math
@@ -52,6 +58,32 @@ NWS_HEADERS = {
 }
 
 ARCHIVE_DIR = Path("archive")  # overridden by --output-dir at runtime
+
+DEFAULT_CLOUD_MODEL = "gemini-3-flash-preview:cloud"
+
+CLOUD_PROMPT = """You are describing a NWS NEXRAD base-reflectivity radar image for a blind user. Be accurate and specific.
+
+COLORS — learn these before describing anything:
+  SOLID BLUE, CYAN, or TEAL filled areas = BODIES OF WATER (Great Lakes, rivers, coastlines). These are NOT precipitation. They are permanent map features.
+  WHITE or LIGHT GRAY areas = NO precipitation detected.
+  LIGHT GREEN = very light rain/drizzle.
+  GREEN = light rain.
+  YELLOW = moderate rain.
+  ORANGE = heavy rain.
+  RED or DARK RED = very heavy rain or large hail.
+  PINK or MAGENTA = ice or extreme precipitation.
+
+LINES — do not confuse these with weather:
+  THIN RED or BROWN LINES = county and state borders. NOT storm outlines.
+
+TOP OF IMAGE — warning legend strip:
+  The very top of the image has a row of colored boxes (Tornado Warning, Severe Thunderstorm Warning, Flash Flood Warning, etc.). These are a LEGEND KEY — they show what color would be used IF a warning existed. Do not report a warning just because you see these colored boxes. Only report a warning if you see a colored polygon or outlined shape drawn ON the MAP itself, below the legend strip.
+
+WHAT TO DESCRIBE:
+1. Is there any precipitation visible on the map (green/yellow/orange/red/pink areas)? If yes: where is it, what intensity, roughly how large an area?
+2. Are any colored polygons or warning outlines drawn ON the map area (not the top legend strip)?
+3. Is the map mostly clear or active?
+Answer each of these three questions. Be specific and factual."""
 
 # ── Geographic diversity sweep (same 20 as the main experiment) ─────────────
 GEO_SWEEP = [
@@ -356,9 +388,32 @@ def alert_zipcodes(max_alerts=15):
     return alert_locs
 
 
+# ── Cloud model description ──────────────────────────────────────────────────
+def cloud_describe(image_bytes: bytes, model: str) -> str:
+    """Send image to an Ollama cloud model and return its description."""
+    try:
+        from PIL import Image as PILImage
+        img = PILImage.open(io.BytesIO(image_bytes))
+        buf = io.BytesIO()
+        img.convert("RGB").save(buf, format="PNG")
+        img_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+    except ImportError:
+        img_b64 = base64.b64encode(image_bytes).decode("utf-8")
+
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": CLOUD_PROMPT, "images": [img_b64]}],
+        "stream": False,
+    }
+    resp = requests.post("http://localhost:11434/api/chat", json=payload, timeout=120)
+    resp.raise_for_status()
+    return resp.json().get("message", {}).get("content", "").strip()
+
+
 # ── Save one image to the archive ────────────────────────────────────────────
 def save_to_archive(stamp, zipcode, station, city, image_bytes, url,
-                    echo_category, echo_frac, echo_detail, gt, reason):
+                    echo_category, echo_frac, echo_detail, gt, reason,
+                    cloud_model=None, cloud_description=None):
     ARCHIVE_DIR.mkdir(exist_ok=True)
     (ARCHIVE_DIR / "voiceover").mkdir(exist_ok=True)
 
@@ -399,7 +454,10 @@ def save_to_archive(stamp, zipcode, station, city, image_bytes, url,
         "image_file": png_path.name,
         "voiceover_file": f"voiceover/{base}.txt",
         "voiceover_description": None,
-        "model_descriptions": {},
+        "cloud_model": cloud_model,
+        "cloud_description": cloud_description,
+        "model_descriptions": ({cloud_model: cloud_description}
+                               if cloud_model and cloud_description else {}),
     }
     json_path = ARCHIVE_DIR / f"{base}.json"
     json_path.write_text(json.dumps(meta, indent=2), encoding="utf-8")
@@ -439,6 +497,12 @@ def main():
                         help="Skip NWS alert hunting, only do geographic sweep")
     parser.add_argument("--label", action="store_true",
                         help="After capture, list archived images missing VoiceOver labels")
+    parser.add_argument("--no-cloud", action="store_true",
+                        help="Skip cloud model descriptions (faster; use when offline or testing)")
+    parser.add_argument("--cloud-model", default=DEFAULT_CLOUD_MODEL,
+                        help=f"Cloud vision model to use for descriptions "
+                             f"(default: {DEFAULT_CLOUD_MODEL}). "
+                             f"Other options: gemma4:31b-cloud, minimax-m3:cloud")
     parser.add_argument("--output-dir", default=None,
                         help="Directory to save archive (default: archive/ next to this script). "
                              "Pass your OneDrive RadarData path to sync automatically.")
@@ -540,10 +604,22 @@ def main():
             skipped.append(zipcode)
             continue
 
+        # Cloud model description
+        cloud_desc = None
+        if not args.no_cloud:
+            print(f"  running {args.cloud_model}...", end="", flush=True)
+            try:
+                cloud_desc = cloud_describe(image_bytes, args.cloud_model)
+                print(f" done ({len(cloud_desc)} chars)")
+            except Exception as e:
+                print(f" failed: {e}")
+
         # Save to archive
         png_path, json_path = save_to_archive(
             stamp, zipcode, station, city, image_bytes, url,
-            echo_cat, echo_frac, echo_detail, gt, reason
+            echo_cat, echo_frac, echo_detail, gt, reason,
+            cloud_model=args.cloud_model if not args.no_cloud else None,
+            cloud_description=cloud_desc,
         )
         print(f"  → saved: {png_path.name}")
         saved.append({"zipcode": zipcode, "city": city, "echo": echo_cat,
