@@ -16,3 +16,8 @@ test_*.png
 # Radar experiment output snapshots (regenerable via quickradar.py)
 radar_*.gif
 radar_*.png
+
+# Per-run output files (text dumps, summaries, comparisons)
+weather_*.txt
+experiment_summary_*.txt
+model_comparison_*.txt
