@@ -1,8 +1,257 @@
 # Resume Work: QuickRadar + WeatherFast AI Radar Description Project
 
-**Purpose:** Load this file into a new GitHub Copilot Chat session on your Mac to get the AI agent current on everything we've done and what's next. Just open this file, start a chat, and say "read this file and continue."
+**Purpose:** Load this file into a new session to get the AI agent current on everything we've done and what's next. Open this file, start a chat, say "read this file and continue."
 
-**Last updated:** 2026-06-20 (logging + ground-truth comparison session — KEY FINDING: VoiceOver beats Foundation Models on radar images; see "Comparison Findings" section)
+**Last updated:** 2026-06-21 (multi-model landscape + test bed design session; 20-location minicpm-v4.6 experiment run; new scripts: run_minicpm_experiment.py, run_saved_comparison.py, build_radar_archive.py)
+
+---
+
+---
+
+## Multi-Model Investigation & Test Bed Design (June 21, 2026)
+
+**THIS SECTION IS THE MOST CURRENT. Read it first.**
+
+### Strategic Frame (Kelly's direction)
+
+This is a long-term investigation, not a sprint to a quick answer. Kelly's explicit position:
+
+- **Not looking for the first thing that works.** Looking for the right foundation.
+- **Availability matters as much as accuracy.** A model that runs on iOS 17+ via llama.cpp reaches users years before iOS 27 Foundation Models ships broadly.
+- **VoiceOver's advantage needs more scrutiny.** We have ONE VoiceOver data point (clear-sky Madison). That's not enough to call it the winner. It may fail on actual storm cells, overlapping warnings, or radar loop frames the same way FM does.
+- **Prompting still has room.** The improved prompt moved minicpm-v4.6 from 0% to 75% accuracy on clear-sky detection. The water-body confusion improved substantially. More targeted prompting could close more of the gap.
+- **VoiceOver internals are worth understanding.** It's new in iOS 27 and the architecture is opaque. There may be a path to understanding or replicating it.
+
+---
+
+### The Model Landscape (June 21, 2026)
+
+You randomly found minicpm-v4.6. Here's the broader field of small VLMs for on-device/mobile deployment as of mid-2026:
+
+**Already installed in Ollama:**
+| Model | Size | Notes |
+|-------|------|-------|
+| `minicpm-v4.6` | 1.6GB | Currently testing; best on legend trap; still hallucinates some precip |
+| `moondream` | 1.7GB | Smallest capable VLM; explicitly edge-focused; fast startup |
+| `granite3.2-vision` | 2.4GB | Failed with GIF input; now works with PNG conversion in quickradar.py |
+| `llava` | 4.7GB | Original; tested in early sessions; hallucinated badly |
+
+**Worth pulling and testing next:**
+| Model | Ollama name | Size | Why interesting |
+|-------|------------|------|----------------|
+| Qwen2.5-VL 3B | `qwen2.5vl:3b` | 3.2GB | Strong spatial reasoning; 125K context; demonstrated on phone |
+| Moondream (already installed) | `moondream` | 1.7GB | Compare against minicpm same prompt |
+| SmolVLM 500M | `smolvlm:500m` (if available) | ~0.5GB | Tiny baseline; tells you the floor |
+
+**Demonstrated running natively on iPhone hardware (not just theoretical):**
+- **MiniCPM-V 4.6** — iOS/Android/HarmonyOS adaptation code open-sourced by OpenBMB; 6-8 tok/s on mobile
+- **FastVLM** (Apple ML Research) — Apple's own published research model, optimized for iPhone 16 Pro via MLX; open-sourced. This is the closest window into what Apple is building internally for VoiceOver.
+- **Qwen3-0.6B** — ~40 tok/s demonstrated on iPhone 15 Pro
+- **Moondream 2** — under 2GB; designed for edge; runs on Raspberry Pi and Jetson
+- **Gemma 3n E2B/E4B** (Google) — specifically designed for mobile (not yet tested)
+- **Phi-3.5-vision** (Microsoft) — 4.2B, runs on phone via MLC-VLM
+
+**iOS inference frameworks (all support iOS 16+, years before Foundation Models):**
+- **llama.cpp** with iOS Swift bindings — simplest for GGUF models; most portable
+- **MLX Swift** — fastest on Apple Silicon; used by FastVLM; iPhone 12+ (A14+)
+- **Core ML** — most memory-efficient (uses Apple Neural Engine); models need conversion
+- **ONNX Runtime Mobile** — cross-platform enterprise option
+
+**Key availability point:** Any model deployed via llama.cpp or MLX runs on iOS 16 or 17+ — meaning it reaches users roughly 3-4 years before iOS 27 Foundation Models is broadly adopted. This is a major practical argument for the open-model path even if accuracy is somewhat lower today.
+
+---
+
+### 20-Location Experiment Results (June 21, 2026)
+
+**Script:** `run_minicpm_experiment.py`
+**Model:** minicpm-v4.6
+**Prompt:** improved water-color-aware prompt (see `prompt.txt`)
+**Summary file:** `experiment_summary_20260621_060823.txt`
+
+**Results:**
+- Precipitation accuracy: **15/20 (75%)**
+- Warning accuracy: **12/20 (60%)** ← note: keyword scorer has bugs (misses "colored polygon" phrasing); actual may differ
+
+**Breakdown:**
+| | Count | Notes |
+|---|---|---|
+| True negative (correctly said clear) | 12/16 | 75% clear-sky accuracy |
+| True positive (correctly found precip) | 3/4 | Hattiesburg, Wichita, Houston |
+| False positive (hallucinated precip) | 4/16 | Chicago, Atlanta, New Orleans, Norman OK |
+| False negative (missed real precip) | 1/4 | Denver — but Denver had fog/mist, which barely shows on radar; arguably correct |
+
+**False positive pattern:** 
+- Chicago: plausibly reading Lake Michigan echoes
+- New Orleans: Gulf Coast coastline returns
+- Atlanta and Norman OK: no nearby water → may be clear-air clutter, bright band, or noise artifacts the model reads as precipitation. Harder to fix with prompting alone.
+
+**Warning accuracy caveats:** Most NWS alerts during the experiment were Heat Advisories, Air Quality Alerts, Red Flag Warnings — things that do NOT appear on radar images. Scoring the model as "wrong" for not reporting a Heat Advisory as a radar warning polygon is a scoring design flaw, not a model failure. Need to filter alerts to only radar-visible types (Tornado Warning, Severe Thunderstorm Warning, Flash Flood Warning) in future scoring.
+
+**Comparison with earlier FM (iOS 27) results:**
+
+| | Legend trap (no warning hallucination) | Precip location |
+|---|---|---|
+| VoiceOver (iOS 27) | ✅ 1/1 tested | ✅ 1/1 tested |
+| minicpm-v4.6 (Mac/Ollama) | ✅ ~90% | ✅ 75% |
+| Foundation Models (iOS 27) | ❌ hallucinated warnings | ❌ mislocated precip |
+
+VoiceOver leads, but we only have 1 VoiceOver data point. minicpm-v4.6 leads FM on both dimensions. This is enough to continue investing in the open-model path.
+
+---
+
+### Test Bed Architecture (June 21, 2026)
+
+A proper test bed needs three things the current setup lacks: **range of conditions**, **stability over time**, and **multi-layer ground truth**. Here's the full design:
+
+#### Condition categories needed
+
+You need at least a few images from each of these, with confirmed ground truth:
+1. Definitively clear — no echoes anywhere in the scan radius
+2. Scattered light precipitation (isolated green cells, no warning)
+3. Solid moderate coverage (yellow/orange, widespread rain event)
+4. Convective cells — discrete storms with red cores
+5. Active tornado warning polygon visibly drawn on the map
+6. Active severe thunderstorm warning polygon
+7. Flash flood warning
+8. Multiple overlapping warnings (worst case for legend confusion)
+9. Winter precipitation (different radar signature — lower reflectivity, mixed colors)
+10. Coastal geometry — radar station near a large water body (deliberately stress-tests water confusion)
+11. Long-range case — city 150+ km from radar station (tests location precision)
+12. Squall line — linear band of storms (tests shape description)
+13. Clear with anomalous propagation (AP) — looks like light rain but is radar artifact
+
+Categories 1-3 collect within days. Categories 5-8 require active severe weather — takes months of opportunistic collection unless you automate capture.
+
+#### Ground truth layers
+
+**Layer 1 — NWS automated (already doing):** conditions, precip amounts, active alerts at capture time.
+
+**Layer 2 — Pixel analysis (now automated):** `build_radar_archive.py` classifies each image as none/light/moderate/heavy/extreme by color signature, stripping the legend strip and scale bar from the analysis. This gives objective image-level truth independent of NWS API.
+
+**Layer 3 — VoiceOver description (manual, systematic):** For each archived image, Kelly opens it on iPhone with VoiceOver enabled and captures the description. This is the gold standard oracle. Archive stores placeholder files in `archive/voiceover/*.txt`. No public API exists for this (see VoiceOver API section below) — manual capture is the only path.
+
+**Layer 4 — Expert human description:** What does a sighted person say the image shows? This separates "what the radar actually shows" from "what the weather actually is" — they differ when the storm is 80 miles away. Currently missing from the pipeline. Even a short sighted description per image would close this gap.
+
+**Layer 5 — Target output (Kelly's spec):** What description would actually be most useful for a blind user? May differ from the sighted description — relative language ("rain is moving toward downtown") rather than cardinal directions, skipping map legends entirely. Writing this out for a sample set defines what "accuracy" even means for this use case.
+
+#### The archive builder
+
+**Script:** `build_radar_archive.py` (run manually, not a cron)
+
+What it does when you run it:
+1. Checks NWS for active severe weather alerts (tornado, severe tstorm, flash flood, winter storm warnings) — finds coordinates, reverse-geocodes to get zipcodes near the action
+2. Downloads radar images for those alert areas AND the 20-location geographic diversity sweep
+3. Pixel-analyses each image (strips legend/scale bar from analysis, classifies echoes)
+4. Saves "interesting" images (has echoes OR active alerts) to `archive/` with full metadata JSON
+5. Creates `archive/voiceover/*.txt` placeholder files for VoiceOver descriptions
+6. Prints what needs labeling
+
+Usage:
+```bash
+python build_radar_archive.py          # normal run (saves interesting images only)
+python build_radar_archive.py --all    # save everything, even clear
+python build_radar_archive.py --no-alerts  # skip alert hunting, just geo sweep
+```
+
+Archive layout:
+```
+archive/
+    20260621_120000_53703_KMKX_Madison.png     ← radar image
+    20260621_120000_53703_KMKX_Madison.json    ← NWS metadata + pixel analysis
+    voiceover/
+        20260621_120000_53703_KMKX_Madison.txt ← paste VoiceOver description here
+    index.jsonl                                ← one line per archived entry
+```
+
+#### VoiceOver labeling workflow
+
+After running `build_radar_archive.py`:
+1. The `archive/voiceover/` folder shows which images need labels
+2. Transfer the PNG to iPhone (AirDrop is easiest)
+3. Open in Photos with VoiceOver enabled
+4. Two-finger tap-and-hold triggers iOS 27's image description
+5. Copy the description text (VoiceOver copies it to clipboard on long-press)
+6. Paste into the corresponding `.txt` file in `archive/voiceover/`
+
+Once a collection of images has VoiceOver descriptions, those become the gold standard against which we score every other model on the same pixels.
+
+#### Model comparison (fixed-image)
+
+**Script:** `run_saved_comparison.py`
+
+Runs multiple models against the SAME already-downloaded radar images, so results are directly comparable (same pixel, same moment, same NWS truth). Reads ground truth from a previous experiment summary file so it doesn't re-hit the NWS API.
+
+```bash
+# Compare models against images from this morning's experiment
+python run_saved_comparison.py --summary experiment_summary_20260621_060823.txt
+
+# Specify which models to compare
+python run_saved_comparison.py --summary experiment_summary_*.txt \
+    --models minicpm-v4.6 moondream granite3.2-vision qwen2.5vl:3b
+```
+
+#### Scoring improvements needed
+
+Current keyword-based scoring in `run_minicpm_experiment.py` has false negatives (misses "colored polygon" phrasing) and false-positive suppression bugs ("mostly clear" at the end of a response overrides earlier "moderate precipitation" claim). Two better approaches:
+
+1. **Filter alerts to radar-visible types only** — only score warning accuracy against Tornado/Severe Tstorm/Flash Flood warnings, not Heat Advisories or Air Quality Alerts
+2. **LLM-as-judge scoring** — use a capable model (Claude API) to evaluate: "Given NWS said [X], did this description accurately represent the radar?" This is the current gold standard for eval but requires an API call per description
+
+---
+
+### VoiceOver API Status (June 21, 2026)
+
+**Bottom line: No public API exists to invoke VoiceOver's image description programmatically.**
+
+What's confirmed:
+- VoiceOver image descriptions are entirely on-device (no cloud processing) since iOS 14
+- iOS 27 significantly upgraded the capability, likely using a larger on-device model
+- Vision framework has OCR, saliency, and segmentation but NOT image captioning
+- Foundation Models framework (iOS 18+) exposes Apple's 3B text model but not image description
+- There is NO public equivalent of `VNGenerateImageDescriptionRequest`
+
+**FastVLM (Apple ML Research)** is the closest public window into what Apple is building:
+- Published by Apple's own ML research team
+- Specifically optimized for iPhone (MLX-based, demonstrated on iPhone 16 Pro)
+- Open-sourced — can be run on Mac today via MLX
+- If VoiceOver uses a similar architecture/training approach, FastVLM on the same radar images would reveal whether the accuracy comes from architecture or training data
+- Worth testing: `pip install mlx-vlm && python -m mlx_vlm.generate --model apple/FastVLM-0.5B-Instruct ...`
+
+**Path forward on VoiceOver internals:**
+- Wait for iOS 27 to leave beta — Apple sometimes adds public APIs that were private in beta
+- Watch WWDC 2026 sessions for any image description API announcements
+- Test FastVLM on the archive images as a proxy for Apple's approach
+- Meanwhile, treat VoiceOver as the oracle and use manual capture to build the label set
+
+---
+
+### What's Next (June 21, 2026)
+
+**Immediate (next session):**
+
+1. **Run `run_saved_comparison.py`** once `qwen2.5vl:3b` finishes pulling. This gives 4-model comparison on the same 20 images — first real apples-to-apples model comparison.
+
+2. **Run `build_radar_archive.py`** when weather is active somewhere. Builds the archive with pixel analysis and VoiceOver placeholder files.
+
+3. **Add VoiceOver descriptions to archive images.** Even 5-10 images with confirmed VoiceOver descriptions gives a multi-point VoiceOver baseline, not just the single Madison sample.
+
+4. **Test FastVLM.** Install `mlx-vlm`, pull FastVLM 0.5B, run it against archive images. Tells you whether Apple's own research model does better than open models on radar.
+
+**Near-term:**
+
+5. **Fix the warning scoring** — filter to radar-visible alert types only; improve keyword detection or switch to LLM-as-judge.
+
+6. **Test granite3.2-vision** — it's already installed but only tested with GIF (failed). Now that PNG conversion is in place, run it in the comparison.
+
+7. **Investigate zoom cropping** — `--zoom 75` in quickradar.py crops to 75km radius around the user. We haven't tested whether this helps or hurts model accuracy. The comparison script makes it easy to test.
+
+8. **Build a FastWeather iOS test harness** — a minimal SwiftUI view that shows a radar image and lets you run multiple prompts/models against it, logging results alongside VoiceOver descriptions. Currently the iOS logging only captures one model (FM). Generalizing it to log any model would let you test on-device models in real conditions.
+
+**Longer-term:**
+
+9. **Evaluate bundling minicpm-v4.6 or moondream into the iOS app** via llama.cpp Swift package. This is the path to iOS 17+ availability without Foundation Models.
+
+10. **Fine-tuning investigation** — once the archive has 50+ labeled images with VoiceOver descriptions as gold-standard labels, evaluate whether fine-tuning a small model specifically on radar image description would close the accuracy gap. This is a real research project but the labeled data you're accumulating is exactly what you'd need.
 
 ---
 

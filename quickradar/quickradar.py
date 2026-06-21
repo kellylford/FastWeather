@@ -474,6 +474,24 @@ def _extract_token_info(response) -> dict:
     return info
 
 
+def _image_to_png_b64(image_path: Path) -> str:
+    """Read an image file and return it as a base64-encoded PNG string.
+
+    GIF files are converted to PNG because many vision models reject GIF input.
+    PNG files are passed through as-is.
+    """
+    try:
+        from PIL import Image
+        import io
+        img = Image.open(image_path)
+        buf = io.BytesIO()
+        img.convert("RGB").save(buf, format="PNG")
+        return base64.b64encode(buf.getvalue()).decode("utf-8")
+    except ImportError:
+        with open(image_path, "rb") as f:
+            return base64.b64encode(f.read()).decode("utf-8")
+
+
 def describe_radar_with_ollama(
     image_path: Path,
     model: str,
@@ -486,8 +504,7 @@ def describe_radar_with_ollama(
     with prompt_eval_count, eval_count, total_tokens, and eval_duration_ns if
     available (Ollama exposes these in the non-streaming chat response).
     """
-    with open(image_path, "rb") as f:
-        img_b64 = base64.b64encode(f.read()).decode("utf-8")
+    img_b64 = _image_to_png_b64(image_path)
 
     token_info = {}
 
