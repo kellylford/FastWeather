@@ -24,12 +24,14 @@ full range of conditions (clear, light, moderate, heavy, warnings) that
 you can use as a fixed test bed for model comparison.
 
 Usage:
-    python build_radar_archive.py               # full run (with cloud descriptions)
-    python build_radar_archive.py --all         # save all images, not just interesting ones
-    python build_radar_archive.py --no-alerts   # skip NWS alert hunting, just do geo sweep
-    python build_radar_archive.py --no-cloud    # skip cloud model descriptions (faster)
-    python build_radar_archive.py --cloud-model gemma4:31b-cloud  # use a different cloud model
-    python build_radar_archive.py --label       # after capture, print images needing VoiceOver labels
+    python build_radar_archive.py               # full run, all locations, local models
+    python build_radar_archive.py --no-alerts   # skip NWS alert hunting, just geo sweep
+    python build_radar_archive.py --no-local    # skip local model descriptions (faster)
+    python build_radar_archive.py --local-models minicpm-v4.6,qwen3-vl:2b  # custom model list
+    python build_radar_archive.py --cloud-model gemini-3-flash-preview:cloud  # add cloud too
+    python build_radar_archive.py --label       # show images needing VoiceOver labels
+
+All locations are always saved — every run produces a complete, equal-sized dataset.
 
 The archive layout:
     archive/
@@ -59,7 +61,7 @@ NWS_HEADERS = {
 
 ARCHIVE_DIR = Path("archive")  # overridden by --output-dir at runtime
 
-DEFAULT_LOCAL_MODEL = "minicpm-v4.6"
+DEFAULT_LOCAL_MODELS = "minicpm-v4.6,qwen2.5vl:3b"
 DEFAULT_CLOUD_MODEL = "gemini-3-flash-preview:cloud"
 
 CLOUD_PROMPT = """You are describing a NWS NEXRAD base-reflectivity radar image for a blind user. Be accurate and specific.
@@ -495,16 +497,14 @@ def save_to_archive(run_dir, zipcode, station, city, image_bytes, url,
 # ── Main ─────────────────────────────────────────────────────────────────────
 def main():
     parser = argparse.ArgumentParser(description="Build radar image archive for test bed")
-    parser.add_argument("--all", action="store_true",
-                        help="Save all images, not just ones with echoes or alerts")
     parser.add_argument("--no-alerts", action="store_true",
                         help="Skip NWS alert hunting, only do geographic sweep")
     parser.add_argument("--label", action="store_true",
                         help="After capture, list archived images missing VoiceOver labels")
     parser.add_argument("--no-local", action="store_true",
                         help="Skip local model descriptions")
-    parser.add_argument("--local-model", default=DEFAULT_LOCAL_MODEL,
-                        help=f"Local Ollama model for descriptions (default: {DEFAULT_LOCAL_MODEL})")
+    parser.add_argument("--local-models", default=DEFAULT_LOCAL_MODELS,
+                        help=f"Comma-separated local Ollama models to run (default: {DEFAULT_LOCAL_MODELS})")
     parser.add_argument("--no-cloud", action="store_true",
                         help="Skip cloud model descriptions (off by default; Ollama quota required)")
     parser.add_argument("--cloud-model", default=DEFAULT_CLOUD_MODEL,
@@ -553,7 +553,6 @@ def main():
     print()
 
     saved = []
-    skipped = []
 
     for i, (zipcode, city_hint, reason) in enumerate(locations, 1):
         is_alert = reason != "Geographic sweep"
@@ -602,27 +601,12 @@ def main():
                   "alerts": [], "station_id": "", "obs_time": "", "error": str(e)}
             print(f"  NWS error: {e}")
 
-        # Decide whether to save
-        interesting = (
-            echo_cat in ("light", "moderate", "heavy", "extreme") or
-            len(gt["alerts"]) > 0 or
-            gt["has_precip"] or
-            is_alert
-        )
-        if not interesting and not args.all:
-            print(f"  → skipped (clear sky, no alerts)")
-            skipped.append(zipcode)
-            continue
-
         # Model descriptions
         model_descriptions = {}
-        for label, model, skip in [
-            ("local", args.local_model, args.no_local),
-            ("cloud", args.cloud_model, args.no_cloud),
-        ]:
-            if skip:
-                continue
-            print(f"  {label} ({model})...", end="", flush=True)
+        local_models = [] if args.no_local else [m.strip() for m in args.local_models.split(",") if m.strip()]
+        cloud_models = [] if args.no_cloud else [args.cloud_model]
+        for model in local_models + cloud_models:
+            print(f"  {model}...", end="", flush=True)
             try:
                 desc = ollama_describe(image_bytes, model)
                 model_descriptions[model] = desc
@@ -648,7 +632,6 @@ def main():
         "stamp": stamp,
         "run_dir": run_dir.name,
         "saved": len(saved),
-        "skipped": len(skipped),
         "locations_processed": len(locations),
         "flags": {
             "all": args.all,
@@ -669,7 +652,6 @@ def main():
     print(f"\n{'='*60}")
     print(f"CAPTURE COMPLETE")
     print(f"  Saved:   {len(saved)} images")
-    print(f"  Skipped: {len(skipped)} (clear/no alerts, use --all to save anyway)")
     print(f"  Run:     {run_dir.resolve()}")
     print()
 
