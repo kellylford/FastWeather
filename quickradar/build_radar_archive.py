@@ -411,28 +411,34 @@ def cloud_describe(image_bytes: bytes, model: str) -> str:
 
 
 # ── Save one image to the archive ────────────────────────────────────────────
-def save_to_archive(stamp, zipcode, station, city, image_bytes, url,
+def save_to_archive(run_dir, zipcode, station, city, image_bytes, url,
                     echo_category, echo_frac, echo_detail, gt, reason,
                     cloud_model=None, cloud_description=None):
-    ARCHIVE_DIR.mkdir(exist_ok=True)
-    (ARCHIVE_DIR / "voiceover").mkdir(exist_ok=True)
+    images_dir = run_dir / "images"
+    data_dir = run_dir / "data"
+    vo_dir = run_dir / "voiceover"
+    images_dir.mkdir(parents=True, exist_ok=True)
+    data_dir.mkdir(exist_ok=True)
+    vo_dir.mkdir(exist_ok=True)
 
+    stamp = run_dir.name  # e.g. "20260621_121012"
     safe_city = re.sub(r"[^\w]", "_", city)
-    base = f"{stamp}_{zipcode}_{station['id']}_{safe_city}"
+    base = f"{zipcode}_{station['id']}_{safe_city}"
 
     # PNG
     try:
         from PIL import Image
         img = Image.open(io.BytesIO(image_bytes))
-        png_path = ARCHIVE_DIR / f"{base}.png"
+        png_path = images_dir / f"{base}.png"
         img.convert("RGB").save(png_path)
     except ImportError:
-        png_path = ARCHIVE_DIR / f"{base}.gif"
+        png_path = images_dir / f"{base}.gif"
         png_path.write_bytes(image_bytes)
 
     # JSON metadata
     meta = {
         "stamp": stamp,
+        "run_dir": run_dir.name,
         "zipcode": zipcode,
         "city": city,
         "station_id": station["id"],
@@ -451,7 +457,7 @@ def save_to_archive(stamp, zipcode, station, city, image_bytes, url,
         "nws_alerts": gt["alerts"],
         "nws_obs_station": gt["station_id"],
         "nws_obs_time": gt["obs_time"],
-        "image_file": png_path.name,
+        "image_file": f"images/{png_path.name}",
         "voiceover_file": f"voiceover/{base}.txt",
         "voiceover_description": None,
         "cloud_model": cloud_model,
@@ -459,27 +465,27 @@ def save_to_archive(stamp, zipcode, station, city, image_bytes, url,
         "model_descriptions": ({cloud_model: cloud_description}
                                if cloud_model and cloud_description else {}),
     }
-    json_path = ARCHIVE_DIR / f"{base}.json"
+    json_path = data_dir / f"{base}.json"
     json_path.write_text(json.dumps(meta, indent=2), encoding="utf-8")
 
     # VoiceOver placeholder
-    vo_path = ARCHIVE_DIR / "voiceover" / f"{base}.txt"
+    vo_path = vo_dir / f"{base}.txt"
     vo_path.write_text(
         f"# VoiceOver description for: {city} ({zipcode})\n"
         f"# NWS conditions: {gt['conditions']}\n"
         f"# Echo level: {echo_category}\n"
         f"# Alerts: {len(gt['alerts'])}\n"
-        f"# Instructions: Open this image on iPhone with VoiceOver enabled,\n"
-        f"#   two-finger tap-and-hold to trigger image description, copy the text,\n"
-        f"#   and paste it below this line.\n\n",
+        f"# Instructions: Open the images/ folder in the OneDrive app on your iPhone.\n"
+        f"#   VoiceOver on, two-finger tap-and-hold on the image to get a description.\n"
+        f"#   Copy the text and paste it below this line.\n\n",
         encoding="utf-8"
     )
 
-    # Index entry
+    # Index entry (cumulative across all runs)
     index_path = ARCHIVE_DIR / "index.jsonl"
     with open(index_path, "a", encoding="utf-8") as f:
         f.write(json.dumps({
-            "stamp": stamp, "zipcode": zipcode, "city": city,
+            "stamp": stamp, "run_dir": run_dir.name, "zipcode": zipcode, "city": city,
             "station": station["id"], "echo_category": echo_category,
             "has_precip": gt["has_precip"], "has_alerts": len(gt["alerts"]) > 0,
             "reason": reason, "base": base,
@@ -514,8 +520,11 @@ def main():
     ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    run_dir = ARCHIVE_DIR / "runs" / stamp
+    run_dir.mkdir(parents=True, exist_ok=True)
+
     print(f"RADAR ARCHIVE BUILDER  —  {stamp}")
-    print(f"Archive dir: {ARCHIVE_DIR.resolve()}")
+    print(f"Run folder: {run_dir.resolve()}")
     print()
 
     # Collect locations to process
@@ -616,12 +625,12 @@ def main():
 
         # Save to archive
         png_path, json_path = save_to_archive(
-            stamp, zipcode, station, city, image_bytes, url,
+            run_dir, zipcode, station, city, image_bytes, url,
             echo_cat, echo_frac, echo_detail, gt, reason,
             cloud_model=args.cloud_model if not args.no_cloud else None,
             cloud_description=cloud_desc,
         )
-        print(f"  → saved: {png_path.name}")
+        print(f"  → saved: images/{png_path.name}")
         saved.append({"zipcode": zipcode, "city": city, "echo": echo_cat,
                       "has_alerts": len(gt["alerts"]) > 0, "png": png_path})
 
@@ -630,41 +639,41 @@ def main():
     print(f"CAPTURE COMPLETE")
     print(f"  Saved:   {len(saved)} images")
     print(f"  Skipped: {len(skipped)} (clear/no alerts, use --all to save anyway)")
-    print(f"  Archive: {ARCHIVE_DIR.resolve()}")
+    print(f"  Run:     {run_dir.resolve()}")
     print()
 
     if saved:
-        # Echo category distribution
         from collections import Counter
         cat_counts = Counter(r["echo"] for r in saved)
-        print("Echo distribution in saved images:")
+        print("Echo distribution:")
         for cat, count in sorted(cat_counts.items()):
             print(f"  {cat:<10} {count}")
         print()
 
-    # Label status
-    if args.label or True:  # always show
-        vo_dir = ARCHIVE_DIR / "voiceover"
-        needs_label = []
-        if vo_dir.exists():
-            for txt in sorted(vo_dir.glob("*.txt")):
-                content = txt.read_text(encoding="utf-8")
-                # Check if there's content below the comment block
-                non_comment = [l for l in content.splitlines() if l.strip() and not l.startswith("#")]
-                if not non_comment:
-                    needs_label.append(txt.stem)
-        if needs_label:
-            print(f"Images needing VoiceOver labels ({len(needs_label)}):")
-            for name in needs_label[:20]:
-                print(f"  {name}")
-            if len(needs_label) > 20:
-                print(f"  ... and {len(needs_label)-20} more")
-            print()
-            print("To add a VoiceOver label:")
-            print("  1. AirDrop or transfer the .png to your iPhone")
-            print("  2. Open in Photos, enable VoiceOver, two-finger tap-and-hold")
-            print("  3. Copy the VoiceOver description text")
-            print(f"  4. Paste into archive/voiceover/<name>.txt (below the # lines)")
+    # Count unlabeled VoiceOver files across all runs
+    runs_dir = ARCHIVE_DIR / "runs"
+    needs_label = []
+    if runs_dir.exists():
+        for txt in sorted(runs_dir.glob("*/voiceover/*.txt")):
+            content = txt.read_text(encoding="utf-8")
+            non_comment = [l for l in content.splitlines() if l.strip() and not l.startswith("#")]
+            if not non_comment:
+                needs_label.append(txt)
+
+    this_run_unlabeled = [t for t in needs_label if run_dir.name in str(t)]
+    if this_run_unlabeled:
+        print(f"This run — {len(this_run_unlabeled)} images need VoiceOver labels:")
+        for txt in this_run_unlabeled:
+            print(f"  {txt.stem}")
+        print()
+        print("To label: open the images/ folder in OneDrive on your iPhone,")
+        print("  VoiceOver on, two-finger tap-and-hold each image, copy the")
+        print("  description, paste into the matching voiceover/*.txt file.")
+        print()
+
+    total_unlabeled = len(needs_label)
+    if total_unlabeled > len(this_run_unlabeled):
+        print(f"Total unlabeled across all runs: {total_unlabeled}")
 
     return 0
 
