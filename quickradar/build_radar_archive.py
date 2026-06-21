@@ -51,7 +51,7 @@ NWS_HEADERS = {
     "User-Agent": "QuickRadarArchive/1.0 (weather-app research; contact: local)",
 }
 
-ARCHIVE_DIR = Path("archive")
+ARCHIVE_DIR = Path("archive")  # overridden by --output-dir at runtime
 
 # ── Geographic diversity sweep (same 20 as the main experiment) ─────────────
 GEO_SWEEP = [
@@ -439,7 +439,15 @@ def main():
                         help="Skip NWS alert hunting, only do geographic sweep")
     parser.add_argument("--label", action="store_true",
                         help="After capture, list archived images missing VoiceOver labels")
+    parser.add_argument("--output-dir", default=None,
+                        help="Directory to save archive (default: archive/ next to this script). "
+                             "Pass your OneDrive RadarData path to sync automatically.")
     args = parser.parse_args()
+
+    global ARCHIVE_DIR
+    if args.output_dir:
+        ARCHIVE_DIR = Path(args.output_dir)
+    ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     print(f"RADAR ARCHIVE BUILDER  —  {stamp}")
