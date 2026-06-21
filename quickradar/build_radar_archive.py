@@ -635,6 +635,31 @@ def main():
                       "has_alerts": len(gt["alerts"]) > 0, "png": png_path})
 
     # Summary
+    # Run summary JSON
+    from collections import Counter
+    cat_counts = Counter(r["echo"] for r in saved)
+    run_summary = {
+        "stamp": stamp,
+        "run_dir": run_dir.name,
+        "saved": len(saved),
+        "skipped": len(skipped),
+        "locations_processed": len(locations),
+        "flags": {
+            "all": args.all,
+            "no_alerts": args.no_alerts,
+            "no_cloud": args.no_cloud,
+            "cloud_model": None if args.no_cloud else args.cloud_model,
+        },
+        "echo_distribution": dict(cat_counts),
+        "alert_captures": sum(1 for r in saved if r["has_alerts"]),
+        "images": [
+            {"zipcode": r["zipcode"], "city": r["city"],
+             "echo": r["echo"], "has_alerts": r["has_alerts"]}
+            for r in saved
+        ],
+    }
+    (run_dir / "summary.json").write_text(json.dumps(run_summary, indent=2), encoding="utf-8")
+
     print(f"\n{'='*60}")
     print(f"CAPTURE COMPLETE")
     print(f"  Saved:   {len(saved)} images")
@@ -643,8 +668,6 @@ def main():
     print()
 
     if saved:
-        from collections import Counter
-        cat_counts = Counter(r["echo"] for r in saved)
         print("Echo distribution:")
         for cat, count in sorted(cat_counts.items()):
             print(f"  {cat:<10} {count}")
