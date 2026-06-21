@@ -634,7 +634,6 @@ def main():
         "saved": len(saved),
         "locations_processed": len(locations),
         "flags": {
-            "all": args.all,
             "no_alerts": args.no_alerts,
             "no_cloud": args.no_cloud,
             "cloud_model": None if args.no_cloud else args.cloud_model,
