@@ -61,7 +61,7 @@ NWS_HEADERS = {
 
 ARCHIVE_DIR = Path("archive")  # overridden by --output-dir at runtime
 
-DEFAULT_LOCAL_MODELS = "minicpm-v4.6,qwen2.5vl:3b"
+DEFAULT_LOCAL_MODELS = "minicpm-v4.6"
 DEFAULT_CLOUD_MODEL = "gemini-3-flash-preview:cloud"
 
 CLOUD_PROMPT = """You are describing a NWS NEXRAD base-reflectivity radar image for a blind user. Be accurate and specific.
