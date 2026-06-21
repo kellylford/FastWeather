@@ -59,6 +59,7 @@ NWS_HEADERS = {
 
 ARCHIVE_DIR = Path("archive")  # overridden by --output-dir at runtime
 
+DEFAULT_LOCAL_MODEL = "minicpm-v4.6"
 DEFAULT_CLOUD_MODEL = "gemini-3-flash-preview:cloud"
 
 CLOUD_PROMPT = """You are describing a NWS NEXRAD base-reflectivity radar image for a blind user. Be accurate and specific.
@@ -388,9 +389,9 @@ def alert_zipcodes(max_alerts=15):
     return alert_locs
 
 
-# ── Cloud model description ──────────────────────────────────────────────────
-def cloud_describe(image_bytes: bytes, model: str) -> str:
-    """Send image to an Ollama cloud model and return its description."""
+# ── Ollama model description (works for local and cloud models) ──────────────
+def ollama_describe(image_bytes: bytes, model: str) -> str:
+    """Send image to any Ollama model (local or cloud) and return its description."""
     try:
         from PIL import Image as PILImage
         img = PILImage.open(io.BytesIO(image_bytes))
@@ -413,7 +414,7 @@ def cloud_describe(image_bytes: bytes, model: str) -> str:
 # ── Save one image to the archive ────────────────────────────────────────────
 def save_to_archive(run_dir, zipcode, station, city, image_bytes, url,
                     echo_category, echo_frac, echo_detail, gt, reason,
-                    cloud_model=None, cloud_description=None):
+                    model_descriptions=None):
     images_dir = run_dir / "images"
     data_dir = run_dir / "data"
     vo_dir = run_dir / "voiceover"
@@ -460,10 +461,7 @@ def save_to_archive(run_dir, zipcode, station, city, image_bytes, url,
         "image_file": f"images/{png_path.name}",
         "voiceover_file": f"voiceover/{base}.txt",
         "voiceover_description": None,
-        "cloud_model": cloud_model,
-        "cloud_description": cloud_description,
-        "model_descriptions": ({cloud_model: cloud_description}
-                               if cloud_model and cloud_description else {}),
+        "model_descriptions": model_descriptions or {},
     }
     json_path = data_dir / f"{base}.json"
     json_path.write_text(json.dumps(meta, indent=2), encoding="utf-8")
@@ -503,11 +501,14 @@ def main():
                         help="Skip NWS alert hunting, only do geographic sweep")
     parser.add_argument("--label", action="store_true",
                         help="After capture, list archived images missing VoiceOver labels")
+    parser.add_argument("--no-local", action="store_true",
+                        help="Skip local model descriptions")
+    parser.add_argument("--local-model", default=DEFAULT_LOCAL_MODEL,
+                        help=f"Local Ollama model for descriptions (default: {DEFAULT_LOCAL_MODEL})")
     parser.add_argument("--no-cloud", action="store_true",
-                        help="Skip cloud model descriptions (faster; use when offline or testing)")
+                        help="Skip cloud model descriptions (off by default; Ollama quota required)")
     parser.add_argument("--cloud-model", default=DEFAULT_CLOUD_MODEL,
-                        help=f"Cloud vision model to use for descriptions "
-                             f"(default: {DEFAULT_CLOUD_MODEL}). "
+                        help=f"Cloud vision model (default: {DEFAULT_CLOUD_MODEL}). "
                              f"Other options: gemma4:31b-cloud, minimax-m3:cloud")
     parser.add_argument("--output-dir", default=None,
                         help="Directory to save archive (default: archive/ next to this script). "
@@ -613,13 +614,19 @@ def main():
             skipped.append(zipcode)
             continue
 
-        # Cloud model description
-        cloud_desc = None
-        if not args.no_cloud:
-            print(f"  running {args.cloud_model}...", end="", flush=True)
+        # Model descriptions
+        model_descriptions = {}
+        for label, model, skip in [
+            ("local", args.local_model, args.no_local),
+            ("cloud", args.cloud_model, args.no_cloud),
+        ]:
+            if skip:
+                continue
+            print(f"  {label} ({model})...", end="", flush=True)
             try:
-                cloud_desc = cloud_describe(image_bytes, args.cloud_model)
-                print(f" done ({len(cloud_desc)} chars)")
+                desc = ollama_describe(image_bytes, model)
+                model_descriptions[model] = desc
+                print(f" done ({len(desc)} chars)")
             except Exception as e:
                 print(f" failed: {e}")
 
@@ -627,8 +634,7 @@ def main():
         png_path, json_path = save_to_archive(
             run_dir, zipcode, station, city, image_bytes, url,
             echo_cat, echo_frac, echo_detail, gt, reason,
-            cloud_model=args.cloud_model if not args.no_cloud else None,
-            cloud_description=cloud_desc,
+            model_descriptions=model_descriptions,
         )
         print(f"  → saved: images/{png_path.name}")
         saved.append({"zipcode": zipcode, "city": city, "echo": echo_cat,
