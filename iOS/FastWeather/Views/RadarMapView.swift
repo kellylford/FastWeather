@@ -86,12 +86,6 @@ struct RadarMapSheet: View {
     @State private var showPromptEditor = false
     @State private var customPromptText = ""
     @State private var isUsingCustomPrompt = false
-    // Logging state
-    @State private var isLogging = false
-    @State private var loggedAt: Date? = nil
-    // VoiceOver image-description capture (pasted by the user for comparison)
-    @State private var voiceoverDesc1 = ""
-    @State private var voiceoverDesc2 = ""
     @ObservedObject private var featureFlags = FeatureFlags.shared
 
     var body: some View {
@@ -188,13 +182,6 @@ struct RadarMapSheet: View {
                             .accessibilityAddTraits(.isImage)
                     }
 
-                    // Log section — paste VoiceOver descriptions, then log everything
-                    // with NWS ground truth. Placed after the images so VoiceOver can
-                    // describe each image, then the user pastes the text just below it.
-                    if radarDescription != nil {
-                        logSection
-                    }
-
                     Text(RadarTileService.attribution)
                         .font(.caption2)
                         .foregroundColor(.secondary)
@@ -270,10 +257,6 @@ struct RadarMapSheet: View {
     private func fetchRadarDescription(customPrompt: String? = nil) async {
         isDescribing = true
         describeError = nil
-        // New images are coming — clear stale VoiceOver paste text and log status.
-        voiceoverDesc1 = ""
-        voiceoverDesc2 = ""
-        loggedAt = nil
         let fmAvailable = RadarFoundationModelsService.shared.isAvailable
         // Movement is skipped when using a custom prompt
         isMovementAnalysis = customPrompt == nil && FeatureFlags.shared.radarTwoFrameMovementEnabled && fmAvailable
@@ -526,132 +509,6 @@ struct RadarMapSheet: View {
     }
 
     // MARK: - Log Section (VoiceOver capture + log button)
-
-    /// Labels for the two VoiceOver paste fields, adapting to whether the
-    /// two-frame movement images or the single radar image are on screen.
-    private var voiceoverFieldLabel1: String {
-        isMovementAnalysis ? "Earlier frame" : "Radar image"
-    }
-    private var voiceoverFieldLabel2: String {
-        isMovementAnalysis ? "Later frame" : "Radar map (top of screen)"
-    }
-
-    private var logSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "square.and.pencil")
-                    .accessibilityHidden(true)
-                Text("Log for Comparison")
-                    .font(.headline)
-                Spacer()
-            }
-
-            Text("Optional: VoiceOver an image above, then paste its description here. Leave blank to log just the AI result.")
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-
-            // VoiceOver paste field 1
-            VStack(alignment: .leading, spacing: 4) {
-                Text("VoiceOver: \(voiceoverFieldLabel1)")
-                    .font(.caption.weight(.medium))
-                    .foregroundColor(.secondary)
-                TextEditor(text: $voiceoverDesc1)
-                    .frame(minHeight: 60)
-                    .padding(6)
-                    .background(Color(uiColor: .tertiarySystemGroupedBackground))
-                    .cornerRadius(8)
-                    .accessibilityLabel("VoiceOver description for \(voiceoverFieldLabel1)")
-                    .accessibilityHint("Paste the VoiceOver image description for the \(voiceoverFieldLabel1) here.")
-            }
-
-            // VoiceOver paste field 2
-            VStack(alignment: .leading, spacing: 4) {
-                Text("VoiceOver: \(voiceoverFieldLabel2)")
-                    .font(.caption.weight(.medium))
-                    .foregroundColor(.secondary)
-                TextEditor(text: $voiceoverDesc2)
-                    .frame(minHeight: 60)
-                    .padding(6)
-                    .background(Color(uiColor: .tertiarySystemGroupedBackground))
-                    .cornerRadius(8)
-                    .accessibilityLabel("VoiceOver description for \(voiceoverFieldLabel2)")
-                    .accessibilityHint("Paste the VoiceOver image description for the \(voiceoverFieldLabel2) here. Optional.")
-            }
-
-            logResultButton
-        }
-        .padding(12)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .cornerRadius(12)
-    }
-
-    private var logResultButton: some View {
-        Button(action: {
-            guard let desc = radarDescription,
-                  let sid = radarStationId,
-                  let sname = radarStationName else { return }
-            isLogging = true
-            let mode = FeatureFlags.shared.radarDescriptionDetailLevel
-            let analysis = radarAnalysis
-            let vo1 = voiceoverDesc1.trimmingCharacters(in: .whitespacesAndNewlines)
-            let vo2 = voiceoverDesc2.trimmingCharacters(in: .whitespacesAndNewlines)
-            let img = radarImage
-            let first = movementFirstFrame
-            let last = movementLastFrame
-            let moving = isMovementAnalysis
-            Task {
-                await RadarAILogger.shared.log(
-                    city: city,
-                    stationId: sid,
-                    stationName: sname,
-                    promptMode: mode,
-                    aiDescription: desc,
-                    analysis: analysis,
-                    radarImage: moving ? nil : img,
-                    firstFrame: moving ? first : nil,
-                    lastFrame: moving ? last : nil,
-                    voiceoverDesc1: vo1.isEmpty ? nil : vo1,
-                    voiceoverLabel1: vo1.isEmpty ? nil : voiceoverFieldLabel1,
-                    voiceoverDesc2: vo2.isEmpty ? nil : vo2,
-                    voiceoverLabel2: vo2.isEmpty ? nil : voiceoverFieldLabel2
-                )
-                await MainActor.run {
-                    isLogging = false
-                    loggedAt = Date()
-                }
-            }
-        }) {
-            HStack(spacing: 6) {
-                if isLogging {
-                    ProgressView()
-                        .scaleEffect(0.75)
-                    Text("Fetching NWS ground truth…")
-                } else if let t = loggedAt {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
-                    Text("Logged at \(t.formatted(date: .omitted, time: .shortened))")
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Text("Log Again")
-                        .foregroundColor(.accentColor)
-                } else {
-                    Image(systemName: "square.and.arrow.down")
-                    Text("Log Result with NWS Ground Truth")
-                }
-            }
-            .font(.caption)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .padding(.horizontal, 12)
-        }
-        .buttonStyle(.bordered)
-        .disabled(isLogging)
-        .accessibilityLabel(loggedAt != nil
-            ? "Re-log radar result with NWS ground truth"
-            : "Log radar result with NWS ground truth")
-        .accessibilityHint("Saves the AI description, any pasted VoiceOver descriptions, and current NWS conditions and active alerts to radar_ai_log.jsonl in the app Documents folder. Visible in Files app under On My iPhone, Weather Fast.")
-    }
 
     private var mapAccessibilityLabel: String {
         if covered {

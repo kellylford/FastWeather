@@ -64,10 +64,26 @@ ARCHIVE_DIR = Path("archive")  # overridden by --output-dir at runtime
 DEFAULT_LOCAL_MODELS = "minicpm-v4.6"
 DEFAULT_CLOUD_MODEL = "gemini-3-flash-preview:cloud"
 
-CLOUD_PROMPT = """You are describing a NWS NEXRAD base-reflectivity radar image for a blind user. Be accurate and specific.
+def build_prompt(city_name: str) -> str:
+    """Build a city-aware radar description prompt.
+
+    Loads from ARCHIVE_DIR/prompt.txt if available (edit that file to iterate
+    on the prompt without touching this code). Falls back to the built-in text.
+    """
+    prompt_file = ARCHIVE_DIR / "prompt.txt"
+    if prompt_file.exists():
+        template = prompt_file.read_text(encoding="utf-8")
+        return template.replace("{CITY}", city_name)
+
+    # Built-in fallback (mirrors prompt.txt — keep in sync)
+    return f"""You are describing a NWS NEXRAD base-reflectivity radar image for a blind user in {city_name}. Be accurate and specific.
+
+LOCATING {city_name}: This image is centered on a radar station, NOT on {city_name}. {city_name} is labeled on the map. The image covers a large area containing many cities and counties.
+
+Describe where precipitation actually IS using the named cities, counties, and geographic features visible on the map. Then state clearly whether {city_name} itself is under precipitation or is clear. Do NOT assume precipitation elsewhere on the map is near {city_name} — report where it actually is by name.
 
 COLORS — learn these before describing anything:
-  SOLID BLUE, CYAN, or TEAL filled areas = BODIES OF WATER (Great Lakes, rivers, coastlines). These are NOT precipitation. They are permanent map features.
+  SOLID BLUE, CYAN, or TEAL filled areas = BODIES OF WATER (Great Lakes, rivers, coastlines). NOT precipitation.
   WHITE or LIGHT GRAY areas = NO precipitation detected.
   LIGHT GREEN = very light rain/drizzle.
   GREEN = light rain.
@@ -80,36 +96,67 @@ LINES — do not confuse these with weather:
   THIN RED or BROWN LINES = county and state borders. NOT storm outlines.
 
 TOP OF IMAGE — warning legend strip:
-  The very top of the image has a row of colored boxes (Tornado Warning, Severe Thunderstorm Warning, Flash Flood Warning, etc.). These are a LEGEND KEY — they show what color would be used IF a warning existed. Do not report a warning just because you see these colored boxes. Only report a warning if you see a colored polygon or outlined shape drawn ON the MAP itself, below the legend strip.
+  The very top of the image has a row of colored boxes (Tornado Warning, Severe Thunderstorm Warning, Flash Flood Warning, etc.). These are a LEGEND KEY — not active warnings. Only report a warning if you see a colored polygon or outlined shape drawn ON the MAP itself, below the legend strip.
 
-WHAT TO DESCRIBE:
-1. Is there any precipitation visible on the map (green/yellow/orange/red/pink areas)? If yes: where is it, what intensity, roughly how large an area?
-2. Are any colored polygons or warning outlines drawn ON the map area (not the top legend strip)?
-3. Is the map mostly clear or active?
-Answer each of these three questions. Be specific and factual."""
+Answer these three questions. Be specific about geography:
+1. Where is precipitation visible (name the cities, counties, or regions it covers)? What intensity?
+2. Are any active warning polygons drawn ON the map area (thick colored outlines over geography, NOT the top legend strip)?
+3. Is {city_name} itself under precipitation or clear?"""
 
 # ── Geographic diversity sweep (same 20 as the main experiment) ─────────────
 GEO_SWEEP = [
+    # Wisconsin / Upper Midwest
     ("53703", "Madison WI"),
+    ("55401", "Minneapolis MN"),
+    # Great Lakes / Midwest
     ("60601", "Chicago IL"),
     ("44101", "Cleveland OH"),
+    ("46201", "Indianapolis IN"),
+    ("48201", "Detroit MI"),
+    ("64101", "Kansas City MO"),
+    ("50301", "Des Moines IA"),
+    # Mid-South / Southeast
+    ("37201", "Nashville TN"),
+    ("38101", "Memphis TN"),
+    ("35201", "Birmingham AL"),
     ("30301", "Atlanta GA"),
-    ("33101", "Miami FL"),
     ("28201", "Charlotte NC"),
     ("39401", "Hattiesburg MS"),
     ("70112", "New Orleans LA"),
+    # Florida
     ("32201", "Jacksonville FL"),
+    ("33601", "Tampa FL"),
+    ("33101", "Miami FL"),
+    # Mid-Atlantic / Northeast
+    ("20001", "Washington DC"),
+    ("10001", "New York NY"),
+    ("02101", "Boston MA"),
+    # Texas
+    ("75201", "Dallas TX"),
+    ("77002", "Houston TX"),
+    ("78201", "San Antonio TX"),
+    # Plains / Oklahoma
     ("73072", "Norman OK"),
     ("67202", "Wichita KS"),
     ("79401", "Lubbock TX"),
-    ("77002", "Houston TX"),
-    ("10001", "New York NY"),
-    ("02101", "Boston MA"),
+    # Mountain / Southwest
     ("80202", "Denver CO"),
-    ("98101", "Seattle WA"),
-    ("94102", "San Francisco CA"),
+    ("84101", "Salt Lake City UT"),
     ("85001", "Phoenix AZ"),
+    ("87101", "Albuquerque NM"),
+    # West Coast
+    ("98101", "Seattle WA"),
+    ("97201", "Portland OR"),
+    ("94102", "San Francisco CA"),
+    ("90001", "Los Angeles CA"),
+    # Southwest / Nevada
     ("89101", "Las Vegas NV"),
+    # Alaska
+    ("99501", "Anchorage AK"),
+    ("99701", "Fairbanks AK"),
+    # Hawaii
+    ("96801", "Honolulu HI"),
+    ("96720", "Hilo HI"),
 ]
 
 # Echo categories (used in metadata)
@@ -392,7 +439,7 @@ def alert_zipcodes(max_alerts=15):
 
 
 # ── Ollama model description (works for local and cloud models) ──────────────
-def ollama_describe(image_bytes: bytes, model: str) -> str:
+def ollama_describe(image_bytes: bytes, model: str, city_name: str = "") -> str:
     """Send image to any Ollama model (local or cloud) and return its description."""
     try:
         from PIL import Image as PILImage
@@ -403,9 +450,10 @@ def ollama_describe(image_bytes: bytes, model: str) -> str:
     except ImportError:
         img_b64 = base64.b64encode(image_bytes).decode("utf-8")
 
+    prompt = build_prompt(city_name) if city_name else build_prompt("this location")
     payload = {
         "model": model,
-        "messages": [{"role": "user", "content": CLOUD_PROMPT, "images": [img_b64]}],
+        "messages": [{"role": "user", "content": prompt, "images": [img_b64]}],
         "stream": False,
     }
     resp = requests.post("http://localhost:11434/api/chat", json=payload, timeout=120)
@@ -414,9 +462,9 @@ def ollama_describe(image_bytes: bytes, model: str) -> str:
 
 
 # ── Save one image to the archive ────────────────────────────────────────────
-def save_to_archive(run_dir, zipcode, station, city, image_bytes, url,
-                    echo_category, echo_frac, echo_detail, gt, reason,
-                    model_descriptions=None):
+def save_to_archive(run_dir, zipcode, station, city, city_lat, city_lon,
+                    image_bytes, url, echo_category, echo_frac, echo_detail,
+                    gt, reason, model_descriptions=None):
     images_dir = run_dir / "images"
     data_dir = run_dir / "data"
     vo_dir = run_dir / "voiceover"
@@ -446,6 +494,8 @@ def save_to_archive(run_dir, zipcode, station, city, image_bytes, url,
         "city": city,
         "station_id": station["id"],
         "station_name": station["name"],
+        "city_lat": city_lat,
+        "city_lon": city_lon,
         "station_lat": station["lat"],
         "station_lon": station["lon"],
         "station_dist_km": round(station["dist_km"], 1),
@@ -608,7 +658,7 @@ def main():
         for model in local_models + cloud_models:
             print(f"  {model}...", end="", flush=True)
             try:
-                desc = ollama_describe(image_bytes, model)
+                desc = ollama_describe(image_bytes, model, city_name=city)
                 model_descriptions[model] = desc
                 print(f" done ({len(desc)} chars)")
             except Exception as e:
@@ -616,8 +666,8 @@ def main():
 
         # Save to archive
         png_path, json_path = save_to_archive(
-            run_dir, zipcode, station, city, image_bytes, url,
-            echo_cat, echo_frac, echo_detail, gt, reason,
+            run_dir, zipcode, station, city, lat, lon,
+            image_bytes, url, echo_cat, echo_frac, echo_detail, gt, reason,
             model_descriptions=model_descriptions,
         )
         print(f"  → saved: images/{png_path.name}")
