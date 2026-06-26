@@ -16,18 +16,20 @@ struct City: Identifiable, Codable, Hashable {
     let longitude: Double
     
     var displayName: String {
+        // `country` is stored canonically in English; localize only the displayed form.
+        let localizedCountry = CountryNames.localizedName(for: country)
         if let state = state, !state.isEmpty {
             // For US cities, show City, State format (without country)
             if country == "United States" || country == "USA" {
                 return "\(name), \(state)"
             }
-            return "\(name), \(state), \(country)"
+            return "\(name), \(state), \(localizedCountry)"
         }
         // For international cities without state, just show City, Country
         if country == "United States" || country == "USA" {
             return name
         }
-        return "\(name), \(country)"
+        return "\(name), \(localizedCountry)"
     }
     
     init(id: UUID = UUID(), name: String, state: String? = nil, country: String, latitude: Double, longitude: Double) {

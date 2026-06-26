@@ -23,7 +23,21 @@ enum MyDataCategory: String, CaseIterable, Codable {
     case marine = "Marine & Ocean"
     case airQuality = "Air Quality"
     
-    var displayName: String { rawValue }
+    var displayName: String {
+        switch self {
+        case .temperature: return String(localized: "mydata.category.temperature.name", defaultValue: "Temperature", comment: "My Data category name")
+        case .humidity: return String(localized: "mydata.category.humidity.name", defaultValue: "Humidity & Moisture", comment: "My Data category name")
+        case .wind: return String(localized: "mydata.category.wind.name", defaultValue: "Wind", comment: "My Data category name")
+        case .precipitation: return String(localized: "mydata.category.precipitation.name", defaultValue: "Precipitation", comment: "My Data category name")
+        case .pressure: return String(localized: "mydata.category.pressure.name", defaultValue: "Pressure", comment: "My Data category name")
+        case .clouds: return String(localized: "mydata.category.clouds.name", defaultValue: "Clouds & Visibility", comment: "My Data category name")
+        case .solar: return String(localized: "mydata.category.solar.name", defaultValue: "Solar & UV", comment: "My Data category name")
+        case .soil: return String(localized: "mydata.category.soil.name", defaultValue: "Soil", comment: "My Data category name")
+        case .atmosphere: return String(localized: "mydata.category.atmosphere.name", defaultValue: "Atmosphere", comment: "My Data category name")
+        case .marine: return String(localized: "mydata.category.marine.name", defaultValue: "Marine & Ocean", comment: "My Data category name")
+        case .airQuality: return String(localized: "mydata.category.airQuality.name", defaultValue: "Air Quality", comment: "My Data category name")
+        }
+    }
 }
 
 // MARK: - All available Open-Meteo current-condition parameters
@@ -148,197 +162,197 @@ enum MyDataParameter: String, CaseIterable, Codable, Equatable, Hashable {
     
     var displayName: String {
         switch self {
-        case .temperature2m: return "Temperature (2m)"
-        case .apparentTemperature: return "Feels Like"
-        case .temperature80m: return "Temperature (80m)"
-        case .temperature120m: return "Temperature (120m)"
-        case .temperature180m: return "Temperature (180m)"
-        case .relativeHumidity2m: return "Relative Humidity"
-        case .dewPoint2m: return "Dew Point"
-        case .vapourPressureDeficit: return "Vapour Pressure Deficit"
-        case .windSpeed10m: return "Wind Speed (10m)"
-        case .windSpeed80m: return "Wind Speed (80m)"
-        case .windSpeed120m: return "Wind Speed (120m)"
-        case .windSpeed180m: return "Wind Speed (180m)"
-        case .windDirection10m: return "Wind Direction (10m)"
-        case .windDirection80m: return "Wind Direction (80m)"
-        case .windDirection120m: return "Wind Direction (120m)"
-        case .windDirection180m: return "Wind Direction (180m)"
-        case .windGusts10m: return "Wind Gusts"
-        case .precipitation: return "Precipitation"
-        case .rain: return "Rain"
-        case .showers: return "Showers"
-        case .snowfall: return "Snowfall"
-        case .snowDepth: return "Snow Depth"
-        case .freezingLevelHeight: return "Freezing Level"
-        case .pressureMsl: return "Sea Level Pressure"
-        case .surfacePressure: return "Surface Pressure"
-        case .cloudCover: return "Cloud Cover"
-        case .cloudCoverLow: return "Low Clouds"
-        case .cloudCoverMid: return "Mid-Level Clouds"
-        case .cloudCoverHigh: return "High Clouds"
-        case .visibility: return "Visibility"
-        case .weatherCode: return "Weather Code"
-        case .isDay: return "Day or Night"
-        case .uvIndex: return "UV Index"
-        case .shortwaveRadiation: return "Solar Radiation"
-        case .directRadiation: return "Direct Radiation"
-        case .directNormalIrradiance: return "Direct Normal Irradiance"
-        case .diffuseRadiation: return "Diffuse Radiation"
-        case .sunshineDuration: return "Sunshine Duration"
-        case .soilTemperature0cm: return "Surface Soil Temp"
-        case .soilTemperature6cm: return "Soil Temp (6 cm)"
-        case .soilTemperature18cm: return "Soil Temp (18 cm)"
-        case .soilTemperature54cm: return "Soil Temp (54 cm)"
-        case .soilMoisture0to1cm: return "Soil Moisture (0–1 cm)"
-        case .soilMoisture1to3cm: return "Soil Moisture (1–3 cm)"
-        case .soilMoisture3to9cm: return "Soil Moisture (3–9 cm)"
-        case .soilMoisture9to27cm: return "Soil Moisture (9–27 cm)"
-        case .soilMoisture27to81cm: return "Soil Moisture (27–81 cm)"
-        case .cape: return "CAPE"
-        case .evapotranspiration: return "Evapotranspiration"
-        case .et0FaoEvapotranspiration: return "Reference Evapotranspiration"
-        case .waveHeight: return "Wave Height"
-        case .waveDirection: return "Wave Direction"
-        case .wavePeriod: return "Wave Period"
-        case .wavePeakPeriod: return "Wave Peak Period"
-        case .windWaveHeight: return "Wind Wave Height"
-        case .windWaveDirection: return "Wind Wave Direction"
-        case .windWavePeriod: return "Wind Wave Period"
-        case .windWavePeakPeriod: return "Wind Wave Peak Period"
-        case .swellWaveHeight: return "Swell Wave Height"
-        case .swellWaveDirection: return "Swell Wave Direction"
-        case .swellWavePeriod: return "Swell Wave Period"
-        case .swellWavePeakPeriod: return "Swell Wave Peak Period"
-        case .secondarySwellWaveHeight: return "Secondary Swell Height"
-        case .secondarySwellWaveDirection: return "Secondary Swell Direction"
-        case .secondarySwellWavePeriod: return "Secondary Swell Period"
-        case .tertiarySwellWaveHeight: return "Tertiary Swell Height"
-        case .tertiarySwellWaveDirection: return "Tertiary Swell Direction"
-        case .tertiarySwellWavePeriod: return "Tertiary Swell Period"
-        case .oceanCurrentVelocity: return "Ocean Current Speed"
-        case .oceanCurrentDirection: return "Ocean Current Direction"
-        case .seaSurfaceTemperature: return "Sea Surface Temperature"
-        case .seaLevelHeightMsl: return "Sea Level Height"
-        case .pm10: return "PM10 Particulates"
-        case .pm25: return "PM2.5 Particulates"
-        case .carbonMonoxide: return "Carbon Monoxide (CO)"
-        case .nitrogenDioxide: return "Nitrogen Dioxide (NO₂)"
-        case .sulphurDioxide: return "Sulphur Dioxide (SO₂)"
-        case .ozone: return "Ozone (O₃)"
-        case .aerosolOpticalDepth: return "Aerosol Optical Depth"
-        case .dust: return "Dust"
-        case .uvIndexAirQuality: return "UV Index"
-        case .uvIndexClearSky: return "UV Index (Clear Sky)"
-        case .ammonia: return "Ammonia (NH₃)"
-        case .carbonDioxide: return "Carbon Dioxide (CO₂)"
-        case .methane: return "Methane (CH₄)"
-        case .europeanAqi: return "European Air Quality Index"
-        case .usAqi: return "US Air Quality Index"
-        case .alderPollen: return "Alder Pollen"
-        case .birchPollen: return "Birch Pollen"
-        case .grassPollen: return "Grass Pollen"
-        case .mugwortPollen: return "Mugwort Pollen"
-        case .olivePollen: return "Olive Pollen"
-        case .ragweedPollen: return "Ragweed Pollen"
+        case .temperature2m: return String(localized: "mydata.temperature2m.name", defaultValue: "Temperature (2m)", comment: "My Data parameter name")
+        case .apparentTemperature: return String(localized: "mydata.apparentTemperature.name", defaultValue: "Feels Like", comment: "My Data parameter name")
+        case .temperature80m: return String(localized: "mydata.temperature80m.name", defaultValue: "Temperature (80m)", comment: "My Data parameter name")
+        case .temperature120m: return String(localized: "mydata.temperature120m.name", defaultValue: "Temperature (120m)", comment: "My Data parameter name")
+        case .temperature180m: return String(localized: "mydata.temperature180m.name", defaultValue: "Temperature (180m)", comment: "My Data parameter name")
+        case .relativeHumidity2m: return String(localized: "mydata.relativeHumidity2m.name", defaultValue: "Relative Humidity", comment: "My Data parameter name")
+        case .dewPoint2m: return String(localized: "mydata.dewPoint2m.name", defaultValue: "Dew Point", comment: "My Data parameter name")
+        case .vapourPressureDeficit: return String(localized: "mydata.vapourPressureDeficit.name", defaultValue: "Vapour Pressure Deficit", comment: "My Data parameter name")
+        case .windSpeed10m: return String(localized: "mydata.windSpeed10m.name", defaultValue: "Wind Speed (10m)", comment: "My Data parameter name")
+        case .windSpeed80m: return String(localized: "mydata.windSpeed80m.name", defaultValue: "Wind Speed (80m)", comment: "My Data parameter name")
+        case .windSpeed120m: return String(localized: "mydata.windSpeed120m.name", defaultValue: "Wind Speed (120m)", comment: "My Data parameter name")
+        case .windSpeed180m: return String(localized: "mydata.windSpeed180m.name", defaultValue: "Wind Speed (180m)", comment: "My Data parameter name")
+        case .windDirection10m: return String(localized: "mydata.windDirection10m.name", defaultValue: "Wind Direction (10m)", comment: "My Data parameter name")
+        case .windDirection80m: return String(localized: "mydata.windDirection80m.name", defaultValue: "Wind Direction (80m)", comment: "My Data parameter name")
+        case .windDirection120m: return String(localized: "mydata.windDirection120m.name", defaultValue: "Wind Direction (120m)", comment: "My Data parameter name")
+        case .windDirection180m: return String(localized: "mydata.windDirection180m.name", defaultValue: "Wind Direction (180m)", comment: "My Data parameter name")
+        case .windGusts10m: return String(localized: "mydata.windGusts10m.name", defaultValue: "Wind Gusts", comment: "My Data parameter name")
+        case .precipitation: return String(localized: "mydata.precipitation.name", defaultValue: "Precipitation", comment: "My Data parameter name")
+        case .rain: return String(localized: "mydata.rain.name", defaultValue: "Rain", comment: "My Data parameter name")
+        case .showers: return String(localized: "mydata.showers.name", defaultValue: "Showers", comment: "My Data parameter name")
+        case .snowfall: return String(localized: "mydata.snowfall.name", defaultValue: "Snowfall", comment: "My Data parameter name")
+        case .snowDepth: return String(localized: "mydata.snowDepth.name", defaultValue: "Snow Depth", comment: "My Data parameter name")
+        case .freezingLevelHeight: return String(localized: "mydata.freezingLevelHeight.name", defaultValue: "Freezing Level", comment: "My Data parameter name")
+        case .pressureMsl: return String(localized: "mydata.pressureMsl.name", defaultValue: "Sea Level Pressure", comment: "My Data parameter name")
+        case .surfacePressure: return String(localized: "mydata.surfacePressure.name", defaultValue: "Surface Pressure", comment: "My Data parameter name")
+        case .cloudCover: return String(localized: "mydata.cloudCover.name", defaultValue: "Cloud Cover", comment: "My Data parameter name")
+        case .cloudCoverLow: return String(localized: "mydata.cloudCoverLow.name", defaultValue: "Low Clouds", comment: "My Data parameter name")
+        case .cloudCoverMid: return String(localized: "mydata.cloudCoverMid.name", defaultValue: "Mid-Level Clouds", comment: "My Data parameter name")
+        case .cloudCoverHigh: return String(localized: "mydata.cloudCoverHigh.name", defaultValue: "High Clouds", comment: "My Data parameter name")
+        case .visibility: return String(localized: "mydata.visibility.name", defaultValue: "Visibility", comment: "My Data parameter name")
+        case .weatherCode: return String(localized: "mydata.weatherCode.name", defaultValue: "Weather Code", comment: "My Data parameter name")
+        case .isDay: return String(localized: "mydata.isDay.name", defaultValue: "Day or Night", comment: "My Data parameter name")
+        case .uvIndex: return String(localized: "mydata.uvIndex.name", defaultValue: "UV Index", comment: "My Data parameter name")
+        case .shortwaveRadiation: return String(localized: "mydata.shortwaveRadiation.name", defaultValue: "Solar Radiation", comment: "My Data parameter name")
+        case .directRadiation: return String(localized: "mydata.directRadiation.name", defaultValue: "Direct Radiation", comment: "My Data parameter name")
+        case .directNormalIrradiance: return String(localized: "mydata.directNormalIrradiance.name", defaultValue: "Direct Normal Irradiance", comment: "My Data parameter name")
+        case .diffuseRadiation: return String(localized: "mydata.diffuseRadiation.name", defaultValue: "Diffuse Radiation", comment: "My Data parameter name")
+        case .sunshineDuration: return String(localized: "mydata.sunshineDuration.name", defaultValue: "Sunshine Duration", comment: "My Data parameter name")
+        case .soilTemperature0cm: return String(localized: "mydata.soilTemperature0cm.name", defaultValue: "Surface Soil Temp", comment: "My Data parameter name")
+        case .soilTemperature6cm: return String(localized: "mydata.soilTemperature6cm.name", defaultValue: "Soil Temp (6 cm)", comment: "My Data parameter name")
+        case .soilTemperature18cm: return String(localized: "mydata.soilTemperature18cm.name", defaultValue: "Soil Temp (18 cm)", comment: "My Data parameter name")
+        case .soilTemperature54cm: return String(localized: "mydata.soilTemperature54cm.name", defaultValue: "Soil Temp (54 cm)", comment: "My Data parameter name")
+        case .soilMoisture0to1cm: return String(localized: "mydata.soilMoisture0to1cm.name", defaultValue: "Soil Moisture (0–1 cm)", comment: "My Data parameter name")
+        case .soilMoisture1to3cm: return String(localized: "mydata.soilMoisture1to3cm.name", defaultValue: "Soil Moisture (1–3 cm)", comment: "My Data parameter name")
+        case .soilMoisture3to9cm: return String(localized: "mydata.soilMoisture3to9cm.name", defaultValue: "Soil Moisture (3–9 cm)", comment: "My Data parameter name")
+        case .soilMoisture9to27cm: return String(localized: "mydata.soilMoisture9to27cm.name", defaultValue: "Soil Moisture (9–27 cm)", comment: "My Data parameter name")
+        case .soilMoisture27to81cm: return String(localized: "mydata.soilMoisture27to81cm.name", defaultValue: "Soil Moisture (27–81 cm)", comment: "My Data parameter name")
+        case .cape: return String(localized: "mydata.cape.name", defaultValue: "CAPE", comment: "My Data parameter name")
+        case .evapotranspiration: return String(localized: "mydata.evapotranspiration.name", defaultValue: "Evapotranspiration", comment: "My Data parameter name")
+        case .et0FaoEvapotranspiration: return String(localized: "mydata.et0FaoEvapotranspiration.name", defaultValue: "Reference Evapotranspiration", comment: "My Data parameter name")
+        case .waveHeight: return String(localized: "mydata.waveHeight.name", defaultValue: "Wave Height", comment: "My Data parameter name")
+        case .waveDirection: return String(localized: "mydata.waveDirection.name", defaultValue: "Wave Direction", comment: "My Data parameter name")
+        case .wavePeriod: return String(localized: "mydata.wavePeriod.name", defaultValue: "Wave Period", comment: "My Data parameter name")
+        case .wavePeakPeriod: return String(localized: "mydata.wavePeakPeriod.name", defaultValue: "Wave Peak Period", comment: "My Data parameter name")
+        case .windWaveHeight: return String(localized: "mydata.windWaveHeight.name", defaultValue: "Wind Wave Height", comment: "My Data parameter name")
+        case .windWaveDirection: return String(localized: "mydata.windWaveDirection.name", defaultValue: "Wind Wave Direction", comment: "My Data parameter name")
+        case .windWavePeriod: return String(localized: "mydata.windWavePeriod.name", defaultValue: "Wind Wave Period", comment: "My Data parameter name")
+        case .windWavePeakPeriod: return String(localized: "mydata.windWavePeakPeriod.name", defaultValue: "Wind Wave Peak Period", comment: "My Data parameter name")
+        case .swellWaveHeight: return String(localized: "mydata.swellWaveHeight.name", defaultValue: "Swell Wave Height", comment: "My Data parameter name")
+        case .swellWaveDirection: return String(localized: "mydata.swellWaveDirection.name", defaultValue: "Swell Wave Direction", comment: "My Data parameter name")
+        case .swellWavePeriod: return String(localized: "mydata.swellWavePeriod.name", defaultValue: "Swell Wave Period", comment: "My Data parameter name")
+        case .swellWavePeakPeriod: return String(localized: "mydata.swellWavePeakPeriod.name", defaultValue: "Swell Wave Peak Period", comment: "My Data parameter name")
+        case .secondarySwellWaveHeight: return String(localized: "mydata.secondarySwellWaveHeight.name", defaultValue: "Secondary Swell Height", comment: "My Data parameter name")
+        case .secondarySwellWaveDirection: return String(localized: "mydata.secondarySwellWaveDirection.name", defaultValue: "Secondary Swell Direction", comment: "My Data parameter name")
+        case .secondarySwellWavePeriod: return String(localized: "mydata.secondarySwellWavePeriod.name", defaultValue: "Secondary Swell Period", comment: "My Data parameter name")
+        case .tertiarySwellWaveHeight: return String(localized: "mydata.tertiarySwellWaveHeight.name", defaultValue: "Tertiary Swell Height", comment: "My Data parameter name")
+        case .tertiarySwellWaveDirection: return String(localized: "mydata.tertiarySwellWaveDirection.name", defaultValue: "Tertiary Swell Direction", comment: "My Data parameter name")
+        case .tertiarySwellWavePeriod: return String(localized: "mydata.tertiarySwellWavePeriod.name", defaultValue: "Tertiary Swell Period", comment: "My Data parameter name")
+        case .oceanCurrentVelocity: return String(localized: "mydata.oceanCurrentVelocity.name", defaultValue: "Ocean Current Speed", comment: "My Data parameter name")
+        case .oceanCurrentDirection: return String(localized: "mydata.oceanCurrentDirection.name", defaultValue: "Ocean Current Direction", comment: "My Data parameter name")
+        case .seaSurfaceTemperature: return String(localized: "mydata.seaSurfaceTemperature.name", defaultValue: "Sea Surface Temperature", comment: "My Data parameter name")
+        case .seaLevelHeightMsl: return String(localized: "mydata.seaLevelHeightMsl.name", defaultValue: "Sea Level Height", comment: "My Data parameter name")
+        case .pm10: return String(localized: "mydata.pm10.name", defaultValue: "PM10 Particulates", comment: "My Data parameter name")
+        case .pm25: return String(localized: "mydata.pm25.name", defaultValue: "PM2.5 Particulates", comment: "My Data parameter name")
+        case .carbonMonoxide: return String(localized: "mydata.carbonMonoxide.name", defaultValue: "Carbon Monoxide (CO)", comment: "My Data parameter name")
+        case .nitrogenDioxide: return String(localized: "mydata.nitrogenDioxide.name", defaultValue: "Nitrogen Dioxide (NO₂)", comment: "My Data parameter name")
+        case .sulphurDioxide: return String(localized: "mydata.sulphurDioxide.name", defaultValue: "Sulphur Dioxide (SO₂)", comment: "My Data parameter name")
+        case .ozone: return String(localized: "mydata.ozone.name", defaultValue: "Ozone (O₃)", comment: "My Data parameter name")
+        case .aerosolOpticalDepth: return String(localized: "mydata.aerosolOpticalDepth.name", defaultValue: "Aerosol Optical Depth", comment: "My Data parameter name")
+        case .dust: return String(localized: "mydata.dust.name", defaultValue: "Dust", comment: "My Data parameter name")
+        case .uvIndexAirQuality: return String(localized: "mydata.uvIndexAirQuality.name", defaultValue: "UV Index", comment: "My Data parameter name")
+        case .uvIndexClearSky: return String(localized: "mydata.uvIndexClearSky.name", defaultValue: "UV Index (Clear Sky)", comment: "My Data parameter name")
+        case .ammonia: return String(localized: "mydata.ammonia.name", defaultValue: "Ammonia (NH₃)", comment: "My Data parameter name")
+        case .carbonDioxide: return String(localized: "mydata.carbonDioxide.name", defaultValue: "Carbon Dioxide (CO₂)", comment: "My Data parameter name")
+        case .methane: return String(localized: "mydata.methane.name", defaultValue: "Methane (CH₄)", comment: "My Data parameter name")
+        case .europeanAqi: return String(localized: "mydata.europeanAqi.name", defaultValue: "European Air Quality Index", comment: "My Data parameter name")
+        case .usAqi: return String(localized: "mydata.usAqi.name", defaultValue: "US Air Quality Index", comment: "My Data parameter name")
+        case .alderPollen: return String(localized: "mydata.alderPollen.name", defaultValue: "Alder Pollen", comment: "My Data parameter name")
+        case .birchPollen: return String(localized: "mydata.birchPollen.name", defaultValue: "Birch Pollen", comment: "My Data parameter name")
+        case .grassPollen: return String(localized: "mydata.grassPollen.name", defaultValue: "Grass Pollen", comment: "My Data parameter name")
+        case .mugwortPollen: return String(localized: "mydata.mugwortPollen.name", defaultValue: "Mugwort Pollen", comment: "My Data parameter name")
+        case .olivePollen: return String(localized: "mydata.olivePollen.name", defaultValue: "Olive Pollen", comment: "My Data parameter name")
+        case .ragweedPollen: return String(localized: "mydata.ragweedPollen.name", defaultValue: "Ragweed Pollen", comment: "My Data parameter name")
         }
     }
     
     var explanation: String {
         switch self {
-        case .temperature2m: return "Air temperature at 2 meters above ground level"
-        case .apparentTemperature: return "Perceived temperature combining wind chill, humidity, and solar radiation"
-        case .temperature80m: return "Air temperature at 80 meters, useful for wind turbine operations"
-        case .temperature120m: return "Air temperature at 120 meters above ground"
-        case .temperature180m: return "Air temperature at 180 meters above ground"
-        case .relativeHumidity2m: return "Percentage of moisture in the air relative to saturation"
-        case .dewPoint2m: return "Temperature at which air becomes saturated and dew forms"
-        case .vapourPressureDeficit: return "Difference between moisture in air and moisture at saturation, important for plant health"
-        case .windSpeed10m: return "Wind speed at standard 10-meter measurement height"
-        case .windSpeed80m: return "Wind speed at 80 meters, relevant for wind energy"
-        case .windSpeed120m: return "Wind speed at 120 meters above ground"
-        case .windSpeed180m: return "Wind speed at 180 meters above ground"
-        case .windDirection10m: return "Direction wind is blowing from at 10 meters, in degrees"
-        case .windDirection80m: return "Wind direction at 80 meters above ground"
-        case .windDirection120m: return "Wind direction at 120 meters above ground"
-        case .windDirection180m: return "Wind direction at 180 meters above ground"
-        case .windGusts10m: return "Maximum wind gust speed in the preceding hour at 10 meters"
-        case .precipitation: return "Total precipitation including rain, showers, and snow in the preceding hour"
-        case .rain: return "Rainfall from large-scale weather systems in the preceding hour"
-        case .showers: return "Convective precipitation from localized showers in the preceding hour"
-        case .snowfall: return "Snowfall amount in the preceding hour"
-        case .snowDepth: return "Current snow depth on the ground"
-        case .freezingLevelHeight: return "Altitude where temperature reaches 0°C"
-        case .pressureMsl: return "Atmospheric pressure adjusted to sea level"
-        case .surfacePressure: return "Atmospheric pressure at the actual ground surface"
-        case .cloudCover: return "Total cloud cover as a percentage of sky"
-        case .cloudCoverLow: return "Low-level clouds and fog up to 3 km altitude"
-        case .cloudCoverMid: return "Mid-level clouds between 3 and 8 km altitude"
-        case .cloudCoverHigh: return "High-level clouds above 8 km altitude"
-        case .visibility: return "Maximum viewing distance through the atmosphere"
-        case .weatherCode: return "WMO weather interpretation code describing current conditions"
-        case .isDay: return "Whether the current time is during daylight hours"
-        case .uvIndex: return "Ultraviolet radiation index indicating sunburn risk"
-        case .shortwaveRadiation: return "Total incoming solar radiation on a horizontal surface"
-        case .directRadiation: return "Solar radiation arriving directly from the sun on a horizontal plane"
-        case .directNormalIrradiance: return "Solar radiation measured perpendicular to the sun's rays"
-        case .diffuseRadiation: return "Solar radiation scattered by the atmosphere"
-        case .sunshineDuration: return "Duration of direct sunlight in the preceding hour"
-        case .soilTemperature0cm: return "Temperature at the soil surface"
-        case .soilTemperature6cm: return "Soil temperature at 6 cm depth"
-        case .soilTemperature18cm: return "Soil temperature at 18 cm depth"
-        case .soilTemperature54cm: return "Soil temperature at 54 cm depth"
-        case .soilMoisture0to1cm: return "Volumetric water content in the top 1 cm of soil"
-        case .soilMoisture1to3cm: return "Volumetric water content at 1 to 3 cm depth"
-        case .soilMoisture3to9cm: return "Volumetric water content at 3 to 9 cm depth"
-        case .soilMoisture9to27cm: return "Volumetric water content at 9 to 27 cm depth"
-        case .soilMoisture27to81cm: return "Volumetric water content at 27 to 81 cm depth"
-        case .cape: return "Convective Available Potential Energy, indicating thunderstorm potential"
-        case .evapotranspiration: return "Water evaporated from soil and transpired by plants in the preceding hour"
-        case .et0FaoEvapotranspiration: return "Reference evapotranspiration assuming unlimited soil water"
-        case .waveHeight: return "Significant mean wave height from all wave sources"
-        case .waveDirection: return "Direction waves are coming from (0° = north, 90° = east)"
-        case .wavePeriod: return "Time interval between successive wave crests"
-        case .wavePeakPeriod: return "Peak period showing dominant wave frequency"
-        case .windWaveHeight: return "Significant wave height from local wind-generated waves"
-        case .windWaveDirection: return "Direction of wind-generated waves"
-        case .windWavePeriod: return "Period of wind-generated waves"
-        case .windWavePeakPeriod: return "Peak period of wind-generated waves"
-        case .swellWaveHeight: return "Significant height of swell waves from distant weather systems"
-        case .swellWaveDirection: return "Direction of primary swell waves"
-        case .swellWavePeriod: return "Period of primary swell waves"
-        case .swellWavePeakPeriod: return "Peak period of primary swell waves"
-        case .secondarySwellWaveHeight: return "Height of secondary swell component"
-        case .secondarySwellWaveDirection: return "Direction of secondary swell"
-        case .secondarySwellWavePeriod: return "Period of secondary swell waves"
-        case .tertiarySwellWaveHeight: return "Height of tertiary swell component"
-        case .tertiarySwellWaveDirection: return "Direction of tertiary swell"
-        case .tertiarySwellWavePeriod: return "Period of tertiary swell waves"
-        case .oceanCurrentVelocity: return "Speed of ocean current including tides and waves"
-        case .oceanCurrentDirection: return "Direction the ocean current is flowing toward"
-        case .seaSurfaceTemperature: return "Water temperature at the ocean surface"
-        case .seaLevelHeightMsl: return "Sea level height accounting for tides and atmospheric pressure"
-        case .pm10: return "Particulate matter with diameter less than 10 micrometers"
-        case .pm25: return "Fine particulate matter with diameter less than 2.5 micrometers"
-        case .carbonMonoxide: return "Toxic gas from incomplete combustion"
-        case .nitrogenDioxide: return "Pollutant from vehicle emissions and industrial processes"
-        case .sulphurDioxide: return "Gas from burning fossil fuels, especially coal"
-        case .ozone: return "Ground-level ozone, a major air pollutant"
-        case .aerosolOpticalDepth: return "Measure of atmospheric haze and particle density"
-        case .dust: return "Saharan dust particles in the atmosphere"
-        case .uvIndexAirQuality: return "UV radiation index considering cloud cover"
-        case .uvIndexClearSky: return "UV index assuming clear sky conditions"
-        case .ammonia: return "Gas from agricultural activities and industrial processes"
-        case .carbonDioxide: return "Primary greenhouse gas from burning fossil fuels"
-        case .methane: return "Potent greenhouse gas from agriculture and natural sources"
-        case .europeanAqi: return "European Air Quality Index (0-100+, higher is worse)"
-        case .usAqi: return "US Air Quality Index (0-500, higher is worse)"
-        case .alderPollen: return "Pollen concentration from alder trees"
-        case .birchPollen: return "Pollen concentration from birch trees"
-        case .grassPollen: return "Pollen concentration from grass species"
-        case .mugwortPollen: return "Pollen concentration from mugwort plants"
-        case .olivePollen: return "Pollen concentration from olive trees"
-        case .ragweedPollen: return "Pollen concentration from ragweed plants"
+        case .temperature2m: return String(localized: "mydata.temperature2m.desc", defaultValue: "Air temperature at 2 meters above ground level", comment: "My Data parameter explanation")
+        case .apparentTemperature: return String(localized: "mydata.apparentTemperature.desc", defaultValue: "Perceived temperature combining wind chill, humidity, and solar radiation", comment: "My Data parameter explanation")
+        case .temperature80m: return String(localized: "mydata.temperature80m.desc", defaultValue: "Air temperature at 80 meters, useful for wind turbine operations", comment: "My Data parameter explanation")
+        case .temperature120m: return String(localized: "mydata.temperature120m.desc", defaultValue: "Air temperature at 120 meters above ground", comment: "My Data parameter explanation")
+        case .temperature180m: return String(localized: "mydata.temperature180m.desc", defaultValue: "Air temperature at 180 meters above ground", comment: "My Data parameter explanation")
+        case .relativeHumidity2m: return String(localized: "mydata.relativeHumidity2m.desc", defaultValue: "Percentage of moisture in the air relative to saturation", comment: "My Data parameter explanation")
+        case .dewPoint2m: return String(localized: "mydata.dewPoint2m.desc", defaultValue: "Temperature at which air becomes saturated and dew forms", comment: "My Data parameter explanation")
+        case .vapourPressureDeficit: return String(localized: "mydata.vapourPressureDeficit.desc", defaultValue: "Difference between moisture in air and moisture at saturation, important for plant health", comment: "My Data parameter explanation")
+        case .windSpeed10m: return String(localized: "mydata.windSpeed10m.desc", defaultValue: "Wind speed at standard 10-meter measurement height", comment: "My Data parameter explanation")
+        case .windSpeed80m: return String(localized: "mydata.windSpeed80m.desc", defaultValue: "Wind speed at 80 meters, relevant for wind energy", comment: "My Data parameter explanation")
+        case .windSpeed120m: return String(localized: "mydata.windSpeed120m.desc", defaultValue: "Wind speed at 120 meters above ground", comment: "My Data parameter explanation")
+        case .windSpeed180m: return String(localized: "mydata.windSpeed180m.desc", defaultValue: "Wind speed at 180 meters above ground", comment: "My Data parameter explanation")
+        case .windDirection10m: return String(localized: "mydata.windDirection10m.desc", defaultValue: "Direction wind is blowing from at 10 meters, in degrees", comment: "My Data parameter explanation")
+        case .windDirection80m: return String(localized: "mydata.windDirection80m.desc", defaultValue: "Wind direction at 80 meters above ground", comment: "My Data parameter explanation")
+        case .windDirection120m: return String(localized: "mydata.windDirection120m.desc", defaultValue: "Wind direction at 120 meters above ground", comment: "My Data parameter explanation")
+        case .windDirection180m: return String(localized: "mydata.windDirection180m.desc", defaultValue: "Wind direction at 180 meters above ground", comment: "My Data parameter explanation")
+        case .windGusts10m: return String(localized: "mydata.windGusts10m.desc", defaultValue: "Maximum wind gust speed in the preceding hour at 10 meters", comment: "My Data parameter explanation")
+        case .precipitation: return String(localized: "mydata.precipitation.desc", defaultValue: "Total precipitation including rain, showers, and snow in the preceding hour", comment: "My Data parameter explanation")
+        case .rain: return String(localized: "mydata.rain.desc", defaultValue: "Rainfall from large-scale weather systems in the preceding hour", comment: "My Data parameter explanation")
+        case .showers: return String(localized: "mydata.showers.desc", defaultValue: "Convective precipitation from localized showers in the preceding hour", comment: "My Data parameter explanation")
+        case .snowfall: return String(localized: "mydata.snowfall.desc", defaultValue: "Snowfall amount in the preceding hour", comment: "My Data parameter explanation")
+        case .snowDepth: return String(localized: "mydata.snowDepth.desc", defaultValue: "Current snow depth on the ground", comment: "My Data parameter explanation")
+        case .freezingLevelHeight: return String(localized: "mydata.freezingLevelHeight.desc", defaultValue: "Altitude where temperature reaches 0°C", comment: "My Data parameter explanation")
+        case .pressureMsl: return String(localized: "mydata.pressureMsl.desc", defaultValue: "Atmospheric pressure adjusted to sea level", comment: "My Data parameter explanation")
+        case .surfacePressure: return String(localized: "mydata.surfacePressure.desc", defaultValue: "Atmospheric pressure at the actual ground surface", comment: "My Data parameter explanation")
+        case .cloudCover: return String(localized: "mydata.cloudCover.desc", defaultValue: "Total cloud cover as a percentage of sky", comment: "My Data parameter explanation")
+        case .cloudCoverLow: return String(localized: "mydata.cloudCoverLow.desc", defaultValue: "Low-level clouds and fog up to 3 km altitude", comment: "My Data parameter explanation")
+        case .cloudCoverMid: return String(localized: "mydata.cloudCoverMid.desc", defaultValue: "Mid-level clouds between 3 and 8 km altitude", comment: "My Data parameter explanation")
+        case .cloudCoverHigh: return String(localized: "mydata.cloudCoverHigh.desc", defaultValue: "High-level clouds above 8 km altitude", comment: "My Data parameter explanation")
+        case .visibility: return String(localized: "mydata.visibility.desc", defaultValue: "Maximum viewing distance through the atmosphere", comment: "My Data parameter explanation")
+        case .weatherCode: return String(localized: "mydata.weatherCode.desc", defaultValue: "WMO weather interpretation code describing current conditions", comment: "My Data parameter explanation")
+        case .isDay: return String(localized: "mydata.isDay.desc", defaultValue: "Whether the current time is during daylight hours", comment: "My Data parameter explanation")
+        case .uvIndex: return String(localized: "mydata.uvIndex.desc", defaultValue: "Ultraviolet radiation index indicating sunburn risk", comment: "My Data parameter explanation")
+        case .shortwaveRadiation: return String(localized: "mydata.shortwaveRadiation.desc", defaultValue: "Total incoming solar radiation on a horizontal surface", comment: "My Data parameter explanation")
+        case .directRadiation: return String(localized: "mydata.directRadiation.desc", defaultValue: "Solar radiation arriving directly from the sun on a horizontal plane", comment: "My Data parameter explanation")
+        case .directNormalIrradiance: return String(localized: "mydata.directNormalIrradiance.desc", defaultValue: "Solar radiation measured perpendicular to the sun's rays", comment: "My Data parameter explanation")
+        case .diffuseRadiation: return String(localized: "mydata.diffuseRadiation.desc", defaultValue: "Solar radiation scattered by the atmosphere", comment: "My Data parameter explanation")
+        case .sunshineDuration: return String(localized: "mydata.sunshineDuration.desc", defaultValue: "Duration of direct sunlight in the preceding hour", comment: "My Data parameter explanation")
+        case .soilTemperature0cm: return String(localized: "mydata.soilTemperature0cm.desc", defaultValue: "Temperature at the soil surface", comment: "My Data parameter explanation")
+        case .soilTemperature6cm: return String(localized: "mydata.soilTemperature6cm.desc", defaultValue: "Soil temperature at 6 cm depth", comment: "My Data parameter explanation")
+        case .soilTemperature18cm: return String(localized: "mydata.soilTemperature18cm.desc", defaultValue: "Soil temperature at 18 cm depth", comment: "My Data parameter explanation")
+        case .soilTemperature54cm: return String(localized: "mydata.soilTemperature54cm.desc", defaultValue: "Soil temperature at 54 cm depth", comment: "My Data parameter explanation")
+        case .soilMoisture0to1cm: return String(localized: "mydata.soilMoisture0to1cm.desc", defaultValue: "Volumetric water content in the top 1 cm of soil", comment: "My Data parameter explanation")
+        case .soilMoisture1to3cm: return String(localized: "mydata.soilMoisture1to3cm.desc", defaultValue: "Volumetric water content at 1 to 3 cm depth", comment: "My Data parameter explanation")
+        case .soilMoisture3to9cm: return String(localized: "mydata.soilMoisture3to9cm.desc", defaultValue: "Volumetric water content at 3 to 9 cm depth", comment: "My Data parameter explanation")
+        case .soilMoisture9to27cm: return String(localized: "mydata.soilMoisture9to27cm.desc", defaultValue: "Volumetric water content at 9 to 27 cm depth", comment: "My Data parameter explanation")
+        case .soilMoisture27to81cm: return String(localized: "mydata.soilMoisture27to81cm.desc", defaultValue: "Volumetric water content at 27 to 81 cm depth", comment: "My Data parameter explanation")
+        case .cape: return String(localized: "mydata.cape.desc", defaultValue: "Convective Available Potential Energy, indicating thunderstorm potential", comment: "My Data parameter explanation")
+        case .evapotranspiration: return String(localized: "mydata.evapotranspiration.desc", defaultValue: "Water evaporated from soil and transpired by plants in the preceding hour", comment: "My Data parameter explanation")
+        case .et0FaoEvapotranspiration: return String(localized: "mydata.et0FaoEvapotranspiration.desc", defaultValue: "Reference evapotranspiration assuming unlimited soil water", comment: "My Data parameter explanation")
+        case .waveHeight: return String(localized: "mydata.waveHeight.desc", defaultValue: "Significant mean wave height from all wave sources", comment: "My Data parameter explanation")
+        case .waveDirection: return String(localized: "mydata.waveDirection.desc", defaultValue: "Direction waves are coming from (0° = north, 90° = east)", comment: "My Data parameter explanation")
+        case .wavePeriod: return String(localized: "mydata.wavePeriod.desc", defaultValue: "Time interval between successive wave crests", comment: "My Data parameter explanation")
+        case .wavePeakPeriod: return String(localized: "mydata.wavePeakPeriod.desc", defaultValue: "Peak period showing dominant wave frequency", comment: "My Data parameter explanation")
+        case .windWaveHeight: return String(localized: "mydata.windWaveHeight.desc", defaultValue: "Significant wave height from local wind-generated waves", comment: "My Data parameter explanation")
+        case .windWaveDirection: return String(localized: "mydata.windWaveDirection.desc", defaultValue: "Direction of wind-generated waves", comment: "My Data parameter explanation")
+        case .windWavePeriod: return String(localized: "mydata.windWavePeriod.desc", defaultValue: "Period of wind-generated waves", comment: "My Data parameter explanation")
+        case .windWavePeakPeriod: return String(localized: "mydata.windWavePeakPeriod.desc", defaultValue: "Peak period of wind-generated waves", comment: "My Data parameter explanation")
+        case .swellWaveHeight: return String(localized: "mydata.swellWaveHeight.desc", defaultValue: "Significant height of swell waves from distant weather systems", comment: "My Data parameter explanation")
+        case .swellWaveDirection: return String(localized: "mydata.swellWaveDirection.desc", defaultValue: "Direction of primary swell waves", comment: "My Data parameter explanation")
+        case .swellWavePeriod: return String(localized: "mydata.swellWavePeriod.desc", defaultValue: "Period of primary swell waves", comment: "My Data parameter explanation")
+        case .swellWavePeakPeriod: return String(localized: "mydata.swellWavePeakPeriod.desc", defaultValue: "Peak period of primary swell waves", comment: "My Data parameter explanation")
+        case .secondarySwellWaveHeight: return String(localized: "mydata.secondarySwellWaveHeight.desc", defaultValue: "Height of secondary swell component", comment: "My Data parameter explanation")
+        case .secondarySwellWaveDirection: return String(localized: "mydata.secondarySwellWaveDirection.desc", defaultValue: "Direction of secondary swell", comment: "My Data parameter explanation")
+        case .secondarySwellWavePeriod: return String(localized: "mydata.secondarySwellWavePeriod.desc", defaultValue: "Period of secondary swell waves", comment: "My Data parameter explanation")
+        case .tertiarySwellWaveHeight: return String(localized: "mydata.tertiarySwellWaveHeight.desc", defaultValue: "Height of tertiary swell component", comment: "My Data parameter explanation")
+        case .tertiarySwellWaveDirection: return String(localized: "mydata.tertiarySwellWaveDirection.desc", defaultValue: "Direction of tertiary swell", comment: "My Data parameter explanation")
+        case .tertiarySwellWavePeriod: return String(localized: "mydata.tertiarySwellWavePeriod.desc", defaultValue: "Period of tertiary swell waves", comment: "My Data parameter explanation")
+        case .oceanCurrentVelocity: return String(localized: "mydata.oceanCurrentVelocity.desc", defaultValue: "Speed of ocean current including tides and waves", comment: "My Data parameter explanation")
+        case .oceanCurrentDirection: return String(localized: "mydata.oceanCurrentDirection.desc", defaultValue: "Direction the ocean current is flowing toward", comment: "My Data parameter explanation")
+        case .seaSurfaceTemperature: return String(localized: "mydata.seaSurfaceTemperature.desc", defaultValue: "Water temperature at the ocean surface", comment: "My Data parameter explanation")
+        case .seaLevelHeightMsl: return String(localized: "mydata.seaLevelHeightMsl.desc", defaultValue: "Sea level height accounting for tides and atmospheric pressure", comment: "My Data parameter explanation")
+        case .pm10: return String(localized: "mydata.pm10.desc", defaultValue: "Particulate matter with diameter less than 10 micrometers", comment: "My Data parameter explanation")
+        case .pm25: return String(localized: "mydata.pm25.desc", defaultValue: "Fine particulate matter with diameter less than 2.5 micrometers", comment: "My Data parameter explanation")
+        case .carbonMonoxide: return String(localized: "mydata.carbonMonoxide.desc", defaultValue: "Toxic gas from incomplete combustion", comment: "My Data parameter explanation")
+        case .nitrogenDioxide: return String(localized: "mydata.nitrogenDioxide.desc", defaultValue: "Pollutant from vehicle emissions and industrial processes", comment: "My Data parameter explanation")
+        case .sulphurDioxide: return String(localized: "mydata.sulphurDioxide.desc", defaultValue: "Gas from burning fossil fuels, especially coal", comment: "My Data parameter explanation")
+        case .ozone: return String(localized: "mydata.ozone.desc", defaultValue: "Ground-level ozone, a major air pollutant", comment: "My Data parameter explanation")
+        case .aerosolOpticalDepth: return String(localized: "mydata.aerosolOpticalDepth.desc", defaultValue: "Measure of atmospheric haze and particle density", comment: "My Data parameter explanation")
+        case .dust: return String(localized: "mydata.dust.desc", defaultValue: "Saharan dust particles in the atmosphere", comment: "My Data parameter explanation")
+        case .uvIndexAirQuality: return String(localized: "mydata.uvIndexAirQuality.desc", defaultValue: "UV radiation index considering cloud cover", comment: "My Data parameter explanation")
+        case .uvIndexClearSky: return String(localized: "mydata.uvIndexClearSky.desc", defaultValue: "UV index assuming clear sky conditions", comment: "My Data parameter explanation")
+        case .ammonia: return String(localized: "mydata.ammonia.desc", defaultValue: "Gas from agricultural activities and industrial processes", comment: "My Data parameter explanation")
+        case .carbonDioxide: return String(localized: "mydata.carbonDioxide.desc", defaultValue: "Primary greenhouse gas from burning fossil fuels", comment: "My Data parameter explanation")
+        case .methane: return String(localized: "mydata.methane.desc", defaultValue: "Potent greenhouse gas from agriculture and natural sources", comment: "My Data parameter explanation")
+        case .europeanAqi: return String(localized: "mydata.europeanAqi.desc", defaultValue: "European Air Quality Index (0-100+, higher is worse)", comment: "My Data parameter explanation")
+        case .usAqi: return String(localized: "mydata.usAqi.desc", defaultValue: "US Air Quality Index (0-500, higher is worse)", comment: "My Data parameter explanation")
+        case .alderPollen: return String(localized: "mydata.alderPollen.desc", defaultValue: "Pollen concentration from alder trees", comment: "My Data parameter explanation")
+        case .birchPollen: return String(localized: "mydata.birchPollen.desc", defaultValue: "Pollen concentration from birch trees", comment: "My Data parameter explanation")
+        case .grassPollen: return String(localized: "mydata.grassPollen.desc", defaultValue: "Pollen concentration from grass species", comment: "My Data parameter explanation")
+        case .mugwortPollen: return String(localized: "mydata.mugwortPollen.desc", defaultValue: "Pollen concentration from mugwort plants", comment: "My Data parameter explanation")
+        case .olivePollen: return String(localized: "mydata.olivePollen.desc", defaultValue: "Pollen concentration from olive trees", comment: "My Data parameter explanation")
+        case .ragweedPollen: return String(localized: "mydata.ragweedPollen.desc", defaultValue: "Pollen concentration from ragweed plants", comment: "My Data parameter explanation")
         }
     }
     
@@ -689,10 +703,12 @@ struct MyDataFormatHelper {
             if let code = WeatherCode(rawValue: Int(value)) {
                 return code.description
             }
-            return "Code \(Int(value))"
-            
+            return String(localized: "mydata.format.weather_code", defaultValue: "Code \(Int(value))", comment: "Fallback label for an unknown WMO weather code")
+
         case .boolean:
-            return value == 1 ? "Day" : "Night"
+            return value == 1
+                ? String(localized: "mydata.format.day", defaultValue: "Day", comment: "Day/night value when it is daytime")
+                : String(localized: "mydata.format.night", defaultValue: "Night", comment: "Day/night value when it is nighttime")
             
         case .index:
             return String(format: "%.1f", value)

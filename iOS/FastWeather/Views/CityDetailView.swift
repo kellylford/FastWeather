@@ -155,14 +155,14 @@ struct CityDetailView: View {
                             .cornerRadius(8)
                             .accessibilityElement(children: .ignore)
                             .accessibilityLabel({
-                                var label = "\(precipProb) percent chance of precipitation"
+                                var label = String(localized: "forecast.precip_chance_percent", defaultValue: "\(precipProb) percent chance of precipitation", comment: "Accessibility: chance of precipitation. Placeholder is a percentage.")
                                 if settingsManager.settings.showPrecipitationAmount {
                                     if let snowfall = daily.snowfallSum?[0], snowfall > 0 {
-                                        label += ", \(formatSnowfall(snowfall)) of snow expected"
+                                        label += String(localized: "forecast.snow_expected_suffix", defaultValue: ", \(formatSnowfall(snowfall)) of snow expected", comment: "Appended: amount of snow expected.")
                                     } else if let rain = daily.rainSum?[0], rain > 0 {
-                                        label += ", \(formatPrecipitation(rain)) of rain expected"
+                                        label += String(localized: "forecast.rain_expected_suffix", defaultValue: ", \(formatPrecipitation(rain)) of rain expected", comment: "Appended: amount of rain expected.")
                                     } else if let precipSum = daily.precipitationSum?[0], precipSum > 0 {
-                                        label += ", \(formatPrecipitation(precipSum)) expected"
+                                        label += String(localized: "forecast.precip_expected_suffix", defaultValue: ", \(formatPrecipitation(precipSum)) expected", comment: "Appended: amount of precipitation expected.")
                                     }
                                 }
                                 if let timingText = precipitationTimingText(from: weather) {
@@ -222,9 +222,9 @@ struct CityDetailView: View {
                             .cornerRadius(8)
                             .accessibilityElement(children: .ignore)
                             .accessibilityLabel({
-                                var label = "Winds up to \(formatWindSpeed(windMax))"
+                                var label = String(localized: "forecast.winds_up_to", defaultValue: "Winds up to \(formatWindSpeed(windMax))", comment: "Accessibility: maximum wind speed. Placeholder is speed with unit.")
                                 if let windDir = daily.windDirectionDominant?[0] {
-                                    label += ", From \(degreesToCardinalLong(windDir))"
+                                    label += String(localized: "forecast.from_direction_suffix", defaultValue: ", From \(degreesToCardinalLong(windDir))", comment: "Appended: wind origin direction, e.g. ', From Northwest'.")
                                 }
                                 return label
                             }())
@@ -302,65 +302,65 @@ struct CityDetailView: View {
             GroupBox(label: Label("Current Conditions", systemImage: "thermometer")) {
                 VStack(spacing: 12) {
                     if let humidity = weather.current.relativeHumidity2m {
-                        DetailRow(label: "Humidity", value: "\(humidity)%")
+                        DetailRow(label: String(localized: "field.humidity", defaultValue: "Humidity", comment: "Weather field label"), value: "\(humidity)%")
                         Divider()
                     }
-                    
+
                     // Wind Speed with Gusts (if enabled and available)
                     if let windSpeed = weather.current.windSpeed10m {
                         if settingsManager.settings.showWindGustsInCurrentConditions,
                            let windGusts = weather.current.windGusts10m,
                            let windDir = weather.current.windDirection10m {
-                            DetailRow(label: "Wind", value: formatWind(speed: windSpeed, direction: windDir, gusts: windGusts, unit: settingsManager.settings.windSpeedUnit.rawValue, degreesToCardinal: degreesToCardinal))
+                            DetailRow(label: String(localized: "field.wind", defaultValue: "Wind", comment: "Weather field label"), value: formatWind(speed: windSpeed, direction: windDir, gusts: windGusts, unit: settingsManager.settings.windSpeedUnit.rawValue, degreesToCardinal: degreesToCardinal))
                         } else {
-                            DetailRow(label: "Wind Speed", value: formatWindSpeed(windSpeed))
+                            DetailRow(label: String(localized: "field.wind_speed", defaultValue: "Wind Speed", comment: "Weather field label"), value: formatWindSpeed(windSpeed))
                         }
                         Divider()
                     }
-                    
+
                     if let windDir = weather.current.windDirection10m, weather.current.windSpeed10m == nil {
-                        DetailRow(label: "Wind Direction", value: formatWindDirection(windDir))
+                        DetailRow(label: String(localized: "field.wind_direction", defaultValue: "Wind Direction", comment: "Weather field label"), value: formatWindDirection(windDir))
                         Divider()
                     }
-                    
+
                     // UV Index (if enabled and daytime)
                     if settingsManager.settings.showUVIndexInCurrentConditions,
                        let isDay = weather.current.isDay, isDay == 1,
                        let uvIndex = weather.current.uvIndex {
-                        DetailRow(label: "UV Index", value: "\(Int(uvIndex.rounded())) (\(UVIndexCategory(uvIndex: uvIndex).category))")
+                        DetailRow(label: String(localized: "field.uv_index", defaultValue: "UV Index", comment: "Weather field label"), value: "\(Int(uvIndex.rounded())) (\(UVIndexCategory(uvIndex: uvIndex).category))")
                         Divider()
                     }
-                    
+
                     // Current precipitation rate (if enabled and > 0)
                     if settingsManager.settings.showCurrentPrecipitationInCurrentConditions {
                         let currentSnow = weather.current.snowfall ?? 0
                         let currentPrecip = weather.current.precipitation ?? 0
                         if currentSnow > 0 {
-                            DetailRow(label: "Snowfall", value: formatSnowfall(currentSnow))
+                            DetailRow(label: String(localized: "field.snowfall", defaultValue: "Snowfall", comment: "Weather field label"), value: formatSnowfall(currentSnow))
                             Divider()
                         } else if currentPrecip > 0 {
                             let rain = weather.current.rain ?? 0
-                            DetailRow(label: rain > 0 ? "Rainfall" : "Precipitation", value: formatPrecipitation(currentPrecip))
+                            DetailRow(label: rain > 0 ? String(localized: "field.rainfall", defaultValue: "Rainfall", comment: "Weather field label") : String(localized: "field.precipitation", defaultValue: "Precipitation", comment: "Weather field label"), value: formatPrecipitation(currentPrecip))
                             Divider()
                         }
                     }
-                    
+
                     // Dew Point (if enabled)
                     if settingsManager.settings.showDewPoint,
                        let dewPoint = weather.current.dewpoint2m {
-                        DetailRow(label: "Dew Point", value: formatDewPoint(dewPoint, isFahrenheit: settingsManager.settings.temperatureUnit == .fahrenheit))
+                        DetailRow(label: String(localized: "field.dew_point", defaultValue: "Dew Point", comment: "Weather field label"), value: formatDewPoint(dewPoint, isFahrenheit: settingsManager.settings.temperatureUnit == .fahrenheit))
                         Divider()
                     }
-                    
+
                     if let pressure = weather.current.pressureMsl {
-                        DetailRow(label: "Pressure", value: formatPressure(pressure))
+                        DetailRow(label: String(localized: "field.pressure", defaultValue: "Pressure", comment: "Weather field label"), value: formatPressure(pressure))
                         Divider()
                     }
                     if let visibility = weather.current.visibility {
-                        DetailRow(label: "Visibility", value: formatVisibility(visibility))
+                        DetailRow(label: String(localized: "field.visibility", defaultValue: "Visibility", comment: "Weather field label"), value: formatVisibility(visibility))
                         Divider()
                     }
-                    DetailRow(label: "Cloud Cover", value: "\(weather.current.cloudCover)%")
+                    DetailRow(label: String(localized: "field.cloud_cover", defaultValue: "Cloud Cover", comment: "Weather field label"), value: "\(weather.current.cloudCover)%")
                 }
                 .padding(.vertical, 8)
             }
@@ -495,15 +495,15 @@ struct CityDetailView: View {
         case .location:
             GroupBox(label: Label("Location", systemImage: "mappin.and.ellipse")) {
                 VStack(spacing: 12) {
-                    DetailRow(label: "City", value: city.name)
+                    DetailRow(label: String(localized: "location.city", defaultValue: "City", comment: "Location field label"), value: city.name)
                     if let state = city.state {
                         Divider()
-                        DetailRow(label: "State", value: state)
+                        DetailRow(label: String(localized: "location.state", defaultValue: "State", comment: "Location field label"), value: state)
                     }
                     Divider()
-                    DetailRow(label: "Country", value: city.country)
+                    DetailRow(label: String(localized: "location.country", defaultValue: "Country", comment: "Location field label"), value: city.country)
                     Divider()
-                    DetailRow(label: "Coordinates", value: String(format: "%.4f, %.4f", city.latitude, city.longitude))
+                    DetailRow(label: String(localized: "location.coordinates", defaultValue: "Coordinates", comment: "Location field label"), value: String(format: "%.4f, %.4f", city.latitude, city.longitude))
                 }
                 .padding(.vertical, 8)
             }
@@ -581,7 +581,7 @@ struct CityDetailView: View {
 
                     let timeFormatter: DateFormatter = {
                         let f = DateFormatter()
-                        f.dateFormat = "h:mm a"
+                        f.setLocalizedDateFormatFromTemplate("jmm")
                         return f
                     }()
 
@@ -602,7 +602,7 @@ struct CityDetailView: View {
                                     }
                                 }
                                 .accessibilityElement(children: .ignore)
-                                .accessibilityLabel("Moonrise: \(moonTimes.rise.map { timeFormatter.string(from: $0) } ?? "not available")")
+                                .accessibilityLabel("Moonrise: \(moonTimes.rise.map { timeFormatter.string(from: $0) } ?? String(localized: "common.not_available_long", defaultValue: "not available", comment: "Shown when a value is not available"))")
                             }
 
                             if settingsManager.settings.showMoonriseInAstronomy && settingsManager.settings.showMoonsetInAstronomy {
@@ -624,7 +624,7 @@ struct CityDetailView: View {
                                     }
                                 }
                                 .accessibilityElement(children: .ignore)
-                                .accessibilityLabel("Moonset: \(moonTimes.set.map { timeFormatter.string(from: $0) } ?? "not available")")
+                                .accessibilityLabel("Moonset: \(moonTimes.set.map { timeFormatter.string(from: $0) } ?? String(localized: "common.not_available_long", defaultValue: "not available", comment: "Shown when a value is not available"))")
                             }
                         }
                     }
@@ -867,7 +867,7 @@ struct CityDetailView: View {
 
     private var shareSubject: String {
         guard let weather = weather else {
-            return "Weather Forecast – \(city.displayName)"
+            return String(localized: "share.subject_no_data", defaultValue: "Weather Forecast – \(city.displayName)", comment: "Share sheet subject when weather is unavailable. Placeholder is the city name.")
         }
         let current = weather.current
         let isFahrenheit = settingsManager.settings.temperatureUnit == .fahrenheit
@@ -877,9 +877,9 @@ struct CityDetailView: View {
         let condStr = WeatherCode(rawValue: current.weatherCode)?.description ?? ""
         let alertPrefix = activeAlerts.isEmpty ? "" : "⚠️ "
         if condStr.isEmpty {
-            return "\(alertPrefix)\(city.displayName) – \(tempStr)"
+            return String(localized: "share.subject_temp", defaultValue: "\(alertPrefix)\(city.displayName) – \(tempStr)", comment: "Share sheet subject: optional alert prefix, city name, temperature.")
         }
-        return "\(alertPrefix)\(city.displayName) – \(tempStr), \(condStr)"
+        return String(localized: "share.subject_temp_conditions", defaultValue: "\(alertPrefix)\(city.displayName) – \(tempStr), \(condStr)", comment: "Share sheet subject: optional alert prefix, city name, temperature, conditions.")
     }
 
     private var shareText: String? {
@@ -900,16 +900,16 @@ struct CityDetailView: View {
         var condParts: [String] = [WeatherCode(rawValue: current.weatherCode)?.description ?? ""]
         condParts.append(fmt(current.temperature2m))
         if let feels = current.apparentTemperature {
-            condParts.append("(Feels like \(fmt(feels)))")
+            condParts.append(String(localized: "share.feels_like_parenthetical", defaultValue: "(Feels like \(fmt(feels)))", comment: "Share text: feels-like temperature in parentheses. Placeholder is temperature."))
         }
         lines.append("\(city.displayName) — \(condParts.filter { !$0.isEmpty }.joined(separator: ", "))")
 
         // Active weather alerts — shown before forecast details
         if !activeAlerts.isEmpty {
             lines.append("")
-            lines.append("⚠️ Active Weather Alerts:")
+            lines.append(String(localized: "share.active_alerts_header", defaultValue: "⚠️ Active Weather Alerts:", comment: "Share text: header before the list of active weather alerts."))
             for alert in activeAlerts {
-                lines.append("• \(alert.severity.rawValue): \(alert.event) — \(alert.headline)")
+                lines.append("• \(alert.severity.localizedLabel): \(alert.event) — \(alert.headline)")
             }
         }
 
@@ -919,27 +919,27 @@ struct CityDetailView: View {
         if let daily = daily {
             let calendar = Calendar.current
             let displayFmt = DateFormatter()
-            displayFmt.dateFormat = "EEE, MMM d"
+            displayFmt.setLocalizedDateFormatFromTemplate("EEEMMMd")
             let shortFmt = DateFormatter()
-            shortFmt.dateFormat = "MMM d"
+            shortFmt.setLocalizedDateFormatFromTemplate("MMMd")
 
             let count = min(3, daily.temperature2mMax.count)
             for i in 0..<count {
                 let date = calendar.date(byAdding: .day, value: i, to: selectedDate) ?? selectedDate
-                let label = i == 0 ? "Today, \(shortFmt.string(from: date))" : displayFmt.string(from: date)
+                let label = i == 0 ? String(localized: "share.today_date", defaultValue: "Today, \(shortFmt.string(from: date))", comment: "Share text: label for today's forecast line. Placeholder is the date.") : displayFmt.string(from: date)
 
                 var parts: [String] = []
                 if let wc = daily.weatherCode?[i], let code = WeatherCode(rawValue: wc) {
                     parts.append(code.description)
                 }
                 if let hi = daily.temperature2mMax[i] {
-                    parts.append("High \(fmt(hi))")
+                    parts.append(String(localized: "share.high_temp", defaultValue: "High \(fmt(hi))", comment: "Share text: daily high temperature. Placeholder is temperature."))
                 }
                 if let lo = daily.temperature2mMin[i] {
-                    parts.append("Low \(fmt(lo))")
+                    parts.append(String(localized: "share.low_temp", defaultValue: "Low \(fmt(lo))", comment: "Share text: daily low temperature. Placeholder is temperature."))
                 }
                 if let prob = daily.precipitationProbabilityMax?[i], prob > 0 {
-                    parts.append("\(prob)% chance of precipitation")
+                    parts.append(String(localized: "forecast.precip_chance", defaultValue: "\(prob)% chance of precipitation", comment: "Glance ahead summary: chance of precipitation. Placeholder is a percentage."))
                 }
                 lines.append("\(label): \(parts.joined(separator: ", "))")
             }
@@ -1019,7 +1019,9 @@ struct CityDetailView: View {
             rawValue = current.myDataValues?[parameter.apiKey]
         }
         
-        guard let value = rawValue else { return "N/A" }
+        guard let value = rawValue else {
+            return String(localized: "common.not_available", defaultValue: "N/A", comment: "Shown when a value is not available")
+        }
         return MyDataFormatHelper.format(parameter: parameter, value: value, settings: settingsManager.settings)
     }
     
@@ -1053,15 +1055,15 @@ struct CityDetailView: View {
         // Determine precipitation type label for natural VoiceOver reading
         let precipType: String
         if let snow = weather.daily?.snowfallSum?[0], snow > 0 {
-            precipType = "Snow"
+            precipType = String(localized: "precip_type.snow", defaultValue: "Snow", comment: "Precipitation type used in timing sentences")
         } else if let rain = weather.daily?.rainSum?[0], rain > 0 {
-            precipType = "Rain"
+            precipType = String(localized: "precip_type.rain", defaultValue: "Rain", comment: "Precipitation type used in timing sentences")
         } else {
-            precipType = "Precipitation"
+            precipType = String(localized: "precip_type.precipitation", defaultValue: "Precipitation", comment: "Precipitation type used in timing sentences")
         }
 
         if rainyIndices.count >= 8 {
-            return "\(precipType) expected throughout the day"
+            return String(localized: "precip_timing.all_day", defaultValue: "\(precipType) expected throughout the day", comment: "Precipitation timing: expected all day. Placeholder is the precipitation type (Snow/Rain/Precipitation).")
         }
 
         // Build contiguous windows (allow 1-hour gap to merge nearby showers)
@@ -1086,11 +1088,12 @@ struct CityDetailView: View {
 
         let parts = windows.prefix(2).map { w -> String in
             return w.start == w.end
-                ? "around \(timeLabel(w.start))"
+                ? String(localized: "precip_timing.around_time", defaultValue: "around \(timeLabel(w.start))", comment: "Precipitation timing window at a single time, e.g. 'around 3 PM'. Placeholder is a time.")
                 : "\(timeLabel(w.start))–\(timeLabel(w.end))"
         }
-        let suffix = windows.count > 2 ? " and later" : ""
-        return "\(precipType) most likely " + parts.joined(separator: " and ") + suffix
+        let suffix = windows.count > 2 ? String(localized: "precip_timing.and_later_suffix", defaultValue: " and later", comment: "Appended when there are more precipitation windows than shown.") : ""
+        let joiner = String(localized: "precip_timing.window_joiner", defaultValue: " and ", comment: "Joins two precipitation timing windows, e.g. 'around 3 PM and around 6 PM'.")
+        return String(localized: "precip_timing.most_likely_prefix", defaultValue: "\(precipType) most likely ", comment: "Precipitation timing sentence prefix. Placeholder is the precipitation type (Snow/Rain/Precipitation).") + parts.joined(separator: joiner) + suffix
     }
 
     private func findCurrentHourIndex(in times: [String?]) -> Int {
@@ -1310,11 +1313,13 @@ struct HourlyForecastCard: View {
     }
     
     private func createAccessibilityLabel() -> String {
-        guard let time = time else { return "No data" }
-        
+        guard let time = time else {
+            return String(localized: "common.no_data", defaultValue: "No data", comment: "Accessibility label when no data is available")
+        }
+
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        
+
         var hourDescription = formattedTime
         if let date = formatter.date(from: time) {
             let calendar = Calendar.current
@@ -1324,7 +1329,7 @@ struct HourlyForecastCard: View {
             let hour12 = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour)
             hourDescription = minute > 0 ? "\(hour12):\(String(format: "%02d", minute)) \(ampm)" : "\(hour12) \(ampm)"
         }
-        
+
         var label = hourDescription
         
         // Add enabled fields to label
@@ -1349,60 +1354,60 @@ struct HourlyForecastCard: View {
             
         case .precipitationProbability:
             if let prob = hourly.precipitationProbability?[index], prob > 0 {
-                return "\(prob) percent chance of precipitation"
+                return String(localized: "forecast.precip_chance_percent", defaultValue: "\(prob) percent chance of precipitation", comment: "Accessibility: chance of precipitation. Placeholder is a percentage.")
             }
-            
+
         case .precipitation:
             let snowfallAmt = hourly.snowfall?[index] ?? 0
             if snowfallAmt > 0 {
-                return "snowfall \(formatSnowfall(snowfallAmt))"
+                return String(localized: "accessibility.snowfall_value", defaultValue: "snowfall \(formatSnowfall(snowfallAmt))", comment: "Accessibility: snowfall amount. Placeholder is amount with unit.")
             } else if let precip = hourly.precipitation?[index], precip > 0 {
-                return "precipitation \(formatPrecipitation(precip))"
+                return String(localized: "accessibility.precipitation_value", defaultValue: "precipitation \(formatPrecipitation(precip))", comment: "Accessibility: precipitation amount. Placeholder is amount with unit.")
             }
-            
+
         case .snowfall:
             if let snow = hourly.snowfall?[index], snow > 0 {
-                return "snowfall \(formatSnowfall(snow))"
+                return String(localized: "accessibility.snowfall_value", defaultValue: "snowfall \(formatSnowfall(snow))", comment: "Accessibility: snowfall amount. Placeholder is amount with unit.")
             }
-            
+
         case .uvIndex:
             if let uv = hourly.uvIndex?[index], uv > 0 {
                 return getUVIndexDescription(uv)
             }
-            
+
         case .windSpeed:
             if let windSpeed = hourly.windSpeed10m?[index], windSpeed > 0 {
-                return "wind \(formatWindSpeed(windSpeed))"
+                return String(localized: "accessibility.wind_value", defaultValue: "wind \(formatWindSpeed(windSpeed))", comment: "Accessibility: wind speed. Placeholder is speed with unit.")
             }
-            
+
         case .windGusts:
             if let windGusts = hourly.windGusts10m?[index], windGusts > 0 {
-                return "gusts \(formatWindSpeed(windGusts))"
+                return String(localized: "accessibility.gusts_value", defaultValue: "gusts \(formatWindSpeed(windGusts))", comment: "Accessibility: wind gust speed. Placeholder is speed with unit.")
             }
-            
+
         case .humidity:
             if let humidity = hourly.relativeHumidity2m?[index] {
-                return "humidity \(humidity) percent"
+                return String(localized: "accessibility.humidity_value", defaultValue: "humidity \(humidity) percent", comment: "Accessibility: humidity. Placeholder is a percentage value.")
             }
-            
+
         default:
             return nil
         }
-        
+
         return nil
     }
-    
+
     private func formatTemperature(_ celsius: Double) -> String {
         let temp = settingsManager.settings.temperatureUnit.convert(celsius)
         let unit = settingsManager.settings.temperatureUnit == .fahrenheit ? "F" : "C"
         return String(format: "%.0f°%@", temp, unit)
     }
-    
+
     private func formatPrecipitation(_ mm: Double) -> String {
         let precip = settingsManager.settings.precipitationUnit.convert(mm)
         return String(format: "%.2f %@", precip, settingsManager.settings.precipitationUnit.rawValue)
     }
-    
+
     private func formatSnowfall(_ cm: Double) -> String {
         switch settingsManager.settings.precipitationUnit {
         case .inches:
@@ -1411,7 +1416,7 @@ struct HourlyForecastCard: View {
             return String(format: "%.1f cm", cm)
         }
     }
-    
+
     private func formatWindSpeed(_ kmh: Double) -> String {
         let speed = settingsManager.settings.windSpeedUnit.convert(kmh)
         return String(format: "%.0f %@", speed, settingsManager.settings.windSpeedUnit.rawValue)
@@ -1460,50 +1465,50 @@ struct HourlyHeadingRow: View {
         switch fieldType {
         case .temperature:
             if let temp = hourly.temperature2m?[index] {
-                return ("Temperature", formatTemperature(temp))
+                return (String(localized: "field.temperature", defaultValue: "Temperature", comment: "Weather field label"), formatTemperature(temp))
             }
         case .conditions:
             if let code = weatherCodeEnum {
-                return ("Conditions", code.description)
+                return (String(localized: "field.conditions", defaultValue: "Conditions", comment: "Weather field label"), code.description)
             }
         case .precipitationProbability:
             if let prob = hourly.precipitationProbability?[index], prob > 0 {
-                return ("Precipitation Probability", "\(prob)%")
+                return (String(localized: "field.precipitation_probability", defaultValue: "Precipitation Probability", comment: "Weather field label"), "\(prob)%")
             }
         case .precipitation:
             if let snow = hourly.snowfall?[index], snow > 0 {
-                return ("Snowfall", formatSnowfall(snow))
+                return (String(localized: "field.snowfall", defaultValue: "Snowfall", comment: "Weather field label"), formatSnowfall(snow))
             } else if let precip = hourly.precipitation?[index], precip > 0 {
-                return ("Precipitation", formatPrecipitation(precip))
+                return (String(localized: "field.precipitation", defaultValue: "Precipitation", comment: "Weather field label"), formatPrecipitation(precip))
             }
         case .snowfall:
             if let snow = hourly.snowfall?[index], snow > 0 {
-                return ("Snowfall", formatSnowfall(snow))
+                return (String(localized: "field.snowfall", defaultValue: "Snowfall", comment: "Weather field label"), formatSnowfall(snow))
             }
         case .uvIndex:
             if let uv = hourly.uvIndex?[index], uv > 0 {
                 let category = UVIndexCategory(uvIndex: uv)
-                return ("UV Index", "\(Int(uv.rounded())) – \(category.category)")
+                return (String(localized: "field.uv_index", defaultValue: "UV Index", comment: "Weather field label"), "\(Int(uv.rounded())) – \(category.category)")
             }
         case .windSpeed:
             if let speed = hourly.windSpeed10m?[index], speed > 0 {
-                return ("Wind Speed", formatWindSpeed(speed))
+                return (String(localized: "field.wind_speed", defaultValue: "Wind Speed", comment: "Weather field label"), formatWindSpeed(speed))
             }
         case .windGusts:
             if let gusts = hourly.windGusts10m?[index], gusts > 0 {
-                return ("Wind Gusts", formatWindSpeed(gusts))
+                return (String(localized: "field.wind_gusts", defaultValue: "Wind Gusts", comment: "Weather field label"), formatWindSpeed(gusts))
             }
         case .humidity:
             if let humidity = hourly.relativeHumidity2m?[index] {
-                return ("Humidity", "\(humidity)%")
+                return (String(localized: "field.humidity", defaultValue: "Humidity", comment: "Weather field label"), "\(humidity)%")
             }
         case .cloudCover:
             if let cloud = hourly.cloudCover?[index] {
-                return ("Cloud Cover", "\(cloud)%")
+                return (String(localized: "field.cloud_cover", defaultValue: "Cloud Cover", comment: "Weather field label"), "\(cloud)%")
             }
         case .dewPoint:
             if let dew = hourly.dewPoint2m?[index] {
-                return ("Dew Point", formatTemperature(dew))
+                return (String(localized: "field.dew_point", defaultValue: "Dew Point", comment: "Weather field label"), formatTemperature(dew))
             }
         default:
             break
@@ -1553,12 +1558,12 @@ struct DailyForecastSummaryView: View {
     // e.g. "today", "tomorrow", "Thursday, March 5"
     private func dayLabel(for index: Int) -> String {
         guard let sunriseStr = daily.sunrise?[index], let date = DateParser.parse(sunriseStr) else {
-            return "day \(index + 1)"
+            return String(localized: "day.numbered", defaultValue: "day \(index + 1)", comment: "Fallback day label when the date is unavailable. Placeholder is the day number.")
         }
-        if index == 0 { return "today" }
-        if index == 1 { return "tomorrow" }
+        if index == 0 { return String(localized: "day.today", defaultValue: "today", comment: "Lowercase 'today' used within sentences") }
+        if index == 1 { return String(localized: "day.tomorrow", defaultValue: "tomorrow", comment: "Lowercase 'tomorrow' used within sentences") }
         let fmt = DateFormatter()
-        fmt.dateFormat = "EEEE, MMM d"
+        fmt.setLocalizedDateFormatFromTemplate("EEEEMMMd")
         return fmt.string(from: date)
     }
 
@@ -1567,26 +1572,26 @@ struct DailyForecastSummaryView: View {
     private func dateList(indices: [Int], noun: String) -> String {
         guard !indices.isEmpty else { return "" }
         let shortFmt = DateFormatter()
-        shortFmt.dateFormat = "MMM d"
+        shortFmt.setLocalizedDateFormatFromTemplate("MMMd")
 
         func shortDate(_ index: Int) -> String {
             guard let sunriseStr = daily.sunrise?[index], let date = DateParser.parse(sunriseStr) else {
-                return "day \(index + 1)"
+                return String(localized: "day.numbered", defaultValue: "day \(index + 1)", comment: "Fallback day label when the date is unavailable. Placeholder is the day number.")
             }
-            if index == 0 { return "today" }
-            if index == 1 { return "tomorrow" }
+            if index == 0 { return String(localized: "day.today", defaultValue: "today", comment: "Lowercase 'today' used within sentences") }
+            if index == 1 { return String(localized: "day.tomorrow", defaultValue: "tomorrow", comment: "Lowercase 'tomorrow' used within sentences") }
             return shortFmt.string(from: date)
         }
 
         switch indices.count {
         case 1:
-            return "\(noun) on \(shortDate(indices[0]))"
+            return String(localized: "datelist.one", defaultValue: "\(noun) on \(shortDate(indices[0]))", comment: "Lists one date, e.g. 'Rain expected on March 3'. First placeholder is a noun phrase, second is a date.")
         case 2:
-            return "\(noun) on \(shortDate(indices[0])) and \(shortDate(indices[1]))"
+            return String(localized: "datelist.two", defaultValue: "\(noun) on \(shortDate(indices[0])) and \(shortDate(indices[1]))", comment: "Lists two dates, e.g. 'Rain expected on March 3 and March 5'. First placeholder is a noun phrase, others are dates.")
         case 3:
-            return "\(noun) on \(shortDate(indices[0])), \(shortDate(indices[1])), and \(shortDate(indices[2]))"
+            return String(localized: "datelist.three", defaultValue: "\(noun) on \(shortDate(indices[0])), \(shortDate(indices[1])), and \(shortDate(indices[2]))", comment: "Lists three dates. First placeholder is a noun phrase, others are dates.")
         default:
-            return "\(noun) on \(indices.count) days"
+            return String(localized: "datelist.many", defaultValue: "\(noun) on \(indices.count) days", comment: "Summarizes many dates, e.g. 'Rain expected on 5 days'. First placeholder is a noun phrase, second is a count.")
         }
     }
 
@@ -1607,23 +1612,24 @@ struct DailyForecastSummaryView: View {
         let firstVal = Int(convert(firstAvg).rounded())
         let lastVal = Int(convert(lastAvg).rounded())
 
+        // unit is a temperature symbol (°F/°C) — left raw by policy.
         if diff > 0 {
             // Warming trend — mention peak with date if notably above ending average
             if let peakHigh = highs.max(), peakHigh > lastAvg + threshold,
                let peakIndex = (0..<dayCount).first(where: { (daily.temperature2mMax[$0] ?? 0) == peakHigh }) {
                 let peakVal = Int(convert(peakHigh).rounded())
-                return "Highs climb from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days, with a peak of \(peakVal)\(unit) on \(dayLabel(for: peakIndex))."
+                return String(localized: "trend.warming_with_peak", defaultValue: "Highs climb from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days, with a peak of \(peakVal)\(unit) on \(dayLabel(for: peakIndex)).", comment: "Multi-day warming trend with a peak day. Placeholders: start temp, end temp, day count, peak temp (all with unit symbol), and a day label.")
             } else {
-                return "Highs climb from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days."
+                return String(localized: "trend.warming", defaultValue: "Highs climb from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days.", comment: "Multi-day warming trend. Placeholders: start temp, end temp (with unit symbol), and day count.")
             }
         } else {
             // Cooling trend — mention trough with date if notably below ending average
             if let troughLow = highs.min(), troughLow < lastAvg - threshold,
                let troughIndex = (0..<dayCount).first(where: { (daily.temperature2mMax[$0] ?? 0) == troughLow }) {
                 let troughVal = Int(convert(troughLow).rounded())
-                return "Highs fall from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days, with a low of \(troughVal)\(unit) on \(dayLabel(for: troughIndex))."
+                return String(localized: "trend.cooling_with_low", defaultValue: "Highs fall from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days, with a low of \(troughVal)\(unit) on \(dayLabel(for: troughIndex)).", comment: "Multi-day cooling trend with a low day. Placeholders: start temp, end temp, day count, low temp (all with unit symbol), and a day label.")
             } else {
-                return "Highs fall from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days."
+                return String(localized: "trend.cooling", defaultValue: "Highs fall from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days.", comment: "Multi-day cooling trend. Placeholders: start temp, end temp (with unit symbol), and day count.")
             }
         }
     }
@@ -1658,19 +1664,24 @@ struct DailyForecastSummaryView: View {
 
         switch (wetCount, snowIndices.count) {
         case (0, _):
-            return "Dry conditions expected throughout the period."
+            return String(localized: "precip_summary.dry", defaultValue: "Dry conditions expected throughout the period.", comment: "16-day summary: no precipitation expected.")
         case (_, 0):
             // Rain only
-            return "\(dateList(indices: rainIndices, noun: "Rain expected").capitalized)."
+            let noun = String(localized: "precip_summary.rain_expected_noun", defaultValue: "Rain expected", comment: "Noun phrase inserted into a date list, e.g. 'Rain expected on March 3'.")
+            return "\(dateList(indices: rainIndices, noun: noun).capitalized)."
         case (let w, let s) where s == w:
             // Snow only
-            return "\(dateList(indices: snowIndices, noun: "Snow expected").capitalized)."
+            let noun = String(localized: "precip_summary.snow_expected_noun", defaultValue: "Snow expected", comment: "Noun phrase inserted into a date list, e.g. 'Snow expected on March 3'.")
+            return "\(dateList(indices: snowIndices, noun: noun).capitalized)."
         default:
             // Mix — lead with snow dates, then mention total rain days
-            let snowPart = dateList(indices: snowIndices, noun: "snow")
+            let snowNoun = String(localized: "precip_summary.snow_noun", defaultValue: "snow", comment: "Lowercase noun inserted into a date list within a larger sentence.")
+            let snowPart = dateList(indices: snowIndices, noun: snowNoun)
             let rainCount = rainIndices.count
-            let rainPart = rainCount == 1 ? "rain on 1 other day" : "rain on \(rainCount) other days"
-            return "Precipitation expected, with \(snowPart) and \(rainPart)."
+            let rainPart = rainCount == 1
+                ? String(localized: "precip_summary.rain_one_other_day", defaultValue: "rain on 1 other day", comment: "Mentions a single additional rain day.")
+                : String(localized: "precip_summary.rain_other_days", defaultValue: "rain on \(rainCount) other days", comment: "Mentions additional rain days. Placeholder is the count.")
+            return String(localized: "precip_summary.mixed", defaultValue: "Precipitation expected, with \(snowPart) and \(rainPart).", comment: "16-day summary mixing snow and rain. First placeholder describes snow days, second describes rain days.")
         }
     }
 
@@ -1691,8 +1702,9 @@ struct DailyForecastSummaryView: View {
         guard maxSpeed > thresholdKmh else { return nil }
 
         let convertedSpeed = Int(settingsManager.settings.windSpeedUnit.convert(maxSpeed).rounded())
+        // unit is a wind speed symbol — left raw by policy.
         let unit = settingsManager.settings.windSpeedUnit.rawValue
-        return "Strong winds up to \(convertedSpeed) \(unit) expected \(dayLabel(for: maxIndex))."
+        return String(localized: "summary.strong_winds", defaultValue: "Strong winds up to \(convertedSpeed) \(unit) expected \(dayLabel(for: maxIndex)).", comment: "16-day summary wind alert. Placeholders: speed, unit symbol, and a day label.")
     }
 
     private var summaryText: String {
@@ -1732,20 +1744,20 @@ struct DailyForecastRow: View {
     private var dayName: String {
         guard let sunrise = sunrise, let date = DateParser.parse(sunrise) else {
             debugLog("⚠️ DailyForecastRow: Failed to parse sunrise '\(sunrise ?? "nil")' for day \(index)")
-            return "Unknown Date"
+            return String(localized: "day.unknown_date", defaultValue: "Unknown Date", comment: "Shown when a forecast day's date cannot be determined")
         }
-        
+
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MMM d"
+        dateFormatter.setLocalizedDateFormatFromTemplate("MMMd")
         let dateString = dateFormatter.string(from: date)
-        
+
         if index == 0 {
-            return "Today, \(dateString)"
+            return String(localized: "day.today_date", defaultValue: "Today, \(dateString)", comment: "Forecast day label for today. Placeholder is the date, e.g. 'Today, Mar 5'.")
         } else if index == 1 {
-            return "Tomorrow, \(dateString)"
+            return String(localized: "day.tomorrow_date", defaultValue: "Tomorrow, \(dateString)", comment: "Forecast day label for tomorrow. Placeholder is the date, e.g. 'Tomorrow, Mar 6'.")
         } else {
             let dayFormatter = DateFormatter()
-            dayFormatter.dateFormat = "EEEE"
+            dayFormatter.setLocalizedDateFormatFromTemplate("EEEE")
             let weekdayName = dayFormatter.string(from: date)
             return "\(weekdayName), \(dateString)"
         }
@@ -2022,64 +2034,64 @@ struct DailyForecastRow: View {
             
         case .temperatureMax:
             if let high = high {
-                return "High \(formatTemperature(high))"
+                return String(localized: "accessibility.high_temp", defaultValue: "High \(formatTemperature(high))", comment: "Accessibility: daily high temperature. Placeholder is temperature.")
             }
-            
+
         case .temperatureMin:
             if let low = low {
-                return "Low \(formatTemperature(low))"
+                return String(localized: "accessibility.low_temp", defaultValue: "Low \(formatTemperature(low))", comment: "Accessibility: daily low temperature. Placeholder is temperature.")
             }
-            
+
         case .precipitationProbability:
             if let prob = daily.precipitationProbabilityMax?[index], prob > 0 {
-                return "\(prob) percent chance of precipitation"
+                return String(localized: "forecast.precip_chance_percent", defaultValue: "\(prob) percent chance of precipitation", comment: "Accessibility: chance of precipitation. Placeholder is a percentage.")
             }
-            
+
         case .rainSum:
             if let rain = daily.rainSum?[index], rain > 0 {
-                return "\(formatPrecipitation(rain)) of rain"
+                return String(localized: "accessibility.rain_amount", defaultValue: "\(formatPrecipitation(rain)) of rain", comment: "Accessibility: amount of rain. Placeholder is amount with unit.")
             }
-            
+
         case .snowfallSum:
             if let snow = daily.snowfallSum?[index], snow > 0 {
-                return "\(formatSnowfall(snow)) of snow"
+                return String(localized: "accessibility.snow_amount", defaultValue: "\(formatSnowfall(snow)) of snow", comment: "Accessibility: amount of snow. Placeholder is amount with unit.")
             }
-            
+
         case .precipitationSum:
             if let snow = daily.snowfallSum?[index], snow > 0 {
-                return "\(formatSnowfall(snow)) of snow"
+                return String(localized: "accessibility.snow_amount", defaultValue: "\(formatSnowfall(snow)) of snow", comment: "Accessibility: amount of snow. Placeholder is amount with unit.")
             } else if let precip = daily.precipitationSum?[index], precip > 0 {
-                return "precipitation \(formatPrecipitation(precip))"
+                return String(localized: "accessibility.precipitation_value", defaultValue: "precipitation \(formatPrecipitation(precip))", comment: "Accessibility: precipitation amount. Placeholder is amount with unit.")
             }
-            
+
         case .uvIndexMax:
             if let uvMax = daily.uvIndexMax?[index] {
                 return getUVIndexDescription(uvMax)
             }
-            
+
         case .daylightDuration:
             if let daylight = daily.daylightDuration?[index] {
-                return "\(formatDuration(daylight)) of daylight"
+                return String(localized: "accessibility.daylight_amount", defaultValue: "\(formatDuration(daylight)) of daylight", comment: "Accessibility: amount of daylight. Placeholder is a duration.")
             }
-            
+
         case .sunshineDuration:
             if let sunshine = daily.sunshineDuration?[index] {
-                return "\(formatDuration(sunshine)) of sunshine"
+                return String(localized: "accessibility.sunshine_amount", defaultValue: "\(formatDuration(sunshine)) of sunshine", comment: "Accessibility: amount of sunshine. Placeholder is a duration.")
             }
-            
+
         case .windSpeedMax:
             if let windMax = daily.windSpeed10mMax?[index] {
-                return "max wind \(formatWindSpeed(windMax))"
+                return String(localized: "accessibility.max_wind", defaultValue: "max wind \(formatWindSpeed(windMax))", comment: "Accessibility: maximum wind speed. Placeholder is speed with unit.")
             }
-            
+
         case .sunrise:
             if let sunrise = sunrise {
-                return "Sunrise \(FormatHelper.formatTime(sunrise))"
+                return String(localized: "accessibility.sunrise_time", defaultValue: "Sunrise \(FormatHelper.formatTime(sunrise))", comment: "Accessibility: sunrise time. Placeholder is a time.")
             }
-            
+
         case .sunset:
             if let sunset = daily.sunset?[index] {
-                return "Sunset \(FormatHelper.formatTime(sunset))"
+                return String(localized: "accessibility.sunset_time", defaultValue: "Sunset \(FormatHelper.formatTime(sunset))", comment: "Accessibility: sunset time. Placeholder is a time.")
             }
             
         default:
@@ -2117,11 +2129,11 @@ struct DailyForecastRow: View {
     private func formatDuration(_ seconds: Double) -> String {
         let hours = Int(seconds / 3600)
         let minutes = Int((seconds.truncatingRemainder(dividingBy: 3600)) / 60)
-        
+
         if minutes > 0 {
-            return "\(hours)h \(minutes)m"
+            return String(localized: "duration.hours_minutes", defaultValue: "\(hours)h \(minutes)m", comment: "Duration in hours and minutes, e.g. '5h 30m'")
         } else {
-            return "\(hours)h"
+            return String(localized: "duration.hours_only", defaultValue: "\(hours)h", comment: "Duration in whole hours, e.g. '5h'")
         }
     }
 }
@@ -2138,14 +2150,16 @@ struct DailyHeadingBlock: View {
     private var sunrise: String? { daily.sunrise?[index] }
 
     private var dayName: String {
-        guard let s = sunrise, let date = DateParser.parse(s) else { return "Unknown Date" }
+        guard let s = sunrise, let date = DateParser.parse(s) else {
+            return String(localized: "day.unknown_date", defaultValue: "Unknown Date", comment: "Shown when a forecast day's date cannot be determined")
+        }
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MMM d"
+        dateFormatter.setLocalizedDateFormatFromTemplate("MMMd")
         let dateString = dateFormatter.string(from: date)
-        if index == 0 { return "Today, \(dateString)" }
-        if index == 1 { return "Tomorrow, \(dateString)" }
+        if index == 0 { return String(localized: "day.today_date", defaultValue: "Today, \(dateString)", comment: "Forecast day label for today. Placeholder is the date, e.g. 'Today, Mar 5'.") }
+        if index == 1 { return String(localized: "day.tomorrow_date", defaultValue: "Tomorrow, \(dateString)", comment: "Forecast day label for tomorrow. Placeholder is the date, e.g. 'Tomorrow, Mar 6'.") }
         let dayFormatter = DateFormatter()
-        dayFormatter.dateFormat = "EEEE"
+        dayFormatter.setLocalizedDateFormatFromTemplate("EEEE")
         return "\(dayFormatter.string(from: date)), \(dateString)"
     }
 
@@ -2187,62 +2201,62 @@ struct DailyHeadingBlock: View {
         switch fieldType {
         case .temperatureMax:
             if let high = daily.temperature2mMax[index] {
-                return ("High", formatTemperature(high))
+                return (String(localized: "field.high", defaultValue: "High", comment: "Weather field label"), formatTemperature(high))
             }
         case .temperatureMin:
             if let low = daily.temperature2mMin[index] {
-                return ("Low", formatTemperature(low))
+                return (String(localized: "field.low", defaultValue: "Low", comment: "Weather field label"), formatTemperature(low))
             }
         case .conditions:
             if let code = daily.weatherCode?[index], let wc = WeatherCode(rawValue: code) {
-                return ("Conditions", wc.description)
+                return (String(localized: "field.conditions", defaultValue: "Conditions", comment: "Weather field label"), wc.description)
             }
         case .sunrise:
             if let s = sunrise {
-                return ("Sunrise", FormatHelper.formatTime(s))
+                return (String(localized: "field.sunrise", defaultValue: "Sunrise", comment: "Weather field label"), FormatHelper.formatTime(s))
             }
         case .sunset:
             if let s = daily.sunset?[index] {
-                return ("Sunset", FormatHelper.formatTime(s))
+                return (String(localized: "field.sunset", defaultValue: "Sunset", comment: "Weather field label"), FormatHelper.formatTime(s))
             }
         case .precipitationSum:
             if let snow = daily.snowfallSum?[index], snow > 0 {
-                return ("Snowfall", formatSnowfall(snow))
+                return (String(localized: "field.snowfall", defaultValue: "Snowfall", comment: "Weather field label"), formatSnowfall(snow))
             } else if let precip = daily.precipitationSum?[index], precip > 0 {
-                return ("Precipitation", formatPrecipitation(precip))
+                return (String(localized: "field.precipitation", defaultValue: "Precipitation", comment: "Weather field label"), formatPrecipitation(precip))
             }
         case .precipitationProbability:
             if let prob = daily.precipitationProbabilityMax?[index], prob > 0 {
-                return ("Precipitation Probability", "\(prob)%")
+                return (String(localized: "field.precipitation_probability", defaultValue: "Precipitation Probability", comment: "Weather field label"), "\(prob)%")
             }
         case .rainSum:
             if let rain = daily.rainSum?[index], rain > 0 {
-                return ("Rain Total", formatPrecipitation(rain))
+                return (String(localized: "field.rain_total", defaultValue: "Rain Total", comment: "Weather field label"), formatPrecipitation(rain))
             }
         case .snowfallSum:
             if let snow = daily.snowfallSum?[index], snow > 0 {
-                return ("Snowfall Total", formatSnowfall(snow))
+                return (String(localized: "field.snowfall_total", defaultValue: "Snowfall Total", comment: "Weather field label"), formatSnowfall(snow))
             }
         case .windSpeedMax:
             if let speed = daily.windSpeed10mMax?[index], speed > 0 {
-                return ("Max Wind Speed", formatWindSpeed(speed))
+                return (String(localized: "field.max_wind_speed", defaultValue: "Max Wind Speed", comment: "Weather field label"), formatWindSpeed(speed))
             }
         case .windDirectionDominant:
             if let degrees = daily.windDirectionDominant?[index] {
-                return ("Wind Direction", formatWindDirection(degrees))
+                return (String(localized: "field.wind_direction", defaultValue: "Wind Direction", comment: "Weather field label"), formatWindDirection(degrees))
             }
         case .uvIndexMax:
             if let uv = daily.uvIndexMax?[index], uv > 0 {
                 let category = UVIndexCategory(uvIndex: uv)
-                return ("UV Index Max", "\(Int(uv.rounded())) – \(category.category)")
+                return (String(localized: "field.uv_index_max", defaultValue: "UV Index Max", comment: "Weather field label"), "\(Int(uv.rounded())) – \(category.category)")
             }
         case .daylightDuration:
             if let daylight = daily.daylightDuration?[index] {
-                return ("Daylight Duration", formatDuration(daylight))
+                return (String(localized: "field.daylight_duration", defaultValue: "Daylight Duration", comment: "Weather field label"), formatDuration(daylight))
             }
         case .sunshineDuration:
             if let sunshine = daily.sunshineDuration?[index] {
-                return ("Sunshine Duration", formatDuration(sunshine))
+                return (String(localized: "field.sunshine_duration", defaultValue: "Sunshine Duration", comment: "Weather field label"), formatDuration(sunshine))
             }
         default:
             break
@@ -2282,7 +2296,9 @@ struct DailyHeadingBlock: View {
     private func formatDuration(_ seconds: Double) -> String {
         let hours = Int(seconds / 3600)
         let minutes = Int((seconds.truncatingRemainder(dividingBy: 3600)) / 60)
-        return minutes > 0 ? "\(hours)h \(minutes)m" : "\(hours)h"
+        return minutes > 0
+            ? String(localized: "duration.hours_minutes", defaultValue: "\(hours)h \(minutes)m", comment: "Duration in hours and minutes, e.g. '5h 30m'")
+            : String(localized: "duration.hours_only", defaultValue: "\(hours)h", comment: "Duration in whole hours, e.g. '5h'")
     }
 }
 
@@ -2341,7 +2357,7 @@ struct WeatherAlertsSection: View {
                             .padding(.horizontal, 4)
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel("\(alert.severity.rawValue.capitalized) alert: \(alert.event)")
+                        .accessibilityLabel("\(alert.severity.localizedLabel) alert: \(alert.event)")
                         .accessibilityHint("Double tap to view alert details")
                         
                         if alert.id != alerts.last?.id {
@@ -2467,7 +2483,9 @@ struct MarineForecastCard: View {
     @EnvironmentObject var settingsManager: SettingsManager
     
     private var timeString: String {
-        guard let time = hourly.time?[index] else { return "Unknown" }
+        guard let time = hourly.time?[index] else {
+            return String(localized: "common.unknown", defaultValue: "Unknown", comment: "Shown when a value is unknown")
+        }
         return FormatHelper.formatTimeCompact(time)
     }
     
@@ -2595,8 +2613,10 @@ struct MarineForecastCard: View {
     }
     
     private func createAccessibilityLabel() -> String {
-        guard let time = hourly.time?[index] else { return "No data" }
-        
+        guard let time = hourly.time?[index] else {
+            return String(localized: "common.no_data", defaultValue: "No data", comment: "Accessibility label when no data is available")
+        }
+
         let timeFormatted = FormatHelper.formatTimeCompact(time)
         var label = timeFormatted
         
@@ -2609,79 +2629,94 @@ struct MarineForecastCard: View {
         return label
     }
     
+    // Spoken-out unit words for VoiceOver (full words rather than the symbols ft/m).
+    private var spokenLengthUnit: String {
+        settingsManager.settings.distanceUnit == .miles
+            ? String(localized: "unit.spoken.feet", defaultValue: "feet", comment: "Spoken length unit for VoiceOver")
+            : String(localized: "unit.spoken.meters", defaultValue: "meters", comment: "Spoken length unit for VoiceOver")
+    }
+
+    // Lowercase spoken compass directions for VoiceOver.
+    private func spokenDirection(_ degrees: Int) -> String {
+        let directions = [
+            String(localized: "direction.spoken.north", defaultValue: "north", comment: "Spoken compass direction for VoiceOver"),
+            String(localized: "direction.spoken.northeast", defaultValue: "northeast", comment: "Spoken compass direction for VoiceOver"),
+            String(localized: "direction.spoken.east", defaultValue: "east", comment: "Spoken compass direction for VoiceOver"),
+            String(localized: "direction.spoken.southeast", defaultValue: "southeast", comment: "Spoken compass direction for VoiceOver"),
+            String(localized: "direction.spoken.south", defaultValue: "south", comment: "Spoken compass direction for VoiceOver"),
+            String(localized: "direction.spoken.southwest", defaultValue: "southwest", comment: "Spoken compass direction for VoiceOver"),
+            String(localized: "direction.spoken.west", defaultValue: "west", comment: "Spoken compass direction for VoiceOver"),
+            String(localized: "direction.spoken.northwest", defaultValue: "northwest", comment: "Spoken compass direction for VoiceOver")
+        ]
+        let dirIndex = Int((Double(degrees) + 22.5) / 45.0) % 8
+        return directions[dirIndex]
+    }
+
     private func getFieldAccessibilityText(for field: MarineFieldType) -> String? {
         switch field {
         case .waveHeight:
             if let value = hourly.waveHeight?[index] {
-                let unit = settingsManager.settings.distanceUnit == .miles ? "feet" : "meters"
-                let formatted = formatWaveHeight(value)
-                return "Wave height \(formatted)".replacingOccurrences(of: " ft", with: " \(unit)").replacingOccurrences(of: " m", with: " \(unit)")
+                let unit = spokenLengthUnit
+                let formatted = formatWaveHeight(value).replacingOccurrences(of: " ft", with: " \(unit)").replacingOccurrences(of: " m", with: " \(unit)")
+                return String(localized: "marine.wave_height", defaultValue: "Wave height \(formatted)", comment: "Accessibility: wave height. Placeholder is the value with spoken unit.")
             }
         case .waveDirection:
             if let value = hourly.waveDirection?[index] {
-                let directions = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"]
-                let dirIndex = Int((Double(value) + 22.5) / 45.0) % 8
-                return "Wave direction \(directions[dirIndex])"
+                return String(localized: "marine.wave_direction", defaultValue: "Wave direction \(spokenDirection(value))", comment: "Accessibility: wave direction. Placeholder is a spoken compass direction.")
             }
         case .wavePeriod:
             if let value = hourly.wavePeriod?[index] {
-                return "Wave period \(formatPeriod(value))"
+                return String(localized: "marine.wave_period", defaultValue: "Wave period \(formatPeriod(value))", comment: "Accessibility: wave period. Placeholder is a duration in seconds.")
             }
         case .wavePeakPeriod:
             if let value = hourly.wavePeakPeriod?[index] {
-                return "Peak period \(formatPeriod(value))"
+                return String(localized: "marine.peak_period", defaultValue: "Peak period \(formatPeriod(value))", comment: "Accessibility: peak wave period. Placeholder is a duration in seconds.")
             }
         case .windWaveHeight:
             if let value = hourly.windWaveHeight?[index] {
-                let unit = settingsManager.settings.distanceUnit == .miles ? "feet" : "meters"
-                let formatted = formatWaveHeight(value)
-                return "Wind wave \(formatted)".replacingOccurrences(of: " ft", with: " \(unit)").replacingOccurrences(of: " m", with: " \(unit)")
+                let unit = spokenLengthUnit
+                let formatted = formatWaveHeight(value).replacingOccurrences(of: " ft", with: " \(unit)").replacingOccurrences(of: " m", with: " \(unit)")
+                return String(localized: "marine.wind_wave", defaultValue: "Wind wave \(formatted)", comment: "Accessibility: wind wave height. Placeholder is the value with spoken unit.")
             }
         case .windWaveDirection:
             if let value = hourly.windWaveDirection?[index] {
-                let directions = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"]
-                let dirIndex = Int((Double(value) + 22.5) / 45.0) % 8
-                return "Wind wave direction \(directions[dirIndex])"
+                return String(localized: "marine.wind_wave_direction", defaultValue: "Wind wave direction \(spokenDirection(value))", comment: "Accessibility: wind wave direction. Placeholder is a spoken compass direction.")
             }
         case .windWavePeriod:
             if let value = hourly.windWavePeriod?[index] {
-                return "Wind wave period \(formatPeriod(value))"
+                return String(localized: "marine.wind_wave_period", defaultValue: "Wind wave period \(formatPeriod(value))", comment: "Accessibility: wind wave period. Placeholder is a duration in seconds.")
             }
         case .swellWaveHeight:
             if let value = hourly.swellWaveHeight?[index] {
-                let unit = settingsManager.settings.distanceUnit == .miles ? "feet" : "meters"
-                let formatted = formatWaveHeight(value)
-                return "Swell height \(formatted)".replacingOccurrences(of: " ft", with: " \(unit)").replacingOccurrences(of: " m", with: " \(unit)")
+                let unit = spokenLengthUnit
+                let formatted = formatWaveHeight(value).replacingOccurrences(of: " ft", with: " \(unit)").replacingOccurrences(of: " m", with: " \(unit)")
+                return String(localized: "marine.swell_height", defaultValue: "Swell height \(formatted)", comment: "Accessibility: swell height. Placeholder is the value with spoken unit.")
             }
         case .swellWaveDirection:
             if let value = hourly.swellWaveDirection?[index] {
-                let directions = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"]
-                let dirIndex = Int((Double(value) + 22.5) / 45.0) % 8
-                return "Swell direction \(directions[dirIndex])"
+                return String(localized: "marine.swell_direction", defaultValue: "Swell direction \(spokenDirection(value))", comment: "Accessibility: swell direction. Placeholder is a spoken compass direction.")
             }
         case .swellWavePeriod:
             if let value = hourly.swellWavePeriod?[index] {
-                return "Swell period \(formatPeriod(value))"
+                return String(localized: "marine.swell_period", defaultValue: "Swell period \(formatPeriod(value))", comment: "Accessibility: swell period. Placeholder is a duration in seconds.")
             }
         case .oceanCurrentVelocity:
             if let value = hourly.oceanCurrentVelocity?[index] {
-                return "Current speed \(formatVelocity(value))"
+                return String(localized: "marine.current_speed", defaultValue: "Current speed \(formatVelocity(value))", comment: "Accessibility: ocean current speed. Placeholder is speed with unit.")
             }
         case .oceanCurrentDirection:
             if let value = hourly.oceanCurrentDirection?[index] {
-                let directions = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"]
-                let dirIndex = Int((Double(value) + 22.5) / 45.0) % 8
-                return "Current direction \(directions[dirIndex])"
+                return String(localized: "marine.current_direction", defaultValue: "Current direction \(spokenDirection(value))", comment: "Accessibility: ocean current direction. Placeholder is a spoken compass direction.")
             }
         case .seaSurfaceTemperature:
             if let value = hourly.seaSurfaceTemperature?[index] {
-                return "Sea temperature \(formatTemperature(value))"
+                return String(localized: "marine.sea_temperature", defaultValue: "Sea temperature \(formatTemperature(value))", comment: "Accessibility: sea surface temperature. Placeholder is temperature with unit.")
             }
         case .seaLevelHeight:
             if let value = hourly.seaLevelHeight?[index] {
-                let unit = settingsManager.settings.distanceUnit == .miles ? "feet" : "meters"
-                let formatted = formatSeaLevel(value)
-                return "Sea level \(formatted)".replacingOccurrences(of: " ft", with: " \(unit)").replacingOccurrences(of: " m", with: " \(unit)")
+                let unit = spokenLengthUnit
+                let formatted = formatSeaLevel(value).replacingOccurrences(of: " ft", with: " \(unit)").replacingOccurrences(of: " m", with: " \(unit)")
+                return String(localized: "marine.sea_level", defaultValue: "Sea level \(formatted)", comment: "Accessibility: sea level height. Placeholder is the value with spoken unit.")
             }
         }
         return nil
@@ -2689,9 +2724,9 @@ struct MarineForecastCard: View {
 }
 
 struct MarineDataRow: View {
-    let label: String
+    let label: LocalizedStringKey
     let value: String
-    
+
     var body: some View {
         HStack {
             Text(label)

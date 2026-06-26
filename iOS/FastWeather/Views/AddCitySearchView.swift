@@ -230,12 +230,12 @@ struct AddCitySearchView: View {
                     searchResults = results
                     isSearching = false
                     if results.isEmpty {
-                        errorMessage = "No cities found. Try a different search term."
+                        errorMessage = String(localized: "search.no_cities_found", defaultValue: "No cities found. Try a different search term.", comment: "Shown when a city search returns no results")
                     }
                 }
             } catch {
                 await MainActor.run {
-                    errorMessage = "Search failed: \(error.localizedDescription)"
+                    errorMessage = String(localized: "search.failed", defaultValue: "Search failed: \(error.localizedDescription)", comment: "Shown when a city search fails with an error")
                     isSearching = false
                 }
             }
@@ -418,11 +418,11 @@ struct AddCitySearchView: View {
         weatherService.addCity(city)
         
         // Announce to VoiceOver
-        UIAccessibility.post(notification: .announcement, argument: "\(city.displayName) added to My Cities")
-        
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "announce.city_added", defaultValue: "\(city.displayName) added to My Cities", comment: "VoiceOver announcement after adding a city"))
+
         dismiss()
     }
-    
+
     // MARK: - Current Location
     
     private func getCurrentLocation() {
@@ -449,7 +449,7 @@ struct AddCitySearchView: View {
                     // Announce to VoiceOver
                     UIAccessibility.post(
                         notification: .announcement,
-                        argument: "Current location detected: \(city.displayName). City added to My Cities."
+                        argument: String(localized: "announce.current_location_added", defaultValue: "Current location detected: \(city.displayName). City added to My Cities.", comment: "VoiceOver announcement after adding the current location as a city")
                     )
                     
                     dismiss()
@@ -462,12 +462,12 @@ struct AddCitySearchView: View {
             } catch {
                 await MainActor.run {
                     isGettingLocation = false
-                    errorMessage = "Unable to get current location: \(error.localizedDescription)"
-                    
+                    errorMessage = String(localized: "location.unable_to_get_current", defaultValue: "Unable to get current location: \(error.localizedDescription)", comment: "Shown when fetching the device's current location fails")
+
                     // Announce error to VoiceOver
                     UIAccessibility.post(
                         notification: .announcement,
-                        argument: errorMessage ?? "Location error"
+                        argument: errorMessage ?? String(localized: "location.error_generic", defaultValue: "Location error", comment: "Generic fallback announcement for a location error")
                     )
                 }
             }

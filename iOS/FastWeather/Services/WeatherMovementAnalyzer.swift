@@ -101,20 +101,34 @@ struct WeatherMovementAnalyzer {
         )
         
         let convertedSpeed = windSpeedUnit.convert(windSpeed)
+        // windSpeedUnit.rawValue is a unit symbol (mph, km/h, m/s) — left raw by policy.
         let speedStr = "\(Int(convertedSpeed.rounded())) \(windSpeedUnit.rawValue)"
-        
+
         let locationStr = locationName.map { " at \($0)" } ?? ""
-        
+
         switch movement {
         case .calm:
-            return "Winds \(speedStr)\(locationStr)"
+            return String(localized: "movement.calm",
+                          defaultValue: "Winds \(speedStr)\(locationStr)",
+                          comment: "Weather movement: calm conditions. First placeholder is speed with unit, second is ' at <location>' (may be empty).")
         case .approaching:
-            return "Approaching\(locationStr) at \(speedStr)"
+            return String(localized: "movement.approaching",
+                          defaultValue: "Approaching\(locationStr) at \(speedStr)",
+                          comment: "Weather movement: approaching. First placeholder is ' at <location>' (may be empty), second is speed with unit.")
         case .receding:
-            return "Moving away\(locationStr) at \(speedStr)"
+            return String(localized: "movement.receding",
+                          defaultValue: "Moving away\(locationStr) at \(speedStr)",
+                          comment: "Weather movement: moving away. First placeholder is ' at <location>' (may be empty), second is speed with unit.")
         case .parallel:
-            let direction = abs(angleDiff) > 90 ? "roughly parallel" : "parallel"
-            return "Moving \(direction)\(locationStr) at \(speedStr)"
+            if abs(angleDiff) > 90 {
+                return String(localized: "movement.roughly_parallel",
+                              defaultValue: "Moving roughly parallel\(locationStr) at \(speedStr)",
+                              comment: "Weather movement: roughly parallel. First placeholder is ' at <location>' (may be empty), second is speed with unit.")
+            } else {
+                return String(localized: "movement.parallel",
+                              defaultValue: "Moving parallel\(locationStr) at \(speedStr)",
+                              comment: "Weather movement: parallel. First placeholder is ' at <location>' (may be empty), second is speed with unit.")
+            }
         }
     }
 }

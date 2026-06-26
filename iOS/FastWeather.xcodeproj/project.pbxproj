@@ -44,6 +44,8 @@
 		A1000001F /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001E /* SettingsView.swift */; };
 		A10000021 /* us-cities-cached.json in Resources */ = {isa = PBXBuildFile; fileRef = A10000020 /* us-cities-cached.json */; };
 		A10000023 /* international-cities-cached.json in Resources */ = {isa = PBXBuildFile; fileRef = A10000022 /* international-cities-cached.json */; };
+		A100LOCALIZ1 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A100LOCALIZ0 /* Localizable.xcstrings */; };
+		A100INFOPL01 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A100INFOPL00 /* InfoPlist.xcstrings */; };
 		A10000025 /* AddCitySearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000026 /* AddCitySearchView.swift */; };
 		A10000028 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A10000027 /* Assets.xcassets */; };
 		A10000029 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1000002A /* PrivacyInfo.xcprivacy */; };
@@ -159,6 +161,8 @@
 		A1000001E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A10000020 /* us-cities-cached.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "us-cities-cached.json"; sourceTree = "<group>"; };
 		A10000022 /* international-cities-cached.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "international-cities-cached.json"; sourceTree = "<group>"; };
+		A100LOCALIZ0 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		A100INFOPL00 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		A10000024 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A10000026 /* AddCitySearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddCitySearchView.swift; sourceTree = "<group>"; };
 		A10000027 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -358,6 +362,8 @@
 				A10000027 /* Assets.xcassets */,
 				A10000020 /* us-cities-cached.json */,
 				A10000022 /* international-cities-cached.json */,
+				A100LOCALIZ0 /* Localizable.xcstrings */,
+				A100INFOPL00 /* InfoPlist.xcstrings */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -474,6 +480,9 @@
 			knownRegions = (
 				en,
 				Base,
+				es,
+				de,
+				it,
 			);
 			mainGroup = A0FFFFFB0;
 			productRefGroup = A0FFFFFD1 /* Products */;
@@ -502,6 +511,8 @@
 				A10000028 /* Assets.xcassets in Resources */,
 				A10000021 /* us-cities-cached.json in Resources */,
 				A10000023 /* international-cities-cached.json in Resources */,
+				A100LOCALIZ1 /* Localizable.xcstrings in Resources */,
+				A100INFOPL01 /* InfoPlist.xcstrings in Resources */,
 				A10000029 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

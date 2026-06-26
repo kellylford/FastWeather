@@ -156,13 +156,27 @@ struct RadarView: View {
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                         
-                        DetailRow(label: "Distance", value: "\(formatDistance(nearest.distanceMiles)) to the \(nearest.direction)")
-                        DetailRow(label: "Type", value: nearest.type)
-                        DetailRow(label: "Intensity", value: nearest.intensity)
-                        DetailRow(label: "Movement", value: "\(nearest.movementDirection) at \(nearest.speedMph) mph")
-                        
+                        DetailRow(label: String(localized: "radar.detail.distance", defaultValue: "Distance",
+                                                comment: "Label: distance to nearest precipitation"),
+                                  value: String(localized: "radar.detail.distance_value",
+                                                defaultValue: "\(formatDistance(nearest.distanceMiles)) to the \(nearest.direction)",
+                                                comment: "Value: distance and compass direction to nearest precipitation"))
+                        DetailRow(label: String(localized: "radar.detail.type", defaultValue: "Type",
+                                                comment: "Label: type of nearest precipitation"),
+                                  value: nearest.type)
+                        DetailRow(label: String(localized: "radar.detail.intensity", defaultValue: "Intensity",
+                                                comment: "Label: intensity of nearest precipitation"),
+                                  value: nearest.intensity)
+                        DetailRow(label: String(localized: "radar.detail.movement", defaultValue: "Movement",
+                                                comment: "Label: movement of nearest precipitation"),
+                                  value: String(localized: "radar.detail.movement_value",
+                                                defaultValue: "\(nearest.movementDirection) at \(nearest.speedMph) mph",
+                                                comment: "Value: movement direction and speed in mph of nearest precipitation"))
+
                         if let arrival = nearest.arrivalEstimate {
-                            DetailRow(label: "Arrival", value: arrival)
+                            DetailRow(label: String(localized: "radar.detail.arrival", defaultValue: "Arrival",
+                                                    comment: "Label: estimated arrival of nearest precipitation"),
+                                      value: arrival)
                         }
                     }
                 }
@@ -175,7 +189,11 @@ struct RadarView: View {
     
     // MARK: - Timeline View
     private func radarTimelineView(_ radar: RadarData) -> some View {
-        let title = radar.dataSource == .weatherKit ? "1-Hour Forecast" : "2-Hour Forecast"
+        let title = radar.dataSource == .weatherKit
+            ? String(localized: "radar.timeline.one_hour", defaultValue: "1-Hour Forecast",
+                     comment: "Title for the 1-hour precipitation timeline (WeatherKit source)")
+            : String(localized: "radar.timeline.two_hour", defaultValue: "2-Hour Forecast",
+                     comment: "Title for the 2-hour precipitation timeline (Open-Meteo source)")
         return GroupBox(label: Label(title, systemImage: "clock")) {
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(radar.timeline, id: \.time) { timepoint in
@@ -220,7 +238,11 @@ struct RadarView: View {
         let maxIntensity = displayData.map { $0.precipitationMmPerHr }.max() ?? 0
         let yMax = max(2.0, maxIntensity * 1.3)
         let axisValues = isMinuteData ? [0, 15, 30, 45, 60] : displayData.map { $0.minute }
-        let title = isMinuteData ? "Next 60 Minutes" : "Next 2 Hours"
+        let title = isMinuteData
+            ? String(localized: "radar.graph.next_60_minutes", defaultValue: "Next 60 Minutes",
+                     comment: "Title for the minute-by-minute precipitation graph")
+            : String(localized: "radar.graph.next_2_hours", defaultValue: "Next 2 Hours",
+                     comment: "Title for the 2-hour precipitation graph")
         // Accessibility uses a sparser set of points so VoiceOver has a manageable number.
         let accessibilityPoints = isMinuteData
             ? displayData.filter { [0, 5, 10, 15, 20, 30, 45, 60].contains($0.minute) }
@@ -325,36 +347,53 @@ struct RadarView: View {
         let interval = now.timeIntervalSince(date)
         
         if interval < 60 {
-            return "just now"
+            return String(localized: "radar.updated.just_now", defaultValue: "just now",
+                          comment: "Relative time: data updated less than a minute ago")
         } else if interval < 3600 {
             let minutes = Int(interval / 60)
-            return "\(minutes) minute\(minutes == 1 ? "" : "s") ago"
+            return String(localized: "radar.updated.minutes_ago",
+                          defaultValue: "\(minutes) minute\(minutes == 1 ? "" : "s") ago",
+                          comment: "Relative time: data updated N minutes ago")
         } else {
             let formatter = DateFormatter()
             formatter.timeStyle = .short
-            return "at \(formatter.string(from: date))"
+            return String(localized: "radar.updated.at_time",
+                          defaultValue: "at \(formatter.string(from: date))",
+                          comment: "Relative time: data updated at a specific clock time")
         }
     }
     
     // MARK: - Accessibility Labels
     private func radarSummaryAccessibilityLabel(_ radar: RadarData) -> String {
-        var label = "Precipitation Summary. \(radar.currentStatus)."
-        
+        var label = String(localized: "radar.summary.a11y_header",
+                           defaultValue: "Precipitation Summary. \(radar.currentStatus).",
+                           comment: "VoiceOver: precipitation summary header plus current status")
+
         if let nearest = radar.nearestPrecipitation {
-            label += " Nearest precipitation: \(nearest.type), \(formatDistance(nearest.distanceMiles)) to the \(nearest.direction), "
-            label += "moving \(nearest.movementDirection) at \(formatSpeed(nearest.speedMph))."
+            label += " " + String(localized: "radar.summary.a11y_nearest",
+                                  defaultValue: "Nearest precipitation: \(nearest.type), \(formatDistance(nearest.distanceMiles)) to the \(nearest.direction), ",
+                                  comment: "VoiceOver: nearest precipitation type, distance and direction")
+            label += String(localized: "radar.summary.a11y_moving",
+                            defaultValue: "moving \(nearest.movementDirection) at \(formatSpeed(nearest.speedMph)).",
+                            comment: "VoiceOver: movement direction and speed of nearest precipitation")
             if let arrival = nearest.arrivalEstimate {
-                label += " Expected arrival: \(arrival)."
+                label += " " + String(localized: "radar.summary.a11y_arrival",
+                                      defaultValue: "Expected arrival: \(arrival).",
+                                      comment: "VoiceOver: expected arrival time of nearest precipitation")
             }
         }
-        
+
         return label
     }
     
     private func timelineAccessibilityLabel(_ timeline: [TimelinePoint]) -> String {
-        var label = "2-hour precipitation timeline. "
+        var label = String(localized: "radar.timeline.a11y_header",
+                           defaultValue: "2-hour precipitation timeline. ",
+                           comment: "VoiceOver: header for the 2-hour precipitation timeline")
         for point in timeline {
-            label += "\(point.time): \(point.condition). "
+            label += String(localized: "radar.timeline.a11y_point",
+                            defaultValue: "\(point.time): \(point.condition). ",
+                            comment: "VoiceOver: one timeline entry, time and condition")
         }
         return label
     }

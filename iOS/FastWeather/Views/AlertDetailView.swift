@@ -22,10 +22,10 @@ struct AlertDetailView: View {
                             .foregroundColor(alert.severity.color)
                             .accessibilityHidden(true)
                         
-                        Text(alert.severity.rawValue.uppercased())
+                        Text(alert.severity.localizedLabel.uppercased())
                             .font(.title2.bold())
                             .accessibilityAddTraits(.isHeader)
-                            .accessibilityLabel("\(alert.severity.rawValue) severity")
+                            .accessibilityLabel("\(alert.severity.localizedLabel) severity")
                     }
                     
                     // Event and headline
@@ -110,7 +110,7 @@ struct AlertDetailView: View {
                     // Source attribution
                     HStack {
                         Spacer()
-                        Text("Source: \(alert.source.rawValue)")
+                        Text("Source: \(alert.source.localizedLabel)")
                             .font(.caption2)
                             .foregroundColor(.secondary)
                         Spacer()

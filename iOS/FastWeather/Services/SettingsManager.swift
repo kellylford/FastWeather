@@ -181,28 +181,60 @@ struct DateParser {
 // MARK: - FormatHelper
 /// Centralized formatting utilities for dates, times, and weather data
 struct FormatHelper {
-    /// Formats an ISO8601 timestamp to 12-hour time format (e.g., "6:50 AM" or "3 PM")
-    /// - Parameter isoString: ISO8601 formatted time string (e.g., "2026-01-18T06:50")
-    /// - Returns: Formatted time string in 12-hour format with AM/PM
-    static func formatTime(_ isoString: String) -> String {
+    /// Recent iOS versions insert a narrow no-break space (U+202F) before AM/PM in some locales
+    /// (e.g. en_US). The app has always displayed a plain ASCII space there, so normalize the
+    /// Unicode spaces back to a regular space for a stable, predictable rendering. 24-hour locales
+    /// have no day period and are unaffected.
+    private static func normalizingSpaces(_ s: String) -> String {
+        s.replacingOccurrences(of: "\u{202F}", with: " ")
+         .replacingOccurrences(of: "\u{00A0}", with: " ")
+    }
+
+    /// Formats an ISO8601 timestamp to a locale-aware short time (e.g., "6:50 AM" in en_US,
+    /// "06:50" in de_DE). The user's system setting decides 12h vs 24h.
+    /// - Parameters:
+    ///   - isoString: ISO8601 formatted time string (e.g., "2026-01-18T06:50")
+    ///   - locale: Locale to format for. Defaults to `.current`; tests pass an explicit locale.
+    /// - Returns: Formatted time string in the locale's short time style.
+    static func formatTime(_ isoString: String, locale: Locale = .current) -> String {
         guard let date = DateParser.parse(isoString) else {
             debugLog("⚠️ FormatHelper.formatTime failed to parse: '\(isoString)'")
             return isoString // Return original if parsing fails
         }
-        
+
         let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "h:mm a"
-        return timeFormatter.string(from: date)
+        timeFormatter.locale = locale
+        // Template "jmm" yields the locale's hour:minute pattern (12h with AM/PM in en_US,
+        // 24h in de_DE, etc.). Using a template (vs. timeStyle) keeps en_US output as a plain
+        // ASCII space before AM/PM, matching the app's long-standing format.
+        timeFormatter.dateFormat = DateFormatter.dateFormat(fromTemplate: "jmm", options: 0, locale: locale)
+            ?? "h:mm a"
+        return normalizingSpaces(timeFormatter.string(from: date))
     }
-    
-    /// Formats an ISO8601 timestamp to 12-hour time format, omitting minutes if :00
-    /// - Parameter isoString: ISO8601 formatted time string
-    /// - Returns: Formatted time string (e.g., "3 PM" instead of "3:00 PM")
-    static func formatTimeCompact(_ isoString: String) -> String {
-        let fullTime = formatTime(isoString)
-        if fullTime.contains(":00") {
-            return fullTime.replacingOccurrences(of: ":00", with: "")
+
+    /// Formats an ISO8601 timestamp to a locale-aware short time, omitting minutes when they are :00
+    /// (e.g., "3 PM" in en_US, "15 Uhr" in de_DE). Locale decides 12h/24h and the minute separator.
+    /// - Parameters:
+    ///   - isoString: ISO8601 formatted time string
+    ///   - locale: Locale to format for. Defaults to `.current`; tests pass an explicit locale.
+    /// - Returns: Compact, locale-aware time string.
+    static func formatTimeCompact(_ isoString: String, locale: Locale = .current) -> String {
+        guard let date = DateParser.parse(isoString) else {
+            debugLog("⚠️ FormatHelper.formatTimeCompact failed to parse: '\(isoString)'")
+            return isoString
         }
-        return fullTime
+
+        // Build a locale-correct skeleton: hour-only when the minute is 0, otherwise hour+minutes.
+        // "j" = locale's hour with day-period as appropriate; "jmm" = hour:minutes.
+        var calendar = Calendar.current
+        calendar.locale = locale
+        let minute = calendar.component(.minute, from: date)
+        let template = (minute == 0) ? "j" : "jmm"
+
+        let timeFormatter = DateFormatter()
+        timeFormatter.locale = locale
+        timeFormatter.dateFormat = DateFormatter.dateFormat(fromTemplate: template, options: 0, locale: locale)
+            ?? (minute == 0 ? "h a" : "h:mm a")
+        return normalizingSpaces(timeFormatter.string(from: date))
     }
 }

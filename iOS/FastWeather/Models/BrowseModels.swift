@@ -20,6 +20,20 @@ enum BrowseSortOrder: String, CaseIterable, Identifiable, Codable {
 
     var id: String { rawValue }
 
+    /// User-facing, localized label. The `rawValue` is a stable storage key — never display it.
+    var localizedLabel: String {
+        switch self {
+        case .nameAZ:      String(localized: "sort.name_az", defaultValue: "Name (A–Z)", comment: "City sort order")
+        case .nameZA:      String(localized: "sort.name_za", defaultValue: "Name (Z–A)", comment: "City sort order")
+        case .northSouth:  String(localized: "sort.north_south", defaultValue: "North to South", comment: "City sort order (by latitude)")
+        case .southNorth:  String(localized: "sort.south_north", defaultValue: "South to North", comment: "City sort order (by latitude)")
+        case .eastWest:    String(localized: "sort.east_west", defaultValue: "East to West", comment: "City sort order (by longitude)")
+        case .westEast:    String(localized: "sort.west_east", defaultValue: "West to East", comment: "City sort order (by longitude)")
+        case .tempHighLow: String(localized: "sort.temp_high_low", defaultValue: "Temperature (High to Low)", comment: "City sort order")
+        case .tempLowHigh: String(localized: "sort.temp_low_high", defaultValue: "Temperature (Low to High)", comment: "City sort order")
+        }
+    }
+
     var systemImage: String {
         switch self {
         case .nameAZ:      return "textformat.abc"

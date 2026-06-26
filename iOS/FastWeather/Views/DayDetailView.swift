@@ -51,10 +51,12 @@ struct DayDetailView: View {
     private var navigationTitle: String {
         guard let sunriseStr = daily?.sunrise?[dayIndex],
               let date = DateParser.parse(sunriseStr) else {
-            return dayIndex == 0 ? "Today" : "Day \(dayIndex + 1)"
+            return dayIndex == 0
+                ? String(localized: "day_detail.title.today", defaultValue: "Today", comment: "Day detail navigation title for the current day")
+                : String(localized: "day_detail.title.day_n", defaultValue: "Day \(dayIndex + 1)", comment: "Day detail navigation title; placeholder is the day number")
         }
         let df = DateFormatter()
-        df.dateFormat = "EEEE, MMMM d"
+        df.setLocalizedDateFormatFromTemplate("EEEEMMMMd")
         return df.string(from: date)
     }
 
@@ -187,13 +189,19 @@ struct DayDetailView: View {
     private var conditionsAccessibilityLabel: String {
         var parts: [String] = []
         if let code = weatherCodeEnum {
-            parts.append("Conditions: \(code.description)")
+            parts.append(String(localized: "day_detail.a11y.conditions",
+                                defaultValue: "Conditions: \(code.description)",
+                                comment: "VoiceOver label; placeholder is the weather condition description"))
         }
         if let high = daily?.temperature2mMax[dayIndex] {
-            parts.append("High: \(formatTemperature(high))")
+            parts.append(String(localized: "day_detail.a11y.high",
+                                defaultValue: "High: \(formatTemperature(high))",
+                                comment: "VoiceOver label; placeholder is the high temperature"))
         }
         if let low = daily?.temperature2mMin[dayIndex] {
-            parts.append("Low: \(formatTemperature(low))")
+            parts.append(String(localized: "day_detail.a11y.low",
+                                defaultValue: "Low: \(formatTemperature(low))",
+                                comment: "VoiceOver label; placeholder is the low temperature"))
         }
         if let timingText = precipitationTimingText() {
             parts.append(timingText)
@@ -227,15 +235,17 @@ struct DayDetailView: View {
         // Determine precipitation type label for natural VoiceOver reading
         let precipType: String
         if let snow = daily?.snowfallSum?[dayIndex], snow > 0 {
-            precipType = "Snow"
+            precipType = String(localized: "precip.type.snow", defaultValue: "Snow", comment: "Precipitation type used in timing summary")
         } else if let rain = daily?.rainSum?[dayIndex], rain > 0 {
-            precipType = "Rain"
+            precipType = String(localized: "precip.type.rain", defaultValue: "Rain", comment: "Precipitation type used in timing summary")
         } else {
-            precipType = "Precipitation"
+            precipType = String(localized: "precip.type.precipitation", defaultValue: "Precipitation", comment: "Precipitation type used in timing summary")
         }
 
         if rainyIndices.count >= 8 {
-            return "\(precipType) expected throughout the day"
+            return String(localized: "precip.timing.throughout_day",
+                          defaultValue: "\(precipType) expected throughout the day",
+                          comment: "Precipitation timing summary; placeholder is precipitation type (Rain/Snow/Precipitation)")
         }
 
         // Build contiguous windows (allow 1-hour gap to merge nearby showers)
@@ -260,11 +270,21 @@ struct DayDetailView: View {
 
         let parts = windows.prefix(2).map { w -> String in
             return w.start == w.end
-                ? "around \(timeLabel(w.start))"
-                : "\(timeLabel(w.start))\u{2013}\(timeLabel(w.end))"
+                ? String(localized: "precip.timing.around_time",
+                         defaultValue: "around \(timeLabel(w.start))",
+                         comment: "Precipitation timing window around a single time; placeholder is a clock time")
+                : String(localized: "precip.timing.time_range",
+                         defaultValue: "\(timeLabel(w.start))\u{2013}\(timeLabel(w.end))",
+                         comment: "Precipitation timing window range; placeholders are start and end clock times")
         }
-        let suffix = windows.count > 2 ? " and later" : ""
-        return "\(precipType) most likely " + parts.joined(separator: " and ") + suffix
+        let joiner = String(localized: "precip.timing.join_and", defaultValue: " and ", comment: "Joins two precipitation timing windows")
+        let suffix = windows.count > 2
+            ? String(localized: "precip.timing.and_later", defaultValue: " and later", comment: "Suffix when there are more than two precipitation timing windows")
+            : ""
+        let windowText = parts.joined(separator: joiner) + suffix
+        return String(localized: "precip.timing.most_likely",
+                      defaultValue: "\(precipType) most likely \(windowText)",
+                      comment: "Precipitation timing summary; first placeholder is precipitation type, second is the time windows")
     }
 
     // MARK: - 24-Hour Forecast
@@ -392,11 +412,11 @@ struct DayDetailView: View {
 
     private func uvCategory(_ uv: Double) -> String? {
         switch uv {
-        case ..<3:  return "Low"
-        case ..<6:  return "Moderate"
-        case ..<8:  return "High"
-        case ..<11: return "Very High"
-        default:    return "Extreme"
+        case ..<3:  return String(localized: "uv.category.low", defaultValue: "Low", comment: "UV index category")
+        case ..<6:  return String(localized: "uv.category.moderate", defaultValue: "Moderate", comment: "UV index category")
+        case ..<8:  return String(localized: "uv.category.high", defaultValue: "High", comment: "UV index category")
+        case ..<11: return String(localized: "uv.category.very_high", defaultValue: "Very High", comment: "UV index category")
+        default:    return String(localized: "uv.category.extreme", defaultValue: "Extreme", comment: "UV index category")
         }
     }
 
@@ -455,7 +475,7 @@ struct DayDetailView: View {
 private struct DayDetailRow: View {
     let icon: String
     let iconColor: Color
-    let label: String
+    let label: LocalizedStringKey
     let value: String
     var badge: String? = nil
 

@@ -261,7 +261,9 @@ struct FlatView: View {
                         .fontWeight(isDetails ? .regular : .medium)
                 }
                 .accessibilityElement(children: .combine)
-                .accessibilityLabel(label.isEmpty ? value : "\(label): \(value)")
+                .accessibilityLabel(label.isEmpty ? value : String(localized: "field.label_value",
+                                                                    defaultValue: "\(label): \(value)",
+                                                                    comment: "VoiceOver label pairing a field name with its value; first placeholder is the field label, second is the value"))
             }
         }
     }
@@ -346,41 +348,41 @@ struct FlatView: View {
             return nil
             
         case .temperature:
-            return (showLabel ? "Temperature" : "", formatTemperature(weather.current.temperature2m))
-            
+            return (showLabel ? WeatherFieldType.temperature.localizedLabel : "", formatTemperature(weather.current.temperature2m))
+
         case .conditions:
             guard let weatherCode = weather.current.weatherCodeEnum else { return nil }
-            return (showLabel ? "Conditions" : "", weatherCode.description)
-            
+            return (showLabel ? WeatherFieldType.conditions.localizedLabel : "", weatherCode.description)
+
         case .feelsLike:
             guard let apparentTemp = weather.current.apparentTemperature else { return nil }
-            return (showLabel ? "Feels Like" : "", formatTemperature(apparentTemp))
-            
+            return (showLabel ? WeatherFieldType.feelsLike.localizedLabel : "", formatTemperature(apparentTemp))
+
         case .humidity:
             guard let humidity = weather.current.relativeHumidity2m else { return nil }
-            return (showLabel ? "Humidity" : "", "\(humidity)%")
-            
+            return (showLabel ? WeatherFieldType.humidity.localizedLabel : "", "\(humidity)%")
+
         case .windSpeed:
             guard let windSpeed = weather.current.windSpeed10m else { return nil }
-            return (showLabel ? "Wind Speed" : "", formatWindSpeed(windSpeed))
-            
+            return (showLabel ? WeatherFieldType.windSpeed.localizedLabel : "", formatWindSpeed(windSpeed))
+
         case .windDirection:
             guard let windDir = weather.current.windDirection10m else { return nil }
-            return (showLabel ? "Wind Direction" : "", formatWindDirection(windDir))
-            
+            return (showLabel ? WeatherFieldType.windDirection.localizedLabel : "", formatWindDirection(windDir))
+
         case .windGusts:
             guard let windGusts = weather.current.windGusts10m else { return nil }
-            return (showLabel ? "Wind Gusts" : "", formatWindSpeed(windGusts))
-            
+            return (showLabel ? WeatherFieldType.windGusts.localizedLabel : "", formatWindSpeed(windGusts))
+
         case .precipitation:
             let snowfall = weather.daily?.snowfallSum?.first.flatMap { $0 } ?? weather.current.snowfall ?? 0
             let precip = weather.daily?.precipitationSum?.first.flatMap { $0 } ?? weather.current.precipitation ?? 0
             if snowfall > 0 {
-                return (showLabel ? "Snow" : "", formatSnowfall(snowfall))
+                return (showLabel ? WeatherFieldType.snowfall.localizedLabel : "", formatSnowfall(snowfall))
             }
             guard precip > 0 else { return nil }
-            return (showLabel ? "Rain" : "", formatPrecipitation(precip))
-            
+            return (showLabel ? WeatherFieldType.rain.localizedLabel : "", formatPrecipitation(precip))
+
         case .precipitationProbability:
             guard let hourly = weather.hourly,
                   let probArray = hourly.precipitationProbability,
@@ -393,57 +395,57 @@ struct FlatView: View {
                let precipAmount = precipArray[0], precipAmount > 0.0 {
                 value += " (\(formatPrecipitation(precipAmount)))"
             }
-            return (showLabel ? "Precip Probability" : "", value)
-            
+            return (showLabel ? String(localized: "field.precip_probability_short", defaultValue: "Precip Probability", comment: "Weather data field label (chance of precipitation)") : "", value)
+
         case .rain:
             guard let rain = weather.current.rain, rain > 0 else { return nil }
-            return (showLabel ? "Rain" : "", formatPrecipitation(rain))
-            
+            return (showLabel ? WeatherFieldType.rain.localizedLabel : "", formatPrecipitation(rain))
+
         case .showers:
             guard let showers = weather.current.showers, showers > 0 else { return nil }
-            return (showLabel ? "Showers" : "", formatPrecipitation(showers))
-            
+            return (showLabel ? WeatherFieldType.showers.localizedLabel : "", formatPrecipitation(showers))
+
         case .snowfall:
             let snow = weather.daily?.snowfallSum?.first.flatMap { $0 } ?? weather.current.snowfall ?? 0
             guard snow > 0 else { return nil }
-            return (showLabel ? "Snow" : "", formatSnowfall(snow))
-            
+            return (showLabel ? WeatherFieldType.snowfall.localizedLabel : "", formatSnowfall(snow))
+
         case .cloudCover:
             let cc = weather.current.cloudCover
-            return (showLabel ? "Cloud Cover" : "", "\(cc)%")
-            
+            return (showLabel ? WeatherFieldType.cloudCover.localizedLabel : "", "\(cc)%")
+
         case .pressure:
             guard let pressure = weather.current.pressureMsl else { return nil }
-            return (showLabel ? "Pressure" : "", formatPressure(pressure))
-            
+            return (showLabel ? WeatherFieldType.pressure.localizedLabel : "", formatPressure(pressure))
+
         case .visibility:
             guard let vis = weather.current.visibility else { return nil }
-            return (showLabel ? "Visibility" : "", formatVisibility(vis))
-            
+            return (showLabel ? WeatherFieldType.visibility.localizedLabel : "", formatVisibility(vis))
+
         case .uvIndex:
             guard let isDay = weather.current.isDay, isDay == 1,
                   let uvIndex = weather.current.uvIndex else { return nil }
-            return (showLabel ? "UV Index" : "", String(format: "%.1f", uvIndex))
-            
+            return (showLabel ? WeatherFieldType.uvIndex.localizedLabel : "", String(format: "%.1f", uvIndex))
+
         case .dewPoint:
             guard let dewPoint = weather.current.dewpoint2m else { return nil }
-            return (showLabel ? "Dew Point" : "", formatTemperature(dewPoint))
-            
+            return (showLabel ? WeatherFieldType.dewPoint.localizedLabel : "", formatTemperature(dewPoint))
+
         case .highTemp:
             guard let daily = weather.daily, !daily.temperature2mMax.isEmpty, let maxTemp = daily.temperature2mMax[0] else { return nil }
-            return (showLabel ? "High" : "", formatTemperature(maxTemp))
-            
+            return (showLabel ? String(localized: "field.high_short", defaultValue: "High", comment: "Short label for high temperature") : "", formatTemperature(maxTemp))
+
         case .lowTemp:
             guard let daily = weather.daily, !daily.temperature2mMin.isEmpty, let minTemp = daily.temperature2mMin[0] else { return nil }
-            return (showLabel ? "Low" : "", formatTemperature(minTemp))
-            
+            return (showLabel ? String(localized: "field.low_short", defaultValue: "Low", comment: "Short label for low temperature") : "", formatTemperature(minTemp))
+
         case .sunrise:
             guard let daily = weather.daily, let sunriseArray = daily.sunrise, !sunriseArray.isEmpty, let sunrise = sunriseArray[0] else { return nil }
-            return (showLabel ? "Sunrise" : "", formatTime(sunrise))
-            
+            return (showLabel ? WeatherFieldType.sunrise.localizedLabel : "", formatTime(sunrise))
+
         case .sunset:
             guard let daily = weather.daily, let sunsetArray = daily.sunset, !sunsetArray.isEmpty, let sunset = sunsetArray[0] else { return nil }
-            return (showLabel ? "Sunset" : "", formatTime(sunset))
+            return (showLabel ? WeatherFieldType.sunset.localizedLabel : "", formatTime(sunset))
         }
     }
     
@@ -497,7 +499,7 @@ struct FlatView: View {
         let cityName = weatherService.savedCities[index].displayName
         let aboveCityName = weatherService.savedCities[index - 1].displayName
         weatherService.moveCity(from: IndexSet(integer: index), to: index - 1)
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(cityName) above \(aboveCityName)")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "announce.moved_above", defaultValue: "Moved \(cityName) above \(aboveCityName)", comment: "VoiceOver announcement; placeholders are the moved city and the city now above it"))
     }
     
     private func moveCityDown(at index: Int) {
@@ -505,26 +507,26 @@ struct FlatView: View {
         let cityName = weatherService.savedCities[index].displayName
         let belowCityName = weatherService.savedCities[index + 1].displayName
         weatherService.moveCity(from: IndexSet(integer: index), to: index + 2)
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(cityName) below \(belowCityName)")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "announce.moved_below", defaultValue: "Moved \(cityName) below \(belowCityName)", comment: "VoiceOver announcement; placeholders are the moved city and the city now below it"))
     }
     
     private func moveCityToTop(at index: Int) {
         guard index > 0 else { return }
         let cityName = weatherService.savedCities[index].displayName
         weatherService.moveCity(from: IndexSet(integer: index), to: 0)
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(cityName) to top of list")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "announce.moved_top", defaultValue: "Moved \(cityName) to top of list", comment: "VoiceOver announcement; placeholder is the moved city name"))
     }
     
     private func moveCityToBottom(at index: Int) {
         guard index < weatherService.savedCities.count - 1 else { return }
         let cityName = weatherService.savedCities[index].displayName
         weatherService.moveCity(from: IndexSet(integer: index), to: weatherService.savedCities.count)
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(cityName) to bottom of list")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "announce.moved_bottom", defaultValue: "Moved \(cityName) to bottom of list", comment: "VoiceOver announcement; placeholder is the moved city name"))
     }
     
     private func viewHistoricalWeather(for city: City) {
         selectedCityForHistory = city
-        UIAccessibility.post(notification: .announcement, argument: "Opening historical weather for \(city.displayName)")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "announce.opening_historical", defaultValue: "Opening historical weather for \(city.displayName)", comment: "VoiceOver announcement; placeholder is the city name"))
     }
 }
 
@@ -637,19 +639,25 @@ struct CitySectionHeader: View {
     }
     
     private func buildAccessibilityLabel(weather: WeatherData) -> String {
-        var label = "\(city.displayName), \(formatTemperature(weather.current.temperature2m))"
-        
+        var label = String(localized: "city_header.a11y.name_temp",
+                           defaultValue: "\(city.displayName), \(formatTemperature(weather.current.temperature2m))",
+                           comment: "VoiceOver label for a city header; placeholders are the city name and the temperature")
+
         // Add alerts if enabled and present
         if settingsManager.settings.weatherFields.first(where: { $0.type == .weatherAlerts })?.isEnabled == true,
            let alert = highestSeverityAlert {
             label += ", "
             if alerts.count == 1 {
-                label += "Alert: \(alert.event)"
+                label += String(localized: "city_header.a11y.alert_one",
+                                defaultValue: "Alert: \(alert.event)",
+                                comment: "VoiceOver label for a single weather alert; placeholder is the alert event name")
             } else {
-                label += "Alerts: \(alert.event) and \(alerts.count - 1) more"
+                label += String(localized: "city_header.a11y.alert_many",
+                                defaultValue: "Alerts: \(alert.event) and \(alerts.count - 1) more",
+                                comment: "VoiceOver label for multiple weather alerts; placeholders are the top alert event name and the count of additional alerts")
             }
         }
-        
+
         return label
     }
     

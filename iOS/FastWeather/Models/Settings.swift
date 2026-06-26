@@ -19,13 +19,20 @@ enum MyLocationPosition: String, CaseIterable, Codable {
 enum ExplorationMode: String, CaseIterable, Codable {
     case arc = "Arc"
     case straightLine = "Straight Line Corridor"
-    
+
+    var localizedLabel: String {
+        switch self {
+        case .arc:          String(localized: "around_me.mode.arc", defaultValue: "Arc", comment: "Weather Around Me search shape option")
+        case .straightLine: String(localized: "around_me.mode.corridor", defaultValue: "Straight Line Corridor", comment: "Weather Around Me search shape option")
+        }
+    }
+
     var description: String {
         switch self {
         case .arc:
-            return "Fan-shaped search expanding outward"
+            return String(localized: "around_me.mode.arc.desc", defaultValue: "Fan-shaped search expanding outward", comment: "Explanation of the Arc search shape")
         case .straightLine:
-            return "Fixed-width corridor along center line"
+            return String(localized: "around_me.mode.corridor.desc", defaultValue: "Fixed-width corridor along center line", comment: "Explanation of the corridor search shape")
         }
     }
 }
@@ -38,19 +45,19 @@ enum ArcWidth: Double, CaseIterable, Codable {
     
     var displayName: String {
         switch self {
-        case .narrow: return "Narrow (10°)"
-        case .standard: return "Standard (22.5°)"
-        case .medium: return "Medium (45°)"
-        case .wide: return "Wide (90°)"
+        case .narrow:   return String(localized: "around_me.arc.narrow", defaultValue: "Narrow (10°)", comment: "Arc width option; the (10°) is the angular width and stays as-is")
+        case .standard: return String(localized: "around_me.arc.standard", defaultValue: "Standard (22.5°)", comment: "Arc width option; the (22.5°) stays as-is")
+        case .medium:   return String(localized: "around_me.arc.medium", defaultValue: "Medium (45°)", comment: "Arc width option; the (45°) stays as-is")
+        case .wide:     return String(localized: "around_me.arc.wide", defaultValue: "Wide (90°)", comment: "Arc width option; the (90°) stays as-is")
         }
     }
-    
+
     var description: String {
         switch self {
-        case .narrow: return "Precise tracking - 17 mi wide at 100 mi"
-        case .standard: return "Balanced coverage - 39 mi wide at 100 mi"
-        case .medium: return "Broad search - 78 mi wide at 100 mi"
-        case .wide: return "Maximum coverage - 141 mi wide at 100 mi"
+        case .narrow:   return String(localized: "around_me.arc.narrow.desc", defaultValue: "Precise tracking - 17 mi wide at 100 mi", comment: "Arc width explanation")
+        case .standard: return String(localized: "around_me.arc.standard.desc", defaultValue: "Balanced coverage - 39 mi wide at 100 mi", comment: "Arc width explanation")
+        case .medium:   return String(localized: "around_me.arc.medium.desc", defaultValue: "Broad search - 78 mi wide at 100 mi", comment: "Arc width explanation")
+        case .wide:     return String(localized: "around_me.arc.wide.desc", defaultValue: "Maximum coverage - 141 mi wide at 100 mi", comment: "Arc width explanation")
         }
     }
     
@@ -67,15 +74,15 @@ enum CorridorWidth: Double, CaseIterable, Codable {
     case fifty = 50.0
     
     var displayName: String {
-        return "\(Int(rawValue)) miles"
+        return String(localized: "around_me.corridor.width", defaultValue: "\(Int(rawValue)) miles", comment: "Corridor total width, e.g. '20 miles'. %lld is the number of miles.")
     }
-    
+
     var description: String {
         switch self {
-        case .ten: return "±5 miles from center line"
-        case .twenty: return "±10 miles from center line"
-        case .thirty: return "±15 miles from center line"
-        case .fifty: return "±25 miles from center line"
+        case .ten:    return String(localized: "around_me.corridor.ten.desc", defaultValue: "±5 miles from center line", comment: "Corridor half-width explanation")
+        case .twenty: return String(localized: "around_me.corridor.twenty.desc", defaultValue: "±10 miles from center line", comment: "Corridor half-width explanation")
+        case .thirty: return String(localized: "around_me.corridor.thirty.desc", defaultValue: "±15 miles from center line", comment: "Corridor half-width explanation")
+        case .fifty:  return String(localized: "around_me.corridor.fifty.desc", defaultValue: "±25 miles from center line", comment: "Corridor half-width explanation")
         }
     }
 }
@@ -1137,5 +1144,169 @@ struct AppSettings: Codable {
         try container.encode(showLowTemp, forKey: .showLowTemp)
         try container.encode(showSunrise, forKey: .showSunrise)
         try container.encode(showSunset, forKey: .showSunset)
+    }
+}
+
+// MARK: - Localized Display Labels
+//
+// IMPORTANT: The `String` raw values of the enums below are STABLE STORAGE KEYS.
+// They are persisted to UserDefaults (via Codable) and used as struct `id`s.
+// They must never change and must never be shown to a user.
+//
+// Everything the user sees comes from the `localizedLabel` / localized computed
+// properties here, which resolve through the String Catalog at runtime. To localize
+// a label, translate its catalog key — no code change required.
+
+extension WeatherFieldType {
+    var localizedLabel: String {
+        switch self {
+        case .weatherAlerts:            String(localized: "field.weather_alerts", defaultValue: "Weather Alerts", comment: "Weather data field name")
+        case .temperature:              String(localized: "field.temperature", defaultValue: "Temperature", comment: "Weather data field name")
+        case .conditions:               String(localized: "field.conditions", defaultValue: "Conditions", comment: "Weather data field name (sky conditions, e.g. Partly Cloudy)")
+        case .feelsLike:                String(localized: "field.feels_like", defaultValue: "Feels Like", comment: "Weather data field name (apparent temperature)")
+        case .humidity:                 String(localized: "field.humidity", defaultValue: "Humidity", comment: "Weather data field name")
+        case .windDirection:            String(localized: "field.wind_direction", defaultValue: "Wind Direction", comment: "Weather data field name")
+        case .windSpeed:                String(localized: "field.wind_speed", defaultValue: "Wind Speed", comment: "Weather data field name")
+        case .windGusts:                String(localized: "field.wind_gusts", defaultValue: "Wind Gusts", comment: "Weather data field name")
+        case .precipitation:            String(localized: "field.precipitation", defaultValue: "Precipitation", comment: "Weather data field name (rain/snow amount)")
+        case .precipitationProbability: String(localized: "field.precipitation_probability", defaultValue: "Precipitation Probability", comment: "Weather data field name (chance of precipitation)")
+        case .rain:                     String(localized: "field.rain", defaultValue: "Rain", comment: "Weather data field name")
+        case .showers:                  String(localized: "field.showers", defaultValue: "Showers", comment: "Weather data field name")
+        case .snowfall:                 String(localized: "field.snowfall", defaultValue: "Snowfall", comment: "Weather data field name")
+        case .cloudCover:               String(localized: "field.cloud_cover", defaultValue: "Cloud Cover", comment: "Weather data field name")
+        case .pressure:                 String(localized: "field.pressure", defaultValue: "Pressure", comment: "Weather data field name (barometric pressure)")
+        case .visibility:               String(localized: "field.visibility", defaultValue: "Visibility", comment: "Weather data field name")
+        case .uvIndex:                  String(localized: "field.uv_index", defaultValue: "UV Index", comment: "Weather data field name (ultraviolet index)")
+        case .dewPoint:                 String(localized: "field.dew_point", defaultValue: "Dew Point", comment: "Weather data field name")
+        case .highTemp:                 String(localized: "field.high_temperature", defaultValue: "High Temperature", comment: "Weather data field name (daily maximum)")
+        case .lowTemp:                  String(localized: "field.low_temperature", defaultValue: "Low Temperature", comment: "Weather data field name (daily minimum)")
+        case .sunrise:                  String(localized: "field.sunrise", defaultValue: "Sunrise", comment: "Weather data field name")
+        case .sunset:                   String(localized: "field.sunset", defaultValue: "Sunset", comment: "Weather data field name")
+        }
+    }
+}
+
+extension HourlyFieldType {
+    var localizedLabel: String {
+        switch self {
+        case .temperature:              String(localized: "field.temperature", defaultValue: "Temperature", comment: "Weather data field name")
+        case .conditions:               String(localized: "field.conditions", defaultValue: "Conditions", comment: "Weather data field name (sky conditions, e.g. Partly Cloudy)")
+        case .feelsLike:                String(localized: "field.feels_like", defaultValue: "Feels Like", comment: "Weather data field name (apparent temperature)")
+        case .humidity:                 String(localized: "field.humidity", defaultValue: "Humidity", comment: "Weather data field name")
+        case .precipitation:            String(localized: "field.precipitation", defaultValue: "Precipitation", comment: "Weather data field name (rain/snow amount)")
+        case .precipitationProbability: String(localized: "field.precipitation_probability", defaultValue: "Precipitation Probability", comment: "Weather data field name (chance of precipitation)")
+        case .rain:                     String(localized: "field.rain", defaultValue: "Rain", comment: "Weather data field name")
+        case .showers:                  String(localized: "field.showers", defaultValue: "Showers", comment: "Weather data field name")
+        case .snowfall:                 String(localized: "field.snowfall", defaultValue: "Snowfall", comment: "Weather data field name")
+        case .windSpeed:                String(localized: "field.wind_speed", defaultValue: "Wind Speed", comment: "Weather data field name")
+        case .windDirection:            String(localized: "field.wind_direction", defaultValue: "Wind Direction", comment: "Weather data field name")
+        case .windGusts:                String(localized: "field.wind_gusts", defaultValue: "Wind Gusts", comment: "Weather data field name")
+        case .cloudCover:               String(localized: "field.cloud_cover", defaultValue: "Cloud Cover", comment: "Weather data field name")
+        case .pressure:                 String(localized: "field.pressure", defaultValue: "Pressure", comment: "Weather data field name (barometric pressure)")
+        case .visibility:               String(localized: "field.visibility", defaultValue: "Visibility", comment: "Weather data field name")
+        case .uvIndex:                  String(localized: "field.uv_index", defaultValue: "UV Index", comment: "Weather data field name (ultraviolet index)")
+        case .dewPoint:                 String(localized: "field.dew_point", defaultValue: "Dew Point", comment: "Weather data field name")
+        }
+    }
+}
+
+extension DailyFieldType {
+    var localizedLabel: String {
+        switch self {
+        case .temperatureMax:           String(localized: "field.high_temperature", defaultValue: "High Temperature", comment: "Weather data field name (daily maximum)")
+        case .temperatureMin:           String(localized: "field.low_temperature", defaultValue: "Low Temperature", comment: "Weather data field name (daily minimum)")
+        case .conditions:               String(localized: "field.conditions", defaultValue: "Conditions", comment: "Weather data field name (sky conditions, e.g. Partly Cloudy)")
+        case .feelsLikeMax:             String(localized: "field.feels_like_high", defaultValue: "Feels Like High", comment: "Weather data field name (apparent daily maximum)")
+        case .feelsLikeMin:             String(localized: "field.feels_like_low", defaultValue: "Feels Like Low", comment: "Weather data field name (apparent daily minimum)")
+        case .sunrise:                  String(localized: "field.sunrise", defaultValue: "Sunrise", comment: "Weather data field name")
+        case .sunset:                   String(localized: "field.sunset", defaultValue: "Sunset", comment: "Weather data field name")
+        case .precipitationSum:         String(localized: "field.precipitation_total", defaultValue: "Precipitation Total", comment: "Weather data field name (daily total)")
+        case .precipitationProbability: String(localized: "field.precipitation_probability", defaultValue: "Precipitation Probability", comment: "Weather data field name (chance of precipitation)")
+        case .precipitationHours:       String(localized: "field.precipitation_hours", defaultValue: "Precipitation Hours", comment: "Weather data field name (hours with precipitation)")
+        case .rainSum:                  String(localized: "field.rain_total", defaultValue: "Rain Total", comment: "Weather data field name (daily total)")
+        case .showersSum:               String(localized: "field.showers_total", defaultValue: "Showers Total", comment: "Weather data field name (daily total)")
+        case .snowfallSum:              String(localized: "field.snowfall_total", defaultValue: "Snowfall Total", comment: "Weather data field name (daily total)")
+        case .windSpeedMax:             String(localized: "field.max_wind_speed", defaultValue: "Max Wind Speed", comment: "Weather data field name (daily maximum)")
+        case .windGustsMax:             String(localized: "field.max_wind_gusts", defaultValue: "Max Wind Gusts", comment: "Weather data field name (daily maximum)")
+        case .windDirectionDominant:    String(localized: "field.wind_direction", defaultValue: "Wind Direction", comment: "Weather data field name")
+        case .uvIndexMax:               String(localized: "field.uv_index_max", defaultValue: "UV Index Max", comment: "Weather data field name (daily maximum UV index)")
+        case .daylightDuration:         String(localized: "field.daylight_duration", defaultValue: "Daylight Duration", comment: "Weather data field name")
+        case .sunshineDuration:         String(localized: "field.sunshine_duration", defaultValue: "Sunshine Duration", comment: "Weather data field name")
+        }
+    }
+}
+
+extension MarineFieldType {
+    var localizedLabel: String {
+        switch self {
+        case .waveHeight:             String(localized: "field.wave_height", defaultValue: "Wave Height", comment: "Marine weather field name")
+        case .waveDirection:          String(localized: "field.wave_direction", defaultValue: "Wave Direction", comment: "Marine weather field name")
+        case .wavePeriod:             String(localized: "field.wave_period", defaultValue: "Wave Period", comment: "Marine weather field name (seconds between waves)")
+        case .seaSurfaceTemperature:  String(localized: "field.sea_surface_temperature", defaultValue: "Sea Surface Temperature", comment: "Marine weather field name")
+        case .swellWaveHeight:        String(localized: "field.swell_wave_height", defaultValue: "Swell Wave Height", comment: "Marine weather field name")
+        case .oceanCurrentVelocity:   String(localized: "field.ocean_current_velocity", defaultValue: "Ocean Current Velocity", comment: "Marine weather field name")
+        case .windWaveHeight:         String(localized: "field.wind_wave_height", defaultValue: "Wind Wave Height", comment: "Marine weather field name")
+        case .swellWaveDirection:     String(localized: "field.swell_wave_direction", defaultValue: "Swell Wave Direction", comment: "Marine weather field name")
+        case .oceanCurrentDirection:  String(localized: "field.ocean_current_direction", defaultValue: "Ocean Current Direction", comment: "Marine weather field name")
+        case .seaLevelHeight:         String(localized: "field.sea_level_height", defaultValue: "Sea Level Height (Tides)", comment: "Marine weather field name")
+        case .wavePeakPeriod:         String(localized: "field.wave_peak_period", defaultValue: "Wave Peak Period", comment: "Marine weather field name")
+        case .windWaveDirection:      String(localized: "field.wind_wave_direction", defaultValue: "Wind Wave Direction", comment: "Marine weather field name")
+        case .windWavePeriod:         String(localized: "field.wind_wave_period", defaultValue: "Wind Wave Period", comment: "Marine weather field name")
+        case .swellWavePeriod:        String(localized: "field.swell_wave_period", defaultValue: "Swell Wave Period", comment: "Marine weather field name")
+        }
+    }
+}
+
+extension DetailCategory {
+    var localizedLabel: String {
+        switch self {
+        case .weatherAlerts:     String(localized: "field.weather_alerts", defaultValue: "Weather Alerts", comment: "Weather data field name")
+        case .currentConditions: String(localized: "category.current_conditions", defaultValue: "Current Conditions", comment: "Section header in city detail")
+        case .todaysForecast:    String(localized: "category.todays_forecast", defaultValue: "Today's Forecast", comment: "Section header in city detail")
+        case .hourlyForecast:    String(localized: "category.hourly_forecast", defaultValue: "24-Hour Forecast", comment: "Section header in city detail")
+        case .dailyForecast:     String(localized: "category.daily_forecast", defaultValue: "16-Day Forecast", comment: "Section header in city detail")
+        case .marineForecast:    String(localized: "category.marine_forecast", defaultValue: "Marine Forecast", comment: "Section header in city detail")
+        case .historicalWeather: String(localized: "category.historical_weather", defaultValue: "Historical Weather", comment: "Section header in city detail")
+        case .location:          String(localized: "category.location", defaultValue: "Location", comment: "Section header in city detail")
+        case .myData:            String(localized: "category.my_data", defaultValue: "My Data", comment: "Section header in city detail — user-chosen custom data")
+        case .astronomy:         String(localized: "category.astronomy", defaultValue: "Astronomy", comment: "Section header in city detail (sunrise/sunset/moon)")
+        }
+    }
+}
+
+extension MyLocationPosition {
+    var localizedLabel: String {
+        switch self {
+        case .beforeCityList: String(localized: "setting.location_position.before", defaultValue: "Before City List", comment: "Where to show the current-location entry in the city list")
+        case .afterCityList:  String(localized: "setting.location_position.after", defaultValue: "After City List", comment: "Where to show the current-location entry in the city list")
+        }
+    }
+}
+
+extension DisplayMode {
+    var localizedLabel: String {
+        switch self {
+        case .condensed: String(localized: "setting.display_mode.condensed", defaultValue: "Condensed", comment: "Display density option")
+        case .details:   String(localized: "setting.display_mode.details", defaultValue: "Details", comment: "Display density option")
+        }
+    }
+}
+
+extension ViewMode {
+    var localizedLabel: String {
+        switch self {
+        case .flat:  String(localized: "setting.view_mode.flat", defaultValue: "Flat", comment: "City list layout option")
+        case .list:  String(localized: "setting.view_mode.list", defaultValue: "List", comment: "City list layout option")
+        case .table: String(localized: "setting.view_mode.table", defaultValue: "Table", comment: "City list layout option")
+        }
+    }
+}
+
+extension ForecastDetailLayout {
+    var localizedLabel: String {
+        switch self {
+        case .list:     String(localized: "setting.forecast_layout.list", defaultValue: "List", comment: "Forecast detail layout option")
+        case .headings: String(localized: "setting.forecast_layout.headings", defaultValue: "Headings", comment: "Forecast detail layout option")
+        }
     }
 }

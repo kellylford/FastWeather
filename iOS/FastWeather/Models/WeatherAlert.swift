@@ -29,6 +29,18 @@ struct WeatherAlert: Codable, Identifiable {
 enum AlertSource: String, Codable {
     case nws = "NWS"              // US National Weather Service
     case weatherKit = "WeatherKit" // Apple WeatherKit (international)
+
+    /// Localized display label. Raw value is stable (Codable storage); use this for display only.
+    var localizedLabel: String {
+        switch self {
+        case .nws:
+            return String(localized: "alert.source.nws", defaultValue: "NWS",
+                          comment: "Weather alert source: US National Weather Service")
+        case .weatherKit:
+            return String(localized: "alert.source.weatherKit", defaultValue: "WeatherKit",
+                          comment: "Weather alert source: Apple WeatherKit")
+        }
+    }
 }
 
 enum AlertSeverity: String, Codable, CaseIterable {
@@ -37,7 +49,28 @@ enum AlertSeverity: String, Codable, CaseIterable {
     case moderate = "Moderate"
     case minor = "Minor"
     case unknown = "Unknown"
-    
+
+    /// Localized display label. Raw value is stable (Codable storage); use this for display only.
+    var localizedLabel: String {
+        switch self {
+        case .extreme:
+            return String(localized: "alert.severity.extreme", defaultValue: "Extreme",
+                          comment: "Weather alert severity level")
+        case .severe:
+            return String(localized: "alert.severity.severe", defaultValue: "Severe",
+                          comment: "Weather alert severity level")
+        case .moderate:
+            return String(localized: "alert.severity.moderate", defaultValue: "Moderate",
+                          comment: "Weather alert severity level")
+        case .minor:
+            return String(localized: "alert.severity.minor", defaultValue: "Minor",
+                          comment: "Weather alert severity level")
+        case .unknown:
+            return String(localized: "alert.severity.unknown", defaultValue: "Unknown",
+                          comment: "Weather alert severity level")
+        }
+    }
+
     /// Lower number = more critical. Used for sorting and picking the highest-severity alert.
     var sortOrder: Int {
         switch self {

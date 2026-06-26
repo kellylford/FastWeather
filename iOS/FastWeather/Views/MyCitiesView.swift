@@ -35,14 +35,14 @@ struct MyCitiesView: View {
     
     private var dateDisplayString: String {
         if dateOffset == 0 {
-            return "Today"
+            return String(localized: "date.today", defaultValue: "Today", comment: "Date navigation label for the current day")
         } else if dateOffset == 1 {
-            return "Tmrw"  // Abbreviated to prevent truncation confusion with "Today"
+            return String(localized: "date.tomorrow_short", defaultValue: "Tmrw", comment: "Abbreviated date navigation label for tomorrow (kept short to avoid truncation)")  // Abbreviated to prevent truncation confusion with "Today"
         } else if dateOffset == -1 {
-            return "Yesterday"
+            return String(localized: "date.yesterday", defaultValue: "Yesterday", comment: "Date navigation label for the previous day")
         } else {
             let formatter = DateFormatter()
-            formatter.dateFormat = "EEE, MMM d"
+            formatter.setLocalizedDateFormatFromTemplate("EEEMMMd")
             return formatter.string(from: selectedDate)
         }
     }
@@ -50,14 +50,14 @@ struct MyCitiesView: View {
     // Full date string for VoiceOver (not abbreviated)
     private var accessibilityDateString: String {
         if dateOffset == 0 {
-            return "Today"
+            return String(localized: "date.today", defaultValue: "Today", comment: "Date navigation label for the current day")
         } else if dateOffset == 1 {
-            return "Tomorrow"  // Full word for VoiceOver (visual shows "Tmrw")
+            return String(localized: "date.tomorrow", defaultValue: "Tomorrow", comment: "Full-word date label for tomorrow, used by VoiceOver")  // Full word for VoiceOver (visual shows "Tmrw")
         } else if dateOffset == -1 {
-            return "Yesterday"
+            return String(localized: "date.yesterday", defaultValue: "Yesterday", comment: "Date navigation label for the previous day")
         } else {
             let formatter = DateFormatter()
-            formatter.dateFormat = "EEEE, MMMM d"  // Full day/month names for VoiceOver
+            formatter.setLocalizedDateFormatFromTemplate("EEEEMMMMd")  // Full day/month names for VoiceOver
             return formatter.string(from: selectedDate)
         }
     }
@@ -162,20 +162,20 @@ struct MyCitiesView: View {
         guard dateOffset > -maxDaysBack else { return }
         dateOffset -= 1
         UINotificationFeedbackGenerator().notificationOccurred(.success)
-        UIAccessibility.post(notification: .announcement, argument: "Viewing weather for \(accessibilityDateString)")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "announce.viewing_weather_for", defaultValue: "Viewing weather for \(accessibilityDateString)", comment: "VoiceOver announcement when changing the displayed day"))
     }
     
     private func navigateToNextDay() {
         guard dateOffset < maxDaysForward else { return }
         dateOffset += 1
         UINotificationFeedbackGenerator().notificationOccurred(.success)
-        UIAccessibility.post(notification: .announcement, argument: "Viewing weather for \(accessibilityDateString)")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "announce.viewing_weather_for", defaultValue: "Viewing weather for \(accessibilityDateString)", comment: "VoiceOver announcement when changing the displayed day"))
     }
     
     private func navigateToToday() {
         dateOffset = 0
         UINotificationFeedbackGenerator().notificationOccurred(.success)
-        UIAccessibility.post(notification: .announcement, argument: "Returned to today")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "announce.returned_to_today", defaultValue: "Returned to today", comment: "VoiceOver announcement when returning to the current day"))
     }
     
     // MARK: - Accessors

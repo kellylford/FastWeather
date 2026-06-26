@@ -43,13 +43,13 @@ struct SettingsView: View {
                     if settingsManager.settings.myLocationEnabled {
                         Picker("Position", selection: $settingsManager.settings.myLocationPosition) {
                             ForEach(MyLocationPosition.allCases, id: \.self) { position in
-                                Text(position.rawValue).tag(position)
+                                Text(position.localizedLabel).tag(position)
                             }
                         }
                         .onChange(of: settingsManager.settings.myLocationPosition) {
                             settingsManager.saveSettings()
                         }
-                        .accessibilityLabel("My Location position, currently \(settingsManager.settings.myLocationPosition.rawValue)")
+                        .accessibilityLabel("My Location position, currently \(settingsManager.settings.myLocationPosition.localizedLabel)")
                         .accessibilityHint("Controls whether My Location appears before or after your saved city list.")
                     }
                 }
@@ -165,13 +165,13 @@ struct SettingsView: View {
                     
                     Picker("Exploration Mode", selection: $settingsManager.settings.weatherAroundMeExplorationMode) {
                         ForEach(ExplorationMode.allCases, id: \.self) { mode in
-                            Text(mode.rawValue).tag(mode)
+                            Text(mode.localizedLabel).tag(mode)
                         }
                     }
                     .onChange(of: settingsManager.settings.weatherAroundMeExplorationMode) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Exploration mode, currently \(settingsManager.settings.weatherAroundMeExplorationMode.rawValue)")
+                    .accessibilityLabel("Exploration mode, currently \(settingsManager.settings.weatherAroundMeExplorationMode.localizedLabel)")
                     .accessibilityHint(settingsManager.settings.weatherAroundMeExplorationMode.description)
                     
                     if settingsManager.settings.weatherAroundMeExplorationMode == .arc {
@@ -241,17 +241,17 @@ struct SettingsView: View {
                         set: { defaultBrowseSortOrderRaw = $0.rawValue }
                     )) {
                         ForEach(BrowseSortOrder.allCases) { order in
-                            Text(order.rawValue).tag(order)
+                            Text(order.localizedLabel).tag(order)
                         }
                     } label: {
                         HStack {
                             Text("Default City Sort")
                             Spacer()
-                            Text(BrowseSortOrder(rawValue: defaultBrowseSortOrderRaw)?.rawValue ?? "Name (A–Z)")
+                            Text((BrowseSortOrder(rawValue: defaultBrowseSortOrderRaw) ?? .nameAZ).localizedLabel)
                                 .foregroundColor(.secondary)
                         }
                     }
-                    .accessibilityLabel("Default browse city sort order, currently \(BrowseSortOrder(rawValue: defaultBrowseSortOrderRaw)?.rawValue ?? "Name (A–Z)")")
+                    .accessibilityLabel("Default browse city sort order, currently \((BrowseSortOrder(rawValue: defaultBrowseSortOrderRaw) ?? .nameAZ).localizedLabel)")
                     .accessibilityHint("Sets the initial sort order when opening a state or country's city list")
                 }
                 
@@ -275,38 +275,38 @@ struct SettingsView: View {
                 Section(header: Text("Display Options")) {
                     Picker(selection: $settingsManager.settings.viewMode) {
                         ForEach(ViewMode.allCases.filter { $0 != .table || featureFlags.tableViewEnabled }, id: \.self) { mode in
-                            Text(mode.rawValue).tag(mode)
+                            Text(mode.localizedLabel).tag(mode)
                         }
                     } label: {
                         HStack {
                             Text("View Mode")
                             Spacer()
-                            Text(settingsManager.settings.viewMode.rawValue)
+                            Text(settingsManager.settings.viewMode.localizedLabel)
                                 .foregroundColor(.secondary)
                         }
                     }
                     .onChange(of: settingsManager.settings.viewMode) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("View mode, currently \(settingsManager.settings.viewMode.rawValue)")
+                    .accessibilityLabel("View mode, currently \(settingsManager.settings.viewMode.localizedLabel)")
                     .accessibilityHint("Choose between Flat and List view. Table view can be enabled in Developer Settings.")
                     
                     Picker(selection: $settingsManager.settings.displayMode) {
                         ForEach(DisplayMode.allCases, id: \.self) { mode in
-                            Text(mode.rawValue).tag(mode)
+                            Text(mode.localizedLabel).tag(mode)
                         }
                     } label: {
                         HStack {
                             Text("List Content Display")
                             Spacer()
-                            Text(settingsManager.settings.displayMode.rawValue)
+                            Text(settingsManager.settings.displayMode.localizedLabel)
                                 .foregroundColor(.secondary)
                         }
                     }
                     .onChange(of: settingsManager.settings.displayMode) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("List content display, currently \(settingsManager.settings.displayMode.rawValue)")
+                    .accessibilityLabel("List content display, currently \(settingsManager.settings.displayMode.localizedLabel)")
                     .accessibilityHint("Condensed shows values only in List view, Details shows labels with values")
                 }
                 
@@ -332,10 +332,10 @@ struct SettingsView: View {
                                     settingsManager.saveSettings()
                                 }
                             )) {
-                                Text(field.type.rawValue)
+                                Text(field.type.localizedLabel)
                                     .font(.body)
                             }
-                            .accessibilityLabel("\(field.type.rawValue)")
+                            .accessibilityLabel("\(field.type.localizedLabel)")
                             .accessibilityHint(field.isEnabled ? "Enabled, double tap to disable" : "Disabled, double tap to enable")
                         }
                         .accessibilityElement(children: .combine)
@@ -362,34 +362,34 @@ struct SettingsView: View {
 
                     Picker("Glance Ahead Time", selection: $settingsManager.settings.glanceAheadHours) {
                         ForEach(1...8, id: \.self) { hours in
-                            Text("\(hours) \(hours == 1 ? "hour" : "hours")").tag(hours)
+                            Text("\(hours) \(hours == 1 ? String(localized: "time.hour", defaultValue: "hour", comment: "Singular hour unit, as in '1 hour'") : String(localized: "time.hours", defaultValue: "hours", comment: "Plural hours unit, as in '4 hours'"))").tag(hours)
                         }
                     }
                     .pickerStyle(.menu)
                     .onChange(of: settingsManager.settings.glanceAheadHours) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Glance Ahead Time, \(settingsManager.settings.glanceAheadHours) \(settingsManager.settings.glanceAheadHours == 1 ? "hour" : "hours")")
+                    .accessibilityLabel("Glance Ahead Time, \(settingsManager.settings.glanceAheadHours) \(settingsManager.settings.glanceAheadHours == 1 ? String(localized: "time.hour", defaultValue: "hour", comment: "Singular hour unit, as in '1 hour'") : String(localized: "time.hours", defaultValue: "hours", comment: "Plural hours unit, as in '4 hours'"))")
                 }
                 
                 // Hourly and Daily Display section
                 Section(header: Text("Hourly and Daily Display")) {
                     Picker(selection: $settingsManager.settings.forecastDetailLayout) {
                         ForEach(ForecastDetailLayout.allCases, id: \.self) { layout in
-                            Text(layout.rawValue).tag(layout)
+                            Text(layout.localizedLabel).tag(layout)
                         }
                     } label: {
                         HStack {
                             Text("Forecast Layout")
                             Spacer()
-                            Text(settingsManager.settings.forecastDetailLayout.rawValue)
+                            Text(settingsManager.settings.forecastDetailLayout.localizedLabel)
                                 .foregroundColor(.secondary)
                         }
                     }
                     .onChange(of: settingsManager.settings.forecastDetailLayout) {
                         settingsManager.saveSettings()
                     }
-                    .accessibilityLabel("Forecast layout, currently \(settingsManager.settings.forecastDetailLayout.rawValue)")
+                    .accessibilityLabel("Forecast layout, currently \(settingsManager.settings.forecastDetailLayout.localizedLabel)")
                     .accessibilityHint("List shows the standard compact forecast. Headings shows each time period as a section with individual field rows.")
                 }
 
@@ -410,11 +410,11 @@ struct SettingsView: View {
                                     .foregroundColor(.secondary)
                                     .accessibilityHidden(true)
                                 
-                                Text(category.category.rawValue)
+                                Text(category.category.localizedLabel)
                                     .font(.body.weight(.semibold))
                             }
                             .accessibilityAddTraits(.isHeader)
-                            .accessibilityLabel(category.category.rawValue)
+                            .accessibilityLabel(category.category.localizedLabel)
                             .accessibilityAction(named: "Move Up") {
                                 moveCategoryUp(at: index)
                             }
@@ -434,14 +434,14 @@ struct SettingsView: View {
                                 .foregroundColor(.secondary)
                             
                             // Toggle for overall section
-                            Toggle("Enable \(category.category.rawValue)", isOn: Binding(
+                            Toggle("Enable \(category.category.localizedLabel)", isOn: Binding(
                                 get: { category.isEnabled },
                                 set: { newValue in
                                     settingsManager.settings.detailCategories[index].isEnabled = newValue
                                     settingsManager.saveSettings()
                                 }
                             ))
-                            .accessibilityLabel("Enable \(category.category.rawValue) section")
+                            .accessibilityLabel("Enable \(category.category.localizedLabel) section")
                             .accessibilityHint(category.isEnabled ? "Enabled, double tap to disable" : "Disabled, double tap to enable")
                             
                             // Show data items for this category
@@ -619,58 +619,58 @@ struct SettingsView: View {
         for city in weatherService.savedCities {
             HistoricalWeatherCache.shared.clearCache(for: city)
         }
-        UIAccessibility.post(notification: .announcement, argument: "Historical weather cache cleared for all cities")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "settings.cache.cleared_all", defaultValue: "Historical weather cache cleared for all cities", comment: "VoiceOver announcement after clearing the historical weather cache"))
     }
     
     private func moveCategoryUp(at index: Int) {
         guard index > 0 else { return }
-        let categoryName = settingsManager.settings.detailCategories[index].category.rawValue
-        let aboveCategoryName = settingsManager.settings.detailCategories[index - 1].category.rawValue
+        let categoryName = settingsManager.settings.detailCategories[index].category.localizedLabel
+        let aboveCategoryName = settingsManager.settings.detailCategories[index - 1].category.localizedLabel
         settingsManager.settings.detailCategories.move(fromOffsets: IndexSet(integer: index), toOffset: index - 1)
         settingsManager.saveSettings()
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(categoryName) above \(aboveCategoryName)")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "settings.reorder.moved_above", defaultValue: "Moved \(categoryName) above \(aboveCategoryName)", comment: "VoiceOver announcement after moving a list item up. %1$@ = the moved item, %2$@ = the item now below it."))
     }
     
     private func moveCategoryDown(at index: Int) {
         guard index < settingsManager.settings.detailCategories.count - 1 else { return }
-        let categoryName = settingsManager.settings.detailCategories[index].category.rawValue
-        let belowCategoryName = settingsManager.settings.detailCategories[index + 1].category.rawValue
+        let categoryName = settingsManager.settings.detailCategories[index].category.localizedLabel
+        let belowCategoryName = settingsManager.settings.detailCategories[index + 1].category.localizedLabel
         settingsManager.settings.detailCategories.move(fromOffsets: IndexSet(integer: index), toOffset: index + 2)
         settingsManager.saveSettings()
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(categoryName) below \(belowCategoryName)")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "settings.reorder.moved_below", defaultValue: "Moved \(categoryName) below \(belowCategoryName)", comment: "VoiceOver announcement after moving a list item down. %1$@ = the moved item, %2$@ = the item now above it."))
     }
     
     private func moveCategoryToTop(at index: Int) {
         guard index > 0 else { return }
-        let categoryName = settingsManager.settings.detailCategories[index].category.rawValue
+        let categoryName = settingsManager.settings.detailCategories[index].category.localizedLabel
         settingsManager.settings.detailCategories.move(fromOffsets: IndexSet(integer: index), toOffset: 0)
         settingsManager.saveSettings()
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(categoryName) to top")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "settings.reorder.moved_to_top", defaultValue: "Moved \(categoryName) to top", comment: "VoiceOver announcement after moving a list item to the top. %@ = the moved item."))
     }
     
     // MARK: - Category Descriptions
     private func categoryDescription(for category: DetailCategory) -> String {
         switch category {
         case .weatherAlerts:
-            return "Active weather warnings and alerts"
+            return String(localized: "category.weather_alerts.desc", defaultValue: "Active weather warnings and alerts", comment: "Settings: description of the Weather Alerts detail section")
         case .currentConditions:
-            return "Temperature, wind, humidity, and atmospheric conditions"
+            return String(localized: "category.current_conditions.desc", defaultValue: "Temperature, wind, humidity, and atmospheric conditions", comment: "Settings: description of the Current Conditions detail section")
         case .todaysForecast:
-            return "Daily summary with high/low temperatures, sunrise/sunset, and precipitation alerts"
+            return String(localized: "category.todays_forecast.desc", defaultValue: "Daily summary with high/low temperatures, sunrise/sunset, and precipitation alerts", comment: "Settings: description of the Today's Forecast detail section")
         case .hourlyForecast:
-            return "24-hour detailed forecast with customizable data fields"
+            return String(localized: "category.hourly_forecast.desc", defaultValue: "24-hour detailed forecast with customizable data fields", comment: "Settings: description of the Hourly Forecast detail section")
         case .dailyForecast:
-            return "16-day forecast with customizable data fields"
+            return String(localized: "category.daily_forecast.desc", defaultValue: "16-day forecast with customizable data fields", comment: "Settings: description of the Daily Forecast detail section")
         case .marineForecast:
-            return "Wave heights, ocean currents, sea temperature, and tides"
+            return String(localized: "category.marine_forecast.desc", defaultValue: "Wave heights, ocean currents, sea temperature, and tides", comment: "Settings: description of the Marine Forecast detail section")
         case .historicalWeather:
-            return "Past year weather comparisons"
+            return String(localized: "category.historical_weather.desc", defaultValue: "Past year weather comparisons", comment: "Settings: description of the Historical Weather detail section")
         case .location:
-            return "Coordinates, elevation, and location details"
+            return String(localized: "category.location.desc", defaultValue: "Coordinates, elevation, and location details", comment: "Settings: description of the Location detail section")
         case .myData:
-            return "Your custom data points from the Open-Meteo API"
+            return String(localized: "category.my_data.desc", defaultValue: "Your custom data points from the Open-Meteo API", comment: "Settings: description of the My Data detail section")
         case .astronomy:
-            return "Moon phase, illumination, moonrise, and moonset"
+            return String(localized: "category.astronomy.desc", defaultValue: "Moon phase, illumination, moonrise, and moonset", comment: "Settings: description of the Astronomy detail section")
         }
     }
     
@@ -781,7 +781,7 @@ struct SettingsView: View {
                 
                 ForEach(settingsManager.settings.hourlyFields.indices, id: \.self) { index in
                     let field = settingsManager.settings.hourlyFields[index]
-                    Toggle(field.type.rawValue, isOn: Binding(
+                    Toggle(field.type.localizedLabel, isOn: Binding(
                         get: { settingsManager.settings.hourlyFields[index].isEnabled },
                         set: { newValue in
                             settingsManager.settings.hourlyFields[index].isEnabled = newValue
@@ -789,7 +789,7 @@ struct SettingsView: View {
                         }
                     ))
                     .font(.caption)
-                    .accessibilityLabel("\(field.type.rawValue) in hourly forecast")
+                    .accessibilityLabel("\(field.type.localizedLabel) in hourly forecast")
                     .accessibilityAction(named: "Move Up") {
                         moveHourlyFieldUp(at: index)
                     }
@@ -806,7 +806,7 @@ struct SettingsView: View {
                 
                 ForEach(settingsManager.settings.dailyFields.indices, id: \.self) { index in
                     let field = settingsManager.settings.dailyFields[index]
-                    Toggle(field.type.rawValue, isOn: Binding(
+                    Toggle(field.type.localizedLabel, isOn: Binding(
                         get: { settingsManager.settings.dailyFields[index].isEnabled },
                         set: { newValue in
                             settingsManager.settings.dailyFields[index].isEnabled = newValue
@@ -814,7 +814,7 @@ struct SettingsView: View {
                         }
                     ))
                     .font(.caption)
-                    .accessibilityLabel("\(field.type.rawValue) in daily forecast")
+                    .accessibilityLabel("\(field.type.localizedLabel) in daily forecast")
                     .accessibilityAction(named: "Move Up") {
                         moveDailyFieldUp(at: index)
                     }
@@ -831,7 +831,7 @@ struct SettingsView: View {
                 
                 ForEach(settingsManager.settings.marineFields.indices, id: \.self) { index in
                     let field = settingsManager.settings.marineFields[index]
-                    Toggle(field.type.rawValue, isOn: Binding(
+                    Toggle(field.type.localizedLabel, isOn: Binding(
                         get: { settingsManager.settings.marineFields[index].isEnabled },
                         set: { newValue in
                             settingsManager.settings.marineFields[index].isEnabled = newValue
@@ -839,7 +839,7 @@ struct SettingsView: View {
                         }
                     ))
                     .font(.caption)
-                    .accessibilityLabel("\(field.type.rawValue) in marine forecast")
+                    .accessibilityLabel("\(field.type.localizedLabel) in marine forecast")
                     .accessibilityAction(named: "Move Up") {
                         moveMarineFieldUp(at: index)
                     }
@@ -965,82 +965,82 @@ struct SettingsView: View {
     
     private func moveCategoryToBottom(at index: Int) {
         guard index < settingsManager.settings.detailCategories.count - 1 else { return }
-        let categoryName = settingsManager.settings.detailCategories[index].category.rawValue
+        let categoryName = settingsManager.settings.detailCategories[index].category.localizedLabel
         settingsManager.settings.detailCategories.move(fromOffsets: IndexSet(integer: index), toOffset: settingsManager.settings.detailCategories.count)
         settingsManager.saveSettings()
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(categoryName) to bottom")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "settings.reorder.moved_to_bottom", defaultValue: "Moved \(categoryName) to bottom", comment: "VoiceOver announcement after moving a list item to the bottom. %@ = the moved item."))
     }
     
     private func moveFieldUp(at index: Int) {
         guard index > 0 else { return }
-        let fieldName = settingsManager.settings.weatherFields[index].type.rawValue
-        let aboveFieldName = settingsManager.settings.weatherFields[index - 1].type.rawValue
+        let fieldName = settingsManager.settings.weatherFields[index].type.localizedLabel
+        let aboveFieldName = settingsManager.settings.weatherFields[index - 1].type.localizedLabel
         settingsManager.settings.weatherFields.move(fromOffsets: IndexSet(integer: index), toOffset: index - 1)
         settingsManager.saveSettings()
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) above \(aboveFieldName)")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "settings.reorder.moved_above", defaultValue: "Moved \(fieldName) above \(aboveFieldName)", comment: "VoiceOver announcement after moving a list item up. %1$@ = the moved item, %2$@ = the item now below it."))
     }
     
     private func moveFieldDown(at index: Int) {
         guard index < settingsManager.settings.weatherFields.count - 1 else { return }
-        let fieldName = settingsManager.settings.weatherFields[index].type.rawValue
-        let belowFieldName = settingsManager.settings.weatherFields[index + 1].type.rawValue
+        let fieldName = settingsManager.settings.weatherFields[index].type.localizedLabel
+        let belowFieldName = settingsManager.settings.weatherFields[index + 1].type.localizedLabel
         settingsManager.settings.weatherFields.move(fromOffsets: IndexSet(integer: index), toOffset: index + 2)
         settingsManager.saveSettings()
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) below \(belowFieldName)")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "settings.reorder.moved_below", defaultValue: "Moved \(fieldName) below \(belowFieldName)", comment: "VoiceOver announcement after moving a list item down. %1$@ = the moved item, %2$@ = the item now above it."))
     }
     
     private func moveHourlyFieldUp(at index: Int) {
         guard index > 0 else { return }
-        let fieldName = settingsManager.settings.hourlyFields[index].type.rawValue
-        let aboveFieldName = settingsManager.settings.hourlyFields[index - 1].type.rawValue
+        let fieldName = settingsManager.settings.hourlyFields[index].type.localizedLabel
+        let aboveFieldName = settingsManager.settings.hourlyFields[index - 1].type.localizedLabel
         settingsManager.settings.hourlyFields.move(fromOffsets: IndexSet(integer: index), toOffset: index - 1)
         settingsManager.saveSettings()
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) above \(aboveFieldName)")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "settings.reorder.moved_above", defaultValue: "Moved \(fieldName) above \(aboveFieldName)", comment: "VoiceOver announcement after moving a list item up. %1$@ = the moved item, %2$@ = the item now below it."))
     }
     
     private func moveHourlyFieldDown(at index: Int) {
         guard index < settingsManager.settings.hourlyFields.count - 1 else { return }
-        let fieldName = settingsManager.settings.hourlyFields[index].type.rawValue
-        let belowFieldName = settingsManager.settings.hourlyFields[index + 1].type.rawValue
+        let fieldName = settingsManager.settings.hourlyFields[index].type.localizedLabel
+        let belowFieldName = settingsManager.settings.hourlyFields[index + 1].type.localizedLabel
         settingsManager.settings.hourlyFields.move(fromOffsets: IndexSet(integer: index), toOffset: index + 2)
         settingsManager.saveSettings()
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) below \(belowFieldName)")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "settings.reorder.moved_below", defaultValue: "Moved \(fieldName) below \(belowFieldName)", comment: "VoiceOver announcement after moving a list item down. %1$@ = the moved item, %2$@ = the item now above it."))
     }
     
     private func moveDailyFieldUp(at index: Int) {
         guard index > 0 else { return }
-        let fieldName = settingsManager.settings.dailyFields[index].type.rawValue
-        let aboveFieldName = settingsManager.settings.dailyFields[index - 1].type.rawValue
+        let fieldName = settingsManager.settings.dailyFields[index].type.localizedLabel
+        let aboveFieldName = settingsManager.settings.dailyFields[index - 1].type.localizedLabel
         settingsManager.settings.dailyFields.move(fromOffsets: IndexSet(integer: index), toOffset: index - 1)
         settingsManager.saveSettings()
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) above \(aboveFieldName)")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "settings.reorder.moved_above", defaultValue: "Moved \(fieldName) above \(aboveFieldName)", comment: "VoiceOver announcement after moving a list item up. %1$@ = the moved item, %2$@ = the item now below it."))
     }
     
     private func moveDailyFieldDown(at index: Int) {
         guard index < settingsManager.settings.dailyFields.count - 1 else { return }
-        let fieldName = settingsManager.settings.dailyFields[index].type.rawValue
-        let belowFieldName = settingsManager.settings.dailyFields[index + 1].type.rawValue
+        let fieldName = settingsManager.settings.dailyFields[index].type.localizedLabel
+        let belowFieldName = settingsManager.settings.dailyFields[index + 1].type.localizedLabel
         settingsManager.settings.dailyFields.move(fromOffsets: IndexSet(integer: index), toOffset: index + 2)
         settingsManager.saveSettings()
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) below \(belowFieldName)")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "settings.reorder.moved_below", defaultValue: "Moved \(fieldName) below \(belowFieldName)", comment: "VoiceOver announcement after moving a list item down. %1$@ = the moved item, %2$@ = the item now above it."))
     }
     
     private func moveMarineFieldUp(at index: Int) {
         guard index > 0 else { return }
-        let fieldName = settingsManager.settings.marineFields[index].type.rawValue
-        let aboveFieldName = settingsManager.settings.marineFields[index - 1].type.rawValue
+        let fieldName = settingsManager.settings.marineFields[index].type.localizedLabel
+        let aboveFieldName = settingsManager.settings.marineFields[index - 1].type.localizedLabel
         settingsManager.settings.marineFields.move(fromOffsets: IndexSet(integer: index), toOffset: index - 1)
         settingsManager.saveSettings()
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) above \(aboveFieldName)")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "settings.reorder.moved_above", defaultValue: "Moved \(fieldName) above \(aboveFieldName)", comment: "VoiceOver announcement after moving a list item up. %1$@ = the moved item, %2$@ = the item now below it."))
     }
     
     private func moveMarineFieldDown(at index: Int) {
         guard index < settingsManager.settings.marineFields.count - 1 else { return }
-        let fieldName = settingsManager.settings.marineFields[index].type.rawValue
-        let belowFieldName = settingsManager.settings.marineFields[index + 1].type.rawValue
+        let fieldName = settingsManager.settings.marineFields[index].type.localizedLabel
+        let belowFieldName = settingsManager.settings.marineFields[index + 1].type.localizedLabel
         settingsManager.settings.marineFields.move(fromOffsets: IndexSet(integer: index), toOffset: index + 2)
         settingsManager.saveSettings()
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) below \(belowFieldName)")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "settings.reorder.moved_below", defaultValue: "Moved \(fieldName) below \(belowFieldName)", comment: "VoiceOver announcement after moving a list item down. %1$@ = the moved item, %2$@ = the item now above it."))
     }
     
     private func moveMyDataFieldUp(at index: Int) {
@@ -1049,7 +1049,7 @@ struct SettingsView: View {
         let aboveFieldName = settingsManager.settings.myDataFields[index - 1].parameter.displayName
         settingsManager.settings.myDataFields.move(fromOffsets: IndexSet(integer: index), toOffset: index - 1)
         settingsManager.saveSettings()
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) above \(aboveFieldName)")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "settings.reorder.moved_above", defaultValue: "Moved \(fieldName) above \(aboveFieldName)", comment: "VoiceOver announcement after moving a list item up. %1$@ = the moved item, %2$@ = the item now below it."))
     }
     
     private func moveMyDataFieldDown(at index: Int) {
@@ -1058,7 +1058,7 @@ struct SettingsView: View {
         let belowFieldName = settingsManager.settings.myDataFields[index + 1].parameter.displayName
         settingsManager.settings.myDataFields.move(fromOffsets: IndexSet(integer: index), toOffset: index + 2)
         settingsManager.saveSettings()
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) below \(belowFieldName)")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "settings.reorder.moved_below", defaultValue: "Moved \(fieldName) below \(belowFieldName)", comment: "VoiceOver announcement after moving a list item down. %1$@ = the moved item, %2$@ = the item now above it."))
     }
     
     private func moveMyDataFieldToTop(at index: Int) {
@@ -1066,7 +1066,7 @@ struct SettingsView: View {
         let fieldName = settingsManager.settings.myDataFields[index].parameter.displayName
         settingsManager.settings.myDataFields.move(fromOffsets: IndexSet(integer: index), toOffset: 0)
         settingsManager.saveSettings()
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) to top")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "settings.reorder.moved_to_top", defaultValue: "Moved \(fieldName) to top", comment: "VoiceOver announcement after moving a list item to the top. %@ = the moved item."))
     }
     
     private func moveMyDataFieldToBottom(at index: Int) {
@@ -1074,7 +1074,7 @@ struct SettingsView: View {
         let fieldName = settingsManager.settings.myDataFields[index].parameter.displayName
         settingsManager.settings.myDataFields.move(fromOffsets: IndexSet(integer: index), toOffset: settingsManager.settings.myDataFields.count)
         settingsManager.saveSettings()
-        UIAccessibility.post(notification: .announcement, argument: "Moved \(fieldName) to bottom")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "settings.reorder.moved_to_bottom", defaultValue: "Moved \(fieldName) to bottom", comment: "VoiceOver announcement after moving a list item to the bottom. %@ = the moved item."))
     }
 }
 

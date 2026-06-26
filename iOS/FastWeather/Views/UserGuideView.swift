@@ -1215,7 +1215,7 @@ struct UserGuideView: View {
 
 struct GuideSection<Content: View>: View {
     let icon: String
-    let title: String
+    let title: LocalizedStringKey
     let color: Color
     @ViewBuilder let content: Content
     

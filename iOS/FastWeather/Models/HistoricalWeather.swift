@@ -103,7 +103,9 @@ struct HistoricalDate: Equatable {
     
     var displayString: String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM d, yyyy"
+        // Locale-aware ordering: "May 28, 2026" (en) vs "28. Mai 2026" (de).
+        formatter.locale = .current
+        formatter.setLocalizedDateFormatFromTemplate("MMMMdyyyy")
         if let date = toDate() {
             return formatter.string(from: date)
         }
@@ -116,7 +118,8 @@ struct HistoricalDate: Equatable {
     
     var monthName: String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM"
+        formatter.locale = .current
+        formatter.setLocalizedDateFormatFromTemplate("MMMM")
         var components = DateComponents()
         components.month = month
         if let date = Calendar.current.date(from: components) {

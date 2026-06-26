@@ -74,27 +74,27 @@ struct TableView: View {
     /// Short labels for visual column headers — must fit in dataColumnWidth.
     private func shortName(for type: WeatherFieldType) -> String {
         switch type {
-        case .temperature:               return "Temp"
-        case .conditions:                return "Sky"
-        case .feelsLike:                 return "Feels"
-        case .humidity:                  return "Humid"
-        case .windSpeed:                 return "Wind"
-        case .windDirection:             return "Dir"
-        case .windGusts:                 return "Gusts"
-        case .precipitation:             return "Precip"
-        case .precipitationProbability:  return "POP"
-        case .rain:                      return "Rain"
-        case .showers:                   return "Shower"
-        case .snowfall:                  return "Snow"
-        case .cloudCover:                return "Cloud"
-        case .pressure:                  return "Press"
-        case .visibility:                return "Vis"
-        case .uvIndex:                   return "UV"
-        case .dewPoint:                  return "Dew"
-        case .highTemp:                  return "High"
-        case .lowTemp:                   return "Low"
-        case .sunrise:                   return "Rise"
-        case .sunset:                    return "Set"
+        case .temperature:               return String(localized: "table.short.temperature", defaultValue: "Temp", comment: "Short column header for Temperature")
+        case .conditions:                return String(localized: "table.short.conditions", defaultValue: "Sky", comment: "Short column header for Conditions")
+        case .feelsLike:                 return String(localized: "table.short.feels_like", defaultValue: "Feels", comment: "Short column header for Feels Like")
+        case .humidity:                  return String(localized: "table.short.humidity", defaultValue: "Humid", comment: "Short column header for Humidity")
+        case .windSpeed:                 return String(localized: "table.short.wind_speed", defaultValue: "Wind", comment: "Short column header for Wind Speed")
+        case .windDirection:             return String(localized: "table.short.wind_direction", defaultValue: "Dir", comment: "Short column header for Wind Direction")
+        case .windGusts:                 return String(localized: "table.short.wind_gusts", defaultValue: "Gusts", comment: "Short column header for Wind Gusts")
+        case .precipitation:             return String(localized: "table.short.precipitation", defaultValue: "Precip", comment: "Short column header for Precipitation")
+        case .precipitationProbability:  return String(localized: "table.short.precipitation_probability", defaultValue: "POP", comment: "Short column header for Precipitation Probability (probability of precipitation)")
+        case .rain:                      return String(localized: "table.short.rain", defaultValue: "Rain", comment: "Short column header for Rain")
+        case .showers:                   return String(localized: "table.short.showers", defaultValue: "Shower", comment: "Short column header for Showers")
+        case .snowfall:                  return String(localized: "table.short.snowfall", defaultValue: "Snow", comment: "Short column header for Snowfall")
+        case .cloudCover:                return String(localized: "table.short.cloud_cover", defaultValue: "Cloud", comment: "Short column header for Cloud Cover")
+        case .pressure:                  return String(localized: "table.short.pressure", defaultValue: "Press", comment: "Short column header for Pressure")
+        case .visibility:                return String(localized: "table.short.visibility", defaultValue: "Vis", comment: "Short column header for Visibility")
+        case .uvIndex:                   return String(localized: "table.short.uv_index", defaultValue: "UV", comment: "Short column header for UV Index")
+        case .dewPoint:                  return String(localized: "table.short.dew_point", defaultValue: "Dew", comment: "Short column header for Dew Point")
+        case .highTemp:                  return String(localized: "field.high_short", defaultValue: "High", comment: "Short label for high temperature")
+        case .lowTemp:                   return String(localized: "field.low_short", defaultValue: "Low", comment: "Short label for low temperature")
+        case .sunrise:                   return String(localized: "table.short.sunrise", defaultValue: "Rise", comment: "Short column header for Sunrise")
+        case .sunset:                    return String(localized: "table.short.sunset", defaultValue: "Set", comment: "Short column header for Sunset")
         case .weatherAlerts:             return ""
         }
     }
@@ -115,7 +115,8 @@ struct TableView: View {
     // MARK: - Accessibility data
 
     private func accessibilityHeaders(columns: [WeatherField]) -> [String] {
-        ["City"] + columns.map { $0.type.rawValue }
+        [String(localized: "table.column.city", defaultValue: "City", comment: "Table column header")]
+            + columns.map { $0.type.localizedLabel }
     }
 
     private func accessibilityRows(cities: [City], columns: [WeatherField]) -> [[String]] {
@@ -204,7 +205,9 @@ struct TableView: View {
                             withAnimation {
                                 weatherService.removeCity(city)
                                 UIAccessibility.post(notification: .announcement,
-                                                     argument: "Removed \(city.displayName)")
+                                                     argument: String(localized: "announce.removed_city",
+                                                                      defaultValue: "Removed \(city.displayName)",
+                                                                      comment: "VoiceOver announcement; placeholder is the city name"))
                             }
                         } label: {
                             Label("Remove City", systemImage: "trash")
@@ -272,7 +275,9 @@ struct TableView: View {
         let aboveName = weatherService.savedCities[index - 1].displayName
         weatherService.moveCity(from: IndexSet(integer: index), to: index - 1)
         UIAccessibility.post(notification: .announcement,
-                             argument: "Moved \(cityName) above \(aboveName)")
+                             argument: String(localized: "announce.moved_above",
+                                              defaultValue: "Moved \(cityName) above \(aboveName)",
+                                              comment: "VoiceOver announcement; placeholders are the moved city and the city now above it"))
     }
 
     private func moveCityDown(at index: Int) {
@@ -281,7 +286,9 @@ struct TableView: View {
         let belowName = weatherService.savedCities[index + 1].displayName
         weatherService.moveCity(from: IndexSet(integer: index), to: index + 2)
         UIAccessibility.post(notification: .announcement,
-                             argument: "Moved \(cityName) below \(belowName)")
+                             argument: String(localized: "announce.moved_below",
+                                              defaultValue: "Moved \(cityName) below \(belowName)",
+                                              comment: "VoiceOver announcement; placeholders are the moved city and the city now below it"))
     }
 
     // MARK: - Field value helper

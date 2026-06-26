@@ -306,13 +306,13 @@ struct HistoricalWeatherView: View {
                     // Get start date
                     guard let startDate = dateFormatter.date(from: selectedDate.dateString) else {
                         data = []
-                        throw NSError(domain: "HistoricalWeather", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid start date"])
+                        throw NSError(domain: "HistoricalWeather", code: -1, userInfo: [NSLocalizedDescriptionKey: String(localized: "historical.error.invalid_start_date", defaultValue: "Invalid start date", comment: "Error when the chosen start date cannot be parsed")])
                     }
                     
                     // Calculate end date (30 days from start)
                     guard let endDate = calendar.date(byAdding: .day, value: 30, to: startDate) else {
                         data = []
-                        throw NSError(domain: "HistoricalWeather", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid end date"])
+                        throw NSError(domain: "HistoricalWeather", code: -1, userInfo: [NSLocalizedDescriptionKey: String(localized: "historical.error.invalid_end_date", defaultValue: "Invalid end date", comment: "Error when the computed end date cannot be derived")])
                     }
                     
                     let startString = dateFormatter.string(from: startDate)
@@ -357,7 +357,9 @@ struct HistoricalWeatherView: View {
                 }
             } catch {
                 await MainActor.run {
-                    errorMessage = "Failed to load: \(error.localizedDescription)"
+                    errorMessage = String(localized: "historical.error.failed_to_load",
+                                          defaultValue: "Failed to load: \(error.localizedDescription)",
+                                          comment: "Error shown when historical weather data fails to load")
                     isLoading = false
                 }
             }
@@ -424,22 +426,30 @@ struct HistoricalWeatherView: View {
     private var previousButtonLabel: String {
         switch viewMode {
         case .dailyBrowse:
-            return "Previous 30 days"
+            return String(localized: "historical.nav.previous_30_days", defaultValue: "Previous 30 days",
+                          comment: "VoiceOver: go back 30 days in daily browse mode")
         case .multiYear:
-            return "Previous \(settingsManager.settings.historicalYearsBack) years"
+            return String(localized: "historical.nav.previous_years",
+                          defaultValue: "Previous \(settingsManager.settings.historicalYearsBack) years",
+                          comment: "VoiceOver: go back N years in multi-year mode")
         default:
-            return "Previous day"
+            return String(localized: "historical.nav.previous_day", defaultValue: "Previous day",
+                          comment: "VoiceOver: go back one day in single-day mode")
         }
     }
-    
+
     private var nextButtonLabel: String {
         switch viewMode {
         case .dailyBrowse:
-            return "Next 30 days"
+            return String(localized: "historical.nav.next_30_days", defaultValue: "Next 30 days",
+                          comment: "VoiceOver: go forward 30 days in daily browse mode")
         case .multiYear:
-            return "Next \(settingsManager.settings.historicalYearsBack) years"
+            return String(localized: "historical.nav.next_years",
+                          defaultValue: "Next \(settingsManager.settings.historicalYearsBack) years",
+                          comment: "VoiceOver: go forward N years in multi-year mode")
         default:
-            return "Next day"
+            return String(localized: "historical.nav.next_day", defaultValue: "Next day",
+                          comment: "VoiceOver: go forward one day in single-day mode")
         }
     }
 }
@@ -453,7 +463,7 @@ struct HistoricalDayRow: View {
     
     private var dateLabel: String {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MMM d"
+        dateFormatter.setLocalizedDateFormatFromTemplate("MMMd")
         return dateFormatter.string(from: day.date)
     }
     
@@ -623,7 +633,7 @@ struct DatePickerSheet: View {
     
     private func monthName(_ month: Int) -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM"
+        formatter.setLocalizedDateFormatFromTemplate("MMMM")
         var components = DateComponents()
         components.month = month
         return formatter.string(from: Calendar.current.date(from: components) ?? Date())

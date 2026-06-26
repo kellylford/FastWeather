@@ -353,8 +353,34 @@ struct CountryNames {
         "Philipines": "Philippines",
     ]
     
+    // MARK: - Localized Display Names
+
+    /// Reverse of `isoToEnglish`: canonical English name → ISO 3166-1 alpha-2 code.
+    /// Built once. Used only to resolve a localized display name; storage stays English.
+    private static let englishToISO: [String: String] = {
+        var map: [String: String] = [:]
+        for (iso, english) in isoToEnglish {
+            map[english] = iso
+        }
+        return map
+    }()
+
+    /// Returns a country name localized to the user's current language.
+    ///
+    /// Country names are stored canonically in English (see `normalize`). For *display*,
+    /// we resolve the canonical English name back to an ISO code and ask the system for the
+    /// localized name (e.g. "Germany" → "Deutschland"/"Allemagne"). Falls back to the English
+    /// name when the country is not in our map. Storage and lookups are unaffected.
+    static func localizedName(for englishName: String, locale: Locale = .current) -> String {
+        guard let iso = englishToISO[englishName],
+              let localized = locale.localizedString(forRegionCode: iso) else {
+            return englishName
+        }
+        return localized
+    }
+
     // MARK: - Normalization Functions
-    
+
     /// Normalize a country name to US English
     /// - Parameters:
     ///   - countryName: Native or English country name

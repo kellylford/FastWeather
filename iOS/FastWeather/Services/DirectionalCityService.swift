@@ -313,6 +313,20 @@ public enum CardinalDirection: String, CaseIterable {
     case west = "West"
     case northwest = "Northwest"
     
+    /// User-facing, localized name. The `rawValue` is a stable English key — never display it.
+    var localizedLabel: String {
+        switch self {
+        case .north:     String(localized: "direction.north", defaultValue: "North", comment: "Compass direction")
+        case .northeast: String(localized: "direction.northeast", defaultValue: "Northeast", comment: "Compass direction")
+        case .east:      String(localized: "direction.east", defaultValue: "East", comment: "Compass direction")
+        case .southeast: String(localized: "direction.southeast", defaultValue: "Southeast", comment: "Compass direction")
+        case .south:     String(localized: "direction.south", defaultValue: "South", comment: "Compass direction")
+        case .southwest: String(localized: "direction.southwest", defaultValue: "Southwest", comment: "Compass direction")
+        case .west:      String(localized: "direction.west", defaultValue: "West", comment: "Compass direction")
+        case .northwest: String(localized: "direction.northwest", defaultValue: "Northwest", comment: "Compass direction")
+        }
+    }
+
     var bearing: Double {
         switch self {
         case .north: return 0
@@ -375,14 +389,14 @@ public struct DirectionalCityInfo: Identifiable {
     public var displayName: String {
         var parts = [name]
         if let state = state { parts.append(state) }
-        parts.append(country)
+        parts.append(CountryNames.localizedName(for: country))
         return parts.joined(separator: ", ")
     }
-    
+
     public func displayName(relativeTo homeCountry: String) -> String {
         var parts = [name]
         if let state = state { parts.append(state) }
-        if country != homeCountry { parts.append(country) }
+        if country != homeCountry { parts.append(CountryNames.localizedName(for: country)) }
         return parts.joined(separator: ", ")
     }
     
@@ -392,19 +406,25 @@ public struct DirectionalCityInfo: Identifiable {
         let absOffset = abs(perpendicularOffsetMiles)
         
         if absOffset < 1.0 {
-            return "On center line"
+            return String(localized: "around_me.offset.on_center", defaultValue: "On center line",
+                          comment: "Accessibility: a city sits on the search center line")
         }
-        
-        let direction = perpendicularOffsetMiles > 0 ? "east" : "west"
+
         let distance: String
-        
         if distanceUnit == .miles {
-            distance = String(format: "%.0f miles", absOffset)
+            distance = String(localized: "around_me.distance_miles", defaultValue: "\(Int(absOffset.rounded())) miles",
+                              comment: "A distance in miles. %lld is the number of miles.")
         } else {
-            let km = absOffset * 1.60934
-            distance = String(format: "%.0f km", km)
+            let km = Int((absOffset * 1.60934).rounded())
+            distance = String(localized: "around_me.distance_km", defaultValue: "\(km) km",
+                              comment: "A distance in kilometers. %lld is the number of km.")
         }
-        
-        return "\(distance) \(direction) of center line"
+
+        // East/west offset from the search center line, e.g. "5 miles east of center line".
+        return perpendicularOffsetMiles > 0
+            ? String(localized: "around_me.offset.east", defaultValue: "\(distance) east of center line",
+                     comment: "Accessibility: how far a city is east of the center line. %@ is a distance like '5 miles'.")
+            : String(localized: "around_me.offset.west", defaultValue: "\(distance) west of center line",
+                     comment: "Accessibility: how far a city is west of the center line. %@ is a distance like '5 miles'.")
     }
 }

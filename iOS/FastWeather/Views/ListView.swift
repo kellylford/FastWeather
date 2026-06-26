@@ -298,7 +298,7 @@ struct ListView: View {
               let times = hourly.time,
               let temps = hourly.temperature2m,
               let precips = hourly.precipitationProbability else {
-            return "Forecast not yet loaded"
+            return String(localized: "glance.forecast_not_loaded", defaultValue: "Forecast not yet loaded", comment: "Shown when the forecast data has not loaded yet")
         }
 
         // Find the first hourly index whose timestamp is at or after the current moment,
@@ -316,7 +316,9 @@ struct ListView: View {
         }
 
         let endIndex = min(startIndex + settingsManager.settings.glanceAheadHours, times.count)
-        guard startIndex < endIndex else { return "Forecast not yet loaded" }
+        guard startIndex < endIndex else {
+            return String(localized: "glance.forecast_not_loaded", defaultValue: "Forecast not yet loaded", comment: "Shown when the forecast data has not loaded yet")
+        }
 
         let unit = settingsManager.settings.temperatureUnit
         let tempSlice = (startIndex..<endIndex).compactMap { i -> Double? in
@@ -329,29 +331,40 @@ struct ListView: View {
         }
 
         guard let firstTemp = tempSlice.first, let lastTemp = tempSlice.last else {
-            return "Forecast not yet loaded"
+            return String(localized: "glance.forecast_not_loaded", defaultValue: "Forecast not yet loaded", comment: "Shown when the forecast data has not loaded yet")
         }
 
         let roundedLast = Int(lastTemp.rounded())
         let diff = lastTemp - firstTemp
+        // unit.rawValue is a temperature symbol (°F/°C) — left raw by policy.
         let tempPart: String
         if abs(diff) < 3 {
-            tempPart = "Around \(roundedLast)\(unit.rawValue)"
+            tempPart = String(localized: "forecast.trend.steady",
+                              defaultValue: "Around \(roundedLast)\(unit.rawValue)",
+                              comment: "Glance ahead temperature trend, roughly steady. Placeholder is temperature with unit symbol.")
         } else if diff > 0 {
-            tempPart = "Increasing to around \(roundedLast)\(unit.rawValue)"
+            tempPart = String(localized: "forecast.trend.increasing",
+                              defaultValue: "Increasing to around \(roundedLast)\(unit.rawValue)",
+                              comment: "Glance ahead temperature trend, rising. Placeholder is temperature with unit symbol.")
         } else {
-            tempPart = "Decreasing to around \(roundedLast)\(unit.rawValue)"
+            tempPart = String(localized: "forecast.trend.decreasing",
+                              defaultValue: "Decreasing to around \(roundedLast)\(unit.rawValue)",
+                              comment: "Glance ahead temperature trend, falling. Placeholder is temperature with unit symbol.")
         }
 
         let maxPrecip = precipSlice.max() ?? 0
         let precipPart: String
         if maxPrecip <= 5 {
-            precipPart = "no precipitation expected"
+            precipPart = String(localized: "forecast.no_precipitation", defaultValue: "no precipitation expected", comment: "Glance ahead summary: no precipitation expected")
         } else {
-            precipPart = "\(maxPrecip)% chance of precipitation"
+            precipPart = String(localized: "forecast.precip_chance",
+                                defaultValue: "\(maxPrecip)% chance of precipitation",
+                                comment: "Glance ahead summary: chance of precipitation. Placeholder is a percentage.")
         }
 
-        return "\(tempPart), \(precipPart)"
+        return String(localized: "glance.summary",
+                      defaultValue: "\(tempPart), \(precipPart)",
+                      comment: "Glance ahead summary combining temperature trend and precipitation, e.g. 'Around 70°F, no precipitation expected'")
     }
 
     @ViewBuilder
@@ -579,50 +592,50 @@ struct ListRowView: View {
                 
             case .conditions:
                 if let weatherCode = weather.current.weatherCodeEnum {
-                    parts.append(isDetails ? "Conditions: \(weatherCode.description)" : weatherCode.description)
+                    parts.append(isDetails ? String(localized: "summary.conditions", defaultValue: "Conditions: \(weatherCode.description)", comment: "City list summary field") : weatherCode.description)
                 }
-                
+
             case .feelsLike:
                 if let apparentTemp = weather.current.apparentTemperature {
                     let value = formatTemperature(apparentTemp)
-                    parts.append(isDetails ? "Feels Like: \(value)" : value)
+                    parts.append(isDetails ? String(localized: "summary.feels_like", defaultValue: "Feels Like: \(value)", comment: "City list summary field") : value)
                 }
-                
+
             case .humidity:
                 if let humidity = weather.current.relativeHumidity2m {
                     let value = "\(humidity)%"
-                    parts.append(isDetails ? "Humidity: \(value)" : value)
+                    parts.append(isDetails ? String(localized: "summary.humidity", defaultValue: "Humidity: \(value)", comment: "City list summary field") : value)
                 }
-                
+
             case .windSpeed:
                 if let windSpeed = weather.current.windSpeed10m {
                     let value = formatWindSpeed(windSpeed)
-                    parts.append(isDetails ? "Wind Speed: \(value)" : value)
+                    parts.append(isDetails ? String(localized: "summary.wind_speed", defaultValue: "Wind Speed: \(value)", comment: "City list summary field") : value)
                 }
-                
+
             case .windDirection:
                 if let windDir = weather.current.windDirection10m {
                     let value = formatWindDirection(windDir)
-                    parts.append(isDetails ? "Wind Direction: \(value)" : value)
+                    parts.append(isDetails ? String(localized: "summary.wind_direction", defaultValue: "Wind Direction: \(value)", comment: "City list summary field") : value)
                 }
-                
+
             case .windGusts:
                 if let windGusts = weather.current.windGusts10m {
                     let value = formatWindSpeed(windGusts)
-                    parts.append(isDetails ? "Wind Gusts: \(value)" : value)
+                    parts.append(isDetails ? String(localized: "summary.wind_gusts", defaultValue: "Wind Gusts: \(value)", comment: "City list summary field") : value)
                 }
-                
+
             case .precipitation:
                 let snowfall = weather.daily?.snowfallSum?.first.flatMap { $0 } ?? weather.current.snowfall ?? 0
                 let precip = weather.daily?.precipitationSum?.first.flatMap { $0 } ?? weather.current.precipitation ?? 0
                 if snowfall > 0 {
                     let value = formatSnowfall(snowfall)
-                    parts.append(isDetails ? "Snow: \(value)" : value)
+                    parts.append(isDetails ? String(localized: "summary.snow", defaultValue: "Snow: \(value)", comment: "City list summary field") : value)
                 } else if precip > 0 {
                     let value = formatPrecipitation(precip)
-                    parts.append(isDetails ? "Rain: \(value)" : value)
+                    parts.append(isDetails ? String(localized: "summary.rain", defaultValue: "Rain: \(value)", comment: "City list summary field") : value)
                 }
-                
+
             case .precipitationProbability:
                 // Get from first hour of hourly data if available
                 if let hourly = weather.hourly,
@@ -636,91 +649,91 @@ struct ListRowView: View {
                        let precipAmount = precipArray[0], precipAmount > 0.0 {
                         value += " (\(formatPrecipitation(precipAmount)))"
                     }
-                    parts.append(isDetails ? "Precip Probability: \(value)" : value)
+                    parts.append(isDetails ? String(localized: "summary.precip_probability", defaultValue: "Precip Probability: \(value)", comment: "City list summary field") : value)
                 }
-                
+
             case .rain:
                 if let rain = weather.current.rain, rain > 0 {
                     let value = formatPrecipitation(rain)
-                    parts.append(isDetails ? "Rain: \(value)" : value)
+                    parts.append(isDetails ? String(localized: "summary.rain", defaultValue: "Rain: \(value)", comment: "City list summary field") : value)
                 }
-                
+
             case .showers:
                 if let showers = weather.current.showers, showers > 0 {
                     let value = formatPrecipitation(showers)
-                    parts.append(isDetails ? "Showers: \(value)" : value)
+                    parts.append(isDetails ? String(localized: "summary.showers", defaultValue: "Showers: \(value)", comment: "City list summary field") : value)
                 }
-                
+
             case .snowfall:
                 let snow = weather.daily?.snowfallSum?.first.flatMap { $0 } ?? weather.current.snowfall ?? 0
                 if snow > 0 {
                     let value = formatSnowfall(snow)
-                    parts.append(isDetails ? "Snow: \(value)" : value)
+                    parts.append(isDetails ? String(localized: "summary.snow", defaultValue: "Snow: \(value)", comment: "City list summary field") : value)
                 }
-                
+
             case .cloudCover:
                 let cc = weather.current.cloudCover
                 let value = "\(cc)%"
-                parts.append(isDetails ? "Cloud Cover: \(value)" : value)
-                
+                parts.append(isDetails ? String(localized: "summary.cloud_cover", defaultValue: "Cloud Cover: \(value)", comment: "City list summary field") : value)
+
             case .pressure:
                 if let pressure = weather.current.pressureMsl {
                     let value = formatPressure(pressure)
-                    parts.append(isDetails ? "Pressure: \(value)" : value)
+                    parts.append(isDetails ? String(localized: "summary.pressure", defaultValue: "Pressure: \(value)", comment: "City list summary field") : value)
                 }
-                
+
             case .visibility:
                 if let vis = weather.current.visibility {
                     let value = formatVisibility(vis)
-                    parts.append(isDetails ? "Visibility: \(value)" : value)
+                    parts.append(isDetails ? String(localized: "summary.visibility", defaultValue: "Visibility: \(value)", comment: "City list summary field") : value)
                 }
-                
+
             case .uvIndex:
                 // Only show during daytime
                 if let isDay = weather.current.isDay, isDay == 1,
                    let uvIndex = weather.current.uvIndex {
                     let value = String(format: "%.1f", uvIndex)
-                    parts.append(isDetails ? "UV Index: \(value)" : value)
+                    parts.append(isDetails ? String(localized: "summary.uv_index", defaultValue: "UV Index: \(value)", comment: "City list summary field") : value)
                 }
-                
+
             case .dewPoint:
                 if let dewPoint = weather.current.dewpoint2m {
                     let value = formatTemperature(dewPoint)
-                    parts.append(isDetails ? "Dew Point: \(value)" : value)
+                    parts.append(isDetails ? String(localized: "summary.dew_point", defaultValue: "Dew Point: \(value)", comment: "City list summary field") : value)
                 }
-                
+
             case .highTemp:
                 if let daily = weather.daily, !daily.temperature2mMax.isEmpty, let maxTemp = daily.temperature2mMax[0] {
                     let value = formatTemperature(maxTemp)
-                    parts.append(isDetails ? "High: \(value)" : value)
+                    parts.append(isDetails ? String(localized: "summary.high", defaultValue: "High: \(value)", comment: "City list summary field") : value)
                 }
-                
+
             case .lowTemp:
                 if let daily = weather.daily, !daily.temperature2mMin.isEmpty, let minTemp = daily.temperature2mMin[0] {
                     let value = formatTemperature(minTemp)
-                    parts.append(isDetails ? "Low: \(value)" : value)
+                    parts.append(isDetails ? String(localized: "summary.low", defaultValue: "Low: \(value)", comment: "City list summary field") : value)
                 }
-                
+
             case .sunrise:
                 if let daily = weather.daily, let sunriseArray = daily.sunrise, !sunriseArray.isEmpty, let sunrise = sunriseArray[0] {
                     let value = formatTime(sunrise)
-                    parts.append(isDetails ? "Sunrise: \(value)" : value)
+                    parts.append(isDetails ? String(localized: "summary.sunrise", defaultValue: "Sunrise: \(value)", comment: "City list summary field") : value)
                 }
-                
+
             case .sunset:
                 if let daily = weather.daily, let sunsetArray = daily.sunset, !sunsetArray.isEmpty, let sunset = sunsetArray[0] {
                     let value = formatTime(sunset)
-                    parts.append(isDetails ? "Sunset: \(value)" : value)
+                    parts.append(isDetails ? String(localized: "summary.sunset", defaultValue: "Sunset: \(value)", comment: "City list summary field") : value)
                 }
             }
         }
-        
+
         return parts.joined(separator: " • ")
     }
     
     private func buildAccessibilityLabel() -> String {
         guard let weather = weather else {
-            return "\(city.displayName), Loading"
+            return String(localized: "city_row.loading_accessibility", defaultValue: "\(city.displayName), Loading", comment: "Accessibility label for a city row while weather is loading. Placeholder is the city name.")
         }
         
         // Start with city name, then temperature (always shown)
@@ -737,9 +750,9 @@ struct ListRowView: View {
                 if let alert = highestSeverityAlert {
                     label += ", "
                     if alerts.count == 1 {
-                        label += isDetails ? "Alert: \(alert.event)" : alert.event
+                        label += isDetails ? String(localized: "city_row.alert_single", defaultValue: "Alert: \(alert.event)", comment: "Accessibility: one active weather alert. Placeholder is the alert event name.") : alert.event
                     } else {
-                        label += isDetails ? "Alerts: \(alert.event) and \(alerts.count - 1) more" : "\(alert.event) +\(alerts.count - 1)"
+                        label += isDetails ? String(localized: "city_row.alerts_multiple", defaultValue: "Alerts: \(alert.event) and \(alerts.count - 1) more", comment: "Accessibility: multiple active alerts. First placeholder is the top alert event, second is the count of additional alerts.") : String(localized: "city_row.alerts_multiple_short", defaultValue: "\(alert.event) +\(alerts.count - 1)", comment: "Compact: top alert event plus count of additional alerts, e.g. 'Tornado Warning +2'")
                     }
                 }
                 
@@ -750,37 +763,37 @@ struct ListRowView: View {
             case .conditions:
                 if let weatherCode = weather.current.weatherCodeEnum {
                     label += ", "
-                    label += isDetails ? "Conditions: \(weatherCode.description)" : weatherCode.description
+                    label += isDetails ? String(localized: "summary.conditions", defaultValue: "Conditions: \(weatherCode.description)", comment: "City list summary field") : weatherCode.description
                 }
-                
+
             case .feelsLike:
                 if let apparentTemp = weather.current.apparentTemperature {
                     label += ", "
-                    label += isDetails ? "Feels Like: \(formatTemperature(apparentTemp))" : formatTemperature(apparentTemp)
+                    label += isDetails ? String(localized: "summary.feels_like", defaultValue: "Feels Like: \(formatTemperature(apparentTemp))", comment: "City list summary field") : formatTemperature(apparentTemp)
                 }
-                
+
             case .humidity:
                 if let humidity = weather.current.relativeHumidity2m {
                     label += ", "
-                    label += isDetails ? "Humidity: \(humidity)%" : "\(humidity)%"
+                    label += isDetails ? String(localized: "summary.humidity", defaultValue: "Humidity: \(humidity)%", comment: "City list summary field") : "\(humidity)%"
                 }
-                
+
             case .windSpeed:
                 if let windSpeed = weather.current.windSpeed10m {
                     label += ", "
-                    label += isDetails ? "Wind Speed: \(formatWindSpeed(windSpeed))" : formatWindSpeed(windSpeed)
+                    label += isDetails ? String(localized: "summary.wind_speed", defaultValue: "Wind Speed: \(formatWindSpeed(windSpeed))", comment: "City list summary field") : formatWindSpeed(windSpeed)
                 }
-                
+
             case .windDirection:
                 if let windDir = weather.current.windDirection10m {
                     label += ", "
-                    label += isDetails ? "Wind Direction: \(formatWindDirection(windDir))" : formatWindDirection(windDir)
+                    label += isDetails ? String(localized: "summary.wind_direction", defaultValue: "Wind Direction: \(formatWindDirection(windDir))", comment: "City list summary field") : formatWindDirection(windDir)
                 }
-                
+
             case .windGusts:
                 if let windGusts = weather.current.windGusts10m {
                     label += ", "
-                    label += isDetails ? "Wind Gusts: \(formatWindSpeed(windGusts))" : formatWindSpeed(windGusts)
+                    label += isDetails ? String(localized: "summary.wind_gusts", defaultValue: "Wind Gusts: \(formatWindSpeed(windGusts))", comment: "City list summary field") : formatWindSpeed(windGusts)
                 }
                 
             case .precipitation:
@@ -788,12 +801,12 @@ struct ListRowView: View {
                 let precip = weather.daily?.precipitationSum?.first.flatMap { $0 } ?? weather.current.precipitation ?? 0
                 if snowfall > 0 {
                     label += ", "
-                    label += isDetails ? "Snow: \(formatSnowfall(snowfall))" : formatSnowfall(snowfall)
+                    label += isDetails ? String(localized: "summary.snow", defaultValue: "Snow: \(formatSnowfall(snowfall))", comment: "City list summary field") : formatSnowfall(snowfall)
                 } else if precip > 0 {
                     label += ", "
-                    label += isDetails ? "Rain: \(formatPrecipitation(precip))" : formatPrecipitation(precip)
+                    label += isDetails ? String(localized: "summary.rain", defaultValue: "Rain: \(formatPrecipitation(precip))", comment: "City list summary field") : formatPrecipitation(precip)
                 }
-                
+
             case .precipitationProbability:
                 // Get from first hour of hourly data if available
                 if let hourly = weather.hourly,
@@ -806,63 +819,63 @@ struct ListRowView: View {
                        !precipArray.isEmpty,
                        let precipAmount = precipArray[0], precipAmount > 0.0 {
                         if isDetails {
-                            label += "Precipitation Probability: \(prob)%, Expected: \(formatPrecipitation(precipAmount))"
+                            label += String(localized: "summary.precip_probability_expected", defaultValue: "Precipitation Probability: \(prob)%, Expected: \(formatPrecipitation(precipAmount))", comment: "Accessibility: precipitation probability with expected amount.")
                         } else {
-                            label += "\(prob)%, \(formatPrecipitation(precipAmount))"
+                            label += String(localized: "summary.precip_probability_expected_short", defaultValue: "\(prob)%, \(formatPrecipitation(precipAmount))", comment: "Compact: precipitation probability percent and expected amount.")
                         }
                     } else {
-                        label += isDetails ? "Precipitation Probability: \(prob)%" : "\(prob)%"
+                        label += isDetails ? String(localized: "summary.precip_probability_full", defaultValue: "Precipitation Probability: \(prob)%", comment: "Accessibility: precipitation probability.") : "\(prob)%"
                     }
                 }
-                
+
             case .rain:
                 if let rain = weather.current.rain, rain > 0 {
                     label += ", "
-                    label += isDetails ? "Rain: \(formatPrecipitation(rain))" : formatPrecipitation(rain)
+                    label += isDetails ? String(localized: "summary.rain", defaultValue: "Rain: \(formatPrecipitation(rain))", comment: "City list summary field") : formatPrecipitation(rain)
                 }
-                
+
             case .showers:
                 if let showers = weather.current.showers, showers > 0 {
                     label += ", "
-                    label += isDetails ? "Showers: \(formatPrecipitation(showers))" : formatPrecipitation(showers)
+                    label += isDetails ? String(localized: "summary.showers", defaultValue: "Showers: \(formatPrecipitation(showers))", comment: "City list summary field") : formatPrecipitation(showers)
                 }
-                
+
             case .snowfall:
                 let snow = weather.daily?.snowfallSum?.first.flatMap { $0 } ?? weather.current.snowfall ?? 0
                 if snow > 0 {
                     label += ", "
-                    label += isDetails ? "Snow: \(formatSnowfall(snow))" : formatSnowfall(snow)
+                    label += isDetails ? String(localized: "summary.snow", defaultValue: "Snow: \(formatSnowfall(snow))", comment: "City list summary field") : formatSnowfall(snow)
                 }
-                
+
             case .cloudCover:
                 let cc = weather.current.cloudCover
                 label += ", "
-                label += isDetails ? "Cloud Cover: \(cc)%" : "\(cc)%"
-                
+                label += isDetails ? String(localized: "summary.cloud_cover", defaultValue: "Cloud Cover: \(cc)%", comment: "City list summary field") : "\(cc)%"
+
             case .pressure:
                 if let pressure = weather.current.pressureMsl {
                     label += ", "
-                    label += isDetails ? "Pressure: \(formatPressure(pressure))" : formatPressure(pressure)
+                    label += isDetails ? String(localized: "summary.pressure", defaultValue: "Pressure: \(formatPressure(pressure))", comment: "City list summary field") : formatPressure(pressure)
                 }
-                
+
             case .visibility:
                 if let vis = weather.current.visibility {
                     label += ", "
-                    label += isDetails ? "Visibility: \(formatVisibility(vis))" : formatVisibility(vis)
+                    label += isDetails ? String(localized: "summary.visibility", defaultValue: "Visibility: \(formatVisibility(vis))", comment: "City list summary field") : formatVisibility(vis)
                 }
-                
+
             case .uvIndex:
                 // Only show during daytime
                 if let isDay = weather.current.isDay, isDay == 1,
                    let uvIndex = weather.current.uvIndex {
                     label += ", "
-                    label += isDetails ? "UV Index: \(String(format: "%.1f", uvIndex))" : String(format: "%.1f", uvIndex)
+                    label += isDetails ? String(localized: "summary.uv_index", defaultValue: "UV Index: \(String(format: "%.1f", uvIndex))", comment: "City list summary field") : String(format: "%.1f", uvIndex)
                 }
-                
+
             case .dewPoint:
                 if let dewPoint = weather.current.dewpoint2m {
                     label += ", "
-                    label += isDetails ? "Dew Point: \(formatTemperature(dewPoint))" : formatTemperature(dewPoint)
+                    label += isDetails ? String(localized: "summary.dew_point", defaultValue: "Dew Point: \(formatTemperature(dewPoint))", comment: "City list summary field") : formatTemperature(dewPoint)
                 }
                 
             case .highTemp:
@@ -875,36 +888,36 @@ struct ListRowView: View {
                        let maxTemp = daily.temperature2mMax[0],
                        let minTemp = daily.temperature2mMin[0] {
                         label += ", "
-                        label += isDetails ? "High: \(formatTemperature(maxTemp)), Low: \(formatTemperature(minTemp))" : "\(formatTemperature(maxTemp)), \(formatTemperature(minTemp))"
+                        label += isDetails ? String(localized: "summary.high_low", defaultValue: "High: \(formatTemperature(maxTemp)), Low: \(formatTemperature(minTemp))", comment: "City list summary: daily high and low temperatures.") : "\(formatTemperature(maxTemp)), \(formatTemperature(minTemp))"
                     }
                 } else {
                     // Only show high temp individually
                     if let daily = weather.daily, !daily.temperature2mMax.isEmpty, let maxTemp = daily.temperature2mMax[0] {
                         label += ", "
-                        label += isDetails ? "High: \(formatTemperature(maxTemp))" : formatTemperature(maxTemp)
+                        label += isDetails ? String(localized: "summary.high", defaultValue: "High: \(formatTemperature(maxTemp))", comment: "City list summary field") : formatTemperature(maxTemp)
                     }
                 }
-                
+
             case .lowTemp:
                 // Only announce low separately if NOT using combined daily high/low
                 if !settingsManager.settings.showDailyHighLowInCityList {
                     if let daily = weather.daily, !daily.temperature2mMin.isEmpty, let minTemp = daily.temperature2mMin[0] {
                         label += ", "
-                        label += isDetails ? "Low: \(formatTemperature(minTemp))" : formatTemperature(minTemp)
+                        label += isDetails ? String(localized: "summary.low", defaultValue: "Low: \(formatTemperature(minTemp))", comment: "City list summary field") : formatTemperature(minTemp)
                     }
                 }
                 // If showDailyHighLowInCityList is true, already announced with highTemp
-                
+
             case .sunrise:
                 if let daily = weather.daily, let sunriseArray = daily.sunrise, !sunriseArray.isEmpty, let sunrise = sunriseArray[0] {
                     label += ", "
-                    label += isDetails ? "Sunrise: \(formatTime(sunrise))" : formatTime(sunrise)
+                    label += isDetails ? String(localized: "summary.sunrise", defaultValue: "Sunrise: \(formatTime(sunrise))", comment: "City list summary field") : formatTime(sunrise)
                 }
-                
+
             case .sunset:
                 if let daily = weather.daily, let sunsetArray = daily.sunset, !sunsetArray.isEmpty, let sunset = sunsetArray[0] {
                     label += ", "
-                    label += isDetails ? "Sunset: \(formatTime(sunset))" : formatTime(sunset)
+                    label += isDetails ? String(localized: "summary.sunset", defaultValue: "Sunset: \(formatTime(sunset))", comment: "City list summary field") : formatTime(sunset)
                 }
             }
         }

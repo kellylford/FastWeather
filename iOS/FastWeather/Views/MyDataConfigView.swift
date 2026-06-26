@@ -309,7 +309,9 @@ struct MyDataConfigView: View {
             MyDataField(parameter: parameter, isEnabled: true)
         )
         settingsManager.saveSettings()
-        UIAccessibility.post(notification: .announcement, argument: "\(parameter.displayName) added to My Data")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "mydata.config.announce_added",
+                                                                            defaultValue: "\(parameter.displayName) added to My Data",
+                                                                            comment: "VoiceOver announcement when a data point is added"))
         
         // Refresh weather to include new parameter in API call
         if let city = previewCity {
@@ -330,7 +332,9 @@ struct MyDataConfigView: View {
             settingsManager.settings.myDataFields = updatedFields
             settingsManager.saveSettings()
         }
-        UIAccessibility.post(notification: .announcement, argument: "\(parameter.displayName) removed from My Data")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "mydata.config.announce_removed",
+                                                                            defaultValue: "\(parameter.displayName) removed from My Data",
+                                                                            comment: "VoiceOver announcement when a data point is removed"))
     }
     
     private func removeAllParameters() {
@@ -338,7 +342,9 @@ struct MyDataConfigView: View {
             settingsManager.settings.myDataFields = []
             settingsManager.saveSettings()
         }
-        UIAccessibility.post(notification: .announcement, argument: "All data points removed from My Data")
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "mydata.config.announce_all_removed",
+                                                                            defaultValue: "All data points removed from My Data",
+                                                                            comment: "VoiceOver announcement when all data points are removed"))
     }
     
     // MARK: - Preview Weather Loading
@@ -366,17 +372,25 @@ struct MyDataConfigView: View {
     
     private func accessibilityLabel(for parameter: MyDataParameter, isAdded: Bool) -> String {
         var label = "\(parameter.displayName). \(parameter.explanation)."
-        
+
         if let value = currentValue(for: parameter) {
             let formatted = MyDataFormatHelper.format(
                 parameter: parameter,
                 value: value,
                 settings: settingsManager.settings
             )
-            label += " Current value: \(formatted)."
+            label += " " + String(localized: "mydata.config.current_value",
+                                   defaultValue: "Current value: \(formatted).",
+                                   comment: "VoiceOver: live value for a data point in My Data config")
         }
-        
-        label += isAdded ? " Added to My Data." : " Not added."
+
+        label += isAdded
+            ? " " + String(localized: "mydata.config.added",
+                           defaultValue: "Added to My Data.",
+                           comment: "VoiceOver: data point is added to My Data")
+            : " " + String(localized: "mydata.config.not_added",
+                           defaultValue: "Not added.",
+                           comment: "VoiceOver: data point is not added to My Data")
         return label
     }
 }

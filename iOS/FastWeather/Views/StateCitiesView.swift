@@ -142,7 +142,7 @@ struct StateCitiesView: View {
                     Button {
                         sortOrder = option
                     } label: {
-                        Label(option.rawValue, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
+                        Label(option.localizedLabel, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
                     }
                 }
             }
@@ -151,7 +151,7 @@ struct StateCitiesView: View {
                     Button {
                         sortOrder = option
                     } label: {
-                        Label(option.rawValue, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
+                        Label(option.localizedLabel, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
                     }
                 }
             }
@@ -160,14 +160,14 @@ struct StateCitiesView: View {
                     Button {
                         sortOrder = option
                     } label: {
-                        Label(option.rawValue, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
+                        Label(option.localizedLabel, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
                     }
                 }
             }
         } label: {
             Label("Sort", systemImage: "arrow.up.arrow.down")
         }
-        .accessibilityLabel("Sort cities. Current sort: \(sortOrder.rawValue)")
+        .accessibilityLabel("Sort cities. Current sort: \(sortOrder.localizedLabel)")
     }
 
     private func loadAllWeather() async {
@@ -302,7 +302,7 @@ struct CountryCitiesView: View {
                     Button {
                         sortOrder = option
                     } label: {
-                        Label(option.rawValue, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
+                        Label(option.localizedLabel, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
                     }
                 }
             }
@@ -311,7 +311,7 @@ struct CountryCitiesView: View {
                     Button {
                         sortOrder = option
                     } label: {
-                        Label(option.rawValue, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
+                        Label(option.localizedLabel, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
                     }
                 }
             }
@@ -320,14 +320,14 @@ struct CountryCitiesView: View {
                     Button {
                         sortOrder = option
                     } label: {
-                        Label(option.rawValue, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
+                        Label(option.localizedLabel, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
                     }
                 }
             }
         } label: {
             Label("Sort", systemImage: "arrow.up.arrow.down")
         }
-        .accessibilityLabel("Sort cities. Current sort: \(sortOrder.rawValue)")
+        .accessibilityLabel("Sort cities. Current sort: \(sortOrder.localizedLabel)")
     }
 
     private func loadAllWeather() async {
@@ -412,23 +412,23 @@ struct CityLocationRowOptimized: View {
     private var weatherAccessibilityLabel: String {
         if let weatherData = weatherData {
             let temp = formatTemperature(weatherData.current.temperature2m)
-            let desc = weatherData.current.weatherCodeEnum?.description ?? "unknown conditions"
-            return "\(cityLocation.displayName), \(temp), \(desc)"
+            let desc = weatherData.current.weatherCodeEnum?.description ?? String(localized: "weather.unknown_conditions", defaultValue: "unknown conditions", comment: "Fallback when weather condition is unavailable")
+            return String(localized: "city_row.accessibility.weather", defaultValue: "\(cityLocation.displayName), \(temp), \(desc)", comment: "Accessibility label: city name, temperature, conditions")
         } else if isLoading {
-            return "\(cityLocation.displayName), loading weather"
+            return String(localized: "city_row.accessibility.loading", defaultValue: "\(cityLocation.displayName), loading weather", comment: "Accessibility label while weather is loading")
         } else {
-            return "\(cityLocation.displayName), unable to load weather"
+            return String(localized: "city_row.accessibility.unable_to_load", defaultValue: "\(cityLocation.displayName), unable to load weather", comment: "Accessibility label when weather failed to load")
         }
     }
-    
+
     private func addCity() {
         let city = cityLocation.toCity()
         weatherService.addCity(city)
-        
+
         // Announce to VoiceOver
         UIAccessibility.post(notification: .announcement, argument: "\(cityLocation.displayName) added to My Cities")
     }
-    
+
     private func formatTemperature(_ celsius: Double) -> String {
         let temp = settingsManager.settings.temperatureUnit.convert(celsius)
         let unit = settingsManager.settings.temperatureUnit == .fahrenheit ? "F" : "C"
@@ -503,10 +503,10 @@ struct CityLocationRow: View {
     private var weatherAccessibilityLabel: String {
         if let weatherData = weatherData {
             let temp = formatTemperature(weatherData.current.temperature2m)
-            let desc = weatherData.current.weatherCodeEnum?.description ?? "unknown conditions"
-            return "\(cityLocation.displayName), \(temp), \(desc)"
+            let desc = weatherData.current.weatherCodeEnum?.description ?? String(localized: "weather.unknown_conditions", defaultValue: "unknown conditions", comment: "Fallback when weather condition is unavailable")
+            return String(localized: "city_row.accessibility.weather", defaultValue: "\(cityLocation.displayName), \(temp), \(desc)", comment: "Accessibility label: city name, temperature, conditions")
         } else if isLoadingWeather {
-            return "\(cityLocation.displayName), loading weather"
+            return String(localized: "city_row.accessibility.loading", defaultValue: "\(cityLocation.displayName), loading weather", comment: "Accessibility label while weather is loading")
         }
         return cityLocation.displayName
     }
@@ -614,26 +614,26 @@ struct CityLocationDetailView: View {
                     GroupBox(label: Label("Current Conditions", systemImage: "thermometer")) {
                         VStack(spacing: 12) {
                             if let humidity = weather.current.relativeHumidity2m {
-                                DetailRow(label: "Humidity", value: "\(humidity)%")
+                                DetailRow(label: String(localized: "field.humidity", defaultValue: "Humidity", comment: "Weather detail row label"), value: "\(humidity)%")
                                 Divider()
                             }
                             if let windSpeed = weather.current.windSpeed10m {
-                                DetailRow(label: "Wind Speed", value: formatWindSpeed(windSpeed))
+                                DetailRow(label: String(localized: "field.wind_speed", defaultValue: "Wind Speed", comment: "Weather detail row label"), value: formatWindSpeed(windSpeed))
                                 Divider()
                             }
                             if let windDir = weather.current.windDirection10m {
-                                DetailRow(label: "Wind Direction", value: formatWindDirection(windDir))
+                                DetailRow(label: String(localized: "field.wind_direction", defaultValue: "Wind Direction", comment: "Weather detail row label"), value: formatWindDirection(windDir))
                                 Divider()
                             }
                             if let pressure = weather.current.pressureMsl {
-                                DetailRow(label: "Pressure", value: String(format: "%.1f hPa", pressure))
+                                DetailRow(label: String(localized: "field.pressure", defaultValue: "Pressure", comment: "Weather detail row label"), value: String(format: "%.1f hPa", pressure))
                                 Divider()
                             }
                             if let visibility = weather.current.visibility {
-                                DetailRow(label: "Visibility", value: formatVisibility(visibility))
+                                DetailRow(label: String(localized: "field.visibility", defaultValue: "Visibility", comment: "Weather detail row label"), value: formatVisibility(visibility))
                                 Divider()
                             }
-                            DetailRow(label: "Cloud Cover", value: "\(weather.current.cloudCover)%")
+                            DetailRow(label: String(localized: "field.cloud_cover", defaultValue: "Cloud Cover", comment: "Weather detail row label"), value: "\(weather.current.cloudCover)%")
                         }
                         .padding(.vertical, 8)
                     }
@@ -644,19 +644,19 @@ struct CityLocationDetailView: View {
                     GroupBox(label: Label("Precipitation", systemImage: "cloud.rain")) {
                         VStack(spacing: 12) {
                             if let precip = weather.current.precipitation {
-                                DetailRow(label: "Total", value: formatPrecipitation(precip))
+                                DetailRow(label: String(localized: "field.total", defaultValue: "Total", comment: "Precipitation total detail row label"), value: formatPrecipitation(precip))
                                 Divider()
                             }
                             if let rain = weather.current.rain {
-                                DetailRow(label: "Rain", value: formatPrecipitation(rain))
+                                DetailRow(label: String(localized: "field.rain", defaultValue: "Rain", comment: "Weather detail row label"), value: formatPrecipitation(rain))
                                 Divider()
                             }
                             if let showers = weather.current.showers {
-                                DetailRow(label: "Showers", value: formatPrecipitation(showers))
+                                DetailRow(label: String(localized: "field.showers", defaultValue: "Showers", comment: "Weather detail row label"), value: formatPrecipitation(showers))
                                 Divider()
                             }
                             if let snow = weather.current.snowfall {
-                                DetailRow(label: "Snowfall", value: formatPrecipitation(snow))
+                                DetailRow(label: String(localized: "field.snowfall", defaultValue: "Snowfall", comment: "Weather detail row label"), value: formatPrecipitation(snow))
                             }
                         }
                         .padding(.vertical, 8)
@@ -669,19 +669,19 @@ struct CityLocationDetailView: View {
                         GroupBox(label: Label("Today", systemImage: "calendar")) {
                             VStack(spacing: 12) {
                                 if let maxTemp = daily.temperature2mMax[0] {
-                                    DetailRow(label: "High", value: formatTemperature(maxTemp))
+                                    DetailRow(label: String(localized: "field.high_short", defaultValue: "High", comment: "Short label for high temperature"), value: formatTemperature(maxTemp))
                                 }
                                 Divider()
                                 if let minTemp = daily.temperature2mMin[0] {
-                                    DetailRow(label: "Low", value: formatTemperature(minTemp))
+                                    DetailRow(label: String(localized: "field.low_short", defaultValue: "Low", comment: "Short label for low temperature"), value: formatTemperature(minTemp))
                                 }
                                 Divider()
                                 if let sunriseArray = daily.sunrise, let sunrise = sunriseArray[0] {
-                                    DetailRow(label: "Sunrise", value: formatTime(sunrise))
+                                    DetailRow(label: String(localized: "field.sunrise", defaultValue: "Sunrise", comment: "Weather detail row label"), value: formatTime(sunrise))
                                 }
                                 Divider()
                                 if let sunsetArray = daily.sunset, let sunset = sunsetArray[0] {
-                                    DetailRow(label: "Sunset", value: formatTime(sunset))
+                                    DetailRow(label: String(localized: "field.sunset", defaultValue: "Sunset", comment: "Weather detail row label"), value: formatTime(sunset))
                                 }
                             }
                             .padding(.vertical, 8)

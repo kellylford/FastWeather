@@ -351,7 +351,7 @@ struct WeatherAroundMeView: View {
                         HStack {
                             Image(systemName: direction.icon)
                                 .accessibilityHidden(true)
-                            Text(direction.rawValue)
+                            Text(direction.localizedLabel)
                         }
                         .tag(direction)
                     }
@@ -359,9 +359,9 @@ struct WeatherAroundMeView: View {
                 .pickerStyle(.wheel)
                 .frame(height: 120)
                 .accessibilityLabel("Select direction to explore")
-                .accessibilityValue(selectedDirection.rawValue)
+                .accessibilityValue(selectedDirection.localizedLabel)
                 .onChange(of: selectedDirection) {
-                    UIAccessibility.post(notification: .announcement, argument: selectedDirection.rawValue)
+                    UIAccessibility.post(notification: .announcement, argument: selectedDirection.localizedLabel)
                     loadCitiesInDirection()
                 }
                 
@@ -376,7 +376,7 @@ struct WeatherAroundMeView: View {
                             .foregroundColor(.secondary)
                     }
                     .padding()
-                    .accessibilityLabel("Loading cities in \(selectedDirection.rawValue) direction")
+                    .accessibilityLabel("Loading cities in \(selectedDirection.localizedLabel) direction")
                 } else if citiesInDirection.isEmpty {
                     Text("No cities found in this direction")
                         .font(.body)
@@ -709,7 +709,9 @@ struct WeatherAroundMeView: View {
     
     private func showAllCities() {
         // Capture values at the moment the alert is triggered to prevent flashing
-        alertTitle = "Cities to the \(selectedDirection.rawValue)"
+        alertTitle = String(localized: "around_me.cities_to",
+                            defaultValue: "Cities to the \(selectedDirection.localizedLabel)",
+                            comment: "Header for the list of cities in a compass direction")
         alertMessage = citiesInDirection.map { cityInfo in
             "\(cityInfo.displayName(relativeTo: city.country)) (~\(formatDistanceFromMiles(cityInfo.distanceMiles)))"
         }.joined(separator: "\n")
@@ -721,14 +723,20 @@ struct WeatherAroundMeView: View {
         let interval = now.timeIntervalSince(date)
         
         if interval < 60 {
-            return "just now"
+            return String(localized: "around_me.updated.just_now",
+                          defaultValue: "just now",
+                          comment: "Relative time: updated less than a minute ago")
         } else if interval < 3600 {
             let minutes = Int(interval / 60)
-            return "\(minutes) minute\(minutes == 1 ? "" : "s") ago"
+            return String(localized: "around_me.updated.minutes_ago",
+                          defaultValue: "\(minutes) minute\(minutes == 1 ? "" : "s") ago",
+                          comment: "Relative time: updated N minutes ago")
         } else {
             let formatter = DateFormatter()
             formatter.timeStyle = .short
-            return "at \(formatter.string(from: date))"
+            return String(localized: "around_me.updated.at_time",
+                          defaultValue: "at \(formatter.string(from: date))",
+                          comment: "Relative time: updated at a specific clock time")
         }
     }
     
@@ -743,19 +751,25 @@ struct WeatherAroundMeView: View {
             
             if !warmerDirs.isEmpty {
                 let dirs = warmerDirs.map { $0.direction.lowercased() }.joined(separator: ", ")
-                summary.append("Warmer to the \(dirs)")
+                summary.append(String(localized: "around_me.summary.warmer",
+                                      defaultValue: "Warmer to the \(dirs)",
+                                      comment: "Regional summary: directions that are warmer"))
             }
             if !colderDirs.isEmpty {
                 let dirs = colderDirs.map { $0.direction.lowercased() }.joined(separator: ", ")
-                summary.append("Colder to the \(dirs)")
+                summary.append(String(localized: "around_me.summary.colder",
+                                      defaultValue: "Colder to the \(dirs)",
+                                      comment: "Regional summary: directions that are colder"))
             }
         }
-        
+
         // Precipitation patterns
         let precipDirs = regional.directions.filter { $0.condition?.lowercased().contains("rain") == true || $0.condition?.lowercased().contains("snow") == true }
         if !precipDirs.isEmpty {
             let dirs = precipDirs.map { $0.direction.lowercased() }.joined(separator: ", ")
-            summary.append("Precipitation to the \(dirs)")
+            summary.append(String(localized: "around_me.summary.precipitation",
+                                  defaultValue: "Precipitation to the \(dirs)",
+                                  comment: "Regional summary: directions with precipitation"))
         }
         
         return summary.isEmpty ? nil : summary.joined(separator: ". ")
@@ -764,7 +778,9 @@ struct WeatherAroundMeView: View {
     // MARK: - Accessibility Labels
     
     private func currentLocationAccessibilityLabel(_ location: DirectionalLocation) -> String {
-        var label = "Your location: \(city.name)"
+        var label = String(localized: "around_me.your_location",
+                           defaultValue: "Your location: \(city.name)",
+                           comment: "Accessibility label prefix for the user's current location")
         if let temp = location.temperature {
             label += ", \(formatTemperature(temp))"
         }
@@ -773,14 +789,18 @@ struct WeatherAroundMeView: View {
         }
         return label
     }
-    
+
     private func directionalAccessibilityLabel(_ location: DirectionalLocation) -> String {
         let actualDistance = calculateDistance(from: city, to: location)
         var label = "\(location.direction)"
         if let locationName = location.locationName {
-            label += ", near \(locationName), \(actualDistance) \(settingsManager.settings.distanceUnit.rawValue)"
+            label += String(localized: "around_me.near_location",
+                            defaultValue: ", near \(locationName), \(actualDistance) \(settingsManager.settings.distanceUnit.rawValue)",
+                            comment: "Accessibility: nearby location name and distance with unit symbol")
         } else {
-            label += ", \(actualDistance) \(settingsManager.settings.distanceUnit.rawValue)"
+            label += String(localized: "around_me.distance_only",
+                            defaultValue: ", \(actualDistance) \(settingsManager.settings.distanceUnit.rawValue)",
+                            comment: "Accessibility: distance with unit symbol")
         }
         if let temp = location.temperature {
             label += ", \(formatTemperature(temp))"
@@ -796,7 +816,9 @@ struct WeatherAroundMeView: View {
         // Only fallback distance labels (e.g. "~30 mi South") use "Weather point".
         let isDistanceFallback = cityInfo.isWaypoint && cityInfo.name.hasPrefix("~")
         var label = isDistanceFallback
-            ? "Weather point: \(cityInfo.displayName(relativeTo: city.country)), "
+            ? String(localized: "around_me.weather_point",
+                     defaultValue: "Weather point: \(cityInfo.displayName(relativeTo: city.country)), ",
+                     comment: "Accessibility: prefix for an unnamed weather waypoint")
             : "\(cityInfo.displayName(relativeTo: city.country)), "
         
         // Add distance from origin
@@ -804,7 +826,9 @@ struct WeatherAroundMeView: View {
         
         // Add bearing if enabled
         if settingsManager.settings.showWeatherAroundMeBearing {
-            label += ", \(Int(cityInfo.bearing.rounded())) degrees"
+            label += String(localized: "around_me.bearing_degrees",
+                            defaultValue: ", \(Int(cityInfo.bearing.rounded())) degrees",
+                            comment: "Accessibility: compass bearing in degrees")
         }
         
         // Add perpendicular offset if enabled
@@ -822,9 +846,13 @@ struct WeatherAroundMeView: View {
                 if let alert = highestSeverityAlert {
                     label += ", "
                     if weather.alerts.count == 1 {
-                        label += "Alert: \(alert.event)"
+                        label += String(localized: "around_me.alert_single",
+                                        defaultValue: "Alert: \(alert.event)",
+                                        comment: "Accessibility: single weather alert for a city")
                     } else {
-                        label += "Alerts: \(alert.event) and \(weather.alerts.count - 1) more"
+                        label += String(localized: "around_me.alert_multiple",
+                                        defaultValue: "Alerts: \(alert.event) and \(weather.alerts.count - 1) more",
+                                        comment: "Accessibility: multiple weather alerts for a city")
                     }
                 }
             }
@@ -850,11 +878,17 @@ struct WeatherAroundMeView: View {
                         let pressureDiff = weather.pressure - previousWeather.pressure
                         let pressureTrend: String
                         if abs(pressureDiff) < 1.0 {
-                            pressureTrend = "Pressure steady"
+                            pressureTrend = String(localized: "around_me.pressure_steady",
+                                                   defaultValue: "Pressure steady",
+                                                   comment: "Accessibility: pressure trend, no significant change")
                         } else if pressureDiff > 0 {
-                            pressureTrend = "Pressure rising \(String(format: "%.1f", abs(pressureDiff))) hPa"
+                            pressureTrend = String(localized: "around_me.pressure_rising",
+                                                   defaultValue: "Pressure rising \(String(format: "%.1f", abs(pressureDiff))) hPa",
+                                                   comment: "Accessibility: pressure trend rising, value in hPa")
                         } else {
-                            pressureTrend = "Pressure falling \(String(format: "%.1f", abs(pressureDiff))) hPa"
+                            pressureTrend = String(localized: "around_me.pressure_falling",
+                                                   defaultValue: "Pressure falling \(String(format: "%.1f", abs(pressureDiff))) hPa",
+                                                   comment: "Accessibility: pressure trend falling, value in hPa")
                         }
                         label += ", \(pressureTrend)"
                     }
@@ -863,8 +897,10 @@ struct WeatherAroundMeView: View {
         }
         
         // Add position in list
-        label += ", \(currentCityIndex + 1) of \(citiesInDirection.count)"
-        
+        label += String(localized: "around_me.position_in_list",
+                        defaultValue: ", \(currentCityIndex + 1) of \(citiesInDirection.count)",
+                        comment: "Accessibility: position of current city in the list, e.g. ', 3 of 8'")
+
         return label
     }
     
@@ -873,9 +909,13 @@ struct WeatherAroundMeView: View {
     /// Returns a description of the current exploration mode for VoiceOver
     private func currentExplorationModeDescription() -> String {
         if settingsManager.settings.weatherAroundMeExplorationMode == .arc {
-            return "Arc mode, \(settingsManager.settings.weatherAroundMeArcWidth.displayName)"
+            return String(localized: "around_me.mode.arc",
+                          defaultValue: "Arc mode, \(settingsManager.settings.weatherAroundMeArcWidth.displayName)",
+                          comment: "Exploration mode description: arc mode with width name")
         } else {
-            return "Corridor mode, \(Int(settingsManager.settings.weatherAroundMeCorridorWidth.rawValue)) miles"
+            return String(localized: "around_me.mode.corridor",
+                          defaultValue: "Corridor mode, \(Int(settingsManager.settings.weatherAroundMeCorridorWidth.rawValue)) miles",
+                          comment: "Exploration mode description: corridor mode with width in miles")
         }
     }
     
@@ -982,8 +1022,8 @@ struct WeatherAroundMeSettingsSheet: View {
             Form {
                 Section {
                     Picker("Exploration Mode", selection: $settingsManager.settings.weatherAroundMeExplorationMode) {
-                        Text(ExplorationMode.arc.rawValue).tag(ExplorationMode.arc)
-                        Text(ExplorationMode.straightLine.rawValue).tag(ExplorationMode.straightLine)
+                        Text(ExplorationMode.arc.localizedLabel).tag(ExplorationMode.arc)
+                        Text(ExplorationMode.straightLine.localizedLabel).tag(ExplorationMode.straightLine)
                     }
                     .accessibilityHint(settingsManager.settings.weatherAroundMeExplorationMode.description)
                 } header: {
