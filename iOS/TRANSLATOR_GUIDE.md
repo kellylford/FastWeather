@@ -10,6 +10,21 @@ format, which Xcode exports and re-imports.
 First three target languages: **Italian (it)** — highest priority, there is a specific request —
 plus **Spanish (es)** and **German (de)**.
 
+> ## ⚠️ A machine-translated draft already exists — REVIEW it, don't retranslate from scratch
+>
+> All 1,536 strings in **it / es / de** have already been filled in with a **machine-generated draft**
+> and are marked **"Needs Review"** in the catalog (the yellow flag in Xcode; `state="needs-review"` in
+> the XLIFF). When you open a `.xcloc`, the target column is **pre-filled**.
+>
+> **Your job is to review and correct, not to translate from a blank slate.** Read each draft, fix what's
+> wrong or stiff, and once you're satisfied mark it reviewed/approved (in Xcode, the status changes to a
+> green "Reviewed"/translated checkmark). Pay closest attention to: weather terminology, the long
+> **User Guide** prose, and the scientific **"My Data"** explanations — that's where machine output is
+> most likely to need fixing. Short UI labels are usually fine but still worth a glance.
+>
+> The draft was produced by an AI, not a human translator, so treat it as a strong first pass only. **Do
+> not ship any language to the App Store until a native speaker has reviewed it** (see §6).
+
 ---
 
 ## 1. What the developer sends the translator

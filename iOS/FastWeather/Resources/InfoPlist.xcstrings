@@ -1,54 +1,126 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "CFBundleDisplayName" : {
-      "comment" : "App name shown under the icon on the Home Screen. Keep it short (<= ~12 chars) so it does not truncate.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weather Fast"
+  "sourceLanguage": "en",
+  "strings": {
+    "CFBundleDisplayName": {
+      "comment": "App name shown under the icon on the Home Screen. Keep it short (<= ~12 chars) so it does not truncate.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weather Fast"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Weather Fast"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Weather Fast"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Weather Fast"
           }
         }
       }
     },
-    "CFBundleName" : {
-      "comment" : "Bundle name",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Weather Fast"
+    "CFBundleName": {
+      "comment": "Bundle name",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Weather Fast"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Weather Fast"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Weather Fast"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Weather Fast"
           }
         }
       }
     },
-    "NSLocationUsageDescription" : {
-      "comment" : "Shown in the system location-permission dialog. Explains why the app may add the user's current city automatically.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weather Fast can use your location to automatically add your current city to the weather list."
+    "NSLocationUsageDescription": {
+      "comment": "Shown in the system location-permission dialog. Explains why the app may add the user's current city automatically.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weather Fast can use your location to automatically add your current city to the weather list."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Weather Fast può usare la tua posizione per aggiungere automaticamente la tua città attuale all'elenco meteo."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Weather Fast puede usar tu ubicación para añadir automáticamente tu ciudad actual a la lista del tiempo."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Weather Fast kann deinen Standort verwenden, um deine aktuelle Stadt automatisch zur Wetterliste hinzuzufügen."
           }
         }
       }
     },
-    "NSLocationWhenInUseUsageDescription" : {
-      "comment" : "Shown in the system location-permission dialog the first time the app asks for location.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weather Fast uses your location to show weather for your current area."
+    "NSLocationWhenInUseUsageDescription": {
+      "comment": "Shown in the system location-permission dialog the first time the app asks for location.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weather Fast uses your location to show weather for your current area."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Weather Fast usa la tua posizione per mostrare il meteo della tua zona attuale."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Weather Fast usa tu ubicación para mostrar el tiempo de tu zona actual."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Weather Fast verwendet deinen Standort, um das Wetter für deine aktuelle Umgebung anzuzeigen."
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }
