@@ -9,6 +9,60 @@ If you've never localized an app before, read this first. The other docs are ref
 
 ---
 
+## 0. Adding new UI later — the 30-second checklist
+
+Most of the time you do **nothing special**: a plain string literal handed to a SwiftUI view is
+auto-localized and auto-added to the catalog on the next build.
+
+```swift
+Text("Save")
+Button("Add City") { … }
+.navigationTitle("Settings")
+Label("My Cities", systemImage: "list.bullet")
+.accessibilityLabel("Close")
+.accessibilityHint("Returns to the city list")
+Section("Units") { … }
+Text("Wind: \(speed) mph")        // interpolation is fine
+```
+
+**The only four traps** — where a string silently will NOT localize:
+
+1. **A non-literal `String` shown to the user** (a `var`, a `func` return, a `switch` result) rendered via
+   `Text(myString)`. Wrap it at the source:
+   ```swift
+   String(localized: "empty.no_cities", defaultValue: "No cities added yet",
+          comment: "Shown when the city list is empty")
+   ```
+2. **An enum's `.rawValue` displayed.** Never show `rawValue` — it's a stable storage key. Add/extend a
+   `localizedLabel` on the enum (see `Settings.swift`) and display that instead.
+3. **A custom view with `let title: String`** rendered via `Text(title)` — literals passed to it won't
+   localize. Change the property type to `LocalizedStringKey`.
+4. **Interpolation in a non-literal string** — keep the placeholder in `defaultValue`, never in the key:
+   ```swift
+   String(localized: "search.found", defaultValue: "Found \(count) cities",
+          comment: "%lld = number of results")
+   ```
+
+**Do NOT localize:** unit symbols (`°F`, `mph`, …), brand/proper names (Weather Fast, WeatherKit), or
+data (city/country names).
+
+**Verify in one move:** run the app in **Edit Scheme → Run → Options → App Language → "Double-Length
+Pseudolanguage."** Every localized string becomes `[Ŵîñð Šþééð~~]`. **Anything still plain English is a
+string you missed** (one of the four traps). This also flags clipping. No translator needed.
+
+**Reuse is mostly automatic:** two identical literals (`Text("Save")` in two places) share one catalog
+entry; for keyed strings, point new UI at an existing key (e.g. reuse `field.temperature`) to inherit its
+translations for free.
+
+**When you've batched up changes:** **Product → Export Localizations**, send the `.xcloc` to a reviewer
+(Xcode/CAT tools surface only the *new* and *needs-review* strings — you never re-translate the whole
+app), then **Product → Import Localizations**. See §3–§5.
+
+The detailed rules behind this checklist are in
+[`LOCALIZATION_EXTRACTION_SPEC.md`](LOCALIZATION_EXTRACTION_SPEC.md).
+
+---
+
 ## 1. The mental model
 
 You already have the right intuition: localization is "show different text depending on the language."
