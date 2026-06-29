@@ -1,0 +1,5 @@
+***Fixed***
+Alert Expirations: For some weather alerts WeatherFast was reporting end dates for the alert incorrectly. This has been addressed.
+
+***A note on International Testing***
+1.5.6 for INTL for now: Build 1.5.6 was recently released to Test Flight for International Testing. That build will remain in test flight while International translation work continues for those who want to stay on that build, you can reinstall it from Test Flight. I expect most testers will not want to do so and to enable progress main builds will jump to 1.5.7 and beyond and progress from Test Flight to full app store submissions.
