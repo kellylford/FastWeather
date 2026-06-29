@@ -117,12 +117,14 @@ struct ListView: View {
         .accessibilityAction(named: "Glance Ahead") {
             let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: 0)
             let hasHourly = weatherService.weatherCache[cacheKey]?.hourly != nil
-            if hasHourly {
-                let summary = glanceAheadSummary(for: city)
-                UIAccessibility.post(notification: .announcement, argument: summary)
-            } else {
-                UIAccessibility.post(notification: .announcement, argument: "Loading forecast, please try again in a moment")
+            let message = hasHourly
+                ? glanceAheadSummary(for: city)
+                : "Loading forecast, please try again in a moment"
+            if !hasHourly {
                 Task { await weatherService.fetchWeatherForDate(for: city, dateOffset: 0, includeHourly: true) }
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                UIAccessibility.post(notification: .announcement, argument: message)
             }
         }
         .contextMenu {
@@ -409,14 +411,16 @@ struct ListView: View {
         .accessibilityAction(named: "Glance Ahead") {
             let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: 0)
             let hasHourly = weatherService.weatherCache[cacheKey]?.hourly != nil
-            if hasHourly {
-                let summary = glanceAheadSummary(for: city)
-                UIAccessibility.post(notification: .announcement, argument: summary)
-            } else {
-                UIAccessibility.post(notification: .announcement, argument: "Loading forecast, please try again in a moment")
-                Task {
-                    await weatherService.fetchWeatherForDate(for: city, dateOffset: 0, includeHourly: true)
-                }
+            let message = hasHourly
+                ? glanceAheadSummary(for: city)
+                : "Loading forecast, please try again in a moment"
+            if !hasHourly {
+                Task { await weatherService.fetchWeatherForDate(for: city, dateOffset: 0, includeHourly: true) }
+            }
+            // Delay so VoiceOver finishes processing the action gesture before receiving the announcement;
+            // posting synchronously from inside an accessibilityAction handler is silently dropped on iOS 26.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                UIAccessibility.post(notification: .announcement, argument: message)
             }
         }
     }
