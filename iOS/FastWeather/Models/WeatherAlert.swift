@@ -87,6 +87,7 @@ struct NWSAlertProperties: Codable {
     private let instructionRaw: FlexibleStringOrArray?
     let onset: String?
     let expires: String?
+    let ends: String?          // When hazardous CONDITIONS end (vs expires = when the alert product expires)
     private let areaDescRaw: FlexibleStringOrArray?
     
     var headline: String {
@@ -122,7 +123,7 @@ struct NWSAlertProperties: Codable {
     }
     
     enum CodingKeys: String, CodingKey {
-        case id, event, severity, onset, expires
+        case id, event, severity, onset, expires, ends
         case headlineRaw = "headline"
         case descriptionRaw = "description"
         case instructionRaw = "instruction"

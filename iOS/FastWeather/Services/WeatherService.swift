@@ -1361,9 +1361,14 @@ class WeatherService: ObservableObject {
                 default: severity = .unknown
                 }
                 
-                // Parse onset and expires dates
+                // Parse onset and expires dates.
+                // Prefer `ends` (when hazardous conditions end) over `expires` (when the NWS alert
+                // product expires, which can pre-date onset for refreshed advisories — causing the
+                // "From: Jun 30, Until: Jun 20" reversal customers reported).
                 let onset = props.onset.flatMap { nwsDateFormatter.date(from: $0) } ?? Date()
-                let expires = props.expires.flatMap { nwsDateFormatter.date(from: $0) } ?? Date().addingTimeInterval(86400)
+                let endsDate = props.ends.flatMap { nwsDateFormatter.date(from: $0) }
+                let expiresDate = props.expires.flatMap { nwsDateFormatter.date(from: $0) } ?? Date().addingTimeInterval(86400)
+                let expires = max(endsDate ?? expiresDate, onset)
                 
                 return WeatherAlert(
                     id: props.id,

@@ -356,11 +356,12 @@ struct ListView: View {
 
     @ViewBuilder
     private func glanceAheadPreview(for city: City) -> some View {
+        let hours = settingsManager.settings.glanceAheadHours
         VStack(alignment: .leading, spacing: 6) {
             Text(city.displayName)
                 .font(.headline)
                 .lineLimit(2)
-            Text("Next 4 Hours")
+            Text("Next \(hours) \(hours == 1 ? "Hour" : "Hours")")
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .textCase(.uppercase)
@@ -376,11 +377,17 @@ struct ListView: View {
     @ViewBuilder
     private func cityRow(for city: City) -> some View {
         let index = weatherService.savedCities.firstIndex(where: { $0.id == city.id }) ?? 0
+        // contextMenu is on the ListRowView label (not the NavigationLink wrapper) so that
+        // iOS 26+ gesture handling on NavigationLink doesn't suppress the preview.
         return NavigationLink(destination: CityDetailView(city: city, dateOffset: dateOffset, selectedDate: selectedDate)) {
             ListRowView(city: city, dateOffset: dateOffset, onAlertTap: { alert in
-                // Create stable AlertSheetItem to prevent re-presentation loop
                 alertSheetItem = AlertSheetItem(city: city, alert: alert)
             })
+            .contextMenu {
+                contextMenuContent(for: city, at: index)
+            } preview: {
+                glanceAheadPreview(for: city)
+            }
         }
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(editMode?.wrappedValue.isEditing == true ? [.allowsDirectInteraction] : [])
@@ -411,11 +418,6 @@ struct ListView: View {
                     await weatherService.fetchWeatherForDate(for: city, dateOffset: 0, includeHourly: true)
                 }
             }
-        }
-        .contextMenu(menuItems: {
-            contextMenuContent(for: city, at: index)
-        }) {
-            glanceAheadPreview(for: city)
         }
     }
 }
