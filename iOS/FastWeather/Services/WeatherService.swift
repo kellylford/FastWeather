@@ -1622,11 +1622,16 @@ class WeatherService: ObservableObject {
     
     // MARK: - Persistence
     
+    private static let citiesModifiedKey = "SavedCitiesLastModified"
+
     private func saveCities() {
         do {
             let encoded = try JSONEncoder().encode(savedCities)
             sharedDefaults.set(encoded, forKey: userDefaultsKey)
-            iCloudSyncService.shared.pushCities(savedCities)
+            // Record the local edit time so iCloud sync can apply last-writer-wins (HI-4).
+            let now = Date()
+            sharedDefaults.set(now.timeIntervalSince1970, forKey: Self.citiesModifiedKey)
+            iCloudSyncService.shared.pushCities(savedCities, modified: now)
         } catch {
             AppLogger.service.error("Failed to save cities: \(error)")
         }
@@ -1646,7 +1651,24 @@ class WeatherService: ObservableObject {
 
     func applyRemoteCities() {
         guard let remoteCities = iCloudSyncService.shared.pullCities() else { return }
+
+        // Last-writer-wins by edit time (HI-4). Only accept the remote list if it's at least as
+        // new as our local edit; otherwise a stale device (older list, just came online) would
+        // clobber newer local data — the city-disappears bug. Deletions still propagate because
+        // the newer edit, including a delete, always wins.
+        let remoteTS = iCloudSyncService.shared.pullCitiesTimestamp() ?? .distantPast
+        let localTS = Date(timeIntervalSince1970: sharedDefaults.double(forKey: Self.citiesModifiedKey))
+        if remoteTS < localTS {
+            // Our local copy is newer — re-push it (keeping our timestamp) so the other device
+            // converges onto it, then keep local unchanged. No loop: accepting never re-pushes.
+            AppLogger.service.debug("iCloud: ignoring older remote cities; re-pushing newer local")
+            iCloudSyncService.shared.pushCities(savedCities, modified: localTS)
+            return
+        }
+
+        guard remoteCities != savedCities else { return }
         savedCities = remoteCities
+        sharedDefaults.set(remoteTS.timeIntervalSince1970, forKey: Self.citiesModifiedKey)
         do {
             let encoded = try JSONEncoder().encode(remoteCities)
             sharedDefaults.set(encoded, forKey: userDefaultsKey)
