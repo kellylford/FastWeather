@@ -47,6 +47,14 @@ struct DeveloperSettingsView: View {
                         .accessibilityLabel("WeatherKit Expected Precipitation feature toggle")
                         .accessibilityHint(featureFlags.weatherKitNowcastEnabled ? "WeatherKit nowcast is enabled. Expected Precipitation uses radar-quality minute-by-minute data from Apple WeatherKit for supported countries." : "WeatherKit nowcast is disabled. Expected Precipitation uses Open-Meteo NWP for all cities, restoring the older experience.")
 
+                    Toggle("WeatherKit Current Conditions", isOn: $featureFlags.weatherKitConditionsEnabled)
+                        .accessibilityLabel("WeatherKit Current Conditions feature toggle")
+                        .accessibilityHint(featureFlags.weatherKitConditionsEnabled ? "WeatherKit current conditions are enabled. The 'now' condition comes from Apple WeatherKit's observation-informed data instead of Open-Meteo's forecast model, so it won't show a thunderstorm when it is dry. Forecasts still use Open-Meteo." : "WeatherKit current conditions are disabled. The current condition uses Open-Meteo's model weather code for all cities.")
+                        .onChange(of: featureFlags.weatherKitConditionsEnabled) {
+                            weatherService.clearWeatherCache()
+                            Task { await weatherService.refreshAllWeather() }
+                        }
+
                     Toggle("Enable Table View", isOn: $featureFlags.tableViewEnabled)
                         .accessibilityLabel("Enable Table View feature toggle")
                         .accessibilityHint(featureFlags.tableViewEnabled ? "Table view is enabled. Table option will appear in the View Mode picker in Settings." : "Table view is disabled. Table option will not appear in the View Mode picker in Settings.")

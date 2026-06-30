@@ -82,6 +82,16 @@ class FeatureFlags: ObservableObject {
         }
     }
 
+    /// Use WeatherKit's observation/nowcast-informed current condition instead of Open-Meteo's
+    /// model `weather_code` for "now". On by default. Fixes cases like a thunderstorm code
+    /// showing while it's dry. Applies to today's conditions only (forecasts stay Open-Meteo);
+    /// unmappable WeatherKit conditions fall back to the Open-Meteo code. See #73.
+    @Published var weatherKitConditionsEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(weatherKitConditionsEnabled, forKey: "feature_weatherkit_conditions_enabled")
+        }
+    }
+
     /// Show specific place names (airports, universities, streets) instead of just the city name.
     /// On by default. When disabled, all searches fall back to the locality-only label ("Madison, WI")
     /// regardless of what was searched. Does not affect cities already saved.
@@ -112,6 +122,7 @@ class FeatureFlags: ObservableObject {
         self.tableViewEnabled = UserDefaults.standard.bool(forKey: "feature_table_view_enabled")
         self.weatherKitSnowEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_snow_enabled")
         self.weatherKitNowcastEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_nowcast_enabled")
+        self.weatherKitConditionsEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_conditions_enabled")
         self.specificPlaceNamesEnabled = UserDefaults.standard.bool(forKey: "feature_specific_place_names_enabled")
         self.myLocationEnabled = UserDefaults.standard.bool(forKey: "feature_my_location_enabled")
 
@@ -141,6 +152,9 @@ class FeatureFlags: ObservableObject {
         if !UserDefaults.standard.contains(key: "feature_weatherkit_nowcast_enabled") {
             self.weatherKitNowcastEnabled = true  // On by default
         }
+        if !UserDefaults.standard.contains(key: "feature_weatherkit_conditions_enabled") {
+            self.weatherKitConditionsEnabled = true  // On by default
+        }
         if !UserDefaults.standard.contains(key: "feature_specific_place_names_enabled") {
             self.specificPlaceNamesEnabled = true  // On by default
         }
@@ -161,6 +175,7 @@ class FeatureFlags: ObservableObject {
         tableViewEnabled = false
         weatherKitSnowEnabled = true
         weatherKitNowcastEnabled = true
+        weatherKitConditionsEnabled = true
         specificPlaceNamesEnabled = true
         myLocationEnabled = true
         debugLog("🔧 Feature flags reset to defaults")
@@ -176,6 +191,7 @@ class FeatureFlags: ObservableObject {
         tableViewEnabled = true
         weatherKitSnowEnabled = true
         weatherKitNowcastEnabled = true
+        weatherKitConditionsEnabled = true
         specificPlaceNamesEnabled = true
         myLocationEnabled = true
         debugLog("🔧 All features enabled")
@@ -190,6 +206,7 @@ class FeatureFlags: ObservableObject {
         tableViewEnabled = false
         weatherKitSnowEnabled = false
         weatherKitNowcastEnabled = false
+        weatherKitConditionsEnabled = false
         specificPlaceNamesEnabled = false
         myLocationEnabled = false
         debugLog("🔧 All features disabled")

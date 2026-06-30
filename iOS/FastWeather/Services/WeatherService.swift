@@ -537,10 +537,13 @@ class WeatherService: ObservableObject {
                 }
             }
             
-            // Optionally overlay WeatherKit snow totals over the Open-Meteo values
+            // Optionally overlay WeatherKit data (current condition and/or snow totals) over
+            // the Open-Meteo values. One WeatherKit call serves both, so enabling the condition
+            // overlay adds no extra request when snow is already on. Each overlay is gated by its
+            // own feature flag inside the function; it returns the data unchanged on any error.
             #if canImport(WeatherKit)
-            if #available(iOS 16.0, *), FeatureFlags.shared.weatherKitSnowEnabled {
-                finalWeatherData = await applyWeatherKitSnowOverlay(for: city, dateOffset: dateOffset, into: finalWeatherData)
+            if #available(iOS 16.0, *) {
+                finalWeatherData = await applyWeatherKitOverlay(for: city, dateOffset: dateOffset, into: finalWeatherData)
             }
             #endif
             
@@ -797,18 +800,28 @@ class WeatherService: ObservableObject {
         
         let data = try await apiData(for: url)
         let response = try JSONDecoder().decode(WeatherResponse.self, from: data)
-        let weatherData = WeatherData(current: response.current, daily: response.daily, hourly: response.hourly, utcOffsetSeconds: response.utcOffsetSeconds)
-        
+        var weatherData = WeatherData(current: response.current, daily: response.daily, hourly: response.hourly, utcOffsetSeconds: response.utcOffsetSeconds)
+
+        // Overlay WeatherKit's observation-informed current condition (browse/around-me rows).
+        #if canImport(WeatherKit)
+        if #available(iOS 16.0, *) {
+            if let wmo = await weatherKitCurrentWMOCode(latitude: latitude, longitude: longitude) {
+                weatherData = weatherData.withCurrentWeatherCode(wmo)
+            }
+        }
+        #endif
+
         // Cache the result
+        let cachedData = weatherData
         await MainActor.run {
-            browseWeatherCache[cacheKey] = weatherData
+            browseWeatherCache[cacheKey] = cachedData
             browseCacheTimestamps[cacheKey] = Date()
             trimBrowseCacheIfNeeded()
         }
-        
+
         return weatherData
     }
-    
+
     // Fetch full weather data (16 days) for detail views
     func fetchWeatherFull(latitude: Double, longitude: Double) async throws -> WeatherData {
         let cacheKey = "\(latitude),\(longitude)"
@@ -1195,60 +1208,99 @@ class WeatherService: ObservableObject {
         return historicalDays
     }
     
-    // MARK: - WeatherKit Snow Override
-    
-    /// Replaces Open-Meteo snowfall_sum values with WeatherKit daily snowfallAmount.
-    /// Called only when the "WeatherKit Snow Totals" dev flag is enabled.
-    /// On any WeatherKit error the original weatherData is returned unchanged.
+    // MARK: - WeatherKit Overlay (current condition + snow totals)
+
+    /// Overlays WeatherKit data onto an Open-Meteo `WeatherData`:
+    ///  - **Current condition** (today only, flag `weatherKitConditionsEnabled`): replaces the
+    ///    Open-Meteo model `weather_code` with WeatherKit's observation/nowcast-informed
+    ///    condition, translated to WMO. Unmappable conditions keep the Open-Meteo code.
+    ///  - **Snow totals** (flag `weatherKitSnowEnabled`, ≤10 days): replaces `snowfall_sum`.
+    ///
+    /// Both come from a **single** WeatherKit request, so enabling conditions adds no extra
+    /// call when snow is already on. On any WeatherKit error the original data is returned
+    /// unchanged — the app never regresses below the Open-Meteo behavior.
     #if canImport(WeatherKit)
     @available(iOS 16.0, *)
-    private func applyWeatherKitSnowOverlay(for city: City, dateOffset: Int, into weatherData: WeatherData) async -> WeatherData {
-        guard let daily = weatherData.daily else { return weatherData }
-        // WeatherKit provides at most 10 days; beyond that fall back silently
-        guard dateOffset < 10 else { return weatherData }
-        
+    private func applyWeatherKitOverlay(for city: City, dateOffset: Int, into weatherData: WeatherData) async -> WeatherData {
+        let conditionsWanted = FeatureFlags.shared.weatherKitConditionsEnabled && dateOffset == 0
+        let snowWanted = FeatureFlags.shared.weatherKitSnowEnabled && dateOffset < 10 && weatherData.daily != nil
+        guard conditionsWanted || snowWanted else { return weatherData }
+
         let location = CLLocation(latitude: city.latitude, longitude: city.longitude)
         do {
-            let dailyForecast = try await WeatherKit.WeatherService.shared.weather(for: location, including: .daily)
-            let forecasts = dailyForecast.forecast
-            
-            let newSnowfallSum: [Double?]
-            if dateOffset == 0 {
-                // Full array: overlay WK values for the first N days WK covers
-                var snow: [Double?] = daily.snowfallSum ?? Array(repeating: nil, count: daily.temperature2mMax.count)
-                for i in 0..<min(forecasts.count, snow.count) {
-                    snow[i] = forecasts[i].snowfallAmount.converted(to: .centimeters).value
+            // One call provides both current condition and the daily forecast.
+            let weather = try await WeatherKit.WeatherService.shared.weather(for: location)
+            var result = weatherData
+
+            // --- Current condition overlay (today only) ---
+            if conditionsWanted {
+                let condition = weather.currentWeather.condition
+                if let wmo = WeatherCode(weatherKitCondition: condition) {
+                    result = result.withCurrentWeatherCode(wmo.rawValue)
+                    debugLog("🌤 WK condition overlay for \(city.name): \(condition) → \(wmo.description)")
+                } else {
+                    debugLog("🌤 WK condition \(condition) has no WMO mapping; keeping Open-Meteo for \(city.name)")
                 }
-                newSnowfallSum = snow
-            } else {
-                // Single-day slice: replace with WK value for that specific day
-                guard dateOffset < forecasts.count else { return weatherData }
-                newSnowfallSum = [forecasts[dateOffset].snowfallAmount.converted(to: .centimeters).value]
             }
-            
-            let newDaily = WeatherData.DailyWeather(
-                temperature2mMax: daily.temperature2mMax,
-                temperature2mMin: daily.temperature2mMin,
-                sunrise: daily.sunrise,
-                sunset: daily.sunset,
-                weatherCode: daily.weatherCode,
-                precipitationSum: daily.precipitationSum,
-                rainSum: daily.rainSum,
-                snowfallSum: newSnowfallSum,
-                precipitationProbabilityMax: daily.precipitationProbabilityMax,
-                uvIndexMax: daily.uvIndexMax,
-                daylightDuration: daily.daylightDuration,
-                sunshineDuration: daily.sunshineDuration,
-                windSpeed10mMax: daily.windSpeed10mMax,
-                windDirectionDominant: daily.windDirectionDominant,
-                apparentTemperatureMax: daily.apparentTemperatureMax,
-                apparentTemperatureMin: daily.apparentTemperatureMin
-            )
-            debugLog("❄️ WK snow overlay applied for \(city.name) offset=\(dateOffset) days=\(forecasts.count)")
-            return WeatherData(current: weatherData.current, daily: newDaily, hourly: weatherData.hourly, utcOffsetSeconds: weatherData.utcOffsetSeconds)
+
+            // --- Snow totals overlay ---
+            if snowWanted, let daily = result.daily {
+                let forecasts = weather.dailyForecast.forecast
+                let newSnowfallSum: [Double?]
+                if dateOffset == 0 {
+                    var snow: [Double?] = daily.snowfallSum ?? Array(repeating: nil, count: daily.temperature2mMax.count)
+                    for i in 0..<min(forecasts.count, snow.count) {
+                        snow[i] = forecasts[i].snowfallAmount.converted(to: .centimeters).value
+                    }
+                    newSnowfallSum = snow
+                } else if dateOffset < forecasts.count {
+                    newSnowfallSum = [forecasts[dateOffset].snowfallAmount.converted(to: .centimeters).value]
+                } else {
+                    newSnowfallSum = daily.snowfallSum ?? []
+                }
+
+                let newDaily = WeatherData.DailyWeather(
+                    temperature2mMax: daily.temperature2mMax,
+                    temperature2mMin: daily.temperature2mMin,
+                    sunrise: daily.sunrise,
+                    sunset: daily.sunset,
+                    weatherCode: daily.weatherCode,
+                    precipitationSum: daily.precipitationSum,
+                    rainSum: daily.rainSum,
+                    snowfallSum: newSnowfallSum,
+                    precipitationProbabilityMax: daily.precipitationProbabilityMax,
+                    uvIndexMax: daily.uvIndexMax,
+                    daylightDuration: daily.daylightDuration,
+                    sunshineDuration: daily.sunshineDuration,
+                    windSpeed10mMax: daily.windSpeed10mMax,
+                    windDirectionDominant: daily.windDirectionDominant,
+                    apparentTemperatureMax: daily.apparentTemperatureMax,
+                    apparentTemperatureMin: daily.apparentTemperatureMin
+                )
+                result = WeatherData(current: result.current, daily: newDaily, hourly: result.hourly, utcOffsetSeconds: result.utcOffsetSeconds)
+                debugLog("❄️ WK snow overlay applied for \(city.name) offset=\(dateOffset) days=\(forecasts.count)")
+            }
+
+            return result
         } catch {
-            debugLog("⚠️ WK snow overlay failed for \(city.name): \(error.localizedDescription)")
+            debugLog("⚠️ WK overlay failed for \(city.name): \(error.localizedDescription)")
             return weatherData
+        }
+    }
+
+    /// Fetches WeatherKit's current condition for a coordinate and returns it as a WMO code,
+    /// or nil if conditions are disabled, the call fails, or the condition has no WMO mapping.
+    /// Used by the lightweight browse/regional paths that don't go through `applyWeatherKitOverlay`.
+    @available(iOS 16.0, *)
+    private func weatherKitCurrentWMOCode(latitude: Double, longitude: Double) async -> Int? {
+        guard FeatureFlags.shared.weatherKitConditionsEnabled else { return nil }
+        do {
+            let current = try await WeatherKit.WeatherService.shared.weather(
+                for: CLLocation(latitude: latitude, longitude: longitude), including: .current)
+            return WeatherCode(weatherKitCondition: current.condition)?.rawValue
+        } catch {
+            debugLog("⚠️ WK condition (browse) failed for \(latitude),\(longitude): \(error.localizedDescription)")
+            return nil
         }
     }
     #endif

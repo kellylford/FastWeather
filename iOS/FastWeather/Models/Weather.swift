@@ -6,6 +6,9 @@
 //
 
 import Foundation
+#if canImport(WeatherKit)
+import WeatherKit
+#endif
 
 // WMO Weather interpretation codes
 enum WeatherCode: Int, Codable {
@@ -104,6 +107,47 @@ enum WeatherCode: Int, Codable {
         }
     }
 }
+
+#if canImport(WeatherKit)
+extension WeatherCode {
+    /// Best-effort map from a WeatherKit `WeatherCondition` to a WMO weather code.
+    ///
+    /// Returns `nil` for conditions with no reasonable WMO equivalent (haze, blowing dust,
+    /// smoke, hot, frigid, breezy, windy, hail, tropical storm, hurricane) — callers keep the
+    /// existing Open-Meteo code in that case, so the app never shows a *worse* label than before.
+    /// WMO codes are day/night agnostic, so daylight is intentionally not consulted.
+    /// Surfacing the unmapped conditions as their own labels is tracked as a separate
+    /// enhancement (#74).
+    @available(iOS 16.0, *)
+    init?(weatherKitCondition condition: WeatherCondition) {
+        switch condition {
+        case .clear:                         self = .clearSky
+        case .mostlyClear:                   self = .mainlyClear
+        case .partlyCloudy:                  self = .partlyCloudy
+        case .mostlyCloudy, .cloudy:         self = .overcast
+        case .foggy:                         self = .fog
+        case .drizzle:                       self = .lightDrizzle
+        case .freezingDrizzle:               self = .lightFreezingDrizzle
+        case .rain:                          self = .moderateRain
+        case .heavyRain:                     self = .heavyRain
+        case .freezingRain, .sleet:          self = .lightFreezingRain
+        case .wintryMix:                     self = .denseFreezingDrizzle
+        case .sunShowers:                    self = .slightRainShowers
+        case .flurries:                      self = .slightSnowFall
+        case .snow, .blowingSnow:            self = .moderateSnowFall
+        case .heavySnow, .blizzard:          self = .heavySnowFall
+        case .sunFlurries:                   self = .slightSnowShowers
+        case .thunderstorms, .isolatedThunderstorms,
+             .scatteredThunderstorms, .strongStorms:
+                                             self = .thunderstorm
+        default:
+            // .hot, .frigid, .breezy, .windy, .haze, .smoky, .blowingDust, .hail,
+            // .tropicalStorm, .hurricane, and any future cases → no WMO equivalent.
+            return nil
+        }
+    }
+}
+#endif
 
 struct WeatherData: Codable {
     let current: CurrentWeather
@@ -263,6 +307,24 @@ struct WeatherData: Codable {
         var weatherCodeEnum: WeatherCode? {
             WeatherCode(rawValue: weatherCode)
         }
+
+        /// Returns a copy with `weatherCode` replaced, preserving all other fields.
+        /// Used by the WeatherKit current-conditions overlay.
+        func withWeatherCode(_ newCode: Int) -> WeatherData.CurrentWeather {
+            WeatherData.CurrentWeather(
+                temperature2m: temperature2m, relativeHumidity2m: relativeHumidity2m,
+                apparentTemperature: apparentTemperature, isDay: isDay, precipitation: precipitation,
+                rain: rain, showers: showers, snowfall: snowfall, weatherCode: newCode,
+                cloudCover: cloudCover, pressureMsl: pressureMsl, windSpeed10m: windSpeed10m,
+                windDirection10m: windDirection10m, visibility: visibility, windGusts10m: windGusts10m,
+                uvIndex: uvIndex, dewpoint2m: dewpoint2m, myDataValues: myDataValues)
+        }
+    }
+
+    /// Returns a copy of this WeatherData with the current `weatherCode` replaced.
+    func withCurrentWeatherCode(_ newCode: Int) -> WeatherData {
+        WeatherData(current: current.withWeatherCode(newCode), daily: daily,
+                    hourly: hourly, utcOffsetSeconds: utcOffsetSeconds)
     }
     
     struct DailyWeather: Codable {

@@ -1,0 +1,7 @@
+***Fixed***
+Current Conditions Accuracy: The "right now" condition for your cities is now powered by Apple WeatherKit's observation-based data instead of a forecast model. Before, a city could read "Thunderstorm" while it was actually dry — for example, Madison showing a thunderstorm on a clear or merely cloudy morning. Current conditions now reflect what's really happening and are consistent everywhere they appear: your city list, city details, Browse Cities, and Weather Around Me. Hourly and daily forecasts are unchanged (they continue to use Open-Meteo).
+
+This is on by default. If you ever want to compare, it can be toggled under Settings → Developer Settings → "WeatherKit Current Conditions."
+
+***A note on International Testing***
+1.5.6 for INTL remains available for International Testing while translation work continues — you can reinstall it from TestFlight if you want to stay on that build. Most testers will not need to; main builds continue at 1.5.7 and beyond toward full App Store submission.

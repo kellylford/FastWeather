@@ -8,6 +8,9 @@
 
 import Foundation
 import CoreLocation
+#if canImport(WeatherKit)
+import WeatherKit
+#endif
 
 class RegionalWeatherService {
     static let shared = RegionalWeatherService()
@@ -180,7 +183,19 @@ class RegionalWeatherService {
         
         // Convert weather code to description
         let weatherCode = WeatherCode(rawValue: weatherResponse.current.weatherCode)
-        
+
+        // Overlay WeatherKit's observation-informed current condition so directional tiles
+        // match the rest of the app (My Cities list, City Detail). Falls back to Open-Meteo
+        // when WeatherKit is disabled/unavailable or the condition has no WMO mapping.
+        var conditionText = weatherCode?.description ?? "Unknown"
+        #if canImport(WeatherKit)
+        if #available(iOS 16.0, *), FeatureFlags.shared.weatherKitConditionsEnabled {
+            if let wkText = await weatherKitConditionDescription(lat: location.lat, lon: location.lon) {
+                conditionText = wkText
+            }
+        }
+        #endif
+
         // Check cache first, then fetch location name via reverse geocoding if needed
         var locationName: String?
         
@@ -208,14 +223,30 @@ class RegionalWeatherService {
             latitude: location.lat,
             longitude: location.lon,
             temperature: weatherResponse.current.temperature2m,
-            condition: weatherCode?.description ?? "Unknown",
+            condition: conditionText,
             locationName: locationName
         )
         
         debugLog("🏁 Returning DirectionalLocation for \(location.direction): locationName = '\(result.locationName ?? "nil")'")
         return result
     }
-    
+
+    /// WeatherKit current condition for a coordinate as a display string (translated to WMO
+    /// wording), or nil if the call fails or the condition has no WMO mapping.
+    #if canImport(WeatherKit)
+    @available(iOS 16.0, *)
+    private func weatherKitConditionDescription(lat: Double, lon: Double) async -> String? {
+        do {
+            let current = try await WeatherKit.WeatherService.shared.weather(
+                for: CLLocation(latitude: lat, longitude: lon), including: .current)
+            return WeatherCode(weatherKitCondition: current.condition)?.description
+        } catch {
+            debugLog("⚠️ WK condition (regional) failed for \(lat),\(lon): \(error.localizedDescription)")
+            return nil
+        }
+    }
+    #endif
+
     /// Reverse geocode coordinates to get location name using Apple's CLGeocoder
     private func reverseGeocode(latitude: Double, longitude: Double) async throws -> String {
         debugLog("🌍 Geocoding with CLGeocoder: \(latitude), \(longitude)")
