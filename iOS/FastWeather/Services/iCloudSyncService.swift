@@ -73,12 +73,23 @@ final class iCloudSyncService {
 
     func pullSettings() -> AppSettings? {
         guard let data = store.data(forKey: Self.settingsKey) else { return nil }
-        return try? JSONDecoder().decode(AppSettings.self, from: data)
+        do {
+            return try JSONDecoder().decode(AppSettings.self, from: data)
+        } catch {
+            // Log instead of silently swallowing (L7) so a sync issue is diagnosable.
+            AppLogger.persistence.error("iCloud: failed to decode remote settings: \(error.localizedDescription, privacy: .public)")
+            return nil
+        }
     }
 
     func pullCities() -> [City]? {
         guard let data = store.data(forKey: Self.citiesKey) else { return nil }
-        return try? JSONDecoder().decode([City].self, from: data)
+        do {
+            return try JSONDecoder().decode([City].self, from: data)
+        } catch {
+            AppLogger.persistence.error("iCloud: failed to decode remote cities: \(error.localizedDescription, privacy: .public)")
+            return nil
+        }
     }
 
     // MARK: - Remote change handler

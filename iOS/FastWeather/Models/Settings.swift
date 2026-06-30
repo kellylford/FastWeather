@@ -440,6 +440,22 @@ struct AppSettings: Codable {
     static let currentVersion = 3  // Note: My Data fields handled via migration in init(from:)
     var settingsVersion: Int = AppSettings.currentVersion  // = 3
 
+    /// Single source of truth for the default detail-section list. Referenced by the property
+    /// initializer, init(), and the decoder so the three can't drift (M5). The property-level
+    /// default previously omitted astronomy + myData.
+    static let defaultDetailCategories: [DetailCategoryField] = [
+        DetailCategoryField(category: .weatherAlerts, isEnabled: true),
+        DetailCategoryField(category: .todaysForecast, isEnabled: true),
+        DetailCategoryField(category: .astronomy, isEnabled: true),
+        DetailCategoryField(category: .currentConditions, isEnabled: true),
+        DetailCategoryField(category: .hourlyForecast, isEnabled: true),
+        DetailCategoryField(category: .dailyForecast, isEnabled: true),
+        DetailCategoryField(category: .historicalWeather, isEnabled: true),
+        DetailCategoryField(category: .marineForecast, isEnabled: true),
+        DetailCategoryField(category: .location, isEnabled: true),
+        DetailCategoryField(category: .myData, isEnabled: false)
+    ]
+
     var myLocationEnabled: Bool = true
     var myLocationPosition: MyLocationPosition = .beforeCityList
 
@@ -614,16 +630,7 @@ struct AppSettings: Codable {
     ]
     
     // Detail categories with enable/disable and order control
-    var detailCategories: [DetailCategoryField] = [
-        DetailCategoryField(category: .weatherAlerts, isEnabled: true),
-        DetailCategoryField(category: .todaysForecast, isEnabled: true),
-        DetailCategoryField(category: .currentConditions, isEnabled: true),
-        DetailCategoryField(category: .hourlyForecast, isEnabled: true),
-        DetailCategoryField(category: .dailyForecast, isEnabled: true),
-        DetailCategoryField(category: .historicalWeather, isEnabled: true),
-        DetailCategoryField(category: .marineForecast, isEnabled: true),
-        DetailCategoryField(category: .location, isEnabled: true)
-    ]
+    var detailCategories: [DetailCategoryField] = AppSettings.defaultDetailCategories
     
     // User-configured My Data fields (custom section with Open-Meteo parameters)
     var myDataFields: [MyDataField] = []
@@ -764,19 +771,8 @@ struct AppSettings: Codable {
             MarineField(type: .swellWavePeriod, isEnabled: false)
         ]
         
-        self.detailCategories = [
-            DetailCategoryField(category: .weatherAlerts, isEnabled: true),
-            DetailCategoryField(category: .todaysForecast, isEnabled: true),
-            DetailCategoryField(category: .astronomy, isEnabled: true),
-            DetailCategoryField(category: .currentConditions, isEnabled: true),
-            DetailCategoryField(category: .hourlyForecast, isEnabled: true),
-            DetailCategoryField(category: .dailyForecast, isEnabled: true),
-            DetailCategoryField(category: .historicalWeather, isEnabled: true),
-            DetailCategoryField(category: .marineForecast, isEnabled: true),
-            DetailCategoryField(category: .location, isEnabled: true),
-            DetailCategoryField(category: .myData, isEnabled: false),
-        ]
-        
+        self.detailCategories = AppSettings.defaultDetailCategories
+
         self.myDataFields = []
     }
     
@@ -1021,19 +1017,8 @@ struct AppSettings: Codable {
         }
         
         // Detail categories with migration: merge saved categories with new defaults
-        let defaultCategories: [DetailCategoryField] = [
-            DetailCategoryField(category: .weatherAlerts, isEnabled: true),
-            DetailCategoryField(category: .todaysForecast, isEnabled: true),
-            DetailCategoryField(category: .astronomy, isEnabled: true),
-            DetailCategoryField(category: .currentConditions, isEnabled: true),
-            DetailCategoryField(category: .hourlyForecast, isEnabled: true),
-            DetailCategoryField(category: .dailyForecast, isEnabled: true),
-            DetailCategoryField(category: .historicalWeather, isEnabled: true),
-            DetailCategoryField(category: .marineForecast, isEnabled: true),
-            DetailCategoryField(category: .location, isEnabled: true),
-            DetailCategoryField(category: .myData, isEnabled: false)
-        ]
-        
+        let defaultCategories = AppSettings.defaultDetailCategories
+
         if let savedCategories = try container.decodeIfPresent([DetailCategoryField].self, forKey: .detailCategories) {
             // Merge: keep saved categories and add any new ones that don't exist
             var mergedCategories = savedCategories
