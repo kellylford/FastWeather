@@ -310,17 +310,14 @@ struct MyDataConfigView: View {
         )
         settingsManager.saveSettings()
         UIAccessibility.post(notification: .announcement, argument: "\(parameter.displayName) added to My Data")
-        
-        // Refresh weather to include new parameter in API call
-        if let city = previewCity {
-            Task { await loadPreviewWeather(forceRefresh: true) }
-            // Also refresh all cities so the new data is available
-            Task {
-                for savedCity in weatherService.savedCities {
-                    await weatherService.fetchWeather(for: savedCity)
-                }
-            }
-        }
+
+        // Invalidate cached weather so fetches pick up the new parameter. Previously this eagerly
+        // looped fetchWeather over every saved city, which amplified API calls AND no-opped on
+        // still-valid cache (so the new param wasn't even fetched, including in the preview). Now:
+        // clear the cache, refresh the preview, and let other saved cities re-fetch lazily on next
+        // view. — HI-5
+        weatherService.clearWeatherCache()
+        Task { await loadPreviewWeather(forceRefresh: true) }
     }
     
     private func removeParameter(_ parameter: MyDataParameter) {

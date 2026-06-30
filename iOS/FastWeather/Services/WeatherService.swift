@@ -1439,6 +1439,11 @@ class WeatherService: ObservableObject {
             let (data, response) = try await URLSession.shared.data(for: request)
             
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                // Log so a "missing alerts" report is diagnosable. NOTE: this still returns []
+                // (looks like "no alerts" to the user). Surfacing a real "couldn't check alerts"
+                // state to the UI is deferred (HI-3) — it needs a UX/VoiceOver decision.
+                let status = (response as? HTTPURLResponse)?.statusCode ?? -1
+                AppLogger.network.error("NWS alerts non-200 (\(status, privacy: .public)) for \(city.name, privacy: .public)")
                 return []
             }
             
@@ -1496,12 +1501,16 @@ class WeatherService: ObservableObject {
             alertsCache[city.id] = (activeAlerts, Date())
             
             return activeAlerts
-            
+
         } catch {
+            // Network/decoding failure. Logged for diagnosability; still returns [] (HI-3:
+            // surfacing a distinct "couldn't check alerts" UI state is deferred pending a
+            // UX/VoiceOver decision). Not cached, so the next attempt retries.
+            AppLogger.network.error("NWS alerts fetch failed for \(city.name, privacy: .public): \(error.localizedDescription, privacy: .public)")
             return []
         }
     }
-    
+
     /// Fetches weather alerts from Apple WeatherKit (international cities)
     private func fetchWeatherKitAlerts(for city: City) async throws -> [WeatherAlert] {
         #if canImport(WeatherKit)
