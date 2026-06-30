@@ -18,6 +18,13 @@ class RegionalWeatherService {
     // Cache for reverse geocoded location names (key: "lat,lon", value: city name)
     private var locationNameCache: [String: String] = [:]
     private let cacheQueue = DispatchQueue(label: "com.weatherfast.locationcache")
+
+    // In-memory cache for WeatherKit current conditions, keyed by rounded coordinate.
+    // Conditions change, so entries expire after a short TTL. This avoids re-billing
+    // WeatherKit on every reappearance of the same directional tiles (HI-1); the overlay
+    // itself is an intentional accuracy fix and is preserved.
+    private var conditionCache: [String: (text: String, timestamp: Date)] = [:]
+    private let conditionCacheTTL: TimeInterval = 10 * 60
     
     // Actor to serialize geocoding requests to respect rate limits
     private actor GeocodingCoordinator {
@@ -58,6 +65,20 @@ class RegionalWeatherService {
         cacheQueue.sync {
             locationNameCache[key] = name
             saveCache()
+        }
+    }
+
+    private func getCachedCondition(for key: String) -> String? {
+        cacheQueue.sync {
+            guard let entry = conditionCache[key],
+                  Date().timeIntervalSince(entry.timestamp) < conditionCacheTTL else { return nil }
+            return entry.text
+        }
+    }
+
+    private func setCachedCondition(_ text: String, for key: String) {
+        cacheQueue.sync {
+            conditionCache[key] = (text, Date())
         }
     }
     
@@ -236,10 +257,14 @@ class RegionalWeatherService {
     #if canImport(WeatherKit)
     @available(iOS 16.0, *)
     private func weatherKitConditionDescription(lat: Double, lon: Double) async -> String? {
+        let key = cacheKey(latitude: lat, longitude: lon)
+        if let cached = getCachedCondition(for: key) { return cached }
         do {
             let current = try await WeatherKit.WeatherService.shared.weather(
                 for: CLLocation(latitude: lat, longitude: lon), including: .current)
-            return WeatherCode(weatherKitCondition: current.condition)?.description
+            guard let text = WeatherCode(weatherKitCondition: current.condition)?.description else { return nil }
+            setCachedCondition(text, for: key)
+            return text
         } catch {
             debugLog("⚠️ WK condition (regional) failed for \(lat),\(lon): \(error.localizedDescription)")
             return nil

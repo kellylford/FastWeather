@@ -1332,10 +1332,19 @@ class WeatherService: ObservableObject {
     @available(iOS 16.0, *)
     private func weatherKitCurrentWMOCode(latitude: Double, longitude: Double) async -> Int? {
         guard FeatureFlags.shared.weatherKitConditionsEnabled else { return nil }
+        // Coordinate-keyed TTL cache (main-actor isolated): avoids re-billing WeatherKit on every
+        // browse-row reappearance — HI-1. The overlay is preserved; only redundant calls are cut.
+        let key = String(format: "%.2f,%.2f", latitude, longitude)
+        if let entry = wkConditionCache[key],
+           Date().timeIntervalSince(entry.timestamp) < wkConditionCacheTTL {
+            return entry.wmo
+        }
         do {
             let current = try await WeatherKit.WeatherService.shared.weather(
                 for: CLLocation(latitude: latitude, longitude: longitude), including: .current)
-            return WeatherCode(weatherKitCondition: current.condition)?.rawValue
+            guard let wmo = WeatherCode(weatherKitCondition: current.condition)?.rawValue else { return nil }
+            wkConditionCache[key] = (wmo, Date())
+            return wmo
         } catch {
             debugLog("⚠️ WK condition (browse) failed for \(latitude),\(longitude): \(error.localizedDescription)")
             return nil
@@ -1347,6 +1356,11 @@ class WeatherService: ObservableObject {
     
     private var alertsCache: [UUID: (alerts: [WeatherAlert], timestamp: Date)] = [:]
     // alertsCache is @MainActor-isolated (WeatherService is @MainActor); no lock needed.
+
+    // Coordinate-keyed cache of WeatherKit current WMO codes for the lightweight browse/regional
+    // paths, with a short TTL (main-actor isolated). Avoids redundant WeatherKit billing — HI-1.
+    private var wkConditionCache: [String: (wmo: Int, timestamp: Date)] = [:]
+    private let wkConditionCacheTTL: TimeInterval = 10 * 60
     private let alertsCacheMinutes: TimeInterval = 5
     
     /// Countries where WeatherKit alerts are known to work
