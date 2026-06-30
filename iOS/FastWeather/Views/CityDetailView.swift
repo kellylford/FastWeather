@@ -1103,7 +1103,9 @@ struct CityDetailView: View {
                 return index
             }
         }
-        return 0 // Fallback to start if not found
+        // All hours are in the past (stale data): fall back to the most recent hour
+        // rather than the oldest, so we don't surface long-past hours as "current" — HI-8.
+        return max(0, times.count - 1)
     }
 }
 
@@ -2406,7 +2408,9 @@ struct MarineForecastSection: View {
                 return index
             }
         }
-        return 0 // Fallback to start if not found
+        // All hours are in the past (stale data): fall back to the most recent hour
+        // rather than the oldest, so we don't surface long-past hours as "current" — HI-8.
+        return max(0, times.count - 1)
     }
     
     var body: some View {

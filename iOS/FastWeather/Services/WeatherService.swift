@@ -257,6 +257,9 @@ class WeatherService: ObservableObject {
         // Remove all cached weather data for this city (all date offsets)
         weatherCache = weatherCache.filter { $0.key.cityId != city.id }
         cacheTimestamps = cacheTimestamps.filter { $0.key.cityId != city.id }
+        // Also drop marine cache entries for this city so they don't linger (L4)
+        marineCache = marineCache.filter { $0.key.cityId != city.id }
+        marineCacheTimestamps = marineCacheTimestamps.filter { $0.key.cityId != city.id }
         alertsCache.removeValue(forKey: city.id)
         saveCities()
     }
@@ -270,6 +273,8 @@ class WeatherService: ObservableObject {
     func clearWeatherCache() {
         weatherCache = [:]
         cacheTimestamps = [:]
+        marineCache = [:]
+        marineCacheTimestamps = [:]
         alertsCache = [:]
     }
     
@@ -308,7 +313,22 @@ class WeatherService: ObservableObject {
             marineCacheTimestamps.removeValue(forKey: key)
         }
     }
-    
+
+    /// Evicts the oldest marine entries independently of weatherCache. Marine data is
+    /// fetched on its own (sailing/coastal cities) and would otherwise grow unbounded
+    /// because trimWeatherCacheIfNeeded only fires on weatherCache growth — H2.
+    private func trimMarineCacheIfNeeded() {
+        guard marineCache.count > maxWeatherCacheEntries else { return }
+        let evict = marineCacheTimestamps
+            .sorted { $0.value < $1.value }
+            .prefix(marineCache.count - maxWeatherCacheEntries)
+            .map { $0.key }
+        for key in evict {
+            marineCache.removeValue(forKey: key)
+            marineCacheTimestamps.removeValue(forKey: key)
+        }
+    }
+
     private func trimBrowseCacheIfNeeded() {
         guard browseWeatherCache.count > maxBrowseCacheEntries else { return }
         let evict = browseCacheTimestamps
@@ -1047,7 +1067,7 @@ class WeatherService: ObservableObject {
             await MainActor.run {
                 self.marineCache[cacheKey] = marineData
                 self.marineCacheTimestamps[cacheKey] = Date()
-                self.trimWeatherCacheIfNeeded()
+                self.trimMarineCacheIfNeeded()
             }
         } catch {
             await MainActor.run {
