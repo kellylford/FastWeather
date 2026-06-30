@@ -25,6 +25,8 @@ class LocationService: NSObject, ObservableObject {
     private let locationManager = CLLocationManager()
     // Main-actor isolated — only ever read/written on the main actor (see delegate methods below).
     private var locationContinuation: CheckedContinuation<CLLocation, Error>?
+    // Resumed by locationManagerDidChangeAuthorization when the user answers the permission prompt.
+    private var authContinuation: CheckedContinuation<CLAuthorizationStatus, Never>?
     
     // MARK: - Singleton
     
@@ -44,6 +46,27 @@ class LocationService: NSObject, ObservableObject {
         locationManager.requestWhenInUseAuthorization()
     }
     
+    /// Requests permission and awaits the user's response via the authorization-change
+    /// delegate, with a timeout fallback so it can never hang. Replaces the old fixed
+    /// 500ms sleep that returned a false "permission denied" when the user was slow to tap.
+    private func requestAuthorizationAndWait() async -> CLAuthorizationStatus {
+        if authorizationStatus != .notDetermined { return authorizationStatus }
+        // If a prompt is already awaiting a response, don't start another.
+        if authContinuation != nil { return authorizationStatus }
+        requestPermission()
+        return await withCheckedContinuation { (continuation: CheckedContinuation<CLAuthorizationStatus, Never>) in
+            self.authContinuation = continuation
+            // Timeout: if the delegate never fires, resume with whatever status we have.
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 10_000_000_000) // 10s
+                if let cont = self.authContinuation {
+                    self.authContinuation = nil
+                    cont.resume(returning: self.authorizationStatus)
+                }
+            }
+        }
+    }
+
     /// Gets the current device location
     /// - Returns: CLLocation object with coordinates
     /// - Throws: LocationError if location cannot be determined
@@ -51,12 +74,10 @@ class LocationService: NSObject, ObservableObject {
         // Check authorization status
         if authorizationStatus != .authorizedWhenInUse && authorizationStatus != .authorizedAlways {
             if authorizationStatus == .notDetermined {
-                requestPermission()
-                // Wait a moment for user to grant permission
-                try await Task.sleep(nanoseconds: 500_000_000)
-                
-                // Check again after delay
-                if authorizationStatus != .authorizedWhenInUse && authorizationStatus != .authorizedAlways {
+                // Wait for the user's actual response to the permission prompt instead of a
+                // fixed 500ms sleep that often fired before they tapped Allow (false denial).
+                let status = await requestAuthorizationAndWait()
+                if status != .authorizedWhenInUse && status != .authorizedAlways {
                     throw LocationError.permissionDenied
                 }
             } else {
@@ -173,6 +194,11 @@ extension LocationService: CLLocationManagerDelegate {
     nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         Task { @MainActor in
             authorizationStatus = manager.authorizationStatus
+            // Resume a pending getCurrentLocation() that's waiting on the permission prompt.
+            if manager.authorizationStatus != .notDetermined, let cont = authContinuation {
+                authContinuation = nil
+                cont.resume(returning: manager.authorizationStatus)
+            }
         }
     }
     

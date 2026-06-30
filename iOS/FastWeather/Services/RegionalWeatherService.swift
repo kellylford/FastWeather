@@ -62,9 +62,14 @@ class RegionalWeatherService {
     
     private func setCachedLocationName(_ name: String, latitude: Double, longitude: Double) {
         let key = cacheKey(latitude: latitude, longitude: longitude)
-        cacheQueue.sync {
+        // Mutate under the lock, then encode + persist OUTSIDE it so the ~9 concurrent
+        // directional fetches don't serialize on disk I/O while holding the cache lock (M1).
+        let snapshot: [String: String] = cacheQueue.sync {
             locationNameCache[key] = name
-            saveCache()
+            return locationNameCache
+        }
+        if let data = try? JSONEncoder().encode(snapshot) {
+            UserDefaults.standard.set(data, forKey: "RegionalWeatherLocationCache")
         }
     }
 
@@ -90,12 +95,6 @@ class RegionalWeatherService {
                 locationNameCache = cache
             }
             debugLog("📍 Loaded \(cache.count) cached location names")
-        }
-    }
-    
-    private func saveCache() {
-        if let data = try? JSONEncoder().encode(locationNameCache) {
-            UserDefaults.standard.set(data, forKey: "RegionalWeatherLocationCache")
         }
     }
     
