@@ -1,5 +1,7 @@
 # VoiceOver Verification Guide
 
+> **RESOLVED 2026-06-30 (user-tested).** Outcome: **VO-4 fixed** (sort selected-state now announced). **VO-6** confirmed *deliberate* (no per-keystroke announcement — results are swipe-discoverable). **VO-1, VO-2, VO-3, VO-5, VO-8** all confirmed working as intended / deliberate. **VO-7** (Dynamic Type) split out to issue #76 for deeper review. VoiceOver is considered good to go for now. Details below kept for reference.
+
 **Purpose:** The code review flagged a set of accessibility concerns by *static analysis*. As the radar timeline showed, static analysis can misread deliberate design. **No VoiceOver/accessibility code has been changed.** This guide gives you the exact path to reach each flagged spot with VoiceOver so you can decide, per item, whether it's a real problem or working as intended.
 
 For each item, mark a verdict at the bottom:
