@@ -3,6 +3,9 @@
 # the raw radar images and report files.
 data/
 
+# weather_lab.py per-run output (images, audio, report.html — all regenerable)
+runs/
+
 # Python
 __pycache__/
 *.pyc

@@ -116,6 +116,85 @@ External users stay on main (current App Store build). Internal testers get the 
 
 ---
 
+## Weather Images Lab (new — June 29, expands beyond radar)
+
+`quickradar/weather_lab.py` is a broader experiment: instead of one radar image,
+it fetches a **whole suite of free NOAA/NWS weather imagery** for a location,
+describes each with a prompt tailored to that image type, sonifies the local
+radar into stereo audio, and emits an **accessible `report.html`** you read
+top-to-bottom with VoiceOver (semantic headings, AI text as image alt, an
+`<audio>` player per description, a skip link).
+
+```bash
+cd quickradar
+python3 weather_lab.py 53703                  # Foundation Models (default), full suite
+python3 weather_lab.py 53703 33101 90210      # multiple locations in one run
+python3 weather_lab.py "Madison, WI" --ai both    # FM + Ollama side by side
+python3 weather_lab.py 53703 --ai none --no-audio # fast fetch-only smoke test
+python3 weather_lab.py 53703 --only radar_local,goes_ir
+```
+
+Multiple locations write one run folder each, then a master `runs/index.html`
+lists all reports (newest first) with conditions + alerts — open that to scan
+many places fast.
+
+**Image suite (13 types, all free, no API key, gracefully skips any 404):**
+- `radar_local` — nearest NEXRAD station base reflectivity (also sonified)
+- `radar_national` — CONUS radar mosaic
+- `goes_geocolor` / `goes_ir` / `goes_wv` / `goes_airmass` — GOES-19 regional
+  sector (auto-picked from 9 sectors by nearest center): true color, Band 13
+  clean IR (cloud-top height = storm strength), Band 9 water vapor (moisture /
+  jet stream), Air Mass RGB (air masses + dry intrusions — reads very well)
+- `forecast_qpf` / `forecast_qpf_day2` — WPC day-1 & day-2 precip amounts
+- `surface_fronts` — WPC surface analysis (fronts, highs/lows)
+- `tropical_atlantic` — NHC 7-day Atlantic tropical outlook (seasonal)
+- `drought` — US Drought Monitor
+- `snow_depth` — NOHRSC national snow depth (best-effort dated URL; empty in summer)
+- `meteogram` — NWS hourly forecast graph for the exact point. URL needs the
+  CORRECT forecast office (`wfo`) + zone, fetched per-point from the NWS points
+  API; a hardcoded office returns a blank 800×40 strip. Tests AI graph reading.
+
+Dead ends (moved to interactive/layered, dropped): NDFD `graphical.weather.gov`
+static maps, SPC `day1otlk.gif` categorical outlook.
+
+**Foundation Models reliability gotchas (June 29):**
+- Each `describe_fm` call spins up the model in a fresh `swift` process. ~13
+  rapid back-to-back calls hit transient `1001`/`1046` errors that cluster at the
+  END of a run. `describe_fm` now retries those with 3s/6s backoff + a 1s settle
+  between calls — clears them. Non-transient errors return short clean messages
+  (no more giant nested NSError blobs in the report).
+- The **US Drought Monitor map intermittently trips Apple's on-device Sensitive
+  Content Analysis filter** (error 15) — likely the deep-red D4 areas. It's
+  non-deterministic; retry often gets through. Handled as a clean
+  "[FM declined this image — on-device sensitive-content filter]" note.
+- Accuracy spot-check: FM read `snow_depth` as "snow near Madison (tan/white)"
+  when tan/white = NONE — it misreads legend semantics. Reinforces: always pair
+  with the ground-truth panel.
+
+**AI backends** (`--ai`): `fm` = Apple Foundation Models via `run_fm_image.sh`
+(wraps `fm_image.swift`, a generic image describer — the image-type-agnostic
+sibling of test_prompt.swift; MUST run under Xcode-beta + MacOSX27 SDK, the
+default toolchain lacks the `Attachment` API). `ollama` = local minicpm-v4.6.
+`both` runs them for comparison. `none` skips AI.
+
+**Audio experiment:** the local radar is turned into a 4-second **"audio radar
+sweep"** (`*_sweep.wav`): 8 compass sectors clockwise from north, pitch rises
+with precipitation intensity, volume with coverage, stereo pan follows E/W
+(west = left ear). v1 uses image center ≈ radar station as the reference point.
+(Text-to-speech of descriptions was removed June 29 — VoiceOver reads the text;
+only this non-speech sonification remains. `--no-audio` skips it.)
+
+**Key early insight (June 29 Madison run):** ground truth was "Mostly Clear,
+90°F, Extreme Heat Warning" — but image-based descriptions never mention the
+heat warning (it's invisible in imagery) and FM read light radar echoes (likely
+hot-day ground clutter) as light rain. Lesson: imagery + AI is great for the
+visual/structural picture but blind to non-visual hazards, so the `report.html`
+always pairs descriptions with an NWS **ground-truth panel** (obs + alerts) so
+you can judge accuracy. Output lands in `quickradar/runs/<timestamp>_<place>/`
+(gitignored) with `images/`, `audio/`, per-image `.txt`, `data.json`, `report.html`.
+
+---
+
 ## Tools
 
 ### Test One City (Mac, ~20-30 seconds)
