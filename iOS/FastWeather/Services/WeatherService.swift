@@ -126,11 +126,27 @@ class WeatherService: ObservableObject {
     
     // MARK: - My Data Dynamic Parameters
     
+    /// Loads the persisted AppSettings without coupling to SettingsManager.
+    /// Reads from the App Group suite (where SettingsManager writes after migration),
+    /// falling back to standard defaults for pre-migration / edge cases. Reading from
+    /// `.standard` alone silently dropped My Data parameters on fresh installs — see CR-2.
+    private static func loadPersistedSettings() -> AppSettings? {
+        let suite = UserDefaults(suiteName: AppGroup.suiteName)
+        if let data = suite?.data(forKey: "AppSettings"),
+           let settings = try? JSONDecoder().decode(AppSettings.self, from: data) {
+            return settings
+        }
+        if let data = UserDefaults.standard.data(forKey: "AppSettings"),
+           let settings = try? JSONDecoder().decode(AppSettings.self, from: data) {
+            return settings
+        }
+        return nil
+    }
+
     /// Appends user-selected My Data API parameters to the base current params string.
     /// Reads directly from UserDefaults to avoid coupling to SettingsManager.
     static func appendMyDataParameters(to baseParams: String) -> String {
-        guard let data = UserDefaults.standard.data(forKey: "AppSettings"),
-              let settings = try? JSONDecoder().decode(AppSettings.self, from: data) else {
+        guard let settings = loadPersistedSettings() else {
             return baseParams
         }
         
@@ -149,8 +165,7 @@ class WeatherService: ObservableObject {
     /// Fetches marine current values for selected My Data parameters.
     /// Returns a dictionary of API key -> value for marine parameters only.
     private func fetchMyDataMarineValues(for city: City) async -> [String: Double]? {
-        guard let data = UserDefaults.standard.data(forKey: "AppSettings"),
-              let settings = try? JSONDecoder().decode(AppSettings.self, from: data) else {
+        guard let settings = Self.loadPersistedSettings() else {
             return nil
         }
         
@@ -188,8 +203,7 @@ class WeatherService: ObservableObject {
     /// Fetches air quality current values for selected My Data parameters.
     /// Returns a dictionary of API key -> value for air quality parameters only.
     private func fetchMyDataAirQualityValues(for city: City) async -> [String: Double]? {
-        guard let data = UserDefaults.standard.data(forKey: "AppSettings"),
-              let settings = try? JSONDecoder().decode(AppSettings.self, from: data) else {
+        guard let settings = Self.loadPersistedSettings() else {
             return nil
         }
         
@@ -267,11 +281,13 @@ class WeatherService: ObservableObject {
         return Date().timeIntervalSince(timestamp) < currentWeatherCacheDuration
     }
     
-    /// Returns true when the cache entry for `key` is fresh enough to skip a new fetch.
-    /// Future offsets are cached for 1 hour; current (offset=0) for 10 minutes.
-    private func isCacheValid(for key: WeatherCacheKey) -> Bool {
-        guard let timestamp = cacheTimestamps[key] else { return false }
-        let duration = key.dateOffset == 0 ? currentWeatherCacheDuration : forecastWeatherCacheDuration
+    /// Returns true when a cache entry is fresh enough to skip a new fetch, using the
+    /// offset-aware policy: current (offset=0) is cached for 10 minutes, future offsets
+    /// for 1 hour. Takes the timestamp explicitly so it works for both the weather and
+    /// marine timestamp dictionaries — see CR review HI-6.
+    private func isCacheValid(timestamp: Date?, dateOffset: Int) -> Bool {
+        guard let timestamp = timestamp else { return false }
+        let duration = dateOffset == 0 ? currentWeatherCacheDuration : forecastWeatherCacheDuration
         return Date().timeIntervalSince(timestamp) < duration
     }
     
@@ -330,7 +346,7 @@ class WeatherService: ObservableObject {
         let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
         
         // Check in-memory cache
-        if isCacheValid(timestamp: cacheTimestamps[cacheKey]) {
+        if isCacheValid(timestamp: cacheTimestamps[cacheKey], dateOffset: dateOffset) {
             if !includeHourly {
                 // Light fetch: any valid cache entry is acceptable
                 return
@@ -414,11 +430,12 @@ class WeatherService: ObservableObject {
                     return
                 }
                 
-                // Build synthetic "current" weather from that day's max/min temps and weather code
-                let avgTemp = ((daily.temperature2mMax[dateOffset] ?? 0) + (daily.temperature2mMin[dateOffset] ?? 0)) / 2
+                // Build synthetic "current" weather from that day's max/min temps and weather code.
+                // All array access is bounds-safe (.value(at:)) so a partial API response can't trap — CR-3.
+                let avgTemp = ((daily.temperature2mMax.value(at: dateOffset) ?? 0) + (daily.temperature2mMin.value(at: dateOffset) ?? 0)) / 2
                 let avgApparentTemp: Double? = {
-                    guard let maxVal = daily.apparentTemperatureMax?[dateOffset],
-                          let minVal = daily.apparentTemperatureMin?[dateOffset] else { return nil }
+                    guard let maxVal = daily.apparentTemperatureMax?.value(at: dateOffset),
+                          let minVal = daily.apparentTemperatureMin?.value(at: dateOffset) else { return nil }
                     return (maxVal + minVal) / 2
                 }()
                 let current = WeatherData.CurrentWeather(
@@ -426,39 +443,39 @@ class WeatherService: ObservableObject {
                     relativeHumidity2m: nil,
                     apparentTemperature: avgApparentTemp,
                     isDay: 1,
-                    precipitation: daily.precipitationSum?[dateOffset] ?? 0,
-                    rain: daily.rainSum?[dateOffset] ?? 0,
+                    precipitation: daily.precipitationSum?.value(at: dateOffset) ?? 0,
+                    rain: daily.rainSum?.value(at: dateOffset) ?? 0,
                     showers: nil,
-                    snowfall: daily.snowfallSum?[dateOffset] ?? 0,
-                    weatherCode: daily.weatherCode?[dateOffset] ?? 0,
+                    snowfall: daily.snowfallSum?.value(at: dateOffset) ?? 0,
+                    weatherCode: daily.weatherCode?.value(at: dateOffset) ?? 0,
                     cloudCover: 0,
                     pressureMsl: nil,
-                    windSpeed10m: daily.windSpeed10mMax?[dateOffset] ?? 0,
+                    windSpeed10m: daily.windSpeed10mMax?.value(at: dateOffset) ?? 0,
                     windDirection10m: nil,
                     visibility: nil,
                     windGusts10m: nil,
-                    uvIndex: daily.uvIndexMax?[dateOffset] ?? nil,
+                    uvIndex: daily.uvIndexMax?.value(at: dateOffset) ?? nil,
                     dewpoint2m: nil
                 )
-                
+
                 // Extract just this day's data from daily arrays (single-element arrays)
                 let singleDayDaily = WeatherData.DailyWeather(
-                    temperature2mMax: [daily.temperature2mMax[dateOffset]].compactMap { $0 },
-                    temperature2mMin: [daily.temperature2mMin[dateOffset]].compactMap { $0 },
-                    sunrise: daily.sunrise.map { [$0[dateOffset]].compactMap { $0 } },
-                    sunset: daily.sunset.map { [$0[dateOffset]].compactMap { $0 } },
-                    weatherCode: daily.weatherCode.map { [$0[dateOffset]].compactMap { $0 } },
-                    precipitationSum: daily.precipitationSum.map { [$0[dateOffset]].compactMap { $0 } },
-                    rainSum: daily.rainSum.map { [$0[dateOffset]].compactMap { $0 } },
-                    snowfallSum: daily.snowfallSum.map { [$0[dateOffset]].compactMap { $0 } },
-                    precipitationProbabilityMax: daily.precipitationProbabilityMax.map { [$0[dateOffset]].compactMap { $0 } },
-                    uvIndexMax: daily.uvIndexMax.map { [$0[dateOffset]].compactMap { $0 } },
-                    daylightDuration: daily.daylightDuration.map { [$0[dateOffset]].compactMap { $0 } },
-                    sunshineDuration: daily.sunshineDuration.map { [$0[dateOffset]].compactMap { $0 } },
-                    windSpeed10mMax: daily.windSpeed10mMax.map { [$0[dateOffset]].compactMap { $0 } },
-                    windDirectionDominant: daily.windDirectionDominant.map { [$0[dateOffset]].compactMap { $0 } },
-                    apparentTemperatureMax: daily.apparentTemperatureMax.map { [$0[dateOffset]].compactMap { $0 } },
-                    apparentTemperatureMin: daily.apparentTemperatureMin.map { [$0[dateOffset]].compactMap { $0 } }
+                    temperature2mMax: [daily.temperature2mMax.value(at: dateOffset)].compactMap { $0 },
+                    temperature2mMin: [daily.temperature2mMin.value(at: dateOffset)].compactMap { $0 },
+                    sunrise: daily.sunrise.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    sunset: daily.sunset.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    weatherCode: daily.weatherCode.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    precipitationSum: daily.precipitationSum.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    rainSum: daily.rainSum.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    snowfallSum: daily.snowfallSum.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    precipitationProbabilityMax: daily.precipitationProbabilityMax.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    uvIndexMax: daily.uvIndexMax.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    daylightDuration: daily.daylightDuration.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    sunshineDuration: daily.sunshineDuration.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    windSpeed10mMax: daily.windSpeed10mMax.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    windDirectionDominant: daily.windDirectionDominant.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    apparentTemperatureMax: daily.apparentTemperatureMax.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    apparentTemperatureMin: daily.apparentTemperatureMin.map { [$0.value(at: dateOffset)].compactMap { $0 } }
                 )
                 
                 // Extract hourly data for that specific day (24 hours starting at midnight of target date)
@@ -602,10 +619,11 @@ class WeatherService: ObservableObject {
             // The target past day is always at index 0 (the oldest entry).
             let targetIndex = 0
 
-            let avgTemp = ((daily.temperature2mMax[targetIndex] ?? 0) + (daily.temperature2mMin[targetIndex] ?? 0)) / 2
+            // Bounds-safe access (.value(at:)) so a partial API response can't trap — CR-3.
+            let avgTemp = ((daily.temperature2mMax.value(at: targetIndex) ?? 0) + (daily.temperature2mMin.value(at: targetIndex) ?? 0)) / 2
             let avgApparentTemp: Double? = {
-                guard let maxVal = daily.apparentTemperatureMax?[targetIndex],
-                      let minVal = daily.apparentTemperatureMin?[targetIndex] else { return nil }
+                guard let maxVal = daily.apparentTemperatureMax?.value(at: targetIndex),
+                      let minVal = daily.apparentTemperatureMin?.value(at: targetIndex) else { return nil }
                 return (maxVal + minVal) / 2
             }()
             let current = WeatherData.CurrentWeather(
@@ -613,38 +631,38 @@ class WeatherService: ObservableObject {
                 relativeHumidity2m: nil,
                 apparentTemperature: avgApparentTemp,
                 isDay: 1,
-                precipitation: daily.precipitationSum?[targetIndex] ?? 0,
-                rain: daily.rainSum?[targetIndex] ?? 0,
+                precipitation: daily.precipitationSum?.value(at: targetIndex) ?? 0,
+                rain: daily.rainSum?.value(at: targetIndex) ?? 0,
                 showers: nil,
-                snowfall: daily.snowfallSum?[targetIndex] ?? 0,
-                weatherCode: daily.weatherCode?[targetIndex] ?? 0,
+                snowfall: daily.snowfallSum?.value(at: targetIndex) ?? 0,
+                weatherCode: daily.weatherCode?.value(at: targetIndex) ?? 0,
                 cloudCover: 0,
                 pressureMsl: nil,
-                windSpeed10m: daily.windSpeed10mMax?[targetIndex] ?? 0,
+                windSpeed10m: daily.windSpeed10mMax?.value(at: targetIndex) ?? 0,
                 windDirection10m: nil,
                 visibility: nil,
                 windGusts10m: nil,
-                uvIndex: daily.uvIndexMax?[targetIndex],
+                uvIndex: daily.uvIndexMax?.value(at: targetIndex) ?? nil,
                 dewpoint2m: nil
             )
 
             let singleDayDaily = WeatherData.DailyWeather(
-                temperature2mMax: [daily.temperature2mMax[targetIndex]].compactMap { $0 },
-                temperature2mMin: [daily.temperature2mMin[targetIndex]].compactMap { $0 },
-                sunrise: daily.sunrise.map { [$0[targetIndex]].compactMap { $0 } },
-                sunset: daily.sunset.map { [$0[targetIndex]].compactMap { $0 } },
-                weatherCode: daily.weatherCode.map { [$0[targetIndex]].compactMap { $0 } },
-                precipitationSum: daily.precipitationSum.map { [$0[targetIndex]].compactMap { $0 } },
-                rainSum: daily.rainSum.map { [$0[targetIndex]].compactMap { $0 } },
-                snowfallSum: daily.snowfallSum.map { [$0[targetIndex]].compactMap { $0 } },
-                precipitationProbabilityMax: daily.precipitationProbabilityMax.map { [$0[targetIndex]].compactMap { $0 } },
-                uvIndexMax: daily.uvIndexMax.map { [$0[targetIndex]].compactMap { $0 } },
-                daylightDuration: daily.daylightDuration.map { [$0[targetIndex]].compactMap { $0 } },
-                sunshineDuration: daily.sunshineDuration.map { [$0[targetIndex]].compactMap { $0 } },
-                windSpeed10mMax: daily.windSpeed10mMax.map { [$0[targetIndex]].compactMap { $0 } },
-                windDirectionDominant: daily.windDirectionDominant.map { [$0[targetIndex]].compactMap { $0 } },
-                apparentTemperatureMax: daily.apparentTemperatureMax.map { [$0[targetIndex]].compactMap { $0 } },
-                apparentTemperatureMin: daily.apparentTemperatureMin.map { [$0[targetIndex]].compactMap { $0 } }
+                temperature2mMax: [daily.temperature2mMax.value(at: targetIndex)].compactMap { $0 },
+                temperature2mMin: [daily.temperature2mMin.value(at: targetIndex)].compactMap { $0 },
+                sunrise: daily.sunrise.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                sunset: daily.sunset.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                weatherCode: daily.weatherCode.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                precipitationSum: daily.precipitationSum.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                rainSum: daily.rainSum.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                snowfallSum: daily.snowfallSum.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                precipitationProbabilityMax: daily.precipitationProbabilityMax.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                uvIndexMax: daily.uvIndexMax.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                daylightDuration: daily.daylightDuration.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                sunshineDuration: daily.sunshineDuration.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                windSpeed10mMax: daily.windSpeed10mMax.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                windDirectionDominant: daily.windDirectionDominant.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                apparentTemperatureMax: daily.apparentTemperatureMax.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                apparentTemperatureMin: daily.apparentTemperatureMin.map { [$0.value(at: targetIndex)].compactMap { $0 } }
             )
 
             // The target past day's hourly data is always the first 24 entries in the response.
@@ -945,7 +963,7 @@ class WeatherService: ObservableObject {
         let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
         
         // Check in-memory cache
-        if isCacheValid(timestamp: marineCacheTimestamps[cacheKey]) {
+        if isCacheValid(timestamp: marineCacheTimestamps[cacheKey], dateOffset: dateOffset) {
             return
         }
         

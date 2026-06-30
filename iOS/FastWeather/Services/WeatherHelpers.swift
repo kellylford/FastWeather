@@ -7,6 +7,18 @@
 
 import SwiftUI
 
+// MARK: - Safe Array Access
+extension Array {
+    /// Returns the element at `index`, or nil when the index is out of range.
+    /// Used for the parallel optional arrays Open-Meteo returns (daily/hourly fields):
+    /// a partial or short response would otherwise trap when subscripting at a fixed
+    /// offset. See code review CR-3.
+    func value<T>(at index: Int) -> T? where Element == T? {
+        guard indices.contains(index) else { return nil }
+        return self[index]
+    }
+}
+
 // MARK: - UV Index Helpers
 struct UVIndexCategory {
     let category: String

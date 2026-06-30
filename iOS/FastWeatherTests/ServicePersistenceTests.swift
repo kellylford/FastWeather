@@ -125,6 +125,81 @@ final class BrowseFavoritesServicePersistenceTests: XCTestCase {
     }
 }
 
+// MARK: - AppSettings Version Encoding Tests (CR-1)
+
+final class AppSettingsVersionTests: XCTestCase {
+
+    // The version gate in SettingsManager reads settingsVersion from the stored JSON.
+    // It is only meaningful if encode(to:) actually writes the key — regression guard for CR-1.
+    func testSettingsVersionIsEncoded() throws {
+        let data = try JSONEncoder().encode(AppSettings())
+        let json = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: data) as? [String: Any],
+            "Encoded settings should be a JSON object"
+        )
+        let storedVersion = try XCTUnwrap(
+            json["settingsVersion"] as? Int,
+            "encode(to:) must write settingsVersion so the version-mismatch reset can fire"
+        )
+        XCTAssertEqual(storedVersion, AppSettings.currentVersion,
+                       "Freshly encoded settings should carry the current version")
+    }
+
+    // settingsVersion must survive a full encode/decode round-trip.
+    func testSettingsVersionRoundTrips() throws {
+        let data = try JSONEncoder().encode(AppSettings())
+        let decoded = try JSONDecoder().decode(AppSettings.self, from: data)
+        XCTAssertEqual(decoded.settingsVersion, AppSettings.currentVersion)
+    }
+
+    // A legacy blob with no settingsVersion key (all existing users) must still decode
+    // — without wiping settings — defaulting to the current version.
+    func testLegacyBlobWithoutVersionDecodesToCurrent() throws {
+        let data = try JSONEncoder().encode(AppSettings())
+        var json = try XCTUnwrap(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+        json.removeValue(forKey: "settingsVersion")
+        let strippedData = try JSONSerialization.data(withJSONObject: json)
+
+        let decoded = try JSONDecoder().decode(AppSettings.self, from: strippedData)
+        XCTAssertEqual(decoded.settingsVersion, AppSettings.currentVersion,
+                       "A versionless legacy blob should decode as the current version, not crash")
+    }
+}
+
+// MARK: - Safe Array Access Tests (CR-3)
+
+final class SafeArrayAccessTests: XCTestCase {
+
+    func testValueAtReturnsElementInRange() {
+        let arr: [Double?] = [10.0, 20.0, 30.0]
+        XCTAssertEqual(arr.value(at: 0), 10.0)
+        XCTAssertEqual(arr.value(at: 2), 30.0)
+    }
+
+    func testValueAtReturnsNilOutOfRange() {
+        let arr: [Double?] = [10.0]
+        XCTAssertNil(arr.value(at: 1), "Out-of-range index must return nil, not trap")
+        XCTAssertNil(arr.value(at: 15), "Far-out-of-range index (e.g. a partial daily response) must return nil")
+    }
+
+    func testValueAtReturnsNilForNegativeIndex() {
+        let arr: [Double?] = [10.0]
+        XCTAssertNil(arr.value(at: -1))
+    }
+
+    func testValueAtOnEmptyArray() {
+        let arr: [String?] = []
+        XCTAssertNil(arr.value(at: 0), "Empty companion array (shorter than the master) must not trap")
+    }
+
+    func testValueAtPreservesStoredNil() {
+        let arr: [Double?] = [nil, 5.0]
+        // Element exists but is nil — value(at:) returns that nil, distinct from out-of-range nil.
+        XCTAssertNil(arr.value(at: 0))
+        XCTAssertEqual(arr.value(at: 1), 5.0)
+    }
+}
+
 // MARK: - BrowseSortOrder Model Tests
 
 final class BrowseSortOrderModelTests: XCTestCase {

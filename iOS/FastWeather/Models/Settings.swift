@@ -783,7 +783,12 @@ struct AppSettings: Codable {
     // Custom Decodable implementation
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        
+
+        // Decode the persisted format version. Absent means this blob predates version
+        // stamping (or was written before settingsVersion was encoded); treat it as the
+        // current version since the decoder below is robust to missing/extra fields.
+        settingsVersion = try container.decodeIfPresent(Int.self, forKey: .settingsVersion) ?? AppSettings.currentVersion
+
         myLocationEnabled = try container.decodeIfPresent(Bool.self, forKey: .myLocationEnabled) ?? true
         myLocationPosition = try container.decodeIfPresent(MyLocationPosition.self, forKey: .myLocationPosition) ?? .beforeCityList
 
@@ -1070,7 +1075,12 @@ struct AppSettings: Codable {
     // Custom Encodable implementation
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        
+
+        // Persist the format version so SettingsManager's version-mismatch reset can fire on
+        // a future breaking change. Without this the version gate is dead (the stored blob
+        // never carries the key) — see code review CR-1.
+        try container.encode(settingsVersion, forKey: .settingsVersion)
+
         try container.encode(myLocationEnabled, forKey: .myLocationEnabled)
         try container.encode(myLocationPosition, forKey: .myLocationPosition)
 
