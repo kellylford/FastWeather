@@ -1,0 +1,12 @@
+App Store "What's New" — Version 1.5.7 (from TestFlight build 1.5.7.2)
+Combines the 1.5.7.1 and 1.5.7.2 TestFlight notes for the public App Store release.
+(The TestFlight "International Testing" note was intentionally omitted — it is tester
+guidance, not relevant to a public App Store release.)
+
+------------------------------------------------------------------------------
+
+Current Conditions Accuracy
+The "right now" conditions for your cities are now powered by Apple WeatherKit's observation-based data instead of a forecast model. Before, a city could read "Thunderstorm" while it was actually dry. Current conditions now reflect what's really happening and stay consistent everywhere they appear — your city list, city details, Browse Cities, and Weather Around Me. Hourly and daily forecasts are unchanged.
+
+Alert Expirations
+Fixed an issue where some weather alerts showed incorrect end dates.
