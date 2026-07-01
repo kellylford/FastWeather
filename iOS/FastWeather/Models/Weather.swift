@@ -73,7 +73,29 @@ enum WeatherCode: Int, Codable {
         case .thunderstormWithHeavyHail: return "Thunderstorm with heavy hail"
         }
     }
-    
+
+    /// True for conditions that describe falling precipitation (drizzle, rain, freezing precip,
+    /// snow, showers, thunderstorm). Clear/cloudy/fog return false, so a precipitation
+    /// probability is never attached to a dry label like "40% Overcast".
+    var involvesPrecipitation: Bool {
+        switch self {
+        case .clearSky, .mainlyClear, .partlyCloudy, .overcast, .fog, .depositingRimeFog:
+            return false
+        default:
+            return true
+        }
+    }
+
+    /// Condition label prefixed with the precipitation probability for precipitation-type
+    /// conditions, e.g. "40% Thunderstorm". A forecast condition is a chance, not a certainty;
+    /// showing the probability keeps the label honest and generalizes across every precipitation
+    /// condition (rain, snow, showers, …), not just thunderstorms. Dry conditions, or a nil/zero
+    /// probability, return the bare description.
+    func description(precipitationProbability probability: Int?) -> String {
+        guard involvesPrecipitation, let probability, probability > 0 else { return description }
+        return "\(probability)% \(description)"
+    }
+
     var systemImageName: String {
         return systemImageName(isDay: true)
     }
@@ -330,6 +352,18 @@ struct WeatherData: Codable {
         WeatherData(current: current.withWeatherCode(newCode), daily: daily,
                     hourly: hourly, utcOffsetSeconds: utcOffsetSeconds)
     }
+
+    /// Returns a copy with the `hourly` block replaced. Used by the WeatherKit
+    /// forecast-conditions overlay.
+    func withHourly(_ newHourly: HourlyWeather?) -> WeatherData {
+        WeatherData(current: current, daily: daily, hourly: newHourly, utcOffsetSeconds: utcOffsetSeconds)
+    }
+
+    /// Returns a copy with the `daily` block replaced. Used by the WeatherKit
+    /// forecast-conditions overlay.
+    func withDaily(_ newDaily: DailyWeather?) -> WeatherData {
+        WeatherData(current: current, daily: newDaily, hourly: hourly, utcOffsetSeconds: utcOffsetSeconds)
+    }
     
     struct DailyWeather: Codable {
         let temperature2mMax: [Double?]
@@ -367,8 +401,21 @@ struct WeatherData: Codable {
             case apparentTemperatureMax = "apparent_temperature_max"
             case apparentTemperatureMin = "apparent_temperature_min"
         }
+
+        /// Returns a copy with the per-day `weatherCode` array replaced, preserving all other
+        /// fields. Used by the WeatherKit forecast-conditions overlay.
+        func withWeatherCodes(_ newCodes: [Int?]?) -> WeatherData.DailyWeather {
+            WeatherData.DailyWeather(
+                temperature2mMax: temperature2mMax, temperature2mMin: temperature2mMin,
+                sunrise: sunrise, sunset: sunset, weatherCode: newCodes,
+                precipitationSum: precipitationSum, rainSum: rainSum, snowfallSum: snowfallSum,
+                precipitationProbabilityMax: precipitationProbabilityMax, uvIndexMax: uvIndexMax,
+                daylightDuration: daylightDuration, sunshineDuration: sunshineDuration,
+                windSpeed10mMax: windSpeed10mMax, windDirectionDominant: windDirectionDominant,
+                apparentTemperatureMax: apparentTemperatureMax, apparentTemperatureMin: apparentTemperatureMin)
+        }
     }
-    
+
     struct HourlyWeather: Codable {
         let time: [String?]?  // Optional for basic mode (not requested)
         let temperature2m: [Double?]?  // Optional for basic mode (not requested)
@@ -396,6 +443,17 @@ struct WeatherData: Codable {
             case windGusts10m = "wind_gusts_10m"
             case dewPoint2m = "dew_point_2m"
             case snowfall
+        }
+
+        /// Returns a copy with the per-hour `weatherCode` array replaced, preserving all other
+        /// fields. Used by the WeatherKit forecast-conditions overlay.
+        func withWeatherCodes(_ newCodes: [Int?]?) -> WeatherData.HourlyWeather {
+            WeatherData.HourlyWeather(
+                time: time, temperature2m: temperature2m, weatherCode: newCodes,
+                precipitation: precipitation, relativeHumidity2m: relativeHumidity2m,
+                windSpeed10m: windSpeed10m, cloudCover: cloudCover,
+                precipitationProbability: precipitationProbability, uvIndex: uvIndex,
+                windGusts10m: windGusts10m, dewPoint2m: dewPoint2m, snowfall: snowfall)
         }
     }
 }

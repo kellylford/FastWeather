@@ -135,7 +135,7 @@ struct DayDetailView: View {
 
                 VStack(alignment: .leading, spacing: 4) {
                     if let code = weatherCodeEnum {
-                        Text(code.description)
+                        Text(code.description(precipitationProbability: daily?.precipitationProbabilityMax?.value(at: dayIndex)))
                             .font(.headline)
                     }
 
@@ -187,7 +187,7 @@ struct DayDetailView: View {
     private var conditionsAccessibilityLabel: String {
         var parts: [String] = []
         if let code = weatherCodeEnum {
-            parts.append("Conditions: \(code.description)")
+            parts.append("Conditions: \(code.description(precipitationProbability: daily?.precipitationProbabilityMax?.value(at: dayIndex)))")
         }
         if let high = daily?.temperature2mMax.value(at: dayIndex) {
             parts.append("High: \(formatTemperature(high))")

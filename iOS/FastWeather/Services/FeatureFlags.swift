@@ -92,6 +92,17 @@ class FeatureFlags: ObservableObject {
         }
     }
 
+    /// Extend the WeatherKit condition overlay to the hourly and daily forecast (not just "now").
+    /// On by default. Within WeatherKit's horizon (~10 days) each forecast hour/day uses
+    /// WeatherKit's condition translated to WMO; hours/days WeatherKit doesn't cover, unmappable
+    /// conditions, and days 11–16 keep the Open-Meteo code. Fixes the phantom-thunderstorm code
+    /// (95/96/99 with ~0 precip) appearing in the 24-hour and 16-day forecasts. See #74.
+    @Published var weatherKitForecastConditionsEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(weatherKitForecastConditionsEnabled, forKey: "feature_weatherkit_forecast_conditions_enabled")
+        }
+    }
+
     /// Show specific place names (airports, universities, streets) instead of just the city name.
     /// On by default. When disabled, all searches fall back to the locality-only label ("Madison, WI")
     /// regardless of what was searched. Does not affect cities already saved.
@@ -123,6 +134,7 @@ class FeatureFlags: ObservableObject {
         self.weatherKitSnowEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_snow_enabled")
         self.weatherKitNowcastEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_nowcast_enabled")
         self.weatherKitConditionsEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_conditions_enabled")
+        self.weatherKitForecastConditionsEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_forecast_conditions_enabled")
         self.specificPlaceNamesEnabled = UserDefaults.standard.bool(forKey: "feature_specific_place_names_enabled")
         self.myLocationEnabled = UserDefaults.standard.bool(forKey: "feature_my_location_enabled")
 
@@ -155,6 +167,9 @@ class FeatureFlags: ObservableObject {
         if !UserDefaults.standard.contains(key: "feature_weatherkit_conditions_enabled") {
             self.weatherKitConditionsEnabled = true  // On by default
         }
+        if !UserDefaults.standard.contains(key: "feature_weatherkit_forecast_conditions_enabled") {
+            self.weatherKitForecastConditionsEnabled = true  // On by default
+        }
         if !UserDefaults.standard.contains(key: "feature_specific_place_names_enabled") {
             self.specificPlaceNamesEnabled = true  // On by default
         }
@@ -176,6 +191,7 @@ class FeatureFlags: ObservableObject {
         weatherKitSnowEnabled = true
         weatherKitNowcastEnabled = true
         weatherKitConditionsEnabled = true
+        weatherKitForecastConditionsEnabled = true
         specificPlaceNamesEnabled = true
         myLocationEnabled = true
         debugLog("🔧 Feature flags reset to defaults")
@@ -192,6 +208,7 @@ class FeatureFlags: ObservableObject {
         weatherKitSnowEnabled = true
         weatherKitNowcastEnabled = true
         weatherKitConditionsEnabled = true
+        weatherKitForecastConditionsEnabled = true
         specificPlaceNamesEnabled = true
         myLocationEnabled = true
         debugLog("🔧 All features enabled")
@@ -207,6 +224,7 @@ class FeatureFlags: ObservableObject {
         weatherKitSnowEnabled = false
         weatherKitNowcastEnabled = false
         weatherKitConditionsEnabled = false
+        weatherKitForecastConditionsEnabled = false
         specificPlaceNamesEnabled = false
         myLocationEnabled = false
         debugLog("🔧 All features disabled")

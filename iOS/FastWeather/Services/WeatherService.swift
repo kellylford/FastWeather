@@ -1252,6 +1252,10 @@ class WeatherService: ObservableObject {
     ///  - **Current condition** (today only, flag `weatherKitConditionsEnabled`): replaces the
     ///    Open-Meteo model `weather_code` with WeatherKit's observation/nowcast-informed
     ///    condition, translated to WMO. Unmappable conditions keep the Open-Meteo code.
+    ///  - **Forecast conditions** (flag `weatherKitForecastConditionsEnabled`): the same WMO
+    ///    translation applied per hour/day across WeatherKit's ~10-day horizon, fixing the
+    ///    phantom-thunderstorm code in the 24-hour and 16-day views. Beyond the horizon and for
+    ///    unmappable conditions, the Open-Meteo code is kept.
     ///  - **Snow totals** (flag `weatherKitSnowEnabled`, ≤10 days): replaces `snowfall_sum`.
     ///
     /// Both come from a **single** WeatherKit request, so enabling conditions adds no extra
@@ -1261,8 +1265,11 @@ class WeatherService: ObservableObject {
     @available(iOS 16.0, *)
     private func applyWeatherKitOverlay(for city: City, dateOffset: Int, into weatherData: WeatherData) async -> WeatherData {
         let conditionsWanted = FeatureFlags.shared.weatherKitConditionsEnabled && dateOffset == 0
+        // Forecast overlay only applies to the today-anchored full fetch, which is the only path
+        // carrying the multi-day hourly/daily arrays the 24-hour and 16-day views render.
+        let forecastWanted = FeatureFlags.shared.weatherKitForecastConditionsEnabled && dateOffset == 0
         let snowWanted = FeatureFlags.shared.weatherKitSnowEnabled && dateOffset < 10 && weatherData.daily != nil
-        guard conditionsWanted || snowWanted else { return weatherData }
+        guard conditionsWanted || forecastWanted || snowWanted else { return weatherData }
 
         let location = CLLocation(latitude: city.latitude, longitude: city.longitude)
         do {
@@ -1278,6 +1285,70 @@ class WeatherService: ObservableObject {
                     debugLog("🌤 WK condition overlay for \(city.name): \(condition) → \(wmo.description)")
                 } else {
                     debugLog("🌤 WK condition \(condition) has no WMO mapping; keeping Open-Meteo for \(city.name)")
+                }
+            }
+
+            // --- Forecast condition overlay (hourly + daily, WeatherKit horizon ~10 days) ---
+            // Same idea as the current-condition overlay, extended across the forecast horizon:
+            // translate each WeatherKit hourly/daily condition to a WMO code and replace the
+            // Open-Meteo model code. Hours/days WeatherKit doesn't cover (beyond ~10 days),
+            // and conditions with no WMO equivalent, keep the Open-Meteo code — never worse
+            // than today. Runs before the snow overlay so the two compose on `result.daily`.
+            if forecastWanted {
+                let tz = result.timeZone
+
+                // Hourly: match WeatherKit's absolute dates to Open-Meteo's city-local hour
+                // strings ("yyyy-MM-dd'T'HH") by formatting the WeatherKit date in the city zone.
+                let hourFmt = DateFormatter()
+                hourFmt.locale = Locale(identifier: "en_US_POSIX")
+                hourFmt.timeZone = tz
+                hourFmt.dateFormat = "yyyy-MM-dd'T'HH"
+                var wkHourly: [String: Int] = [:]
+                for h in weather.hourlyForecast.forecast {
+                    if let wmo = WeatherCode(weatherKitCondition: h.condition) {
+                        wkHourly[hourFmt.string(from: h.date)] = wmo.rawValue
+                    }
+                }
+                if let hourly = result.hourly, let times = hourly.time, var codes = hourly.weatherCode {
+                    var changed = 0
+                    for i in 0..<min(times.count, codes.count) {
+                        guard let t = times[i], let wmo = wkHourly[String(t.prefix(13))] else { continue }
+                        if codes[i] != wmo { codes[i] = wmo; changed += 1 }
+                    }
+                    if changed > 0 {
+                        result = result.withHourly(hourly.withWeatherCodes(codes))
+                        debugLog("🌤 WK hourly overlay for \(city.name): \(changed) hours updated")
+                    }
+                }
+
+                // Daily: match by city-local day ("yyyy-MM-dd"). Daily rows carry no date of their
+                // own, so anchor them to the ordered unique days present in the hourly time array.
+                let dayFmt = DateFormatter()
+                dayFmt.locale = Locale(identifier: "en_US_POSIX")
+                dayFmt.timeZone = tz
+                dayFmt.dateFormat = "yyyy-MM-dd"
+                var wkDaily: [String: Int] = [:]
+                for d in weather.dailyForecast.forecast {
+                    if let wmo = WeatherCode(weatherKitCondition: d.condition) {
+                        wkDaily[dayFmt.string(from: d.date)] = wmo.rawValue
+                    }
+                }
+                if let daily = result.daily, var dcodes = daily.weatherCode {
+                    var orderedDays: [String] = []
+                    var seen = Set<String>()
+                    for case let t? in (result.hourly?.time ?? []) {
+                        let day = String(t.prefix(10))
+                        if seen.insert(day).inserted { orderedDays.append(day) }
+                    }
+                    var changed = 0
+                    for i in 0..<dcodes.count {
+                        guard i < orderedDays.count, let wmo = wkDaily[orderedDays[i]] else { continue }
+                        if dcodes[i] != wmo { dcodes[i] = wmo; changed += 1 }
+                    }
+                    if changed > 0 {
+                        result = result.withDaily(daily.withWeatherCodes(dcodes))
+                        debugLog("🌤 WK daily overlay for \(city.name): \(changed) days updated")
+                    }
                 }
             }
 

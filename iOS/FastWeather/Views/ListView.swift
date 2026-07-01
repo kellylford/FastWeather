@@ -12,8 +12,10 @@ struct ListView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @EnvironmentObject var myLocationService: MyLocationService
     @Environment(\.editMode) var editMode
+    @StateObject private var featureFlags = FeatureFlags.shared
     @Binding var selectedCityForHistory: City?
     @State private var alertSheetItem: AlertSheetItem?  // Stable sheet item to prevent re-presentation loop
+    @State private var weatherAroundMeCity: City?  // Non-nil while the Weather Around Me sheet is presented
 
     // Date navigation parameters
     let dateOffset: Int
@@ -39,6 +41,18 @@ struct ListView: View {
         .listStyle(.plain)
         .sheet(item: $alertSheetItem) { item in
             AlertDetailView(alert: item.alert)
+        }
+        .sheet(item: $weatherAroundMeCity) { city in
+            NavigationView {
+                WeatherAroundMeView(city: city, defaultDistance: settingsManager.settings.weatherAroundMeDistance)
+                    .environmentObject(settingsManager)
+                    .environmentObject(weatherService)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button("Done") { weatherAroundMeCity = nil }
+                        }
+                    }
+            }
         }
     }
 
@@ -127,6 +141,9 @@ struct ListView: View {
                 UIAccessibility.post(notification: .announcement, argument: message)
             }
         }
+        .modifier(WeatherAroundMeAction(enabled: featureFlags.weatherAroundMeEnabled) {
+            weatherAroundMeCity = city
+        })
         .contextMenu {
             Button {
                 myLocationService.addToMyCityList(weatherService: weatherService)
@@ -146,6 +163,14 @@ struct ListView: View {
                 selectedCityForHistory = city
             } label: {
                 Label("View Historical Weather", systemImage: "calendar")
+            }
+
+            if featureFlags.weatherAroundMeEnabled {
+                Button {
+                    weatherAroundMeCity = city
+                } label: {
+                    Label("Weather Around Me", systemImage: "location.circle")
+                }
             }
         } preview: {
             myLocationGlancePreview(for: city)
@@ -291,8 +316,16 @@ struct ListView: View {
         }) {
             Label("View Historical Weather", systemImage: "calendar")
         }
+
+        if featureFlags.weatherAroundMeEnabled {
+            Button(action: {
+                weatherAroundMeCity = city
+            }) {
+                Label("Weather Around Me", systemImage: "location.circle")
+            }
+        }
     }
-    
+
     private func glanceAheadSummary(for city: City) -> String {
         let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: 0)
         guard let weather = weatherService.weatherCache[cacheKey],
@@ -422,6 +455,25 @@ struct ListView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 UIAccessibility.post(notification: .announcement, argument: message)
             }
+        }
+        // Only offered when the feature is enabled, so VoiceOver users don't see a dead action.
+        .modifier(WeatherAroundMeAction(enabled: featureFlags.weatherAroundMeEnabled) {
+            weatherAroundMeCity = city
+        })
+    }
+}
+
+/// Adds a "Weather Around Me" VoiceOver custom action only when the feature is enabled.
+/// A ViewModifier keeps the conditional out of the long `cityRow` modifier chain.
+private struct WeatherAroundMeAction: ViewModifier {
+    let enabled: Bool
+    let action: () -> Void
+
+    func body(content: Content) -> some View {
+        if enabled {
+            content.accessibilityAction(named: "Weather Around Me", action)
+        } else {
+            content
         }
     }
 }

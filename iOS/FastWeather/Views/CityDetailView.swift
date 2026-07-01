@@ -76,16 +76,17 @@ struct CityDetailView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         // Weather summary with condition
                         if let weatherCode = daily.weatherCode?.value(at: 0), let code = WeatherCode(rawValue: weatherCode) {
+                            let conditionLabel = code.description(precipitationProbability: daily.precipitationProbabilityMax?.value(at: 0))
                             HStack(spacing: 8) {
                                 Image(systemName: code.systemImageName)
                                     .font(.title2)
                                     .foregroundColor(.blue)
                                     .accessibilityHidden(true)
-                                Text(code.description)
+                                Text(conditionLabel)
                                     .font(.headline)
                             }
                             .accessibilityElement(children: .ignore)
-                            .accessibilityLabel("Conditions: \(code.description)")
+                            .accessibilityLabel("Conditions: \(conditionLabel)")
                         }
                         
                         // Temperature range
@@ -1860,7 +1861,7 @@ struct DailyForecastRow: View {
                         
                         // Show condition description when the conditions field is enabled
                         if isFieldEnabled(.conditions) {
-                            Text(weatherCode.description)
+                            Text(weatherCode.description(precipitationProbability: daily.precipitationProbabilityMax?.value(at: index)))
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                                 .lineLimit(1)
@@ -2062,8 +2063,8 @@ struct DailyForecastRow: View {
     private func getFieldAccessibilityText(for fieldType: DailyFieldType) -> String? {
         switch fieldType {
         case .conditions:
-            return weatherCodeEnum?.description
-            
+            return weatherCodeEnum?.description(precipitationProbability: daily.precipitationProbabilityMax?.value(at: index))
+
         case .temperatureMax:
             if let high = high {
                 return "High \(formatTemperature(high))"
@@ -2239,7 +2240,7 @@ struct DailyHeadingBlock: View {
             }
         case .conditions:
             if let code = daily.weatherCode?.value(at: index), let wc = WeatherCode(rawValue: code) {
-                return ("Conditions", wc.description)
+                return ("Conditions", wc.description(precipitationProbability: daily.precipitationProbabilityMax?.value(at: index)))
             }
         case .sunrise:
             if let s = sunrise {

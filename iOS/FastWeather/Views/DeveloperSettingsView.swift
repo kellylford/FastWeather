@@ -55,6 +55,14 @@ struct DeveloperSettingsView: View {
                             Task { await weatherService.refreshAllWeather() }
                         }
 
+                    Toggle("WeatherKit Forecast Conditions", isOn: $featureFlags.weatherKitForecastConditionsEnabled)
+                        .accessibilityLabel("WeatherKit Forecast Conditions feature toggle")
+                        .accessibilityHint(featureFlags.weatherKitForecastConditionsEnabled ? "WeatherKit forecast conditions are enabled. The 24-hour and 16-day forecast icons come from Apple WeatherKit for about the first ten days, so a thunderstorm won't appear when the forecast is dry. Days eleven to sixteen still use Open-Meteo." : "WeatherKit forecast conditions are disabled. The hourly and daily forecast conditions use Open-Meteo's model weather code for all days.")
+                        .onChange(of: featureFlags.weatherKitForecastConditionsEnabled) {
+                            weatherService.clearWeatherCache()
+                            Task { await weatherService.refreshAllWeather() }
+                        }
+
                     Toggle("Enable Table View", isOn: $featureFlags.tableViewEnabled)
                         .accessibilityLabel("Enable Table View feature toggle")
                         .accessibilityHint(featureFlags.tableViewEnabled ? "Table view is enabled. Table option will appear in the View Mode picker in Settings." : "Table view is disabled. Table option will not appear in the View Mode picker in Settings.")
