@@ -1335,15 +1335,14 @@ class WeatherService: ObservableObject {
         // Coordinate-keyed TTL cache (main-actor isolated): avoids re-billing WeatherKit on every
         // browse-row reappearance — HI-1. The overlay is preserved; only redundant calls are cut.
         let key = String(format: "%.2f,%.2f", latitude, longitude)
-        if let entry = wkConditionCache[key],
-           Date().timeIntervalSince(entry.timestamp) < wkConditionCacheTTL {
-            return entry.wmo
+        if let wmo = wkConditionCache.value(for: key) {
+            return wmo
         }
         do {
             let current = try await WeatherKit.WeatherService.shared.weather(
                 for: CLLocation(latitude: latitude, longitude: longitude), including: .current)
             guard let wmo = WeatherCode(weatherKitCondition: current.condition)?.rawValue else { return nil }
-            wkConditionCache[key] = (wmo, Date())
+            wkConditionCache.set(wmo, for: key)
             return wmo
         } catch {
             debugLog("⚠️ WK condition (browse) failed for \(latitude),\(longitude): \(error.localizedDescription)")
@@ -1358,9 +1357,8 @@ class WeatherService: ObservableObject {
     // alertsCache is @MainActor-isolated (WeatherService is @MainActor); no lock needed.
 
     // Coordinate-keyed cache of WeatherKit current WMO codes for the lightweight browse/regional
-    // paths, with a short TTL (main-actor isolated). Avoids redundant WeatherKit billing — HI-1.
-    private var wkConditionCache: [String: (wmo: Int, timestamp: Date)] = [:]
-    private let wkConditionCacheTTL: TimeInterval = 10 * 60
+    // paths, with a short TTL. Avoids redundant WeatherKit billing — HI-1. Shared TTLCache type.
+    private let wkConditionCache = TTLCache<String, Int>(ttl: 10 * 60)
     private let alertsCacheMinutes: TimeInterval = 5
     
     /// Countries where WeatherKit alerts are known to work
@@ -1649,26 +1647,34 @@ class WeatherService: ObservableObject {
         }
     }
 
-    func applyRemoteCities() {
+    /// Apply the cities list currently in iCloud.
+    /// - Parameter force: when true (an explicit user choice like "Use iCloud List"), skip the
+    ///   last-writer-wins comparison and always adopt the remote list.
+    func applyRemoteCities(force: Bool = false) {
         guard let remoteCities = iCloudSyncService.shared.pullCities() else { return }
 
-        // Last-writer-wins by edit time (HI-4). Only accept the remote list if it's at least as
-        // new as our local edit; otherwise a stale device (older list, just came online) would
-        // clobber newer local data — the city-disappears bug. Deletions still propagate because
-        // the newer edit, including a delete, always wins.
-        let remoteTS = iCloudSyncService.shared.pullCitiesTimestamp() ?? .distantPast
-        let localTS = Date(timeIntervalSince1970: sharedDefaults.double(forKey: Self.citiesModifiedKey))
-        if remoteTS < localTS {
-            // Our local copy is newer — re-push it (keeping our timestamp) so the other device
-            // converges onto it, then keep local unchanged. No loop: accepting never re-pushes.
-            AppLogger.service.debug("iCloud: ignoring older remote cities; re-pushing newer local")
-            iCloudSyncService.shared.pushCities(savedCities, modified: localTS)
-            return
+        // Last-writer-wins by edit time (HI-4), but only when the remote actually carries a
+        // timestamp. A legacy blob pushed by an app version before timestamps existed has none —
+        // that's real user data, not garbage, so we must NOT reject it as "older than local"
+        // (which would stomp it with our local list during the upgrade window). We also skip the
+        // check entirely when the user explicitly asked for the iCloud list (force).
+        if !force, let remoteTS = iCloudSyncService.shared.pullCitiesTimestamp() {
+            let localTS = Date(timeIntervalSince1970: sharedDefaults.double(forKey: Self.citiesModifiedKey))
+            if remoteTS < localTS {
+                // Our local copy is newer — re-push it (keeping our timestamp) so the other device
+                // converges onto it, then keep local unchanged. No loop: accepting never re-pushes.
+                AppLogger.service.debug("iCloud: ignoring older remote cities; re-pushing newer local")
+                iCloudSyncService.shared.pushCities(savedCities, modified: localTS)
+                return
+            }
         }
 
         guard remoteCities != savedCities else { return }
         savedCities = remoteCities
-        sharedDefaults.set(remoteTS.timeIntervalSince1970, forKey: Self.citiesModifiedKey)
+        // Stamp local bookkeeping with the remote's timestamp (or now, if the remote was a legacy
+        // un-timestamped blob) so future comparisons stay consistent.
+        let appliedTS = iCloudSyncService.shared.pullCitiesTimestamp() ?? Date()
+        sharedDefaults.set(appliedTS.timeIntervalSince1970, forKey: Self.citiesModifiedKey)
         do {
             let encoded = try JSONEncoder().encode(remoteCities)
             sharedDefaults.set(encoded, forKey: userDefaultsKey)
@@ -1676,6 +1682,15 @@ class WeatherService: ObservableObject {
         } catch {
             AppLogger.service.error("Failed to save remote cities locally: \(error)")
         }
+    }
+
+    /// Push the local city list to iCloud and record the local edit time together, so the LWW
+    /// bookkeeping read by applyRemoteCities() can never drift from what was pushed (review
+    /// finding 1). Use this instead of calling iCloudSyncService.pushCities() directly.
+    func pushCitiesToCloud() {
+        let now = Date()
+        sharedDefaults.set(now.timeIntervalSince1970, forKey: Self.citiesModifiedKey)
+        iCloudSyncService.shared.pushCities(savedCities, modified: now)
     }
     
     // MARK: - Data Migration

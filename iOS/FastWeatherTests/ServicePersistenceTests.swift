@@ -200,6 +200,36 @@ final class SafeArrayAccessTests: XCTestCase {
     }
 }
 
+// MARK: - TTLCache Tests (review finding 4)
+
+final class TTLCacheTests: XCTestCase {
+
+    func testReturnsValueWithinTTL() {
+        let cache = TTLCache<String, Int>(ttl: 100)
+        cache.set(42, for: "a")
+        XCTAssertEqual(cache.value(for: "a"), 42)
+    }
+
+    func testMissingKeyReturnsNil() {
+        let cache = TTLCache<String, Int>(ttl: 100)
+        XCTAssertNil(cache.value(for: "absent"))
+    }
+
+    func testExpiredEntryReturnsNil() {
+        // ttl 0 → any entry is already older than its window.
+        let cache = TTLCache<String, String>(ttl: 0)
+        cache.set("stale", for: "k")
+        XCTAssertNil(cache.value(for: "k"), "Entry past its TTL must not be served")
+    }
+
+    func testOverwriteRefreshesValue() {
+        let cache = TTLCache<String, Int>(ttl: 100)
+        cache.set(1, for: "k")
+        cache.set(2, for: "k")
+        XCTAssertEqual(cache.value(for: "k"), 2)
+    }
+}
+
 // MARK: - BrowseSortOrder Model Tests
 
 final class BrowseSortOrderModelTests: XCTestCase {

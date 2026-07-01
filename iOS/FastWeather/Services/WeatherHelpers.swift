@@ -19,6 +19,32 @@ extension Array {
     }
 }
 
+// MARK: - TTL Cache
+
+/// A minimal thread-safe time-to-live cache keyed by a Hashable key. Shared by the WeatherKit
+/// coordinate-condition caches (HI-1) so the TTL/eviction policy lives in one place (review
+/// finding 4). Self-locking, so it is safe both from the main actor (WeatherService) and from
+/// the concurrent regional fan-out (RegionalWeatherService).
+final class TTLCache<Key: Hashable, Value> {
+    private let ttl: TimeInterval
+    private var storage: [Key: (value: Value, timestamp: Date)] = [:]
+    private let lock = NSLock()
+
+    init(ttl: TimeInterval) { self.ttl = ttl }
+
+    func value(for key: Key) -> Value? {
+        lock.lock(); defer { lock.unlock() }
+        guard let entry = storage[key],
+              Date().timeIntervalSince(entry.timestamp) < ttl else { return nil }
+        return entry.value
+    }
+
+    func set(_ value: Value, for key: Key) {
+        lock.lock(); defer { lock.unlock() }
+        storage[key] = (value, Date())
+    }
+}
+
 // MARK: - UV Index Helpers
 struct UVIndexCategory {
     let category: String

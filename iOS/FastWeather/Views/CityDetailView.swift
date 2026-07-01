@@ -75,7 +75,7 @@ struct CityDetailView: View {
                 GroupBox(label: Label("Today's Forecast", systemImage: "calendar")) {
                     VStack(alignment: .leading, spacing: 16) {
                         // Weather summary with condition
-                        if let weatherCode = daily.weatherCode?[0], let code = WeatherCode(rawValue: weatherCode) {
+                        if let weatherCode = daily.weatherCode?.value(at: 0), let code = WeatherCode(rawValue: weatherCode) {
                             HStack(spacing: 8) {
                                 Image(systemName: code.systemImageName)
                                     .font(.title2)
@@ -89,8 +89,8 @@ struct CityDetailView: View {
                         }
                         
                         // Temperature range
-                        if !daily.temperature2mMax.isEmpty, let maxTemp = daily.temperature2mMax[0],
-                           !daily.temperature2mMin.isEmpty, let minTemp = daily.temperature2mMin[0] {
+                        if !daily.temperature2mMax.isEmpty, let maxTemp = daily.temperature2mMax.value(at: 0),
+                           !daily.temperature2mMin.isEmpty, let minTemp = daily.temperature2mMin.value(at: 0) {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Temperature Range")
                                     .font(.caption)
@@ -113,7 +113,7 @@ struct CityDetailView: View {
                         
                         // Precipitation alert (only if significant)
                         if settingsManager.settings.showPrecipitationProbabilityInTodaysForecast,
-                           let precipProb = daily.precipitationProbabilityMax?[0], precipProb > 20 {
+                           let precipProb = daily.precipitationProbabilityMax?.value(at: 0), precipProb > 20 {
                             HStack(spacing: 8) {
                                 Image(systemName: "drop.fill")
                                     .foregroundColor(.blue)
@@ -124,17 +124,17 @@ struct CityDetailView: View {
                                         .fixedSize(horizontal: false, vertical: true)
                                     // Show snow or rain amount based on which is present (if setting enabled)
                                     if settingsManager.settings.showPrecipitationAmount {
-                                        if let snowfall = daily.snowfallSum?[0], snowfall > 0 {
+                                        if let snowfall = daily.snowfallSum?.value(at: 0), snowfall > 0 {
                                             Text("\(formatSnowfall(snowfall)) of snow expected")
                                                 .font(.caption)
                                                 .foregroundColor(.secondary)
                                                 .fixedSize(horizontal: false, vertical: true)
-                                        } else if let rain = daily.rainSum?[0], rain > 0 {
+                                        } else if let rain = daily.rainSum?.value(at: 0), rain > 0 {
                                             Text("\(formatPrecipitation(rain)) of rain expected")
                                                 .font(.caption)
                                                 .foregroundColor(.secondary)
                                                 .fixedSize(horizontal: false, vertical: true)
-                                        } else if let precipSum = daily.precipitationSum?[0], precipSum > 0 {
+                                        } else if let precipSum = daily.precipitationSum?.value(at: 0), precipSum > 0 {
                                             Text("\(formatPrecipitation(precipSum)) expected")
                                                 .font(.caption)
                                                 .foregroundColor(.secondary)
@@ -157,11 +157,11 @@ struct CityDetailView: View {
                             .accessibilityLabel({
                                 var label = "\(precipProb) percent chance of precipitation"
                                 if settingsManager.settings.showPrecipitationAmount {
-                                    if let snowfall = daily.snowfallSum?[0], snowfall > 0 {
+                                    if let snowfall = daily.snowfallSum?.value(at: 0), snowfall > 0 {
                                         label += ", \(formatSnowfall(snowfall)) of snow expected"
-                                    } else if let rain = daily.rainSum?[0], rain > 0 {
+                                    } else if let rain = daily.rainSum?.value(at: 0), rain > 0 {
                                         label += ", \(formatPrecipitation(rain)) of rain expected"
-                                    } else if let precipSum = daily.precipitationSum?[0], precipSum > 0 {
+                                    } else if let precipSum = daily.precipitationSum?.value(at: 0), precipSum > 0 {
                                         label += ", \(formatPrecipitation(precipSum)) expected"
                                     }
                                 }
@@ -174,7 +174,7 @@ struct CityDetailView: View {
                         
                         // UV warning (only if significant)
                         if settingsManager.settings.showUVIndexInTodaysForecast,
-                           let uvMax = daily.uvIndexMax?[0], uvMax >= 6 {
+                           let uvMax = daily.uvIndexMax?.value(at: 0), uvMax >= 6 {
                             let category = UVIndexCategory(uvIndex: uvMax)
                             HStack(spacing: 8) {
                                 Image(systemName: "sun.max.fill")
@@ -200,7 +200,7 @@ struct CityDetailView: View {
                         
                         // Wind alert (only if significant)
                         if settingsManager.settings.showWindGustsInTodaysForecast,
-                           let windMax = daily.windSpeed10mMax?[0], windMax > 25 {
+                           let windMax = daily.windSpeed10mMax?.value(at: 0), windMax > 25 {
                             HStack(spacing: 8) {
                                 Image(systemName: "wind")
                                     .foregroundColor(.orange)
@@ -209,7 +209,7 @@ struct CityDetailView: View {
                                     Text("Winds up to \(formatWindSpeed(windMax))")
                                         .font(.subheadline)
                                         .fixedSize(horizontal: false, vertical: true)
-                                    if let windDir = daily.windDirectionDominant?[0] {
+                                    if let windDir = daily.windDirectionDominant?.value(at: 0) {
                                         Text("From \(degreesToCardinalLong(windDir))")
                                             .font(.caption)
                                             .foregroundColor(.secondary)
@@ -223,7 +223,7 @@ struct CityDetailView: View {
                             .accessibilityElement(children: .ignore)
                             .accessibilityLabel({
                                 var label = "Winds up to \(formatWindSpeed(windMax))"
-                                if let windDir = daily.windDirectionDominant?[0] {
+                                if let windDir = daily.windDirectionDominant?.value(at: 0) {
                                     label += ", From \(degreesToCardinalLong(windDir))"
                                 }
                                 return label
@@ -262,7 +262,7 @@ struct CityDetailView: View {
                             }
                             
                             if settingsManager.settings.showDaylightDuration,
-                               let daylight = daily.daylightDuration?[0] {
+                               let daylight = daily.daylightDuration?.value(at: 0) {
                                 HStack(spacing: 4) {
                                     Image(systemName: "sun.max")
                                         .font(.caption)
@@ -277,7 +277,7 @@ struct CityDetailView: View {
                             }
                             
                             if settingsManager.settings.showSunshineDuration,
-                               let sunshine = daily.sunshineDuration?[0], sunshine > 0 {
+                               let sunshine = daily.sunshineDuration?.value(at: 0), sunshine > 0 {
                                 HStack(spacing: 4) {
                                     Image(systemName: "sun.and.horizon")
                                         .font(.caption)
@@ -929,16 +929,16 @@ struct CityDetailView: View {
                 let label = i == 0 ? "Today, \(shortFmt.string(from: date))" : displayFmt.string(from: date)
 
                 var parts: [String] = []
-                if let wc = daily.weatherCode?[i], let code = WeatherCode(rawValue: wc) {
+                if let wc = daily.weatherCode?.value(at: i), let code = WeatherCode(rawValue: wc) {
                     parts.append(code.description)
                 }
-                if let hi = daily.temperature2mMax[i] {
+                if let hi = daily.temperature2mMax.value(at: i) {
                     parts.append("High \(fmt(hi))")
                 }
-                if let lo = daily.temperature2mMin[i] {
+                if let lo = daily.temperature2mMin.value(at: i) {
                     parts.append("Low \(fmt(lo))")
                 }
-                if let prob = daily.precipitationProbabilityMax?[i], prob > 0 {
+                if let prob = daily.precipitationProbabilityMax?.value(at: i), prob > 0 {
                     parts.append("\(prob)% chance of precipitation")
                 }
                 lines.append("\(label): \(parts.joined(separator: ", "))")
@@ -1554,7 +1554,7 @@ struct DailyForecastSummaryView: View {
     // Returns a natural-language day label with the calendar date included.
     // e.g. "today", "tomorrow", "Thursday, March 5"
     private func dayLabel(for index: Int) -> String {
-        guard let sunriseStr = daily.sunrise?[index], let date = DateParser.parse(sunriseStr) else {
+        guard let sunriseStr = daily.sunrise?.value(at: index), let date = DateParser.parse(sunriseStr) else {
             return "day \(index + 1)"
         }
         if index == 0 { return "today" }
@@ -1572,7 +1572,7 @@ struct DailyForecastSummaryView: View {
         shortFmt.dateFormat = "MMM d"
 
         func shortDate(_ index: Int) -> String {
-            guard let sunriseStr = daily.sunrise?[index], let date = DateParser.parse(sunriseStr) else {
+            guard let sunriseStr = daily.sunrise?.value(at: index), let date = DateParser.parse(sunriseStr) else {
                 return "day \(index + 1)"
             }
             if index == 0 { return "today" }
@@ -1595,7 +1595,7 @@ struct DailyForecastSummaryView: View {
     // Temperature trend: compare first-3-day average high vs last-3-day average high
     private var temperatureTrendText: String? {
         guard dayCount >= 6 else { return nil }
-        let highs = (0..<dayCount).compactMap { daily.temperature2mMax[$0] }
+        let highs = (0..<dayCount).compactMap { daily.temperature2mMax.value(at: $0) }
         guard highs.count >= 6 else { return nil }
 
         let firstAvg = highs.prefix(3).reduce(0, +) / 3.0
@@ -1612,7 +1612,7 @@ struct DailyForecastSummaryView: View {
         if diff > 0 {
             // Warming trend — mention peak with date if notably above ending average
             if let peakHigh = highs.max(), peakHigh > lastAvg + threshold,
-               let peakIndex = (0..<dayCount).first(where: { (daily.temperature2mMax[$0] ?? 0) == peakHigh }) {
+               let peakIndex = (0..<dayCount).first(where: { (daily.temperature2mMax.value(at: $0) ?? 0) == peakHigh }) {
                 let peakVal = Int(convert(peakHigh).rounded())
                 return "Highs climb from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days, with a peak of \(peakVal)\(unit) on \(dayLabel(for: peakIndex))."
             } else {
@@ -1621,7 +1621,7 @@ struct DailyForecastSummaryView: View {
         } else {
             // Cooling trend — mention trough with date if notably below ending average
             if let troughLow = highs.min(), troughLow < lastAvg - threshold,
-               let troughIndex = (0..<dayCount).first(where: { (daily.temperature2mMax[$0] ?? 0) == troughLow }) {
+               let troughIndex = (0..<dayCount).first(where: { (daily.temperature2mMax.value(at: $0) ?? 0) == troughLow }) {
                 let troughVal = Int(convert(troughLow).rounded())
                 return "Highs fall from \(firstVal)\(unit) to \(lastVal)\(unit) over the next \(dayCount) days, with a low of \(troughVal)\(unit) on \(dayLabel(for: troughIndex))."
             } else {
@@ -1636,9 +1636,9 @@ struct DailyForecastSummaryView: View {
         var snowIndices: [Int] = []
 
         for i in 0..<dayCount {
-            let prob = daily.precipitationProbabilityMax?[i]
-            let precip = daily.precipitationSum?[i]
-            let snow = daily.snowfallSum?[i]
+            let prob = daily.precipitationProbabilityMax?.value(at: i)
+            let precip = daily.precipitationSum?.value(at: i)
+            let snow = daily.snowfallSum?.value(at: i)
 
             let isWet: Bool
             if let p = prob {
@@ -1684,7 +1684,7 @@ struct DailyForecastSummaryView: View {
         var maxSpeed = 0.0
         var maxIndex = 0
         for i in 0..<dayCount {
-            let speed = windSpeeds[i] ?? 0
+            let speed = windSpeeds.value(at: i) ?? 0
             if speed > maxSpeed {
                 maxSpeed = speed
                 maxIndex = i
@@ -1720,15 +1720,15 @@ struct DailyForecastRow: View {
     @ObservedObject var settingsManager: SettingsManager
     
     private var sunrise: String? {
-        daily.sunrise?[index]
+        daily.sunrise?.value(at: index)
     }
     
     private var high: Double? {
-        daily.temperature2mMax[index]
+        daily.temperature2mMax.value(at: index)
     }
     
     private var low: Double? {
-        daily.temperature2mMin[index]
+        daily.temperature2mMin.value(at: index)
     }
     
     private var dayName: String {
@@ -1754,7 +1754,7 @@ struct DailyForecastRow: View {
     }
     
     private var weatherCodeEnum: WeatherCode? {
-        if let code = daily.weatherCode?[index] {
+        if let code = daily.weatherCode?.value(at: index) {
             return WeatherCode(rawValue: code)
         }
         return nil
@@ -1859,7 +1859,7 @@ struct DailyForecastRow: View {
     private func getInlineFieldContent(for fieldType: DailyFieldType) -> AnyView? {
         switch fieldType {
         case .precipitationProbability:
-            if let prob = daily.precipitationProbabilityMax?[index], prob > 0 {
+            if let prob = daily.precipitationProbabilityMax?.value(at: index), prob > 0 {
                 return AnyView(HStack(spacing: 4) {
                     Image(systemName: "drop.fill")
                         .font(.caption)
@@ -1872,7 +1872,7 @@ struct DailyForecastRow: View {
             }
             
         case .rainSum:
-            if let rain = daily.rainSum?[index], rain > 0 {
+            if let rain = daily.rainSum?.value(at: index), rain > 0 {
                 return AnyView(HStack(spacing: 4) {
                     Image(systemName: "drop.fill")
                         .font(.caption)
@@ -1885,7 +1885,7 @@ struct DailyForecastRow: View {
             }
             
         case .snowfallSum:
-            if let snow = daily.snowfallSum?[index], snow > 0 {
+            if let snow = daily.snowfallSum?.value(at: index), snow > 0 {
                 return AnyView(HStack(spacing: 4) {
                     Image(systemName: "snowflake")
                         .font(.caption)
@@ -1899,7 +1899,7 @@ struct DailyForecastRow: View {
             
         case .precipitationSum:
             // Prefer snowfall in proper units when snow is expected; fall back to liquid total
-            if let snow = daily.snowfallSum?[index], snow > 0 {
+            if let snow = daily.snowfallSum?.value(at: index), snow > 0 {
                 return AnyView(HStack(spacing: 4) {
                     Image(systemName: "snowflake")
                         .font(.caption)
@@ -1909,7 +1909,7 @@ struct DailyForecastRow: View {
                         .foregroundColor(.secondary)
                 }
                 .frame(minWidth: 50))
-            } else if let precip = daily.precipitationSum?[index], precip > 0 {
+            } else if let precip = daily.precipitationSum?.value(at: index), precip > 0 {
                 return AnyView(HStack(spacing: 4) {
                     Image(systemName: "drop.fill")
                         .font(.caption)
@@ -1930,7 +1930,7 @@ struct DailyForecastRow: View {
     private func getDetailFieldContent(for fieldType: DailyFieldType) -> AnyView? {
         switch fieldType {
         case .uvIndexMax:
-            if let uvMax = daily.uvIndexMax?[index], uvMax > 0 {
+            if let uvMax = daily.uvIndexMax?.value(at: index), uvMax > 0 {
                 let category = UVIndexCategory(uvIndex: uvMax)
                 return AnyView(HStack(spacing: 4) {
                     Text("UV:")
@@ -1948,7 +1948,7 @@ struct DailyForecastRow: View {
             }
             
         case .daylightDuration:
-            if let daylight = daily.daylightDuration?[index] {
+            if let daylight = daily.daylightDuration?.value(at: index) {
                 return AnyView(HStack(spacing: 4) {
                     Image(systemName: "sun.max")
                         .font(.caption2)
@@ -1959,7 +1959,7 @@ struct DailyForecastRow: View {
             }
             
         case .sunshineDuration:
-            if let sunshine = daily.sunshineDuration?[index] {
+            if let sunshine = daily.sunshineDuration?.value(at: index) {
                 return AnyView(HStack(spacing: 4) {
                     Image(systemName: "sun.max.fill")
                         .font(.caption2)
@@ -1970,7 +1970,7 @@ struct DailyForecastRow: View {
             }
             
         case .windSpeedMax:
-            if let windMax = daily.windSpeed10mMax?[index], windMax > 0 {
+            if let windMax = daily.windSpeed10mMax?.value(at: index), windMax > 0 {
                 return AnyView(HStack(spacing: 4) {
                     Image(systemName: "wind")
                         .font(.caption2)
@@ -2033,44 +2033,44 @@ struct DailyForecastRow: View {
             }
             
         case .precipitationProbability:
-            if let prob = daily.precipitationProbabilityMax?[index], prob > 0 {
+            if let prob = daily.precipitationProbabilityMax?.value(at: index), prob > 0 {
                 return "\(prob) percent chance of precipitation"
             }
             
         case .rainSum:
-            if let rain = daily.rainSum?[index], rain > 0 {
+            if let rain = daily.rainSum?.value(at: index), rain > 0 {
                 return "\(formatPrecipitation(rain)) of rain"
             }
             
         case .snowfallSum:
-            if let snow = daily.snowfallSum?[index], snow > 0 {
+            if let snow = daily.snowfallSum?.value(at: index), snow > 0 {
                 return "\(formatSnowfall(snow)) of snow"
             }
             
         case .precipitationSum:
-            if let snow = daily.snowfallSum?[index], snow > 0 {
+            if let snow = daily.snowfallSum?.value(at: index), snow > 0 {
                 return "\(formatSnowfall(snow)) of snow"
-            } else if let precip = daily.precipitationSum?[index], precip > 0 {
+            } else if let precip = daily.precipitationSum?.value(at: index), precip > 0 {
                 return "precipitation \(formatPrecipitation(precip))"
             }
             
         case .uvIndexMax:
-            if let uvMax = daily.uvIndexMax?[index] {
+            if let uvMax = daily.uvIndexMax?.value(at: index) {
                 return getUVIndexDescription(uvMax)
             }
             
         case .daylightDuration:
-            if let daylight = daily.daylightDuration?[index] {
+            if let daylight = daily.daylightDuration?.value(at: index) {
                 return "\(formatDuration(daylight)) of daylight"
             }
             
         case .sunshineDuration:
-            if let sunshine = daily.sunshineDuration?[index] {
+            if let sunshine = daily.sunshineDuration?.value(at: index) {
                 return "\(formatDuration(sunshine)) of sunshine"
             }
             
         case .windSpeedMax:
-            if let windMax = daily.windSpeed10mMax?[index] {
+            if let windMax = daily.windSpeed10mMax?.value(at: index) {
                 return "max wind \(formatWindSpeed(windMax))"
             }
             
@@ -2080,7 +2080,7 @@ struct DailyForecastRow: View {
             }
             
         case .sunset:
-            if let sunset = daily.sunset?[index] {
+            if let sunset = daily.sunset?.value(at: index) {
                 return "Sunset \(FormatHelper.formatTime(sunset))"
             }
             
@@ -2137,7 +2137,7 @@ struct DailyHeadingBlock: View {
     let index: Int
     @ObservedObject var settingsManager: SettingsManager
 
-    private var sunrise: String? { daily.sunrise?[index] }
+    private var sunrise: String? { daily.sunrise?.value(at: index) }
 
     private var dayName: String {
         guard let s = sunrise, let date = DateParser.parse(s) else { return "Unknown Date" }
@@ -2188,15 +2188,15 @@ struct DailyHeadingBlock: View {
     private func fieldText(for fieldType: DailyFieldType) -> (String, String)? {
         switch fieldType {
         case .temperatureMax:
-            if let high = daily.temperature2mMax[index] {
+            if let high = daily.temperature2mMax.value(at: index) {
                 return ("High", formatTemperature(high))
             }
         case .temperatureMin:
-            if let low = daily.temperature2mMin[index] {
+            if let low = daily.temperature2mMin.value(at: index) {
                 return ("Low", formatTemperature(low))
             }
         case .conditions:
-            if let code = daily.weatherCode?[index], let wc = WeatherCode(rawValue: code) {
+            if let code = daily.weatherCode?.value(at: index), let wc = WeatherCode(rawValue: code) {
                 return ("Conditions", wc.description)
             }
         case .sunrise:
@@ -2204,46 +2204,46 @@ struct DailyHeadingBlock: View {
                 return ("Sunrise", FormatHelper.formatTime(s))
             }
         case .sunset:
-            if let s = daily.sunset?[index] {
+            if let s = daily.sunset?.value(at: index) {
                 return ("Sunset", FormatHelper.formatTime(s))
             }
         case .precipitationSum:
-            if let snow = daily.snowfallSum?[index], snow > 0 {
+            if let snow = daily.snowfallSum?.value(at: index), snow > 0 {
                 return ("Snowfall", formatSnowfall(snow))
-            } else if let precip = daily.precipitationSum?[index], precip > 0 {
+            } else if let precip = daily.precipitationSum?.value(at: index), precip > 0 {
                 return ("Precipitation", formatPrecipitation(precip))
             }
         case .precipitationProbability:
-            if let prob = daily.precipitationProbabilityMax?[index], prob > 0 {
+            if let prob = daily.precipitationProbabilityMax?.value(at: index), prob > 0 {
                 return ("Precipitation Probability", "\(prob)%")
             }
         case .rainSum:
-            if let rain = daily.rainSum?[index], rain > 0 {
+            if let rain = daily.rainSum?.value(at: index), rain > 0 {
                 return ("Rain Total", formatPrecipitation(rain))
             }
         case .snowfallSum:
-            if let snow = daily.snowfallSum?[index], snow > 0 {
+            if let snow = daily.snowfallSum?.value(at: index), snow > 0 {
                 return ("Snowfall Total", formatSnowfall(snow))
             }
         case .windSpeedMax:
-            if let speed = daily.windSpeed10mMax?[index], speed > 0 {
+            if let speed = daily.windSpeed10mMax?.value(at: index), speed > 0 {
                 return ("Max Wind Speed", formatWindSpeed(speed))
             }
         case .windDirectionDominant:
-            if let degrees = daily.windDirectionDominant?[index] {
+            if let degrees = daily.windDirectionDominant?.value(at: index) {
                 return ("Wind Direction", formatWindDirection(degrees))
             }
         case .uvIndexMax:
-            if let uv = daily.uvIndexMax?[index], uv > 0 {
+            if let uv = daily.uvIndexMax?.value(at: index), uv > 0 {
                 let category = UVIndexCategory(uvIndex: uv)
                 return ("UV Index Max", "\(Int(uv.rounded())) – \(category.category)")
             }
         case .daylightDuration:
-            if let daylight = daily.daylightDuration?[index] {
+            if let daylight = daily.daylightDuration?.value(at: index) {
                 return ("Daylight Duration", formatDuration(daylight))
             }
         case .sunshineDuration:
-            if let sunshine = daily.sunshineDuration?[index] {
+            if let sunshine = daily.sunshineDuration?.value(at: index) {
                 return ("Sunshine Duration", formatDuration(sunshine))
             }
         default:
