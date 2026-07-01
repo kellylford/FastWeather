@@ -360,7 +360,12 @@ struct CityDetailView: View {
                         DetailRow(label: "Visibility", value: formatVisibility(visibility))
                         Divider()
                     }
-                    DetailRow(label: "Cloud Cover", value: "\(weather.current.cloudCover)%")
+                    // Cloud cover is a real observation only for today (dateOffset 0). On future/past
+                    // days the synthetic "current" struct fills it with 0, so don't fabricate a
+                    // "Cloud Cover 0%" fact for those days (product review #3).
+                    if dateOffset == 0 {
+                        DetailRow(label: "Cloud Cover", value: "\(weather.current.cloudCover)%")
+                    }
                 }
                 .padding(.vertical, 8)
             }
@@ -579,9 +584,13 @@ struct CityDetailView: View {
                         longitude: city.longitude
                     )
 
+                    // MoonCalculator returns absolute UTC dates; render them in the CITY's timezone
+                    // so moon times match sunrise/sunset (which are city-local). Without this they
+                    // rendered in device-local time — wrong for any remote city (product review #5).
                     let timeFormatter: DateFormatter = {
                         let f = DateFormatter()
                         f.dateFormat = "h:mm a"
+                        f.timeZone = weather.timeZone
                         return f
                     }()
 
@@ -659,24 +668,47 @@ struct CityDetailView: View {
                     
                     // Main weather display
                     VStack(spacing: 16) {
-                        // Current temperature - read first after city name
-                        Text(formatTemperature(weather.current.temperature2m))
-                            .font(.system(size: 72, weight: .bold))
-                            .accessibilityLabel("Current temperature \(formatTemperature(weather.current.temperature2m))")
-                        
+                        if dateOffset == 0 {
+                            // Today: a real current temperature — read first after city name.
+                            Text(formatTemperature(weather.current.temperature2m))
+                                .font(.system(size: 72, weight: .bold))
+                                .accessibilityLabel("Current temperature \(formatTemperature(weather.current.temperature2m))")
+                        } else {
+                            // Future/past day: the synthetic "current" temperature is a min/max
+                            // average, not a real reading. Show the day's forecast High and Low
+                            // instead of a fabricated "current" (product review #3).
+                            let dayHigh = weather.daily?.temperature2mMax.value(at: 0)
+                            let dayLow = weather.daily?.temperature2mMin.value(at: 0)
+                            VStack(spacing: 4) {
+                                if let hi = dayHigh {
+                                    Text("High \(formatTemperature(hi))")
+                                        .font(.system(size: 56, weight: .bold))
+                                }
+                                if let lo = dayLow {
+                                    Text("Low \(formatTemperature(lo))")
+                                        .font(.title2)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel(forecastHighLowLabel(high: dayHigh, low: dayLow))
+                        }
+
                         // Temperature and condition
                         if let weatherCode = weather.current.weatherCodeEnum {
                             Image(systemName: weatherCode.systemImageName(isDay: (weather.current.isDay ?? 1) == 1))
                                 .font(.system(size: 60))
                                 .foregroundColor(.blue)
                                 .accessibilityHidden(true)
-                            
+
                             Text(weatherCode.description)
                                 .font(.title2)
                                 .accessibilityLabel("Conditions: \(weatherCode.description)")
                         }
-                        
-                        if let apparentTemp = weather.current.apparentTemperature {
+
+                        // "Feels like" is a real current reading only for today; on other days it
+                        // would be a min/max average of apparent temp, so omit it (product review #3).
+                        if dateOffset == 0, let apparentTemp = weather.current.apparentTemperature {
                             Text("Feels like \(formatTemperature(apparentTemp))")
                                 .font(.title3)
                                 .foregroundColor(.secondary)
@@ -863,6 +895,16 @@ struct CityDetailView: View {
         let temp = settingsManager.settings.temperatureUnit.convert(celsius)
         let unit = settingsManager.settings.temperatureUnit == .fahrenheit ? "F" : "C"
         return String(format: "%.0f°%@", temp, unit)
+    }
+
+    /// VoiceOver label for the future/past-day forecast High/Low hero (product review #3).
+    private func forecastHighLowLabel(high: Double?, low: Double?) -> String {
+        switch (high, low) {
+        case let (hi?, lo?): return "Forecast high \(formatTemperature(hi)), low \(formatTemperature(lo))"
+        case let (hi?, nil): return "Forecast high \(formatTemperature(hi))"
+        case let (nil, lo?): return "Forecast low \(formatTemperature(lo))"
+        default: return "Forecast temperature unavailable"
+        }
     }
 
     private var shareSubject: String {
@@ -2296,7 +2338,8 @@ struct WeatherAlertsSection: View {
     @EnvironmentObject var weatherService: WeatherService
     @State private var isLoading = true
     @State private var hasLoaded = false  // Prevent re-fetching on every appear
-    
+    @State private var loadFailed = false // Distinguish "couldn't check" from "no alerts"
+
     var body: some View {
         GroupBox(label: Label("Weather Alerts", systemImage: "exclamationmark.triangle.fill")) {
             VStack(spacing: 12) {
@@ -2304,6 +2347,19 @@ struct WeatherAlertsSection: View {
                     ProgressView("Checking for alerts...")
                         .frame(minHeight: 60)  // Consistent height to prevent layout shift
                         .padding()
+                } else if loadFailed {
+                    // A fetch failure must never look like "no alerts" for a safety feature.
+                    VStack(spacing: 8) {
+                        Text("Couldn't check for alerts")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        Button("Try Again") {
+                            Task { await loadAlerts() }
+                        }
+                        .accessibilityHint("Retries checking for weather alerts")
+                    }
+                    .frame(minHeight: 60)
+                    .padding()
                 } else if alerts.isEmpty {
                     Text("No active alerts")
                         .font(.subheadline)
@@ -2359,17 +2415,23 @@ struct WeatherAlertsSection: View {
         .accessibilityElement(children: .contain)
         .task(id: city.id) {
             guard !hasLoaded else { return }
-            
-            do {
-                let fetchedAlerts = try await weatherService.fetchNWSAlerts(for: city)
-                
-                alerts = fetchedAlerts.sorted { $0.severity.sortOrder < $1.severity.sortOrder }
-                isLoading = false
-                hasLoaded = true
-            } catch {
-                isLoading = false
-                hasLoaded = true
-            }
+            await loadAlerts()
+        }
+    }
+
+    private func loadAlerts() async {
+        isLoading = true
+        loadFailed = false
+        do {
+            let fetchedAlerts = try await weatherService.fetchNWSAlerts(for: city)
+            alerts = fetchedAlerts.sorted { $0.severity.sortOrder < $1.severity.sortOrder }
+            isLoading = false
+            hasLoaded = true
+        } catch {
+            // Could not determine alert state — show the "couldn't check" state, not "no alerts".
+            isLoading = false
+            loadFailed = true
+            hasLoaded = true
         }
     }
 }

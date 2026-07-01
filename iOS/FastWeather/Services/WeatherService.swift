@@ -1395,6 +1395,9 @@ class WeatherService: ObservableObject {
     /// - US cities: National Weather Service (detailed alerts with full text)
     /// - International: Apple WeatherKit (when feature flag enabled AND country supported)
     /// - Returns: Array of active weather alerts (empty if no alerts or service unavailable)
+    /// Signals that the alert state could not be determined (vs. a genuine "no alerts").
+    enum AlertFetchError: Error { case badStatus(Int) }
+
     func fetchNWSAlerts(for city: City) async throws -> [WeatherAlert] {
         // Check cache first, filtering out expired alerts
         if let cached = alertsCache[city.id] {
@@ -1437,12 +1440,12 @@ class WeatherService: ObservableObject {
             let (data, response) = try await URLSession.shared.data(for: request)
             
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                // Log so a "missing alerts" report is diagnosable. NOTE: this still returns []
-                // (looks like "no alerts" to the user). Surfacing a real "couldn't check alerts"
-                // state to the UI is deferred (HI-3) — it needs a UX/VoiceOver decision.
+                // A non-200 means we could NOT determine the alert state. Throw so the UI can show a
+                // distinct "couldn't check alerts" state — a fetch failure must never render as
+                // "No active alerts" for a safety feature (HI-3 / product review #1).
                 let status = (response as? HTTPURLResponse)?.statusCode ?? -1
                 AppLogger.network.error("NWS alerts non-200 (\(status, privacy: .public)) for \(city.name, privacy: .public)")
-                return []
+                throw AlertFetchError.badStatus(status)
             }
             
             // Don't use .iso8601 date decoding strategy - it interferes with FlexibleStringOrArray
@@ -1501,11 +1504,11 @@ class WeatherService: ObservableObject {
             return activeAlerts
 
         } catch {
-            // Network/decoding failure. Logged for diagnosability; still returns [] (HI-3:
-            // surfacing a distinct "couldn't check alerts" UI state is deferred pending a
-            // UX/VoiceOver decision). Not cached, so the next attempt retries.
+            // Network/decoding failure — we could NOT determine the alert state. Rethrow so the UI
+            // shows "couldn't check alerts" rather than a misleading "No active alerts" (HI-3 /
+            // product review #1). Not cached, so the next attempt (or a retry) tries again.
             AppLogger.network.error("NWS alerts fetch failed for \(city.name, privacy: .public): \(error.localizedDescription, privacy: .public)")
-            return []
+            throw error
         }
     }
 
@@ -1564,35 +1567,22 @@ class WeatherService: ObservableObject {
             return activeAlerts
             
         } catch {
-            // Parse error to provide helpful messaging
             let nsError = error as NSError
             let errorDescription = nsError.localizedDescription
-            
-            // HTTP 400 errors typically mean the country/region doesn't support weather alerts
+
+            // HTTP 400 = this region simply has no WeatherKit alert coverage. That's a genuine
+            // "no alerts here," not a failure to check — cache empty and return normally.
             if errorDescription.contains("400") || errorDescription.contains("responseFailed: 400") {
-                debugLog("⚠️ WeatherKit alerts not available for \(city.name)")
-                debugLog("   → WeatherKit doesn't support weather alerts in \(city.country)")
-                debugLog("   → Coverage is limited to select countries (US, Canada, parts of Europe, etc.)")
+                debugLog("⚠️ WeatherKit alerts not available for \(city.name) (region unsupported)")
+                alertsCache[city.id] = ([], Date())
+                return []
             }
-            // JWT/Authentication errors
-            else if nsError.domain.contains("WDSJWTAuthenticatorServiceListener") {
-                debugLog("⚠️ WeatherKit authentication failed for \(city.name)")
-                debugLog("   → WeatherKit may not be enabled for your App ID in Apple Developer Portal")
-                debugLog("   → Visit https://developer.apple.com/account/resources/identifiers/list")
-                debugLog("   → Edit your App ID and enable the WeatherKit capability under App Services")
-            }
-            // Other WeatherDaemon errors
-            else if nsError.domain.contains("WeatherDaemon") {
-                debugLog("⚠️ WeatherKit service error for \(city.name): \(errorDescription)")
-            }
-            // Unknown errors
-            else {
-                debugLog("⚠️ Error fetching WeatherKit alerts for \(city.name): \(error)")
-            }
-            
-            // Cache empty result to avoid repeated failed requests
-            alertsCache[city.id] = ([], Date())
-            return []
+
+            // Any other error (auth, daemon, network) means we could NOT determine the alert
+            // state. Rethrow so the UI shows "couldn't check alerts" instead of a false
+            // "No active alerts" (product review #1). Not cached, so a retry re-attempts.
+            AppLogger.network.error("WeatherKit alerts fetch failed for \(city.name, privacy: .public): \(errorDescription, privacy: .public)")
+            throw error
         }
         #else
         debugLog("⚠️ WeatherKit not available on this platform")
