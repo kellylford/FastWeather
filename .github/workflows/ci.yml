@@ -22,13 +22,32 @@ jobs:
           }
           EOF
 
+      - name: Select iOS Simulator
+        id: sim
+        run: |
+          # Pick an available iPhone simulator by UDID instead of hardcoding a model name.
+          # The runner image's device list changes over time, so 'name=iPhone 16' intermittently
+          # fails with "Unable to find a device matching the provided destination specifier".
+          echo "Available simulators:"
+          xcrun simctl list devices available
+          UDID=$(xcrun simctl list devices available \
+            | grep -E 'iPhone' \
+            | grep -oiE '[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}' \
+            | head -1)
+          if [ -z "$UDID" ]; then
+            echo "::error::No available iPhone simulator found on the runner"
+            exit 1
+          fi
+          echo "Selected simulator UDID: $UDID"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
       - name: Build and Test
         run: |
           set -o pipefail
           xcodebuild test \
             -project iOS/FastWeather.xcodeproj \
             -scheme FastWeather \
-            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
             -skip-testing:FastWeatherTests/OpenMeteoAPIParameterTests/testForecastDaysUsesCorrectValues \
             -skip-testing:FastWeatherTests/OpenMeteoAPIParameterTests/testLiveAPICallWithCorrectParameters \
             CODE_SIGN_IDENTITY="" \
