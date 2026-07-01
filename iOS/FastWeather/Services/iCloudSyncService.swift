@@ -16,6 +16,7 @@ final class iCloudSyncService {
 
     private static let settingsKey = "icloud_AppSettings"
     private static let citiesKey   = "icloud_SavedCities"
+    private static let citiesTimestampKey = "icloud_SavedCities_ts"
     static let enabledKey          = "iCloudSyncEnabled"
 
     var isEnabled: Bool {
@@ -62,29 +63,55 @@ final class iCloudSyncService {
         AppLogger.persistence.debug("iCloud: pushed settings")
     }
 
-    func pushCities(_ cities: [City]) {
+    func pushCities(_ cities: [City], modified: Date = Date()) {
         guard isEnabled else { return }
         guard let data = try? JSONEncoder().encode(cities) else { return }
         store.set(data, forKey: Self.citiesKey)
-        AppLogger.persistence.debug("iCloud: pushed \(cities.count) cities")
+        // Stamp the edit time so receivers can apply last-writer-wins and avoid a stale device
+        // clobbering newer data (HI-4).
+        store.set(modified.timeIntervalSince1970, forKey: Self.citiesTimestampKey)
+        AppLogger.persistence.debug("iCloud: pushed \(cities.count) cities (ts \(modified.timeIntervalSince1970))")
+    }
+
+    /// The edit timestamp accompanying the cities currently in iCloud, or nil if none stored.
+    func pullCitiesTimestamp() -> Date? {
+        let ts = store.double(forKey: Self.citiesTimestampKey)
+        return ts > 0 ? Date(timeIntervalSince1970: ts) : nil
     }
 
     // MARK: - Pull (iCloud → local)
 
     func pullSettings() -> AppSettings? {
         guard let data = store.data(forKey: Self.settingsKey) else { return nil }
-        return try? JSONDecoder().decode(AppSettings.self, from: data)
+        do {
+            return try JSONDecoder().decode(AppSettings.self, from: data)
+        } catch {
+            // Log instead of silently swallowing (L7) so a sync issue is diagnosable.
+            AppLogger.persistence.error("iCloud: failed to decode remote settings: \(error.localizedDescription, privacy: .public)")
+            return nil
+        }
     }
 
     func pullCities() -> [City]? {
         guard let data = store.data(forKey: Self.citiesKey) else { return nil }
-        return try? JSONDecoder().decode([City].self, from: data)
+        do {
+            return try JSONDecoder().decode([City].self, from: data)
+        } catch {
+            AppLogger.persistence.error("iCloud: failed to decode remote cities: \(error.localizedDescription, privacy: .public)")
+            return nil
+        }
     }
 
     // MARK: - Remote change handler
 
     private func storeDidChange(_ notification: Notification) {
         guard isEnabled else { return }
+        // Surface KVS quota violations (1 MB total / per-key limit). On overflow the write was
+        // silently dropped, so a "my cities didn't sync" report is otherwise undiagnosable (HI-4).
+        if let reason = notification.userInfo?[NSUbiquitousKeyValueStoreChangeReasonKey] as? Int,
+           reason == NSUbiquitousKeyValueStoreQuotaViolationChange {
+            AppLogger.persistence.error("iCloud: KVS quota violation — sync payload exceeds the 1 MB limit; some changes were not saved")
+        }
         guard let keys = notification.userInfo?[NSUbiquitousKeyValueStoreChangedKeysKey] as? [String]
         else { return }
 

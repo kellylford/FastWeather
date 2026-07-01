@@ -49,7 +49,7 @@ struct DayDetailView: View {
     }
 
     private var navigationTitle: String {
-        guard let sunriseStr = daily?.sunrise?[dayIndex],
+        guard let sunriseStr = daily?.sunrise?.value(at: dayIndex),
               let date = DateParser.parse(sunriseStr) else {
             return dayIndex == 0 ? "Today" : "Day \(dayIndex + 1)"
         }
@@ -59,7 +59,7 @@ struct DayDetailView: View {
     }
 
     private var weatherCodeEnum: WeatherCode? {
-        guard let code = daily?.weatherCode?[dayIndex] else { return nil }
+        guard let code = daily?.weatherCode?.value(at: dayIndex) else { return nil }
         return WeatherCode(rawValue: code)
     }
 
@@ -139,8 +139,8 @@ struct DayDetailView: View {
                             .font(.headline)
                     }
 
-                    if let high = daily?.temperature2mMax[dayIndex],
-                       let low = daily?.temperature2mMin[dayIndex] {
+                    if let high = daily?.temperature2mMax.value(at: dayIndex),
+                       let low = daily?.temperature2mMin.value(at: dayIndex) {
                         HStack(spacing: 12) {
                             Label {
                                 Text(formatTemperature(high))
@@ -189,10 +189,10 @@ struct DayDetailView: View {
         if let code = weatherCodeEnum {
             parts.append("Conditions: \(code.description)")
         }
-        if let high = daily?.temperature2mMax[dayIndex] {
+        if let high = daily?.temperature2mMax.value(at: dayIndex) {
             parts.append("High: \(formatTemperature(high))")
         }
-        if let low = daily?.temperature2mMin[dayIndex] {
+        if let low = daily?.temperature2mMin.value(at: dayIndex) {
             parts.append("Low: \(formatTemperature(low))")
         }
         if let timingText = precipitationTimingText() {
@@ -226,9 +226,9 @@ struct DayDetailView: View {
 
         // Determine precipitation type label for natural VoiceOver reading
         let precipType: String
-        if let snow = daily?.snowfallSum?[dayIndex], snow > 0 {
+        if let snow = daily?.snowfallSum?.value(at: dayIndex), snow > 0 {
             precipType = "Snow"
-        } else if let rain = daily?.rainSum?[dayIndex], rain > 0 {
+        } else if let rain = daily?.rainSum?.value(at: dayIndex), rain > 0 {
             precipType = "Rain"
         } else {
             precipType = "Precipitation"
@@ -295,10 +295,10 @@ struct DayDetailView: View {
 
     @ViewBuilder
     private var precipitationSection: some View {
-        let prob = daily?.precipitationProbabilityMax?[dayIndex]
-        let precipSum = daily?.precipitationSum?[dayIndex]
-        let rainSum = daily?.rainSum?[dayIndex]
-        let snowSum = daily?.snowfallSum?[dayIndex]
+        let prob = daily?.precipitationProbabilityMax?.value(at: dayIndex)
+        let precipSum = daily?.precipitationSum?.value(at: dayIndex)
+        let rainSum = daily?.rainSum?.value(at: dayIndex)
+        let snowSum = daily?.snowfallSum?.value(at: dayIndex)
 
         let hasAny = (prob ?? 0) > 0 || (precipSum ?? 0) > 0 || (rainSum ?? 0) > 0 || (snowSum ?? 0) > 0
 
@@ -352,9 +352,9 @@ struct DayDetailView: View {
 
     @ViewBuilder
     private var windAndUVSection: some View {
-        let wind = daily?.windSpeed10mMax?[dayIndex]
-        let windDir = daily?.windDirectionDominant?[dayIndex]
-        let uv = daily?.uvIndexMax?[dayIndex]
+        let wind = daily?.windSpeed10mMax?.value(at: dayIndex)
+        let windDir = daily?.windDirectionDominant?.value(at: dayIndex)
+        let uv = daily?.uvIndexMax?.value(at: dayIndex)
 
         if wind != nil || uv != nil {
             GroupBox(label: Label("Wind & UV", systemImage: "wind")) {
@@ -404,10 +404,10 @@ struct DayDetailView: View {
 
     @ViewBuilder
     private var astronomySection: some View {
-        let sunriseStr = daily?.sunrise?[dayIndex]
-        let sunsetStr  = daily?.sunset?[dayIndex]
-        let daylight   = daily?.daylightDuration?[dayIndex]
-        let sunshine   = daily?.sunshineDuration?[dayIndex]
+        let sunriseStr = daily?.sunrise?.value(at: dayIndex)
+        let sunsetStr  = daily?.sunset?.value(at: dayIndex)
+        let daylight   = daily?.daylightDuration?.value(at: dayIndex)
+        let sunshine   = daily?.sunshineDuration?.value(at: dayIndex)
 
         if sunriseStr != nil || sunsetStr != nil || daylight != nil {
             GroupBox(label: Label("Astronomy", systemImage: "sun.horizon")) {

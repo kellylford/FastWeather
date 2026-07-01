@@ -9,18 +9,29 @@ import Foundation
 
 class HistoricalWeatherCache {
     static let shared = HistoricalWeatherCache()
-    
+
     private let fileManager = FileManager.default
+
+    private init() {
+        // Historical data is immutable and regenerable, so it belongs in Caches (OS-purgeable,
+        // excluded from backup) rather than Documents. Delete the old backed-up copy once. (M3)
+        let oldDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("HistoricalWeather", isDirectory: true)
+        if fileManager.fileExists(atPath: oldDir.path) {
+            try? fileManager.removeItem(at: oldDir)
+        }
+    }
+
     private var cacheDirectory: URL {
-        let paths = fileManager.urls(for: .documentDirectory, in: .userDomainMask)
-        let documentsDirectory = paths[0]
-        let cacheDir = documentsDirectory.appendingPathComponent("HistoricalWeather", isDirectory: true)
-        
+        let paths = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)
+        let baseDirectory = paths[0]
+        let cacheDir = baseDirectory.appendingPathComponent("HistoricalWeather", isDirectory: true)
+
         // Create directory if it doesn't exist
         if !fileManager.fileExists(atPath: cacheDir.path) {
             try? fileManager.createDirectory(at: cacheDir, withIntermediateDirectories: true)
         }
-        
+
         return cacheDir
     }
     

@@ -114,6 +114,9 @@ All flags are toggled in `DeveloperSettingsView` (Settings → Developer Setting
 | `tableViewEnabled` | `false` | Table view mode (experimental, has text-clipping issues) |
 | `weatherKitSnowEnabled` | `true` | Use WeatherKit daily snow totals instead of Open-Meteo |
 | `weatherKitNowcastEnabled` | `true` | Use WeatherKit minute-by-minute nowcast for precipitation |
+| `weatherKitConditionsEnabled` | `true` | Use WeatherKit's observation-informed current condition instead of Open-Meteo's model `weather_code` for "now" (today only; unmappable conditions fall back to Open-Meteo) |
+| `specificPlaceNamesEnabled` | `true` | Show specific place names (airports, universities, streets) instead of city-only labels; when off, searches fall back to locality-only |
+| `myLocationEnabled` | `true` | Show the My Location section on the city list; when off, the whole My Location feature is hidden |
 
 **Adding a feature-flagged feature:**
 1. Add `@Published var featureEnabled: Bool` to `FeatureFlags.swift`

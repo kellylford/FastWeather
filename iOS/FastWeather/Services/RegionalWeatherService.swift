@@ -18,6 +18,13 @@ class RegionalWeatherService {
     // Cache for reverse geocoded location names (key: "lat,lon", value: city name)
     private var locationNameCache: [String: String] = [:]
     private let cacheQueue = DispatchQueue(label: "com.weatherfast.locationcache")
+
+    // In-memory cache for WeatherKit current conditions, keyed by rounded coordinate.
+    // Conditions change, so entries expire after a short TTL. This avoids re-billing
+    // WeatherKit on every reappearance of the same directional tiles (HI-1); the overlay
+    // itself is an intentional accuracy fix and is preserved.
+    // Coordinate-keyed TTL cache of WeatherKit condition text (HI-1). Shared TTLCache type.
+    private let conditionCache = TTLCache<String, String>(ttl: 10 * 60)
     
     // Actor to serialize geocoding requests to respect rate limits
     private actor GeocodingCoordinator {
@@ -55,12 +62,17 @@ class RegionalWeatherService {
     
     private func setCachedLocationName(_ name: String, latitude: Double, longitude: Double) {
         let key = cacheKey(latitude: latitude, longitude: longitude)
-        cacheQueue.sync {
+        // Mutate under the lock, then encode + persist OUTSIDE it so the ~9 concurrent
+        // directional fetches don't serialize on disk I/O while holding the cache lock (M1).
+        let snapshot: [String: String] = cacheQueue.sync {
             locationNameCache[key] = name
-            saveCache()
+            return locationNameCache
+        }
+        if let data = try? JSONEncoder().encode(snapshot) {
+            UserDefaults.standard.set(data, forKey: "RegionalWeatherLocationCache")
         }
     }
-    
+
     private func loadCache() {
         let defaults = UserDefaults.standard
         if let data = defaults.data(forKey: "RegionalWeatherLocationCache"),
@@ -69,12 +81,6 @@ class RegionalWeatherService {
                 locationNameCache = cache
             }
             debugLog("📍 Loaded \(cache.count) cached location names")
-        }
-    }
-    
-    private func saveCache() {
-        if let data = try? JSONEncoder().encode(locationNameCache) {
-            UserDefaults.standard.set(data, forKey: "RegionalWeatherLocationCache")
         }
     }
     
@@ -236,10 +242,14 @@ class RegionalWeatherService {
     #if canImport(WeatherKit)
     @available(iOS 16.0, *)
     private func weatherKitConditionDescription(lat: Double, lon: Double) async -> String? {
+        let key = cacheKey(latitude: lat, longitude: lon)
+        if let cached = conditionCache.value(for: key) { return cached }
         do {
             let current = try await WeatherKit.WeatherService.shared.weather(
                 for: CLLocation(latitude: lat, longitude: lon), including: .current)
-            return WeatherCode(weatherKitCondition: current.condition)?.description
+            guard let text = WeatherCode(weatherKitCondition: current.condition)?.description else { return nil }
+            conditionCache.set(text, for: key)
+            return text
         } catch {
             debugLog("⚠️ WK condition (regional) failed for \(lat),\(lon): \(error.localizedDescription)")
             return nil

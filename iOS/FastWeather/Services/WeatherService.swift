@@ -126,11 +126,27 @@ class WeatherService: ObservableObject {
     
     // MARK: - My Data Dynamic Parameters
     
+    /// Loads the persisted AppSettings without coupling to SettingsManager.
+    /// Reads from the App Group suite (where SettingsManager writes after migration),
+    /// falling back to standard defaults for pre-migration / edge cases. Reading from
+    /// `.standard` alone silently dropped My Data parameters on fresh installs — see CR-2.
+    private static func loadPersistedSettings() -> AppSettings? {
+        let suite = UserDefaults(suiteName: AppGroup.suiteName)
+        if let data = suite?.data(forKey: "AppSettings"),
+           let settings = try? JSONDecoder().decode(AppSettings.self, from: data) {
+            return settings
+        }
+        if let data = UserDefaults.standard.data(forKey: "AppSettings"),
+           let settings = try? JSONDecoder().decode(AppSettings.self, from: data) {
+            return settings
+        }
+        return nil
+    }
+
     /// Appends user-selected My Data API parameters to the base current params string.
     /// Reads directly from UserDefaults to avoid coupling to SettingsManager.
     static func appendMyDataParameters(to baseParams: String) -> String {
-        guard let data = UserDefaults.standard.data(forKey: "AppSettings"),
-              let settings = try? JSONDecoder().decode(AppSettings.self, from: data) else {
+        guard let settings = loadPersistedSettings() else {
             return baseParams
         }
         
@@ -149,8 +165,7 @@ class WeatherService: ObservableObject {
     /// Fetches marine current values for selected My Data parameters.
     /// Returns a dictionary of API key -> value for marine parameters only.
     private func fetchMyDataMarineValues(for city: City) async -> [String: Double]? {
-        guard let data = UserDefaults.standard.data(forKey: "AppSettings"),
-              let settings = try? JSONDecoder().decode(AppSettings.self, from: data) else {
+        guard let settings = Self.loadPersistedSettings() else {
             return nil
         }
         
@@ -188,8 +203,7 @@ class WeatherService: ObservableObject {
     /// Fetches air quality current values for selected My Data parameters.
     /// Returns a dictionary of API key -> value for air quality parameters only.
     private func fetchMyDataAirQualityValues(for city: City) async -> [String: Double]? {
-        guard let data = UserDefaults.standard.data(forKey: "AppSettings"),
-              let settings = try? JSONDecoder().decode(AppSettings.self, from: data) else {
+        guard let settings = Self.loadPersistedSettings() else {
             return nil
         }
         
@@ -243,6 +257,9 @@ class WeatherService: ObservableObject {
         // Remove all cached weather data for this city (all date offsets)
         weatherCache = weatherCache.filter { $0.key.cityId != city.id }
         cacheTimestamps = cacheTimestamps.filter { $0.key.cityId != city.id }
+        // Also drop marine cache entries for this city so they don't linger (L4)
+        marineCache = marineCache.filter { $0.key.cityId != city.id }
+        marineCacheTimestamps = marineCacheTimestamps.filter { $0.key.cityId != city.id }
         alertsCache.removeValue(forKey: city.id)
         saveCities()
     }
@@ -256,6 +273,8 @@ class WeatherService: ObservableObject {
     func clearWeatherCache() {
         weatherCache = [:]
         cacheTimestamps = [:]
+        marineCache = [:]
+        marineCacheTimestamps = [:]
         alertsCache = [:]
     }
     
@@ -267,11 +286,13 @@ class WeatherService: ObservableObject {
         return Date().timeIntervalSince(timestamp) < currentWeatherCacheDuration
     }
     
-    /// Returns true when the cache entry for `key` is fresh enough to skip a new fetch.
-    /// Future offsets are cached for 1 hour; current (offset=0) for 10 minutes.
-    private func isCacheValid(for key: WeatherCacheKey) -> Bool {
-        guard let timestamp = cacheTimestamps[key] else { return false }
-        let duration = key.dateOffset == 0 ? currentWeatherCacheDuration : forecastWeatherCacheDuration
+    /// Returns true when a cache entry is fresh enough to skip a new fetch, using the
+    /// offset-aware policy: current (offset=0) is cached for 10 minutes, future offsets
+    /// for 1 hour. Takes the timestamp explicitly so it works for both the weather and
+    /// marine timestamp dictionaries — see CR review HI-6.
+    private func isCacheValid(timestamp: Date?, dateOffset: Int) -> Bool {
+        guard let timestamp = timestamp else { return false }
+        let duration = dateOffset == 0 ? currentWeatherCacheDuration : forecastWeatherCacheDuration
         return Date().timeIntervalSince(timestamp) < duration
     }
     
@@ -292,7 +313,22 @@ class WeatherService: ObservableObject {
             marineCacheTimestamps.removeValue(forKey: key)
         }
     }
-    
+
+    /// Evicts the oldest marine entries independently of weatherCache. Marine data is
+    /// fetched on its own (sailing/coastal cities) and would otherwise grow unbounded
+    /// because trimWeatherCacheIfNeeded only fires on weatherCache growth — H2.
+    private func trimMarineCacheIfNeeded() {
+        guard marineCache.count > maxWeatherCacheEntries else { return }
+        let evict = marineCacheTimestamps
+            .sorted { $0.value < $1.value }
+            .prefix(marineCache.count - maxWeatherCacheEntries)
+            .map { $0.key }
+        for key in evict {
+            marineCache.removeValue(forKey: key)
+            marineCacheTimestamps.removeValue(forKey: key)
+        }
+    }
+
     private func trimBrowseCacheIfNeeded() {
         guard browseWeatherCache.count > maxBrowseCacheEntries else { return }
         let evict = browseCacheTimestamps
@@ -330,7 +366,7 @@ class WeatherService: ObservableObject {
         let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
         
         // Check in-memory cache
-        if isCacheValid(timestamp: cacheTimestamps[cacheKey]) {
+        if isCacheValid(timestamp: cacheTimestamps[cacheKey], dateOffset: dateOffset) {
             if !includeHourly {
                 // Light fetch: any valid cache entry is acceptable
                 return
@@ -414,11 +450,12 @@ class WeatherService: ObservableObject {
                     return
                 }
                 
-                // Build synthetic "current" weather from that day's max/min temps and weather code
-                let avgTemp = ((daily.temperature2mMax[dateOffset] ?? 0) + (daily.temperature2mMin[dateOffset] ?? 0)) / 2
+                // Build synthetic "current" weather from that day's max/min temps and weather code.
+                // All array access is bounds-safe (.value(at:)) so a partial API response can't trap — CR-3.
+                let avgTemp = ((daily.temperature2mMax.value(at: dateOffset) ?? 0) + (daily.temperature2mMin.value(at: dateOffset) ?? 0)) / 2
                 let avgApparentTemp: Double? = {
-                    guard let maxVal = daily.apparentTemperatureMax?[dateOffset],
-                          let minVal = daily.apparentTemperatureMin?[dateOffset] else { return nil }
+                    guard let maxVal = daily.apparentTemperatureMax?.value(at: dateOffset),
+                          let minVal = daily.apparentTemperatureMin?.value(at: dateOffset) else { return nil }
                     return (maxVal + minVal) / 2
                 }()
                 let current = WeatherData.CurrentWeather(
@@ -426,39 +463,39 @@ class WeatherService: ObservableObject {
                     relativeHumidity2m: nil,
                     apparentTemperature: avgApparentTemp,
                     isDay: 1,
-                    precipitation: daily.precipitationSum?[dateOffset] ?? 0,
-                    rain: daily.rainSum?[dateOffset] ?? 0,
+                    precipitation: daily.precipitationSum?.value(at: dateOffset) ?? 0,
+                    rain: daily.rainSum?.value(at: dateOffset) ?? 0,
                     showers: nil,
-                    snowfall: daily.snowfallSum?[dateOffset] ?? 0,
-                    weatherCode: daily.weatherCode?[dateOffset] ?? 0,
+                    snowfall: daily.snowfallSum?.value(at: dateOffset) ?? 0,
+                    weatherCode: daily.weatherCode?.value(at: dateOffset) ?? 0,
                     cloudCover: 0,
                     pressureMsl: nil,
-                    windSpeed10m: daily.windSpeed10mMax?[dateOffset] ?? 0,
+                    windSpeed10m: daily.windSpeed10mMax?.value(at: dateOffset) ?? 0,
                     windDirection10m: nil,
                     visibility: nil,
                     windGusts10m: nil,
-                    uvIndex: daily.uvIndexMax?[dateOffset] ?? nil,
+                    uvIndex: daily.uvIndexMax?.value(at: dateOffset) ?? nil,
                     dewpoint2m: nil
                 )
-                
+
                 // Extract just this day's data from daily arrays (single-element arrays)
                 let singleDayDaily = WeatherData.DailyWeather(
-                    temperature2mMax: [daily.temperature2mMax[dateOffset]].compactMap { $0 },
-                    temperature2mMin: [daily.temperature2mMin[dateOffset]].compactMap { $0 },
-                    sunrise: daily.sunrise.map { [$0[dateOffset]].compactMap { $0 } },
-                    sunset: daily.sunset.map { [$0[dateOffset]].compactMap { $0 } },
-                    weatherCode: daily.weatherCode.map { [$0[dateOffset]].compactMap { $0 } },
-                    precipitationSum: daily.precipitationSum.map { [$0[dateOffset]].compactMap { $0 } },
-                    rainSum: daily.rainSum.map { [$0[dateOffset]].compactMap { $0 } },
-                    snowfallSum: daily.snowfallSum.map { [$0[dateOffset]].compactMap { $0 } },
-                    precipitationProbabilityMax: daily.precipitationProbabilityMax.map { [$0[dateOffset]].compactMap { $0 } },
-                    uvIndexMax: daily.uvIndexMax.map { [$0[dateOffset]].compactMap { $0 } },
-                    daylightDuration: daily.daylightDuration.map { [$0[dateOffset]].compactMap { $0 } },
-                    sunshineDuration: daily.sunshineDuration.map { [$0[dateOffset]].compactMap { $0 } },
-                    windSpeed10mMax: daily.windSpeed10mMax.map { [$0[dateOffset]].compactMap { $0 } },
-                    windDirectionDominant: daily.windDirectionDominant.map { [$0[dateOffset]].compactMap { $0 } },
-                    apparentTemperatureMax: daily.apparentTemperatureMax.map { [$0[dateOffset]].compactMap { $0 } },
-                    apparentTemperatureMin: daily.apparentTemperatureMin.map { [$0[dateOffset]].compactMap { $0 } }
+                    temperature2mMax: [daily.temperature2mMax.value(at: dateOffset)].compactMap { $0 },
+                    temperature2mMin: [daily.temperature2mMin.value(at: dateOffset)].compactMap { $0 },
+                    sunrise: daily.sunrise.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    sunset: daily.sunset.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    weatherCode: daily.weatherCode.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    precipitationSum: daily.precipitationSum.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    rainSum: daily.rainSum.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    snowfallSum: daily.snowfallSum.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    precipitationProbabilityMax: daily.precipitationProbabilityMax.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    uvIndexMax: daily.uvIndexMax.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    daylightDuration: daily.daylightDuration.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    sunshineDuration: daily.sunshineDuration.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    windSpeed10mMax: daily.windSpeed10mMax.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    windDirectionDominant: daily.windDirectionDominant.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    apparentTemperatureMax: daily.apparentTemperatureMax.map { [$0.value(at: dateOffset)].compactMap { $0 } },
+                    apparentTemperatureMin: daily.apparentTemperatureMin.map { [$0.value(at: dateOffset)].compactMap { $0 } }
                 )
                 
                 // Extract hourly data for that specific day (24 hours starting at midnight of target date)
@@ -602,10 +639,11 @@ class WeatherService: ObservableObject {
             // The target past day is always at index 0 (the oldest entry).
             let targetIndex = 0
 
-            let avgTemp = ((daily.temperature2mMax[targetIndex] ?? 0) + (daily.temperature2mMin[targetIndex] ?? 0)) / 2
+            // Bounds-safe access (.value(at:)) so a partial API response can't trap — CR-3.
+            let avgTemp = ((daily.temperature2mMax.value(at: targetIndex) ?? 0) + (daily.temperature2mMin.value(at: targetIndex) ?? 0)) / 2
             let avgApparentTemp: Double? = {
-                guard let maxVal = daily.apparentTemperatureMax?[targetIndex],
-                      let minVal = daily.apparentTemperatureMin?[targetIndex] else { return nil }
+                guard let maxVal = daily.apparentTemperatureMax?.value(at: targetIndex),
+                      let minVal = daily.apparentTemperatureMin?.value(at: targetIndex) else { return nil }
                 return (maxVal + minVal) / 2
             }()
             let current = WeatherData.CurrentWeather(
@@ -613,38 +651,38 @@ class WeatherService: ObservableObject {
                 relativeHumidity2m: nil,
                 apparentTemperature: avgApparentTemp,
                 isDay: 1,
-                precipitation: daily.precipitationSum?[targetIndex] ?? 0,
-                rain: daily.rainSum?[targetIndex] ?? 0,
+                precipitation: daily.precipitationSum?.value(at: targetIndex) ?? 0,
+                rain: daily.rainSum?.value(at: targetIndex) ?? 0,
                 showers: nil,
-                snowfall: daily.snowfallSum?[targetIndex] ?? 0,
-                weatherCode: daily.weatherCode?[targetIndex] ?? 0,
+                snowfall: daily.snowfallSum?.value(at: targetIndex) ?? 0,
+                weatherCode: daily.weatherCode?.value(at: targetIndex) ?? 0,
                 cloudCover: 0,
                 pressureMsl: nil,
-                windSpeed10m: daily.windSpeed10mMax?[targetIndex] ?? 0,
+                windSpeed10m: daily.windSpeed10mMax?.value(at: targetIndex) ?? 0,
                 windDirection10m: nil,
                 visibility: nil,
                 windGusts10m: nil,
-                uvIndex: daily.uvIndexMax?[targetIndex],
+                uvIndex: daily.uvIndexMax?.value(at: targetIndex) ?? nil,
                 dewpoint2m: nil
             )
 
             let singleDayDaily = WeatherData.DailyWeather(
-                temperature2mMax: [daily.temperature2mMax[targetIndex]].compactMap { $0 },
-                temperature2mMin: [daily.temperature2mMin[targetIndex]].compactMap { $0 },
-                sunrise: daily.sunrise.map { [$0[targetIndex]].compactMap { $0 } },
-                sunset: daily.sunset.map { [$0[targetIndex]].compactMap { $0 } },
-                weatherCode: daily.weatherCode.map { [$0[targetIndex]].compactMap { $0 } },
-                precipitationSum: daily.precipitationSum.map { [$0[targetIndex]].compactMap { $0 } },
-                rainSum: daily.rainSum.map { [$0[targetIndex]].compactMap { $0 } },
-                snowfallSum: daily.snowfallSum.map { [$0[targetIndex]].compactMap { $0 } },
-                precipitationProbabilityMax: daily.precipitationProbabilityMax.map { [$0[targetIndex]].compactMap { $0 } },
-                uvIndexMax: daily.uvIndexMax.map { [$0[targetIndex]].compactMap { $0 } },
-                daylightDuration: daily.daylightDuration.map { [$0[targetIndex]].compactMap { $0 } },
-                sunshineDuration: daily.sunshineDuration.map { [$0[targetIndex]].compactMap { $0 } },
-                windSpeed10mMax: daily.windSpeed10mMax.map { [$0[targetIndex]].compactMap { $0 } },
-                windDirectionDominant: daily.windDirectionDominant.map { [$0[targetIndex]].compactMap { $0 } },
-                apparentTemperatureMax: daily.apparentTemperatureMax.map { [$0[targetIndex]].compactMap { $0 } },
-                apparentTemperatureMin: daily.apparentTemperatureMin.map { [$0[targetIndex]].compactMap { $0 } }
+                temperature2mMax: [daily.temperature2mMax.value(at: targetIndex)].compactMap { $0 },
+                temperature2mMin: [daily.temperature2mMin.value(at: targetIndex)].compactMap { $0 },
+                sunrise: daily.sunrise.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                sunset: daily.sunset.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                weatherCode: daily.weatherCode.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                precipitationSum: daily.precipitationSum.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                rainSum: daily.rainSum.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                snowfallSum: daily.snowfallSum.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                precipitationProbabilityMax: daily.precipitationProbabilityMax.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                uvIndexMax: daily.uvIndexMax.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                daylightDuration: daily.daylightDuration.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                sunshineDuration: daily.sunshineDuration.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                windSpeed10mMax: daily.windSpeed10mMax.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                windDirectionDominant: daily.windDirectionDominant.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                apparentTemperatureMax: daily.apparentTemperatureMax.map { [$0.value(at: targetIndex)].compactMap { $0 } },
+                apparentTemperatureMin: daily.apparentTemperatureMin.map { [$0.value(at: targetIndex)].compactMap { $0 } }
             )
 
             // The target past day's hourly data is always the first 24 entries in the response.
@@ -945,7 +983,7 @@ class WeatherService: ObservableObject {
         let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
         
         // Check in-memory cache
-        if isCacheValid(timestamp: marineCacheTimestamps[cacheKey]) {
+        if isCacheValid(timestamp: marineCacheTimestamps[cacheKey], dateOffset: dateOffset) {
             return
         }
         
@@ -1029,7 +1067,7 @@ class WeatherService: ObservableObject {
             await MainActor.run {
                 self.marineCache[cacheKey] = marineData
                 self.marineCacheTimestamps[cacheKey] = Date()
-                self.trimWeatherCacheIfNeeded()
+                self.trimMarineCacheIfNeeded()
             }
         } catch {
             await MainActor.run {
@@ -1294,10 +1332,18 @@ class WeatherService: ObservableObject {
     @available(iOS 16.0, *)
     private func weatherKitCurrentWMOCode(latitude: Double, longitude: Double) async -> Int? {
         guard FeatureFlags.shared.weatherKitConditionsEnabled else { return nil }
+        // Coordinate-keyed TTL cache (main-actor isolated): avoids re-billing WeatherKit on every
+        // browse-row reappearance — HI-1. The overlay is preserved; only redundant calls are cut.
+        let key = String(format: "%.2f,%.2f", latitude, longitude)
+        if let wmo = wkConditionCache.value(for: key) {
+            return wmo
+        }
         do {
             let current = try await WeatherKit.WeatherService.shared.weather(
                 for: CLLocation(latitude: latitude, longitude: longitude), including: .current)
-            return WeatherCode(weatherKitCondition: current.condition)?.rawValue
+            guard let wmo = WeatherCode(weatherKitCondition: current.condition)?.rawValue else { return nil }
+            wkConditionCache.set(wmo, for: key)
+            return wmo
         } catch {
             debugLog("⚠️ WK condition (browse) failed for \(latitude),\(longitude): \(error.localizedDescription)")
             return nil
@@ -1309,6 +1355,10 @@ class WeatherService: ObservableObject {
     
     private var alertsCache: [UUID: (alerts: [WeatherAlert], timestamp: Date)] = [:]
     // alertsCache is @MainActor-isolated (WeatherService is @MainActor); no lock needed.
+
+    // Coordinate-keyed cache of WeatherKit current WMO codes for the lightweight browse/regional
+    // paths, with a short TTL. Avoids redundant WeatherKit billing — HI-1. Shared TTLCache type.
+    private let wkConditionCache = TTLCache<String, Int>(ttl: 10 * 60)
     private let alertsCacheMinutes: TimeInterval = 5
     
     /// Countries where WeatherKit alerts are known to work
@@ -1345,6 +1395,13 @@ class WeatherService: ObservableObject {
     /// - US cities: National Weather Service (detailed alerts with full text)
     /// - International: Apple WeatherKit (when feature flag enabled AND country supported)
     /// - Returns: Array of active weather alerts (empty if no alerts or service unavailable)
+    /// Signals that the alert state could not be determined (vs. a genuine "no alerts").
+    enum AlertFetchError: Error { case badStatus(Int) }
+
+    /// URLSession used for NWS alert fetches. Injectable so the failure / empty-200 paths can be
+    /// tested deterministically without the network (defaults to `.shared`).
+    var alertsURLSession: URLSession = .shared
+
     func fetchNWSAlerts(for city: City) async throws -> [WeatherAlert] {
         // Check cache first, filtering out expired alerts
         if let cached = alertsCache[city.id] {
@@ -1382,12 +1439,17 @@ class WeatherService: ObservableObject {
         
         var request = URLRequest(url: url)
         request.setValue("WeatherFast/1.0 iOS", forHTTPHeaderField: "User-Agent")
-        
+
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await alertsURLSession.data(for: request)
             
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                return []
+                // A non-200 means we could NOT determine the alert state. Throw so the UI can show a
+                // distinct "couldn't check alerts" state — a fetch failure must never render as
+                // "No active alerts" for a safety feature (HI-3 / product review #1).
+                let status = (response as? HTTPURLResponse)?.statusCode ?? -1
+                AppLogger.network.error("NWS alerts non-200 (\(status, privacy: .public)) for \(city.name, privacy: .public)")
+                throw AlertFetchError.badStatus(status)
             }
             
             // Don't use .iso8601 date decoding strategy - it interferes with FlexibleStringOrArray
@@ -1444,12 +1506,16 @@ class WeatherService: ObservableObject {
             alertsCache[city.id] = (activeAlerts, Date())
             
             return activeAlerts
-            
+
         } catch {
-            return []
+            // Network/decoding failure — we could NOT determine the alert state. Rethrow so the UI
+            // shows "couldn't check alerts" rather than a misleading "No active alerts" (HI-3 /
+            // product review #1). Not cached, so the next attempt (or a retry) tries again.
+            AppLogger.network.error("NWS alerts fetch failed for \(city.name, privacy: .public): \(error.localizedDescription, privacy: .public)")
+            throw error
         }
     }
-    
+
     /// Fetches weather alerts from Apple WeatherKit (international cities)
     private func fetchWeatherKitAlerts(for city: City) async throws -> [WeatherAlert] {
         #if canImport(WeatherKit)
@@ -1505,35 +1571,22 @@ class WeatherService: ObservableObject {
             return activeAlerts
             
         } catch {
-            // Parse error to provide helpful messaging
             let nsError = error as NSError
             let errorDescription = nsError.localizedDescription
-            
-            // HTTP 400 errors typically mean the country/region doesn't support weather alerts
+
+            // HTTP 400 = this region simply has no WeatherKit alert coverage. That's a genuine
+            // "no alerts here," not a failure to check — cache empty and return normally.
             if errorDescription.contains("400") || errorDescription.contains("responseFailed: 400") {
-                debugLog("⚠️ WeatherKit alerts not available for \(city.name)")
-                debugLog("   → WeatherKit doesn't support weather alerts in \(city.country)")
-                debugLog("   → Coverage is limited to select countries (US, Canada, parts of Europe, etc.)")
+                debugLog("⚠️ WeatherKit alerts not available for \(city.name) (region unsupported)")
+                alertsCache[city.id] = ([], Date())
+                return []
             }
-            // JWT/Authentication errors
-            else if nsError.domain.contains("WDSJWTAuthenticatorServiceListener") {
-                debugLog("⚠️ WeatherKit authentication failed for \(city.name)")
-                debugLog("   → WeatherKit may not be enabled for your App ID in Apple Developer Portal")
-                debugLog("   → Visit https://developer.apple.com/account/resources/identifiers/list")
-                debugLog("   → Edit your App ID and enable the WeatherKit capability under App Services")
-            }
-            // Other WeatherDaemon errors
-            else if nsError.domain.contains("WeatherDaemon") {
-                debugLog("⚠️ WeatherKit service error for \(city.name): \(errorDescription)")
-            }
-            // Unknown errors
-            else {
-                debugLog("⚠️ Error fetching WeatherKit alerts for \(city.name): \(error)")
-            }
-            
-            // Cache empty result to avoid repeated failed requests
-            alertsCache[city.id] = ([], Date())
-            return []
+
+            // Any other error (auth, daemon, network) means we could NOT determine the alert
+            // state. Rethrow so the UI shows "couldn't check alerts" instead of a false
+            // "No active alerts" (product review #1). Not cached, so a retry re-attempts.
+            AppLogger.network.error("WeatherKit alerts fetch failed for \(city.name, privacy: .public): \(errorDescription, privacy: .public)")
+            throw error
         }
         #else
         debugLog("⚠️ WeatherKit not available on this platform")
@@ -1561,11 +1614,16 @@ class WeatherService: ObservableObject {
     
     // MARK: - Persistence
     
+    private static let citiesModifiedKey = "SavedCitiesLastModified"
+
     private func saveCities() {
         do {
             let encoded = try JSONEncoder().encode(savedCities)
             sharedDefaults.set(encoded, forKey: userDefaultsKey)
-            iCloudSyncService.shared.pushCities(savedCities)
+            // Record the local edit time so iCloud sync can apply last-writer-wins (HI-4).
+            let now = Date()
+            sharedDefaults.set(now.timeIntervalSince1970, forKey: Self.citiesModifiedKey)
+            iCloudSyncService.shared.pushCities(savedCities, modified: now)
         } catch {
             AppLogger.service.error("Failed to save cities: \(error)")
         }
@@ -1583,9 +1641,34 @@ class WeatherService: ObservableObject {
         }
     }
 
-    func applyRemoteCities() {
+    /// Apply the cities list currently in iCloud.
+    /// - Parameter force: when true (an explicit user choice like "Use iCloud List"), skip the
+    ///   last-writer-wins comparison and always adopt the remote list.
+    func applyRemoteCities(force: Bool = false) {
         guard let remoteCities = iCloudSyncService.shared.pullCities() else { return }
+
+        // Last-writer-wins by edit time (HI-4), but only when the remote actually carries a
+        // timestamp. A legacy blob pushed by an app version before timestamps existed has none —
+        // that's real user data, not garbage, so we must NOT reject it as "older than local"
+        // (which would stomp it with our local list during the upgrade window). We also skip the
+        // check entirely when the user explicitly asked for the iCloud list (force).
+        if !force, let remoteTS = iCloudSyncService.shared.pullCitiesTimestamp() {
+            let localTS = Date(timeIntervalSince1970: sharedDefaults.double(forKey: Self.citiesModifiedKey))
+            if remoteTS < localTS {
+                // Our local copy is newer — re-push it (keeping our timestamp) so the other device
+                // converges onto it, then keep local unchanged. No loop: accepting never re-pushes.
+                AppLogger.service.debug("iCloud: ignoring older remote cities; re-pushing newer local")
+                iCloudSyncService.shared.pushCities(savedCities, modified: localTS)
+                return
+            }
+        }
+
+        guard remoteCities != savedCities else { return }
         savedCities = remoteCities
+        // Stamp local bookkeeping with the remote's timestamp (or now, if the remote was a legacy
+        // un-timestamped blob) so future comparisons stay consistent.
+        let appliedTS = iCloudSyncService.shared.pullCitiesTimestamp() ?? Date()
+        sharedDefaults.set(appliedTS.timeIntervalSince1970, forKey: Self.citiesModifiedKey)
         do {
             let encoded = try JSONEncoder().encode(remoteCities)
             sharedDefaults.set(encoded, forKey: userDefaultsKey)
@@ -1593,6 +1676,15 @@ class WeatherService: ObservableObject {
         } catch {
             AppLogger.service.error("Failed to save remote cities locally: \(error)")
         }
+    }
+
+    /// Push the local city list to iCloud and record the local edit time together, so the LWW
+    /// bookkeeping read by applyRemoteCities() can never drift from what was pushed (review
+    /// finding 1). Use this instead of calling iCloudSyncService.pushCities() directly.
+    func pushCitiesToCloud() {
+        let now = Date()
+        sharedDefaults.set(now.timeIntervalSince1970, forKey: Self.citiesModifiedKey)
+        iCloudSyncService.shared.pushCities(savedCities, modified: now)
     }
     
     // MARK: - Data Migration

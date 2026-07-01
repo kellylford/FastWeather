@@ -144,6 +144,8 @@ struct StateCitiesView: View {
                     } label: {
                         Label(option.rawValue, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
                     }
+                    // Announce the active sort to VoiceOver (was conveyed by checkmark icon only) — VO-4
+                    .accessibilityAddTraits(sortOrder == option ? .isSelected : [])
                 }
             }
             Section("Geographic") {
@@ -153,6 +155,8 @@ struct StateCitiesView: View {
                     } label: {
                         Label(option.rawValue, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
                     }
+                    // Announce the active sort to VoiceOver (was conveyed by checkmark icon only) — VO-4
+                    .accessibilityAddTraits(sortOrder == option ? .isSelected : [])
                 }
             }
             Section("Temperature") {
@@ -162,6 +166,8 @@ struct StateCitiesView: View {
                     } label: {
                         Label(option.rawValue, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
                     }
+                    // Announce the active sort to VoiceOver (was conveyed by checkmark icon only) — VO-4
+                    .accessibilityAddTraits(sortOrder == option ? .isSelected : [])
                 }
             }
         } label: {
@@ -304,6 +310,8 @@ struct CountryCitiesView: View {
                     } label: {
                         Label(option.rawValue, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
                     }
+                    // Announce the active sort to VoiceOver (was conveyed by checkmark icon only) — VO-4
+                    .accessibilityAddTraits(sortOrder == option ? .isSelected : [])
                 }
             }
             Section("Geographic") {
@@ -313,6 +321,8 @@ struct CountryCitiesView: View {
                     } label: {
                         Label(option.rawValue, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
                     }
+                    // Announce the active sort to VoiceOver (was conveyed by checkmark icon only) — VO-4
+                    .accessibilityAddTraits(sortOrder == option ? .isSelected : [])
                 }
             }
             Section("Temperature") {
@@ -322,6 +332,8 @@ struct CountryCitiesView: View {
                     } label: {
                         Label(option.rawValue, systemImage: sortOrder == option ? "checkmark" : option.systemImage)
                     }
+                    // Announce the active sort to VoiceOver (was conveyed by checkmark icon only) — VO-4
+                    .accessibilityAddTraits(sortOrder == option ? .isSelected : [])
                 }
             }
         } label: {

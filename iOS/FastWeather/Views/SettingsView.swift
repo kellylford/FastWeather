@@ -493,9 +493,10 @@ struct SettingsView: View {
                                 cloudCityCount = remoteCount
                                 showingICloudConflictAlert = true
                             } else if remoteCount > 0 {
-                                // No local cities to lose — enable and pull silently
+                                // No local cities to lose — enable and pull silently. Explicit
+                                // enable with nothing local to protect, so adopt iCloud's list.
                                 iCloudSyncEnabled = true
-                                weatherService.applyRemoteCities()
+                                weatherService.applyRemoteCities(force: true)
                                 if iCloudSyncService.shared.hasCloudSettings() {
                                     settingsManager.applyRemoteSettings()
                                 } else {
@@ -504,7 +505,7 @@ struct SettingsView: View {
                             } else {
                                 // iCloud is empty — enable and push this device's data up
                                 iCloudSyncEnabled = true
-                                iCloudSyncService.shared.pushCities(weatherService.savedCities)
+                                weatherService.pushCitiesToCloud()
                                 iCloudSyncService.shared.pushSettings(settingsManager.settings)
                             }
                         }
@@ -567,7 +568,8 @@ struct SettingsView: View {
             .alert("iCloud Has a Saved City List", isPresented: $showingICloudConflictAlert) {
                 Button("Use iCloud List") {
                     iCloudSyncEnabled = true
-                    weatherService.applyRemoteCities()
+                    // Explicit user choice — adopt the iCloud list regardless of timestamps.
+                    weatherService.applyRemoteCities(force: true)
                     if iCloudSyncService.shared.hasCloudSettings() {
                         settingsManager.applyRemoteSettings()
                     } else {
@@ -576,7 +578,7 @@ struct SettingsView: View {
                 }
                 Button("Keep My List") {
                     iCloudSyncEnabled = true
-                    iCloudSyncService.shared.pushCities(weatherService.savedCities)
+                    weatherService.pushCitiesToCloud()
                     iCloudSyncService.shared.pushSettings(settingsManager.settings)
                 }
                 Button("Don't Sync", role: .cancel) { }

@@ -157,9 +157,13 @@ struct WeatherData: Codable {
     let utcOffsetSeconds: Int?
 
     /// City-local timezone derived from the API response offset.
-    /// Defaults to UTC when offset is unavailable (historical path has no hourly data anyway).
+    /// Defaults to UTC when the offset is unavailable — never the device's local timezone, which
+    /// would silently show a remote city's times in the wrong zone (M7).
     var timeZone: TimeZone {
-        TimeZone(secondsFromGMT: utcOffsetSeconds ?? 0) ?? .current
+        if let offset = utcOffsetSeconds, let tz = TimeZone(secondsFromGMT: offset) {
+            return tz
+        }
+        return TimeZone(identifier: "UTC") ?? TimeZone(secondsFromGMT: 0)!
     }
     
     struct CurrentWeather: Codable {

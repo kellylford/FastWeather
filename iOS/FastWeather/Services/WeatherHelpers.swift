@@ -7,6 +7,44 @@
 
 import SwiftUI
 
+// MARK: - Safe Array Access
+extension Array {
+    /// Returns the element at `index`, or nil when the index is out of range.
+    /// Used for the parallel optional arrays Open-Meteo returns (daily/hourly fields):
+    /// a partial or short response would otherwise trap when subscripting at a fixed
+    /// offset. See code review CR-3.
+    func value<T>(at index: Int) -> T? where Element == T? {
+        guard indices.contains(index) else { return nil }
+        return self[index]
+    }
+}
+
+// MARK: - TTL Cache
+
+/// A minimal thread-safe time-to-live cache keyed by a Hashable key. Shared by the WeatherKit
+/// coordinate-condition caches (HI-1) so the TTL/eviction policy lives in one place (review
+/// finding 4). Self-locking, so it is safe both from the main actor (WeatherService) and from
+/// the concurrent regional fan-out (RegionalWeatherService).
+final class TTLCache<Key: Hashable, Value> {
+    private let ttl: TimeInterval
+    private var storage: [Key: (value: Value, timestamp: Date)] = [:]
+    private let lock = NSLock()
+
+    init(ttl: TimeInterval) { self.ttl = ttl }
+
+    func value(for key: Key) -> Value? {
+        lock.lock(); defer { lock.unlock() }
+        guard let entry = storage[key],
+              Date().timeIntervalSince(entry.timestamp) < ttl else { return nil }
+        return entry.value
+    }
+
+    func set(_ value: Value, for key: Key) {
+        lock.lock(); defer { lock.unlock() }
+        storage[key] = (value, Date())
+    }
+}
+
 // MARK: - UV Index Helpers
 struct UVIndexCategory {
     let category: String
