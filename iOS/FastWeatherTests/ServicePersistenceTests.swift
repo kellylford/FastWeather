@@ -230,6 +230,90 @@ final class TTLCacheTests: XCTestCase {
     }
 }
 
+// MARK: - Alert Fetch Failure-vs-Empty Tests (product review #1)
+
+/// Stubs the network so alert fetches can be driven deterministically.
+final class StubURLProtocol: URLProtocol {
+    // Serialized by XCTest's serial test execution; reset in tearDown.
+    static var handler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
+
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+    override func startLoading() {
+        guard let handler = StubURLProtocol.handler else {
+            client?.urlProtocol(self, didFailWithError: URLError(.badServerResponse))
+            return
+        }
+        do {
+            let (response, data) = try handler(request)
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didLoad: data)
+            client?.urlProtocolDidFinishLoading(self)
+        } catch {
+            client?.urlProtocol(self, didFailWithError: error)
+        }
+    }
+    override func stopLoading() {}
+}
+
+final class AlertFetchTests: XCTestCase {
+
+    private let usCity = City(name: "Testville", state: "KS", country: "United States",
+                              latitude: 39.0, longitude: -98.0)
+
+    private func stubbedSession() -> URLSession {
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [StubURLProtocol.self]
+        return URLSession(configuration: config)
+    }
+
+    override func tearDown() {
+        StubURLProtocol.handler = nil
+        super.tearDown()
+    }
+
+    // A server error must THROW so the UI shows "couldn't check for alerts" — never a false
+    // "No active alerts". This is the core of product-review fix #1.
+    func testServerErrorThrowsInsteadOfReportingNoAlerts() async {
+        StubURLProtocol.handler = { req in
+            (HTTPURLResponse(url: req.url!, statusCode: 503, httpVersion: nil, headerFields: nil)!, Data())
+        }
+        let service = await MainActor.run { WeatherService() }
+        await MainActor.run { service.alertsURLSession = stubbedSession() }
+        do {
+            _ = try await service.fetchNWSAlerts(for: usCity)
+            XCTFail("A 503 must throw (couldn't check), not resolve to an empty 'no alerts' list")
+        } catch {
+            // expected
+        }
+    }
+
+    // A network failure (no connectivity) must likewise throw.
+    func testNetworkFailureThrows() async {
+        StubURLProtocol.handler = { _ in throw URLError(.notConnectedToInternet) }
+        let service = await MainActor.run { WeatherService() }
+        await MainActor.run { service.alertsURLSession = stubbedSession() }
+        do {
+            _ = try await service.fetchNWSAlerts(for: usCity)
+            XCTFail("A network failure must throw so the UI can distinguish it from 'no alerts'")
+        } catch {
+            // expected
+        }
+    }
+
+    // A genuine empty 200 response IS "no active alerts" and must NOT throw.
+    func testEmptySuccessReturnsNoAlerts() async throws {
+        StubURLProtocol.handler = { req in
+            (HTTPURLResponse(url: req.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!,
+             Data(#"{"features":[]}"#.utf8))
+        }
+        let service = await MainActor.run { WeatherService() }
+        await MainActor.run { service.alertsURLSession = stubbedSession() }
+        let alerts = try await service.fetchNWSAlerts(for: usCity)
+        XCTAssertTrue(alerts.isEmpty, "An empty 200 is a genuine 'no active alerts', not a failure")
+    }
+}
+
 // MARK: - BrowseSortOrder Model Tests
 
 final class BrowseSortOrderModelTests: XCTestCase {

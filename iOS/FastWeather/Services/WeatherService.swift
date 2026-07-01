@@ -1398,6 +1398,10 @@ class WeatherService: ObservableObject {
     /// Signals that the alert state could not be determined (vs. a genuine "no alerts").
     enum AlertFetchError: Error { case badStatus(Int) }
 
+    /// URLSession used for NWS alert fetches. Injectable so the failure / empty-200 paths can be
+    /// tested deterministically without the network (defaults to `.shared`).
+    var alertsURLSession: URLSession = .shared
+
     func fetchNWSAlerts(for city: City) async throws -> [WeatherAlert] {
         // Check cache first, filtering out expired alerts
         if let cached = alertsCache[city.id] {
@@ -1435,9 +1439,9 @@ class WeatherService: ObservableObject {
         
         var request = URLRequest(url: url)
         request.setValue("WeatherFast/1.0 iOS", forHTTPHeaderField: "User-Agent")
-        
+
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await alertsURLSession.data(for: request)
             
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 // A non-200 means we could NOT determine the alert state. Throw so the UI can show a
