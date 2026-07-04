@@ -43,7 +43,7 @@ struct RadarView: View {
             }
             .padding()
         }
-        .navigationTitle("Expected Precipitation")
+        .navigationTitle(FeatureFlags.shared.nowcastRefinementsEnabled ? "Next Hour" : "Expected Precipitation")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -127,9 +127,17 @@ struct RadarView: View {
                 .accessibilityLabel("Data last updated \(formatLastUpdated(lastUpdated))")
             }
             
-            // Summary Card - Most important info first for accessibility
-            radarSummaryCard(radar)
-            
+            // Gap 2: concise plain-language nowcast, read first for accessibility.
+            if FeatureFlags.shared.nextHourNarrationEnabled, let summary = radar.nextHourSummary {
+                nextHourCard(summary)
+            }
+
+            // Summary Card - Most important info first for accessibility.
+            // When refinements are on this screen is purely temporal, so the older
+            // wind-inferred "nearest precipitation" block is hidden (Weather Around
+            // Me's Storm Approach does direction better).
+            radarSummaryCard(radar, showNearest: !FeatureFlags.shared.nowcastRefinementsEnabled)
+
             // Timeline View
             radarTimelineView(radar)
             
@@ -142,14 +150,26 @@ struct RadarView: View {
         }
     }
     
+    // MARK: - Next Hour Card (Gap 2)
+    private func nextHourCard(_ summary: String) -> some View {
+        GroupBox(label: Label("Next Hour", systemImage: "cloud.rain")) {
+            Text(summary)
+                .font(.headline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, 8)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Next hour. \(summary)")
+    }
+
     // MARK: - Precipitation Summary Card
-    private func radarSummaryCard(_ radar: RadarData) -> some View {
+    private func radarSummaryCard(_ radar: RadarData, showNearest: Bool) -> some View {
         GroupBox(label: Label("Precipitation Summary", systemImage: "cloud.rain")) {
             VStack(alignment: .leading, spacing: 12) {
                 Text(radar.currentStatus)
                     .font(.headline)
-                
-                if let nearest = radar.nearestPrecipitation {
+
+                if showNearest, let nearest = radar.nearestPrecipitation {
                     Divider()
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Nearest Precipitation:")
@@ -170,7 +190,7 @@ struct RadarView: View {
             .padding(.vertical, 8)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(radarSummaryAccessibilityLabel(radar))
+        .accessibilityLabel(radarSummaryAccessibilityLabel(radar, showNearest: showNearest))
     }
     
     // MARK: - Timeline View
@@ -288,7 +308,7 @@ struct RadarView: View {
     private func loadRadarData() async {
         isLoading = true
         errorMessage = nil
-        
+
         do {
             let data = try await RadarService.shared.fetchPrecipitationNowcast(for: city)
 
@@ -337,10 +357,10 @@ struct RadarView: View {
     }
     
     // MARK: - Accessibility Labels
-    private func radarSummaryAccessibilityLabel(_ radar: RadarData) -> String {
+    private func radarSummaryAccessibilityLabel(_ radar: RadarData, showNearest: Bool) -> String {
         var label = "Precipitation Summary. \(radar.currentStatus)."
-        
-        if let nearest = radar.nearestPrecipitation {
+
+        if showNearest, let nearest = radar.nearestPrecipitation {
             label += " Nearest precipitation: \(nearest.type), \(formatDistance(nearest.distanceMiles)) to the \(nearest.direction), "
             label += "moving \(nearest.movementDirection) at \(formatSpeed(nearest.speedMph))."
             if let arrival = nearest.arrivalEstimate {

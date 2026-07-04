@@ -15,6 +15,7 @@ struct WeatherAroundMeView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @EnvironmentObject var weatherService: WeatherService
     @State private var regionalWeather: RegionalWeatherData?
+    @State private var stormApproach: StormApproach?
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var lastUpdated: Date?
@@ -197,7 +198,12 @@ struct WeatherAroundMeView: View {
                 .accessibilityElement(children: .combine)
                 .accessibilityLabel("Data last updated \(formatLastUpdated(lastUpdated))")
             }
-            
+
+            // Storm picture first — the radar-replacement "what's coming at me".
+            if FeatureFlags.shared.stormApproachEnabled, let storm = stormApproach {
+                stormApproachCard(storm)
+            }
+
             // Your Location
             currentLocationCard(regional.center)
             
@@ -218,6 +224,62 @@ struct WeatherAroundMeView: View {
         }
     }
     
+    // MARK: - Storm Approach Card (radar replacement)
+    private func stormApproachCard(_ storm: StormApproach) -> some View {
+        let distanceUnit = settingsManager.settings.distanceUnit
+        let speedUnit = settingsManager.settings.windSpeedUnit
+        let headline = storm.headline(distanceUnit: distanceUnit, speedUnit: speedUnit)
+        let placeLines = storm.placeLines(distanceUnit: distanceUnit)
+        let cityLines = storm.cityLines()
+        return GroupBox(label: Label("Storm Approach", systemImage: "location.north.line")) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(headline)
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                if !placeLines.isEmpty {
+                    Divider()
+                    stormSection(title: "Nearby towns:", lines: placeLines)
+                }
+
+                if !cityLines.isEmpty {
+                    Divider()
+                    stormSection(title: "Your saved cities:", lines: cityLines)
+                }
+            }
+            .padding(.vertical, 8)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(stormApproachAccessibilityLabel(
+            headline: headline, placeLines: placeLines, cityLines: cityLines))
+    }
+
+    private func stormSection(title: String, lines: [String]) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+            ForEach(lines, id: \.self) { line in
+                Text(line)
+                    .font(.subheadline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+
+    private func stormApproachAccessibilityLabel(headline: String,
+                                                 placeLines: [String],
+                                                 cityLines: [String]) -> String {
+        var label = "Storm approach. \(headline)"
+        if !placeLines.isEmpty {
+            label += " Nearby towns. " + placeLines.joined(separator: " ")
+        }
+        if !cityLines.isEmpty {
+            label += " Your saved cities. " + cityLines.joined(separator: " ")
+        }
+        return label
+    }
+
     // MARK: - Current Location Card
     private func currentLocationCard(_ location: DirectionalLocation) -> some View {
         GroupBox(label: Label("Your Location", systemImage: "location.fill")) {
@@ -533,12 +595,29 @@ struct WeatherAroundMeView: View {
     private func loadRegionalWeather() async {
         isLoading = true
         errorMessage = nil
-        
+        stormApproach = nil
+
         do {
             let data = try await RegionalWeatherService.shared.fetchRegionalWeather(for: city, distanceMiles: distanceMiles)
-            
+
+            // Storm picture is best-effort: a failure must not break the regional
+            // comparison, so swallow its errors and just omit the section.
+            var storm: StormApproach? = nil
+            if FeatureFlags.shared.stormApproachEnabled {
+                // The condition code the app is currently displaying for this city
+                // (post-WeatherKit-overlay), so the dry-convection note stays in
+                // agreement with the main screen. Nil when the city isn't cached.
+                let displayedCode = weatherService
+                    .weatherCache[WeatherCacheKey(cityId: city.id, dateOffset: 0)]?
+                    .current.weatherCode
+                storm = try? await StormApproachService.shared.fetchStormApproach(
+                    for: city, nearbySavedCities: weatherService.savedCities,
+                    displayedConditionCode: displayedCode)
+            }
+
             await MainActor.run {
                 self.regionalWeather = data
+                self.stormApproach = storm
                 self.lastUpdated = Date()
                 self.isLoading = false
             }

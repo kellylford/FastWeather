@@ -25,7 +25,9 @@ struct CityDetailView: View {
     @State private var removalCityName = "" // Captured at trigger time to prevent dialog flashing
     @State private var isRefreshing = false
     @State private var cacheMetadata: CachedWeather?
-    
+    /// One-sentence nowcast for the inline "Next Hour" card (nowcast refinements feature).
+    @State private var nextHourSummary: String?
+
     // Backward compatibility initializer (defaults to today)
     init(city: City, dateOffset: Int = 0, selectedDate: Date = Date()) {
         self.city = city
@@ -66,7 +68,45 @@ struct CityDetailView: View {
     private func isCategoryEnabled(_ category: DetailCategory) -> Bool {
         return settingsManager.settings.detailCategories.first(where: { $0.category == category })?.isEnabled ?? true
     }
-    
+
+    // MARK: - Inline Next Hour Card (nowcast refinements)
+    @ViewBuilder
+    private func nextHourInlineCard(_ summary: String) -> some View {
+        Button(action: { showingRadar = true }) {
+            GroupBox(label: Label("Next Hour", systemImage: "cloud.rain")) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(summary)
+                        .font(.subheadline)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .accessibilityHidden(true)
+                }
+                .padding(.vertical, 4)
+            }
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Next Hour. \(summary)")
+        .accessibilityHint("Opens precipitation timing details.")
+    }
+
+    /// Best-effort fetch of the one-sentence nowcast for the inline card.
+    /// Silent on failure — the card simply doesn't appear. The underlying
+    /// service call is TTL-cached, so opening the full Next Hour screen
+    /// afterwards reuses this data rather than re-billing WeatherKit.
+    private func loadNextHourSummary() async {
+        guard FeatureFlags.shared.nowcastRefinementsEnabled,
+              FeatureFlags.shared.radarEnabled,
+              dateOffset == 0 else { return }
+        let data = try? await RadarService.shared.fetchPrecipitationNowcast(for: city)
+        await MainActor.run { self.nextHourSummary = data?.nextHourSummary }
+    }
+
+
     @ViewBuilder
     private func detailSection(for category: DetailCategory, weather: WeatherData) -> some View {
         switch category {
@@ -716,7 +756,14 @@ struct CityDetailView: View {
                         }
                     }
                     .padding()
-                    
+
+                    // Inline "Next Hour" nowcast one-liner (refinements feature). Tappable to
+                    // open the full timing screen. Today only; hidden when no summary is available.
+                    if featureFlags.nowcastRefinementsEnabled, featureFlags.radarEnabled,
+                       dateOffset == 0, let summary = nextHourSummary {
+                        nextHourInlineCard(summary)
+                    }
+
                     // Add to My Cities (shown when browsing a city not yet in saved list)
                     if !isSaved {
                         Button(action: addCity) {
@@ -750,7 +797,8 @@ struct CityDetailView: View {
                         
                         if featureFlags.radarEnabled {
                             Button(action: { showingRadar = true }) {
-                                Label("Expected Precipitation", systemImage: "cloud.rain")
+                                Label(featureFlags.nowcastRefinementsEnabled ? "Next Hour" : "Expected Precipitation",
+                                      systemImage: "cloud.rain")
                             }
                         }
                         
@@ -820,6 +868,9 @@ struct CityDetailView: View {
         }
         .task {
             await loadCacheMetadata()
+        }
+        .task(id: city.id) {
+            await loadNextHourSummary()
         }
         .refreshable {
             await refreshWeather()

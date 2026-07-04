@@ -120,7 +120,47 @@ class FeatureFlags: ObservableObject {
             UserDefaults.standard.set(myLocationEnabled, forKey: "feature_my_location_enabled")
         }
     }
-    
+
+    // MARK: - Nowcasting (Storm Approach & Next Hour)
+
+    /// Show a concise "Next Hour" precipitation narration at the top of Expected Precipitation.
+    /// On by default. Plain-language summary ("Rain starting in about 11 minutes, lasting about
+    /// 35 minutes") derived from the same minute-by-minute data already fetched.
+    @Published var nextHourNarrationEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(nextHourNarrationEnabled, forKey: "feature_next_hour_narration_enabled")
+        }
+    }
+
+    /// Show the "Storm Approach" card — accessible radar replacement that samples a ring of
+    /// surrounding points to report which direction precipitation is coming from, its estimated
+    /// motion, arrival time, and impact on nearby saved cities and towns. On by default.
+    @Published var stormApproachEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(stormApproachEnabled, forKey: "feature_storm_approach_enabled")
+        }
+    }
+
+    /// Nowcast information-architecture refinements. When on: the precipitation screen is
+    /// renamed "Next Hour" and becomes purely temporal (the older wind-inferred "nearest
+    /// precipitation" block is hidden, since Storm Approach in Weather Around Me does direction
+    /// better), and a tappable Next Hour one-liner appears on the main city detail screen.
+    @Published var nowcastRefinementsEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(nowcastRefinementsEnabled, forKey: "feature_nowcast_refinements_enabled")
+        }
+    }
+
+    /// Weather Around Me accuracy improvements. When on, Storm Approach uses mid-level steering
+    /// winds (not surface wind or pure centroid) for storm motion, reports a confidence level and
+    /// hedges its wording accordingly, samples a denser ring, and labels precipitation type
+    /// (rain/snow) per nearby town. When off, Storm Approach uses centroid tracking only.
+    @Published var weatherAroundMeImprovementsEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(weatherAroundMeImprovementsEnabled, forKey: "feature_wam_improvements_enabled")
+        }
+    }
+
     // MARK: - Initialization
     
     private init() {
@@ -137,6 +177,10 @@ class FeatureFlags: ObservableObject {
         self.weatherKitForecastConditionsEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_forecast_conditions_enabled")
         self.specificPlaceNamesEnabled = UserDefaults.standard.bool(forKey: "feature_specific_place_names_enabled")
         self.myLocationEnabled = UserDefaults.standard.bool(forKey: "feature_my_location_enabled")
+        self.nextHourNarrationEnabled = UserDefaults.standard.bool(forKey: "feature_next_hour_narration_enabled")
+        self.stormApproachEnabled = UserDefaults.standard.bool(forKey: "feature_storm_approach_enabled")
+        self.nowcastRefinementsEnabled = UserDefaults.standard.bool(forKey: "feature_nowcast_refinements_enabled")
+        self.weatherAroundMeImprovementsEnabled = UserDefaults.standard.bool(forKey: "feature_wam_improvements_enabled")
 
         // Default values (if first launch or not set)
         // All features enabled by default for production
@@ -176,6 +220,19 @@ class FeatureFlags: ObservableObject {
         if !UserDefaults.standard.contains(key: "feature_my_location_enabled") {
             self.myLocationEnabled = true  // On by default
         }
+        // Nowcasting features — on by default on this testing branch so they're visible.
+        if !UserDefaults.standard.contains(key: "feature_next_hour_narration_enabled") {
+            self.nextHourNarrationEnabled = true
+        }
+        if !UserDefaults.standard.contains(key: "feature_storm_approach_enabled") {
+            self.stormApproachEnabled = true
+        }
+        if !UserDefaults.standard.contains(key: "feature_nowcast_refinements_enabled") {
+            self.nowcastRefinementsEnabled = true
+        }
+        if !UserDefaults.standard.contains(key: "feature_wam_improvements_enabled") {
+            self.weatherAroundMeImprovementsEnabled = true
+        }
     }
     
     // MARK: - Helper Methods
@@ -194,6 +251,10 @@ class FeatureFlags: ObservableObject {
         weatherKitForecastConditionsEnabled = true
         specificPlaceNamesEnabled = true
         myLocationEnabled = true
+        nextHourNarrationEnabled = true
+        stormApproachEnabled = true
+        nowcastRefinementsEnabled = true
+        weatherAroundMeImprovementsEnabled = true
         debugLog("🔧 Feature flags reset to defaults")
     }
     
@@ -211,6 +272,10 @@ class FeatureFlags: ObservableObject {
         weatherKitForecastConditionsEnabled = true
         specificPlaceNamesEnabled = true
         myLocationEnabled = true
+        nextHourNarrationEnabled = true
+        stormApproachEnabled = true
+        nowcastRefinementsEnabled = true
+        weatherAroundMeImprovementsEnabled = true
         debugLog("🔧 All features enabled")
     }
 
@@ -227,6 +292,10 @@ class FeatureFlags: ObservableObject {
         weatherKitForecastConditionsEnabled = false
         specificPlaceNamesEnabled = false
         myLocationEnabled = false
+        nextHourNarrationEnabled = false
+        stormApproachEnabled = false
+        nowcastRefinementsEnabled = false
+        weatherAroundMeImprovementsEnabled = false
         debugLog("🔧 All features disabled")
     }
 }

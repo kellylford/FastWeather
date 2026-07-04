@@ -74,6 +74,25 @@ struct DeveloperSettingsView: View {
                             }
                         }
                 }
+
+                Section(header: Text("Nowcasting"),
+                        footer: Text("Storm Approach and Next Hour are text-first replacements for glancing at radar: where precipitation is, which way it is moving, and when it starts and stops.")) {
+                    Toggle("Next Hour Narration", isOn: $featureFlags.nextHourNarrationEnabled)
+                        .accessibilityLabel("Next Hour Narration feature toggle")
+                        .accessibilityHint(featureFlags.nextHourNarrationEnabled ? "Next Hour narration is enabled. A one-sentence precipitation summary appears at the top of the precipitation screen." : "Next Hour narration is disabled. The precipitation screen shows only the timeline and summary card.")
+
+                    Toggle("Storm Approach", isOn: $featureFlags.stormApproachEnabled)
+                        .accessibilityLabel("Storm Approach feature toggle")
+                        .accessibilityHint(featureFlags.stormApproachEnabled ? "Storm Approach is enabled. Weather Around Me opens with a card reporting where precipitation is, its direction of motion, arrival time, and affected nearby towns and saved cities." : "Storm Approach is disabled. Weather Around Me shows only the temperature and condition comparison.")
+
+                    Toggle("Storm Motion Accuracy", isOn: $featureFlags.weatherAroundMeImprovementsEnabled)
+                        .accessibilityLabel("Storm Motion Accuracy feature toggle")
+                        .accessibilityHint(featureFlags.weatherAroundMeImprovementsEnabled ? "Accuracy improvements are enabled. Storm motion comes from mid-level steering winds with a confidence level, a denser sampling ring, and rain versus snow labels per town." : "Accuracy improvements are disabled. Storm motion uses centroid tracking only, with the original coarser sampling ring.")
+
+                    Toggle("Next Hour Layout", isOn: $featureFlags.nowcastRefinementsEnabled)
+                        .accessibilityLabel("Next Hour Layout feature toggle")
+                        .accessibilityHint(featureFlags.nowcastRefinementsEnabled ? "Next Hour layout is enabled. The precipitation feature is titled Next Hour, its wind-inferred nearest precipitation block is hidden, and a tappable Next Hour summary appears on the city detail screen." : "Next Hour layout is disabled. The feature is titled Expected Precipitation with its original layout, and no summary appears on the city detail screen.")
+                }
                 
                 // My Data configuration
                 if featureFlags.myDataEnabled {
