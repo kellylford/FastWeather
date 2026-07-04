@@ -5,7 +5,7 @@
 wxPython>=4.2.5
 
 # HTTP Requests for Weather API and Geocoding
-requests>=2.31.0
+requests>=2.34.2
 
 # Build Tool (optional - auto-installed by build.py if needed)
 # pyinstaller>=6.0.0
