@@ -8,11 +8,12 @@ future diagnostic tools):**
    inherits them automatically.
 2. **Tools are run from the OneDrive folder**
    (`~/Library/CloudStorage/OneDrive-Personal/RadarData/`) via Finder
-   double-clickable `.command` wrappers. Each wrapper first calls
-   `fastweather-tools-sync.sh` (in that folder), which exports main's
-   `tools/` to a local cache (`~/.fastweather-tools`) using `git archive` —
-   so a run always uses main's current tools no matter which branch is
-   checked out in the repo, and nothing needs manual re-copying.
+   double-clickable `.command` wrappers. Each wrapper calls
+   `fastweather-tools-sync.sh` (in that folder), which points at the
+   checked-out repo's `tools/` — since every branch carries `tools/`,
+   whatever branch is open just works, including branch-local tool changes.
+   If an old branch without `tools/` is checked out, it falls back to
+   exporting main's copy via `git archive`. Nothing needs manual re-copying.
 3. **Results always log to the OneDrive folder** (per-run subfolders like
    `datatesting/run-<timestamp>/`), never into the repo.
 
