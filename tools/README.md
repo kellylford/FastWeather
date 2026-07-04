@@ -21,6 +21,13 @@ Adding a new tool: put it in `tools/<area>/` on main, keep it Python-stdlib
 only where possible, make it take an `--output-root`-style flag, and add a
 `.command` wrapper in RadarData that syncs then runs it.
 
+## tools/wrappers — versioned OneDrive launch set
+
+Version-controlled copies of everything that lives and runs in the RadarData
+OneDrive folder: the `.command` Finder wrappers, `fastweather-tools-sync.sh`,
+`run_archive.sh`, `fm_describe.swift`, and the live FM prompt. See
+`tools/wrappers/README.md` for the sync discipline.
+
 ## tools/datatesting — nowcast data validation
 
 Validates the nowcast feature set's data layer against live APIs with
