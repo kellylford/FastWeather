@@ -172,6 +172,19 @@ python build.py      # produces dist/ executable via PyInstaller
 
 ---
 
+## Diagnostic Tools (`tools/`)
+
+Out-of-app testing/diagnostic tools follow a fixed pattern — keep it for any new tool:
+
+- **Tools live in `tools/` on `main`** (single source of truth; every new branch inherits them). Develop new tools on main or merge them there promptly.
+- **They are run from OneDrive** (`~/Library/CloudStorage/OneDrive-Personal/RadarData/`) via Finder `.command` wrappers. Each wrapper first runs `fastweather-tools-sync.sh` (in that folder), which `git archive`s main's `tools/` into `~/.fastweather-tools` — runs never depend on which branch is checked out.
+- **Results always log to the RadarData folder** (per-run subfolders), never into the repo.
+- New tools: `tools/<area>/`, Python-stdlib-only where possible, accept an output-root flag, plus a `.command` wrapper in RadarData.
+
+Current tools: `tools/datatesting/` (nowcast data validation) and `tools/quickradar/` (radar image lab). See `tools/README.md`.
+
+---
+
 ## City Data (Shared Across Platforms)
 
 Pre-geocoded city files live in `CityData/` and are copied to each platform. Rebuild only when adding cities/countries.
