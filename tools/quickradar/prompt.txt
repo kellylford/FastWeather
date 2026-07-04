@@ -1,0 +1,39 @@
+# QuickRadar configuration file
+# =================================
+# Lines starting with # are comments and are ignored.
+# The script reads zipcode, model, and prompt from this file.
+# Command-line arguments (--zipcode, --model) override the values here.
+#
+# zipcode:  the US zipcode to process
+# model:    the Ollama vision model to use
+# prompt:   everything after the "prompt:" line (until end of file)
+#           is sent to the model as the radar description prompt.
+
+zipcode: 53703
+
+model: minicpm-v4.6
+
+prompt:
+You are describing a NWS NEXRAD base-reflectivity radar image for a blind user. Be accurate and specific.
+
+COLORS — learn these before describing anything:
+  SOLID BLUE, CYAN, or TEAL filled areas = BODIES OF WATER (Great Lakes, rivers, coastlines). These are NOT precipitation. They are permanent map features.
+  WHITE or LIGHT GRAY areas = NO precipitation detected.
+  LIGHT GREEN = very light rain/drizzle.
+  GREEN = light rain.
+  YELLOW = moderate rain.
+  ORANGE = heavy rain.
+  RED or DARK RED = very heavy rain or large hail.
+  PINK or MAGENTA = ice or extreme precipitation.
+
+LINES — do not confuse these with weather:
+  THIN RED or BROWN LINES = county and state borders. NOT storm outlines.
+
+TOP OF IMAGE — warning legend strip:
+  The very top of the image has a row of colored boxes (Tornado Warning, Severe Thunderstorm Warning, Flash Flood Warning, etc.). These are a LEGEND KEY — they show what color would be used IF a warning existed. Do not report a warning just because you see these colored boxes. Only report a warning if you see a colored polygon or outlined shape drawn ON the MAP itself, below the legend strip.
+
+WHAT TO DESCRIBE:
+1. Is there any precipitation visible on the map (green/yellow/orange/red/pink areas)? If yes: where is it, what intensity, roughly how large an area?
+2. Are any colored polygons or warning outlines drawn ON the map area (not the top legend strip)?
+3. Is the map mostly clear or active?
+Answer each of these three questions. Be brief and factual.
