@@ -1,10 +1,24 @@
 # tools — testing and validation tooling
 
-Single home for every out-of-app testing tool, so all branches carry the same
-set. The repo copies here are canonical; runnable copies and Finder
-double-clickable `.command` wrappers live in
-`~/Library/CloudStorage/OneDrive-Personal/RadarData/` and should be re-copied
-after changes here.
+Single home for every out-of-app testing tool. **The pattern (use it for all
+future diagnostic tools):**
+
+1. **Tools live here, on `main`** — the single source of truth. Develop new
+   tools on main (or merge them to main promptly) so every new branch
+   inherits them automatically.
+2. **Tools are run from the OneDrive folder**
+   (`~/Library/CloudStorage/OneDrive-Personal/RadarData/`) via Finder
+   double-clickable `.command` wrappers. Each wrapper first calls
+   `fastweather-tools-sync.sh` (in that folder), which exports main's
+   `tools/` to a local cache (`~/.fastweather-tools`) using `git archive` —
+   so a run always uses main's current tools no matter which branch is
+   checked out in the repo, and nothing needs manual re-copying.
+3. **Results always log to the OneDrive folder** (per-run subfolders like
+   `datatesting/run-<timestamp>/`), never into the repo.
+
+Adding a new tool: put it in `tools/<area>/` on main, keep it Python-stdlib
+only where possible, make it take an `--output-root`-style flag, and add a
+`.command` wrapper in RadarData that syncs then runs it.
 
 ## tools/datatesting — nowcast data validation
 
