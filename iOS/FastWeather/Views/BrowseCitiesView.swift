@@ -77,7 +77,7 @@ struct BrowseCitiesView: View {
                     }
                 }
             }
-            .navigationTitle("Browse Cities")
+            .navigationTitle("Weather Browser")
             .navigationDestination(for: BrowseDestination.self) { destination in
                 switch destination {
                 case .region(.us):
