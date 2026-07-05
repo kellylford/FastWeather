@@ -125,7 +125,6 @@ struct NationalAlertDigestView: View {
     // Optional hazard-type filter (nil = all types), e.g. "Storms" gathers
     // tornado/thunderstorm products that span several severities.
     @State private var hazardType: HazardType?
-    @State private var selectedAlert: WeatherAlert?
 
     var body: some View {
         List {
@@ -142,9 +141,6 @@ struct NationalAlertDigestView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task(id: region.id) { await load() }
         .refreshable { await load() }
-        .sheet(item: $selectedAlert) { alert in
-            AlertDetailView(alert: alert)
-        }
     }
 
     // MARK: States
@@ -176,11 +172,16 @@ struct NationalAlertDigestView: View {
 
     @ViewBuilder
     private func loadedContent(_ alerts: [WeatherAlert]) -> some View {
+        // Classify each alert's hazard family exactly once per render; the tuple
+        // list is reused for the filter controls, the scope, and the type menu
+        // (classify lowercases + substring-scans, so recomputing it is wasteful).
+        let classified = alerts.map { (alert: $0, hazard: HazardType.classify($0.event)) }
+
         Section {
-            filterControls(alerts)
+            filterControls(classified)
         }
 
-        let scoped = alerts.filter { hazardType == nil || HazardType.classify($0.event) == hazardType }
+        let scoped = classified.filter { hazardType == nil || $0.hazard == hazardType }.map(\.alert)
         let groups = service.digest(from: scoped, filter: severityFilter)
         if groups.isEmpty {
             Section {
@@ -206,17 +207,17 @@ struct NationalAlertDigestView: View {
     /// Exclusive severity segments + a hazard-type menu. Severity segment counts
     /// reflect the current hazard scope. VoiceOver reads each segment as
     /// "Extreme, 3 alerts" (it appends the position, "1 of 4").
-    private func filterControls(_ alerts: [WeatherAlert]) -> some View {
+    private func filterControls(_ classified: [(alert: WeatherAlert, hazard: HazardType)]) -> some View {
         // Severity counts respect the hazard filter so they match what's shown.
-        let scoped = alerts.filter { hazardType == nil || HazardType.classify($0.event) == hazardType }
+        let scoped = classified.filter { hazardType == nil || $0.hazard == hazardType }
         // Only offer hazard families that are actually present right now.
         let presentFamilies = HazardType.allCases.filter { fam in
-            alerts.contains { HazardType.classify($0.event) == fam }
+            classified.contains { $0.hazard == fam }
         }
         return Group {
             Picker("Minimum severity", selection: $severityFilter) {
                 ForEach(SeverityFilter.allCases) { filter in
-                    let n = scoped.filter { filter.includes($0.severity) }.count
+                    let n = scoped.filter { filter.includes($0.alert.severity) }.count
                     Text(filter.rawValue)
                         .tag(filter)
                         .accessibilityLabel("\(filter.rawValue), \(n) alert\(n == 1 ? "" : "s")")
@@ -227,7 +228,7 @@ struct NationalAlertDigestView: View {
             Picker("Type", selection: $hazardType) {
                 Text("All types").tag(HazardType?.none)
                 ForEach(presentFamilies) { fam in
-                    let n = alerts.filter { HazardType.classify($0.event) == fam }.count
+                    let n = classified.filter { $0.hazard == fam }.count
                     Text("\(fam.rawValue) (\(n))").tag(HazardType?.some(fam))
                 }
             }
@@ -299,17 +300,23 @@ struct NationalAlertDigestView: View {
         }
     }
 
-    private func shortTime(_ date: Date) -> String {
+    // Cached once — DateFormatter construction is expensive and shortTime runs
+    // per group row on every render.
+    private static let shortTimeFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .none
         formatter.timeStyle = .short
-        return formatter.string(from: date)
+        return formatter
+    }()
+
+    private func shortTime(_ date: Date) -> String {
+        Self.shortTimeFormatter.string(from: date)
     }
 
     private func load() async {
         state = .loading
         do {
-            let alerts = try await service.fetchAlerts(for: region, landOnly: false)
+            let alerts = try await service.fetchAlerts(for: region)
             state = .loaded(alerts)
         } catch is CancellationError {
             // Superseded by a newer load; leave state alone.

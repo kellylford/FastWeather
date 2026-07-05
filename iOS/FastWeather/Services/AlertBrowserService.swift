@@ -34,12 +34,6 @@ struct AlertRegion: Hashable, Identifiable {
     let systemImage: String
     let provider: Provider
 
-    /// Only NWS distinguishes land vs. marine cleanly enough to offer the toggle.
-    var supportsLandMarineFilter: Bool {
-        if case .nws = provider { return true }
-        return false
-    }
-
     // North America — direct entries.
     static let unitedStates = AlertRegion(id: "us-nws", displayName: "United States",
                                           systemImage: "flag.fill", provider: .nws)
@@ -189,7 +183,7 @@ final class AlertBrowserService: ObservableObject {
             return hit.count
         }
         do {
-            let count = try await fetchAlerts(for: region, landOnly: false).count
+            let count = try await fetchAlerts(for: region).count
             countCache[region.id] = (count, Date())
             return count
         } catch {
@@ -200,11 +194,10 @@ final class AlertBrowserService: ObservableObject {
     // MARK: Fetch
 
     /// Fetch all currently active alerts for a region, normalized to WeatherAlert.
-    /// `landOnly` applies to NWS only (drops Small Craft Advisories & marine noise).
-    func fetchAlerts(for region: AlertRegion, landOnly: Bool = true) async throws -> [WeatherAlert] {
+    func fetchAlerts(for region: AlertRegion) async throws -> [WeatherAlert] {
         switch region.provider {
         case .nws:
-            return try await fetchNWS(landOnly: landOnly)
+            return try await fetchNWS()
         case .eccc:
             return try await fetchECCC()
         case .meteoAlarm(let slug):
@@ -262,15 +255,22 @@ final class AlertBrowserService: ObservableObject {
         return data
     }
 
-    // Shared ISO8601 parser (allocated once per call; fractional + plain).
+    // ISO8601DateFormatter construction is expensive and parseISO runs ~3× per
+    // alert across hundreds of alerts, so the two formatters are cached once.
+    private static let isoFractional: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f
+    }()
+    private static let isoPlain: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime]
+        return f
+    }()
+
     private static func parseISO(_ string: String?) -> Date? {
         guard let string, !string.isEmpty else { return nil }
-        let fractional = ISO8601DateFormatter()
-        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let d = fractional.date(from: string) { return d }
-        let plain = ISO8601DateFormatter()
-        plain.formatOptions = [.withInternetDateTime]
-        return plain.date(from: string)
+        return isoFractional.date(from: string) ?? isoPlain.date(from: string)
     }
 
     /// Give a real severity to products NWS tags "Unknown". Air Quality Alerts
@@ -285,13 +285,11 @@ final class AlertBrowserService: ObservableObject {
 
     // MARK: NWS (United States)
 
-    private func fetchNWS(landOnly: Bool) async throws -> [WeatherAlert] {
+    private func fetchNWS() async throws -> [WeatherAlert] {
         // Note: /alerts/active returns all active alerts and does NOT accept a
         // "limit" query parameter — sending one yields HTTP 400.
         var components = URLComponents(string: "https://api.weather.gov/alerts/active")!
-        var items = [URLQueryItem(name: "status", value: "actual")]
-        if landOnly { items.append(URLQueryItem(name: "region_type", value: "land")) }
-        components.queryItems = items
+        components.queryItems = [URLQueryItem(name: "status", value: "actual")]
 
         let data = try await fetchData(components.url!)
         let decoded = try JSONDecoder().decode(NWSAlertsResponse.self, from: data)
@@ -416,7 +414,7 @@ final class AlertBrowserService: ObservableObject {
         let decoded = try JSONDecoder().decode(MeteoAlarmResponse.self, from: data)
 
         var alerts: [WeatherAlert] = []
-        for (index, warning) in decoded.warnings.enumerated() {
+        for warning in decoded.warnings {
             // Prefer the English CAP <info>; else the first available language.
             let infos = warning.alert.info
             guard let info = infos.first(where: { ($0.language ?? "").lowercased().hasPrefix("en") }) ?? infos.first
@@ -427,9 +425,14 @@ final class AlertBrowserService: ObservableObject {
             let area = info.area?.compactMap { $0.areaDesc }.joined(separator: ", ")
             let awarenessType = info.parameter?
                 .first { ($0.valueName ?? "").lowercased() == "awareness_type" }?.value
+            let event = Self.meteoAlarmEventName(info.event ?? info.headline, awarenessType: awarenessType)
+            // When a feed omits an identifier, derive a stable key from content
+            // (not array position) so ForEach identity survives feed reordering.
+            let stableID = warning.alert.identifier
+                ?? "meteoalarm-\(slug)-\(event)-\(area ?? "")-\(info.onset ?? info.effective ?? "")-\(info.expires ?? "")"
             alerts.append(WeatherAlert(
-                id: warning.alert.identifier ?? "meteoalarm-\(slug)-\(index)",
-                event: Self.meteoAlarmEventName(info.event ?? info.headline, awarenessType: awarenessType),
+                id: stableID,
+                event: event,
                 severity: severity,
                 headline: info.headline ?? "",
                 description: info.description ?? "",
