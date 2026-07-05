@@ -119,10 +119,9 @@ struct NationalAlertDigestView: View {
 
     @StateObject private var service = AlertBrowserService()
     @State private var state: AlertBrowserService.LoadState = .idle
-    // Moderate+ default so watches (NWS tags them Moderate) aren't hidden;
-    // "Unknown" severity (e.g. Air Quality) sorts below Minor, so it stays in "All".
-    @State private var severityFilter: SeverityFilter = .moderate
-    @State private var landOnly = true
+    // Exclusive severity buttons: each shows only that severity. Default is All
+    // so nothing is hidden on open; the buttons narrow to a single severity.
+    @State private var severityFilter: SeverityFilter = .all
     @State private var selectedAlert: WeatherAlert?
 
     var body: some View {
@@ -138,7 +137,7 @@ struct NationalAlertDigestView: View {
         }
         .navigationTitle(region.displayName)
         .navigationBarTitleDisplayMode(.inline)
-        .task(id: "\(region.id)-\(landOnly)") { await load() }
+        .task(id: region.id) { await load() }
         .refreshable { await load() }
         .sheet(item: $selectedAlert) { alert in
             AlertDetailView(alert: alert)
@@ -183,7 +182,7 @@ struct NationalAlertDigestView: View {
             Section {
                 Text(alerts.isEmpty
                      ? "No active alerts right now."
-                     : "No alerts at the \(severityFilter.rawValue) level. Lower the filter to see more.")
+                     : "No \(severityFilter.rawValue) alerts. Select All to see other severities.")
                     .foregroundColor(.secondary)
             }
         } else {
@@ -200,10 +199,10 @@ struct NationalAlertDigestView: View {
 
     // MARK: Filters
 
-    /// Segmented severity floor + (NWS-only) land/marine toggle. Each segment's
-    /// VoiceOver label carries how many alerts that level would show, e.g.
-    /// "Extreme, 3 alerts" (VoiceOver appends the segment position, "1 of 4").
-    @ViewBuilder
+    /// Segmented severity floor. Each segment's VoiceOver label carries how many
+    /// alerts that level would show, e.g. "Extreme, 3 alerts" (VoiceOver appends
+    /// the segment position, "1 of 4"). This is the only filter; "All" shows
+    /// every active alert with nothing gated behind a second control.
     private func filterControls(_ alerts: [WeatherAlert]) -> some View {
         Picker("Minimum severity", selection: $severityFilter) {
             ForEach(SeverityFilter.allCases) { filter in
@@ -214,13 +213,6 @@ struct NationalAlertDigestView: View {
             }
         }
         .pickerStyle(.segmented)
-
-        if region.supportsLandMarineFilter {
-            Toggle("Hide marine alerts", isOn: $landOnly)
-                .accessibilityHint(landOnly
-                    ? "Marine alerts such as Small Craft Advisories are hidden. Turn off to include them."
-                    : "Marine alerts are shown. Turn on to hide Small Craft Advisories and other marine products.")
-        }
     }
 
     /// Severity section header carrying its total count, e.g. "Extreme (3)".
@@ -296,7 +288,7 @@ struct NationalAlertDigestView: View {
     private func load() async {
         state = .loading
         do {
-            let alerts = try await service.fetchAlerts(for: region, landOnly: landOnly)
+            let alerts = try await service.fetchAlerts(for: region, landOnly: false)
             state = .loaded(alerts)
         } catch is CancellationError {
             // Superseded by a newer load; leave state alone.

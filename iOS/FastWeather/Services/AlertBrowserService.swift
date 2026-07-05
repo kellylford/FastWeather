@@ -73,29 +73,24 @@ struct AlertRegion: Hashable, Identifiable {
 
 // MARK: - Severity filter
 
-/// The "severity floor" that keeps the digest scannable. Defaults to Severe+
-/// so the advisory/marine noise is hidden until the user opts in.
+/// Exclusive severity filter: each level shows ONLY that severity. Only `all`
+/// is inclusive (every alert, including Minor Small Craft Advisories and
+/// Unknown-severity Air Quality). Picking "Moderate" shows moderate alerts only.
 enum SeverityFilter: String, CaseIterable, Identifiable {
     case extremeOnly = "Extreme"
-    case severe = "Severe+"
-    case moderate = "Moderate+"
+    case severe = "Severe"
+    case moderate = "Moderate"
     case all = "All"
 
     var id: String { rawValue }
 
-    /// Highest (numerically) severity sortOrder allowed through. Lower sortOrder
-    /// is more critical (extreme = 0).
-    private var maxSortOrder: Int {
-        switch self {
-        case .extremeOnly: return 0
-        case .severe:      return 1
-        case .moderate:    return 2
-        case .all:         return 4
-        }
-    }
-
     func includes(_ severity: AlertSeverity) -> Bool {
-        severity.sortOrder <= maxSortOrder
+        switch self {
+        case .extremeOnly: return severity == .extreme
+        case .severe:      return severity == .severe
+        case .moderate:    return severity == .moderate
+        case .all:         return true
+        }
     }
 }
 
