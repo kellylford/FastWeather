@@ -85,11 +85,6 @@ struct NationalAlertDigestView: View {
 
     @StateObject private var service = AlertBrowserService()
     @State private var state: AlertBrowserService.LoadState = .idle
-    // Moderate+ is the default so watches (Tornado / Severe Thunderstorm Watch,
-    // Flood/Heat Watch), which NWS tags as Moderate, aren't hidden. "Unknown"
-    // severity (e.g. Air Quality) sorts below Minor, so it stays gated to "All".
-    @State private var severityFilter: SeverityFilter = .moderate
-    @State private var landOnly = true
     @State private var selectedAlert: WeatherAlert?
 
     var body: some View {
@@ -105,15 +100,12 @@ struct NationalAlertDigestView: View {
         }
         .navigationTitle(region.displayName)
         .navigationBarTitleDisplayMode(.inline)
-        .task(id: taskID) { await load() }
+        .task(id: region.id) { await load() }
         .refreshable { await load() }
         .sheet(item: $selectedAlert) { alert in
             AlertDetailView(alert: alert)
         }
     }
-
-    // Re-run the loader when the land/marine toggle changes (NWS only).
-    private var taskID: String { "\(region.id)-\(landOnly)" }
 
     // MARK: States
 
@@ -144,21 +136,17 @@ struct NationalAlertDigestView: View {
 
     @ViewBuilder
     private func loadedContent(_ alerts: [WeatherAlert]) -> some View {
-        Section {
-            filterControls
-        }
-
-        let groups = service.digest(from: alerts, filter: severityFilter)
+        // No filtering: show every active alert, grouped by severity.
+        let groups = service.digest(from: alerts, filter: .all)
         if groups.isEmpty {
             Section {
-                Text(alerts.isEmpty
-                     ? "No active alerts right now."
-                     : "No alerts at the \(severityFilter.rawValue) level. Lower the filter to see more.")
+                Text("No active alerts right now.")
                     .foregroundColor(.secondary)
             }
         } else {
             ForEach(groupsBySeverity(groups), id: \.0) { severity, sevGroups in
-                Section(header: Text(severity.rawValue)) {
+                let sevCount = sevGroups.reduce(0) { $0 + $1.count }
+                Section(header: severityHeader(severity, count: sevCount)) {
                     ForEach(sevGroups) { group in
                         groupRow(group)
                     }
@@ -167,24 +155,17 @@ struct NationalAlertDigestView: View {
         }
     }
 
-    // MARK: Filters
-
-    @ViewBuilder
-    private var filterControls: some View {
-        Picker("Minimum severity", selection: $severityFilter) {
-            ForEach(SeverityFilter.allCases) { filter in
-                Text(filter.rawValue).tag(filter)
-            }
+    /// Severity section header carrying its total count, e.g. "Extreme (3)".
+    /// VoiceOver reads "Extreme, 3 alerts" as a heading.
+    private func severityHeader(_ severity: AlertSeverity, count: Int) -> some View {
+        HStack {
+            Text(severity.rawValue)
+            Spacer()
+            Text("\(count)")
         }
-        .pickerStyle(.segmented)
-        .accessibilityLabel("Minimum severity filter")
-
-        if region.supportsLandMarineFilter {
-            Toggle("Hide marine alerts", isOn: $landOnly)
-                .accessibilityHint(landOnly
-                    ? "Marine alerts such as Small Craft Advisories are hidden. Turn off to include them."
-                    : "Marine alerts are shown. Turn on to hide Small Craft Advisories and other marine products.")
-        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(severity.rawValue), \(count) alert\(count == 1 ? "" : "s")")
+        .accessibilityAddTraits(.isHeader)
     }
 
     // MARK: Group row
@@ -211,11 +192,11 @@ struct NationalAlertDigestView: View {
                 Text("\(group.count)")
                     .font(.title3.monospacedDigit().weight(.semibold))
                     .foregroundColor(group.severity.color)
-                    .accessibilityHidden(true)
+                    .accessibilityLabel(areaCountPhrase(group))
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(group.severity.rawValue). \(group.event). \(areaCountPhrase(group)).\(expiryPhrase(group))")
+        .accessibilityLabel("\(group.event), \(areaCountPhrase(group)).\(expiryPhrase(group))")
         .accessibilityHint("Double tap to view affected areas")
     }
 
@@ -247,7 +228,7 @@ struct NationalAlertDigestView: View {
     private func load() async {
         state = .loading
         do {
-            let alerts = try await service.fetchAlerts(for: region, landOnly: landOnly)
+            let alerts = try await service.fetchAlerts(for: region, landOnly: false)
             state = .loaded(alerts)
         } catch is CancellationError {
             // Superseded by a newer load; leave state alone.
