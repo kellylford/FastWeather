@@ -105,6 +105,7 @@ enum HazardType: String, CaseIterable, Identifiable {
     case storms = "Storms"
     case tropical = "Tropical"
     case flood = "Flooding"
+    case rain = "Rain"
     case heat = "Heat"
     case winter = "Winter"
     case wind = "Wind"
@@ -117,19 +118,24 @@ enum HazardType: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 
     /// Classify an event name into exactly one family (first match wins).
+    /// Keywords cover both US (NWS) and European (MeteoAlarm) vocabularies —
+    /// e.g. Europe says "high-temperature" where the US says "heat".
     static func classify(_ event: String) -> HazardType {
         let e = event.lowercased()
         func any(_ needles: [String]) -> Bool { needles.contains { e.contains($0) } }
 
         if any(["hurricane", "tropical", "typhoon", "storm surge"]) { return .tropical }
-        if any(["tornado", "thunderstorm", "severe weather", "special weather statement"]) { return .storms }
+        if any(["tornado", "thunderstorm", "severe weather", "special weather statement", "lightning"]) { return .storms }
         if any(["flood", "hydrologic", "seiche"]) { return .flood }
-        if any(["winter", "snow", "blizzard", "ice storm", "freez", "frost", "wind chill", "sleet", "cold", "avalanche"]) { return .winter }
+        // Cold before heat so "low-temperature" isn't mistaken for a heat event.
+        if any(["winter", "snow", "blizzard", "ice storm", "freez", "frost", "wind chill", "sleet", "cold", "avalanche", "low temperature", "low-temperature", "icy", "glaze"]) { return .winter }
         if any(["fire", "red flag"]) { return .fire }
         if any(["air quality", "air stagnation", "ozone", "dust", "ashfall", "smoke"]) { return .airQuality }
-        if any(["heat"]) { return .heat }
+        if any(["heat", "high temperature", "high-temperature", "hot", "heatwave", "warm"]) { return .heat }
         if any(["fog"]) { return .fog }
-        if any(["wind", "gale"]) { return .wind }
+        if any(["rain", "downpour", "shower", "precipitation"]) { return .rain }
+        // "storm" (not thunderstorm/storm surge, handled above) is a MeteoAlarm wind product.
+        if any(["wind", "gale", "storm"]) { return .wind }
         if any(["marine", "small craft", "seas", "surf", "rip current", "beach", "coastal", "tsunami", "low water", "ashore"]) { return .marine }
         return .other
     }
@@ -369,6 +375,39 @@ final class AlertBrowserService: ObservableObject {
                                  options: .regularExpression)
     }
 
+    /// MeteoAlarm awareness_type code → human hazard name.
+    private static let meteoAlarmTypeNames: [Int: String] = [
+        1: "Wind", 2: "Snow/ice", 3: "Thunderstorm", 4: "Fog", 5: "High temperature",
+        6: "Low temperature", 7: "Coastal event", 8: "Forest fire", 9: "Avalanche",
+        10: "Rain", 11: "Flood", 12: "Flood"
+    ]
+
+    /// Best display name for a MeteoAlarm alert. Uses the CAP event when it's a
+    /// real string, but repairs the cases where a feed emits an empty event or a
+    /// raw "awareness_type=3, awareness_level=2" dump by decoding the structured
+    /// awareness_type ("3; Thunderstorm" or code) into "Thunderstorm warning".
+    static func meteoAlarmEventName(_ rawEvent: String?, awarenessType: String?) -> String {
+        let event = (rawEvent ?? "").trimmingCharacters(in: .whitespaces)
+        let broken = event.isEmpty || event.lowercased().contains("awareness_type")
+        if !broken { return tidyEventName(event) }
+
+        // Prefer a name spelled out in the awareness_type value ("3; Thunderstorm").
+        if let awarenessType {
+            let segs = awarenessType.split(separator: ";").map { $0.trimmingCharacters(in: .whitespaces) }
+            if segs.count >= 2, Int(segs[1]) == nil, !segs[1].isEmpty {
+                return segs[1].capitalizedFirst + " warning"
+            }
+        }
+        // Else map a numeric code found in the param or the broken event string.
+        for source in [awarenessType ?? "", event] {
+            if let range = source.range(of: #"\d+"#, options: .regularExpression),
+               let code = Int(source[range]), let name = meteoAlarmTypeNames[code] {
+                return name + " warning"
+            }
+        }
+        return "Weather warning"
+    }
+
     // MARK: MeteoAlarm (Europe)
 
     private func fetchMeteoAlarm(slug: String) async throws -> [WeatherAlert] {
@@ -386,9 +425,11 @@ final class AlertBrowserService: ObservableObject {
             let onset = Self.parseISO(info.onset) ?? Self.parseISO(info.effective) ?? Date()
             let severity = AlertSeverity(rawValue: (info.severity ?? "Unknown").capitalizedFirst) ?? .unknown
             let area = info.area?.compactMap { $0.areaDesc }.joined(separator: ", ")
+            let awarenessType = info.parameter?
+                .first { ($0.valueName ?? "").lowercased() == "awareness_type" }?.value
             alerts.append(WeatherAlert(
                 id: warning.alert.identifier ?? "meteoalarm-\(slug)-\(index)",
-                event: Self.tidyEventName(info.event ?? info.headline ?? "Weather Warning"),
+                event: Self.meteoAlarmEventName(info.event ?? info.headline, awarenessType: awarenessType),
                 severity: severity,
                 headline: info.headline ?? "",
                 description: info.description ?? "",
@@ -455,10 +496,16 @@ private struct MeteoAlarmInfo: Codable {
     let expires: String?
     let web: String?
     let area: [MeteoAlarmArea]?
+    let parameter: [MeteoAlarmParameter]?
 }
 
 private struct MeteoAlarmArea: Codable {
     let areaDesc: String?
+}
+
+private struct MeteoAlarmParameter: Codable {
+    let valueName: String?
+    let value: String?
 }
 
 // MARK: - Small helper
