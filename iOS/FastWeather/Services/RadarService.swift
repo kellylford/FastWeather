@@ -15,8 +15,23 @@ import WeatherKit
 
 class RadarService {
     static let shared = RadarService()
-    
+
     private init() {}
+
+    // MARK: - WeatherKit intensity floor (docs/NOWCAST_CENTRE_AUTHORITY_SPEC.md)
+
+    /// WeatherKit minute data only counts as precipitation at or above this rate when the
+    /// single-authority feature is on. Chosen from instrumented harness runs: radar phantoms
+    /// measured 0.05–0.07 mm/h; real storms 3.6–10.4 mm/h.
+    static let wkIntensityFloorMmPerHr = 0.2
+
+    /// Floored precipitation test for WeatherKit signals. The type/condition must say
+    /// precipitation AND, when the floor is enabled, the rate must clear the floor.
+    /// Internal (not private) so unit tests can exercise the classification directly.
+    static func wkPrecipActive(typeSaysPrecip: Bool, mmPerHr: Double, floorEnabled: Bool) -> Bool {
+        guard typeSaysPrecip else { return false }
+        return floorEnabled ? mmPerHr >= wkIntensityFloorMmPerHr : true
+    }
     
     // MARK: - Fetch Precipitation Nowcast
 
@@ -33,6 +48,17 @@ class RadarService {
     // deduplicating rapid re-opens; it also keeps the inline card and the full
     // Next Hour screen showing the same data.
     private let nowcastCache = TTLCache<String, RadarData>(ttl: 3 * 60)
+
+    /// Whether the WeatherKit minute path would be used for this city — the gate
+    /// Storm Approach checks before adopting the nowcast as its centre authority.
+    func usesWeatherKitNowcast(for city: City) -> Bool {
+        #if canImport(WeatherKit)
+        if #available(iOS 16.0, *), FeatureFlags.shared.weatherKitNowcastEnabled {
+            return weatherKitMinuteForecastCountries.contains(city.country)
+        }
+        #endif
+        return false
+    }
 
     /// Fetches precipitation nowcast, preferring WeatherKit (radar-quality, 1-minute) where
     /// available and falling back to Open-Meteo NWP for unsupported regions.
@@ -74,10 +100,19 @@ class RadarService {
         let (current, minuteByMinuteOptional) = try await WeatherKit.WeatherService.shared
             .weather(for: location, including: .current, .minute)
 
-        // Use WeatherKit's condition enum as the SOLE authority for whether it is
-        // currently precipitating. Intensity alone misses drizzle and can have
-        // near-zero floating-point noise during clear conditions.
-        let currentIsPrecip = isWKConditionPrecipitating(current.condition)
+        // Single-authority feature: apply the intensity floor to every WeatherKit
+        // "is it precipitating" decision in this function, so the narration, the
+        // timeline, and Storm Approach's centre all see one consistent reality.
+        let floorOn = FeatureFlags.shared.nowcastCentreAuthorityEnabled
+        let currentMmPerHr = precipMmPerHour(current.precipitationIntensity)
+
+        // The condition enum is the type authority for whether it is currently
+        // precipitating (intensity alone misses drizzle and has floating-point
+        // noise when clear); with the floor on, trace rates below 0.2 mm/h are
+        // additionally rejected — the measured radar-phantom class.
+        let currentIsPrecip = Self.wkPrecipActive(
+            typeSaysPrecip: isWKConditionPrecipitating(current.condition),
+            mmPerHr: currentMmPerHr, floorEnabled: floorOn)
         // This card is purely about precipitation. Only show the sky condition name
         // when it IS precipitating (e.g. "Drizzle", "Rain"). When dry, say
         // "No precipitation" — not a sky condition like "Cloudy" or "Clear", which
@@ -86,7 +121,6 @@ class RadarService {
         let currentStatus = currentIsPrecip
             ? "\(currentConditionLabel) at your location"
             : "No precipitation at your location"
-        let currentMmPerHr = precipMmPerHour(current.precipitationIntensity)
 
         debugLog("🌧 WK nowcast for \(city.name): condition=\(current.condition), " +
               "intensity=\(String(format: "%.4f", currentMmPerHr)) mm/hr, " +
@@ -108,7 +142,10 @@ class RadarService {
                 timeline: [TimelinePoint(time: "Now", condition: currentConditionLabel,
                                          precipitationMmPerHr: currentMmPerHr)],
                 chartData: nil,
-                dataSource: .weatherKit
+                dataSource: .weatherKit,
+                wkNowActive: currentIsPrecip,
+                wkArrivalMinutes: nil,
+                wkCurrentMmPerHr: currentMmPerHr
             )
         }
 
@@ -120,7 +157,10 @@ class RadarService {
         // minute-by-minute forecast is radar-based and more precise for "right now."
         // If minute[0] explicitly reports a precipitation type, that takes precedence.
         let firstMinutePrecip = allMinutes.first?.precipitation ?? .none
-        let isFirstMinutePrecip = firstMinutePrecip != .none
+        let firstMinuteMm = allMinutes.first.map { precipMmPerHour($0.precipitationIntensity) } ?? 0
+        let isFirstMinutePrecip = Self.wkPrecipActive(
+            typeSaysPrecip: firstMinutePrecip != .none,
+            mmPerHr: firstMinuteMm, floorEnabled: floorOn)
         let effectiveIsPrecip: Bool
         let effectiveConditionLabel: String
         let effectiveStatus: String
@@ -149,18 +189,20 @@ class RadarService {
             }
             let minute = allMinutes[interval]
             let mm = precipMmPerHour(minute.precipitationIntensity)
-            // precipitation != .none is the explicit type-based signal; intensity is
-            // only used when the type is already known to be non-none (for labeling).
-            let isPrecip = minute.precipitation != .none
+            // precipitation != .none is the explicit type-based signal; the floor
+            // additionally rejects trace rates when the single-authority flag is on.
+            let isPrecip = Self.wkPrecipActive(typeSaysPrecip: minute.precipitation != .none,
+                                               mmPerHr: mm, floorEnabled: floorOn)
             let condition = isPrecip ? describePrecipitation(minute.precipitation, mm: mm) : "None"
             return TimelinePoint(time: "\(interval) min", condition: condition,
                                  precipitationMmPerHr: mm)
         }
 
-        // Full 1-minute chart data
+        // Full 1-minute chart data (labels floored; raw mm values kept as-is)
         let chartData: [ChartPoint] = allMinutes.enumerated().map { (i, minute) in
             let mm = precipMmPerHour(minute.precipitationIntensity)
-            let isPrecip = minute.precipitation != .none
+            let isPrecip = Self.wkPrecipActive(typeSaysPrecip: minute.precipitation != .none,
+                                               mmPerHr: mm, floorEnabled: floorOn)
             return ChartPoint(
                 minute: i,
                 precipitationMmPerHr: mm,
@@ -175,8 +217,10 @@ class RadarService {
             // If already precipitating, nearestPrecipitation = nil (it's here now)
             guard !effectiveIsPrecip else { return nil }
             for (i, minute) in allMinutes.enumerated() where i > 0 {
-                guard minute.precipitation != .none else { continue }
-                let mm = precipMmPerHour(minute.precipitationIntensity)
+                let candidateMm = precipMmPerHour(minute.precipitationIntensity)
+                guard Self.wkPrecipActive(typeSaysPrecip: minute.precipitation != .none,
+                                          mmPerHr: candidateMm, floorEnabled: floorOn) else { continue }
+                let mm = candidateMm
                 let distanceMiles = Int(Double(i) * windSpeedMph / 60.0)
                 let arrival = i == 1 ? "1 minute" : "\(i) minutes"
                 let desc = describePrecipitation(minute.precipitation, mm: mm)
@@ -193,7 +237,11 @@ class RadarService {
             return nil
         }()
 
-        let hasFuturePrecip = allMinutes.dropFirst().contains { $0.precipitation != .none }
+        let hasFuturePrecip = allMinutes.dropFirst().contains {
+            Self.wkPrecipActive(typeSaysPrecip: $0.precipitation != .none,
+                                mmPerHr: precipMmPerHour($0.precipitationIntensity),
+                                floorEnabled: floorOn)
+        }
         let generalStatus: String = {
             if effectiveIsPrecip { return "Precipitation at location" }
             return hasFuturePrecip ? "Precipitation approaching" : "None"
@@ -210,10 +258,17 @@ class RadarService {
         let summarySamples: [(minutes: Int, mmPerHr: Double, active: Bool)] =
             allMinutes.prefix(61).enumerated().map { (i, minute) in
                 let mm = precipMmPerHour(minute.precipitationIntensity)
-                let active = i == 0 ? effectiveIsPrecip : (minute.precipitation != .none)
+                let active = i == 0
+                    ? effectiveIsPrecip
+                    : Self.wkPrecipActive(typeSaysPrecip: minute.precipitation != .none,
+                                          mmPerHr: mm, floorEnabled: floorOn)
                 return (minutes: i, mmPerHr: mm, active: active)
             }
         let nextHourSummary = buildNextHourSummary(samples: summarySamples, windowMinutes: 60)
+
+        // Centre-authority fields for Storm Approach (Part B of the spec): the
+        // floored now-state and the first floored-active minute within the hour.
+        let wkArrival = summarySamples.first(where: { $0.minutes > 0 && $0.active })?.minutes
 
         return RadarData(
             currentStatus: effectiveStatus,
@@ -222,7 +277,10 @@ class RadarService {
             timeline: timelineResult,
             chartData: chartData.isEmpty ? nil : chartData,
             dataSource: .weatherKit,
-            nextHourSummary: nextHourSummary
+            nextHourSummary: nextHourSummary,
+            wkNowActive: effectiveIsPrecip,
+            wkArrivalMinutes: effectiveIsPrecip ? nil : wkArrival,
+            wkCurrentMmPerHr: effectiveIsPrecip ? max(currentMmPerHr, firstMinuteMm) : currentMmPerHr
         )
     }
 
@@ -687,6 +745,13 @@ struct RadarData {
     /// One-sentence relative-phrased nowcast ("Rain starting in about 11 minutes,
     /// lasting about 35 minutes"). Nil when no detailed minute data is available.
     var nextHourSummary: String? = nil
+    /// Centre-authority fields (docs/NOWCAST_CENTRE_AUTHORITY_SPEC.md), set only on
+    /// the WeatherKit path. Floored "is it precipitating at this location right now".
+    var wkNowActive: Bool? = nil
+    /// First floored-active minute within the next hour (nil when active now or none).
+    var wkArrivalMinutes: Int? = nil
+    /// Current precipitation rate (mm/h) at the location per WeatherKit.
+    var wkCurrentMmPerHr: Double? = nil
 }
 
 struct NearestPrecipitation {

@@ -92,6 +92,10 @@ struct DeveloperSettingsView: View {
                     Toggle("Next Hour Layout", isOn: $featureFlags.nowcastRefinementsEnabled)
                         .accessibilityLabel("Next Hour Layout feature toggle")
                         .accessibilityHint(featureFlags.nowcastRefinementsEnabled ? "Next Hour layout is enabled. The precipitation feature is titled Next Hour, its wind-inferred nearest precipitation block is hidden, and a tappable Next Hour summary appears on the city detail screen." : "Next Hour layout is disabled. The feature is titled Expected Precipitation with its original layout, and no summary appears on the city detail screen.")
+
+                    Toggle("Single Rain Authority", isOn: $featureFlags.nowcastCentreAuthorityEnabled)
+                        .accessibilityLabel("Single Rain Authority feature toggle")
+                        .accessibilityHint(featureFlags.nowcastCentreAuthorityEnabled ? "Single rain authority is enabled. Whether it is raining at your location comes from one radar-informed source with a light-rain floor, so the Next Hour card and Storm Approach always agree." : "Single rain authority is disabled. Next Hour uses WeatherKit while Storm Approach uses the Open-Meteo model, and the two can disagree about rain at your location.")
                 }
                 
                 // My Data configuration

@@ -161,6 +161,18 @@ class FeatureFlags: ObservableObject {
         }
     }
 
+    /// Single centre authority + intensity floor (docs/NOWCAST_CENTRE_AUTHORITY_SPEC.md).
+    /// When on: WeatherKit minute data only counts as precipitation at >= 0.2 mm/h (kills the
+    /// radar phantoms measured at 0.05-0.07 mm/h without touching real rain at 3.6+ mm/h), and
+    /// Storm Approach's "at your location" state reads the same floored WeatherKit nowcast the
+    /// Next Hour narration uses — the two cards cannot contradict each other about whether it
+    /// is raining on the user. Off restores the previous two-source behavior.
+    @Published var nowcastCentreAuthorityEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(nowcastCentreAuthorityEnabled, forKey: "feature_nowcast_centre_authority_enabled")
+        }
+    }
+
     // MARK: - Initialization
     
     private init() {
@@ -181,6 +193,7 @@ class FeatureFlags: ObservableObject {
         self.stormApproachEnabled = UserDefaults.standard.bool(forKey: "feature_storm_approach_enabled")
         self.nowcastRefinementsEnabled = UserDefaults.standard.bool(forKey: "feature_nowcast_refinements_enabled")
         self.weatherAroundMeImprovementsEnabled = UserDefaults.standard.bool(forKey: "feature_wam_improvements_enabled")
+        self.nowcastCentreAuthorityEnabled = UserDefaults.standard.bool(forKey: "feature_nowcast_centre_authority_enabled")
 
         // Default values (if first launch or not set)
         // All features enabled by default for production
@@ -233,6 +246,9 @@ class FeatureFlags: ObservableObject {
         if !UserDefaults.standard.contains(key: "feature_wam_improvements_enabled") {
             self.weatherAroundMeImprovementsEnabled = true
         }
+        if !UserDefaults.standard.contains(key: "feature_nowcast_centre_authority_enabled") {
+            self.nowcastCentreAuthorityEnabled = true
+        }
     }
     
     // MARK: - Helper Methods
@@ -255,6 +271,7 @@ class FeatureFlags: ObservableObject {
         stormApproachEnabled = true
         nowcastRefinementsEnabled = true
         weatherAroundMeImprovementsEnabled = true
+        nowcastCentreAuthorityEnabled = true
         debugLog("🔧 Feature flags reset to defaults")
     }
     
@@ -276,6 +293,7 @@ class FeatureFlags: ObservableObject {
         stormApproachEnabled = true
         nowcastRefinementsEnabled = true
         weatherAroundMeImprovementsEnabled = true
+        nowcastCentreAuthorityEnabled = true
         debugLog("🔧 All features enabled")
     }
 
@@ -296,6 +314,7 @@ class FeatureFlags: ObservableObject {
         stormApproachEnabled = false
         nowcastRefinementsEnabled = false
         weatherAroundMeImprovementsEnabled = false
+        nowcastCentreAuthorityEnabled = false
         debugLog("🔧 All features disabled")
     }
 }

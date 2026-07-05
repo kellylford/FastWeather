@@ -180,6 +180,14 @@ struct StormApproach {
 
 // MARK: - Service
 
+/// Centre state adopted from the shared WeatherKit nowcast when the single-
+/// authority feature is on (docs/NOWCAST_CENTRE_AUTHORITY_SPEC.md).
+struct CentreOverride {
+    let nowActive: Bool          // floored "raining at the user's location now"
+    let mmPerHr: Double          // current rate for hereIntensity
+    let arrivalMinutes: Int?     // first floored-active minute in the next hour
+}
+
 final class StormApproachService {
     static let shared = StormApproachService()
     private init() {}
@@ -266,12 +274,29 @@ final class StormApproachService {
             ? await fetchSteeringWind(lat: city.latitude, lon: city.longitude)
             : nil
 
+        // 6. Single centre authority (docs/NOWCAST_CENTRE_AUTHORITY_SPEC.md): adopt the
+        // same floored WeatherKit nowcast the Next Hour narration uses, so the two
+        // cards cannot disagree about rain at the user's location. The RadarService
+        // fetch is TTL-cached (3 min) — normally a cache hit, not a new request.
+        // Best-effort: any failure falls back to the Open-Meteo centre.
+        var centreOverride: CentreOverride? = nil
+        if FeatureFlags.shared.nowcastCentreAuthorityEnabled,
+           RadarService.shared.usesWeatherKitNowcast(for: city),
+           let nowcast = try? await RadarService.shared.fetchPrecipitationNowcast(for: city),
+           nowcast.dataSource == .weatherKit,
+           let nowActive = nowcast.wkNowActive {
+            centreOverride = CentreOverride(nowActive: nowActive,
+                                            mmPerHr: nowcast.wkCurrentMmPerHr ?? 0,
+                                            arrivalMinutes: nowcast.wkArrivalMinutes)
+        }
+
         return analyse(city: city,
                        samples: samples, sampleForecasts: sampleForecasts,
                        cityPoints: cityPoints, cityForecasts: cityForecasts,
                        placePoints: placePoints, placeForecasts: placeForecasts,
                        steering: steering,
-                       displayedConditionCode: displayedConditionCode)
+                       displayedConditionCode: displayedConditionCode,
+                       centreOverride: centreOverride)
     }
 
     // MARK: - Nearby bundled towns
@@ -324,24 +349,47 @@ final class StormApproachService {
                          cityPoints: [CityPoint], cityForecasts: [PointForecast],
                          placePoints: [CityPoint], placeForecasts: [PointForecast],
                          steering: StormMotion?,
-                         displayedConditionCode: Int?) -> StormApproach {
+                         displayedConditionCode: Int?,
+                         centreOverride: CentreOverride?) -> StormApproach {
         let nowEpoch = Date().timeIntervalSince1970
 
         // Per-sample series starting at "now" (index 0 == current 15-min step).
         let series: [[Double]] = sampleForecasts.map { extractSeries(from: $0, nowEpoch: nowEpoch) }
 
         // --- Centre (index 0): are we wet now, and when does it arrive? ---
+        // With the single-authority override, the WeatherKit nowcast answers for
+        // minutes 0-60 (its horizon); Open-Meteo answers only the 75-120 minute
+        // window so the 2-hour promise still holds. Without it, Open-Meteo
+        // answers everything, exactly as before.
         let centreSeries = series.first ?? []
         let hereMm = (centreSeries.first ?? 0)
-        let hereIntensity = PrecipIntensity(mmPerHour: hereMm * 4)
-        let rainingHere = hereMm >= activeThresholdMm
-
+        let rainingHere: Bool
+        let hereIntensity: PrecipIntensity
         var arrivalMinutes: Int? = nil
-        if !rainingHere {
-            for step in 1...horizonSteps where step < centreSeries.count {
-                if centreSeries[step] >= activeThresholdMm {
-                    arrivalMinutes = step * 15
-                    break
+        if let override = centreOverride {
+            rainingHere = override.nowActive
+            hereIntensity = PrecipIntensity(mmPerHour: override.mmPerHr)
+            if !rainingHere {
+                if let wkArrival = override.arrivalMinutes {
+                    arrivalMinutes = wkArrival
+                } else {
+                    for step in 5...horizonSteps where step < centreSeries.count {
+                        if centreSeries[step] >= activeThresholdMm {
+                            arrivalMinutes = step * 15
+                            break
+                        }
+                    }
+                }
+            }
+        } else {
+            rainingHere = hereMm >= activeThresholdMm
+            hereIntensity = PrecipIntensity(mmPerHour: hereMm * 4)
+            if !rainingHere {
+                for step in 1...horizonSteps where step < centreSeries.count {
+                    if centreSeries[step] >= activeThresholdMm {
+                        arrivalMinutes = step * 15
+                        break
+                    }
                 }
             }
         }

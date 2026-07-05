@@ -134,3 +134,51 @@ final class NextHourSummaryTests: XCTestCase {
                       "unexpected phrasing: \(summary!)")
     }
 }
+
+// MARK: - Intensity floor (docs/NOWCAST_CENTRE_AUTHORITY_SPEC.md)
+
+/// Classification tests for the WeatherKit intensity floor. Values mirror the
+/// instrumented harness runs: radar phantoms measured 0.05-0.07 mm/h; real
+/// storms 3.6-10.4 mm/h. The floor (0.2) must reject the former class and
+/// preserve the latter, and must be a no-op when the feature flag is off.
+final class IntensityFloorTests: XCTestCase {
+
+    func testPhantomDrizzleRejectedWhenFloorOn() {
+        // The east-Madison class: condition says rain, trace intensity.
+        XCTAssertFalse(RadarService.wkPrecipActive(typeSaysPrecip: true,
+                                                   mmPerHr: 0.05, floorEnabled: true))
+        XCTAssertFalse(RadarService.wkPrecipActive(typeSaysPrecip: true,
+                                                   mmPerHr: 0.07, floorEnabled: true))
+    }
+
+    func testRealRainPreservedWhenFloorOn() {
+        XCTAssertTrue(RadarService.wkPrecipActive(typeSaysPrecip: true,
+                                                  mmPerHr: 3.6, floorEnabled: true))
+        XCTAssertTrue(RadarService.wkPrecipActive(typeSaysPrecip: true,
+                                                  mmPerHr: 10.4, floorEnabled: true))
+    }
+
+    func testFloorBoundaryIsInclusive() {
+        XCTAssertTrue(RadarService.wkPrecipActive(typeSaysPrecip: true,
+                                                  mmPerHr: 0.2, floorEnabled: true))
+        XCTAssertFalse(RadarService.wkPrecipActive(typeSaysPrecip: true,
+                                                   mmPerHr: 0.19, floorEnabled: true))
+    }
+
+    func testFlagOffRestoresTypeOnlyBehavior() {
+        // With the floor off, any precipitation type counts — byte-for-byte the
+        // pre-fix behavior, regardless of intensity.
+        XCTAssertTrue(RadarService.wkPrecipActive(typeSaysPrecip: true,
+                                                  mmPerHr: 0.0, floorEnabled: false))
+        XCTAssertTrue(RadarService.wkPrecipActive(typeSaysPrecip: true,
+                                                  mmPerHr: 0.05, floorEnabled: false))
+    }
+
+    func testDryTypeNeverActivatesRegardlessOfIntensity() {
+        // Intensity noise during clear conditions must never count as rain.
+        XCTAssertFalse(RadarService.wkPrecipActive(typeSaysPrecip: false,
+                                                   mmPerHr: 5.0, floorEnabled: true))
+        XCTAssertFalse(RadarService.wkPrecipActive(typeSaysPrecip: false,
+                                                   mmPerHr: 5.0, floorEnabled: false))
+    }
+}
