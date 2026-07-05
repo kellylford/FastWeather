@@ -314,14 +314,25 @@ struct NationalAlertDigestView: View {
     }
 
     private func load() async {
-        state = .loading
+        // On a pull-to-refresh we already have alerts on screen — keep them
+        // visible under the .refreshable spinner instead of flashing the
+        // full-screen loading row. Only show that row on the initial load.
+        let hadContent: Bool
+        if case .loaded = state {
+            hadContent = true
+        } else {
+            hadContent = false
+            state = .loading
+        }
         do {
             let alerts = try await service.fetchAlerts(for: region)
             state = .loaded(alerts)
         } catch is CancellationError {
             // Superseded by a newer load; leave state alone.
         } catch {
-            state = .failed(error.localizedDescription)
+            // Don't wipe valid alerts already on screen for a transient refresh
+            // failure; only surface the failure screen when we have nothing.
+            if !hadContent { state = .failed(error.localizedDescription) }
         }
     }
 }
