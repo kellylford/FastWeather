@@ -56,14 +56,30 @@ No dependencies beyond Python 3 stdlib. Uses the paid Open-Meteo key from
 `OPEN_METEO_API_KEY` env var); falls back to the free tier. A 100-city run is
 ~310 API calls.
 
+## WeatherKit sampling (the seam instrument)
+
+When `~/.fastweather-keys/weatherkit.json` exists (team_id, key_id,
+service_id, p8_path — a WeatherKit key from the Apple Developer portal), the
+harness also samples **WeatherKit via REST** (`weatherkit_rest.py`, same
+backend as the app's Swift framework) for cities in the app's minute-coverage
+set (US, CA, GB, IE, AU, NZ). Each such city gets a
+`centre_precip_source_seam` row comparing the WeatherKit-based Next Hour
+narration (what US users actually hear) against Open-Meteo's view (what Storm
+Approach sees) — a `mismatch` means the app's two cards would contradict each
+other for that city right now (the east-Madison bug class of 2026-07-04).
+Without the key file, WeatherKit sampling is skipped silently and the rest of
+the harness runs as before. REST calls draw from the app's 500k/month
+WeatherKit allowance.
+
 ## Known deviations from the app (documented in the script header)
 
 1. Legacy-path time indexing uses `timeformat=unixtime` instead of local ISO +
    `DateParser` — index selection is mathematically identical; every other
    query parameter matches the app.
-2. WeatherKit paths can't run outside an entitled app bundle. The narration
-   tested is the Open-Meteo `minutely_15` path; the summarizer function itself
-   is shared and separately locked by `FastWeatherTests/NextHourSummaryTests`.
+2. The WeatherKit Swift *framework* can't run outside an entitled app bundle;
+   the harness samples WeatherKit via REST instead (same backend). REST
+   minutes carry no precipitation-type field, so per-minute `active` is
+   `intensity > 0` — a documented approximation of the Swift path.
 3. "Saved cities" are stand-ins: the 3 nearest bundled cities 40–250 km away
    (app filter is >1 km, ≤250 km, nearest 5 of the user's real list).
 
