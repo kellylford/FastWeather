@@ -52,7 +52,7 @@ import sys
 import time
 import urllib.parse
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timezone  # datetime also used by nws_observation
 
 sys_path_dir = os.path.dirname(os.path.abspath(__file__))
 if sys_path_dir not in __import__("sys").path:
@@ -474,8 +474,48 @@ def find_interesting_cities(pool, want, log):
     return chosen
 
 
-def build_city_list(pool, total, log):
-    interesting = find_interesting_cities(pool, want=max(1, total * 6 // 10), log=log)
+# ---------------------------------------------------------------------------
+# NWS observation referee (US only) — nearest station's current conditions,
+# used to adjudicate WeatherKit-vs-Open-Meteo seam disagreements about "now".
+# ---------------------------------------------------------------------------
+
+NWS_PRECIP_WORDS = ("rain", "drizzle", "snow", "thunder", "shower", "sleet",
+                    "hail", "storm", "wintry")
+
+
+def nws_observation(lat, lon):
+    """Latest observation from the nearest NWS station, or None.
+    Three requests: points -> stations -> latest observation."""
+    try:
+        pt = http_get_json("https://api.weather.gov/points/%.4f,%.4f" % (lat, lon),
+                           user_agent=NWS_USER_AGENT, retries=2, timeout=20)
+        stations_url = pt["properties"]["observationStations"]
+        st = http_get_json(stations_url, user_agent=NWS_USER_AGENT, retries=2, timeout=20)
+        feats = st.get("features") or []
+        if not feats:
+            return None
+        sid = feats[0]["properties"]["stationIdentifier"]
+        obs = http_get_json("https://api.weather.gov/stations/%s/observations/latest" % sid,
+                            user_agent=NWS_USER_AGENT, retries=2, timeout=20)
+        prop = obs["properties"]
+        text = prop.get("textDescription") or ""
+        ts = prop.get("timestamp") or ""
+        age_min = ""
+        try:
+            obs_epoch = datetime.fromisoformat(ts.replace("Z", "+00:00")).timestamp()
+            age_min = int((time.time() - obs_epoch) / 60)
+        except Exception:  # noqa: BLE001
+            pass
+        return dict(station=sid, text=text, timestamp=ts, age_min=age_min,
+                    precip_last_hr=(prop.get("precipitationLastHour") or {}).get("value"),
+                    raining=any(w in text.lower() for w in NWS_PRECIP_WORDS))
+    except Exception:  # noqa: BLE001 — referee is best-effort
+        return None
+
+
+def build_city_list(pool, total, log, baseline_only=False):
+    interesting = [] if baseline_only else find_interesting_cities(
+        pool, want=max(1, total * 6 // 10), log=log)
     cities = list(interesting)
     have = {(c["name"], c["country"]) for c in cities}
     for name, region, country in BASELINE_CITIES:
@@ -1019,6 +1059,9 @@ def evaluate_city(city, pool, base, key, log):
             wk = WK.centre_nowcast(lat, lon, country=iso)
         except Exception as e:  # noqa: BLE001 — best-effort, like steering
             log("  wk fetch failed for %s: %s" % (city["name"], e))
+    # NWS observation referee (US only) — adjudicates "raining now" disputes.
+    obs = nws_observation(lat, lon) if city["country"] == "United States" else None
+
     wk_narration = None
     if wk and wk["has_next_hour"]:
         # Mirror RadarService.fetchWeatherKitNowcast summarySamples: 61 minutes,
@@ -1031,7 +1074,7 @@ def evaluate_city(city, pool, base, key, log):
                 narration=narration, narration_onset=narration_onset,
                 towns_count=len(towns), saved_names=[s["name"] for s in saved],
                 legacy_current=legacy.get("current") or {},
-                wk=wk, wk_narration=wk_narration)
+                wk=wk, wk_narration=wk_narration, obs=obs)
 
 
 # ---------------------------------------------------------------------------
@@ -1173,6 +1216,21 @@ def build_rows(city, ev):
             seam_details = ("WeatherKit (radar-informed) and Open-Meteo (model) disagree about "
                             "precipitation at this location within the hour — in the app the Next Hour "
                             "narration would contradict Storm Approach here (the east-Madison bug class)")
+        # Referee: the nearest NWS station can adjudicate the "now" component.
+        obs = ev.get("obs")
+        if obs is not None:
+            wk_now = wk["is_precipitating"]
+            om_now = sa["situation"] == "rainingHere"
+            if obs["raining"] == wk_now and obs["raining"] == om_now:
+                verdict = "observation agrees with both"
+            elif obs["raining"] == wk_now:
+                verdict = "observation supports WeatherKit"
+            elif obs["raining"] == om_now:
+                verdict = "observation supports Open-Meteo"
+            else:
+                verdict = "observation contradicts both"
+            seam_details = (seam_details + " | " if seam_details else "") +                 "NWS %s says '%s' (%s min old) -> %s" % (
+                    obs["station"], obs["text"], obs["age_min"], verdict)
         row("centre_precip_source_seam",
             "Next Hour narration (WeatherKit) vs Storm Approach centre (Open-Meteo)",
             ev.get("wk_narration") or ("WK current: %s, intensity %.2f mm/h, no next-hour minutes"
@@ -1241,6 +1299,10 @@ def build_city_row(city, ev):
         wk_intensity_now=(ev["wk"]["intensity_now"] if ev.get("wk") else ""),
         wk_active_minutes=(sum(1 for m in ev["wk"]["minutes"] if m[2]) if ev.get("wk") else ""),
         wk_narration=ev.get("wk_narration") or "",
+        nws_station=(ev["obs"]["station"] if ev.get("obs") else ""),
+        nws_obs_text=(ev["obs"]["text"] if ev.get("obs") else ""),
+        nws_obs_age_min=(ev["obs"]["age_min"] if ev.get("obs") else ""),
+        nws_obs_raining=(ev["obs"]["raining"] if ev.get("obs") else ""),
         headline_new=storm_headline(sa),
         headline_legacy=storm_headline(leg),
     )
@@ -1257,6 +1319,8 @@ def main():
                     help="default: <script dir>/datatesting when run from RadarData, else ./datatesting")
     ap.add_argument("--repo", default=None)
     ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--baseline", action="store_true",
+                    help="skip the interesting-weather finder (quiet-day baseline sample)")
     args = ap.parse_args()
 
     if args.repo:
@@ -1285,7 +1349,7 @@ def main():
     pool = load_city_pools(repo)
     log("City pool: %d bundled locations" % len(pool))
 
-    cities = build_city_list(pool, args.cities, log)
+    cities = build_city_list(pool, args.cities, log, baseline_only=args.baseline)
     log("Testing %d cities (%d interesting, %d baseline/fill)" % (
         len(cities),
         sum(1 for c in cities if not c.get("reason", "").startswith(("baseline", "fill"))),
@@ -1347,11 +1411,20 @@ def main():
         cities_requested=args.cities,
         cities_completed=len(city_rows), errors=errors,
         phantom_thunderstorm_count=sum(1 for c in city_rows if c["phantom_thunderstorm"]),
+        baseline_mode=args.baseline,
         weatherkit_enabled=WEATHERKIT_ENABLED,
         weatherkit_cities_sampled=sum(1 for c in city_rows if c["wk_available"]),
         wk_om_seam_mismatches=sum(1 for r in all_rows
                                   if r["data_name"] == "centre_precip_source_seam"
                                   and r["check_result"] == "mismatch"),
+        nws_referee_cities=sum(1 for c in city_rows if c["nws_station"]),
+        referee_verdicts={v: sum(1 for r in all_rows
+                                 if r["data_name"] == "centre_precip_source_seam"
+                                 and v in r["details"])
+                          for v in ("observation agrees with both",
+                                    "observation supports WeatherKit",
+                                    "observation supports Open-Meteo",
+                                    "observation contradicts both")},
         active_weather_cities=sum(1 for c in city_rows if c["situation_new"] != "clear"),
         check_results_by_data_name=checks,
         deviations_from_app=[

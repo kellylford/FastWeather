@@ -71,6 +71,13 @@ Without the key file, WeatherKit sampling is skipped silently and the rest of
 the harness runs as before. REST calls draw from the app's 500k/month
 WeatherKit allowance.
 
+For US cities the harness also pulls the **nearest NWS station's latest
+observation** as a referee: each seam row's details name the station, its
+current conditions, the observation age, and whose "raining now" claim the
+observation supports. `--baseline` skips the interesting-weather finder for
+a quiet-day sample (measures the seam's background rate rather than its
+storm-day rate).
+
 ## Known deviations from the app (documented in the script header)
 
 1. Legacy-path time indexing uses `timeformat=unixtime` instead of local ISO +
