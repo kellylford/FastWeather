@@ -97,6 +97,10 @@ REPO_CANDIDATES = [
 # ---------------------------------------------------------------------------
 
 ACTIVE_THRESHOLD_MM = 0.1       # StormApproachService: activeThresholdMm
+# Proposed fix (spec under verification): WeatherKit minute data only counts as
+# precipitation at or above this rate. Chosen from the two instrumented runs:
+# radar phantoms measured 0.05-0.07 mm/h; real storms 3.6-10.4 mm/h.
+WK_INTENSITY_FLOOR_MMHR = 0.2
 HORIZON_STEPS = 8               # 8 x 15 min = 2 h look-ahead
 MAX_CITY_KM = 250.0             # saved-city classification range
 MAX_CITIES = 5
@@ -1070,11 +1074,36 @@ def evaluate_city(city, pool, base, key, log):
                    for i, m in enumerate(wk["minutes"][:61])]
         wk_narration = build_next_hour_summary(samples, 60)
 
+    # --- Fix simulation: floor applied at the shared source (RadarService's
+    # WK path), so BOTH the narration and Storm Approach's centre read the same
+    # floored WeatherKit view. Storm Approach centre falls back to Open-Meteo
+    # beyond WK's ~60-minute horizon (preserves the 2-hour promise).
+    wk_fixed_narration = None
+    fixed_centre = None   # dict(now_active, active_hour, arrival_min, source)
+    if wk and wk["has_next_hour"]:
+        floor = WK_INTENSITY_FLOOR_MMHR
+        now_active_fixed = wk["is_precipitating"] and wk["intensity_now"] >= floor
+        fsamples = [(m[0], m[1], (now_active_fixed if i == 0 else m[1] >= floor))
+                    for i, m in enumerate(wk["minutes"][:61])]
+        wk_fixed_narration = build_next_hour_summary(fsamples, 60)
+        arrival = next((m[0] for m in fsamples if m[0] > 0 and m[2]), None)
+        if arrival is None and not now_active_fixed:
+            # WK horizon dry: check Open-Meteo for the 60-120 min window only.
+            for step in range(5, HORIZON_STEPS + 1):   # 75..120 min
+                serie = extract_series({"minutely_15": legacy.get("minutely_15")}, now_epoch)
+                if step < len(serie) and serie[step] >= ACTIVE_THRESHOLD_MM:
+                    arrival = step * 15
+                    break
+        fixed_centre = dict(now_active=now_active_fixed,
+                            active_hour=now_active_fixed or any(m[2] for m in fsamples),
+                            arrival_min=arrival, source="weatherkit+floor")
+
     return dict(sa_new=sa_new, sa_leg=sa_leg, old_nearest=old_nearest, old_status=old_status,
                 narration=narration, narration_onset=narration_onset,
                 towns_count=len(towns), saved_names=[s["name"] for s in saved],
                 legacy_current=legacy.get("current") or {},
-                wk=wk, wk_narration=wk_narration, obs=obs)
+                wk=wk, wk_narration=wk_narration, obs=obs,
+                wk_fixed_narration=wk_fixed_narration, fixed_centre=fixed_centre)
 
 
 # ---------------------------------------------------------------------------
@@ -1238,6 +1267,39 @@ def build_rows(city, ev):
             ev["narration"] or "(no Open-Meteo narration)",
             "same city, two sources — the seam the in-app harness could not test before",
             "WK-vs-OM precipitation-within-the-hour agreement", seam_result, seam_details)
+
+    # 8c. Fix simulation: what the app would say after the proposed fix
+    # (WeatherKit authority at the centre + intensity floor at the shared
+    # source), classified against the current behavior and the NWS referee.
+    if ev.get("fixed_centre") is not None:
+        wk = ev["wk"]
+        cur_wet = wk["is_precipitating"] or any(m[2] for m in wk["minutes"][:61])
+        fix_wet = ev["fixed_centre"]["active_hour"]
+        obs = ev.get("obs")
+        if cur_wet and not fix_wet:
+            if obs is not None and not obs["raining"]:
+                fix_class, fix_result = "phantom suppressed (observation confirms dry)", "ok"
+            elif obs is not None and obs["raining"]:
+                fix_class, fix_result = "OVERSUPPRESSED - floor removed rain the station reports", "mismatch"
+            else:
+                fix_class, fix_result = "low-intensity claim suppressed (no referee)", "review"
+        elif cur_wet and fix_wet:
+            fix_class, fix_result = "real precipitation preserved above floor", "ok"
+        elif not cur_wet and not fix_wet:
+            fix_class, fix_result = "dry, unchanged", "ok"
+        else:
+            fix_class, fix_result = "unexpected: fix wetter than current", "review"
+        # After the fix the seam closes BY CONSTRUCTION for WK cities (both
+        # cards read the same floored data); what remains meaningful is the
+        # single story's accuracy vs the referee, captured in fix_class.
+        row("intensity_floor_fix_sim",
+            "simulated: RadarService WK path with 0.2 mm/h floor; Storm Approach centre reads it",
+            ev.get("wk_fixed_narration") or "(no WK next-hour data)",
+            ev.get("wk_narration") or "(no WK next-hour data)",
+            "proposed fix ON vs current nowcast-port behavior",
+            fix_class, fix_result,
+            "fixed arrival=%s src=%s" % (ev["fixed_centre"]["arrival_min"],
+                                         ev["fixed_centre"]["source"]))
 
     # 8. Thunderstorm reconciliation (phantom detection).
     code = sa["centre_code_raw"]
@@ -1418,6 +1480,14 @@ def main():
                                   if r["data_name"] == "centre_precip_source_seam"
                                   and r["check_result"] == "mismatch"),
         nws_referee_cities=sum(1 for c in city_rows if c["nws_station"]),
+        fix_sim={cls: sum(1 for r in all_rows
+                          if r["data_name"] == "intensity_floor_fix_sim"
+                          and r["check"] == cls)
+                 for cls in ("phantom suppressed (observation confirms dry)",
+                             "OVERSUPPRESSED - floor removed rain the station reports",
+                             "low-intensity claim suppressed (no referee)",
+                             "real precipitation preserved above floor",
+                             "dry, unchanged")},
         referee_verdicts={v: sum(1 for r in all_rows
                                  if r["data_name"] == "centre_precip_source_seam"
                                  and v in r["details"])
