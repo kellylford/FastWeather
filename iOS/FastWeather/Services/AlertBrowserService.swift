@@ -51,11 +51,18 @@ struct AlertRegion: Hashable, Identifiable {
     /// MeteoAlarm member countries we surface. Slug is the English name the
     /// feeds API expects: feeds.meteoalarm.org/api/v1/warnings/feeds-<slug>
     static let meteoAlarmCountries: [AlertRegion] = [
-        ("Austria", "austria"), ("Belgium", "belgium"), ("Croatia", "croatia"),
-        ("Denmark", "denmark"), ("Finland", "finland"), ("France", "france"),
-        ("Germany", "germany"), ("Greece", "greece"), ("Ireland", "ireland"),
-        ("Italy", "italy"), ("Netherlands", "netherlands"), ("Norway", "norway"),
-        ("Poland", "poland"), ("Portugal", "portugal"), ("Spain", "spain"),
+        ("Austria", "austria"), ("Belgium", "belgium"),
+        ("Bosnia and Herzegovina", "bosnia-herzegovina"), ("Bulgaria", "bulgaria"),
+        ("Croatia", "croatia"), ("Cyprus", "cyprus"), ("Czechia", "czechia"),
+        ("Denmark", "denmark"), ("Estonia", "estonia"), ("Finland", "finland"),
+        ("France", "france"), ("Germany", "germany"), ("Greece", "greece"),
+        ("Hungary", "hungary"), ("Iceland", "iceland"), ("Ireland", "ireland"),
+        ("Israel", "israel"), ("Italy", "italy"), ("Latvia", "latvia"),
+        ("Lithuania", "lithuania"), ("Luxembourg", "luxembourg"), ("Malta", "malta"),
+        ("Moldova", "moldova"), ("Montenegro", "montenegro"),
+        ("Netherlands", "netherlands"), ("Norway", "norway"), ("Poland", "poland"),
+        ("Portugal", "portugal"), ("Romania", "romania"), ("Serbia", "serbia"),
+        ("Slovakia", "slovakia"), ("Slovenia", "slovenia"), ("Spain", "spain"),
         ("Sweden", "sweden"), ("Switzerland", "switzerland"),
         ("United Kingdom", "united-kingdom")
     ].map { name, slug in
@@ -122,8 +129,30 @@ final class AlertBrowserService: ObservableObject {
     private let session: URLSession
     private let userAgent = "WeatherFast/1.0 iOS (weatherfast.online)"
 
+    // Short-lived per-region count cache so re-opening the country list (or
+    // navigating back and forth) doesn't refetch every feed. Courtesy to the
+    // free MeteoAlarm service; these feeds cost nothing and no API key.
+    private var countCache: [String: (count: Int, at: Date)] = [:]
+    private let countTTL: TimeInterval = 300  // 5 minutes
+
     init(session: URLSession = .shared) {
         self.session = session
+    }
+
+    /// Number of active alerts for a region, cached for `countTTL`.
+    /// Returns nil if the fetch fails (so the UI can stay quiet rather than
+    /// showing a misleading zero).
+    func alertCount(for region: AlertRegion) async -> Int? {
+        if let hit = countCache[region.id], Date().timeIntervalSince(hit.at) < countTTL {
+            return hit.count
+        }
+        do {
+            let count = try await fetchAlerts(for: region, landOnly: false).count
+            countCache[region.id] = (count, Date())
+            return count
+        } catch {
+            return nil
+        }
     }
 
     // MARK: Fetch

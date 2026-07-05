@@ -53,6 +53,8 @@ struct AlertRegionsView: View {
 
 struct AlertMeteoAlarmCountriesView: View {
     @Binding var navPath: [BrowseDestination]
+    @StateObject private var service = AlertBrowserService()
+    @State private var counts: [String: Int] = [:]
     @State private var searchText = ""
 
     private var filtered: [AlertRegion] {
@@ -68,13 +70,45 @@ struct AlertMeteoAlarmCountriesView: View {
                 Button {
                     navPath.append(.alertDigest(region))
                 } label: {
-                    Text(region.displayName).foregroundColor(.primary)
+                    HStack {
+                        Text(region.displayName).foregroundColor(.primary)
+                        Spacer()
+                        if let count = counts[region.id] {
+                            Text("\(count)")
+                                .foregroundColor(count == 0 ? .secondary : .primary)
+                                .font(count == 0 ? .body : .body.weight(.semibold))
+                        }
+                    }
                 }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(accessibilityLabel(for: region))
                 .accessibilityHint("Double tap to view active alerts for \(region.displayName)")
             }
         }
         .navigationTitle("Europe")
         .searchable(text: $searchText, prompt: "Search countries")
+        .task { await loadCounts() }
+        .refreshable { await loadCounts() }
+    }
+
+    private func accessibilityLabel(for region: AlertRegion) -> String {
+        guard let count = counts[region.id] else { return region.displayName }
+        if count == 0 { return "\(region.displayName), no active alerts" }
+        return "\(region.displayName), \(count) alert\(count == 1 ? "" : "s")"
+    }
+
+    /// Fetch every country's active-alert count. URLSession caps connections
+    /// per host (~6), so these ~36 requests queue politely; the service also
+    /// caches results for 5 minutes.
+    private func loadCounts() async {
+        await withTaskGroup(of: (String, Int?).self) { group in
+            for region in AlertRegion.meteoAlarmCountries {
+                group.addTask { (region.id, await service.alertCount(for: region)) }
+            }
+            for await (id, count) in group {
+                if let count { counts[id] = count }
+            }
+        }
     }
 }
 
