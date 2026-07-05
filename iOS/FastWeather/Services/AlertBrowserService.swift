@@ -205,9 +205,10 @@ final class AlertBrowserService: ObservableObject {
     // MARK: NWS (United States)
 
     private func fetchNWS(landOnly: Bool) async throws -> [WeatherAlert] {
+        // Note: /alerts/active returns all active alerts and does NOT accept a
+        // "limit" query parameter — sending one yields HTTP 400.
         var components = URLComponents(string: "https://api.weather.gov/alerts/active")!
-        var items = [URLQueryItem(name: "status", value: "actual"),
-                     URLQueryItem(name: "limit", value: "500")]
+        var items = [URLQueryItem(name: "status", value: "actual")]
         if landOnly { items.append(URLQueryItem(name: "region_type", value: "land")) }
         components.queryItems = items
 
