@@ -273,6 +273,36 @@ final class AlertBrowserService: ObservableObject {
         return isoFractional.date(from: string) ?? isoPlain.date(from: string)
     }
 
+    /// Valid US state / territory postal abbreviations. Used to tell a real
+    /// state prefix in a UGC code apart from a marine-zone prefix (ANZ, GMZ,
+    /// PZZ, LEZ, …), which we must not append as if it were a state.
+    private static let statePostalCodes: Set<String> = [
+        "AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN",
+        "IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV",
+        "NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN",
+        "TX","UT","VT","VA","WA","WV","WI","WY","DC","PR","VI","GU","AS","MP"
+    ]
+
+    /// Append the state abbreviation to each NWS area name that lacks one.
+    /// NWS `areaDesc` lists areas separated by "; "; county-based products
+    /// already carry ", OH", but zone-based ones (Special Weather Statements)
+    /// are bare. The parallel `geocode.UGC` array encodes the state as each
+    /// code's first two letters, so we zip the two lists by position and add
+    /// ", <state>" where it's missing and the prefix is a real state.
+    private static func labeledArea(areaDesc: String?, ugc: [String]) -> String? {
+        guard let areaDesc, !areaDesc.isEmpty else { return nil }
+        let parts = areaDesc.components(separatedBy: "; ")
+        let labeled = parts.enumerated().map { index, name -> String in
+            // Already state-suffixed ("Mahoning, OH")? Leave it untouched.
+            if name.range(of: #", [A-Z]{2}$"#, options: .regularExpression) != nil { return name }
+            guard index < ugc.count else { return name }
+            let state = String(ugc[index].prefix(2)).uppercased()
+            guard statePostalCodes.contains(state) else { return name }
+            return "\(name), \(state)"
+        }
+        return labeled.joined(separator: "; ")
+    }
+
     /// Give a real severity to products NWS tags "Unknown". Air Quality Alerts
     /// carry Unknown severity but are advisory-grade, so we surface them as
     /// Moderate rather than stranding them in an "Unknown" bucket.
@@ -309,7 +339,7 @@ final class AlertBrowserService: ObservableObject {
                 instruction: p.instruction,
                 onset: onset,
                 expires: expires,
-                areaDesc: p.areaDesc,
+                areaDesc: Self.labeledArea(areaDesc: p.areaDesc, ugc: p.ugcCodes),
                 source: .nws,
                 detailsURL: nil
             )

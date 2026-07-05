@@ -91,7 +91,13 @@ struct NWSAlertProperties: Codable {
     let expires: String?
     let ends: String?          // When hazardous CONDITIONS end (vs expires = when the alert product expires)
     private let areaDescRaw: FlexibleStringOrArray?
-    
+    let geocode: NWSAlertGeocode?
+
+    /// UGC zone/county codes, parallel to the `areaDesc` entries. Each code's
+    /// first two letters are the state postal abbreviation (e.g. "OHC099" → OH),
+    /// so these let us label bare zone names with their state.
+    var ugcCodes: [String] { geocode?.UGC ?? [] }
+
     var headline: String {
         switch headlineRaw {
         case .string(let str): return str
@@ -125,12 +131,19 @@ struct NWSAlertProperties: Codable {
     }
     
     enum CodingKeys: String, CodingKey {
-        case id, event, severity, onset, expires, ends
+        case id, event, severity, onset, expires, ends, geocode
         case headlineRaw = "headline"
         case descriptionRaw = "description"
         case instructionRaw = "instruction"
         case areaDescRaw = "areaDesc"
     }
+}
+
+/// NWS geocodes for an alert's areas. UGC codes are parallel to `areaDesc`;
+/// each begins with the two-letter state (land) or marine-zone prefix.
+struct NWSAlertGeocode: Codable {
+    let UGC: [String]?
+    let SAME: [String]?
 }
 
 // Helper enum to handle NWS API's inconsistent field types
