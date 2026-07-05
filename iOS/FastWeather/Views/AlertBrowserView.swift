@@ -85,7 +85,10 @@ struct NationalAlertDigestView: View {
 
     @StateObject private var service = AlertBrowserService()
     @State private var state: AlertBrowserService.LoadState = .idle
-    @State private var severityFilter: SeverityFilter = .severe
+    // Moderate+ is the default so watches (Tornado / Severe Thunderstorm Watch,
+    // Flood/Heat Watch), which NWS tags as Moderate, aren't hidden. "Unknown"
+    // severity (e.g. Air Quality) sorts below Minor, so it stays gated to "All".
+    @State private var severityFilter: SeverityFilter = .moderate
     @State private var landOnly = true
     @State private var selectedAlert: WeatherAlert?
 
@@ -142,7 +145,6 @@ struct NationalAlertDigestView: View {
     @ViewBuilder
     private func loadedContent(_ alerts: [WeatherAlert]) -> some View {
         Section {
-            summaryHeader(alerts)
             filterControls
         }
 
@@ -165,25 +167,7 @@ struct NationalAlertDigestView: View {
         }
     }
 
-    // MARK: Summary + filters
-
-    private func summaryHeader(_ alerts: [WeatherAlert]) -> some View {
-        let counts = service.severityCounts(alerts)
-        let summary = counts.map { "\($0.1) \($0.0.rawValue.lowercased())" }
-            .joined(separator: " · ")
-        return VStack(alignment: .leading, spacing: 4) {
-            Text("\(alerts.count) active alert\(alerts.count == 1 ? "" : "s")")
-                .font(.headline)
-            if !summary.isEmpty {
-                Text(summary)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-        }
-        .padding(.vertical, 2)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(alerts.count) active alerts. \(summary)")
-    }
+    // MARK: Filters
 
     @ViewBuilder
     private var filterControls: some View {
@@ -216,23 +200,23 @@ struct NationalAlertDigestView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(group.event)
                         .font(.body)
-                    Text(subtitle(for: group))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    if let expires = group.soonestExpires {
+                        Text("Until \(shortTime(expires))")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
+                Spacer(minLength: 8)
+                // Prominent per-category count (the "number on the button").
+                Text("\(group.count)")
+                    .font(.title3.monospacedDigit().weight(.semibold))
+                    .foregroundColor(group.severity.color)
+                    .accessibilityHidden(true)
             }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(group.severity.rawValue). \(group.event). \(areaCountPhrase(group)).\(expiryPhrase(group))")
         .accessibilityHint("Double tap to view affected areas")
-    }
-
-    private func subtitle(for group: AlertDigestGroup) -> String {
-        var parts = [areaCountPhrase(group)]
-        if let expires = group.soonestExpires {
-            parts.append("expires \(shortTime(expires))")
-        }
-        return parts.joined(separator: " · ")
     }
 
     private func areaCountPhrase(_ group: AlertDigestGroup) -> String {
