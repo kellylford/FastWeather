@@ -54,6 +54,21 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 
+sys_path_dir = os.path.dirname(os.path.abspath(__file__))
+if sys_path_dir not in __import__("sys").path:
+    __import__("sys").path.insert(0, sys_path_dir)
+try:
+    import weatherkit_rest as WK
+    WEATHERKIT_ENABLED = WK.is_configured()
+except Exception:  # noqa: BLE001 — harness must run without the key
+    WK, WEATHERKIT_ENABLED = None, False
+
+# Countries where the app uses the WeatherKit minute path
+# (RadarService.weatherKitMinuteForecastCountries) -> ISO codes for REST.
+WK_MINUTE_COUNTRIES = {"United States": "US", "Canada": "CA",
+                       "United Kingdom": "GB", "Ireland": "IE",
+                       "Australia": "AU", "New Zealand": "NZ"}
+
 # Prefer IPv4. macOS + urllib can hang in the TLS handshake when a host's
 # IPv6 path is broken; sorting A records first avoids the stall.
 _real_getaddrinfo = socket.getaddrinfo
@@ -995,10 +1010,28 @@ def evaluate_city(city, pool, base, key, log):
     old_status = determine_current_status(legacy.get("current") or {})
     narration, narration_onset = next_hour_from_minutely15(legacy, now_epoch)
 
+    # WeatherKit centre nowcast (REST) — what the app's US narration path sees.
+    # Instruments the WK-vs-OM seam the in-app bug reports came from.
+    wk = None
+    iso = WK_MINUTE_COUNTRIES.get(city["country"])
+    if WEATHERKIT_ENABLED and iso:
+        try:
+            wk = WK.centre_nowcast(lat, lon, country=iso)
+        except Exception as e:  # noqa: BLE001 — best-effort, like steering
+            log("  wk fetch failed for %s: %s" % (city["name"], e))
+    wk_narration = None
+    if wk and wk["has_next_hour"]:
+        # Mirror RadarService.fetchWeatherKitNowcast summarySamples: 61 minutes,
+        # active[0] from the condition-based effectiveIsPrecip.
+        samples = [(m[0], m[1], (wk["is_precipitating"] if i == 0 else m[2]))
+                   for i, m in enumerate(wk["minutes"][:61])]
+        wk_narration = build_next_hour_summary(samples, 60)
+
     return dict(sa_new=sa_new, sa_leg=sa_leg, old_nearest=old_nearest, old_status=old_status,
                 narration=narration, narration_onset=narration_onset,
                 towns_count=len(towns), saved_names=[s["name"] for s in saved],
-                legacy_current=legacy.get("current") or {})
+                legacy_current=legacy.get("current") or {},
+                wk=wk, wk_narration=wk_narration)
 
 
 # ---------------------------------------------------------------------------
@@ -1127,6 +1160,27 @@ def build_rows(city, ev):
         "informational (pseudo-saved stand-ins: %s)" % ", ".join(ev["saved_names"]) if ev["saved_names"] else "informational",
         "n_a", "app uses the user's real saved cities; harness uses 3 nearest 40-250 km")
 
+    # 8b (inserted as its own row below). WK-vs-OM centre seam.
+    if ev.get("wk") is not None:
+        wk = ev["wk"]
+        wk_active_hour = wk["is_precipitating"] or any(m[2] for m in wk["minutes"][:61])
+        om_active_hour = sa["situation"] == "rainingHere" or (
+            sa["arrival"] is not None and sa["arrival"] <= 60)
+        if wk_active_hour == om_active_hour:
+            seam_result, seam_details = "ok", ""
+        else:
+            seam_result = "mismatch"
+            seam_details = ("WeatherKit (radar-informed) and Open-Meteo (model) disagree about "
+                            "precipitation at this location within the hour — in the app the Next Hour "
+                            "narration would contradict Storm Approach here (the east-Madison bug class)")
+        row("centre_precip_source_seam",
+            "Next Hour narration (WeatherKit) vs Storm Approach centre (Open-Meteo)",
+            ev.get("wk_narration") or ("WK current: %s, intensity %.2f mm/h, no next-hour minutes"
+                                       % (wk["condition"], wk["intensity_now"])),
+            ev["narration"] or "(no Open-Meteo narration)",
+            "same city, two sources — the seam the in-app harness could not test before",
+            "WK-vs-OM precipitation-within-the-hour agreement", seam_result, seam_details)
+
     # 8. Thunderstorm reconciliation (phantom detection).
     code = sa["centre_code_raw"]
     phantom = code in THUNDER_CODES and sa["here_mm"] < ACTIVE_THRESHOLD_MM
@@ -1182,6 +1236,11 @@ def build_city_row(city, ev):
         towns_sampled=ev["towns_count"],
         towns_active=sum(1 for t in sa["towns"] if t["trend"] in ("rainingNow", "arriving")),
         narration=ev["narration"] or "",
+        wk_available=ev.get("wk") is not None,
+        wk_condition=(ev["wk"]["condition"] if ev.get("wk") else ""),
+        wk_intensity_now=(ev["wk"]["intensity_now"] if ev.get("wk") else ""),
+        wk_active_minutes=(sum(1 for m in ev["wk"]["minutes"] if m[2]) if ev.get("wk") else ""),
+        wk_narration=ev.get("wk_narration") or "",
         headline_new=storm_headline(sa),
         headline_legacy=storm_headline(leg),
     )
@@ -1288,11 +1347,16 @@ def main():
         cities_requested=args.cities,
         cities_completed=len(city_rows), errors=errors,
         phantom_thunderstorm_count=sum(1 for c in city_rows if c["phantom_thunderstorm"]),
+        weatherkit_enabled=WEATHERKIT_ENABLED,
+        weatherkit_cities_sampled=sum(1 for c in city_rows if c["wk_available"]),
+        wk_om_seam_mismatches=sum(1 for r in all_rows
+                                  if r["data_name"] == "centre_precip_source_seam"
+                                  and r["check_result"] == "mismatch"),
         active_weather_cities=sum(1 for c in city_rows if c["situation_new"] != "clear"),
         check_results_by_data_name=checks,
         deviations_from_app=[
             "unixtime indexing on the legacy path (equivalent index math; app uses DateParser on local ISO)",
-            "WeatherKit minute narration not testable outside the app; Open-Meteo minutely_15 narration path tested (same summarizer)",
+            "WeatherKit sampled via REST (same backend as the app's framework) when ~/.fastweather-keys/weatherkit.json exists; REST minutes lack a precipitation-type field so per-minute active = intensity>0 (approximation of the Swift path)",
             "pseudo-saved cities: 3 nearest bundled cities 40-250 km stand in for user's saved list",
         ])
     with open(os.path.join(run_dir, "summary.json"), "w") as f:
