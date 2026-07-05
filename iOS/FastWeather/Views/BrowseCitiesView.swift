@@ -12,11 +12,15 @@ enum BrowseDestination: Hashable {
     case region(BrowseRegionType)
     case stateCities(name: String, sortOrder: BrowseSortOrder?)
     case countryCities(name: String, sortOrder: BrowseSortOrder?)
+    case alertBrowser
+    case alertMeteoAlarmCountries
+    case alertDigest(AlertRegion)
 }
 
 struct BrowseCitiesView: View {
     @StateObject private var cityDataService = CityDataService()
     @StateObject private var favoritesService = BrowseFavoritesService()
+    @ObservedObject private var featureFlags = FeatureFlags.shared
     @State private var navPath: [BrowseDestination] = []
 
     var body: some View {
@@ -59,6 +63,19 @@ struct BrowseCitiesView: View {
                     }
                     .accessibilityHint("Double tap to browse countries")
                 }
+
+                if featureFlags.alertBrowserEnabled {
+                    Section(header: Text("Weather Alerts"),
+                            footer: Text("View active government weather alerts by country, independent of your saved cities.")) {
+                        Button {
+                            navPath.append(.alertBrowser)
+                        } label: {
+                            Label("Browse Alerts", systemImage: "exclamationmark.triangle.fill")
+                                .foregroundColor(.primary)
+                        }
+                        .accessibilityHint("Double tap to browse active weather alerts by country")
+                    }
+                }
             }
             .navigationTitle("Browse Cities")
             .navigationDestination(for: BrowseDestination.self) { destination in
@@ -81,6 +98,12 @@ struct BrowseCitiesView: View {
                         favoritesService: favoritesService,
                         overrideSortOrder: sortOrder
                     )
+                case .alertBrowser:
+                    AlertRegionsView(navPath: $navPath)
+                case .alertMeteoAlarmCountries:
+                    AlertMeteoAlarmCountriesView(navPath: $navPath)
+                case .alertDigest(let region):
+                    NationalAlertDigestView(region: region)
                 }
             }
         }

@@ -29,6 +29,8 @@ struct WeatherAlert: Codable, Identifiable {
 enum AlertSource: String, Codable {
     case nws = "NWS"              // US National Weather Service
     case weatherKit = "WeatherKit" // Apple WeatherKit (international)
+    case eccc = "Environment Canada"   // Meteorological Service of Canada
+    case meteoalarm = "MeteoAlarm"     // European national services (aggregated)
 }
 
 enum AlertSeverity: String, Codable, CaseIterable {

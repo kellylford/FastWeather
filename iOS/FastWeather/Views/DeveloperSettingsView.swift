@@ -23,6 +23,10 @@ struct DeveloperSettingsView: View {
                         .accessibilityLabel("My Location feature toggle")
                         .accessibilityHint(featureFlags.myLocationEnabled ? "My Location is enabled. A My Location section appears on the city list when the user setting is also on." : "My Location is disabled globally. The My Location section will not appear regardless of user settings.")
 
+                    Toggle("Browse Alerts", isOn: $featureFlags.alertBrowserEnabled)
+                        .accessibilityLabel("Browse Alerts feature toggle")
+                        .accessibilityHint(featureFlags.alertBrowserEnabled ? "Browse Alerts is enabled. A Weather Alerts section appears in the Browse tab for viewing active alerts by country, independent of your saved cities." : "Browse Alerts is disabled. The Weather Alerts section will not appear in the Browse tab.")
+
                     Toggle("Specific Place Names", isOn: $featureFlags.specificPlaceNamesEnabled)
                         .accessibilityLabel("Specific Place Names feature toggle")
                         .accessibilityHint(featureFlags.specificPlaceNamesEnabled ? "Specific place names are enabled. Searching for an airport or university shows its full name instead of just the city." : "Specific place names are disabled. All searches label the result by city name only.")

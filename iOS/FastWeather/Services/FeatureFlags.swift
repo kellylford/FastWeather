@@ -120,6 +120,15 @@ class FeatureFlags: ObservableObject {
             UserDefaults.standard.set(myLocationEnabled, forKey: "feature_my_location_enabled")
         }
     }
+
+    /// Enable/disable the Browse Alerts feature (browse active government weather
+    /// alerts by service/country, independent of any saved city).
+    /// On by default. When disabled, the Weather Alerts section is hidden from the Browse tab.
+    @Published var alertBrowserEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(alertBrowserEnabled, forKey: "feature_alert_browser_enabled")
+        }
+    }
     
     // MARK: - Initialization
     
@@ -137,6 +146,7 @@ class FeatureFlags: ObservableObject {
         self.weatherKitForecastConditionsEnabled = UserDefaults.standard.bool(forKey: "feature_weatherkit_forecast_conditions_enabled")
         self.specificPlaceNamesEnabled = UserDefaults.standard.bool(forKey: "feature_specific_place_names_enabled")
         self.myLocationEnabled = UserDefaults.standard.bool(forKey: "feature_my_location_enabled")
+        self.alertBrowserEnabled = UserDefaults.standard.bool(forKey: "feature_alert_browser_enabled")
 
         // Default values (if first launch or not set)
         // All features enabled by default for production
@@ -176,6 +186,9 @@ class FeatureFlags: ObservableObject {
         if !UserDefaults.standard.contains(key: "feature_my_location_enabled") {
             self.myLocationEnabled = true  // On by default
         }
+        if !UserDefaults.standard.contains(key: "feature_alert_browser_enabled") {
+            self.alertBrowserEnabled = true  // On by default
+        }
     }
     
     // MARK: - Helper Methods
@@ -194,6 +207,7 @@ class FeatureFlags: ObservableObject {
         weatherKitForecastConditionsEnabled = true
         specificPlaceNamesEnabled = true
         myLocationEnabled = true
+        alertBrowserEnabled = true
         debugLog("🔧 Feature flags reset to defaults")
     }
     
@@ -211,6 +225,7 @@ class FeatureFlags: ObservableObject {
         weatherKitForecastConditionsEnabled = true
         specificPlaceNamesEnabled = true
         myLocationEnabled = true
+        alertBrowserEnabled = true
         debugLog("🔧 All features enabled")
     }
 
@@ -227,6 +242,7 @@ class FeatureFlags: ObservableObject {
         weatherKitForecastConditionsEnabled = false
         specificPlaceNamesEnabled = false
         myLocationEnabled = false
+        alertBrowserEnabled = false
         debugLog("🔧 All features disabled")
     }
 }
