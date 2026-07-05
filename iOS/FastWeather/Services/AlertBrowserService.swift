@@ -309,6 +309,15 @@ final class AlertBrowserService: ObservableObject {
         }
     }
 
+    /// Some MeteoAlarm members (notably Austria) supply glued English event
+    /// names like "Heatwarning" / "Thunderstormwarning" — the German compound
+    /// translated without a space. Insert the missing space before "warning".
+    private static func tidyEventName(_ raw: String) -> String {
+        raw.replacingOccurrences(of: "([a-z])([Ww]arning)",
+                                 with: "$1 $2",
+                                 options: .regularExpression)
+    }
+
     // MARK: MeteoAlarm (Europe)
 
     private func fetchMeteoAlarm(slug: String) async throws -> [WeatherAlert] {
@@ -328,7 +337,7 @@ final class AlertBrowserService: ObservableObject {
             let area = info.area?.compactMap { $0.areaDesc }.joined(separator: ", ")
             alerts.append(WeatherAlert(
                 id: warning.alert.identifier ?? "meteoalarm-\(slug)-\(index)",
-                event: info.event ?? info.headline ?? "Weather Warning",
+                event: Self.tidyEventName(info.event ?? info.headline ?? "Weather Warning"),
                 severity: severity,
                 headline: info.headline ?? "",
                 description: info.description ?? "",
