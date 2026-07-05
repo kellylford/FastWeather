@@ -94,6 +94,47 @@ enum SeverityFilter: String, CaseIterable, Identifiable {
     }
 }
 
+// MARK: - Hazard type filter
+
+/// A hazard family, derived from the event name, so alerts can be filtered by
+/// what kind of weather they're about (independent of severity). "Storms"
+/// gathers tornado / thunderstorm / severe-weather products that NWS otherwise
+/// scatters across Extreme (Tornado Warning), Severe (Svr Thunderstorm) and
+/// Moderate (watches).
+enum HazardType: String, CaseIterable, Identifiable {
+    case storms = "Storms"
+    case tropical = "Tropical"
+    case flood = "Flooding"
+    case heat = "Heat"
+    case winter = "Winter"
+    case wind = "Wind"
+    case fire = "Fire"
+    case fog = "Fog"
+    case marine = "Marine & Coastal"
+    case airQuality = "Air Quality"
+    case other = "Other"
+
+    var id: String { rawValue }
+
+    /// Classify an event name into exactly one family (first match wins).
+    static func classify(_ event: String) -> HazardType {
+        let e = event.lowercased()
+        func any(_ needles: [String]) -> Bool { needles.contains { e.contains($0) } }
+
+        if any(["hurricane", "tropical", "typhoon", "storm surge"]) { return .tropical }
+        if any(["tornado", "thunderstorm", "severe weather", "special weather statement"]) { return .storms }
+        if any(["flood", "hydrologic", "seiche"]) { return .flood }
+        if any(["winter", "snow", "blizzard", "ice storm", "freez", "frost", "wind chill", "sleet", "cold", "avalanche"]) { return .winter }
+        if any(["fire", "red flag"]) { return .fire }
+        if any(["air quality", "air stagnation", "ozone", "dust", "ashfall", "smoke"]) { return .airQuality }
+        if any(["heat"]) { return .heat }
+        if any(["fog"]) { return .fog }
+        if any(["wind", "gale"]) { return .wind }
+        if any(["marine", "small craft", "seas", "surf", "rip current", "beach", "coastal", "tsunami", "low water", "ashore"]) { return .marine }
+        return .other
+    }
+}
+
 // MARK: - Digest grouping
 
 /// One collapsed row in the national digest: all active alerts that share an
@@ -226,6 +267,16 @@ final class AlertBrowserService: ObservableObject {
         return plain.date(from: string)
     }
 
+    /// Give a real severity to products NWS tags "Unknown". Air Quality Alerts
+    /// carry Unknown severity but are advisory-grade, so we surface them as
+    /// Moderate rather than stranding them in an "Unknown" bucket.
+    private static func normalizedSeverity(_ raw: AlertSeverity, event: String) -> AlertSeverity {
+        guard raw == .unknown else { return raw }
+        let e = event.lowercased()
+        if e.contains("air quality") { return .moderate }
+        return raw
+    }
+
     // MARK: NWS (United States)
 
     private func fetchNWS(landOnly: Bool) async throws -> [WeatherAlert] {
@@ -244,11 +295,11 @@ final class AlertBrowserService: ObservableObject {
             let expires = Self.parseISO(p.ends) ?? Self.parseISO(p.expires)
             guard let expires else { return nil }
             let onset = Self.parseISO(p.onset) ?? Date()
-            let severity = AlertSeverity(rawValue: p.severity ?? "Unknown") ?? .unknown
+            let rawSeverity = AlertSeverity(rawValue: p.severity ?? "Unknown") ?? .unknown
             return WeatherAlert(
                 id: p.id,
                 event: p.event,
-                severity: severity,
+                severity: Self.normalizedSeverity(rawSeverity, event: p.event),
                 headline: p.headline,
                 description: p.description,
                 instruction: p.instruction,

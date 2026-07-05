@@ -122,6 +122,9 @@ struct NationalAlertDigestView: View {
     // Exclusive severity buttons: each shows only that severity. Default is All
     // so nothing is hidden on open; the buttons narrow to a single severity.
     @State private var severityFilter: SeverityFilter = .all
+    // Optional hazard-type filter (nil = all types), e.g. "Storms" gathers
+    // tornado/thunderstorm products that span several severities.
+    @State private var hazardType: HazardType?
     @State private var selectedAlert: WeatherAlert?
 
     var body: some View {
@@ -177,12 +180,13 @@ struct NationalAlertDigestView: View {
             filterControls(alerts)
         }
 
-        let groups = service.digest(from: alerts, filter: severityFilter)
+        let scoped = alerts.filter { hazardType == nil || HazardType.classify($0.event) == hazardType }
+        let groups = service.digest(from: scoped, filter: severityFilter)
         if groups.isEmpty {
             Section {
                 Text(alerts.isEmpty
                      ? "No active alerts right now."
-                     : "No \(severityFilter.rawValue) alerts. Select All to see other severities.")
+                     : "No alerts match this filter. Try All severities or All types.")
                     .foregroundColor(.secondary)
             }
         } else {
@@ -199,20 +203,37 @@ struct NationalAlertDigestView: View {
 
     // MARK: Filters
 
-    /// Segmented severity floor. Each segment's VoiceOver label carries how many
-    /// alerts that level would show, e.g. "Extreme, 3 alerts" (VoiceOver appends
-    /// the segment position, "1 of 4"). This is the only filter; "All" shows
-    /// every active alert with nothing gated behind a second control.
+    /// Exclusive severity segments + a hazard-type menu. Severity segment counts
+    /// reflect the current hazard scope. VoiceOver reads each segment as
+    /// "Extreme, 3 alerts" (it appends the position, "1 of 4").
     private func filterControls(_ alerts: [WeatherAlert]) -> some View {
-        Picker("Minimum severity", selection: $severityFilter) {
-            ForEach(SeverityFilter.allCases) { filter in
-                let n = alerts.filter { filter.includes($0.severity) }.count
-                Text(filter.rawValue)
-                    .tag(filter)
-                    .accessibilityLabel("\(filter.rawValue), \(n) alert\(n == 1 ? "" : "s")")
-            }
+        // Severity counts respect the hazard filter so they match what's shown.
+        let scoped = alerts.filter { hazardType == nil || HazardType.classify($0.event) == hazardType }
+        // Only offer hazard families that are actually present right now.
+        let presentFamilies = HazardType.allCases.filter { fam in
+            alerts.contains { HazardType.classify($0.event) == fam }
         }
-        .pickerStyle(.segmented)
+        return Group {
+            Picker("Minimum severity", selection: $severityFilter) {
+                ForEach(SeverityFilter.allCases) { filter in
+                    let n = scoped.filter { filter.includes($0.severity) }.count
+                    Text(filter.rawValue)
+                        .tag(filter)
+                        .accessibilityLabel("\(filter.rawValue), \(n) alert\(n == 1 ? "" : "s")")
+                }
+            }
+            .pickerStyle(.segmented)
+
+            Picker("Type", selection: $hazardType) {
+                Text("All types").tag(HazardType?.none)
+                ForEach(presentFamilies) { fam in
+                    let n = alerts.filter { HazardType.classify($0.event) == fam }.count
+                    Text("\(fam.rawValue) (\(n))").tag(HazardType?.some(fam))
+                }
+            }
+            .pickerStyle(.menu)
+            .accessibilityHint("Filters alerts by hazard type, such as Storms, Heat, or Flooding")
+        }
     }
 
     /// Severity section header carrying its total count, e.g. "Extreme (3)".
