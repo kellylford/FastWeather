@@ -95,7 +95,7 @@ struct AlertDetailView: View {
                                 .cornerRadius(12)
                         }
                         .accessibilityHint("Opens Safari to view official National Weather Service alert information")
-                    } else if alert.source == .weatherKit, let urlString = alert.detailsURL, let url = URL(string: urlString) {
+                    } else if alert.source != .nws, let urlString = alert.detailsURL, let url = URL(string: urlString) {
                         Link(destination: url) {
                             Label("View Alert Details", systemImage: "safari")
                                 .frame(maxWidth: .infinity)
@@ -104,7 +104,7 @@ struct AlertDetailView: View {
                                 .foregroundColor(.white)
                                 .cornerRadius(12)
                         }
-                        .accessibilityHint("Opens Safari to view official weather alert from local authorities")
+                        .accessibilityHint("Opens Safari to view the official weather alert from \(alert.source.rawValue)")
                     }
                     
                     // Source attribution

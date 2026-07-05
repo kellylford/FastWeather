@@ -15,6 +15,7 @@
 		4A6D0D115A976039A83A189E /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486EDF8DF974A3A8043714DD /* FeatureFlags.swift */; };
 		4B07E53F90DD3EA9329F2D45 /* WeatherCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5456D76628AB29EB3D6E266 /* WeatherCache.swift */; };
 		4D0C3D7F2B79D81702BFFF57 /* BrowseModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD557832C1BCA3C9AA2DF4EF /* BrowseModels.swift */; };
+		5BF7DE3C2398278205064E2B /* AlertBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DB44AB014963809D9F8AB2 /* AlertBrowserView.swift */; };
 		62CB858A1D1017158A62BC44 /* RadarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EED081CD8BA9AD9146E4318 /* RadarService.swift */; };
 		6B0A5D23AB1E6BAB93B5BCED /* MoonCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DEF54F1AE97F7891D18FB90 /* MoonCalculator.swift */; };
 		6CA5EB93D785DE05210F375A /* DeveloperSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F0E524751DEEAE77391AD2 /* DeveloperSettingsView.swift */; };
@@ -25,6 +26,7 @@
 		7B789880182BB3780DACFD9E /* DateParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84585CC21719C6078A0B9F83 /* DateParserTests.swift */; };
 		85468083C7B9028D150DEF80 /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F1C0121EB82A3FC69A6DB53 /* WidgetViews.swift */; };
 		90B76CB12EE73F0BF533980A /* HistoricalWeatherCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 808AC3615E6E747E006B95C9 /* HistoricalWeatherCache.swift */; };
+		90D52D117D0218E839582F9C /* AlertBrowserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE56BAD519A834059D39FAD4 /* AlertBrowserService.swift */; };
 		936F0EBB42AF986505E6F18D /* WeatherMovementAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FACFB641A124BC50AA47A82 /* WeatherMovementAnalyzer.swift */; };
 		A10000001 /* WeatherFastApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000 /* WeatherFastApp.swift */; };
 		A10000003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000002 /* ContentView.swift */; };
@@ -57,6 +59,7 @@
 		A1000MYDVB1 /* MyDataConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000MYDV1 /* MyDataConfigView.swift */; };
 		A1000WARMB1 /* WeatherAroundMeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000WARM1 /* WeatherAroundMeView.swift */; };
 		A1000WARMB2 /* RegionalWeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000WARM2 /* RegionalWeatherService.swift */; };
+		A1MYLOC002 /* MyLocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1MYLOC001 /* MyLocationService.swift */; };
 		A6886D9C7A65040E1717E6A4 /* FormatHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6EEC9A0A5A7E9A8E6CDB3BB /* FormatHelperTests.swift */; };
 		AABCDEF02 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABCDEF01 /* Secrets.swift */; };
 		AAE791FC717973BF6D2C064A /* AppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80554E71E10D5B842963E4AF /* AppGroup.swift */; };
@@ -72,7 +75,6 @@
 		CE046B003A58C6559345F3A6 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E5E353DA647F3B0B2671055 /* SwiftUI.framework */; };
 		E41FA69A048BFD0F634DB005 /* RadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8C597ECDBB8F82B9D13 /* RadarView.swift */; };
 		E4F1B4B29C76E05475F84205 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 582B5A12CF76291E75D023B0 /* AppLogger.swift */; };
-		A1MYLOC002 /* MyLocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1MYLOC001 /* MyLocationService.swift */; };
 		FCF060427E69A6D68459749C /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F83A2A75D10D105C7225AE79 /* LocationService.swift */; };
 		FFDCDC0E6C3FE2E629DA343D /* CountryNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91C990465E49C005E87F407B /* CountryNames.swift */; };
 		ICLOUD0001B /* iCloudSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ICLOUD0001 /* iCloudSyncService.swift */; };
@@ -173,6 +175,7 @@
 		A1000MYDV1 /* MyDataConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyDataConfigView.swift; sourceTree = "<group>"; };
 		A1000WARM1 /* WeatherAroundMeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherAroundMeView.swift; sourceTree = "<group>"; };
 		A1000WARM2 /* RegionalWeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionalWeatherService.swift; sourceTree = "<group>"; };
+		A1MYLOC001 /* MyLocationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MyLocationService.swift; sourceTree = "<group>"; };
 		A5456D76628AB29EB3D6E266 /* WeatherCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeatherCache.swift; sourceTree = "<group>"; };
 		A5F0E524751DEEAE77391AD2 /* DeveloperSettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeveloperSettingsView.swift; sourceTree = "<group>"; };
 		A62CB507C34F8584AF86B4EB /* FastWeatherWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FastWeatherWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -183,8 +186,9 @@
 		BB100001A0 /* HistoricalDateParsingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HistoricalDateParsingTests.swift; path = FastWeatherTests/HistoricalDateParsingTests.swift; sourceTree = "<group>"; };
 		BB100002A0 /* ViewConfigurationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ViewConfigurationTests.swift; path = FastWeatherTests/ViewConfigurationTests.swift; sourceTree = "<group>"; };
 		BB100003A0 /* UnitConversionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = UnitConversionTests.swift; path = FastWeatherTests/UnitConversionTests.swift; sourceTree = "<group>"; };
+		C0DB44AB014963809D9F8AB2 /* AlertBrowserView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AlertBrowserView.swift; sourceTree = "<group>"; };
 		CD557832C1BCA3C9AA2DF4EF /* BrowseModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowseModels.swift; sourceTree = "<group>"; };
-		A1MYLOC001 /* MyLocationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MyLocationService.swift; sourceTree = "<group>"; };
+		CE56BAD519A834059D39FAD4 /* AlertBrowserService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AlertBrowserService.swift; sourceTree = "<group>"; };
 		F83A2A75D10D105C7225AE79 /* LocationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		ICLOUD0001 /* iCloudSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iCloudSyncService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -321,6 +325,7 @@
 				9BE8987965BEC94AF7BD11D7 /* UserGuideView.swift */,
 				A1000MYDV1 /* MyDataConfigView.swift */,
 				A1000DAYDV1 /* DayDetailView.swift */,
+				C0DB44AB014963809D9F8AB2 /* AlertBrowserView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -348,6 +353,7 @@
 				2FACFB641A124BC50AA47A82 /* WeatherMovementAnalyzer.swift */,
 				80554E71E10D5B842963E4AF /* AppGroup.swift */,
 				ICLOUD0001 /* iCloudSyncService.swift */,
+				CE56BAD519A834059D39FAD4 /* AlertBrowserService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -593,6 +599,8 @@
 				936F0EBB42AF986505E6F18D /* WeatherMovementAnalyzer.swift in Sources */,
 				712DFE4BE25CBCDDED5D6DF3 /* AppGroup.swift in Sources */,
 				ICLOUD0001B /* iCloudSyncService.swift in Sources */,
+				90D52D117D0218E839582F9C /* AlertBrowserService.swift in Sources */,
+				5BF7DE3C2398278205064E2B /* AlertBrowserView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -685,7 +693,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEFINES_MODULE = YES;
 				ENABLE_APP_SANDBOX = YES;
@@ -742,7 +750,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ENABLE_PREVIEWS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -775,12 +782,13 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = YES;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_PREVIEWS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SELECTED_FILES = readwrite;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -946,7 +954,7 @@
 				CODE_SIGN_ENTITLEMENTS = FastWeatherWidget/FastWeatherWidget.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = P887QF74N8;
 				ENABLE_APP_SANDBOX = NO;
@@ -976,7 +984,7 @@
 				CODE_SIGN_ENTITLEMENTS = FastWeatherWidget/FastWeatherWidget.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = P887QF74N8;
 				ENABLE_APP_SANDBOX = NO;
