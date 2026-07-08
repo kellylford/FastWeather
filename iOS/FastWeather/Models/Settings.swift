@@ -634,7 +634,14 @@ struct AppSettings: Codable {
     
     // User-configured My Data fields (custom section with Open-Meteo parameters)
     var myDataFields: [MyDataField] = []
-    
+
+    // Saved default filters for the weather-alert browser, stored as raw values so
+    // this Model stays decoupled from the SeverityFilter/HazardType enums (defined in
+    // the service layer). Persisted here so the choice roams across the user's devices.
+    // nil hazard type means "All types".
+    var defaultAlertSeverityFilter: String = SeverityFilter.all.rawValue
+    var defaultAlertHazardType: String? = nil
+
     // Legacy properties for backward compatibility (deprecated)
     var showTemperature: Bool = true
     var showConditions: Bool = true
@@ -675,6 +682,7 @@ struct AppSettings: Codable {
         case showWeatherAroundMeOffsetDistance, showWeatherAroundMeBearing, showWeatherAroundMeMovement, showWeatherAroundMePressureTrends, showWeatherAroundMeAlerts
         case weatherFields, hourlyFields, dailyFields, marineFields, detailCategories
         case myDataFields
+        case defaultAlertSeverityFilter, defaultAlertHazardType
         case forecastDetailLayout
         // Legacy properties
         case showTemperature, showConditions, showFeelsLike, showHumidity
@@ -1043,7 +1051,10 @@ struct AppSettings: Codable {
         
         // My Data fields (user-configured custom data points)
         myDataFields = try container.decodeIfPresent([MyDataField].self, forKey: .myDataFields) ?? []
-        
+
+        defaultAlertSeverityFilter = try container.decodeIfPresent(String.self, forKey: .defaultAlertSeverityFilter) ?? SeverityFilter.all.rawValue
+        defaultAlertHazardType = try container.decodeIfPresent(String.self, forKey: .defaultAlertHazardType)
+
         // Legacy properties
         showTemperature = try container.decodeIfPresent(Bool.self, forKey: .showTemperature) ?? true
         showConditions = try container.decodeIfPresent(Bool.self, forKey: .showConditions) ?? true
@@ -1120,7 +1131,10 @@ struct AppSettings: Codable {
         try container.encode(marineFields, forKey: .marineFields)
         try container.encode(detailCategories, forKey: .detailCategories)
         try container.encode(myDataFields, forKey: .myDataFields)
-        
+
+        try container.encode(defaultAlertSeverityFilter, forKey: .defaultAlertSeverityFilter)
+        try container.encodeIfPresent(defaultAlertHazardType, forKey: .defaultAlertHazardType)
+
         // Legacy properties
         try container.encode(showTemperature, forKey: .showTemperature)
         try container.encode(showConditions, forKey: .showConditions)
