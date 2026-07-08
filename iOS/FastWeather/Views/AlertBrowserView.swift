@@ -259,9 +259,14 @@ struct NationalAlertDigestView: View {
     private func filterControls(_ classified: [(alert: WeatherAlert, hazard: HazardType)]) -> some View {
         // Severity counts respect the hazard filter so they match what's shown.
         let scoped = classified.filter { hazardType == nil || $0.hazard == hazardType }
-        // Only offer hazard families that are actually present right now.
-        let presentFamilies = HazardType.allCases.filter { fam in
+        // Only offer hazard families that are actually present right now — plus the
+        // currently-selected one even if absent, so a saved default (e.g. Fire) still
+        // shows in the menu (as "Fire (0)") instead of leaving the picker blank.
+        var menuFamilies = HazardType.allCases.filter { fam in
             classified.contains { $0.hazard == fam }
+        }
+        if let selected = hazardType, !menuFamilies.contains(selected) {
+            menuFamilies.append(selected)
         }
         return Group {
             Picker("Minimum severity", selection: $severityFilter) {
@@ -276,7 +281,7 @@ struct NationalAlertDigestView: View {
 
             Picker("Type", selection: $hazardType) {
                 Text("All types").tag(HazardType?.none)
-                ForEach(presentFamilies) { fam in
+                ForEach(menuFamilies) { fam in
                     let n = classified.filter { $0.hazard == fam }.count
                     Text("\(fam.rawValue) (\(n))").tag(HazardType?.some(fam))
                 }

@@ -542,6 +542,7 @@ struct SettingsView: View {
                         HStack {
                             Image(systemName: "checkmark.seal.fill")
                                 .foregroundColor(.blue)
+                                .accessibilityHidden(true)
                             Text("Data Sources & Attribution")
                         }
                     }
@@ -1104,7 +1105,6 @@ struct DataSourcesView: View {
                 Text("Weather Fast combines several weather and mapping services to give you the most complete and accurate picture possible. We're grateful to the organizations below and encourage you to visit them.")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-                    .accessibilityAddTraits(.isStaticText)
             }
 
             Section(header: Text("Weather Data")) {
