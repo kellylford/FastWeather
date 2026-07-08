@@ -117,14 +117,20 @@ struct AlertMeteoAlarmCountriesView: View {
 struct NationalAlertDigestView: View {
     let region: AlertRegion
 
+    @EnvironmentObject private var settingsManager: SettingsManager
     @StateObject private var service = AlertBrowserService()
     @State private var state: AlertBrowserService.LoadState = .idle
-    // Exclusive severity buttons: each shows only that severity. Default is All
-    // so nothing is hidden on open; the buttons narrow to a single severity.
+    // Exclusive severity buttons: each shows only that severity. Seeded from the
+    // user's saved default (falls back to All so nothing is hidden on open).
     @State private var severityFilter: SeverityFilter = .all
     // Optional hazard-type filter (nil = all types), e.g. "Storms" gathers
     // tornado/thunderstorm products that span several severities.
     @State private var hazardType: HazardType?
+    // Seed the filters from saved defaults exactly once, so navigating deeper and
+    // back doesn't clobber in-session filter changes.
+    @State private var didApplyDefaults = false
+    // Brief "Saved" confirmation on the button after tapping.
+    @State private var justSavedDefaults = false
 
     var body: some View {
         List {
@@ -139,6 +145,7 @@ struct NationalAlertDigestView: View {
         }
         .navigationTitle(region.displayName)
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear { applySavedDefaultsIfNeeded() }
         .task(id: region.id) { await load() }
         .refreshable { await load() }
     }
@@ -200,6 +207,48 @@ struct NationalAlertDigestView: View {
                 }
             }
         }
+
+        saveDefaultsSection
+    }
+
+    // MARK: Save defaults
+
+    /// Persists the current severity/type filters as the default applied whenever the
+    /// alert browser opens. Stored in AppSettings, so it roams across the user's devices.
+    private var saveDefaultsSection: some View {
+        Section {
+            Button {
+                saveCurrentFiltersAsDefault()
+            } label: {
+                Label(justSavedDefaults ? "Saved as Default" : "Save Current Filters as Default",
+                      systemImage: justSavedDefaults ? "checkmark.circle.fill" : "square.and.arrow.down")
+            }
+            .disabled(justSavedDefaults)
+            .accessibilityHint("Remembers the current severity and type filters and applies them each time you open weather alerts. Syncs across your devices.")
+        } footer: {
+            Text("Applied each time you open weather alerts, and synced across your devices.")
+        }
+    }
+
+    private func applySavedDefaultsIfNeeded() {
+        guard !didApplyDefaults else { return }
+        didApplyDefaults = true
+        severityFilter = SeverityFilter(rawValue: settingsManager.settings.defaultAlertSeverityFilter) ?? .all
+        hazardType = settingsManager.settings.defaultAlertHazardType.flatMap(HazardType.init(rawValue:))
+    }
+
+    private func saveCurrentFiltersAsDefault() {
+        settingsManager.settings.defaultAlertSeverityFilter = severityFilter.rawValue
+        settingsManager.settings.defaultAlertHazardType = hazardType?.rawValue
+        settingsManager.saveSettings()
+
+        UIAccessibility.post(notification: .announcement, argument: "Saved as default alert filters")
+
+        justSavedDefaults = true
+        Task {
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            justSavedDefaults = false
+        }
     }
 
     // MARK: Filters
@@ -210,9 +259,14 @@ struct NationalAlertDigestView: View {
     private func filterControls(_ classified: [(alert: WeatherAlert, hazard: HazardType)]) -> some View {
         // Severity counts respect the hazard filter so they match what's shown.
         let scoped = classified.filter { hazardType == nil || $0.hazard == hazardType }
-        // Only offer hazard families that are actually present right now.
-        let presentFamilies = HazardType.allCases.filter { fam in
+        // Only offer hazard families that are actually present right now — plus the
+        // currently-selected one even if absent, so a saved default (e.g. Fire) still
+        // shows in the menu (as "Fire (0)") instead of leaving the picker blank.
+        var menuFamilies = HazardType.allCases.filter { fam in
             classified.contains { $0.hazard == fam }
+        }
+        if let selected = hazardType, !menuFamilies.contains(selected) {
+            menuFamilies.append(selected)
         }
         return Group {
             Picker("Minimum severity", selection: $severityFilter) {
@@ -227,7 +281,7 @@ struct NationalAlertDigestView: View {
 
             Picker("Type", selection: $hazardType) {
                 Text("All types").tag(HazardType?.none)
-                ForEach(presentFamilies) { fam in
+                ForEach(menuFamilies) { fam in
                     let n = classified.filter { $0.hazard == fam }.count
                     Text("\(fam.rawValue) (\(n))").tag(HazardType?.some(fam))
                 }

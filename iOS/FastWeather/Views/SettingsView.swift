@@ -537,9 +537,17 @@ struct SettingsView: View {
                     }
                     .accessibilityElement(children: .combine)
                     .accessibilityLabel("Version \(appVersion) build \(buildNumber)")
-                    
-                    Link("Weather Data by Open-Meteo", destination: URL(string: "https://open-meteo.com")!)
-                        .accessibilityLabel("Weather data provided by Open-Meteo")
+
+                    NavigationLink(destination: DataSourcesView()) {
+                        HStack {
+                            Image(systemName: "checkmark.seal.fill")
+                                .foregroundColor(.blue)
+                                .accessibilityHidden(true)
+                            Text("Data Sources & Attribution")
+                        }
+                    }
+                    .accessibilityLabel("Data Sources and Attribution")
+                    .accessibilityHint("View the weather and location data providers Weather Fast relies on")
                 }
                 
                 // Developer Settings section (hidden by default)
@@ -1084,4 +1092,98 @@ struct SettingsView: View {
     SettingsView()
         .environmentObject(SettingsManager())
         .environmentObject(WeatherService())
+}
+
+// MARK: - Data Sources & Attribution
+
+/// Lists every external provider Weather Fast relies on, what each one powers,
+/// and a link to the provider so users can review terms and give proper credit.
+struct DataSourcesView: View {
+    var body: some View {
+        List {
+            Section {
+                Text("Weather Fast combines several weather and mapping services to give you the most complete and accurate picture possible. We're grateful to the organizations below and encourage you to visit them.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+
+            Section(header: Text("Weather Data")) {
+                DataSourceRow(
+                    name: "Open-Meteo",
+                    detail: "Current conditions, hourly and daily forecasts, historical weather, marine and air-quality data, and precipitation nowcasts. Licensed under CC BY 4.0.",
+                    urlString: "https://open-meteo.com"
+                )
+                DataSourceRow(
+                    name: "Apple Weather",
+                    detail: "Minute-by-minute precipitation nowcasts and observation-informed current conditions in supported regions, via Apple WeatherKit.",
+                    urlString: "https://weatherkit.apple.com/legal-attribution.html"
+                )
+            }
+
+            Section(header: Text("Weather Alerts")) {
+                DataSourceRow(
+                    name: "National Weather Service (NOAA)",
+                    detail: "Official severe-weather alerts for the United States.",
+                    urlString: "https://www.weather.gov"
+                )
+                DataSourceRow(
+                    name: "Environment and Climate Change Canada",
+                    detail: "Official weather warnings and alerts for Canada.",
+                    urlString: "https://weather.gc.ca"
+                )
+                DataSourceRow(
+                    name: "MeteoAlarm (EUMETNET)",
+                    detail: "Official weather warnings for European countries, aggregated from national meteorological services.",
+                    urlString: "https://meteoalarm.org"
+                )
+            }
+
+            Section(header: Text("Location & Maps")) {
+                DataSourceRow(
+                    name: "Apple Maps",
+                    detail: "Location search and place names, including points of interest such as airports and universities, via MapKit and Core Location geocoding.",
+                    urlString: "https://www.apple.com/legal/internet-services/maps/terms-en.html"
+                )
+            }
+        }
+        .navigationTitle("Data Sources")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+/// A single attribution row: the provider name, what it powers, and a link to it.
+private struct DataSourceRow: View {
+    let name: String
+    let detail: String
+    let urlString: String
+
+    var body: some View {
+        Link(destination: URL(string: urlString)!) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(name)
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    Spacer()
+                    Image(systemName: "arrow.up.right.square")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                        .accessibilityHidden(true)
+                }
+                Text(detail)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(name). \(detail)")
+        .accessibilityHint("Opens the \(name) website")
+        .accessibilityAddTraits(.isLink)
+    }
+}
+
+#Preview {
+    NavigationView {
+        DataSourcesView()
+    }
 }
