@@ -29,7 +29,7 @@ class RegionalWeatherService {
     // Actor to serialize geocoding requests to respect rate limits
     private actor GeocodingCoordinator {
         func geocode(latitude: Double, longitude: Double, reverseGeocodeFn: (Double, Double) async throws -> String) async throws -> String {
-            // Add delay to respect Nominatim's 1 request/second limit
+            // Throttle Apple CLGeocoder requests (~1/sec) to avoid rate-limit errors
             try await Task.sleep(nanoseconds: 1_100_000_000)
             return try await reverseGeocodeFn(latitude, longitude)
         }
