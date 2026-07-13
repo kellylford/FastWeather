@@ -1,0 +1,5 @@
+New
+
+Weather Attribution: A new Weather Attribution page has been added in Settings listing all the data providers used by WeatherFast.
+
+Alert Defaults: A new Save button has been added to the end of the recently added feature for browsing alerts. When you have selected an alert provider and the severity and category of alerts, you can use this to make it your default. Each time you visit the alerts going forward, the page will default to those settings. If you change settings and want to make those your new default, just use the Save button again.
