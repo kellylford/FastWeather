@@ -123,6 +123,19 @@ All flags are toggled in `DeveloperSettingsView` (Settings → Developer Setting
 2. Add toggle in `DeveloperSettingsView.swift`
 3. Gate in views with `if featureFlags.featureEnabled { ... }`
 
+### Releasing (TestFlight & App Store)
+
+**Full guide: [`iOS/RELEASING.md`](iOS/RELEASING.md) — read it before any release step.**
+
+⛔ **Golden rule:** this dev Mac runs a **beta macOS**, so any App Store binary built
+locally is rejected as `INVALID_BINARY` (regardless of Xcode). **App Store builds must
+come from the GitHub Actions workflow** `.github/workflows/ios-release.yml` (released-macOS
+runner): `gh workflow run ios-release.yml -f build_number=<N>`, then attach the build to the
+App Store version and submit via `~/.fastweather-keys/asc.py`. **TestFlight** builds may be
+local: `iOS/scripts/release-testflight.sh`. Credentials/tooling live in `~/.fastweather-keys/`
+(never committed). Key gotchas: binary `CFBundleShortVersionString` ≤ 3 integers (the 4-part
+`X.Y.Z.build` label goes on the store version record only); build numbers are single-use.
+
 ---
 
 ## Web/PWA

@@ -38,6 +38,7 @@ NOTES=""
 BETA_GROUPS="Internal test,External"
 SUBMIT_EXTERNAL=1
 WIRE_ONLY=0
+UPLOAD_ONLY=0
 VERSION=""
 BUILD=""
 
@@ -51,6 +52,7 @@ while [[ $# -gt 0 ]]; do
     --groups) BETA_GROUPS="$2"; shift 2;;
     --no-external-review) SUBMIT_EXTERNAL=0; shift;;
     --wire-only) WIRE_ONLY=1; shift;;
+    --upload-only) UPLOAD_ONLY=1; shift;;
     --version) VERSION="$2"; shift 2;;
     --build) BUILD="$2"; shift 2;;
     -h|--help) grep '^#' "$0" | sed 's/^# \{0,1\}//'; exit 0;;
@@ -59,10 +61,13 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -f "$ASC" && -f "$ASC_JSON" ]] || die "missing $ASC / $ASC_JSON (ASC credentials not set up)"
-[[ -n "$NOTES" ]] || die "--notes <file> is required (the What-to-Test text)"
-NOTES="$(cd "$(dirname "$NOTES")" && pwd)/$(basename "$NOTES")"   # absolutize
-[[ -f "$NOTES" ]] || die "notes file not found: $NOTES"
-[[ -s "$NOTES" ]] || die "notes file is empty: $NOTES"
+# Notes are the TestFlight What-to-Test text; not needed for --upload-only.
+if [[ "$UPLOAD_ONLY" -eq 0 ]]; then
+  [[ -n "$NOTES" ]] || die "--notes <file> is required (the What-to-Test text)"
+  NOTES="$(cd "$(dirname "$NOTES")" && pwd)/$(basename "$NOTES")"   # absolutize
+  [[ -f "$NOTES" ]] || die "notes file not found: $NOTES"
+  [[ -s "$NOTES" ]] || die "notes file is empty: $NOTES"
+fi
 
 # Read key id + issuer from the config (no secrets duplicated in this script).
 read_cfg() { python3 -c "import json,sys;print(json.load(open('$ASC_JSON'))['$1'])"; }
@@ -123,6 +128,13 @@ step "Uploading to App Store Connect"
 xcrun altool --upload-app --type ios --file "$IPA" \
   --apiKey "$KEY_ID" --apiIssuer "$ISSUER"
 echo "  Upload accepted; App Store Connect is now processing the build."
+
+# --- upload-only stops here (e.g. App Store submission handled separately) ---
+if [[ "$UPLOAD_ONLY" -eq 1 ]]; then
+  echo ""
+  echo "✅ Built + uploaded $VERSION ($BUILD). Skipped TestFlight wiring (--upload-only)."
+  exit 0
+fi
 
 # --- wire TestFlight (polls until the build is VALID) ---
 wire_testflight "$VERSION" "$BUILD"

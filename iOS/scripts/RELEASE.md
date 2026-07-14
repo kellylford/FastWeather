@@ -1,5 +1,9 @@
 # FastWeather iOS — TestFlight release
 
+> **For the full release guide — including the critical beta-macOS constraint and
+> the App Store submission flow — read [`../RELEASING.md`](../RELEASING.md) first.**
+> This file only covers the local TestFlight script's flags.
+
 One command builds, uploads, and wires a new build into TestFlight — no Xcode
 Organizer, no manual App Store Connect clicking.
 
