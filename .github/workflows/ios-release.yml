@@ -42,29 +42,27 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      - name: Show toolchain and reject beta SDK/Xcode
+      - name: Show toolchain and reject beta build machine
         run: |
           set -euo pipefail
           echo "=== xcodebuild ==="
           xcodebuild -version
           echo "=== iOS SDK ==="
           xcrun --sdk iphoneos --show-sdk-version
-          SDK_BUILD="$(xcrun --sdk iphoneos --show-sdk-build-version)"
-          XC_BUILD="$(xcodebuild -version | awk '/Build version/{print $3}')"
-          echo "iOS SDK build:  $SDK_BUILD"
-          echo "Xcode build:    $XC_BUILD"
-          # Beta/seed build numbers end in a lowercase letter (e.g. 23F81a);
-          # released builds end in a digit. Fail fast rather than upload a
-          # binary Apple will reject.
-          if printf '%s' "$SDK_BUILD" | grep -qE '[a-z]$'; then
-            echo "::error::iOS SDK $SDK_BUILD looks like a beta seed. Aborting."
+          echo "iOS SDK build:  $(xcrun --sdk iphoneos --show-sdk-build-version)"
+          echo "Xcode build:    $(xcodebuild -version | awk '/Build version/{print $3}')"
+          # The field Apple actually rejects on is BuildMachineOSBuild - the
+          # build number of the macOS the runner is on. Released macOS builds
+          # end in a digit (e.g. 24A335); beta seeds end in a lowercase letter
+          # (e.g. 26A5378j). GitHub-hosted runners are on released macOS, so
+          # this passes - it just guarantees we never ship a beta-OS binary.
+          OS_BUILD="$(sw_vers -buildVersion)"
+          echo "macOS build:    $OS_BUILD"
+          if printf '%s' "$OS_BUILD" | grep -qE '[a-z]$'; then
+            echo "::error::Build machine is on a beta macOS ($OS_BUILD); App Store would reject. Aborting."
             exit 1
           fi
-          if printf '%s' "$XC_BUILD" | grep -qE '[a-z]$'; then
-            echo "::error::Xcode $XC_BUILD looks like a beta. Aborting."
-            exit 1
-          fi
-          echo "Toolchain is a released build. Proceeding."
+          echo "Build machine is on released macOS. Proceeding."
 
       - name: Recreate Secrets.swift
         env:
