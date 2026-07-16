@@ -67,18 +67,22 @@ jobs:
       - name: Recreate Secrets.swift
         env:
           OPENMETEO_API_KEY: ${{ secrets.OPENMETEO_API_KEY }}
+          AIRNOW_API_KEY: ${{ secrets.AIRNOW_API_KEY }}
         run: |
           set -euo pipefail
           mkdir -p iOS/FastWeather/Services
-          if [ -n "${OPENMETEO_API_KEY:-}" ]; then
-            printf 'enum Secrets {\n    static let openMeteoAPIKey: String? = "%s"\n}\n' \
-              "$OPENMETEO_API_KEY" > iOS/FastWeather/Services/Secrets.swift
-            echo "Secrets.swift written WITH Open-Meteo key."
-          else
-            printf 'enum Secrets {\n    static let openMeteoAPIKey: String? = nil\n}\n' \
-              > iOS/FastWeather/Services/Secrets.swift
-            echo "::warning::OPENMETEO_API_KEY not set - building on the rate-limited free tier."
-          fi
+          # Emit a Swift String? literal: quoted value, or nil when the secret is unset.
+          swift_opt() { if [ -n "${1:-}" ]; then printf '"%s"' "$1"; else printf 'nil'; fi; }
+          OM=$(swift_opt "${OPENMETEO_API_KEY:-}")
+          AN=$(swift_opt "${AIRNOW_API_KEY:-}")
+          {
+            echo 'enum Secrets {'
+            echo "    static let openMeteoAPIKey: String? = ${OM}"
+            echo "    static let airNowAPIKey: String? = ${AN}"
+            echo '}'
+          } > iOS/FastWeather/Services/Secrets.swift
+          [ "$OM" = nil ] && echo "::warning::OPENMETEO_API_KEY not set - free tier." || echo "Open-Meteo key set."
+          [ "$AN" = nil ] && echo "::warning::AIRNOW_API_KEY not set - air quality observed layer disabled." || echo "AirNow key set."
 
       - name: Set version and build number
         env:
