@@ -220,6 +220,7 @@ struct MarineField: Codable, Identifiable, Equatable {
 
 enum DetailCategory: String, CaseIterable, Codable {
     case weatherAlerts = "Weather Alerts"
+    case airQuality = "Air Quality"
     case currentConditions = "Current Conditions"
     case todaysForecast = "Today's Forecast"
     case hourlyForecast = "24-Hour Forecast"
@@ -445,6 +446,7 @@ struct AppSettings: Codable {
     /// default previously omitted astronomy + myData.
     static let defaultDetailCategories: [DetailCategoryField] = [
         DetailCategoryField(category: .weatherAlerts, isEnabled: true),
+        DetailCategoryField(category: .airQuality, isEnabled: true),
         DetailCategoryField(category: .todaysForecast, isEnabled: true),
         DetailCategoryField(category: .astronomy, isEnabled: true),
         DetailCategoryField(category: .currentConditions, isEnabled: true),

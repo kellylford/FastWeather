@@ -497,6 +497,15 @@ struct CityDetailView: View {
                 .onAppear {
                     debugLog("🔶 WeatherAlerts category appeared for \(city.name)")
                 }
+
+        case .airQuality:
+            // Air quality section — observation-first, alert-aware. Feature-flagged.
+            // US-only for now: AirNow observed data and NWS air quality alerts are
+            // US-only, so the international modeled-only path is gated off until it
+            // has region-correct AQI (European AQI) and an international alert source.
+            if featureFlags.airQualityEnabled && city.country == "United States" {
+                AirQualitySection(city: city, selectedAlert: $selectedAlert)
+            }
             
         case .location:
             GroupBox(label: Label("Location", systemImage: "mappin.and.ellipse")) {

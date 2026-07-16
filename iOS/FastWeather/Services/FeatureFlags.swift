@@ -129,6 +129,15 @@ class FeatureFlags: ObservableObject {
             UserDefaults.standard.set(alertBrowserEnabled, forKey: "feature_alert_browser_enabled")
         }
     }
+
+    /// Enable/disable the Air Quality detail section. Observation-first (AirNow, US)
+    /// and alert-aware (defers to active NWS air quality alerts). On by default.
+    /// When disabled, the Air Quality section is hidden from city detail.
+    @Published var airQualityEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(airQualityEnabled, forKey: "feature_air_quality_enabled")
+        }
+    }
     
     // MARK: - Initialization
     
@@ -147,6 +156,7 @@ class FeatureFlags: ObservableObject {
         self.specificPlaceNamesEnabled = UserDefaults.standard.bool(forKey: "feature_specific_place_names_enabled")
         self.myLocationEnabled = UserDefaults.standard.bool(forKey: "feature_my_location_enabled")
         self.alertBrowserEnabled = UserDefaults.standard.bool(forKey: "feature_alert_browser_enabled")
+        self.airQualityEnabled = UserDefaults.standard.bool(forKey: "feature_air_quality_enabled")
 
         // Default values (if first launch or not set)
         // All features enabled by default for production
@@ -189,6 +199,9 @@ class FeatureFlags: ObservableObject {
         if !UserDefaults.standard.contains(key: "feature_alert_browser_enabled") {
             self.alertBrowserEnabled = true  // On by default
         }
+        if !UserDefaults.standard.contains(key: "feature_air_quality_enabled") {
+            self.airQualityEnabled = true  // On by default
+        }
     }
     
     // MARK: - Helper Methods
@@ -208,6 +221,7 @@ class FeatureFlags: ObservableObject {
         specificPlaceNamesEnabled = true
         myLocationEnabled = true
         alertBrowserEnabled = true
+        airQualityEnabled = true
         debugLog("🔧 Feature flags reset to defaults")
     }
     
@@ -226,6 +240,7 @@ class FeatureFlags: ObservableObject {
         specificPlaceNamesEnabled = true
         myLocationEnabled = true
         alertBrowserEnabled = true
+        airQualityEnabled = true
         debugLog("🔧 All features enabled")
     }
 
@@ -243,6 +258,7 @@ class FeatureFlags: ObservableObject {
         specificPlaceNamesEnabled = false
         myLocationEnabled = false
         alertBrowserEnabled = false
+        airQualityEnabled = false
         debugLog("🔧 All features disabled")
     }
 }

@@ -27,6 +27,10 @@ struct DeveloperSettingsView: View {
                         .accessibilityLabel("Browse Alerts feature toggle")
                         .accessibilityHint(featureFlags.alertBrowserEnabled ? "Browse Alerts is enabled. A Weather Alerts section appears in the Browse tab for viewing active alerts by country, independent of your saved cities." : "Browse Alerts is disabled. The Weather Alerts section will not appear in the Browse tab.")
 
+                    Toggle("Air Quality Section", isOn: $featureFlags.airQualityEnabled)
+                        .accessibilityLabel("Air Quality feature toggle")
+                        .accessibilityHint(featureFlags.airQualityEnabled ? "Air Quality is enabled. An Air Quality section appears in city detail, using observed monitors where available and deferring to active air quality alerts." : "Air Quality is disabled. The Air Quality section will not appear in city detail.")
+
                     Toggle("Specific Place Names", isOn: $featureFlags.specificPlaceNamesEnabled)
                         .accessibilityLabel("Specific Place Names feature toggle")
                         .accessibilityHint(featureFlags.specificPlaceNamesEnabled ? "Specific place names are enabled. Searching for an airport or university shows its full name instead of just the city." : "Specific place names are disabled. All searches label the result by city name only.")

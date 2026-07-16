@@ -663,6 +663,8 @@ struct SettingsView: View {
         switch category {
         case .weatherAlerts:
             return "Active weather warnings and alerts"
+        case .airQuality:
+            return "Air quality index, pollutants, and health guidance (observed monitors where available)"
         case .currentConditions:
             return "Temperature, wind, humidity, and atmospheric conditions"
         case .todaysForecast:
@@ -693,7 +695,15 @@ struct SettingsView: View {
                 Text("• Active weather warnings")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                
+
+            case .airQuality:
+                Text("• Air quality index and category")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text("• Pollutant breakdown and health guidance")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
             case .currentConditions:
                 Text("• Temperature, Feels Like")
                     .font(.caption)
