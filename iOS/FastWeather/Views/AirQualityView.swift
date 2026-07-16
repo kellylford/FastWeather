@@ -138,14 +138,24 @@ struct AirQualitySection: View {
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityHidden(true)
+            // Reporting-area label: AirNow readings are area-wide (metro), not
+            // point-precise — every location in the area shares one number. Show
+            // the area so the granularity is honest. Only meaningful when observed.
+            if data.isObserved {
+                Text("\(data.reportingArea) · area-wide reading")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .accessibilityHidden(true)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         // One VoiceOver element carrying the full meaning; color/number are hidden above.
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
             data.accessibilityHeadline
-            + (data.isObserved ? " Source, observed from AirNow monitors."
-                               : " Source, modeled estimate.")
+            + (data.isObserved
+               ? " Reporting area, \(data.reportingArea), an area-wide reading. Source, observed from AirNow monitors."
+               : " Source, modeled estimate.")
         )
     }
 
