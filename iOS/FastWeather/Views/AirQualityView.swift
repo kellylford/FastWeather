@@ -66,7 +66,7 @@ struct AirQualitySection: View {
             // Number first (the headline), then the alert detail below it.
             headline(data)
             if let alert = data.activeAlert {
-                alertBanner(alert)
+                alertBanner(alert, tint: data.headlineCategory.alertTint)
             }
             Divider()
             pollutantList(data.pollutants)
@@ -75,12 +75,15 @@ struct AirQualitySection: View {
 
     // MARK: - Active alert banner (dominates when present)
 
-    private func alertBanner(_ alert: WeatherAlert) -> some View {
+    private func alertBanner(_ alert: WeatherAlert, tint: Color) -> some View {
+        // An active air quality alert always reads as a warning: use a fixed warning
+        // icon and the AQI-derived tint, not NWS's severity (which tags these
+        // "Unknown" → gray and visually underplays a serious advisory).
         Button(action: { selectedAlert = alert }) {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 6) {
-                    Image(systemName: alert.severity.iconName)
-                        .foregroundColor(alert.severity.color)
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(tint)
                         .accessibilityHidden(true)
                     Text(alert.event)
                         .font(.headline)
@@ -99,7 +102,7 @@ struct AirQualitySection: View {
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(alert.severity.color.opacity(0.12))
+            .background(tint.opacity(0.15))
             .cornerRadius(10)
         }
         .buttonStyle(.plain)

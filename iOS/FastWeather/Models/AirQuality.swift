@@ -67,6 +67,17 @@ enum AQICategory: Int, CaseIterable {
         }
     }
 
+    /// Tint for an active air-quality alert banner. An active official alert is a
+    /// warning regardless of the instantaneous reading, so this is floored to a
+    /// warning color for the calm categories (Good/Moderate) and otherwise tracks
+    /// the category color. Never green — the banner must never look reassuring.
+    var alertTint: Color {
+        switch self {
+        case .good, .moderate: return .orange
+        default:               return color
+        }
+    }
+
     /// Decorative band color following the conventional AQI palette. Never the
     /// sole carrier of meaning — always paired with `word` and hidden from VoiceOver.
     var color: Color {
