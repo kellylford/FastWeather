@@ -19,6 +19,7 @@ jobs:
           cat > iOS/FastWeather/Services/Secrets.swift << 'EOF'
           enum Secrets {
               static let openMeteoAPIKey: String? = nil
+              static let airNowAPIKey: String? = nil
           }
           EOF
 
