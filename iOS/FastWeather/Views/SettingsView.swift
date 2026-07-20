@@ -1120,13 +1120,26 @@ struct DataSourcesView: View {
             Section(header: Text("Weather Data")) {
                 DataSourceRow(
                     name: "Open-Meteo",
-                    detail: "Current conditions, hourly and daily forecasts, historical weather, marine and air-quality data, and precipitation nowcasts. Licensed under CC BY 4.0.",
+                    detail: "Current conditions, hourly and daily forecasts, historical weather, marine data, and precipitation nowcasts. Licensed under CC BY 4.0.",
                     urlString: "https://open-meteo.com"
                 )
                 DataSourceRow(
                     name: "Apple Weather",
                     detail: "Minute-by-minute precipitation nowcasts and observation-informed current conditions in supported regions, via Apple WeatherKit.",
                     urlString: "https://weatherkit.apple.com/legal-attribution.html"
+                )
+            }
+
+            Section(header: Text("Air Quality")) {
+                DataSourceRow(
+                    name: "AirNow (U.S. EPA)",
+                    detail: "Observed air quality from ground-monitor readings across the United States, from the AirNow program — a partnership led by the U.S. EPA with NOAA, the National Park Service, and state, local, and tribal agencies.",
+                    urlString: "https://www.airnow.gov"
+                )
+                DataSourceRow(
+                    name: "Copernicus Atmosphere Monitoring Service (CAMS)",
+                    detail: "Modeled air-quality estimates used outside AirNow coverage and as a contrast to observed readings, delivered via the Open-Meteo air-quality API.",
+                    urlString: "https://atmosphere.copernicus.eu"
                 )
             }
 
