@@ -459,7 +459,10 @@ class WeatherService: ObservableObject {
 
         do {
             let data = try await apiData(for: url)
-            let response = try JSONDecoder().decode(WeatherResponse.self, from: data)
+            // Decode into a minimal struct, NOT the full WeatherResponse: DailyWeather has
+            // required fields (e.g. temperature_2m_max) that this daylight-only request omits,
+            // which would make a full decode throw keyNotFound and silently drop the note.
+            let response = try JSONDecoder().decode(DaylightChangeResponse.self, from: data)
             guard let durations = response.daily?.daylightDuration else { return nil }
             let targetIndex = dateOffset + pastDays
             guard let target = durations.value(at: targetIndex),
@@ -469,6 +472,16 @@ class WeatherService: ObservableObject {
             debugLog("❌ Failed to fetch daylight change: \(error.localizedDescription)")
             return nil
         }
+    }
+
+    /// Minimal decodable for the daylight-only request in `fetchDaylightChangeVsPreviousDay`,
+    /// so it doesn't require the many non-optional fields of the full `WeatherResponse.DailyWeather`.
+    private struct DaylightChangeResponse: Decodable {
+        struct Daily: Decodable {
+            let daylightDuration: [Double?]?
+            enum CodingKeys: String, CodingKey { case daylightDuration = "daylight_duration" }
+        }
+        let daily: Daily?
     }
     
     // Fetch weather data for a specific date offset.
