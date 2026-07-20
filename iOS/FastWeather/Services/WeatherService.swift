@@ -702,14 +702,19 @@ class WeatherService: ObservableObject {
             await MainActor.run {
                 self.weatherCache[cacheKey] = finalWeatherData
                 self.cacheTimestamps[cacheKey] = Date()
-                self.failedCacheKeys.remove(cacheKey)
+                // failedCacheKeys tracks FULL-fetch state only (it drives the detail view's
+                // "couldn't load the full forecast" banner). A light fetch has no hourly/16-day
+                // data, so it must neither set nor clear the marker — otherwise a light success
+                // would hide a real full-fetch failure, and a light failure would show the
+                // banner over perfectly good cached full data.
+                if includeHourly { self.failedCacheKeys.remove(cacheKey) }
                 self.trimWeatherCacheIfNeeded()
             }
         } catch {
             debugLog("❌ fetchWeatherForDate failed (dateOffset=\(dateOffset), includeHourly=\(includeHourly)): \(error.localizedDescription)")
             await MainActor.run {
                 self.errorMessage = "Failed to fetch weather: \(error.localizedDescription)"
-                self.failedCacheKeys.insert(cacheKey)
+                if includeHourly { self.failedCacheKeys.insert(cacheKey) }
             }
         }
     }
