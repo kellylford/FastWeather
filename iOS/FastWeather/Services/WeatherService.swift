@@ -84,21 +84,71 @@ class WeatherService: ObservableObject {
     }
 
     /// Executes an Open-Meteo API request and returns the raw response data.
-    /// If the server returns a non-200 status, decodes the Open-Meteo error body
+    /// Retries transient failures — request timeouts, dropped connections, and
+    /// HTTP 429/5xx rate-limit or server errors — up to `maxRetries` times with
+    /// exponential backoff before giving up. Without this, a single network blip or
+    /// rate-limit spike drops the caller back to stale/partial (light) cached data,
+    /// which is what produced the "only a few days" / "missing hourly" reports.
+    /// A non-transient non-200 status decodes the Open-Meteo error body
     /// ({"error":true,"reason":"..."}) and throws a descriptive NSError rather than
     /// letting the caller receive a generic DecodingError on the response body.
-    private func apiData(for url: URL, timeout: TimeInterval = 15) async throws -> Data {
-        let request = apiRequest(for: url, timeout: timeout)
-        let (data, response) = try await URLSession.shared.data(for: request)
-        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
-            if let errorBody = try? JSONDecoder().decode(OpenMeteoErrorResponse.self, from: data),
-               errorBody.error {
-                throw NSError(domain: "OpenMeteo", code: httpResponse.statusCode,
-                              userInfo: [NSLocalizedDescriptionKey: errorBody.reason ?? "Unknown API error"])
+    private func apiData(for url: URL, timeout: TimeInterval = 15, maxRetries: Int = 2) async throws -> Data {
+        var attempt = 0
+        while true {
+            do {
+                let request = apiRequest(for: url, timeout: timeout)
+                let (data, response) = try await URLSession.shared.data(for: request)
+                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+                    // Retry rate-limit (429) and server (5xx) errors; surface everything else.
+                    if Self.isRetryableStatus(httpResponse.statusCode), attempt < maxRetries {
+                        attempt += 1
+                        try await Task.sleep(nanoseconds: Self.backoffNanoseconds(forAttempt: attempt))
+                        continue
+                    }
+                    if let errorBody = try? JSONDecoder().decode(OpenMeteoErrorResponse.self, from: data),
+                       errorBody.error {
+                        throw NSError(domain: "OpenMeteo", code: httpResponse.statusCode,
+                                      userInfo: [NSLocalizedDescriptionKey: errorBody.reason ?? "Unknown API error"])
+                    }
+                    throw URLError(.badServerResponse)
+                }
+                return data
+            } catch {
+                // Retry transient network errors (timeout, connection lost, DNS blip).
+                if Self.isTransientNetworkError(error), attempt < maxRetries {
+                    attempt += 1
+                    try? await Task.sleep(nanoseconds: Self.backoffNanoseconds(forAttempt: attempt))
+                    continue
+                }
+                throw error
             }
-            throw URLError(.badServerResponse)
         }
-        return data
+    }
+
+    /// HTTP statuses worth retrying: rate limiting and transient server-side faults.
+    private static func isRetryableStatus(_ status: Int) -> Bool {
+        status == 429 || (500...599).contains(status)
+    }
+
+    /// Transient client-side network failures that a brief retry can clear. Deliberately
+    /// excludes `.notConnectedToInternet` (no point retrying a device that's offline) and
+    /// `.badServerResponse` (already decided not to retry that status above).
+    private static func isTransientNetworkError(_ error: Error) -> Bool {
+        guard let urlError = error as? URLError else { return false }
+        switch urlError.code {
+        case .timedOut, .networkConnectionLost, .cannotConnectToHost,
+             .cannotFindHost, .dnsLookupFailed:
+            return true
+        default:
+            return false
+        }
+    }
+
+    /// Exponential backoff: ~0.5s before the first retry, ~1.5s before the second —
+    /// long enough to clear a blip, short enough not to strand the UI.
+    private static func backoffNanoseconds(forAttempt attempt: Int) -> UInt64 {
+        let seconds = 0.5 * pow(3.0, Double(attempt - 1))
+        return UInt64(seconds * 1_000_000_000)
     }
     
     // Cache durations
@@ -358,6 +408,68 @@ class WeatherService: ObservableObject {
         // Light fetch for list display — detail view will request full data on open
         await fetchWeatherForDate(for: city, dateOffset: 0, includeHourly: false)
     }
+
+    /// Clears any prior failure marker for this city/date and re-attempts a full fetch.
+    /// Once a full fetch fails, `failedCacheKeys` guards the list-row `.task` from
+    /// re-fetching (so it doesn't loop on a persistent error), which leaves a city stuck
+    /// showing truncated light data. The detail view's "Try Again" button calls this to
+    /// escape that state.
+    func retryFetch(for city: City, dateOffset: Int) async {
+        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+        await MainActor.run { self.failedCacheKeys.remove(cacheKey) }
+        await fetchWeatherForDate(for: city, dateOffset: dateOffset, includeHourly: true)
+    }
+
+    /// Change in daylight duration (in seconds) for the given day versus the day before it —
+    /// positive means more daylight than the previous day, negative means less. Powers the
+    /// "N minutes more/less than yesterday" note under the daylight total.
+    ///
+    /// First reuses per-day data already cached by day navigation ("look ahead") — each
+    /// visited day is fetched with `daylight_duration`, so once the previous day has been
+    /// viewed this costs nothing. Only when the previous day isn't cached (e.g. a cold
+    /// today-view, which never pre-fetches yesterday) does it fall back to a tiny dedicated
+    /// request — daily=daylight_duration only, no hourly — that doesn't bloat the main
+    /// payload. Returns nil on any error.
+    func fetchDaylightChangeVsPreviousDay(for city: City, dateOffset: Int) async -> Double? {
+        // Fast path: both days are already in the weather cache from day navigation.
+        let currentKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+        let previousKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset - 1)
+        if let current = weatherCache[currentKey]?.daily?.daylightDuration?.value(at: 0),
+           let previous = weatherCache[previousKey]?.daily?.daylightDuration?.value(at: 0) {
+            return current - previous
+        }
+
+        // With past_days=P and forecast_days=F, the daily array covers dateOffsets -P…(F-1),
+        // so a given dateOffset lives at index (dateOffset + P). Size the window to include
+        // both the target day and the day before it.
+        let previousOffset = dateOffset - 1
+        let pastDays = max(0, -previousOffset)
+        let forecastDays = max(1, dateOffset + 1)
+
+        var components = URLComponents(string: baseURL)!
+        components.queryItems = [
+            URLQueryItem(name: "latitude", value: String(city.latitude)),
+            URLQueryItem(name: "longitude", value: String(city.longitude)),
+            URLQueryItem(name: "daily", value: "daylight_duration"),
+            URLQueryItem(name: "past_days", value: String(pastDays)),
+            URLQueryItem(name: "forecast_days", value: String(forecastDays)),
+            URLQueryItem(name: "timezone", value: "auto")
+        ]
+        guard let url = components.url else { return nil }
+
+        do {
+            let data = try await apiData(for: url)
+            let response = try JSONDecoder().decode(WeatherResponse.self, from: data)
+            guard let durations = response.daily?.daylightDuration else { return nil }
+            let targetIndex = dateOffset + pastDays
+            guard let target = durations.value(at: targetIndex),
+                  let previous = durations.value(at: targetIndex - 1) else { return nil }
+            return target - previous
+        } catch {
+            debugLog("❌ Failed to fetch daylight change: \(error.localizedDescription)")
+            return nil
+        }
+    }
     
     // Fetch weather data for a specific date offset.
     // includeHourly: false → skip hourly, forecast_days=3 (fast; used by list/background refresh)
@@ -430,11 +542,14 @@ class WeatherService: ObservableObject {
         }
         
         do {
-            let data = try await apiData(for: url)
-            
+            // The full fetch (hourly + 16 daily variables) is a large payload; give it
+            // 30s on slow cellular so it doesn't time out and fall back to light data.
+            // The light fetch (3 days, no hourly) is small — keep the tighter 15s.
+            let data = try await apiData(for: url, timeout: includeHourly ? 30 : 15)
+
             let decoder = JSONDecoder()
             let response = try decoder.decode(WeatherResponse.self, from: data)
-            
+
             // For dateOffset = 0 (today), use the current weather directly
             // For dateOffset > 0 (future), extract that day's data from daily/hourly arrays
             let weatherData: WeatherData

@@ -25,6 +25,9 @@ struct CityDetailView: View {
     @State private var removalCityName = "" // Captured at trigger time to prevent dialog flashing
     @State private var isRefreshing = false
     @State private var cacheMetadata: CachedWeather?
+    /// Change in daylight (seconds) vs. the previous day, for the "N min more/less than
+    /// yesterday" note. Fetched separately since the previous day isn't in the forecast array.
+    @State private var daylightChangeSeconds: Double?
     
     // Backward compatibility initializer (defaults to today)
     init(city: City, dateOffset: Int = 0, selectedDate: Date = Date()) {
@@ -33,9 +36,18 @@ struct CityDetailView: View {
         self.selectedDate = selectedDate
     }
     
+    private var cacheKey: WeatherCacheKey {
+        WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
+    }
+
     private var weather: WeatherData? {
-        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
-        return weatherService.weatherCache[cacheKey]
+        weatherService.weatherCache[cacheKey]
+    }
+
+    /// The most recent full fetch for this city/date failed. Used to surface a retry
+    /// banner instead of silently showing truncated (light, 3-day/no-hourly) data.
+    private var fetchFailed: Bool {
+        weatherService.failedCacheKeys.contains(cacheKey)
     }
     
     private var isSaved: Bool {
@@ -54,12 +66,31 @@ struct CityDetailView: View {
         await weatherService.fetchWeatherForDate(for: city, dateOffset: dateOffset)
         isRefreshing = false
         // Refresh cache metadata
-        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
         cacheMetadata = await weatherService.getCacheMetadata(for: cacheKey)
     }
-    
+
+    /// Ensures the detail view has full data (hourly + 16-day) when it appears, and loads
+    /// cache metadata. If only light data is cached (hourly missing) it upgrades to a full
+    /// fetch — even for a city the list marked failed, so opening the detail acts as a retry.
+    private func loadWeather() async {
+        let cached = weatherService.weatherCache[cacheKey]
+        // Today/future forecasts carry hourly; a nil hourly means we only have light data.
+        let needsFull = cached == nil || (dateOffset >= 0 && cached?.hourly == nil)
+        if needsFull {
+            await weatherService.retryFetch(for: city, dateOffset: dateOffset)
+        }
+        cacheMetadata = await weatherService.getCacheMetadata(for: cacheKey)
+    }
+
+    /// Clears the failure marker and re-attempts a full fetch (the "Try Again" button).
+    private func retry() async {
+        isRefreshing = true
+        await weatherService.retryFetch(for: city, dateOffset: dateOffset)
+        isRefreshing = false
+        cacheMetadata = await weatherService.getCacheMetadata(for: cacheKey)
+    }
+
     private func loadCacheMetadata() async {
-        let cacheKey = WeatherCacheKey(cityId: city.id, dateOffset: dateOffset)
         cacheMetadata = await weatherService.getCacheMetadata(for: cacheKey)
     }
     
@@ -264,17 +295,28 @@ struct CityDetailView: View {
                             
                             if settingsManager.settings.showDaylightDuration,
                                let daylight = daily.daylightDuration?.value(at: 0) {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "sun.max")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                        .accessibilityHidden(true)
-                                    Text("\(formatDuration(daylight)) of daylight")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
+                                let changePhrase = daylightChangeSeconds.flatMap { daylightChangePhrase($0) }
+                                VStack(spacing: 2) {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "sun.max")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                            .accessibilityHidden(true)
+                                        Text("\(formatDuration(daylight)) of daylight")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    if let changePhrase {
+                                        Text(changePhrase)
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                            .multilineTextAlignment(.center)
+                                    }
                                 }
                                 .accessibilityElement(children: .ignore)
-                                .accessibilityLabel("\(formatDuration(daylight)) of daylight")
+                                .accessibilityLabel(changePhrase.map {
+                                    "\(formatDuration(daylight)) of daylight, \($0)"
+                                } ?? "\(formatDuration(daylight)) of daylight")
                             }
                             
                             if settingsManager.settings.showSunshineDuration,
@@ -655,10 +697,52 @@ struct CityDetailView: View {
         }
     }
     
+    /// Shown when the full forecast fetch failed. Tells the user the data on screen may
+    /// be incomplete and offers a retry, rather than silently presenting truncated data.
+    private var forecastErrorBanner: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 8) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(.orange)
+                    .accessibilityHidden(true)
+                Text("Couldn't load the full forecast")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+            }
+            Text("The 16-day and hourly forecast may be incomplete. Check your connection and try again.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            Button {
+                Task { await retry() }
+            } label: {
+                Label("Try Again", systemImage: "arrow.clockwise")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(isRefreshing)
+            .accessibilityHint("Reloads the full 16-day and hourly forecast")
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Color.orange.opacity(0.12))
+        .cornerRadius(12)
+        .padding(.horizontal)
+        .accessibilityElement(children: .contain)
+    }
+
     var body: some View {
         let _ = debugLog("🟢 CityDetailView body called for \(city.name), selectedAlert: \(selectedAlert?.event ?? "nil")")
         ScrollView {
             VStack(spacing: 24) {
+                // Full-fetch failure banner — shown whether or not partial (light) data
+                // is present, so a truncated forecast is never displayed as if complete.
+                if fetchFailed {
+                    forecastErrorBanner
+                }
+
                 if let weather = weather {
                     // Cache status indicator (if data is stale)
                     if let metadata = cacheMetadata, metadata.isStale {
@@ -804,10 +888,12 @@ struct CityDetailView: View {
                         }
                     }
                     
-                } else {
+                } else if !fetchFailed {
                     ProgressView("Loading weather data...")
                         .padding()
                 }
+                // When fetchFailed and there's no cached data, the banner above stands alone
+                // instead of spinning forever.
             }
             .padding(.vertical)
         }
@@ -828,7 +914,13 @@ struct CityDetailView: View {
             }
         }
         .task {
-            await loadCacheMetadata()
+            await loadWeather()
+        }
+        .task(id: "\(city.id)-\(dateOffset)-daylight") {
+            // Reset first so a stale other-city value never flashes while this loads.
+            daylightChangeSeconds = nil
+            guard settingsManager.settings.showDaylightDuration else { return }
+            daylightChangeSeconds = await weatherService.fetchDaylightChangeVsPreviousDay(for: city, dateOffset: dateOffset)
         }
         .refreshable {
             await refreshWeather()
@@ -915,6 +1007,26 @@ struct CityDetailView: View {
         case let (nil, lo?): return "Forecast low \(formatTemperature(lo))"
         default: return "Forecast temperature unavailable"
         }
+    }
+
+    /// "1 minute less than yesterday" / "2 minutes more than today" for the daylight change.
+    /// Always compares the displayed day against the day before it; the reference word tracks
+    /// the day-navigation offset so it reads naturally both looking back and looking forward:
+    /// today→"yesterday", tomorrow→"today", any other day→"the previous day". Returns nil when
+    /// the change rounds to under a minute (near the solstices), so we omit the note rather
+    /// than showing "0 minutes".
+    private func daylightChangePhrase(_ deltaSeconds: Double) -> String? {
+        let minutes = Int((abs(deltaSeconds) / 60).rounded())
+        guard minutes >= 1 else { return nil }
+        let unit = minutes == 1 ? "minute" : "minutes"
+        let direction = deltaSeconds >= 0 ? "more" : "less"
+        let reference: String
+        switch dateOffset {
+        case 0: reference = "yesterday"
+        case 1: reference = "today"
+        default: reference = "the previous day"
+        }
+        return "\(minutes) \(unit) \(direction) than \(reference)"
     }
 
     private var shareSubject: String {
@@ -2171,7 +2283,7 @@ struct DailyForecastRow: View {
     private func formatDuration(_ seconds: Double) -> String {
         let hours = Int(seconds / 3600)
         let minutes = Int((seconds.truncatingRemainder(dividingBy: 3600)) / 60)
-        
+
         if minutes > 0 {
             return "\(hours)h \(minutes)m"
         } else {
