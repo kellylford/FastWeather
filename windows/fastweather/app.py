@@ -22,7 +22,7 @@ from .ui.dialogs.city_select import CitySelectionDialog
 from .ui.dialogs.config_dialog import WeatherConfigDialog
 from .ui.dialogs.location_browser import LocationBrowserDialog
 from .ui.events import EVT_FETCH_RESULT
-from .services import alert_service
+from .services import alert_service, location_service
 from .ui.dialogs.alerts_dialog import AlertsDialog
 from .ui.dialogs.around_me_dialog import AroundMeDialog
 from .ui.dialogs.historical_dialog import HistoricalDialog
@@ -113,7 +113,9 @@ class MainFrame(wx.Frame):
 
         browse_row = wx.BoxSizer(wx.HORIZONTAL)
         self.browse_btn = wx.Button(self.main_view, label="Browse Cities by State/Country")
-        browse_row.Add(self.browse_btn, 1, wx.EXPAND)
+        self.mylocation_btn = wx.Button(self.main_view, label="Add My Location")
+        browse_row.Add(self.browse_btn, 1, wx.EXPAND | wx.RIGHT, 5)
+        browse_row.Add(self.mylocation_btn, 0)
         inp_box.Add(browse_row, 0, wx.EXPAND | wx.ALL, 5)
 
         mv_sizer.Add(inp_box, 0, wx.EXPAND | wx.ALL, 10)
@@ -179,6 +181,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.on_add_city, self.add_btn)
         self.city_input.Bind(wx.EVT_TEXT_ENTER, self.on_add_city)
         self.Bind(wx.EVT_BUTTON, self.on_browse_cities, self.browse_btn)
+        self.Bind(wx.EVT_BUTTON, self.on_add_my_location, self.mylocation_btn)
         self.Bind(wx.EVT_LISTBOX, self.on_select, self.city_list)
         self.city_list.Bind(wx.EVT_LISTBOX_DCLICK, self.on_full_weather)
         self.Bind(wx.EVT_BUTTON, self.on_move_up, self.btn_up)
@@ -221,6 +224,7 @@ class MainFrame(wx.Frame):
         cities_menu = wx.Menu()
         mi_add = cities_menu.Append(wx.ID_ANY, "Add City")
         mi_browse = cities_menu.Append(wx.ID_ANY, "Browse Cities by State/Country...")
+        mi_myloc = cities_menu.Append(wx.ID_ANY, "Add My Location")
         cities_menu.AppendSeparator()
         mi_full = cities_menu.Append(wx.ID_ANY, "Full Weather")
         mi_refresh = cities_menu.Append(wx.ID_ANY, "Refresh")
@@ -254,6 +258,7 @@ class MainFrame(wx.Frame):
 
         self.Bind(wx.EVT_MENU, self.on_focus_new_city, mi_add)
         self.Bind(wx.EVT_MENU, self.on_browse_cities, mi_browse)
+        self.Bind(wx.EVT_MENU, self.on_add_my_location, mi_myloc)
         self.Bind(wx.EVT_MENU, self.on_full_weather, mi_full)
         self.Bind(wx.EVT_MENU, self.on_refresh, mi_refresh)
         self.Bind(wx.EVT_MENU, self.on_remove, mi_remove)
@@ -550,6 +555,31 @@ class MainFrame(wx.Frame):
                 break
         self.update_buttons()
 
+    def on_add_my_location(self, event):
+        if wx.MessageBox(
+            "Detect your approximate location and add it as a city?\n\n"
+            "If precise device location is unavailable, an IP-based lookup "
+            "(ipapi.co) is used to estimate your city.",
+            "Add My Location", wx.YES_NO | wx.ICON_QUESTION,
+        ) != wx.YES:
+            return
+        self.statusbar.SetStatusText("Detecting location...", 0)
+        self.mylocation_btn.Disable()
+        self.fetch.submit("mylocation", location_service.get_location)
+
+    def _add_location_city(self, place):
+        name = place["name"]
+        if name not in self.cities:
+            self.cities.add(name, place["lat"], place["lon"])
+            self.update_city_list()
+        for i in range(self.city_list.GetCount()):
+            if self.city_list.GetString(i).startswith(name):
+                self.city_list.SetSelection(i)
+                self.city_list.SetFocus()
+                break
+        self.update_buttons()
+        self.statusbar.SetStatusText(f"Added your location: {name}", 0)
+
     def on_browse_cities(self, event):
         if not self.us_cities_cache and not self.intl_cities_cache:
             wx.MessageBox(
@@ -706,6 +736,14 @@ class MainFrame(wx.Frame):
                 self.on_geo_error(event.error)
             else:
                 self.on_geo_ready(event.request_id, event.payload)
+        elif event.kind == "mylocation":
+            self.statusbar.SetStatusText("Ready", 0)
+            self.mylocation_btn.Enable()
+            if event.error:
+                wx.MessageBox(f"Could not determine your location: {event.error}",
+                              "Location Unavailable", wx.OK | wx.ICON_WARNING)
+            else:
+                self._add_location_city(event.payload)
         elif event.kind == "alert_badge":
             # Best-effort: only badge on a positive result; never annotate on
             # error (can't distinguish "no alerts" from "couldn't check").
