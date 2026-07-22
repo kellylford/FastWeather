@@ -27,6 +27,7 @@ from .ui.dialogs.alerts_dialog import AlertsDialog
 from .ui.dialogs.around_me_dialog import AroundMeDialog
 from .ui.dialogs.marine_dialog import MarineDialog
 from .ui.dialogs.mydata_dialog import MyDataDialog
+from .ui.dialogs.radar_dialog import RadarDialog
 from .ui.formatters import Formatter
 from .ui.full_weather_view import build_full_weather_lines
 from .paths import user_data_dir
@@ -247,6 +248,7 @@ class MainFrame(wx.Frame):
 
         # Feature sheets (registered per phase).
         self.add_weather_menu_item("Weather Alerts...", self.on_alerts)
+        self.add_weather_menu_item("Expected Precipitation...", self.on_radar)
         self.add_weather_menu_item("Weather Around Me...", self.on_weather_around_me)
         self.add_weather_menu_item("My Data...", self.on_mydata)
         self.add_weather_menu_item("Marine Forecast...", self.on_marine)
@@ -288,6 +290,14 @@ class MainFrame(wx.Frame):
         if not city:
             return
         dlg = AlertsDialog(self, city)
+        dlg.ShowModal()
+        dlg.Destroy()
+
+    def on_radar(self, event):
+        city = self.require_selected_city()
+        if not city:
+            return
+        dlg = RadarDialog(self, city, self.fmt)
         dlg.ShowModal()
         dlg.Destroy()
 
