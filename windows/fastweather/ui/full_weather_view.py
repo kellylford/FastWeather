@@ -17,6 +17,109 @@ def _duration_hours(seconds):
     return f"{h}h {m}m"
 
 
+def _hour_ampm(iso):
+    """'2026-07-22T15:00' -> '3 PM'."""
+    dt = datetime.strptime(iso, "%Y-%m-%dT%H:%M")
+    return dt.strftime("%I %p").lstrip("0")
+
+
+def build_today_outlook(data, settings, fmt):
+    """Plain-language highlights for today (precip timing, UV, wind)."""
+    lines = []
+    hourly = data.get("hourly", {})
+    daily = data.get("daily", {})
+    curr = data.get("current", {})
+    times = hourly.get("time", [])
+    probs = hourly.get("precipitation_probability", [])
+    ctime = curr.get("time")
+    today = (ctime or (times[0] if times else ""))[:10]
+
+    # Precipitation timing: longest run of hours today (>= now) with prob >= 50%.
+    best = None
+    run = None
+    for i, t in enumerate(times):
+        if not t.startswith(today):
+            continue
+        if ctime and t < ctime:
+            continue
+        p = probs[i] if i < len(probs) else None
+        if p is not None and p >= 50:
+            if run is None:
+                run = [i, i, p]
+            else:
+                run[1], run[2] = i, max(run[2], p)
+        elif run is not None:
+            if best is None or (run[1] - run[0]) > (best[1] - best[0]):
+                best = run
+            run = None
+    if run is not None and (best is None or (run[1] - run[0]) > (best[1] - best[0])):
+        best = run
+    if best is not None:
+        s, e, peak = best
+        span = _hour_ampm(times[s]) if s == e else f"{_hour_ampm(times[s])}-{_hour_ampm(times[e])}"
+        lines.append(f"Precipitation most likely {span} ({peak}% chance)")
+
+    # UV and wind alerts from today's daily values.
+    uv = (daily.get("uv_index_max") or [None])[0]
+    if uv is not None and uv >= 6:
+        lines.append(f"High UV today (max {uv:.0f})")
+    wind = (daily.get("windspeed_10m_max") or [None])[0]
+    if wind is not None and wind >= 40:  # ~25 mph
+        lines.append(f"Breezy today (up to {fmt.wind_speed(wind)})")
+    return lines
+
+
+def build_day_lines(city, data, settings, fmt, target_date, offset_label):
+    """Render a specific day's hourly + summary (for date navigation)."""
+    lines = [f"Weather for {city}", f"{target_date} ({offset_label})", "=" * 40]
+
+    daily = data.get("daily", {})
+    dtimes = daily.get("time", [])
+    if target_date in dtimes:
+        idx = dtimes.index(target_date)
+        # Build a compact summary line for the day.
+        summary = [f"{datetime.strptime(target_date, '%Y-%m-%d').strftime('%a %b %d')}:"]
+        mx = (daily.get("temperature_2m_max") or [None] * (idx + 1))[idx]
+        mn = (daily.get("temperature_2m_min") or [None] * (idx + 1))[idx]
+        if mx is not None:
+            summary.append(f"High {fmt.temperature_short(mx)}")
+        if mn is not None:
+            summary.append(f"Low {fmt.temperature_short(mn)}")
+        ps = (daily.get("precipitation_sum") or [None] * (idx + 1))[idx]
+        if ps:
+            summary.append(f"{fmt.precipitation(ps)} precip")
+        code = (daily.get("weathercode") or [None] * (idx + 1))[idx]
+        desc = describe_weather_code(code)
+        if desc:
+            summary.append(desc)
+        lines.append("SUMMARY")
+        lines.append(" ".join(summary))
+        lines.append("")
+
+    # Hourly for the target day.
+    hourly = data.get("hourly", {})
+    htimes = hourly.get("time", [])
+    temps = hourly.get("temperature_2m", [])
+    precip = hourly.get("precipitation", [])
+    probs = hourly.get("precipitation_probability", [])
+    lines.append("HOURLY")
+    for i, t in enumerate(htimes):
+        if not t.startswith(target_date):
+            continue
+        when = datetime.strptime(t, "%Y-%m-%dT%H:%M").strftime("%I:%M %p")
+        parts = [f"{when}:"]
+        if i < len(temps) and temps[i] is not None:
+            parts.append(fmt.temperature_short(temps[i]))
+        if i < len(probs) and probs[i]:
+            parts.append(f"{probs[i]}% chance")
+        if i < len(precip) and precip[i]:
+            parts.append(f"{fmt.precipitation(precip[i])} precip")
+        lines.append(" ".join(parts))
+    lines.append("")
+    lines.append("Data by Open-Meteo.com (CC BY 4.0)")
+    return lines
+
+
 def build_full_weather_lines(city, data, settings, fmt):
     lines = []
     lines.append(f"Report for {city}")
@@ -139,6 +242,13 @@ def build_full_weather_lines(city, data, settings, fmt):
                 lines.append(f"Wind Gusts: {fmt.wind_speed(gust)}")
 
         lines.append("")
+
+        if settings["current"].get("today_outlook", True):
+            outlook = build_today_outlook(data, settings, fmt)
+            if outlook:
+                lines.append("TODAY'S OUTLOOK")
+                lines.extend(outlook)
+                lines.append("")
 
     cfg_hourly = settings["hourly"]
     if hourly and any(cfg_hourly.values()):

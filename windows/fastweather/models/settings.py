@@ -14,6 +14,7 @@ def default_config():
     """Return a fresh copy of the default weather-display configuration."""
     return {
         "current": {
+            "today_outlook": True,
             "condition": True, "temperature": True, "feels_like": True,
             "humidity": True, "dew_point": False,
             "wind_speed": True, "wind_direction": True, "wind_gusts": False,

@@ -37,6 +37,7 @@ class WeatherConfigDialog(wx.Dialog):
             nb.AddPage(p, name)
 
         add_tab("Current", "current", [
+            ("today_outlook", "Today's Outlook"),
             ("condition", "Condition"), ("temperature", "Temperature"),
             ("feels_like", "Feels Like"), ("humidity", "Humidity"),
             ("dew_point", "Dew Point"), ("wind_speed", "Wind Speed"),

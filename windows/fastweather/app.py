@@ -29,8 +29,9 @@ from .ui.dialogs.historical_dialog import HistoricalDialog
 from .ui.dialogs.marine_dialog import MarineDialog
 from .ui.dialogs.mydata_dialog import MyDataDialog
 from .ui.dialogs.radar_dialog import RadarDialog
+from .ui.dialogs.astronomy_dialog import AstronomyDialog
 from .ui.formatters import Formatter
-from .ui.full_weather_view import build_full_weather_lines
+from .ui.full_weather_view import build_day_lines, build_full_weather_lines
 from .paths import user_data_dir
 
 
@@ -53,6 +54,8 @@ class MainFrame(wx.Frame):
         # Cached city coordinates for browsing
         self.us_cities_cache, self.intl_cities_cache = load_cached_cities()
         self._all_cities = None  # flattened lazily for the Directional Explorer
+        self.day_offset = 0      # detailed-view date navigation (-7..+7)
+        self.current_full_data = None
 
         self.cities.load()
         self.load_config()
@@ -144,9 +147,15 @@ class MainFrame(wx.Frame):
         self.lbl_full_title.SetFont(
             wx.Font(14, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
         )
+        self.btn_prev_day = wx.Button(self.full_view, label="Prev Day")
+        self.btn_today = wx.Button(self.full_view, label="Today")
+        self.btn_next_day = wx.Button(self.full_view, label="Next Day")
         self.btn_config = wx.Button(self.full_view, label="Configure")
         head_row.Add(self.btn_back, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 10)
         head_row.Add(self.lbl_full_title, 1, wx.ALIGN_CENTER_VERTICAL)
+        head_row.Add(self.btn_prev_day, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 4)
+        head_row.Add(self.btn_today, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 4)
+        head_row.Add(self.btn_next_day, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 10)
         head_row.Add(self.btn_config, 0, wx.ALIGN_CENTER_VERTICAL)
         fv_sizer.Add(head_row, 0, wx.EXPAND | wx.ALL, 10)
 
@@ -177,6 +186,9 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.on_refresh, self.btn_refresh)
         self.Bind(wx.EVT_BUTTON, self.on_full_weather, self.btn_full)
         self.Bind(wx.EVT_BUTTON, self.on_back, self.btn_back)
+        self.Bind(wx.EVT_BUTTON, lambda e: self.nav_day(-1), self.btn_prev_day)
+        self.Bind(wx.EVT_BUTTON, lambda e: self.nav_day(0), self.btn_today)
+        self.Bind(wx.EVT_BUTTON, lambda e: self.nav_day(1), self.btn_next_day)
         self.Bind(wx.EVT_BUTTON, self.on_config, self.btn_config)
         self.Bind(wx.EVT_BUTTON, self.on_config, self.btn_config_main)
         self.city_list.Bind(wx.EVT_KEY_DOWN, self.on_list_key)
@@ -254,6 +266,7 @@ class MainFrame(wx.Frame):
         self.add_weather_menu_item("Historical Weather...", self.on_historical)
         self.add_weather_menu_item("My Data...", self.on_mydata)
         self.add_weather_menu_item("Marine Forecast...", self.on_marine)
+        self.add_weather_menu_item("Astronomy (Moon)...", self.on_astronomy)
 
     def all_cities(self):
         """Flattened list of every cached city (built once, lazily)."""
@@ -296,6 +309,14 @@ class MainFrame(wx.Frame):
         dlg.ShowModal()
         dlg.Destroy()
 
+    def on_astronomy(self, event):
+        city = self.require_selected_city()
+        if not city:
+            return
+        dlg = AstronomyDialog(self, city)
+        dlg.ShowModal()
+        dlg.Destroy()
+
     def on_alerts(self, event):
         city = self.require_selected_city()
         if not city:
@@ -315,7 +336,7 @@ class MainFrame(wx.Frame):
     def add_weather_menu_item(self, label, handler):
         """Register a per-city feature sheet in the Weather menu (used by phases)."""
         if self._weather_placeholder is not None:
-            self.weather_menu.Destroy(self._weather_placeholder)
+            self.weather_menu.DestroyItem(self._weather_placeholder)
             self._weather_placeholder = None
         item = self.weather_menu.Append(wx.ID_ANY, label)
         self.Bind(wx.EVT_MENU, handler, item)
@@ -566,11 +587,42 @@ class MainFrame(wx.Frame):
         city = self.city_list.GetString(sel).split(" - ")[0]
         lat, lon = self.cities.coords(city)
         self.current_full_city = (city, lat, lon)
+        self.day_offset = 0
+        self.current_full_data = None
         self.lbl_full_title.SetLabel(f"Full Weather - {city}")
         self.full_display.set_message("Loading...")
         self.book.SetSelection(1)
         self.full_display.set_focus()
         self._fetch_weather(city, lat, lon, "full")
+
+    def nav_day(self, direction):
+        """Navigate the detailed view by day (direction 0 resets to today)."""
+        if self.current_full_data is None:
+            return
+        if direction == 0:
+            self.day_offset = 0
+        else:
+            self.day_offset = max(-7, min(7, self.day_offset + direction))
+        self._render_full()
+
+    def _render_full(self):
+        if self.current_full_data is None or not hasattr(self, "current_full_city"):
+            return
+        city = self.current_full_city[0]
+        data = self.current_full_data
+        if self.day_offset == 0:
+            lines = build_full_weather_lines(city, data, self.settings, self.fmt)
+        else:
+            ref = data.get("current", {}).get("time", "")[:10]
+            try:
+                from datetime import date, timedelta
+                target = (date.fromisoformat(ref) + timedelta(days=self.day_offset)).isoformat()
+            except Exception:
+                return
+            label = f"{'+' if self.day_offset > 0 else ''}{self.day_offset} day" \
+                    + ("s" if abs(self.day_offset) != 1 else "")
+            lines = build_day_lines(city, data, self.settings, self.fmt, target, label)
+        self.full_display.set_lines(lines)
 
     def on_back(self, event):
         self.book.SetSelection(0)
@@ -693,8 +745,8 @@ class MainFrame(wx.Frame):
         if (hasattr(self, "current_full_city")
                 and self.current_full_city[0] == city
                 and self.book.GetSelection() == 1):
-            lines = build_full_weather_lines(city, data, self.settings, self.fmt)
-            self.full_display.set_lines(lines)
+            self.current_full_data = data
+            self._render_full()
 
     def on_weather_error(self, city, err):
         if (self.book.GetSelection() == 1

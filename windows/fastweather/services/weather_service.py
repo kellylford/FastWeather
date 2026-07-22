@@ -32,11 +32,12 @@ _FULL_DAILY_FIELDS = (
 )
 
 
-def fetch_weather(lat, lon, detail="basic", forecast_days=16):
+def fetch_weather(lat, lon, detail="basic", forecast_days=16, past_days=7):
     """Fetch forecast data for a coordinate. Returns parsed JSON dict.
 
     detail="basic": lightweight (list summary). detail="full": complete
-    hourly + daily forecast for the detailed view.
+    hourly + daily forecast for the detailed view, including ``past_days`` of
+    history so the detailed view's date navigation can browse recent days.
     """
     params = {
         "latitude": lat,
@@ -48,6 +49,7 @@ def fetch_weather(lat, lon, detail="basic", forecast_days=16):
         params["hourly"] = _FULL_HOURLY_FIELDS
         params["daily"] = _FULL_DAILY_FIELDS
         params["forecast_days"] = forecast_days
+        params["past_days"] = past_days
     else:
         params["hourly"] = "cloudcover"
         params["daily"] = "temperature_2m_max,temperature_2m_min"
