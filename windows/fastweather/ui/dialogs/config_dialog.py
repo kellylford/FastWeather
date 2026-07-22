@@ -12,7 +12,7 @@ import wx
 
 class WeatherConfigDialog(wx.Dialog):
     def __init__(self, parent, current_config):
-        super().__init__(parent, title="Configure Weather Display", size=(600, 500))
+        super().__init__(parent, title="Configure Weather Display", size=(640, 680))
         self.config = copy.deepcopy(current_config)
 
         panel = wx.Panel(self)
@@ -37,25 +37,33 @@ class WeatherConfigDialog(wx.Dialog):
             nb.AddPage(p, name)
 
         add_tab("Current", "current", [
-            ("temperature", "Temperature"), ("feels_like", "Feels Like"),
-            ("humidity", "Humidity"), ("wind_speed", "Wind Speed"),
-            ("wind_direction", "Wind Direction"), ("pressure", "Pressure"),
-            ("visibility", "Visibility"), ("uv_index", "UV Index"),
-            ("precipitation", "Precipitation"), ("cloud_cover", "Cloud Cover"),
-            ("snowfall", "Snowfall"), ("snow_depth", "Snow Depth"),
-            ("rain", "Rain"), ("showers", "Showers"),
+            ("condition", "Condition"), ("temperature", "Temperature"),
+            ("feels_like", "Feels Like"), ("humidity", "Humidity"),
+            ("dew_point", "Dew Point"), ("wind_speed", "Wind Speed"),
+            ("wind_direction", "Wind Direction"), ("wind_gusts", "Wind Gusts"),
+            ("pressure", "Pressure"), ("visibility", "Visibility"),
+            ("uv_index", "UV Index"), ("precipitation", "Precipitation"),
+            ("cloud_cover", "Cloud Cover"), ("snowfall", "Snowfall"),
+            ("snow_depth", "Snow Depth"), ("rain", "Rain"), ("showers", "Showers"),
         ])
         add_tab("Hourly", "hourly", [
-            ("temperature", "Temperature"), ("feels_like", "Feels Like"),
-            ("humidity", "Humidity"), ("precipitation", "Precipitation"),
-            ("wind_speed", "Wind Speed"), ("wind_direction", "Wind Direction"),
+            ("condition", "Condition"), ("temperature", "Temperature"),
+            ("feels_like", "Feels Like"), ("humidity", "Humidity"),
+            ("dew_point", "Dew Point"), ("precip_probability", "Precip Chance"),
+            ("precipitation", "Precipitation"), ("wind_speed", "Wind Speed"),
+            ("wind_direction", "Wind Direction"), ("wind_gusts", "Wind Gusts"),
             ("cloud_cover", "Cloud Cover"), ("snowfall", "Snowfall"),
             ("rain", "Rain"), ("showers", "Showers"),
         ])
         add_tab("Daily", "daily", [
-            ("temperature_max", "High Temp"), ("temperature_min", "Low Temp"),
-            ("sunrise", "Sunrise"), ("sunset", "Sunset"),
-            ("precipitation_sum", "Precip Total"), ("precipitation_hours", "Precip Hours"),
+            ("condition", "Condition"), ("temperature_max", "High Temp"),
+            ("temperature_min", "Low Temp"), ("apparent_max", "Feels High"),
+            ("apparent_min", "Feels Low"), ("sunrise", "Sunrise"),
+            ("sunset", "Sunset"), ("daylight_duration", "Daylight Duration"),
+            ("sunshine_duration", "Sunshine Duration"), ("uv_max", "UV Index Max"),
+            ("precipitation_sum", "Precip Total"),
+            ("precip_probability_max", "Precip Chance"),
+            ("precipitation_hours", "Precip Hours"),
             ("wind_speed_max", "Max Wind"), ("wind_direction_dominant", "Wind Direction"),
             ("snowfall_sum", "Snowfall Total"), ("rain_sum", "Rain Total"),
             ("showers_sum", "Showers Total"),
@@ -79,17 +87,50 @@ class WeatherConfigDialog(wx.Dialog):
 
         wind_box = wx.StaticBox(units_panel, label="Wind Speed")
         wind_sizer = wx.StaticBoxSizer(wind_box, wx.HORIZONTAL)
+        cur_wind = self.config["units"].get("wind_speed", "mph")
         self.unit_controls["wind_mph"] = wx.RadioButton(
             units_panel, label="Miles per hour (mph)", style=wx.RB_GROUP
         )
         self.unit_controls["wind_kmh"] = wx.RadioButton(
             units_panel, label="Kilometers per hour (km/h)"
         )
-        self.unit_controls["wind_mph"].SetValue(self.config["units"].get("wind_speed", "mph") == "mph")
-        self.unit_controls["wind_kmh"].SetValue(self.config["units"].get("wind_speed", "mph") == "km/h")
+        self.unit_controls["wind_ms"] = wx.RadioButton(units_panel, label="Meters per second (m/s)")
+        self.unit_controls["wind_mph"].SetValue(cur_wind == "mph")
+        self.unit_controls["wind_kmh"].SetValue(cur_wind == "km/h")
+        self.unit_controls["wind_ms"].SetValue(cur_wind == "m/s")
         wind_sizer.Add(self.unit_controls["wind_mph"], 0, wx.ALL, 5)
         wind_sizer.Add(self.unit_controls["wind_kmh"], 0, wx.ALL, 5)
+        wind_sizer.Add(self.unit_controls["wind_ms"], 0, wx.ALL, 5)
         units_sizer.Add(wind_sizer, 0, wx.EXPAND | wx.ALL, 10)
+
+        dist_box = wx.StaticBox(units_panel, label="Distance")
+        dist_sizer = wx.StaticBoxSizer(dist_box, wx.HORIZONTAL)
+        cur_dist = self.config["units"].get("distance", "mi")
+        self.unit_controls["dist_mi"] = wx.RadioButton(
+            units_panel, label="Miles (mi)", style=wx.RB_GROUP
+        )
+        self.unit_controls["dist_km"] = wx.RadioButton(units_panel, label="Kilometers (km)")
+        self.unit_controls["dist_mi"].SetValue(cur_dist == "mi")
+        self.unit_controls["dist_km"].SetValue(cur_dist == "km")
+        dist_sizer.Add(self.unit_controls["dist_mi"], 0, wx.ALL, 5)
+        dist_sizer.Add(self.unit_controls["dist_km"], 0, wx.ALL, 5)
+        units_sizer.Add(dist_sizer, 0, wx.EXPAND | wx.ALL, 10)
+
+        pres_box = wx.StaticBox(units_panel, label="Pressure")
+        pres_sizer = wx.StaticBoxSizer(pres_box, wx.HORIZONTAL)
+        cur_pres = self.config["units"].get("pressure", "inHg")
+        self.unit_controls["pres_inhg"] = wx.RadioButton(
+            units_panel, label="Inches of mercury (inHg)", style=wx.RB_GROUP
+        )
+        self.unit_controls["pres_hpa"] = wx.RadioButton(units_panel, label="Hectopascals (hPa)")
+        self.unit_controls["pres_mmhg"] = wx.RadioButton(units_panel, label="Millimeters of mercury (mmHg)")
+        self.unit_controls["pres_inhg"].SetValue(cur_pres == "inHg")
+        self.unit_controls["pres_hpa"].SetValue(cur_pres == "hPa")
+        self.unit_controls["pres_mmhg"].SetValue(cur_pres == "mmHg")
+        pres_sizer.Add(self.unit_controls["pres_inhg"], 0, wx.ALL, 5)
+        pres_sizer.Add(self.unit_controls["pres_hpa"], 0, wx.ALL, 5)
+        pres_sizer.Add(self.unit_controls["pres_mmhg"], 0, wx.ALL, 5)
+        units_sizer.Add(pres_sizer, 0, wx.EXPAND | wx.ALL, 10)
 
         precip_box = wx.StaticBox(units_panel, label="Precipitation")
         precip_sizer = wx.StaticBoxSizer(precip_box, wx.HORIZONTAL)
@@ -127,8 +168,20 @@ class WeatherConfigDialog(wx.Dialog):
             for key, cb in self.checkboxes[section].items():
                 self.config[section][key] = cb.GetValue()
         self.config["units"]["temperature"] = "F" if self.unit_controls["temp_f"].GetValue() else "C"
-        self.config["units"]["wind_speed"] = "mph" if self.unit_controls["wind_mph"].GetValue() else "km/h"
+        if self.unit_controls["wind_kmh"].GetValue():
+            self.config["units"]["wind_speed"] = "km/h"
+        elif self.unit_controls["wind_ms"].GetValue():
+            self.config["units"]["wind_speed"] = "m/s"
+        else:
+            self.config["units"]["wind_speed"] = "mph"
         self.config["units"]["precipitation"] = "in" if self.unit_controls["precip_in"].GetValue() else "mm"
+        self.config["units"]["distance"] = "mi" if self.unit_controls["dist_mi"].GetValue() else "km"
+        if self.unit_controls["pres_hpa"].GetValue():
+            self.config["units"]["pressure"] = "hPa"
+        elif self.unit_controls["pres_mmhg"].GetValue():
+            self.config["units"]["pressure"] = "mmHg"
+        else:
+            self.config["units"]["pressure"] = "inHg"
 
     def on_ok(self, event):
         self._harvest()

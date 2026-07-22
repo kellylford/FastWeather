@@ -8,9 +8,9 @@ from ..constants import OPEN_METEO_API_URL
 from . import http
 
 _CURRENT_FIELDS = (
-    "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,"
-    "rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,"
-    "wind_speed_10m,wind_direction_10m,wind_gusts_10m,visibility"
+    "temperature_2m,relative_humidity_2m,apparent_temperature,dewpoint_2m,is_day,"
+    "precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,"
+    "surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m,visibility"
 )
 
 _FULL_HOURLY_FIELDS = (

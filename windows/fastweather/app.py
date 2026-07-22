@@ -10,6 +10,7 @@ import os
 
 import wx
 
+from . import __version__
 from .city_data import load_cached_cities
 from .models.city import CityStore
 from .models.settings import AppSettings
@@ -52,6 +53,7 @@ class MainFrame(wx.Frame):
         self.fetch = FetchManager(self)
 
         self.init_ui()
+        self.create_menubar()
         self.setup_shortcuts()
 
         self.Bind(EVT_FETCH_RESULT, self.on_fetch_result)
@@ -184,6 +186,100 @@ class MainFrame(wx.Frame):
             self.city_list.Navigate(flags)
         else:
             event.Skip()
+
+    def create_menubar(self):
+        """Menu bar for discoverable, accessible access to all actions.
+
+        Menu mnemonics deliberately avoid C/F/U/D/N so they don't collide with
+        the Alt+C/F/U/D/N accelerators in the accelerator table. Feature sheets
+        are added to the Weather menu by their respective phases via
+        add_weather_menu_item().
+        """
+        mb = wx.MenuBar()
+
+        cities_menu = wx.Menu()
+        mi_add = cities_menu.Append(wx.ID_ANY, "Add City")
+        mi_browse = cities_menu.Append(wx.ID_ANY, "Browse Cities by State/Country...")
+        cities_menu.AppendSeparator()
+        mi_full = cities_menu.Append(wx.ID_ANY, "Full Weather")
+        mi_refresh = cities_menu.Append(wx.ID_ANY, "Refresh")
+        cities_menu.AppendSeparator()
+        mi_remove = cities_menu.Append(wx.ID_ANY, "Remove City")
+        mi_up = cities_menu.Append(wx.ID_ANY, "Move Up")
+        mi_down = cities_menu.Append(wx.ID_ANY, "Move Down")
+        cities_menu.AppendSeparator()
+        mi_exit = cities_menu.Append(wx.ID_EXIT, "Exit")
+        mb.Append(cities_menu, "C&ities")
+
+        self.weather_menu = wx.Menu()
+        self._weather_placeholder = self.weather_menu.Append(
+            wx.ID_ANY, "(select a city, then choose a feature)"
+        )
+        self._weather_placeholder.Enable(False)
+        mb.Append(self.weather_menu, "&Weather")
+
+        settings_menu = wx.Menu()
+        mi_config = settings_menu.Append(wx.ID_ANY, "Configure Display && Units...")
+        mb.Append(settings_menu, "&Settings")
+
+        help_menu = wx.Menu()
+        mi_about = help_menu.Append(wx.ID_ABOUT, "About")
+        mb.Append(help_menu, "&Help")
+
+        self.SetMenuBar(mb)
+
+        self.Bind(wx.EVT_MENU, self.on_focus_new_city, mi_add)
+        self.Bind(wx.EVT_MENU, self.on_browse_cities, mi_browse)
+        self.Bind(wx.EVT_MENU, self.on_full_weather, mi_full)
+        self.Bind(wx.EVT_MENU, self.on_refresh, mi_refresh)
+        self.Bind(wx.EVT_MENU, self.on_remove, mi_remove)
+        self.Bind(wx.EVT_MENU, self.on_move_up, mi_up)
+        self.Bind(wx.EVT_MENU, self.on_move_down, mi_down)
+        self.Bind(wx.EVT_MENU, lambda e: self.Close(), mi_exit)
+        self.Bind(wx.EVT_MENU, self.on_config, mi_config)
+        self.Bind(wx.EVT_MENU, self.on_about, mi_about)
+
+    def add_weather_menu_item(self, label, handler):
+        """Register a per-city feature sheet in the Weather menu (used by phases)."""
+        if self._weather_placeholder is not None:
+            self.weather_menu.Destroy(self._weather_placeholder)
+            self._weather_placeholder = None
+        item = self.weather_menu.Append(wx.ID_ANY, label)
+        self.Bind(wx.EVT_MENU, handler, item)
+        return item
+
+    def selected_city(self):
+        """Return (name, lat, lon) for the active city, or None.
+
+        Uses the detailed view's city when it is showing, otherwise the
+        selection in the main list.
+        """
+        if self.book.GetSelection() == 1 and hasattr(self, "current_full_city"):
+            return self.current_full_city
+        sel = self.city_list.GetSelection()
+        if sel == wx.NOT_FOUND:
+            return None
+        name = self.city_list.GetString(sel).split(" - ")[0]
+        if name in self.cities:
+            lat, lon = self.cities.coords(name)
+            return (name, lat, lon)
+        return None
+
+    def require_selected_city(self):
+        """Return the active city or show a prompt and return None."""
+        city = self.selected_city()
+        if city is None:
+            wx.MessageBox("Select a city first.", "No City Selected",
+                          wx.OK | wx.ICON_INFORMATION)
+        return city
+
+    def on_about(self, event):
+        wx.MessageBox(
+            f"FastWeather for Windows\nVersion {__version__}\n\n"
+            "Weather data by Open-Meteo.com (CC BY 4.0)\n"
+            "Geocoding by OpenStreetMap / Nominatim",
+            "About FastWeather", wx.OK | wx.ICON_INFORMATION,
+        )
 
     def setup_shortcuts(self):
         self.ID_REFRESH = wx.NewIdRef()

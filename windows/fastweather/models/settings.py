@@ -14,24 +14,33 @@ def default_config():
     """Return a fresh copy of the default weather-display configuration."""
     return {
         "current": {
-            "temperature": True, "feels_like": True, "humidity": True,
-            "wind_speed": True, "wind_direction": True, "pressure": False,
-            "visibility": False, "uv_index": False, "precipitation": True,
-            "cloud_cover": False, "snowfall": False, "snow_depth": False,
-            "rain": False, "showers": False,
+            "condition": True, "temperature": True, "feels_like": True,
+            "humidity": True, "dew_point": False,
+            "wind_speed": True, "wind_direction": True, "wind_gusts": False,
+            "pressure": False, "visibility": False, "uv_index": False,
+            "precipitation": True, "cloud_cover": False, "snowfall": False,
+            "snow_depth": False, "rain": False, "showers": False,
         },
         "hourly": {
-            "temperature": True, "feels_like": False, "humidity": False,
+            "condition": False, "temperature": True, "feels_like": False,
+            "humidity": False, "dew_point": False, "precip_probability": False,
             "precipitation": True, "wind_speed": False, "wind_direction": False,
-            "cloud_cover": False, "snowfall": False, "rain": False, "showers": False,
+            "wind_gusts": False, "cloud_cover": False, "snowfall": False,
+            "rain": False, "showers": False,
         },
         "daily": {
-            "temperature_max": True, "temperature_min": True, "sunrise": True,
-            "sunset": True, "precipitation_sum": True, "precipitation_hours": False,
+            "condition": False, "temperature_max": True, "temperature_min": True,
+            "apparent_max": False, "apparent_min": False, "sunrise": True,
+            "sunset": True, "daylight_duration": False, "sunshine_duration": False,
+            "uv_max": False, "precipitation_sum": True, "precipitation_hours": False,
+            "precip_probability_max": False,
             "wind_speed_max": False, "wind_direction_dominant": False,
             "snowfall_sum": False, "rain_sum": False, "showers_sum": False,
         },
-        "units": {"temperature": "F", "wind_speed": "mph", "precipitation": "in"},
+        "units": {
+            "temperature": "F", "wind_speed": "mph", "precipitation": "in",
+            "distance": "mi", "pressure": "inHg",
+        },
     }
 
 

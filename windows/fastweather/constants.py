@@ -4,6 +4,10 @@
 KMH_TO_MPH = 0.621371
 MM_TO_INCHES = 0.0393701
 HPA_TO_INHG = 0.02953
+HPA_TO_MMHG = 0.750062
+KMH_TO_MS = 1 / 3.6
+METERS_TO_MILES = 1 / 1609.34
+METERS_TO_KM = 1 / 1000.0
 
 # API endpoints
 OPEN_METEO_API_URL = "https://api.open-meteo.com/v1/forecast"

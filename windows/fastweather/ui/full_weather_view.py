@@ -7,8 +7,14 @@ Formatter (unit-aware). Returns a list of lines for AccessibleLinesPanel.
 
 from datetime import datetime
 
-from ..constants import HPA_TO_INHG
-from ..models.weather import describe_cloud_cover
+from ..models.weather import describe_cloud_cover, describe_weather_code
+
+
+def _duration_hours(seconds):
+    """Format a duration in seconds as 'Xh Ym'."""
+    total_min = int(round(seconds / 60))
+    h, m = divmod(total_min, 60)
+    return f"{h}h {m}m"
 
 
 def build_full_weather_lines(city, data, settings, fmt):
@@ -32,6 +38,12 @@ def build_full_weather_lines(city, data, settings, fmt):
                     return curr[k]
             return default
 
+        if cfg_curr.get("condition", True):
+            code = get_val(["weather_code", "weathercode"], None)
+            desc = describe_weather_code(code)
+            if desc:
+                lines.append(f"Condition: {desc}")
+
         if cfg_curr.get("temperature", True):
             temp_c = get_val(["temperature_2m", "temperature"])
             lines.append(f"Temp: {fmt.temperature(temp_c)}")
@@ -44,15 +56,18 @@ def build_full_weather_lines(city, data, settings, fmt):
             hum = get_val(["relative_humidity_2m"])
             lines.append(f"Humidity: {hum}%")
 
+        if cfg_curr.get("dew_point", False):
+            dp = get_val(["dewpoint_2m", "dew_point_2m"], None)
+            if dp is not None:
+                lines.append(f"Dew Point: {fmt.temperature(dp)}")
+
         if cfg_curr.get("pressure", False):
             pres = get_val(["pressure_msl", "surface_pressure"])
-            pres_in = pres * HPA_TO_INHG
-            lines.append(f"Pressure: {pres_in:.2f} inHg")
+            lines.append(f"Pressure: {fmt.pressure(pres)}")
 
         if cfg_curr.get("visibility", False):
             vis_m = get_val(["visibility"])
-            vis_miles = vis_m / 1609.34
-            lines.append(f"Visibility: {vis_miles:.1f} miles")
+            lines.append(f"Visibility: {fmt.distance(vis_m)}")
 
         if cfg_curr.get("uv_index", False):
             uv = get_val(["uv_index"])
@@ -118,6 +133,11 @@ def build_full_weather_lines(city, data, settings, fmt):
             wind_card = fmt.cardinal(wind_dir)
             lines.append(f"Wind Dir: {wind_card} ({wind_dir}°)")
 
+        if cfg_curr.get("wind_gusts", False):
+            gust = get_val(["wind_gusts_10m", "windgusts_10m"], None)
+            if gust is not None:
+                lines.append(f"Wind Gusts: {fmt.wind_speed(gust)}")
+
         lines.append("")
 
     cfg_hourly = settings["hourly"]
@@ -134,6 +154,10 @@ def build_full_weather_lines(city, data, settings, fmt):
         snowfall = hourly.get("snowfall", [])
         rain = hourly.get("rain", [])
         showers = hourly.get("showers", [])
+        codes = hourly.get("weathercode", [])
+        dewpoints = hourly.get("dewpoint_2m", [])
+        precip_prob = hourly.get("precipitation_probability", [])
+        gusts = hourly.get("windgusts_10m", [])
 
         start = 0
         curr_time = curr.get("time") if curr else None
@@ -158,6 +182,17 @@ def build_full_weather_lines(city, data, settings, fmt):
 
             if cfg_hourly.get("feels_like", False) and i < len(app_temps) and app_temps[i] is not None:
                 parts.append(f"Feels Like {fmt.temperature_short(app_temps[i])}")
+
+            if cfg_hourly.get("condition", False) and i < len(codes) and codes[i] is not None:
+                desc = describe_weather_code(codes[i])
+                if desc:
+                    parts.append(desc)
+
+            if cfg_hourly.get("dew_point", False) and i < len(dewpoints) and dewpoints[i] is not None:
+                parts.append(f"Dew {fmt.temperature_short(dewpoints[i])}")
+
+            if cfg_hourly.get("precip_probability", False) and i < len(precip_prob) and precip_prob[i] is not None:
+                parts.append(f"{precip_prob[i]}% chance")
 
             if cfg_hourly.get("precipitation", True) and i < len(precip) and precip[i] is not None:
                 p = precip[i]
@@ -193,6 +228,9 @@ def build_full_weather_lines(city, data, settings, fmt):
             if cfg_hourly.get("wind_direction", False) and i < len(wind_dirs) and wind_dirs[i] is not None:
                 parts.append(f"{fmt.cardinal(wind_dirs[i])}")
 
+            if cfg_hourly.get("wind_gusts", False) and i < len(gusts) and gusts[i] is not None:
+                parts.append(f"gust {fmt.wind_speed(gusts[i])}")
+
             lines.append(" ".join(parts))
         lines.append("")
 
@@ -211,10 +249,22 @@ def build_full_weather_lines(city, data, settings, fmt):
         snowfall_sum = daily.get("snowfall_sum", [])
         rain_sum = daily.get("rain_sum", [])
         showers_sum = daily.get("showers_sum", [])
+        codes = daily.get("weathercode", [])
+        app_max = daily.get("apparent_temperature_max", [])
+        app_min = daily.get("apparent_temperature_min", [])
+        uv_max = daily.get("uv_index_max", [])
+        daylight = daily.get("daylight_duration", [])
+        sunshine = daily.get("sunshine_duration", [])
+        precip_prob_max = daily.get("precipitation_probability_max", [])
 
         for i in range(len(times)):
             d = datetime.strptime(times[i], "%Y-%m-%d").strftime("%a %b %d")
             parts = [f"{d}:"]
+
+            if cfg_daily.get("condition", False) and i < len(codes) and codes[i] is not None:
+                desc = describe_weather_code(codes[i])
+                if desc:
+                    parts.append(desc)
 
             if cfg_daily.get("temperature_max", True) and i < len(maxs) and maxs[i] is not None:
                 parts.append(f"High {fmt.temperature_short(maxs[i])}")
@@ -222,10 +272,28 @@ def build_full_weather_lines(city, data, settings, fmt):
             if cfg_daily.get("temperature_min", True) and i < len(mins) and mins[i] is not None:
                 parts.append(f"Low {fmt.temperature_short(mins[i])}")
 
+            if cfg_daily.get("apparent_max", False) and i < len(app_max) and app_max[i] is not None:
+                parts.append(f"Feels High {fmt.temperature_short(app_max[i])}")
+
+            if cfg_daily.get("apparent_min", False) and i < len(app_min) and app_min[i] is not None:
+                parts.append(f"Feels Low {fmt.temperature_short(app_min[i])}")
+
             if cfg_daily.get("precipitation_sum", True) and i < len(precip_sum) and precip_sum[i] is not None:
                 p = precip_sum[i]
                 if p > 0:
                     parts.append(f"{fmt.precipitation(p)} precip")
+
+            if cfg_daily.get("precip_probability_max", False) and i < len(precip_prob_max) and precip_prob_max[i] is not None:
+                parts.append(f"{precip_prob_max[i]}% chance")
+
+            if cfg_daily.get("uv_max", False) and i < len(uv_max) and uv_max[i] is not None:
+                parts.append(f"UV {uv_max[i]:.0f}")
+
+            if cfg_daily.get("daylight_duration", False) and i < len(daylight) and daylight[i] is not None:
+                parts.append(f"Daylight {_duration_hours(daylight[i])}")
+
+            if cfg_daily.get("sunshine_duration", False) and i < len(sunshine) and sunshine[i] is not None:
+                parts.append(f"Sunshine {_duration_hours(sunshine[i])}")
 
             if cfg_daily.get("precipitation_hours", False) and i < len(precip_hours) and precip_hours[i] is not None:
                 ph = precip_hours[i]
@@ -261,7 +329,7 @@ def build_full_weather_lines(city, data, settings, fmt):
                 ss = datetime.strptime(sunset[i], "%Y-%m-%dT%H:%M").strftime("%I:%M %p")
                 parts.append(f"Sunset {ss}")
 
-            lines.append("".join(parts))
+            lines.append(" ".join(parts))
 
     lines.append("")
     lines.append("Data by Open-Meteo.com (CC BY 4.0)")
