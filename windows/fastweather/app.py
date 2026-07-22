@@ -22,6 +22,8 @@ from .ui.dialogs.city_select import CitySelectionDialog
 from .ui.dialogs.config_dialog import WeatherConfigDialog
 from .ui.dialogs.location_browser import LocationBrowserDialog
 from .ui.events import EVT_FETCH_RESULT
+from .services import alert_service
+from .ui.dialogs.alerts_dialog import AlertsDialog
 from .ui.dialogs.around_me_dialog import AroundMeDialog
 from .ui.dialogs.marine_dialog import MarineDialog
 from .ui.dialogs.mydata_dialog import MyDataDialog
@@ -244,6 +246,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_about, mi_about)
 
         # Feature sheets (registered per phase).
+        self.add_weather_menu_item("Weather Alerts...", self.on_alerts)
         self.add_weather_menu_item("Weather Around Me...", self.on_weather_around_me)
         self.add_weather_menu_item("My Data...", self.on_mydata)
         self.add_weather_menu_item("Marine Forecast...", self.on_marine)
@@ -277,6 +280,14 @@ class MainFrame(wx.Frame):
         if not city:
             return
         dlg = MarineDialog(self, city, self.fmt)
+        dlg.ShowModal()
+        dlg.Destroy()
+
+    def on_alerts(self, event):
+        city = self.require_selected_city()
+        if not city:
+            return
+        dlg = AlertsDialog(self, city)
         dlg.ShowModal()
         dlg.Destroy()
 
@@ -572,6 +583,28 @@ class MainFrame(wx.Frame):
                 self.on_geo_error(event.error)
             else:
                 self.on_geo_ready(event.request_id, event.payload)
+        elif event.kind == "alert_badge":
+            # Best-effort: only badge on a positive result; never annotate on
+            # error (can't distinguish "no alerts" from "couldn't check").
+            if not event.error and event.payload:
+                self._apply_alert_badge(event.request_id)
+
+    def _check_alert_badge(self, city, lat, lon):
+        """Fire a best-effort NWS alert check for US cities to badge the row."""
+        if "United States" not in city:  # NWS is US-only
+            return
+        self.fetch.submit(
+            "alert_badge",
+            lambda: alert_service.has_active_alerts(lat, lon),
+            request_id=city,
+        )
+
+    def _apply_alert_badge(self, city):
+        for i in range(self.city_list.GetCount()):
+            text = self.city_list.GetString(i)
+            if text.startswith(city + " - ") and "[ALERT]" not in text:
+                self.city_list.SetString(i, text + "  [ALERT]")
+                break
 
     def on_weather_ready(self, city, data):
         curr = data.get("current", data.get("current_weather", {}))
@@ -630,6 +663,11 @@ class MainFrame(wx.Frame):
                 if self.city_list.GetString(i).startswith(city + " - "):
                     self.city_list.SetString(i, new_text)
                     break
+
+            # Best-effort alert badge for US cities (cached 5 min).
+            if city in self.cities:
+                lat, lon = self.cities.coords(city)
+                self._check_alert_badge(city, lat, lon)
 
         if (hasattr(self, "current_full_city")
                 and self.current_full_city[0] == city
