@@ -23,6 +23,8 @@ from .ui.dialogs.config_dialog import WeatherConfigDialog
 from .ui.dialogs.location_browser import LocationBrowserDialog
 from .ui.events import EVT_FETCH_RESULT
 from .ui.dialogs.around_me_dialog import AroundMeDialog
+from .ui.dialogs.marine_dialog import MarineDialog
+from .ui.dialogs.mydata_dialog import MyDataDialog
 from .ui.formatters import Formatter
 from .ui.full_weather_view import build_full_weather_lines
 from .paths import user_data_dir
@@ -243,6 +245,8 @@ class MainFrame(wx.Frame):
 
         # Feature sheets (registered per phase).
         self.add_weather_menu_item("Weather Around Me...", self.on_weather_around_me)
+        self.add_weather_menu_item("My Data...", self.on_mydata)
+        self.add_weather_menu_item("Marine Forecast...", self.on_marine)
 
     def all_cities(self):
         """Flattened list of every cached city (built once, lazily)."""
@@ -258,6 +262,23 @@ class MainFrame(wx.Frame):
         dlg.ShowModal()
         dlg.Destroy()
         self.save_config()  # persist radius/mode/width chosen in the sheet
+
+    def on_mydata(self, event):
+        city = self.require_selected_city()
+        if not city:
+            return
+        dlg = MyDataDialog(self, city, self.settings, self.fmt)
+        dlg.ShowModal()
+        dlg.Destroy()
+        self.save_config()  # persist the parameter selection
+
+    def on_marine(self, event):
+        city = self.require_selected_city()
+        if not city:
+            return
+        dlg = MarineDialog(self, city, self.fmt)
+        dlg.ShowModal()
+        dlg.Destroy()
 
     def add_weather_menu_item(self, label, handler):
         """Register a per-city feature sheet in the Weather menu (used by phases)."""

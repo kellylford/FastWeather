@@ -47,6 +47,7 @@ def default_config():
             "around_me_mode": "arc",          # arc | corridor
             "around_me_width": "Standard",    # Narrow | Standard | Medium | Wide
             "historical_years_back": 20,
+            "mydata_selection": [],           # ordered list of MyDataParameter keys
         },
     }
 
