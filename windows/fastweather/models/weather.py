@@ -28,6 +28,15 @@ def describe_weather_code(code):
     return WEATHER_CODE_DESCRIPTION.get(code)
 
 
+def condition_summary(weather_code, cloud_cover=None):
+    """Best-available short condition text: WMO code, else cloud bucket."""
+    desc = describe_weather_code(weather_code)
+    if desc:
+        return desc
+    cloud = describe_cloud_cover(cloud_cover)
+    return cloud.title() if cloud else "—"
+
+
 def describe_cloud_cover(cc):
     """Bucket a cloud-cover percentage into a description (matches monolith)."""
     if cc is None:

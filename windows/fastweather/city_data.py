@@ -38,3 +38,34 @@ def load_cached_cities():
     us = _load_first("us-cities-cached.json")
     intl = _load_first("international-cities-cached.json")
     return us, intl
+
+
+def flatten_cities(us_cache, intl_cache):
+    """Flatten the state/country caches into one list of city dicts.
+
+    Each entry: {name, display, lat, lon, region}. Used by the Directional
+    Explorer to search cities along a bearing.
+    """
+    out = []
+    for cache, region_is_country in ((us_cache, False), (intl_cache, True)):
+        if not cache:
+            continue
+        for region, cities in cache.items():
+            for c in cities:
+                try:
+                    lat = float(c["lat"])
+                    lon = float(c["lon"])
+                except (KeyError, TypeError, ValueError):
+                    continue
+                name = c.get("name", "")
+                state = c.get("state", "")
+                country = c.get("country", region if region_is_country else "")
+                parts = [p for p in [name, state, country] if p]
+                out.append({
+                    "name": name,
+                    "display": ", ".join(parts),
+                    "lat": lat,
+                    "lon": lon,
+                    "region": region,
+                })
+    return out

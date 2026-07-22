@@ -30,15 +30,14 @@ def bundled_file(name):
 def user_data_dir():
     """Platform user-data directory (created if missing).
 
-    Uses wx.StandardPaths when available; falls back to %APPDATA%/FastWeather.
+    Resolves to %APPDATA%/FastWeather on Windows, which matches what
+    wx.StandardPaths.GetUserDataDir() returns once the app name is set. Kept
+    wx-free so it is safe to call before (or without) a wx.App exists — calling
+    wx.StandardPaths.Get() without an app hard-crashes on Windows.
     """
-    try:
-        import wx
-        sp = wx.StandardPaths.Get()
-        path = sp.GetUserDataDir()
-    except Exception:
-        base = os.environ.get("APPDATA") or os.path.expanduser("~")
-        path = os.path.join(base, "FastWeather")
+    base = (os.environ.get("APPDATA")
+            or os.path.join(os.path.expanduser("~"), "AppData", "Roaming"))
+    path = os.path.join(base, "FastWeather")
     if not os.path.exists(path):
         try:
             os.makedirs(path)

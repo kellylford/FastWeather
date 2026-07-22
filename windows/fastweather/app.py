@@ -11,7 +11,7 @@ import os
 import wx
 
 from . import __version__
-from .city_data import load_cached_cities
+from .city_data import flatten_cities, load_cached_cities
 from .models.city import CityStore
 from .models.settings import AppSettings
 from .models.weather import describe_cloud_cover
@@ -22,6 +22,7 @@ from .ui.dialogs.city_select import CitySelectionDialog
 from .ui.dialogs.config_dialog import WeatherConfigDialog
 from .ui.dialogs.location_browser import LocationBrowserDialog
 from .ui.events import EVT_FETCH_RESULT
+from .ui.dialogs.around_me_dialog import AroundMeDialog
 from .ui.formatters import Formatter
 from .ui.full_weather_view import build_full_weather_lines
 from .paths import user_data_dir
@@ -45,6 +46,7 @@ class MainFrame(wx.Frame):
 
         # Cached city coordinates for browsing
         self.us_cities_cache, self.intl_cities_cache = load_cached_cities()
+        self._all_cities = None  # flattened lazily for the Directional Explorer
 
         self.cities.load()
         self.load_config()
@@ -238,6 +240,24 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, lambda e: self.Close(), mi_exit)
         self.Bind(wx.EVT_MENU, self.on_config, mi_config)
         self.Bind(wx.EVT_MENU, self.on_about, mi_about)
+
+        # Feature sheets (registered per phase).
+        self.add_weather_menu_item("Weather Around Me...", self.on_weather_around_me)
+
+    def all_cities(self):
+        """Flattened list of every cached city (built once, lazily)."""
+        if self._all_cities is None:
+            self._all_cities = flatten_cities(self.us_cities_cache, self.intl_cities_cache)
+        return self._all_cities
+
+    def on_weather_around_me(self, event):
+        city = self.require_selected_city()
+        if not city:
+            return
+        dlg = AroundMeDialog(self, city, self.settings, self.fmt, self.all_cities())
+        dlg.ShowModal()
+        dlg.Destroy()
+        self.save_config()  # persist radius/mode/width chosen in the sheet
 
     def add_weather_menu_item(self, label, handler):
         """Register a per-city feature sheet in the Weather menu (used by phases)."""

@@ -41,6 +41,13 @@ def default_config():
             "temperature": "F", "wind_speed": "mph", "precipitation": "in",
             "distance": "mi", "pressure": "inHg",
         },
+        # Miscellaneous scalar options for feature screens.
+        "options": {
+            "around_me_radius_km": 160,       # ~100 mi
+            "around_me_mode": "arc",          # arc | corridor
+            "around_me_width": "Standard",    # Narrow | Standard | Medium | Wide
+            "historical_years_back": 20,
+        },
     }
 
 
