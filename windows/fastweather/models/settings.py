@@ -49,6 +49,8 @@ def default_config():
             "around_me_width": "Standard",    # Narrow | Standard | Medium | Wide
             "historical_years_back": 20,
             "mydata_selection": [],           # ordered list of MyDataParameter keys
+            "default_alert_severity_filter": "All",   # Extreme|Severe|Moderate|All
+            "default_alert_hazard_type": "",          # hazard family or "" for all
         },
     }
 

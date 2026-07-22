@@ -23,6 +23,7 @@ from .ui.dialogs.config_dialog import WeatherConfigDialog
 from .ui.dialogs.location_browser import LocationBrowserDialog
 from .ui.events import EVT_FETCH_RESULT
 from .services import alert_service, location_service
+from .ui.dialogs.alert_browser_dialog import AlertBrowserDialog
 from .ui.dialogs.alerts_dialog import AlertsDialog
 from .ui.dialogs.around_me_dialog import AroundMeDialog
 from .ui.dialogs.historical_dialog import HistoricalDialog
@@ -226,6 +227,8 @@ class MainFrame(wx.Frame):
         mi_browse = cities_menu.Append(wx.ID_ANY, "Browse Cities by State/Country...")
         mi_myloc = cities_menu.Append(wx.ID_ANY, "Add My Location")
         cities_menu.AppendSeparator()
+        mi_alertbrowser = cities_menu.Append(wx.ID_ANY, "Browse Weather Alerts...")
+        cities_menu.AppendSeparator()
         mi_full = cities_menu.Append(wx.ID_ANY, "Full Weather")
         mi_refresh = cities_menu.Append(wx.ID_ANY, "Refresh")
         cities_menu.AppendSeparator()
@@ -259,6 +262,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_focus_new_city, mi_add)
         self.Bind(wx.EVT_MENU, self.on_browse_cities, mi_browse)
         self.Bind(wx.EVT_MENU, self.on_add_my_location, mi_myloc)
+        self.Bind(wx.EVT_MENU, self.on_browse_alerts, mi_alertbrowser)
         self.Bind(wx.EVT_MENU, self.on_full_weather, mi_full)
         self.Bind(wx.EVT_MENU, self.on_refresh, mi_refresh)
         self.Bind(wx.EVT_MENU, self.on_remove, mi_remove)
@@ -554,6 +558,12 @@ class MainFrame(wx.Frame):
                 self.city_list.SetSelection(i)
                 break
         self.update_buttons()
+
+    def on_browse_alerts(self, event):
+        dlg = AlertBrowserDialog(self, self.settings)
+        dlg.ShowModal()
+        dlg.Destroy()
+        self.save_config()  # persist saved default filters
 
     def on_add_my_location(self, event):
         if wx.MessageBox(
