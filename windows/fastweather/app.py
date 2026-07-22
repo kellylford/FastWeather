@@ -25,6 +25,7 @@ from .ui.events import EVT_FETCH_RESULT
 from .services import alert_service
 from .ui.dialogs.alerts_dialog import AlertsDialog
 from .ui.dialogs.around_me_dialog import AroundMeDialog
+from .ui.dialogs.historical_dialog import HistoricalDialog
 from .ui.dialogs.marine_dialog import MarineDialog
 from .ui.dialogs.mydata_dialog import MyDataDialog
 from .ui.dialogs.radar_dialog import RadarDialog
@@ -250,6 +251,7 @@ class MainFrame(wx.Frame):
         self.add_weather_menu_item("Weather Alerts...", self.on_alerts)
         self.add_weather_menu_item("Expected Precipitation...", self.on_radar)
         self.add_weather_menu_item("Weather Around Me...", self.on_weather_around_me)
+        self.add_weather_menu_item("Historical Weather...", self.on_historical)
         self.add_weather_menu_item("My Data...", self.on_mydata)
         self.add_weather_menu_item("Marine Forecast...", self.on_marine)
 
@@ -267,6 +269,15 @@ class MainFrame(wx.Frame):
         dlg.ShowModal()
         dlg.Destroy()
         self.save_config()  # persist radius/mode/width chosen in the sheet
+
+    def on_historical(self, event):
+        city = self.require_selected_city()
+        if not city:
+            return
+        dlg = HistoricalDialog(self, city, self.settings, self.fmt)
+        dlg.ShowModal()
+        dlg.Destroy()
+        self.save_config()  # persist years-back
 
     def on_mydata(self, event):
         city = self.require_selected_city()
