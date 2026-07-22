@@ -66,6 +66,7 @@ class AlertBrowserDialog(wx.Dialog):
         self.book.AddPage(p, "Regions")
         b.Bind(wx.EVT_BUTTON, self.on_pick_region)
         self.region_list.Bind(wx.EVT_LISTBOX_DCLICK, self.on_pick_region)
+        self._bind_enter(self.region_list, self.on_pick_region)
 
     def _load_counts(self):
         def work():
@@ -126,6 +127,7 @@ class AlertBrowserDialog(wx.Dialog):
         self.group_list.Bind(wx.EVT_LISTBOX, lambda e: self.open_group_btn.Enable(
             self.group_list.GetSelection() != wx.NOT_FOUND))
         self.group_list.Bind(wx.EVT_LISTBOX_DCLICK, self.on_open_group)
+        self._bind_enter(self.group_list, self.on_open_group)
         self.open_group_btn.Bind(wx.EVT_BUTTON, self.on_open_group)
 
     # -- group page -----------------------------------------------------------
@@ -148,6 +150,7 @@ class AlertBrowserDialog(wx.Dialog):
         self.area_list.Bind(wx.EVT_LISTBOX, lambda e: self.open_area_btn.Enable(
             self.area_list.GetSelection() != wx.NOT_FOUND))
         self.area_list.Bind(wx.EVT_LISTBOX_DCLICK, self.on_open_area)
+        self._bind_enter(self.area_list, self.on_open_area)
         self.open_area_btn.Bind(wx.EVT_BUTTON, self.on_open_area)
 
     # -- detail page ----------------------------------------------------------
@@ -166,6 +169,15 @@ class AlertBrowserDialog(wx.Dialog):
         self.book.SetSelection(page)
         if focus_ctrl is not None:
             focus_ctrl.SetFocus()
+
+    def _bind_enter(self, ctrl, handler):
+        """Enter on a list advances to the next level (as elsewhere in the app)."""
+        def on_key(evt):
+            if evt.GetKeyCode() in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER):
+                handler(evt)
+            else:
+                evt.Skip()
+        ctrl.Bind(wx.EVT_KEY_DOWN, on_key)
 
     # -- region selected ------------------------------------------------------
     def on_pick_region(self, event):

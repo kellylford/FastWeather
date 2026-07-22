@@ -60,6 +60,7 @@ class AlertsDialog(wx.Dialog):
         self.list_box.Bind(wx.EVT_LISTBOX, lambda e: self.view_btn.Enable(
             self.list_box.GetSelection() != wx.NOT_FOUND))
         self.list_box.Bind(wx.EVT_LISTBOX_DCLICK, self.on_view)
+        self.list_box.Bind(wx.EVT_KEY_DOWN, self._on_list_key)
         self.back_btn.Bind(wx.EVT_BUTTON, self.on_back)
         self.Bind(wx.EVT_BUTTON, lambda e: self.Close(), id=wx.ID_CLOSE)
         self.Bind(wx.EVT_CLOSE, self._on_close)
@@ -108,6 +109,12 @@ class AlertsDialog(wx.Dialog):
         self.list_box.SetSelection(0)
         self.view_btn.Enable()
         self.list_box.SetFocus()
+
+    def _on_list_key(self, event):
+        if event.GetKeyCode() in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER):
+            self.on_view(event)
+        else:
+            event.Skip()
 
     def on_view(self, event):
         sel = self.list_box.GetSelection()
