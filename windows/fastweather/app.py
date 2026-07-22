@@ -38,7 +38,7 @@ from .paths import user_data_dir
 
 class MainFrame(wx.Frame):
     def __init__(self, city_file=None):
-        super().__init__(None, title="FastWeather", size=(1000, 700))
+        super().__init__(None, title="WeatherFast", size=(1000, 700))
 
         data_dir = user_data_dir()
         if city_file is None:
@@ -423,10 +423,10 @@ class MainFrame(wx.Frame):
 
     def on_about(self, event):
         wx.MessageBox(
-            f"FastWeather for Windows\nVersion {__version__}\n\n"
+            f"WeatherFast for Windows\nVersion {__version__}\n\n"
             "Weather data by Open-Meteo.com (CC BY 4.0)\n"
             "Geocoding by OpenStreetMap / Nominatim",
-            "About FastWeather", wx.OK | wx.ICON_INFORMATION,
+            "About WeatherFast", wx.OK | wx.ICON_INFORMATION,
         )
 
     def setup_shortcuts(self):
@@ -476,6 +476,7 @@ class MainFrame(wx.Frame):
         else:
             self.city_input.SetFocus()
         self.update_buttons()
+        self._update_title()
 
     def update_buttons(self):
         sel = self.city_list.GetSelection()
@@ -683,6 +684,7 @@ class MainFrame(wx.Frame):
         self.full_display.set_message("Loading...")
         self.book.SetSelection(1)
         self.full_display.set_focus()
+        self._update_title()
         self._fetch_weather(city, lat, lon, "full")
 
     def nav_day(self, direction):
@@ -694,6 +696,12 @@ class MainFrame(wx.Frame):
         else:
             self.day_offset = max(-7, min(7, self.day_offset + direction))
         self._render_full()
+
+    def _day_label(self):
+        n = self.day_offset
+        if n == 0:
+            return "Today"
+        return f"{'+' if n > 0 else ''}{n} day" + ("s" if abs(n) != 1 else "")
 
     def _render_full(self):
         if self.current_full_data is None or not hasattr(self, "current_full_city"):
@@ -709,14 +717,27 @@ class MainFrame(wx.Frame):
                 target = (date.fromisoformat(ref) + timedelta(days=self.day_offset)).isoformat()
             except Exception:
                 return
-            label = f"{'+' if self.day_offset > 0 else ''}{self.day_offset} day" \
-                    + ("s" if abs(self.day_offset) != 1 else "")
-            lines = build_day_lines(city, data, self.settings, self.fmt, target, label)
+            lines = build_day_lines(city, data, self.settings, self.fmt, target,
+                                    self._day_label())
         self.full_display.set_lines(lines)
+        self._update_title()
+
+    def _update_title(self):
+        """Keep the window title (the screen reader's window name) contextual."""
+        app = "WeatherFast"
+        if self.book.GetSelection() == 1 and hasattr(self, "current_full_city"):
+            city = self.current_full_city[0]
+            if self.day_offset == 0:
+                self.SetTitle(f"{city} - Full Weather - {app}")
+            else:
+                self.SetTitle(f"{city} - {self._day_label()} - {app}")
+        else:
+            self.SetTitle(f"My Cities - {app}")
 
     def on_back(self, event):
         self.book.SetSelection(0)
         self.city_list.SetFocus()
+        self._update_title()
 
     def on_config(self, event):
         dlg = WeatherConfigDialog(self, self.settings.to_dict())

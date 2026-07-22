@@ -1,1 +1,1 @@
-"""Data models for FastWeather (plain dataclasses, no wx dependency)."""
+"""Data models for WeatherFast (plain dataclasses, no wx dependency)."""

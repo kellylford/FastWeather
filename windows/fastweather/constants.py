@@ -17,7 +17,7 @@ OPEN_METEO_ARCHIVE_URL = "https://archive-api.open-meteo.com/v1/archive"
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 
 # HTTP
-USER_AGENT = "FastWeather GUI/1.0"
+USER_AGENT = "WeatherFast GUI/1.0"
 DEFAULT_TIMEOUT = 10
 
 # Default seed cities: display name -> [lat, lon]

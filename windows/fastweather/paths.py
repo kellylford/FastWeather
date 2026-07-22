@@ -27,22 +27,58 @@ def bundled_file(name):
     return os.path.join(bundle_dir(), name)
 
 
+APP_DIR_NAME = "WeatherFast"
+_LEGACY_DIR_NAME = "FastWeather"  # pre-rename; migrated once on first run
+
+
+def _appdata_base():
+    return (os.environ.get("APPDATA")
+            or os.path.join(os.path.expanduser("~"), "AppData", "Roaming"))
+
+
+def _migrate_legacy(new_path):
+    """One-time copy of saved data from the old FastWeather folder.
+
+    Runs only when the new WeatherFast folder has no city.json yet but the old
+    folder exists, so an existing user's cities/settings carry over unchanged.
+    """
+    if os.path.exists(os.path.join(new_path, "city.json")):
+        return
+    old_path = os.path.join(_appdata_base(), _LEGACY_DIR_NAME)
+    if not os.path.isdir(old_path) or old_path == new_path:
+        return
+    import shutil
+    for name in ("city.json", "config.json", "browse_favorites.json"):
+        src = os.path.join(old_path, name)
+        if os.path.exists(src):
+            try:
+                shutil.copy2(src, os.path.join(new_path, name))
+            except Exception:
+                pass
+    old_cache = os.path.join(old_path, "cache")
+    new_cache = os.path.join(new_path, "cache")
+    if os.path.isdir(old_cache) and not os.path.exists(new_cache):
+        try:
+            shutil.copytree(old_cache, new_cache)
+        except Exception:
+            pass
+
+
 def user_data_dir():
     """Platform user-data directory (created if missing).
 
-    Resolves to %APPDATA%/FastWeather on Windows, which matches what
-    wx.StandardPaths.GetUserDataDir() returns once the app name is set. Kept
-    wx-free so it is safe to call before (or without) a wx.App exists — calling
-    wx.StandardPaths.Get() without an app hard-crashes on Windows.
+    Resolves to %APPDATA%/WeatherFast on Windows. Kept wx-free so it is safe to
+    call before (or without) a wx.App exists — calling wx.StandardPaths.Get()
+    without an app hard-crashes on Windows. On first run it migrates data from
+    the legacy %APPDATA%/FastWeather folder.
     """
-    base = (os.environ.get("APPDATA")
-            or os.path.join(os.path.expanduser("~"), "AppData", "Roaming"))
-    path = os.path.join(base, "FastWeather")
+    path = os.path.join(_appdata_base(), APP_DIR_NAME)
     if not os.path.exists(path):
         try:
             os.makedirs(path)
         except Exception:
             pass
+    _migrate_legacy(path)
     return path
 
 
