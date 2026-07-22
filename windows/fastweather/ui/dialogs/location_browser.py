@@ -1,78 +1,71 @@
-"""Browse cities by US state or international country (multi-select add)."""
+"""Browse cities by US state or country, with sorting and region favorites."""
+
+import threading
+from concurrent.futures import ThreadPoolExecutor
 
 import wx
 
+from ... import browse_favorites
+from ...services import weather_service
+
+_SORTS = [
+    "Name (A-Z)", "Name (Z-A)",
+    "North to South", "South to North",
+    "East to West", "West to East",
+    "Temperature (Warm-Cold)", "Temperature (Cold-Warm)",
+]
+
 
 class LocationBrowserDialog(wx.Dialog):
-    """Dialog for browsing cities by US State or International Country."""
+    """Browse cities by US State or country; multi-select add, sort, favorites."""
 
-    def __init__(self, parent, us_cities_cache, intl_cities_cache):
-        super().__init__(parent, title="Browse Cities by Location", size=(700, 600))
+    def __init__(self, parent, us_cities_cache, intl_cities_cache, favorites=None):
+        super().__init__(parent, title="Browse Cities by Location", size=(720, 640))
         self.us_cities_cache = us_cities_cache
         self.intl_cities_cache = intl_cities_cache
-        self.selected_cities = []  # (display_name, lat, lon)
+        self.favorites = list(favorites or [])
+        self.selected_cities = []
+        self.loaded_cities = []           # list of dicts for the current region
+        self.loaded_region = None         # (kind, region_name)
+        self._alive = True
 
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         self.notebook = wx.Notebook(panel)
+        self._build_us_tab()
+        self._build_intl_tab()
+        self._build_fav_tab()
+        vbox.Add(self.notebook, 0, wx.EXPAND | wx.ALL, 8)
 
-        # US States tab
-        us_panel = wx.Panel(self.notebook)
-        us_sizer = wx.BoxSizer(wx.VERTICAL)
-        us_sizer.Add(wx.StaticText(us_panel, label="Select a U.S. State:"), 0, wx.ALL, 10)
-        self.state_choice = wx.Choice(us_panel)
-        if us_cities_cache:
-            self.state_choice.Append("-- Select a State --")
-            for state in sorted(us_cities_cache.keys()):
-                self.state_choice.Append(state)
-            self.state_choice.SetSelection(0)
-        us_sizer.Add(self.state_choice, 0, wx.EXPAND | wx.ALL, 10)
-        self.load_state_btn = wx.Button(us_panel, label="Load Cities")
-        us_sizer.Add(self.load_state_btn, 0, wx.ALIGN_CENTER | wx.ALL, 10)
-        us_panel.SetSizer(us_sizer)
+        # Sort + favorite row
+        ctrl_row = wx.BoxSizer(wx.HORIZONTAL)
+        ctrl_row.Add(wx.StaticText(panel, label="Sort:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 4)
+        self.sort_choice = wx.Choice(panel, choices=_SORTS)
+        self.sort_choice.SetSelection(0)
+        ctrl_row.Add(self.sort_choice, 0, wx.RIGHT, 8)
+        self.fav_btn = wx.Button(panel, label="Add Region to Favorites")
+        self.fav_btn.Disable()
+        ctrl_row.Add(self.fav_btn, 0)
+        vbox.Add(ctrl_row, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
 
-        # International tab
-        intl_panel = wx.Panel(self.notebook)
-        intl_sizer = wx.BoxSizer(wx.VERTICAL)
-        intl_sizer.Add(wx.StaticText(intl_panel, label="Select a Country:"), 0, wx.ALL, 10)
-        self.country_choice = wx.Choice(intl_panel)
-        if intl_cities_cache:
-            self.country_choice.Append("-- Select a Country --")
-            for country in sorted(intl_cities_cache.keys()):
-                self.country_choice.Append(country)
-            self.country_choice.SetSelection(0)
-        intl_sizer.Add(self.country_choice, 0, wx.EXPAND | wx.ALL, 10)
-        self.load_country_btn = wx.Button(intl_panel, label="Load Cities")
-        intl_sizer.Add(self.load_country_btn, 0, wx.ALIGN_CENTER | wx.ALL, 10)
-        intl_panel.SetSizer(intl_sizer)
-
-        self.notebook.AddPage(us_panel, "U.S. States")
-        self.notebook.AddPage(intl_panel, "International")
-        vbox.Add(self.notebook, 0, wx.EXPAND | wx.ALL, 10)
-
-        vbox.Add(
-            wx.StaticText(panel, label="Select cities to add (check multiple cities):"),
-            0, wx.ALL, 10,
-        )
+        vbox.Add(wx.StaticText(panel, label="Select cities to add (check multiple cities):"),
+                 0, wx.LEFT | wx.RIGHT, 8)
         self.cities_list = wx.CheckListBox(panel)
-        vbox.Add(self.cities_list, 1, wx.EXPAND | wx.ALL, 10)
+        vbox.Add(self.cities_list, 1, wx.EXPAND | wx.ALL, 8)
 
         sel_box = wx.BoxSizer(wx.HORIZONTAL)
         self.select_all_btn = wx.Button(panel, label="Select All")
         self.deselect_all_btn = wx.Button(panel, label="Deselect All")
         sel_box.Add(self.select_all_btn, 0, wx.RIGHT, 5)
         sel_box.Add(self.deselect_all_btn, 0)
-        vbox.Add(sel_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
+        vbox.Add(sel_box, 0, wx.ALIGN_CENTER | wx.ALL, 8)
 
         btns = wx.StdDialogButtonSizer()
-        add_btn = wx.Button(panel, wx.ID_OK, "Add Selected Cities")
-        cancel_btn = wx.Button(panel, wx.ID_CANCEL)
-        btns.AddButton(add_btn)
-        btns.AddButton(cancel_btn)
+        btns.AddButton(wx.Button(panel, wx.ID_OK, "Add Selected Cities"))
+        btns.AddButton(wx.Button(panel, wx.ID_CANCEL))
         btns.Realize()
-        vbox.Add(btns, 0, wx.ALIGN_CENTER | wx.ALL, 10)
-
+        vbox.Add(btns, 0, wx.ALIGN_CENTER | wx.ALL, 8)
         panel.SetSizer(vbox)
 
         self.Bind(wx.EVT_BUTTON, self.on_load_state, self.load_state_btn)
@@ -80,45 +73,184 @@ class LocationBrowserDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.on_select_all, self.select_all_btn)
         self.Bind(wx.EVT_BUTTON, self.on_deselect_all, self.deselect_all_btn)
         self.Bind(wx.EVT_BUTTON, self.on_add_cities, id=wx.ID_OK)
+        self.Bind(wx.EVT_BUTTON, self.on_toggle_favorite, self.fav_btn)
+        self.sort_choice.Bind(wx.EVT_CHOICE, lambda e: self._populate())
+        self.Bind(wx.EVT_CLOSE, self._on_close)
 
+    def _build_us_tab(self):
+        us_panel = wx.Panel(self.notebook)
+        s = wx.BoxSizer(wx.VERTICAL)
+        s.Add(wx.StaticText(us_panel, label="Select a U.S. State:"), 0, wx.ALL, 10)
+        self.state_choice = wx.Choice(us_panel)
+        if self.us_cities_cache:
+            self.state_choice.Append("-- Select a State --")
+            for state in sorted(self.us_cities_cache.keys()):
+                self.state_choice.Append(state)
+            self.state_choice.SetSelection(0)
+        s.Add(self.state_choice, 0, wx.EXPAND | wx.ALL, 10)
+        self.load_state_btn = wx.Button(us_panel, label="Load Cities")
+        s.Add(self.load_state_btn, 0, wx.ALIGN_CENTER | wx.ALL, 10)
+        us_panel.SetSizer(s)
+        self.notebook.AddPage(us_panel, "U.S. States")
+
+    def _build_intl_tab(self):
+        intl_panel = wx.Panel(self.notebook)
+        s = wx.BoxSizer(wx.VERTICAL)
+        s.Add(wx.StaticText(intl_panel, label="Select a Country:"), 0, wx.ALL, 10)
+        self.country_choice = wx.Choice(intl_panel)
+        if self.intl_cities_cache:
+            self.country_choice.Append("-- Select a Country --")
+            for country in sorted(self.intl_cities_cache.keys()):
+                self.country_choice.Append(country)
+            self.country_choice.SetSelection(0)
+        s.Add(self.country_choice, 0, wx.EXPAND | wx.ALL, 10)
+        self.load_country_btn = wx.Button(intl_panel, label="Load Cities")
+        s.Add(self.load_country_btn, 0, wx.ALIGN_CENTER | wx.ALL, 10)
+        intl_panel.SetSizer(s)
+        self.notebook.AddPage(intl_panel, "International")
+
+    def _build_fav_tab(self):
+        p = wx.Panel(self.notebook)
+        s = wx.BoxSizer(wx.VERTICAL)
+        s.Add(wx.StaticText(p, label="Favorite regions:"), 0, wx.ALL, 10)
+        self.fav_list = wx.ListBox(p, style=wx.LB_SINGLE)
+        self._refresh_fav_list()
+        s.Add(self.fav_list, 1, wx.EXPAND | wx.ALL, 10)
+        load_fav = wx.Button(p, label="Load Favorite")
+        s.Add(load_fav, 0, wx.ALIGN_CENTER | wx.ALL, 10)
+        p.SetSizer(s)
+        self.notebook.AddPage(p, "Favorites")
+        load_fav.Bind(wx.EVT_BUTTON, self.on_load_favorite)
+
+    def _refresh_fav_list(self):
+        self.fav_list.Clear()
+        for f in self.favorites:
+            label = f"{'US' if f['kind'] == 'us' else 'Intl'}: {f['region']}"
+            self.fav_list.Append(label)
+
+    # -- loading regions ------------------------------------------------------
     def on_load_state(self, event):
         sel = self.state_choice.GetSelection()
-        if sel == 0 or sel == wx.NOT_FOUND:
+        if sel <= 0 or sel == wx.NOT_FOUND:
             wx.MessageBox("Please select a state", "No Selection", wx.OK | wx.ICON_WARNING)
             return
-        state_name = self.state_choice.GetString(sel)
-        if state_name in self.us_cities_cache:
-            self.cities_list.Clear()
-            for city_data in self.us_cities_cache[state_name]:
-                display = f"{city_data['name']}, {city_data['state']}, {city_data['country']}"
-                self.cities_list.Append(display)
-                self.cities_list.SetClientData(
-                    self.cities_list.GetCount() - 1,
-                    (city_data["name"], city_data["lat"], city_data["lon"],
-                     city_data["state"], city_data["country"]),
-                )
+        self._load_region("us", self.state_choice.GetString(sel))
 
     def on_load_country(self, event):
         sel = self.country_choice.GetSelection()
-        if sel == 0 or sel == wx.NOT_FOUND:
+        if sel <= 0 or sel == wx.NOT_FOUND:
             wx.MessageBox("Please select a country", "No Selection", wx.OK | wx.ICON_WARNING)
             return
-        country_name = self.country_choice.GetString(sel)
-        if country_name in self.intl_cities_cache:
-            self.cities_list.Clear()
-            for city_data in self.intl_cities_cache[country_name]:
-                parts = [city_data["name"]]
-                if city_data.get("state"):
-                    parts.append(city_data["state"])
-                parts.append(country_name)
-                display = ", ".join(parts)
-                self.cities_list.Append(display)
-                self.cities_list.SetClientData(
-                    self.cities_list.GetCount() - 1,
-                    (city_data["name"], city_data["lat"], city_data["lon"],
-                     city_data.get("state", ""), country_name),
-                )
+        self._load_region("intl", self.country_choice.GetString(sel))
 
+    def on_load_favorite(self, event):
+        sel = self.fav_list.GetSelection()
+        if sel == wx.NOT_FOUND:
+            return
+        fav = self.favorites[sel]
+        self._load_region(fav["kind"], fav["region"])
+
+    def _load_region(self, kind, region):
+        cache = self.us_cities_cache if kind == "us" else self.intl_cities_cache
+        if not cache or region not in cache:
+            wx.MessageBox("No data for that region.", "Unavailable", wx.OK | wx.ICON_WARNING)
+            return
+        self.loaded_region = (kind, region)
+        self.loaded_cities = []
+        for c in cache[region]:
+            parts = [c["name"]]
+            if c.get("state"):
+                parts.append(c["state"])
+            parts.append(c.get("country", region))
+            self.loaded_cities.append({
+                "name": c["name"], "lat": c["lat"], "lon": c["lon"],
+                "state": c.get("state", ""), "country": c.get("country", region),
+                "display": ", ".join(parts), "temp": None,
+            })
+        self._update_fav_button()
+        self._populate()
+
+    def _update_fav_button(self):
+        if not self.loaded_region:
+            self.fav_btn.Disable()
+            return
+        self.fav_btn.Enable()
+        kind, region = self.loaded_region
+        fav = browse_favorites.is_favorite(self.favorites, kind, region)
+        self.fav_btn.SetLabel("Remove Region from Favorites" if fav
+                              else "Add Region to Favorites")
+
+    def on_toggle_favorite(self, event):
+        if not self.loaded_region:
+            return
+        kind, region = self.loaded_region
+        self.favorites, _ = browse_favorites.toggle(self.favorites, kind, region)
+        self._refresh_fav_list()
+        self._update_fav_button()
+
+    # -- sorting + populate ---------------------------------------------------
+    def _populate(self):
+        if not self.loaded_cities:
+            return
+        sort = self.sort_choice.GetStringSelection()
+        if sort.startswith("Temperature") and any(c["temp"] is None for c in self.loaded_cities):
+            self._fetch_temps_then_populate()
+            return
+        self._fill_list(self._sorted(sort))
+
+    def _sorted(self, sort):
+        cities = list(self.loaded_cities)
+        if sort == "Name (A-Z)":
+            cities.sort(key=lambda c: c["display"].lower())
+        elif sort == "Name (Z-A)":
+            cities.sort(key=lambda c: c["display"].lower(), reverse=True)
+        elif sort == "North to South":
+            cities.sort(key=lambda c: c["lat"], reverse=True)
+        elif sort == "South to North":
+            cities.sort(key=lambda c: c["lat"])
+        elif sort == "East to West":
+            cities.sort(key=lambda c: c["lon"], reverse=True)
+        elif sort == "West to East":
+            cities.sort(key=lambda c: c["lon"])
+        elif sort == "Temperature (Warm-Cold)":
+            cities.sort(key=lambda c: (c["temp"] is None, -(c["temp"] or 0)))
+        elif sort == "Temperature (Cold-Warm)":
+            cities.sort(key=lambda c: (c["temp"] is None, c["temp"] or 0))
+        return cities
+
+    def _fill_list(self, cities):
+        self.cities_list.Clear()
+        for c in cities:
+            label = c["display"]
+            if c["temp"] is not None:
+                label += f"  ({c['temp']:.0f}°C)"
+            self.cities_list.Append(label)
+            self.cities_list.SetClientData(self.cities_list.GetCount() - 1, c)
+
+    def _fetch_temps_then_populate(self):
+        self.cities_list.Clear()
+        self.cities_list.Append("Fetching temperatures for sorting...")
+        cities = self.loaded_cities
+
+        def work():
+            def one(c):
+                try:
+                    d = weather_service.fetch_weather(c["lat"], c["lon"], "basic")
+                    c["temp"] = d.get("current", {}).get("temperature_2m")
+                except Exception:
+                    c["temp"] = None
+            with ThreadPoolExecutor(max_workers=8) as ex:
+                list(ex.map(one, cities))
+            wx.CallAfter(self._after_temps)
+
+        threading.Thread(target=work, daemon=True).start()
+
+    def _after_temps(self):
+        if not self._alive:
+            return
+        self._fill_list(self._sorted(self.sort_choice.GetStringSelection()))
+
+    # -- selection ------------------------------------------------------------
     def on_select_all(self, event):
         for i in range(self.cities_list.GetCount()):
             self.cities_list.Check(i, True)
@@ -131,20 +263,21 @@ class LocationBrowserDialog(wx.Dialog):
         self.selected_cities = []
         for i in range(self.cities_list.GetCount()):
             if self.cities_list.IsChecked(i):
-                name, lat, lon, state, country = self.cities_list.GetClientData(i)
-                parts = [name]
-                if state:
-                    parts.append(state)
-                parts.append(country)
-                self.selected_cities.append((", ".join(parts), lat, lon))
-
+                c = self.cities_list.GetClientData(i)
+                if c:
+                    self.selected_cities.append((c["display"], c["lat"], c["lon"]))
         if not self.selected_cities:
-            wx.MessageBox(
-                "Please select at least one city to add", "No Cities Selected",
-                wx.OK | wx.ICON_WARNING,
-            )
+            wx.MessageBox("Please select at least one city to add", "No Cities Selected",
+                          wx.OK | wx.ICON_WARNING)
             return
         self.EndModal(wx.ID_OK)
 
     def get_selected_cities(self):
         return self.selected_cities
+
+    def get_favorites(self):
+        return self.favorites
+
+    def _on_close(self, event):
+        self._alive = False
+        event.Skip()

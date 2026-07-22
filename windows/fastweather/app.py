@@ -10,7 +10,7 @@ import os
 
 import wx
 
-from . import __version__
+from . import __version__, browse_favorites
 from .city_data import flatten_cities, load_cached_cities
 from .models.city import CityStore
 from .models.settings import AppSettings
@@ -54,6 +54,7 @@ class MainFrame(wx.Frame):
         # Cached city coordinates for browsing
         self.us_cities_cache, self.intl_cities_cache = load_cached_cities()
         self._all_cities = None  # flattened lazily for the Directional Explorer
+        self.browse_favs = browse_favorites.load()
         self.day_offset = 0      # detailed-view date navigation (-7..+7)
         self.current_full_data = None
 
@@ -228,6 +229,9 @@ class MainFrame(wx.Frame):
         mi_up = cities_menu.Append(wx.ID_ANY, "Move Up")
         mi_down = cities_menu.Append(wx.ID_ANY, "Move Down")
         cities_menu.AppendSeparator()
+        mi_copy = cities_menu.Append(wx.ID_ANY, "Copy Weather Report")
+        mi_save = cities_menu.Append(wx.ID_ANY, "Save Weather Report...")
+        cities_menu.AppendSeparator()
         mi_exit = cities_menu.Append(wx.ID_EXIT, "Exit")
         mb.Append(cities_menu, "C&ities")
 
@@ -255,6 +259,8 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_remove, mi_remove)
         self.Bind(wx.EVT_MENU, self.on_move_up, mi_up)
         self.Bind(wx.EVT_MENU, self.on_move_down, mi_down)
+        self.Bind(wx.EVT_MENU, self.on_copy_report, mi_copy)
+        self.Bind(wx.EVT_MENU, self.on_save_report, mi_save)
         self.Bind(wx.EVT_MENU, lambda e: self.Close(), mi_exit)
         self.Bind(wx.EVT_MENU, self.on_config, mi_config)
         self.Bind(wx.EVT_MENU, self.on_about, mi_about)
@@ -366,6 +372,45 @@ class MainFrame(wx.Frame):
             wx.MessageBox("Select a city first.", "No City Selected",
                           wx.OK | wx.ICON_INFORMATION)
         return city
+
+    def _report_text(self):
+        """The currently displayed detailed report as text, or None."""
+        lb = self.full_display.listbox
+        if self.book.GetSelection() != 1 or lb.GetCount() == 0:
+            return None
+        return "\n".join(lb.GetString(i) for i in range(lb.GetCount()))
+
+    def on_copy_report(self, event):
+        text = self._report_text()
+        if not text:
+            wx.MessageBox("Open Full Weather for a city first.", "Nothing to Copy",
+                          wx.OK | wx.ICON_INFORMATION)
+            return
+        if wx.TheClipboard.Open():
+            wx.TheClipboard.SetData(wx.TextDataObject(text))
+            wx.TheClipboard.Close()
+            self.statusbar.SetStatusText("Report copied to clipboard", 0)
+
+    def on_save_report(self, event):
+        text = self._report_text()
+        if not text:
+            wx.MessageBox("Open Full Weather for a city first.", "Nothing to Save",
+                          wx.OK | wx.ICON_INFORMATION)
+            return
+        default = "weather.txt"
+        if hasattr(self, "current_full_city"):
+            default = self.current_full_city[0].split(",")[0].strip() + " weather.txt"
+        with wx.FileDialog(self, "Save Weather Report", defaultFile=default,
+                           wildcard="Text files (*.txt)|*.txt",
+                           style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as dlg:
+            if dlg.ShowModal() == wx.ID_CANCEL:
+                return
+            try:
+                with open(dlg.GetPath(), "w", encoding="utf-8") as f:
+                    f.write(text)
+                self.statusbar.SetStatusText(f"Saved {dlg.GetPath()}", 0)
+            except Exception as e:  # noqa: BLE001
+                wx.MessageBox(f"Could not save: {e}", "Error", wx.OK | wx.ICON_ERROR)
 
     def on_about(self, event):
         wx.MessageBox(
@@ -514,8 +559,13 @@ class MainFrame(wx.Frame):
             )
             return
 
-        dlg = LocationBrowserDialog(self, self.us_cities_cache, self.intl_cities_cache)
-        if dlg.ShowModal() == wx.ID_OK:
+        dlg = LocationBrowserDialog(self, self.us_cities_cache, self.intl_cities_cache,
+                                    self.browse_favs)
+        result = dlg.ShowModal()
+        # Persist any favorites changes regardless of OK/Cancel.
+        self.browse_favs = dlg.get_favorites()
+        browse_favorites.save(self.browse_favs)
+        if result == wx.ID_OK:
             cities_to_add = dlg.get_selected_cities()
             added_count = 0
             skipped_count = 0
