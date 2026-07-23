@@ -20,6 +20,10 @@ NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 USER_AGENT = "WeatherFast GUI/1.0"
 DEFAULT_TIMEOUT = 10
 
+# Published, formatted user guide (built from docs/user-guide.md by the
+# publish-user-guide workflow and served from GitHub Pages).
+USER_GUIDE_URL = "https://kellylford.github.io/FastWeather/"
+
 # Default seed cities: display name -> [lat, lon]
 DEFAULT_CITIES = {
     "Madison, Wisconsin, United States": [43.074761, -89.3837613],

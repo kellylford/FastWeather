@@ -12,6 +12,7 @@ import sys
 import wx
 
 from . import __version__, browse_favorites
+from .constants import USER_GUIDE_URL
 from .city_data import flatten_cities, load_cached_cities
 from .models.city import CityStore
 from .models.settings import AppSettings
@@ -261,6 +262,8 @@ class MainFrame(wx.Frame):
         mb.Append(settings_menu, "&Settings")
 
         help_menu = wx.Menu()
+        mi_guide = help_menu.Append(wx.ID_ANY, "User Guide\tF1")
+        help_menu.AppendSeparator()
         mi_update = help_menu.Append(wx.ID_ANY, "Check for Updates...")
         mi_autoupdate = help_menu.AppendCheckItem(wx.ID_ANY, "Automatically Check for Updates")
         mi_autoupdate.Check(self.settings["options"].get("auto_check_updates", True))
@@ -284,6 +287,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, lambda e: self.Close(), mi_exit)
         self.Bind(wx.EVT_MENU, self.on_config, mi_config)
         self.Bind(wx.EVT_MENU, self._on_toggle_place_names, mi_placenames)
+        self.Bind(wx.EVT_MENU, lambda e: wx.LaunchDefaultBrowser(USER_GUIDE_URL), mi_guide)
         self.Bind(wx.EVT_MENU, lambda e: self.check_for_updates(manual=True), mi_update)
         self.Bind(wx.EVT_MENU, self._on_toggle_auto_update, mi_autoupdate)
         self.Bind(wx.EVT_MENU, self.on_about, mi_about)
