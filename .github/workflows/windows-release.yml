@@ -1,0 +1,108 @@
+name: WeatherFast (Windows)
+
+# Adopted from QuickMail's release workflow, adapted to Python/PyInstaller +
+# Inno Setup. Pushing a version tag (e.g. v1.2.0) builds the app and installer
+# and publishes a GitHub Release with both assets. The in-app updater reads the
+# latest release and downloads the *-Setup.exe asset. Pull requests that touch
+# the Windows app build (and run tests) but never publish a release.
+
+on:
+  push:
+    tags: ['v*']
+  pull_request:
+    paths:
+      - 'windows/**'
+      - 'installer/**'
+      - '.github/workflows/windows-release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        working-directory: windows
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+
+      - name: Run tests
+        working-directory: windows
+        run: python -m unittest discover -s tests -t . -v
+
+      # The tag is the single source of truth for the release version and must
+      # match the package __version__, which the in-app updater compares against.
+      - name: Verify tag matches package version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          $tag = '${{ github.ref_name }}'.TrimStart('v')
+          $init = Get-Content windows/fastweather/__init__.py -Raw
+          if ($init -notmatch '__version__\s*=\s*"([^"]+)"') { throw "Could not read __version__" }
+          $ver = $Matches[1]
+          if ($tag -ne $ver) {
+            throw "Tag '$tag' does not match __version__ '$ver'. Bump __init__.py or re-tag."
+          }
+          Write-Host "Version OK: $ver"
+
+      - name: Determine version
+        id: ver
+        shell: pwsh
+        run: |
+          if ('${{ github.ref }}' -like 'refs/tags/v*') {
+            $v = '${{ github.ref_name }}'.TrimStart('v')
+          } else {
+            $init = Get-Content windows/fastweather/__init__.py -Raw
+            $null = $init -match '__version__\s*=\s*"([^"]+)"'
+            $v = $Matches[1]
+          }
+          "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "Building version $v"
+
+      - name: Build executable (PyInstaller)
+        working-directory: windows
+        env:
+          PYTHONUTF8: '1'
+        run: python build.py
+
+      - name: Build installer (Inno Setup)
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            choco install innosetup -y --no-progress
+            $iscc = (Get-Command iscc).Source
+          }
+          & $iscc /DMyAppVersion=${{ steps.ver.outputs.version }} installer/weatherfast.iss
+          if ($LASTEXITCODE -ne 0) { throw "ISCC failed ($LASTEXITCODE)" }
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: WeatherFast-${{ steps.ver.outputs.version }}
+          path: |
+            windows/dist/WeatherFast.exe
+            installer/Output/WeatherFast-*-Setup.exe
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: WeatherFast ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            windows/dist/WeatherFast.exe
+            installer/Output/WeatherFast-*-Setup.exe
+          fail_on_unmatched_files: true

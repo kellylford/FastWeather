@@ -1,0 +1,139 @@
+name: Publish User Guide
+
+# Builds a formatted HTML version of docs/user-guide.md (a single-page view, one
+# page per section with prev/next navigation, and a table-of-contents index) and
+# publishes it to the gh-pages branch, which GitHub Pages serves. The desktop
+# app's Help > User Guide and F1 open the published site.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/user-guide.md'
+      - '.github/workflows/publish-user-guide.yml'
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  publish-guide:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc
+
+      - name: Read version
+        id: version
+        run: |
+          VERSION=$(grep -oP '(?<=__version__ = ")[^"]+' windows/fastweather/__init__.py)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Detected version: $VERSION"
+
+      - name: Create build directory
+        run: mkdir -p build/docs
+
+      - name: Write shared CSS
+        run: |
+          cat > /tmp/guide-style.html << 'STYLEEOF'
+          <style>
+            :root { color-scheme: light dark; }
+            body { max-width: 860px; margin: 0 auto; padding: 1rem 2rem;
+                   font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+                   line-height: 1.6; }
+            h1 { border-bottom: 2px solid #8884; padding-bottom: 0.3em; }
+            h2 { border-bottom: 1px solid #8884; padding-bottom: 0.2em; margin-top: 2em; }
+            table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+            th, td { border: 1px solid #8886; padding: 0.5rem 0.75rem; text-align: left; }
+            th { background: #8882; font-weight: 600; }
+            code { background: #8882; padding: 0.15em 0.35em; border-radius: 3px;
+                   font-size: 0.9em; font-family: "Cascadia Code", Consolas, monospace; }
+            pre { background: #8882; padding: 1rem; border-radius: 4px; overflow-x: auto; }
+            pre code { background: none; padding: 0; }
+            a { color: #2a7ae2; }
+            hr { border: none; border-top: 1px solid #8884; margin: 2rem 0; }
+            blockquote { border-left: 3px solid #8886; margin-left: 0; padding-left: 1rem; }
+            .nav { margin-bottom: 2em; padding-bottom: 0.75em; border-bottom: 1px solid #8884;
+                   font-size: 0.9em; }
+            .nav a { margin-right: 1em; text-decoration: none; }
+            .nav a:hover { text-decoration: underline; }
+            .version { opacity: 0.7; font-size: 0.85em; margin-top: -1em; margin-bottom: 2em; }
+          </style>
+          STYLEEOF
+
+      - name: Generate single-page HTML
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          pandoc docs/user-guide.md \
+            --from gfm --to html5 --standalone \
+            --include-in-header=/tmp/guide-style.html \
+            --metadata title="WeatherFast User Guide" \
+            --metadata lang=en \
+            --output build/docs/full.html
+
+      - name: Generate sectioned HTML with navigation
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          python3 - "$VERSION" << 'EOF'
+          import re, subprocess, sys
+          version = sys.argv[1]
+          with open('docs/user-guide.md', encoding='utf-8') as f:
+              content = f.read()
+          with open('/tmp/guide-style.html', encoding='utf-8') as f:
+              shared_css = f.read()
+
+          sections = re.split(r'^## ', content, flags=re.MULTILINE)
+          section_files = []
+          for section in sections[1:]:
+              lines = section.split('\n', 1)
+              title = lines[0].strip()
+              body = lines[1] if len(lines) > 1 else ""
+              if title.lower() == 'contents':
+                  continue
+              fn = re.sub(r'[^\w\s-]', '', title).strip().lower().replace(' ', '-')
+              section_files.append((fn, title, body))
+
+          def nav(i):
+              s = '<div class="nav"><a href="index.html">Contents</a> | <a href="full.html">Single Page</a>'
+              if i > 0:
+                  s += f' | <a href="{section_files[i-1][0]}.html">Previous: {section_files[i-1][1]}</a>'
+              if i < len(section_files) - 1:
+                  s += f' | <a href="{section_files[i+1][0]}.html">Next: {section_files[i+1][1]}</a>'
+              return s + '</div>'
+
+          for i, (fn, title, body) in enumerate(section_files):
+              html_body = subprocess.run(
+                  ['pandoc', '--from', 'gfm', '--to', 'html5'],
+                  input=f"# {title}\n\n{body}", capture_output=True, text=True).stdout
+              page = f"""<!DOCTYPE html>
+          <html lang="en"><head><meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>{title} - WeatherFast User Guide</title>{shared_css}</head>
+          <body>{nav(i)}{html_body}{nav(i)}</body></html>"""
+              with open(f'build/docs/{fn}.html', 'w', encoding='utf-8') as f:
+                  f.write(page)
+
+          toc = '\n'.join(f'<li><a href="{fn}.html">{t}</a></li>' for fn, t, _ in section_files)
+          index = f"""<!DOCTYPE html>
+          <html lang="en"><head><meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>WeatherFast User Guide</title>{shared_css}</head>
+          <body><h1>WeatherFast User Guide</h1>
+          <p class="version">Version {version}</p>
+          <h2>Contents</h2><ul>
+          {toc}
+          </ul><hr><p><a href="full.html">View as a single page</a></p></body></html>"""
+          with open('build/docs/index.html', 'w', encoding='utf-8') as f:
+              f.write(index)
+          print(f"Generated {len(section_files)} section pages")
+          EOF
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/docs
