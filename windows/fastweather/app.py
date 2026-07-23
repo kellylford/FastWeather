@@ -7,6 +7,7 @@ AccessibleLinesPanel, dialogs). Behavior and layout are preserved.
 
 import json
 import os
+import sys
 
 import wx
 
@@ -22,7 +23,7 @@ from .ui.dialogs.city_select import CitySelectionDialog
 from .ui.dialogs.config_dialog import WeatherConfigDialog
 from .ui.dialogs.location_browser import LocationBrowserDialog
 from .ui.events import EVT_FETCH_RESULT
-from .services import alert_service, location_service
+from .services import alert_service, location_service, updater
 from .ui.dialogs.alert_browser_dialog import AlertBrowserDialog
 from .ui.dialogs.alerts_dialog import AlertsDialog
 from .ui.dialogs.around_me_dialog import AroundMeDialog
@@ -73,6 +74,8 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.on_close)
 
         wx.CallAfter(self.set_initial_focus)
+        # Auto-check for updates shortly after launch (frozen build only).
+        wx.CallLater(4000, self._maybe_auto_check_updates)
 
     # -- configuration persistence -------------------------------------------
     def load_config(self):
@@ -254,6 +257,10 @@ class MainFrame(wx.Frame):
         mb.Append(settings_menu, "&Settings")
 
         help_menu = wx.Menu()
+        mi_update = help_menu.Append(wx.ID_ANY, "Check for Updates...")
+        mi_autoupdate = help_menu.AppendCheckItem(wx.ID_ANY, "Automatically Check for Updates")
+        mi_autoupdate.Check(self.settings["options"].get("auto_check_updates", True))
+        help_menu.AppendSeparator()
         mi_about = help_menu.Append(wx.ID_ABOUT, "About")
         mb.Append(help_menu, "&Help")
 
@@ -272,6 +279,8 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_save_report, mi_save)
         self.Bind(wx.EVT_MENU, lambda e: self.Close(), mi_exit)
         self.Bind(wx.EVT_MENU, self.on_config, mi_config)
+        self.Bind(wx.EVT_MENU, lambda e: self.check_for_updates(manual=True), mi_update)
+        self.Bind(wx.EVT_MENU, self._on_toggle_auto_update, mi_autoupdate)
         self.Bind(wx.EVT_MENU, self.on_about, mi_about)
 
         # Feature sheets (registered per phase).
@@ -420,6 +429,43 @@ class MainFrame(wx.Frame):
                 self.statusbar.SetStatusText(f"Saved {dlg.GetPath()}", 0)
             except Exception as e:  # noqa: BLE001
                 wx.MessageBox(f"Could not save: {e}", "Error", wx.OK | wx.ICON_ERROR)
+
+    # -- updates ---------------------------------------------------------------
+    def _maybe_auto_check_updates(self):
+        if getattr(sys, "frozen", False) and \
+                self.settings["options"].get("auto_check_updates", True):
+            self.check_for_updates(manual=False)
+
+    def _on_toggle_auto_update(self, event):
+        self.settings["options"]["auto_check_updates"] = event.IsChecked()
+        self.save_config()
+
+    def check_for_updates(self, manual=False):
+        if manual:
+            self.statusbar.SetStatusText("Checking for updates...", 0)
+        self.fetch.submit("update_check", updater.check_for_update,
+                          request_id=("manual" if manual else "auto"))
+
+    def _prompt_update(self, info):
+        notes = info.get("notes", "")
+        if len(notes) > 600:
+            notes = notes[:600] + "\n..."
+        if not info.get("url"):
+            if wx.MessageBox(
+                f"WeatherFast {info['version']} is available (you have {__version__}).\n\n"
+                "Open the downloads page?", "Update Available",
+                wx.YES_NO | wx.ICON_INFORMATION,
+            ) == wx.YES:
+                wx.LaunchDefaultBrowser(
+                    f"https://github.com/{updater.GITHUB_REPO}/releases/latest")
+            return
+        msg = (f"WeatherFast {info['version']} is available "
+               f"(you have {__version__}).\n\n{notes}\n\n"
+               "Download and install now? The app will close to finish installing.")
+        if wx.MessageBox(msg, "Update Available", wx.YES_NO | wx.ICON_INFORMATION) == wx.YES:
+            self.statusbar.SetStatusText("Downloading update...", 0)
+            url = info["url"]
+            self.fetch.submit("update_download", lambda: updater.download_installer(url))
 
     def on_about(self, event):
         wx.MessageBox(
@@ -767,6 +813,29 @@ class MainFrame(wx.Frame):
                 self.on_geo_error(event.error)
             else:
                 self.on_geo_ready(event.request_id, event.payload)
+        elif event.kind == "update_check":
+            manual = event.request_id == "manual"
+            if manual:
+                self.statusbar.SetStatusText("Ready", 0)
+            if event.error:
+                if manual:
+                    wx.MessageBox(f"Could not check for updates: {event.error}",
+                                  "Update Check", wx.OK | wx.ICON_WARNING)
+                return
+            if not event.payload:
+                if manual:
+                    wx.MessageBox(f"You're up to date (version {__version__}).",
+                                  "No Updates", wx.OK | wx.ICON_INFORMATION)
+                return
+            self._prompt_update(event.payload)
+        elif event.kind == "update_download":
+            self.statusbar.SetStatusText("Ready", 0)
+            if event.error:
+                wx.MessageBox(f"Update download failed: {event.error}",
+                              "Update", wx.OK | wx.ICON_ERROR)
+                return
+            updater.launch_installer(event.payload)
+            self.Close()
         elif event.kind == "mylocation":
             self.statusbar.SetStatusText("Ready", 0)
             self.mylocation_btn.Enable()

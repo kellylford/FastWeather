@@ -51,6 +51,7 @@ def default_config():
             "mydata_selection": [],           # ordered list of MyDataParameter keys
             "default_alert_severity_filter": "All",   # Extreme|Severe|Moderate|All
             "default_alert_hazard_type": "",          # hazard family or "" for all
+            "auto_check_updates": True,               # check GitHub Releases on launch
         },
     }
 

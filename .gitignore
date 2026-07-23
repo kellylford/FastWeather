@@ -9,6 +9,9 @@ dist/
 build/
 *.spec
 
+# Windows installer build output (Inno Setup)
+installer/Output/
+
 # Virtual environments
 venv/
 env/
