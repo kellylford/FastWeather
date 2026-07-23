@@ -30,7 +30,7 @@ class AlertsDialog(wx.Dialog):
         ls = wx.BoxSizer(wx.VERTICAL)
         self.status = wx.StaticText(list_page, label="Checking for alerts...")
         ls.Add(self.status, 0, wx.ALL, 8)
-        self.list_box = wx.ListBox(list_page, style=wx.LB_SINGLE)
+        self.list_box = wx.ListBox(list_page, style=wx.LB_SINGLE | wx.WANTS_CHARS)
         ls.Add(self.list_box, 1, wx.EXPAND | wx.ALL, 8)
         self.view_btn = wx.Button(list_page, label="View Details")
         self.view_btn.Disable()
@@ -111,8 +111,13 @@ class AlertsDialog(wx.Dialog):
         self.list_box.SetFocus()
 
     def _on_list_key(self, event):
-        if event.GetKeyCode() in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER):
+        kc = event.GetKeyCode()
+        if kc in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER):
             self.on_view(event)
+        elif kc == wx.WXK_TAB:
+            flags = (wx.NavigationKeyEvent.IsBackward if event.ShiftDown()
+                     else wx.NavigationKeyEvent.IsForward)
+            self.list_box.Navigate(flags)
         else:
             event.Skip()
 
