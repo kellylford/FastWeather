@@ -1,5 +1,0 @@
-# CityData Geocoding Requirements
-# Install with: pip install -r requirements.txt
-
-# HTTP Requests for Geocoding API (Nominatim)
-requests>=2.34.2

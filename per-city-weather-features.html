@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Per-City Weather Features - WeatherFast User Guide</title><style>
+  :root { color-scheme: light dark; }
+  body { max-width: 860px; margin: 0 auto; padding: 1rem 2rem;
+         font-family: -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.6; }
+  h1 { border-bottom: 2px solid #8884; padding-bottom: 0.3em; }
+  h2 { border-bottom: 1px solid #8884; padding-bottom: 0.2em; margin-top: 2em; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+  th, td { border: 1px solid #8886; padding: 0.5rem 0.75rem; text-align: left; }
+  th { background: #8882; font-weight: 600; }
+  code { background: #8882; padding: 0.15em 0.35em; border-radius: 3px;
+         font-size: 0.9em; font-family: "Cascadia Code", Consolas, monospace; }
+  pre { background: #8882; padding: 1rem; border-radius: 4px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  a { color: #2a7ae2; }
+  hr { border: none; border-top: 1px solid #8884; margin: 2rem 0; }
+  .nav { margin-bottom: 2em; padding-bottom: 0.75em; border-bottom: 1px solid #8884; font-size: 0.9em; }
+  .nav a { margin-right: 1em; text-decoration: none; }
+  .version { opacity: 0.7; font-size: 0.85em; margin-top: -1em; margin-bottom: 2em; }
+</style></head><body><div class="nav"><a href="index.html">Contents</a> | <a href="full.html">Single Page</a> | <a href="configure-display-and-units.html">Previous: Configure Display and Units</a> | <a href="browse-weather-alerts.html">Next: Browse Weather Alerts</a></div><h1 id="per-city-weather-features">Per-City Weather Features</h1>
+<p>The <strong>Weather</strong> menu holds specialized reports that
+apply to the city currently selected (or the city shown in Full
+Weather). Select a city first; if none is selected, the app prompts you
+to choose one.</p>
+<h3 id="weather-alerts">Weather Alerts</h3>
+<p>Shows active US National Weather Service alerts for the selected
+city. Alerts are listed with the most serious first; select one and
+choose <strong>View Details</strong> (or press Enter) to read the full
+alert. When there are none, the dialog clearly says so, and if the check
+fails it says the check could not be completed — a failure is never
+reported as "no alerts."</p>
+<h3 id="expected-precipitation">Expected Precipitation</h3>
+<p>A short-range precipitation timeline for the next hour, in 15-minute
+steps, showing when and how intensely precipitation is expected. This is
+a text timeline (no map), drawn from Open-Meteo's 15-minute nowcast.</p>
+<h3 id="weather-around-me">Weather Around Me</h3>
+<p>Compares weather in the area around your selected city. It has two
+tabs:</p>
+<ul>
+<li><strong>Around Me</strong> — current conditions in the eight compass
+directions plus the center, at a radius you choose (options range from
+roughly 50 to 350 miles). The first load reverse-geocodes place names
+and can take several seconds.</li>
+<li><strong>Directional Explorer</strong> — lists cities along a chosen
+bearing. Pick a <strong>Direction</strong>, a <strong>Mode</strong> (Arc
+or Corridor), and a <strong>Width</strong> (Narrow, Standard, Medium, or
+Wide), then <strong>Explore</strong> to see cities in that direction
+with their current weather. Your radius, mode, and width choices are
+remembered.</li>
+</ul>
+<h3 id="historical-weather">Historical Weather</h3>
+<p>Looks up past weather (Open-Meteo's archive covers 1940 through
+yesterday). Three tabs:</p>
+<ul>
+<li><strong>Single Day</strong> — conditions for one chosen date.</li>
+<li><strong>Multi-Year</strong> — the same calendar day across a number
+of past years (you set how many years back, up to 85), useful for
+comparing a date over time.</li>
+<li><strong>Daily Browse</strong> — a run of consecutive days from a
+chosen start date (up to 31 days).</li>
+</ul>
+<h3 id="my-data">My Data</h3>
+<p>A custom report you build from a large catalog of Open-Meteo
+parameters. Choose <strong>Choose Parameters...</strong> to pick fields,
+organized into category tabs including Temperature, Humidity and
+Moisture, Wind, Precipitation, Pressure, Clouds and Visibility, Solar
+and UV, Soil, Atmosphere, Marine and Ocean, Air Quality, and Pollen.
+Each parameter has a tooltip explaining what it is. The selected values
+are shown grouped by category, drawn from Open-Meteo's forecast, marine,
+and air-quality services. <strong>Refresh</strong> re-fetches them. Your
+selection is saved. Note that marine values only appear for coastal
+points.</p>
+<h3 id="marine-forecast">Marine Forecast</h3>
+<p>Current sea conditions — wave height, direction, and period;
+wind-wave and swell height; ocean current velocity and direction; and
+sea-surface temperature. Marine data exists only for coastal and ocean
+points; for an inland place the dialog says no marine data is available
+rather than showing an error.</p>
+<h3 id="astronomy-moon">Astronomy (Moon)</h3>
+<p>Today's moon phase, illumination percentage, and moon age, plus the
+dates of the next new moon and next full moon.</p>
+<div class="nav"><a href="index.html">Contents</a> | <a href="full.html">Single Page</a> | <a href="configure-display-and-units.html">Previous: Configure Display and Units</a> | <a href="browse-weather-alerts.html">Next: Browse Weather Alerts</a></div></body></html>

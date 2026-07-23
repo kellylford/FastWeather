@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Getting Started - WeatherFast User Guide</title><style>
+  :root { color-scheme: light dark; }
+  body { max-width: 860px; margin: 0 auto; padding: 1rem 2rem;
+         font-family: -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.6; }
+  h1 { border-bottom: 2px solid #8884; padding-bottom: 0.3em; }
+  h2 { border-bottom: 1px solid #8884; padding-bottom: 0.2em; margin-top: 2em; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+  th, td { border: 1px solid #8886; padding: 0.5rem 0.75rem; text-align: left; }
+  th { background: #8882; font-weight: 600; }
+  code { background: #8882; padding: 0.15em 0.35em; border-radius: 3px;
+         font-size: 0.9em; font-family: "Cascadia Code", Consolas, monospace; }
+  pre { background: #8882; padding: 1rem; border-radius: 4px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  a { color: #2a7ae2; }
+  hr { border: none; border-top: 1px solid #8884; margin: 2rem 0; }
+  .nav { margin-bottom: 2em; padding-bottom: 0.75em; border-bottom: 1px solid #8884; font-size: 0.9em; }
+  .nav a { margin-right: 1em; text-decoration: none; }
+  .version { opacity: 0.7; font-size: 0.85em; margin-top: -1em; margin-bottom: 2em; }
+</style></head><body><div class="nav"><a href="index.html">Contents</a> | <a href="full.html">Single Page</a> | <a href="the-main-window.html">Next: The Main Window</a></div><h1 id="getting-started">Getting Started</h1>
+<h3 id="installing">Installing</h3>
+<p>There are two ways to run WeatherFast.</p>
+<ul>
+<li><strong>Installer</strong> — run
+<code>WeatherFast-&lt;version&gt;-Setup.exe</code>. This performs a
+per-user install into your local application data folder and adds a
+Start Menu shortcut. It does not require administrator rights and
+installs only for your account.</li>
+<li><strong>Portable</strong> — run <code>WeatherFast.exe</code>
+directly. Nothing is installed; the app runs from wherever the file
+sits.</li>
+</ul>
+<p>WeatherFast is not yet code-signed. The first time you run either
+version, Windows SmartScreen may show a warning. If that happens, choose
+<strong>More info</strong> and then <strong>Run anyway</strong> to start
+the app.</p>
+<h3 id="first-launch">First launch</h3>
+<p>On its first run the app seeds a short list of default cities
+(including Madison, San Diego, Portland, London, Miami, and a few
+others) so you have something to look at immediately. You can remove any
+of these and add your own at any time.</p>
+<p>Your data is stored under <code>%APPDATA%\WeatherFast</code> — this
+holds your saved city list (<code>city.json</code>), your display and
+unit settings (<code>config.json</code>), your browse favorites, and a
+small cache. If you previously used an older build named FastWeather,
+your saved cities and settings are copied over automatically the first
+time WeatherFast runs.</p>
+<h3 id="command-line-options">Command-line options</h3>
+<p>WeatherFast accepts two optional command-line arguments:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--reset</code></td>
+<td>Delete the saved city list before starting (the app then starts with
+defaults).</td>
+</tr>
+<tr>
+<td><code>-c &lt;path&gt;</code> or
+<code>--config &lt;path&gt;</code></td>
+<td>Use a specific city-list JSON file instead of the default. Useful
+for keeping separate lists.</td>
+</tr>
+</tbody>
+</table>
+<div class="nav"><a href="index.html">Contents</a> | <a href="full.html">Single Page</a> | <a href="the-main-window.html">Next: The Main Window</a></div></body></html>

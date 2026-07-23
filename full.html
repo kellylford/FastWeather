@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>WeatherFast User Guide</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <style>
+    :root { color-scheme: light dark; }
+    body { max-width: 860px; margin: 0 auto; padding: 1rem 2rem;
+           font-family: -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.6; }
+    h1 { border-bottom: 2px solid #8884; padding-bottom: 0.3em; }
+    h2 { border-bottom: 1px solid #8884; padding-bottom: 0.2em; margin-top: 2em; }
+    table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+    th, td { border: 1px solid #8886; padding: 0.5rem 0.75rem; text-align: left; }
+    th { background: #8882; font-weight: 600; }
+    code { background: #8882; padding: 0.15em 0.35em; border-radius: 3px;
+           font-size: 0.9em; font-family: "Cascadia Code", Consolas, monospace; }
+    pre { background: #8882; padding: 1rem; border-radius: 4px; overflow-x: auto; }
+    pre code { background: none; padding: 0; }
+    a { color: #2a7ae2; }
+    hr { border: none; border-top: 1px solid #8884; margin: 2rem 0; }
+    .nav { margin-bottom: 2em; padding-bottom: 0.75em; border-bottom: 1px solid #8884; font-size: 0.9em; }
+    .nav a { margin-right: 1em; text-decoration: none; }
+    .version { opacity: 0.7; font-size: 0.85em; margin-top: -1em; margin-bottom: 2em; }
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">WeatherFast User Guide</h1>
+</header>
+<h1 id="weatherfast-user-guide">WeatherFast User Guide</h1>
+<p>WeatherFast is a Windows desktop weather app. It shows current
+conditions, hourly and multi-day forecasts, weather alerts, and a range
+of specialized reports for any place you add. Weather comes from
+Open-Meteo, alerts from the US National Weather Service and Environment
+Canada, and place search from OpenStreetMap. No account, sign-up, or API
+key is needed.</p>
+<h2 id="contents">Contents</h2>
+<ul>
+<li>Getting Started</li>
+<li>The Main Window</li>
+<li>Adding Places</li>
+<li>Browse Cities by State or Country</li>
+<li>Add My Location</li>
+<li>Full Weather View</li>
+<li>Configure Display and Units</li>
+<li>Per-City Weather Features</li>
+<li>Browse Weather Alerts</li>
+<li>Copy and Save Reports</li>
+<li>Updates</li>
+<li>Menus and Keyboard Reference</li>
+<li>Data and Privacy</li>
+</ul>
+<h2 id="getting-started">Getting Started</h2>
+<h3 id="installing">Installing</h3>
+<p>There are two ways to run WeatherFast.</p>
+<ul>
+<li><strong>Installer</strong> — run
+<code>WeatherFast-&lt;version&gt;-Setup.exe</code>. This performs a
+per-user install into your local application data folder and adds a
+Start Menu shortcut. It does not require administrator rights and
+installs only for your account.</li>
+<li><strong>Portable</strong> — run <code>WeatherFast.exe</code>
+directly. Nothing is installed; the app runs from wherever the file
+sits.</li>
+</ul>
+<p>WeatherFast is not yet code-signed. The first time you run either
+version, Windows SmartScreen may show a warning. If that happens, choose
+<strong>More info</strong> and then <strong>Run anyway</strong> to start
+the app.</p>
+<h3 id="first-launch">First launch</h3>
+<p>On its first run the app seeds a short list of default cities
+(including Madison, San Diego, Portland, London, Miami, and a few
+others) so you have something to look at immediately. You can remove any
+of these and add your own at any time.</p>
+<p>Your data is stored under <code>%APPDATA%\WeatherFast</code> — this
+holds your saved city list (<code>city.json</code>), your display and
+unit settings (<code>config.json</code>), your browse favorites, and a
+small cache. If you previously used an older build named FastWeather,
+your saved cities and settings are copied over automatically the first
+time WeatherFast runs.</p>
+<h3 id="command-line-options">Command-line options</h3>
+<p>WeatherFast accepts two optional command-line arguments:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--reset</code></td>
+<td>Delete the saved city list before starting (the app then starts with
+defaults).</td>
+</tr>
+<tr>
+<td><code>-c &lt;path&gt;</code> or
+<code>--config &lt;path&gt;</code></td>
+<td>Use a specific city-list JSON file instead of the default. Useful
+for keeping separate lists.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="the-main-window">The Main Window</h2>
+<p>The main window is titled <strong>My Cities</strong>. It has two
+areas: a place to add cities at the top and your city list below.</p>
+<h3 id="add-new-city-area">Add New City area</h3>
+<ul>
+<li><strong>Enter city</strong> — a text field where you type a place to
+search for. Press Enter or the <strong>Add City</strong> button to
+search.</li>
+<li><strong>Browse Cities by State/Country</strong> — opens the bulk
+city browser (see below).</li>
+<li><strong>Add My Location</strong> — detects and adds your approximate
+location (see below).</li>
+</ul>
+<h3 id="your-cities-list">Your Cities list</h3>
+<p>The list shows every place you have added. Each row shows the place
+name followed by a short current summary — temperature, a sky
+description, a rain or snow marker when precipitation is falling, and
+today's high and low. For example:
+<code>Madison, Wisconsin, United States - 72°F, Partly Cloudy (High: 78°F, Low: 61°F)</code>.</p>
+<p>For US places with an active weather warning, the row also ends with
+a <strong>[ALERT]</strong> marker so you can see at a glance which
+cities have something in effect. This check runs only for US
+locations.</p>
+<p>Below the list are buttons that act on the selected city:</p>
+<table>
+<thead>
+<tr>
+<th>Button</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Move Up</td>
+<td>Move the selected city one place earlier in the list.</td>
+</tr>
+<tr>
+<td>Move Down</td>
+<td>Move the selected city one place later in the list.</td>
+</tr>
+<tr>
+<td>Remove</td>
+<td>Remove the selected city (asks for confirmation).</td>
+</tr>
+<tr>
+<td>Refresh</td>
+<td>Re-fetch current weather for the selected city.</td>
+</tr>
+<tr>
+<td>Full Weather</td>
+<td>Open the detailed forecast for the selected city.</td>
+</tr>
+<tr>
+<td>Configure</td>
+<td>Open the display and units settings.</td>
+</tr>
+</tbody>
+</table>
+<p>Selecting a row and pressing Enter also opens Full Weather.</p>
+<h2 id="adding-places">Adding Places</h2>
+<p>Type into the <strong>Enter city</strong> field and press Enter (or
+click <strong>Add City</strong>). You can search by:</p>
+<ul>
+<li>City name, optionally with state or country (for example,
+<code>Portland Oregon</code>)</li>
+<li>ZIP or postal code</li>
+<li>A street address</li>
+<li>A specific place name such as an airport, university, or
+landmark</li>
+</ul>
+<p>A <strong>Search Results</strong> window opens listing what was found
+(up to eight matches), even when there is only one result, so you can
+review and confirm before anything is added. Use the arrow keys to
+choose a result and press Enter (or <strong>Add</strong>) to add it;
+press Escape or <strong>Cancel</strong> to back out. If nothing matches,
+the app tells you and returns you to the search field.</p>
+<h3 id="specific-place-names">Specific place names</h3>
+<p>The <strong>Settings</strong> menu has a <strong>Search: Use Specific
+Place Names (airports, landmarks)</strong> option, on by default. When
+it is on, searches can return specific named places — an airport, a
+university, a park — with locality context added. When it is off,
+searches return city-level (locality-only) results instead. Turn it off
+if you prefer to always add the surrounding city rather than a specific
+point.</p>
+<h2 id="browse-cities-by-state-or-country">Browse Cities by State or
+Country</h2>
+<p>Choose <strong>Browse Cities by State/Country</strong> (on the main
+window or the Cities menu) to add several places at once from a built-in
+list of cities.</p>
+<p>The dialog has tabs:</p>
+<ul>
+<li><strong>U.S. States</strong> — pick a state, then <strong>Load
+Cities</strong>.</li>
+<li><strong>International</strong> — pick a country, then <strong>Load
+Cities</strong>.</li>
+<li><strong>Favorites</strong> — your saved regions; pick one and
+<strong>Load Favorite</strong> to jump straight to it.</li>
+</ul>
+<p>Once a region is loaded, its cities appear in a checklist. Check any
+number of them (or use <strong>Select All</strong> / <strong>Deselect
+All</strong>), then choose <strong>Add Selected Cities</strong> to add
+them to your list. Cities already in your list are skipped, and the app
+reports how many were added.</p>
+<p>Use the <strong>Sort</strong> control to order the loaded cities
+by:</p>
+<ul>
+<li>Name A-Z or Z-A</li>
+<li>North to South or South to North</li>
+<li>East to West or West to East</li>
+<li>Temperature, warmest-to-coldest or coldest-to-warmest (this fetches
+current temperatures for the region first)</li>
+</ul>
+<p><strong>Add Region to Favorites</strong> saves the currently loaded
+state or country so you can reload it quickly from the Favorites tab
+later; the button toggles to remove it again. Favorites are saved
+whether you close the dialog with OK or Cancel.</p>
+<h2 id="add-my-location">Add My Location</h2>
+<p><strong>Add My Location</strong> (on the main window or the Cities
+menu) detects your approximate position and adds it as a place. It first
+asks you to confirm. If precise device location is available and
+permitted by Windows, that is used; otherwise the app falls back to an
+IP-based lookup (via ipapi.co) to estimate your city. The detected place
+is added to your list and selected. If your location cannot be
+determined, the app says so rather than adding anything.</p>
+<h2 id="full-weather-view">Full Weather View</h2>
+<p>Open <strong>Full Weather</strong> (button, Cities menu, or Enter on
+a selected city) to see the detailed forecast for a place. The view is a
+readable text report with these sections, depending on what you have
+enabled:</p>
+<ul>
+<li><strong>Current</strong> — the conditions right now (temperature,
+and any other current fields you have turned on).</li>
+<li><strong>Today's Outlook</strong> — plain-language highlights for the
+rest of today, such as when precipitation is most likely, high UV, or
+breezy conditions.</li>
+<li><strong>Hourly</strong> — an hour-by-hour list starting from the
+current hour, covering the next 24 hours.</li>
+<li><strong>Daily</strong> — a multi-day forecast, one line per
+day.</li>
+</ul>
+<p>At the top of the view are navigation buttons:</p>
+<table>
+<thead>
+<tr>
+<th>Button</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Back</td>
+<td>Return to your city list.</td>
+</tr>
+<tr>
+<td>Prev Day</td>
+<td>Show the previous day's detail.</td>
+</tr>
+<tr>
+<td>Today</td>
+<td>Return to today.</td>
+</tr>
+<tr>
+<td>Next Day</td>
+<td>Show the next day's detail.</td>
+</tr>
+<tr>
+<td>Configure</td>
+<td>Open display and units settings.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Prev Day</strong> and <strong>Next Day</strong> browse other
+days (up to about a week in either direction). When you move off today,
+the view shows that day's summary and its hour-by-hour detail. Press
+Escape or <strong>Back</strong> to return to the list.</p>
+<h2 id="configure-display-and-units">Configure Display and Units</h2>
+<p>Open <strong>Configure</strong> (a button on the main window or Full
+Weather view, or <strong>Configure Display &amp; Units...</strong> on
+the Settings menu) to control what WeatherFast shows and in which units.
+The dialog has tabs.</p>
+<h3 id="choosing-fields">Choosing fields</h3>
+<p>Three tabs — <strong>Current</strong>, <strong>Hourly</strong>, and
+<strong>Daily</strong> — each list the fields available in that section.
+Check a field to include it, uncheck it to hide it. Available fields
+include:</p>
+<ul>
+<li><strong>Current</strong>: Today's Outlook, condition, temperature,
+feels-like, humidity, dew point, wind speed and direction, wind gusts,
+pressure, visibility, UV index, precipitation, cloud cover, snowfall,
+snow depth, rain, showers.</li>
+<li><strong>Hourly</strong>: condition, temperature, feels-like,
+humidity, dew point, precipitation chance, precipitation amount, wind
+speed and direction, wind gusts, cloud cover, snowfall, rain,
+showers.</li>
+<li><strong>Daily</strong>: condition, high and low temperature,
+feels-like high and low, sunrise, sunset, daylight and sunshine
+duration, UV maximum, precipitation total, precipitation chance,
+precipitation hours, maximum wind, dominant wind direction, snowfall,
+rain, and showers totals.</li>
+</ul>
+<h3 id="units">Units</h3>
+<p>The <strong>Units</strong> tab sets the measurement units used
+throughout the app:</p>
+<table>
+<thead>
+<tr>
+<th>Measure</th>
+<th>Choices</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Temperature</td>
+<td>Fahrenheit (°F) or Celsius (°C)</td>
+</tr>
+<tr>
+<td>Wind speed</td>
+<td>Miles per hour, kilometers per hour, or meters per second</td>
+</tr>
+<tr>
+<td>Precipitation</td>
+<td>Inches or millimeters</td>
+</tr>
+<tr>
+<td>Distance</td>
+<td>Miles or kilometers</td>
+</tr>
+<tr>
+<td>Pressure</td>
+<td>Inches of mercury (inHg), hectopascals (hPa), or millimeters of
+mercury (mmHg)</td>
+</tr>
+</tbody>
+</table>
+<p>Use <strong>OK</strong> to apply and close, <strong>Apply</strong> to
+preview changes without closing, or <strong>Cancel</strong> to discard
+them. Your choices are saved and persist between sessions.</p>
+<h2 id="per-city-weather-features">Per-City Weather Features</h2>
+<p>The <strong>Weather</strong> menu holds specialized reports that
+apply to the city currently selected (or the city shown in Full
+Weather). Select a city first; if none is selected, the app prompts you
+to choose one.</p>
+<h3 id="weather-alerts">Weather Alerts</h3>
+<p>Shows active US National Weather Service alerts for the selected
+city. Alerts are listed with the most serious first; select one and
+choose <strong>View Details</strong> (or press Enter) to read the full
+alert. When there are none, the dialog clearly says so, and if the check
+fails it says the check could not be completed — a failure is never
+reported as "no alerts."</p>
+<h3 id="expected-precipitation">Expected Precipitation</h3>
+<p>A short-range precipitation timeline for the next hour, in 15-minute
+steps, showing when and how intensely precipitation is expected. This is
+a text timeline (no map), drawn from Open-Meteo's 15-minute nowcast.</p>
+<h3 id="weather-around-me">Weather Around Me</h3>
+<p>Compares weather in the area around your selected city. It has two
+tabs:</p>
+<ul>
+<li><strong>Around Me</strong> — current conditions in the eight compass
+directions plus the center, at a radius you choose (options range from
+roughly 50 to 350 miles). The first load reverse-geocodes place names
+and can take several seconds.</li>
+<li><strong>Directional Explorer</strong> — lists cities along a chosen
+bearing. Pick a <strong>Direction</strong>, a <strong>Mode</strong> (Arc
+or Corridor), and a <strong>Width</strong> (Narrow, Standard, Medium, or
+Wide), then <strong>Explore</strong> to see cities in that direction
+with their current weather. Your radius, mode, and width choices are
+remembered.</li>
+</ul>
+<h3 id="historical-weather">Historical Weather</h3>
+<p>Looks up past weather (Open-Meteo's archive covers 1940 through
+yesterday). Three tabs:</p>
+<ul>
+<li><strong>Single Day</strong> — conditions for one chosen date.</li>
+<li><strong>Multi-Year</strong> — the same calendar day across a number
+of past years (you set how many years back, up to 85), useful for
+comparing a date over time.</li>
+<li><strong>Daily Browse</strong> — a run of consecutive days from a
+chosen start date (up to 31 days).</li>
+</ul>
+<h3 id="my-data">My Data</h3>
+<p>A custom report you build from a large catalog of Open-Meteo
+parameters. Choose <strong>Choose Parameters...</strong> to pick fields,
+organized into category tabs including Temperature, Humidity and
+Moisture, Wind, Precipitation, Pressure, Clouds and Visibility, Solar
+and UV, Soil, Atmosphere, Marine and Ocean, Air Quality, and Pollen.
+Each parameter has a tooltip explaining what it is. The selected values
+are shown grouped by category, drawn from Open-Meteo's forecast, marine,
+and air-quality services. <strong>Refresh</strong> re-fetches them. Your
+selection is saved. Note that marine values only appear for coastal
+points.</p>
+<h3 id="marine-forecast">Marine Forecast</h3>
+<p>Current sea conditions — wave height, direction, and period;
+wind-wave and swell height; ocean current velocity and direction; and
+sea-surface temperature. Marine data exists only for coastal and ocean
+points; for an inland place the dialog says no marine data is available
+rather than showing an error.</p>
+<h3 id="astronomy-moon">Astronomy (Moon)</h3>
+<p>Today's moon phase, illumination percentage, and moon age, plus the
+dates of the next new moon and next full moon.</p>
+<h2 id="browse-weather-alerts">Browse Weather Alerts</h2>
+<p><strong>Browse Weather Alerts...</strong> (on the Cities menu) opens
+a browser for all active alerts across a whole region, independent of
+your city list.</p>
+<ol type="1">
+<li><strong>Pick a region</strong> — United States (National Weather
+Service) or Canada (Environment Canada). Each shows a count of currently
+active alerts.</li>
+<li><strong>Read the digest</strong> — active alerts are grouped so each
+row is one event type with the number of affected areas and, where
+known, when the soonest one expires.</li>
+<li><strong>Filter</strong> — narrow the digest by
+<strong>Severity</strong> (Extreme, Severe, Moderate, or All — each
+level shows only that level) and by <strong>Hazard type</strong> (the
+list shows only hazard families actually present, with counts).</li>
+<li><strong>Drill in</strong> — open a group to see its list of affected
+areas with <strong>View Affected Areas</strong>, then open an area with
+<strong>View Details</strong> to read the full alert. Enter also
+advances through these lists.</li>
+</ol>
+<p><strong>Save Current Filters as Default</strong> remembers your
+chosen severity and hazard filters so they are applied automatically
+next time you open the browser.</p>
+<h2 id="copy-and-save-reports">Copy and Save Reports</h2>
+<p>When a detailed report is on screen in the Full Weather view, two
+commands on the <strong>Cities</strong> menu export it as plain
+text:</p>
+<ul>
+<li><strong>Copy Weather Report</strong> — copies the displayed report
+to the clipboard.</li>
+<li><strong>Save Weather Report...</strong> — saves it to a text file
+(the suggested filename is based on the city name).</li>
+</ul>
+<p>Both require Full Weather to be open for a city; otherwise the app
+tells you there is nothing to copy or save.</p>
+<h2 id="updates">Updates</h2>
+<p>WeatherFast can update itself from its GitHub releases. On the
+<strong>Help</strong> menu:</p>
+<ul>
+<li><strong>Check for Updates...</strong> checks immediately and reports
+whether a newer version is available.</li>
+<li><strong>Automatically Check for Updates</strong> (a toggle, on by
+default) checks shortly after each launch.</li>
+</ul>
+<p>When a newer version exists, the app tells you the new version number
+and offers to download and install it. If you agree, it downloads the
+installer, launches it, and closes so the per-user installer can finish.
+If a direct installer download is not available, it offers to open the
+releases page in your browser instead. Automatic checking and
+self-installation apply to the installed build.</p>
+<h2 id="menus-and-keyboard-reference">Menus and Keyboard Reference</h2>
+<h3 id="menus">Menus</h3>
+<table>
+<thead>
+<tr>
+<th>Menu</th>
+<th>Items</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cities</td>
+<td>Add City, Browse Cities by State/Country, Add My Location, Browse
+Weather Alerts, Full Weather, Refresh, Remove City, Move Up, Move Down,
+Copy Weather Report, Save Weather Report, Exit</td>
+</tr>
+<tr>
+<td>Weather</td>
+<td>Weather Alerts, Expected Precipitation, Weather Around Me,
+Historical Weather, My Data, Marine Forecast, Astronomy (Moon) — each
+acts on the selected city</td>
+</tr>
+<tr>
+<td>Settings</td>
+<td>Configure Display &amp; Units, Search: Use Specific Place Names</td>
+</tr>
+<tr>
+<td>Help</td>
+<td>User Guide, Check for Updates, Automatically Check for Updates,
+About</td>
+</tr>
+</tbody>
+</table>
+<p>The menu bar is reachable with Alt, then the underlined letter of a
+menu.</p>
+<h3 id="keyboard-shortcuts">Keyboard shortcuts</h3>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F5 or Ctrl+R</td>
+<td>Refresh the selected city</td>
+</tr>
+<tr>
+<td>Delete</td>
+<td>Remove the selected city</td>
+</tr>
+<tr>
+<td>Alt+U</td>
+<td>Move the selected city up</td>
+</tr>
+<tr>
+<td>Alt+D</td>
+<td>Move the selected city down</td>
+</tr>
+<tr>
+<td>Alt+F</td>
+<td>Open Full Weather for the selected city</td>
+</tr>
+<tr>
+<td>Alt+N</td>
+<td>Move focus to the add-city field</td>
+</tr>
+<tr>
+<td>Alt+C</td>
+<td>Open Configure Display &amp; Units</td>
+</tr>
+<tr>
+<td>Enter (in the city list)</td>
+<td>Open Full Weather for the selected city</td>
+</tr>
+<tr>
+<td>Enter (in a results or alert list)</td>
+<td>Add the selected result, or open the next level of detail</td>
+</tr>
+<tr>
+<td>Escape</td>
+<td>Return from Full Weather to the city list</td>
+</tr>
+<tr>
+<td>F1</td>
+<td>Open this user guide in your browser</td>
+</tr>
+</tbody>
+</table>
+<h2 id="data-and-privacy">Data and Privacy</h2>
+<p>WeatherFast needs no account, sign-in, or API key. It stores its data
+locally under <code>%APPDATA%\WeatherFast</code> — your city list, your
+display and unit preferences, browse favorites, and a small cache.
+Nothing is uploaded about you.</p>
+<p>The app contacts these services only to fetch the data you ask
+for:</p>
+<ul>
+<li><strong>Open-Meteo</strong> — forecasts, hourly and daily data, the
+precipitation nowcast, historical archive, marine data, and air-quality
+and pollen data.</li>
+<li><strong>US National Weather Service</strong> and <strong>Environment
+Canada</strong> — active weather alerts.</li>
+<li><strong>OpenStreetMap / Nominatim</strong> — place search and
+reverse geocoding.</li>
+<li><strong>ipapi.co</strong> — only when you use Add My Location and
+precise device location is unavailable, to estimate your city from your
+IP address.</li>
+<li><strong>GitHub</strong> — only when checking for or downloading an
+app update.</li>
+</ul>
+</body>
+</html>
