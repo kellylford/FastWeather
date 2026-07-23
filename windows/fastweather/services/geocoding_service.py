@@ -27,35 +27,69 @@ def _cache():
     return _reverse_cache
 
 
-def geocode(query):
-    """Return a list of match dicts for a city name / zip query.
+_LOCALITY_KEYS = ("city", "town", "village", "hamlet", "municipality", "suburb", "county")
 
-    Each match: {display, city, state, country, lat, lon}.
+
+def _locality(addr):
+    for k in _LOCALITY_KEYS:
+        if addr.get(k):
+            return addr[k]
+    return ""
+
+
+def build_match(result, specific=True):
+    """Turn a raw Nominatim result into a match dict with a display label.
+
+    When ``specific`` is True and the result is a named place distinct from its
+    locality (an airport, university, landmark, address...), the label leads
+    with that specific name and appends locality context - mirroring the iOS
+    "specific place names" behavior. When False, or for plain localities, the
+    label is the familiar "City, State, Country".
     """
-    params = {"q": query, "format": "json", "addressdetails": 1, "limit": 5}
+    addr = result.get("address", {})
+    name = (result.get("namedetails") or {}).get("name") or result.get("name") or ""
+    locality = _locality(addr)
+    state = addr.get("state", "")
+    country = addr.get("country", "")
+
+    if specific and name and name != locality:
+        context = ", ".join(p for p in (locality, state, country) if p)
+        display = f"{name} - {context}" if context else name
+    else:
+        display = ", ".join(p for p in (locality or name, state, country) if p)
+
+    if not display:
+        display = name or f"{result.get('lat')}, {result.get('lon')}"
+
+    return {
+        "display": display,
+        "name": name,
+        "city": locality,
+        "state": state,
+        "country": country,
+        "kind": result.get("addresstype") or result.get("type") or "",
+        "importance": float(result.get("importance") or 0.0),
+        "lat": float(result["lat"]),
+        "lon": float(result["lon"]),
+    }
+
+
+def geocode(query, specific=True):
+    """Return a list of match dicts for a place / city / zip / address query.
+
+    Each match: {display, name, city, state, country, kind, importance, lat, lon}.
+    Results are ordered by Nominatim's importance so a genuinely notable place
+    (a city, a university, an airport) outranks an obscure road that merely
+    shares the query text (Nominatim otherwise boosts exact-name matches).
+    """
+    params = {
+        "q": query, "format": "json", "addressdetails": 1,
+        "namedetails": 1, "limit": 8,
+    }
     headers = {"User-Agent": USER_AGENT}
     results = http.get_json(NOMINATIM_URL, params=params, headers=headers)
-
-    matches = []
-    for r in results:
-        address = r.get("address", {})
-        city_name = (
-            address.get("city")
-            or address.get("town")
-            or address.get("village")
-            or query
-        )
-        state = address.get("state", "")
-        country = address.get("country", "")
-        display_parts = [p for p in [city_name, state, country] if p]
-        matches.append({
-            "display": ", ".join(display_parts),
-            "city": city_name,
-            "state": state,
-            "country": country,
-            "lat": float(r["lat"]),
-            "lon": float(r["lon"]),
-        })
+    matches = [build_match(r, specific) for r in results]
+    matches.sort(key=lambda m: m["importance"], reverse=True)
     return matches
 
 

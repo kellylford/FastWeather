@@ -254,6 +254,10 @@ class MainFrame(wx.Frame):
 
         settings_menu = wx.Menu()
         mi_config = settings_menu.Append(wx.ID_ANY, "Configure Display && Units...")
+        settings_menu.AppendSeparator()
+        mi_placenames = settings_menu.AppendCheckItem(
+            wx.ID_ANY, "Search: Use Specific Place Names (airports, landmarks)")
+        mi_placenames.Check(self.settings["options"].get("specific_place_names", True))
         mb.Append(settings_menu, "&Settings")
 
         help_menu = wx.Menu()
@@ -279,6 +283,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_save_report, mi_save)
         self.Bind(wx.EVT_MENU, lambda e: self.Close(), mi_exit)
         self.Bind(wx.EVT_MENU, self.on_config, mi_config)
+        self.Bind(wx.EVT_MENU, self._on_toggle_place_names, mi_placenames)
         self.Bind(wx.EVT_MENU, lambda e: self.check_for_updates(manual=True), mi_update)
         self.Bind(wx.EVT_MENU, self._on_toggle_auto_update, mi_autoupdate)
         self.Bind(wx.EVT_MENU, self.on_about, mi_about)
@@ -440,6 +445,10 @@ class MainFrame(wx.Frame):
         self.settings["options"]["auto_check_updates"] = event.IsChecked()
         self.save_config()
 
+    def _on_toggle_place_names(self, event):
+        self.settings["options"]["specific_place_names"] = event.IsChecked()
+        self.save_config()
+
     def check_for_updates(self, manual=False):
         if manual:
             self.statusbar.SetStatusText("Checking for updates...", 0)
@@ -571,8 +580,10 @@ class MainFrame(wx.Frame):
         if val:
             self.statusbar.SetStatusText("Searching...", 0)
             self.add_btn.Disable()
+            specific = self.settings["options"].get("specific_place_names", True)
             self.fetch.submit(
-                "geo", lambda: geocoding_service.geocode(val), request_id=val
+                "geo", lambda: geocoding_service.geocode(val, specific=specific),
+                request_id=val,
             )
 
     def on_geo_ready(self, orig, matches):

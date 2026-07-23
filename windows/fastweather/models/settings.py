@@ -52,6 +52,7 @@ def default_config():
             "default_alert_severity_filter": "All",   # Extreme|Severe|Moderate|All
             "default_alert_hazard_type": "",          # hazard family or "" for all
             "auto_check_updates": True,               # check GitHub Releases on launch
+            "specific_place_names": True,             # airports/landmarks vs locality-only
         },
     }
 
