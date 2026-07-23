@@ -402,7 +402,7 @@ The Windows desktop app correctly displays all 101 countries. It uses the same J
 ## Contact Info for Handoff
 
 User: kellylford  
-Repo: github.com/kellylford/FastWeather  
+Repo: github.com/kellylford/WeatherFast  
 Branch: main  
 Date: January 18, 2026  
 
