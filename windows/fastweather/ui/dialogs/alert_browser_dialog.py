@@ -55,7 +55,7 @@ class AlertBrowserDialog(wx.Dialog):
         s = wx.BoxSizer(wx.VERTICAL)
         s.Add(wx.StaticText(p, label="Choose a region to browse active alerts:"),
               0, wx.ALL, 8)
-        self.region_list = wx.ListBox(p, style=wx.LB_SINGLE)
+        self.region_list = wx.ListBox(p, style=wx.LB_SINGLE | wx.WANTS_CHARS)
         for r in svc.REGIONS:
             self.region_list.Append(r["name"])
         self.region_list.SetSelection(0)
@@ -112,7 +112,7 @@ class AlertBrowserDialog(wx.Dialog):
 
         self.digest_status = wx.StaticText(p, label="")
         s.Add(self.digest_status, 0, wx.LEFT | wx.BOTTOM, 8)
-        self.group_list = wx.ListBox(p, style=wx.LB_SINGLE)
+        self.group_list = wx.ListBox(p, style=wx.LB_SINGLE | wx.WANTS_CHARS)
         s.Add(self.group_list, 1, wx.EXPAND | wx.ALL, 8)
         self.open_group_btn = wx.Button(p, label="View Affected Areas")
         self.open_group_btn.Disable()
@@ -138,7 +138,7 @@ class AlertBrowserDialog(wx.Dialog):
         s.Add(self.group_back, 0, wx.ALL, 8)
         self.group_title = wx.StaticText(p, label="")
         s.Add(self.group_title, 0, wx.LEFT | wx.BOTTOM, 8)
-        self.area_list = wx.ListBox(p, style=wx.LB_SINGLE)
+        self.area_list = wx.ListBox(p, style=wx.LB_SINGLE | wx.WANTS_CHARS)
         s.Add(self.area_list, 1, wx.EXPAND | wx.ALL, 8)
         self.open_area_btn = wx.Button(p, label="View Details")
         self.open_area_btn.Disable()
@@ -171,10 +171,20 @@ class AlertBrowserDialog(wx.Dialog):
             focus_ctrl.SetFocus()
 
     def _bind_enter(self, ctrl, handler):
-        """Enter on a list advances to the next level (as elsewhere in the app)."""
+        """Enter on a list advances to the next level (as elsewhere in the app).
+
+        The list must be created with wx.WANTS_CHARS, or the dialog consumes
+        Enter/Tab for navigation and this handler never sees them. Tab is
+        re-implemented here so keyboard focus can still leave the list.
+        """
         def on_key(evt):
-            if evt.GetKeyCode() in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER):
+            kc = evt.GetKeyCode()
+            if kc in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER):
                 handler(evt)
+            elif kc == wx.WXK_TAB:
+                flags = (wx.NavigationKeyEvent.IsBackward if evt.ShiftDown()
+                         else wx.NavigationKeyEvent.IsForward)
+                ctrl.Navigate(flags)
             else:
                 evt.Skip()
         ctrl.Bind(wx.EVT_KEY_DOWN, on_key)
