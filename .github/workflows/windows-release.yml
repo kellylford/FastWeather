@@ -1,14 +1,15 @@
 name: WeatherFast (Windows)
 
 # Adopted from QuickMail's release workflow, adapted to Python/PyInstaller +
-# Inno Setup. Pushing a version tag (e.g. v1.2.0) builds the app and installer
-# and publishes a GitHub Release with both assets. The in-app updater reads the
-# latest release and downloads the *-Setup.exe asset. Pull requests that touch
-# the Windows app build (and run tests) but never publish a release.
+# Inno Setup. Pushing a `windows-v<semver>` tag (e.g. windows-v3.0.0) builds the
+# app and installer and publishes a GitHub Release with both assets. The tag is
+# Windows-specific so it never collides with this repo's iOS/web release tags,
+# and the in-app updater only looks at `windows-v*` releases. Pull requests that
+# touch the Windows app build (and run tests) but never publish a release.
 
 on:
   push:
-    tags: ['v*']
+    tags: ['windows-v*']
   pull_request:
     paths:
       - 'windows/**'
@@ -43,10 +44,10 @@ jobs:
       # The tag is the single source of truth for the release version and must
       # match the package __version__, which the in-app updater compares against.
       - name: Verify tag matches package version
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/windows-v')
         shell: pwsh
         run: |
-          $tag = '${{ github.ref_name }}'.TrimStart('v')
+          $tag = '${{ github.ref_name }}' -replace '^windows-v', ''
           $init = Get-Content windows/fastweather/__init__.py -Raw
           if ($init -notmatch '__version__\s*=\s*"([^"]+)"') { throw "Could not read __version__" }
           $ver = $Matches[1]
@@ -59,8 +60,8 @@ jobs:
         id: ver
         shell: pwsh
         run: |
-          if ('${{ github.ref }}' -like 'refs/tags/v*') {
-            $v = '${{ github.ref_name }}'.TrimStart('v')
+          if ('${{ github.ref }}' -like 'refs/tags/windows-v*') {
+            $v = '${{ github.ref_name }}' -replace '^windows-v', ''
           } else {
             $init = Get-Content windows/fastweather/__init__.py -Raw
             $null = $init -match '__version__\s*=\s*"([^"]+)"'
@@ -97,10 +98,10 @@ jobs:
           retention-days: 14
 
       - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/windows-v')
         uses: softprops/action-gh-release@v2
         with:
-          name: WeatherFast ${{ github.ref_name }}
+          name: WeatherFast ${{ steps.ver.outputs.version }} (Windows)
           generate_release_notes: true
           files: |
             windows/dist/WeatherFast.exe
