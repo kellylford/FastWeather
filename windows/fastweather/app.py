@@ -14,6 +14,7 @@ import wx
 from . import __version__, browse_favorites
 from .constants import USER_GUIDE_URL
 from .city_data import flatten_cities, load_cached_cities
+from .locale_units import locale_default_units
 from .models.city import CityStore
 from .models.settings import AppSettings
 from .models.weather import describe_cloud_cover
@@ -62,6 +63,12 @@ class MainFrame(wx.Frame):
         self.current_full_data = None
 
         self.cities.load()
+        # First run only: seed units from the user's Windows region (matches
+        # iOS locale-aware defaults). Saved config always wins afterward.
+        if not os.path.exists(self.config_file):
+            regional = locale_default_units()
+            if regional:
+                self.settings["units"].update(regional)
         self.load_config()
 
         # Background fetch manager
