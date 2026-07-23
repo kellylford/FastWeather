@@ -386,10 +386,23 @@ class MainFrame(wx.Frame):
         sel = self.city_list.GetSelection()
         if sel == wx.NOT_FOUND:
             return None
-        name = self.city_list.GetString(sel).split(" - ")[0]
-        if name in self.cities:
+        name = self._city_key_at(sel)
+        if name and name in self.cities:
             lat, lon = self.cities.coords(name)
             return (name, lat, lon)
+        return None
+
+    def _city_key_at(self, index):
+        """The CityStore key for a list row, recovered by position.
+
+        The list is always built and kept in CityStore order, so the row index
+        maps directly to the key. The display string cannot be used to recover
+        the key because place names may themselves contain ' - '
+        (e.g. "O'Hare International Airport - Chicago, Illinois, United States").
+        """
+        names = self.cities.names()
+        if 0 <= index < len(names):
+            return names[index]
         return None
 
     def require_selected_city(self):
@@ -547,22 +560,26 @@ class MainFrame(wx.Frame):
 
     # -- city list ------------------------------------------------------------
     def update_city_list(self, reload=True):
-        sel_str = (
-            self.city_list.GetStringSelection().split(" - ")[0]
-            if self.city_list.GetSelection() != wx.NOT_FOUND else None
-        )
+        # Remember the selected row's full display string so selection can be
+        # restored after the rebuild. Match by full key (names may contain
+        # ' - '), not a split prefix.
+        prev = (self.city_list.GetStringSelection()
+                if self.city_list.GetSelection() != wx.NOT_FOUND else None)
         self.city_list.Clear()
-        for city in self.cities.names():
+        names = self.cities.names()
+        for city in names:
             self.city_list.Append(f"{city} - Loading...")
         if reload:
             self.load_all_weather()
 
-        if sel_str:
-            for i in range(self.city_list.GetCount()):
-                if self.city_list.GetString(i).startswith(sel_str):
+        restored = False
+        if prev:
+            for i, key in enumerate(names):
+                if prev.startswith(key + " - "):
                     self.city_list.SetSelection(i)
+                    restored = True
                     break
-        elif self.city_list.GetCount() > 0:
+        if not restored and self.city_list.GetCount() > 0:
             self.city_list.SetSelection(0)
         self.update_buttons()
 
@@ -580,8 +597,11 @@ class MainFrame(wx.Frame):
 
     # -- add / browse ---------------------------------------------------------
     def on_add_city(self, event):
+        if getattr(self, "_geo_in_flight", False):
+            return
         val = self.city_input.GetValue().strip()
         if val:
+            self._geo_in_flight = True
             self.statusbar.SetStatusText("Searching...", 0)
             self.add_btn.Disable()
             specific = self.settings["options"].get("specific_place_names", True)
@@ -591,6 +611,7 @@ class MainFrame(wx.Frame):
             )
 
     def on_geo_ready(self, orig, matches):
+        self._geo_in_flight = False
         self.add_btn.Enable()
         self.statusbar.SetStatusText("Ready", 0)
         if not matches:
@@ -608,6 +629,7 @@ class MainFrame(wx.Frame):
         dlg.Destroy()
 
     def on_geo_error(self, err):
+        self._geo_in_flight = False
         self.add_btn.Enable()
         wx.MessageBox(f"Error: {err}", "Error", wx.OK | wx.ICON_ERROR)
 
@@ -665,7 +687,7 @@ class MainFrame(wx.Frame):
             return
 
         dlg = LocationBrowserDialog(self, self.us_cities_cache, self.intl_cities_cache,
-                                    self.browse_favs)
+                                    self.browse_favs, self.fmt)
         result = dlg.ShowModal()
         # Persist any favorites changes regardless of OK/Cancel.
         self.browse_favs = dlg.get_favorites()
@@ -702,7 +724,9 @@ class MainFrame(wx.Frame):
         sel = self.city_list.GetSelection()
         if sel == wx.NOT_FOUND:
             return
-        city = self.city_list.GetString(sel).split(" - ")[0]
+        city = self._city_key_at(sel)
+        if not city:
+            return
         if wx.MessageBox(f"Remove {city}?", "Confirm", wx.YES_NO) == wx.YES:
             self.cities.remove(city)
             self.update_city_list(False)
@@ -731,7 +755,9 @@ class MainFrame(wx.Frame):
     def on_refresh(self, event):
         sel = self.city_list.GetSelection()
         if sel != wx.NOT_FOUND:
-            city = self.city_list.GetString(sel).split(" - ")[0]
+            city = self._city_key_at(sel)
+            if not city:
+                return
             lat, lon = self.cities.coords(city)
             self._fetch_weather(city, lat, lon, "basic")
 
@@ -739,7 +765,9 @@ class MainFrame(wx.Frame):
         sel = self.city_list.GetSelection()
         if sel == wx.NOT_FOUND:
             return
-        city = self.city_list.GetString(sel).split(" - ")[0]
+        city = self._city_key_at(sel)
+        if not city:
+            return
         lat, lon = self.cities.coords(city)
         self.current_full_city = (city, lat, lon)
         self.day_offset = 0
@@ -868,9 +896,21 @@ class MainFrame(wx.Frame):
             if not event.error and event.payload:
                 self._apply_alert_badge(event.request_id)
 
+    @staticmethod
+    def _is_us_coord(lat, lon):
+        """Rough US coverage test (NWS is US-only): CONUS, AK, HI, PR."""
+        boxes = (
+            (24.0, 50.0, -125.0, -66.0),   # continental US
+            (51.0, 72.0, -170.0, -129.0),  # Alaska
+            (18.0, 23.0, -161.0, -154.0),  # Hawaii
+            (17.5, 18.6, -67.5, -65.0),    # Puerto Rico
+        )
+        return any(la0 <= lat <= la1 and lo0 <= lon <= lo1
+                   for la0, la1, lo0, lo1 in boxes)
+
     def _check_alert_badge(self, city, lat, lon):
         """Fire a best-effort NWS alert check for US cities to badge the row."""
-        if "United States" not in city:  # NWS is US-only
+        if not self._is_us_coord(lat, lon):  # NWS is US-only
             return
         self.fetch.submit(
             "alert_badge",

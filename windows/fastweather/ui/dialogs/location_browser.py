@@ -19,11 +19,12 @@ _SORTS = [
 class LocationBrowserDialog(wx.Dialog):
     """Browse cities by US State or country; multi-select add, sort, favorites."""
 
-    def __init__(self, parent, us_cities_cache, intl_cities_cache, favorites=None):
+    def __init__(self, parent, us_cities_cache, intl_cities_cache, favorites=None, fmt=None):
         super().__init__(parent, title="Browse Cities by Location", size=(720, 640))
         self.us_cities_cache = us_cities_cache
         self.intl_cities_cache = intl_cities_cache
         self.favorites = list(favorites or [])
+        self.fmt = fmt
         self.selected_cities = []
         self.loaded_cities = []           # list of dicts for the current region
         self.loaded_region = None         # (kind, region_name)
@@ -223,7 +224,9 @@ class LocationBrowserDialog(wx.Dialog):
         for c in cities:
             label = c["display"]
             if c["temp"] is not None:
-                label += f"  ({c['temp']:.0f}°C)"
+                temp = (self.fmt.temperature_short(c["temp"]) if self.fmt
+                        else f"{c['temp']:.0f}°C")
+                label += f"  ({temp})"
             self.cities_list.Append(label)
             self.cities_list.SetClientData(self.cities_list.GetCount() - 1, c)
 

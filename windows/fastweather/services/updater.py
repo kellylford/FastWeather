@@ -22,7 +22,11 @@ def _version_tuple(v):
 
 
 def is_newer(latest, current):
-    return _version_tuple(latest) > _version_tuple(current)
+    a, b = _version_tuple(latest), _version_tuple(current)
+    n = max(len(a), len(b))
+    a += (0,) * (n - len(a))  # zero-pad so 1.1 and 1.1.0 compare equal
+    b += (0,) * (n - len(b))
+    return a > b
 
 
 def check_for_update(current_version=None):
@@ -66,5 +70,9 @@ def download_installer(url, progress=None):
 
 
 def launch_installer(path):
-    """Launch the downloaded installer (Windows)."""
-    os.startfile(path)  # noqa: S606 - launching the just-downloaded signed installer
+    """Launch the downloaded installer (Windows).
+
+    The installer is downloaded over HTTPS from the project's GitHub release
+    assets. Note it is not yet code-signed, so Windows SmartScreen may prompt.
+    """
+    os.startfile(path)  # noqa: S606

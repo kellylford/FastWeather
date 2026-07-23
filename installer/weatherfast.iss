@@ -19,6 +19,10 @@
 [Setup]
 ; Stable AppId so upgrades replace the prior install (never change this GUID).
 AppId={{7C2F1B84-3A6E-4E2B-9C1D-9E7A4F0B21A5}
+; The running app holds this named mutex; lets the installer detect and wait
+; for it to close before replacing the (in-app auto-update) executable.
+AppMutex=WeatherFastRunning
+CloseApplications=yes
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}

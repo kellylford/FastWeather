@@ -9,8 +9,19 @@ from .app import MainFrame
 from .paths import user_data_dir
 
 
+def _hold_app_mutex():
+    """Hold a named mutex so the installer (AppMutex=WeatherFastRunning) can
+    detect a running instance and wait for it to close during an update."""
+    try:
+        import ctypes
+        return ctypes.windll.kernel32.CreateMutexW(None, False, "WeatherFastRunning")
+    except Exception:
+        return None
+
+
 def main():
     app = wx.App()
+    app._weatherfast_mutex = _hold_app_mutex()  # kept alive for the process
 
     parser = argparse.ArgumentParser(prog="WeatherFast", description="WeatherFast")
     parser.add_argument("--reset", action="store_true",
