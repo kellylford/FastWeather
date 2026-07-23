@@ -590,15 +590,18 @@ class MainFrame(wx.Frame):
         self.add_btn.Enable()
         self.statusbar.SetStatusText("Ready", 0)
         if not matches:
-            wx.MessageBox("City not found", "Error", wx.OK | wx.ICON_WARNING)
+            wx.MessageBox(f"No places found for '{orig}'.", "No Results",
+                          wx.OK | wx.ICON_INFORMATION)
+            self.city_input.SetFocus()
             return
-        if len(matches) == 1:
-            self.add_city_match(matches[0])
+        # Always present the results list (even a single match) so keyboard /
+        # screen-reader users get a consistent, selectable list.
+        dlg = CitySelectionDialog(self, matches, orig)
+        if dlg.ShowModal() == wx.ID_OK:
+            self.add_city_match(dlg.selected_match)
         else:
-            dlg = CitySelectionDialog(self, matches, orig)
-            if dlg.ShowModal() == wx.ID_OK:
-                self.add_city_match(dlg.selected_match)
-            dlg.Destroy()
+            self.city_input.SetFocus()
+        dlg.Destroy()
 
     def on_geo_error(self, err):
         self.add_btn.Enable()
