@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Getting Started - WeatherFast User Guide</title><style>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Getting Started - WeatherFast User Guide</title><style>
   :root { color-scheme: light dark; }
   body { max-width: 860px; margin: 0 auto; padding: 1rem 2rem;
-         font-family: -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.6; }
+         font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+         line-height: 1.6; }
   h1 { border-bottom: 2px solid #8884; padding-bottom: 0.3em; }
   h2 { border-bottom: 1px solid #8884; padding-bottom: 0.2em; margin-top: 2em; }
   table { border-collapse: collapse; width: 100%; margin: 1em 0; }
@@ -14,10 +17,15 @@
   pre code { background: none; padding: 0; }
   a { color: #2a7ae2; }
   hr { border: none; border-top: 1px solid #8884; margin: 2rem 0; }
-  .nav { margin-bottom: 2em; padding-bottom: 0.75em; border-bottom: 1px solid #8884; font-size: 0.9em; }
+  blockquote { border-left: 3px solid #8886; margin-left: 0; padding-left: 1rem; }
+  .nav { margin-bottom: 2em; padding-bottom: 0.75em; border-bottom: 1px solid #8884;
+         font-size: 0.9em; }
   .nav a { margin-right: 1em; text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
   .version { opacity: 0.7; font-size: 0.85em; margin-top: -1em; margin-bottom: 2em; }
-</style></head><body><div class="nav"><a href="index.html">Contents</a> | <a href="full.html">Single Page</a> | <a href="the-main-window.html">Next: The Main Window</a></div><h1 id="getting-started">Getting Started</h1>
+</style>
+</head>
+<body><div class="nav"><a href="index.html">Contents</a> | <a href="full.html">Single Page</a> | <a href="the-main-window.html">Next: The Main Window</a></div><h1 id="getting-started">Getting Started</h1>
 <h3 id="installing">Installing</h3>
 <p>There are two ways to run WeatherFast.</p>
 <ul>
@@ -49,18 +57,18 @@ time WeatherFast runs.</p>
 <p>WeatherFast accepts two optional command-line arguments:</p>
 <table>
 <thead>
-<tr>
+<tr class="header">
 <th>Option</th>
 <th>Effect</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td><code>--reset</code></td>
 <td>Delete the saved city list before starting (the app then starts with
 defaults).</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>-c &lt;path&gt;</code> or
 <code>--config &lt;path&gt;</code></td>
 <td>Use a specific city-list JSON file instead of the default. Useful

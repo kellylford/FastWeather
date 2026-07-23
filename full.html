@@ -2,13 +2,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc 3.10" />
+  <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>WeatherFast User Guide</title>
   <style>
-    /* Default styles provided by pandoc.
-    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-    */
     html {
       color: #1a1a1a;
       background-color: #fdfdfd;
@@ -63,10 +60,6 @@
     img {
       max-width: 100%;
     }
-    svg {
-      height: auto;
-      max-width: 100%;
-    }
     h1, h2, h3, h4, h5, h6 {
       margin-top: 1.4em;
     }
@@ -91,7 +84,6 @@
       color: #606060;
     }
     code {
-      white-space: pre-wrap;
       font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
       font-size: 85%;
       margin: 0;
@@ -111,8 +103,8 @@
      overflow: visible;
     }
     hr {
+      background-color: #1a1a1a;
       border: none;
-      border-top: 1px solid #1a1a1a;
       height: 1px;
       margin: 1em 0;
     }
@@ -155,13 +147,10 @@
     #TOC a:not(:hover) {
       text-decoration: none;
     }
+    code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: 1.5em;}
-    div.column{flex: auto;}
-    @media screen {
-    div.columns{gap: min(4vw, 1.5em);}
-    div.column{overflow-x: auto;}
-    }
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     /* The extra [class] is a hack that increases specificity enough to
        override a similar rule in reveal.js */
@@ -177,7 +166,8 @@
   <style>
     :root { color-scheme: light dark; }
     body { max-width: 860px; margin: 0 auto; padding: 1rem 2rem;
-           font-family: -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.6; }
+           font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+           line-height: 1.6; }
     h1 { border-bottom: 2px solid #8884; padding-bottom: 0.3em; }
     h2 { border-bottom: 1px solid #8884; padding-bottom: 0.2em; margin-top: 2em; }
     table { border-collapse: collapse; width: 100%; margin: 1em 0; }
@@ -189,8 +179,11 @@
     pre code { background: none; padding: 0; }
     a { color: #2a7ae2; }
     hr { border: none; border-top: 1px solid #8884; margin: 2rem 0; }
-    .nav { margin-bottom: 2em; padding-bottom: 0.75em; border-bottom: 1px solid #8884; font-size: 0.9em; }
+    blockquote { border-left: 3px solid #8886; margin-left: 0; padding-left: 1rem; }
+    .nav { margin-bottom: 2em; padding-bottom: 0.75em; border-bottom: 1px solid #8884;
+           font-size: 0.9em; }
     .nav a { margin-right: 1em; text-decoration: none; }
+    .nav a:hover { text-decoration: underline; }
     .version { opacity: 0.7; font-size: 0.85em; margin-top: -1em; margin-bottom: 2em; }
   </style>
 </head>
@@ -253,18 +246,18 @@ time WeatherFast runs.</p>
 <p>WeatherFast accepts two optional command-line arguments:</p>
 <table>
 <thead>
-<tr>
+<tr class="header">
 <th>Option</th>
 <th>Effect</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td><code>--reset</code></td>
 <td>Delete the saved city list before starting (the app then starts with
 defaults).</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>-c &lt;path&gt;</code> or
 <code>--config &lt;path&gt;</code></td>
 <td>Use a specific city-list JSON file instead of the default. Useful
@@ -298,33 +291,33 @@ locations.</p>
 <p>Below the list are buttons that act on the selected city:</p>
 <table>
 <thead>
-<tr>
+<tr class="header">
 <th>Button</th>
 <th>Action</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td>Move Up</td>
 <td>Move the selected city one place earlier in the list.</td>
 </tr>
-<tr>
+<tr class="even">
 <td>Move Down</td>
 <td>Move the selected city one place later in the list.</td>
 </tr>
-<tr>
+<tr class="odd">
 <td>Remove</td>
 <td>Remove the selected city (asks for confirmation).</td>
 </tr>
-<tr>
+<tr class="even">
 <td>Refresh</td>
 <td>Re-fetch current weather for the selected city.</td>
 </tr>
-<tr>
+<tr class="odd">
 <td>Full Weather</td>
 <td>Open the detailed forecast for the selected city.</td>
 </tr>
-<tr>
+<tr class="even">
 <td>Configure</td>
 <td>Open the display and units settings.</td>
 </tr>
@@ -415,29 +408,29 @@ day.</li>
 <p>At the top of the view are navigation buttons:</p>
 <table>
 <thead>
-<tr>
+<tr class="header">
 <th>Button</th>
 <th>Action</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td>Back</td>
 <td>Return to your city list.</td>
 </tr>
-<tr>
+<tr class="even">
 <td>Prev Day</td>
 <td>Show the previous day's detail.</td>
 </tr>
-<tr>
+<tr class="odd">
 <td>Today</td>
 <td>Return to today.</td>
 </tr>
-<tr>
+<tr class="even">
 <td>Next Day</td>
 <td>Show the next day's detail.</td>
 </tr>
-<tr>
+<tr class="odd">
 <td>Configure</td>
 <td>Open display and units settings.</td>
 </tr>
@@ -477,29 +470,29 @@ rain, and showers totals.</li>
 throughout the app:</p>
 <table>
 <thead>
-<tr>
+<tr class="header">
 <th>Measure</th>
 <th>Choices</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td>Temperature</td>
 <td>Fahrenheit (°F) or Celsius (°C)</td>
 </tr>
-<tr>
+<tr class="even">
 <td>Wind speed</td>
 <td>Miles per hour, kilometers per hour, or meters per second</td>
 </tr>
-<tr>
+<tr class="odd">
 <td>Precipitation</td>
 <td>Inches or millimeters</td>
 </tr>
-<tr>
+<tr class="even">
 <td>Distance</td>
 <td>Miles or kilometers</td>
 </tr>
-<tr>
+<tr class="odd">
 <td>Pressure</td>
 <td>Inches of mercury (inHg), hectopascals (hPa), or millimeters of
 mercury (mmHg)</td>
@@ -625,29 +618,29 @@ self-installation apply to the installed build.</p>
 <h3 id="menus">Menus</h3>
 <table>
 <thead>
-<tr>
+<tr class="header">
 <th>Menu</th>
 <th>Items</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td>Cities</td>
 <td>Add City, Browse Cities by State/Country, Add My Location, Browse
 Weather Alerts, Full Weather, Refresh, Remove City, Move Up, Move Down,
 Copy Weather Report, Save Weather Report, Exit</td>
 </tr>
-<tr>
+<tr class="even">
 <td>Weather</td>
 <td>Weather Alerts, Expected Precipitation, Weather Around Me,
 Historical Weather, My Data, Marine Forecast, Astronomy (Moon) — each
 acts on the selected city</td>
 </tr>
-<tr>
+<tr class="odd">
 <td>Settings</td>
 <td>Configure Display &amp; Units, Search: Use Specific Place Names</td>
 </tr>
-<tr>
+<tr class="even">
 <td>Help</td>
 <td>User Guide, Check for Updates, Automatically Check for Updates,
 About</td>
@@ -659,53 +652,53 @@ menu.</p>
 <h3 id="keyboard-shortcuts">Keyboard shortcuts</h3>
 <table>
 <thead>
-<tr>
+<tr class="header">
 <th>Key</th>
 <th>Action</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td>F5 or Ctrl+R</td>
 <td>Refresh the selected city</td>
 </tr>
-<tr>
+<tr class="even">
 <td>Delete</td>
 <td>Remove the selected city</td>
 </tr>
-<tr>
+<tr class="odd">
 <td>Alt+U</td>
 <td>Move the selected city up</td>
 </tr>
-<tr>
+<tr class="even">
 <td>Alt+D</td>
 <td>Move the selected city down</td>
 </tr>
-<tr>
+<tr class="odd">
 <td>Alt+F</td>
 <td>Open Full Weather for the selected city</td>
 </tr>
-<tr>
+<tr class="even">
 <td>Alt+N</td>
 <td>Move focus to the add-city field</td>
 </tr>
-<tr>
+<tr class="odd">
 <td>Alt+C</td>
 <td>Open Configure Display &amp; Units</td>
 </tr>
-<tr>
+<tr class="even">
 <td>Enter (in the city list)</td>
 <td>Open Full Weather for the selected city</td>
 </tr>
-<tr>
+<tr class="odd">
 <td>Enter (in a results or alert list)</td>
 <td>Add the selected result, or open the next level of detail</td>
 </tr>
-<tr>
+<tr class="even">
 <td>Escape</td>
 <td>Return from Full Weather to the city list</td>
 </tr>
-<tr>
+<tr class="odd">
 <td>F1</td>
 <td>Open this user guide in your browser</td>
 </tr>
