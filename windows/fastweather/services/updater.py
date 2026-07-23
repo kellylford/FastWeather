@@ -14,7 +14,10 @@ from .. import __version__
 from . import http
 
 GITHUB_REPO = "kellylford/FastWeather"
-LATEST_RELEASE_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
+RELEASES_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases?per_page=30"
+# This is a multi-platform repo; Windows releases are tagged `windows-v<semver>`
+# so the updater never picks up an iOS or web release.
+WINDOWS_TAG_PREFIX = "windows-v"
 
 
 def _version_tuple(v):
@@ -29,23 +32,40 @@ def is_newer(latest, current):
     return a > b
 
 
-def check_for_update(current_version=None):
-    """Return {'version', 'url', 'notes'} if a newer release exists, else None.
+def _windows_version(tag):
+    """Return the semver from a `windows-v<semver>` tag, else None."""
+    if tag and tag.startswith(WINDOWS_TAG_PREFIX):
+        return tag[len(WINDOWS_TAG_PREFIX):]
+    return None
 
+
+def check_for_update(current_version=None):
+    """Return {'version', 'url', 'notes'} for the newest Windows release if it
+    is newer than the running version, else None.
+
+    Considers only `windows-v*` releases (this repo also ships iOS and web).
     Raises on network/API failure so a manual check can report "couldn't check".
     """
     current = current_version or __version__
-    data = http.get_json(LATEST_RELEASE_URL)
-    tag = (data.get("tag_name") or "").lstrip("v")
-    if not tag or not is_newer(tag, current):
+    releases = http.get_json(RELEASES_URL) or []
+    best, best_ver = None, None
+    for r in releases:
+        if r.get("draft") or r.get("prerelease"):
+            continue
+        ver = _windows_version(r.get("tag_name") or "")
+        if not ver:
+            continue
+        if best is None or _version_tuple(ver) > _version_tuple(best_ver):
+            best, best_ver = r, ver
+
+    if best is None or not is_newer(best_ver, current):
         return None
     url = None
-    for asset in data.get("assets", []):
-        name = (asset.get("name") or "").lower()
-        if name.endswith("setup.exe"):
+    for asset in best.get("assets", []):
+        if (asset.get("name") or "").lower().endswith("setup.exe"):
             url = asset.get("browser_download_url")
             break
-    return {"version": tag, "url": url, "notes": data.get("body") or ""}
+    return {"version": best_ver, "url": url, "notes": best.get("body") or ""}
 
 
 def download_installer(url, progress=None):
