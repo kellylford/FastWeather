@@ -43,8 +43,9 @@ city.json.backup
 README.old.md
 iOS/FastWeather/Services/Secrets.swift
 
-# Test files
+# Test files (stray root-level scratch scripts) — but keep the real suites
 test_*.py
+!windows/tests/test_*.py
 
 # Node modules
 node_modules/

@@ -38,7 +38,7 @@ jobs:
 
       - name: Run tests
         working-directory: windows
-        run: python -m unittest discover -s tests
+        run: python -m unittest discover -s tests -t . -v
 
       # The tag is the single source of truth for the release version and must
       # match the package __version__, which the in-app updater compares against.
